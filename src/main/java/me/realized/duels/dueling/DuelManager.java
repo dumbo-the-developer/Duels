@@ -80,6 +80,7 @@ public class DuelManager implements Listener {
             return;
         }
 
+        event.setDeathMessage(null);
         event.setKeepLevel(true);
         event.setDroppedExp(0);
         event.getDrops().clear();
