@@ -1,6 +1,7 @@
 package me.realized.duels.utilities.inventory;
 
 import me.realized.duels.utilities.StringUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -34,14 +35,16 @@ public class ItemToConfig {
                 builder.append("lore:").append(StringUtil.join(meta.getLore(), ";")).append("-");
             }
 
-            if (!meta.getItemFlags().isEmpty()) {
-                builder.append("flags:");
+            if (!Bukkit.getBukkitVersion().equals("1.7.10-R0.1-SNAPSHOT")) {
+                if (!meta.getItemFlags().isEmpty()) {
+                    builder.append("flags:");
 
-                for (ItemFlag flag : meta.getItemFlags()) {
-                    builder.append(flag.name()).append(";");
+                    for (ItemFlag flag : meta.getItemFlags()) {
+                        builder.append(flag.name()).append(";");
+                    }
+
+                    builder.append("-");
                 }
-
-                builder.append("-");
             }
 
             for (Map.Entry<Enchantment, Integer> entry : item.getEnchantments().entrySet()) {
