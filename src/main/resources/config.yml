@@ -1,0 +1,143 @@
+# Make sure to read the comments before configuring! It'll be a big help.
+
+# Duel settings
+Dueling:
+  # If enabled: Players must have a cleared inventory to execute the command /duel.
+  # Recommended: Keep it enabled to prevent players loosing their inventory contents!
+  requires-cleared-inventory: true
+
+  # If enabled: On duel end, players will be teleported to the latest location they were at before the start of the match.
+  # Recommended: 'true' if your server type is factions/survival. 'false' if your server type is kitpvp.
+  teleport-to-latest-location: false
+
+  # On duel end, winner will be teleported after following amount of seconds to spawn / latest location if enabled.
+  delay-until-teleport-on-win: 5
+
+  # If enabled: Allows players to drop item while in duel.
+  # Recommended: 'true' if you have any sort of dropped item remover. 'false' if you do not.
+  drop-item: true
+
+  # If enabled: Allows players to pick up item while in duel.
+  # Recommended: 'true' if you have any sort of dropped item remover. 'false' if you do not.
+  pick-up-item: false
+
+  # Commands in the following list will be disabled while in duel.
+  # Recommended: Add all the commands that will allow players to gain advantage while in duel. Examples: /heal, /kit
+  # Added most of the known commands to default configuration just to save your time. ;)
+  disabled-commands:
+  - 'heal'
+  - 'eheal'
+  - 'essentials:heal'
+  - 'essentials:eheal'
+  - 'feed'
+  - 'efeed'
+  - 'eat'
+  - 'eeat'
+  - 'essentials:feed'
+  - 'essentials:efeed'
+  - 'essentials:eat'
+  - 'essentials:eeat'
+  - 'kit'
+  - 'ekit'
+  - 'kits'
+  - 'ekits'
+  - 'essentials:kit'
+  - 'essentials:ekit'
+  - 'essentials:kits'
+  - 'essentials:ekits'
+  - 'enderchest'
+  - 'echest'
+  - 'eechest'
+  - 'eenderchest'
+  - 'endersee'
+  - 'eendersee'
+  - 'ec'
+  - 'eec'
+  - 'essentials:enderchest'
+  - 'essentials:echest'
+  - 'essentials:eechest'
+  - 'essentials:eenderchest'
+  - 'essentials:endersee'
+  - 'essentials:eendersee'
+  - 'essentials:ec'
+  - 'essentials:eec'
+  - 'tpaccept'
+  - 'etpaccept'
+  - 'tpyes'
+  - 'etpyes'
+  - 'essentials:tpaccept'
+  - 'essentials:etpaccept'
+  - 'essentials:tpyes'
+  - 'essentials:etpyes'
+  - 'vault'
+  - 'chest'
+
+# DuelZone settings. Requires WorldGuard!
+DuelZone:
+  # If enabled: Player must be inside of the region declared below to execute the command /duel.
+  enabled: false
+  region: spawn
+
+# Stats command settings
+Stats:
+  # If enabled: Displays a list of data of the player's 10 latest matches when /stats is executed.
+  display-matches: true
+
+# Edit messages here! Read the comments above the messages for more information.
+Messages:
+  # Displayed on command: /stats
+  # Placeholders:
+  # {NAME} - Name of the stats owner.
+  # {WINS} - Amount of duel wins.
+  # {LOSSES} - Amount of duel losses.
+  # {REQUESTS_ENABLED} - Displays 'enabled' if player has duel requests enabled, else 'disabled'.
+  stats:
+    - '&7Displaying stats of &f{NAME} &7-'
+    - '&71v1 Wins: &f{WINS}'
+    - '&71v1 Losses: &f{LOSSES}'
+    - '&71v1 Requests: &f{REQUESTS_ENABLED}'
+    - '&7Latest 1v1 matches -'
+
+  # Displayed after the list above if 'display-matches' is enabled.
+  # Placeholders:
+  # {WINNER} - Name of the winner.
+  # {LOSER} - Name of the loser.
+  match-format: '&a{WINNER} &fvs &c{LOSER} &6[Hover Me!]'
+
+  # Displayed when hovering the message above.
+  # Placeholders:
+  # {DURATION} - Formatted match duration.
+  # {TIME} - Time since the happening of the match.
+  # {HEALTH} - Winner's health.
+  # {NEWLINE} - Moves on to the next line.
+  match-hover: '&7Duration: &f{DURATION}{NEWLINE}&7Time: &f{TIME} ago{NEWLINE}&7Health: &d&l{HEALTH} ♥'
+
+  # Displayed when player sends a duel request.
+  # Placeholders:
+  # {PLAYER} - Receiver's name for 'on-request-send', Sender's name for 'on-request-receive'.
+  # {KIT} - Name of the kit selected on request send.
+  on-request-send: '&9[Duels] &7Duel request sent to &f{PLAYER} &7with kit &f{KIT}&7.'
+  on-request-receive: '&9[Duels] &7Duel request received from &f{PLAYER} &7with kit &f{KIT}&7. Type &f/duel accept {PLAYER} &7to accept. &e[Expires in 30s]'
+
+  # Displayed when a duel ends.
+  # {WINNER} - Winner's name.
+  # {LOSER} - Loser's name.
+  # {HEALTH} - Winner's health.
+  on-duel-end: '&9[Duels] &f{WINNER} &7has defeated &f{LOSER} &7with &d&l{HEALTH} ♥'
+
+  # Displayed when player accepts a duel request.
+  # Placeholders:
+  # {PLAYER} - Request acceptor's name for 'on-request-accept-target', sender's name for 'on-request-accept-sender'.
+  on-request-accept-target: '&9[Duels] &7Accepted duel request from &f{PLAYER}&7. Starting match with kit &f{KIT}&7.'
+  on-request-accept-sender: '&9[Duels] &7Your duel request to &f{PLAYER} &7was accepted. Starting match with kit &f{KIT}&7.'
+
+  # Displayed when player accepts a duel request.
+  # Placeholders:
+  # {PLAYER} - Request acceptor's name for 'on-request-accept-target', sender's name for 'on-request-accept-sender'.
+  on-request-deny-target: '&9[Duels] &7Denied duel request from &f{PLAYER}&7.'
+  on-request-deny-sender: '&9[Duels] &7Your duel request to &f{PLAYER} &7was denied.'
+
+  # Displayed when player executes the command /toggle.
+  # Placeholders: none
+  on-requests-enable: '&a&lOthers may send you duel requests from now on.'
+  on-requests-disable: '&c&lOthers may not send you duel requests from now on.'
