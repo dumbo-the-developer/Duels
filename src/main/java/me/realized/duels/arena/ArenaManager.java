@@ -1,6 +1,6 @@
 package me.realized.duels.arena;
 
-import com.google.common.reflect.TypeToken;
+import com.google.gson.reflect.TypeToken;
 import me.realized.duels.Core;
 import me.realized.duels.data.ArenaData;
 import org.bukkit.Bukkit;

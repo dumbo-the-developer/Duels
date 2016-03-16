@@ -1,6 +1,6 @@
 package me.realized.duels.kits;
 
-import com.google.common.reflect.TypeToken;
+import com.google.gson.reflect.TypeToken;
 import me.realized.duels.Core;
 import me.realized.duels.event.KitCreateEvent;
 import me.realized.duels.event.KitRemoveEvent;
