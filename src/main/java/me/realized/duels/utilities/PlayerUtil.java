@@ -109,4 +109,10 @@ public class PlayerUtil {
 
         return false;
     }
+
+    public static void refreshChunk(Location... locations) {
+        for (Location location : locations) {
+            location.getChunk().load();
+        }
+    }
 }

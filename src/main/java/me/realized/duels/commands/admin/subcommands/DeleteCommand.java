@@ -27,7 +27,7 @@ public class DeleteCommand extends SubCommand {
         Arena arena = manager.getArena(name);
 
         if (arena.isUsed()) {
-            pm(sender, "&cThat arena is currently in use. To force-end a match, type /practice kill [name].");
+            pm(sender, "&cThat arena is currently in use. To prevent arena from being used, disable it using /duels toggle [name].");
             return;
         }
 

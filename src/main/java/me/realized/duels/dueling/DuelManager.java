@@ -53,6 +53,7 @@ public class DuelManager implements Listener {
 
         Location pos1 = arena.getPositions().get(1);
         Location pos2 = arena.getPositions().get(2);
+        PlayerUtil.refreshChunk(pos1, pos2);
 
         if (!PlayerUtil.canTeleportTo(player, pos1) || !PlayerUtil.canTeleportTo(target, pos2)) {
             PlayerUtil.pm("&cFailed to teleport to the arena! Please contact an administrator.", player, target);

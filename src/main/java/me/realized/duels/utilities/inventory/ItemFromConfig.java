@@ -1,8 +1,10 @@
 package me.realized.duels.utilities.inventory;
 
 import me.realized.duels.utilities.StringUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.TippedArrow;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -114,6 +116,12 @@ public class ItemFromConfig {
 
             if (effects.get(type) != null) {
                 builder.addEffect(new PotionEffect(effects.get(type), Integer.parseInt(split[1].split(";")[0]), Integer.parseInt(split[1].split(";")[0])));
+            }
+
+            if (Bukkit.getBukkitVersion().equals("1.9-R0.1-SNAPSHOT") && item.getType() == Material.TIPPED_ARROW) {
+                if (type.split("_").length != 0 && effects.get(type.split("_")[1]) != null) {
+                    ((TippedArrow) item).addCustomEffect(new PotionEffect(effects.get(type), Integer.parseInt(split[1].split(";")[0]), Integer.parseInt(split[1].split(";")[0])), true);
+                }
             }
 
             if (type.equals("owner")) {
