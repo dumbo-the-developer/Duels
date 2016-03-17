@@ -12,6 +12,7 @@ import me.realized.duels.kits.KitManager;
 import me.realized.duels.utilities.PlayerUtil;
 import me.realized.duels.utilities.StringUtil;
 import org.bukkit.*;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -102,7 +103,7 @@ public class DuelManager implements Listener {
 
         if (!arena.isEmpty()) {
             final Player target = Bukkit.getPlayer(arena.getPlayers().get(0));
-            Firework firework = target.getWorld().spawn(target.getEyeLocation(), Firework.class);
+            Firework firework = (Firework) target.getWorld().spawnEntity(target.getEyeLocation(), EntityType.FIREWORK);
             FireworkMeta meta = firework.getFireworkMeta();
             meta.addEffect(FireworkEffect.builder().withColor(Color.RED).with(FireworkEffect.Type.BALL_LARGE).withTrail().build());
             firework.setFireworkMeta(meta);
