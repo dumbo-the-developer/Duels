@@ -5,11 +5,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.TippedArrow;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
-import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 
 import java.util.Map;
@@ -46,15 +44,6 @@ public class ItemToConfig {
                     }
 
                     builder.append("-");
-                }
-            }
-
-            if (Bukkit.getBukkitVersion().equals("1.9-R0.1-SNAPSHOT") && item.getType() == Material.TIPPED_ARROW) {
-                TippedArrow arrow = (TippedArrow) item;
-                if (arrow.hasCustomEffects()) {
-                    for (PotionEffect effect : arrow.getCustomEffects()) {
-                        builder.append("a_").append(effect.getType()).append(":").append(effect.getDuration()).append(";").append(effect.getAmplifier()).append("-");
-                    }
                 }
             }
 
