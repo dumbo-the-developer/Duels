@@ -1,5 +1,6 @@
 package me.realized.duels.commands.duel.subcommands;
 
+import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.commands.SubCommand;
 import me.realized.duels.data.DataManager;
 import me.realized.duels.data.UserData;
@@ -14,12 +15,14 @@ import org.bukkit.entity.Player;
 public class AcceptCommand extends SubCommand {
 
     private final DuelManager duelManager;
+    private final ArenaManager arenaManager;
     private final DataManager dataManager;
     private final RequestManager requestManager;
 
     public AcceptCommand() {
         super("accept", "accept [player]", "Accept a duel request.", 2);
         this.duelManager = getInstance().getDuelManager();
+        this.arenaManager = getInstance().getArenaManager();
         this.dataManager = getInstance().getDataManager();
         this.requestManager = getInstance().getRequestManager();
     }
@@ -52,6 +55,11 @@ public class AcceptCommand extends SubCommand {
                     pm(sender, "&cThat player did not send you a duel request!");
                     return;
             }
+        }
+
+        if (arenaManager.isInMatch(player) || arenaManager.isInMatch(target)) {
+            pm(sender, "&cEither you or that player is in a match.");
+            return;
         }
 
         Request request = requestManager.getRequestFrom(player, target);
