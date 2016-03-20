@@ -53,6 +53,14 @@ public class Arena {
         return positions;
     }
 
+    public boolean isValid() {
+        Location pos1 = positions.get(1);
+        Location pos2 = positions.get(2);
+
+        return !(pos1 == null || pos2 == null) && !(pos1.getWorld() == null || pos2.getWorld() == null || !pos1.getWorld().getName().equals(pos2.getWorld().getName()));
+
+    }
+
     public List<UUID> getPlayers() {
         return players;
     }

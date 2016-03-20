@@ -5,8 +5,7 @@ import me.realized.duels.Core;
 import me.realized.duels.event.KitCreateEvent;
 import me.realized.duels.event.KitRemoveEvent;
 import me.realized.duels.utilities.inventory.ItemBuilder;
-import me.realized.duels.utilities.inventory.ItemFromConfig;
-import me.realized.duels.utilities.inventory.ItemToConfig;
+import me.realized.duels.utilities.inventory.JSONItem;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -36,7 +35,7 @@ public class KitManager implements Listener {
             boolean generated = base.createNewFile();
 
             if (generated) {
-                instance.info("Generated arena file.");
+                instance.info("Generated kits file.");
             }
 
         } catch (IOException e) {
@@ -48,27 +47,23 @@ public class KitManager implements Listener {
 
     public void load() {
         try (InputStreamReader reader = new InputStreamReader(new FileInputStream(base))) {
-            Map<String, Map<Type, Map<Integer, String>>> loaded = instance.getGson().fromJson(reader, new TypeToken<Map<String, Map<Type, Map<Integer, String>>>>() {}.getType());
+            Map<String, Map<Type, Map<Integer, JSONItem>>> loaded = instance.getGson().fromJson(reader, new TypeToken<Map<String, Map<Type, Map<Integer, JSONItem>>>>() {}.getType());
 
             if (loaded != null) {
-                ItemFromConfig from = new ItemFromConfig();
-
                 for (String key : loaded.keySet()) {
-                    Map<Type, Map<Integer, String>> value = loaded.get(key);
+                    Map<Type, Map<Integer, JSONItem>> value = loaded.get(key);
                     Map<Integer, ItemStack> inventory = new HashMap<>();
                     Map<Integer, ItemStack> armor = new HashMap<>();
-                    Map<Integer, String> contents = value.get(Type.INVENTORY);
+                    Map<Integer, JSONItem> contents = value.get(Type.INVENTORY);
 
-                    for (Map.Entry<Integer, String> entry : contents.entrySet()) {
-                        from.setLine(entry.getValue());
-                        inventory.put(entry.getKey(), from.buildWithMeta());
+                    for (Map.Entry<Integer, JSONItem> entry : contents.entrySet()) {
+                        inventory.put(entry.getKey(), entry.getValue().construct());
                     }
 
                     contents = value.get(Type.ARMOR);
 
-                    for (Map.Entry<Integer, String> entry : contents.entrySet()) {
-                        from.setLine(entry.getValue());
-                        armor.put(entry.getKey(), from.buildWithMeta());
+                    for (Map.Entry<Integer, JSONItem> entry : contents.entrySet()) {
+                        armor.put(entry.getKey(), entry.getValue().construct());
                     }
 
                     kits.put(key, new KitContents(inventory, armor));
@@ -96,23 +91,20 @@ public class KitManager implements Listener {
             }
         }
 
-        ItemToConfig to = new ItemToConfig();
-        Map<String, Map<Type, Map<Integer, String>>> saved = new HashMap<>();
+        Map<String, Map<Type, Map<Integer, JSONItem>>> saved = new HashMap<>();
 
         for (String key : kits.keySet()) {
             KitContents kit = kits.get(key);
-            Map<Type, Map<Integer, String>> contents = new HashMap<>();
-            Map<Integer, String> armor = new HashMap<>();
-            Map<Integer, String> inventory = new HashMap<>();
+            Map<Type, Map<Integer, JSONItem>> contents = new HashMap<>();
+            Map<Integer, JSONItem> armor = new HashMap<>();
+            Map<Integer, JSONItem> inventory = new HashMap<>();
 
             for (Map.Entry<Integer, ItemStack> entry : kit.getArmor().entrySet()) {
-                to.setItem(entry.getValue());
-                armor.put(entry.getKey(), to.toString());
+                armor.put(entry.getKey(), JSONItem.fromItemStack(entry.getValue()));
             }
 
             for (Map.Entry<Integer, ItemStack> entry : kit.getInventory().entrySet()) {
-                to.setItem(entry.getValue());
-                inventory.put(entry.getKey(), to.toString());
+                inventory.put(entry.getKey(), JSONItem.fromItemStack(entry.getValue()));
             }
 
             contents.put(Type.ARMOR, armor);

@@ -26,7 +26,7 @@ public enum Lang {
             "&b&m------------------------------------",
             "&7Arena name color states:",
             "&4DARK RED&7: Arena is disabled.",
-            "&9BLUE&7: Arena without any spawn positions set.",
+            "&9BLUE&7: Arena without valid spawn positions set.",
             "&aGREEN&7: Arena available for a match.",
             "&cRED&7: Arena in use.",
             "&7Arenas: &r{ARENAS}",

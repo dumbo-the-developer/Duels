@@ -112,6 +112,10 @@ public class PlayerUtil {
 
     public static void refreshChunk(Location... locations) {
         for (Location location : locations) {
+            if (location == null || location.getWorld() == null) {
+                continue;
+            }
+
             location.getChunk().load();
         }
     }

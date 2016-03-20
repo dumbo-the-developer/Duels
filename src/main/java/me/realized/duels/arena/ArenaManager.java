@@ -114,7 +114,7 @@ public class ArenaManager {
 
     public Arena getAvailableArena() {
         for (Arena arena : arenas) {
-            if (!arena.isDisabled() && !arena.isUsed() && arena.getPositions().size() >= 2) {
+            if (!arena.isDisabled() && !arena.isUsed() && arena.isValid()) {
                 return arena;
             }
         }
@@ -154,7 +154,7 @@ public class ArenaManager {
                 continue;
             }
 
-            if (arena.getPositions().size() < 2) {
+            if (!arena.isValid()) {
                 result.add(ChatColor.BLUE + arena.getName());
                 continue;
             }
