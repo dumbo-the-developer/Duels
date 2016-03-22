@@ -10,12 +10,14 @@ import org.bukkit.entity.Player;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 public class ArenaManager {
 
     private final Core instance;
     private final File base;
+    private final Random random = new Random();
 
     private List<Arena> arenas = new ArrayList<>();
 
@@ -55,8 +57,12 @@ public class ArenaManager {
     }
 
     public void save() {
+        List<ArenaData> saved = new ArrayList<>();
+
         if (!arenas.isEmpty()) {
             for (Arena arena : arenas) {
+                saved.add(new ArenaData(arena));
+
                 if (arena.isUsed()) {
                     for (UUID uuid : arena.getPlayers()) {
                         Player player = Bukkit.getPlayer(uuid);
@@ -75,12 +81,6 @@ public class ArenaManager {
 
             if (generated) {
                 instance.info("Generated arena file!");
-            }
-
-            List<ArenaData> saved = new ArrayList<>();
-
-            for (Arena arena : arenas) {
-                saved.add(new ArenaData(arena));
             }
 
             Writer writer = new OutputStreamWriter(new FileOutputStream(base));
@@ -113,13 +113,19 @@ public class ArenaManager {
     }
 
     public Arena getAvailableArena() {
+        List<Arena> available = new ArrayList<>();
+
         for (Arena arena : arenas) {
-            if (!arena.isDisabled() && !arena.isUsed() && arena.isValid()) {
-                return arena;
+            if (!arena.isDisabled()  && arena.isValid() && !arena.isUsed()) {
+                available.add(arena);
             }
         }
 
-        return null;
+        if (available.isEmpty()) {
+            return null;
+        }
+
+        return available.get(random.nextInt(available.size()));
     }
 
     public boolean isInMatch(Player player) {

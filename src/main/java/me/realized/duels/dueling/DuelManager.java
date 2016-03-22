@@ -47,7 +47,7 @@ public class DuelManager implements Listener {
         Arena arena = arenaManager.getAvailableArena();
 
         if (arena == null) {
-            PlayerUtil.pm("&cAll arenas are currently in use, please try again later.", player, target);
+            PlayerUtil.pm("&cNo available arenas were found, please try again later.", player, target);
             return;
         }
 
