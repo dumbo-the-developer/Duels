@@ -8,7 +8,7 @@
     <version>1.0.3</version>
     <name>Duels</name>
     <description>Everything you need for duels.</description>
-    
+
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
         <resources>

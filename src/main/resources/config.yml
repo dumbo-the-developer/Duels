@@ -3,7 +3,7 @@
 # Duel settings
 Dueling:
   # If enabled: Players must have a cleared inventory to execute the command /duel.
-  # Recommended: Keep it enabled to prevent players loosing their inventory contents!
+  # Player inventories will be restored on duel end if this value is set to 'false'.
   requires-cleared-inventory: true
 
   # If enabled: On duel end, players will be teleported to the latest location they were at before the start of the match.
