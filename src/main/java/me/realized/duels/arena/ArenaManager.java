@@ -2,9 +2,13 @@ package me.realized.duels.arena;
 
 import com.google.gson.reflect.TypeToken;
 import me.realized.duels.Core;
+import me.realized.duels.configuration.Config;
 import me.realized.duels.data.ArenaData;
+import me.realized.duels.data.DataManager;
+import me.realized.duels.utilities.PlayerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.io.*;
@@ -16,6 +20,8 @@ import java.util.UUID;
 public class ArenaManager {
 
     private final Core instance;
+    private final Config config;
+    private final DataManager dataManager;
     private final File base;
     private final Random random = new Random();
 
@@ -23,6 +29,8 @@ public class ArenaManager {
 
     public ArenaManager(Core instance) {
         this.instance = instance;
+        this.config = instance.getConfiguration();
+        this.dataManager = instance.getDataManager();
 
         base = new File(instance.getDataFolder(), "arenas.json");
 
@@ -58,18 +66,36 @@ public class ArenaManager {
 
     public void save() {
         List<ArenaData> saved = new ArrayList<>();
+        Location toTeleport = dataManager.getLobby() != null ? dataManager.getLobby() : Bukkit.getWorlds().get(0).getSpawnLocation();
 
         if (!arenas.isEmpty()) {
             for (Arena arena : arenas) {
                 saved.add(new ArenaData(arena));
 
                 if (arena.isUsed()) {
+                    Arena.Match match = arena.getCurrentMatch();
+
                     for (UUID uuid : arena.getPlayers()) {
                         Player player = Bukkit.getPlayer(uuid);
-                        
-                        if (player != null) {
+
+                        if (player == null || player.isDead()) {
+                            continue;
+                        }
+
+                        if (config.getBoolean("teleport-to-latest-location")) {
+                            toTeleport = match.getLocation(uuid);
+                        }
+
+                        PlayerUtil.pm("&c&l[Duels] Plugin is disabling, matches are ended by default.", player);
+                        PlayerUtil.reset(player);
+
+                        Arena.InventoryData data = match.getInventories(uuid);
+
+                        if (!PlayerUtil.canTeleportTo(player, toTeleport)) {
                             player.setHealth(0.0D);
-                            player.sendMessage(ChatColor.RED + "[Duels] Plugin is disabling, matches are automatically finished by force.");
+                        } else {
+                            player.teleport(toTeleport);
+                            PlayerUtil.setInventory(player, data.getInventoryContents(), data.getArmorContents(), false);
                         }
                     }
                 }

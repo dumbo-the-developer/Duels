@@ -6,7 +6,6 @@ import me.realized.duels.Core;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
@@ -28,7 +27,7 @@ public class PlayerUtil {
         }
     }
 
-    public static void extinguish(final Player player) {
+    private static void extinguish(final Player player) {
         new BukkitRunnable() {
 
             @Override
@@ -46,11 +45,30 @@ public class PlayerUtil {
         player.setHealth(20.0D);
         player.setFoodLevel(20);
         clearInventory(player);
+        extinguish(player);
     }
 
     public static void reset(Player... players) {
         for (Player player : players) {
             reset(player);
+        }
+    }
+
+    public static void setInventory(final Player player, final ItemStack[] inventory, final ItemStack[] armor, boolean delayed) {
+        if (!delayed) {
+            player.getInventory().setContents(inventory);
+            player.getInventory().setArmorContents(armor);
+            player.updateInventory();
+        } else {
+            new BukkitRunnable() {
+
+                @Override
+                public void run() {
+                    player.getInventory().setContents(inventory);
+                    player.getInventory().setArmorContents(armor);
+                    player.updateInventory();
+                }
+            }.runTaskLater(Core.getInstance(), 1L);
         }
     }
 

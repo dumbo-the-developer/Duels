@@ -63,9 +63,8 @@ public class DuelManager implements Listener {
         KitContents contents = kitManager.getKit(kit);
 
         arena.setUsed(true);
+        arena.getCurrentMatch().setData(player, target);
         PlayerUtil.reset(player, target);
-        arena.getCurrentMatch().setLocation(player);
-        arena.getCurrentMatch().setLocation(target);
         contents.equip(player, target);
         player.teleport(pos1);
         target.teleport(pos2);
@@ -86,18 +85,22 @@ public class DuelManager implements Listener {
         event.setKeepLevel(true);
         event.setDroppedExp(0);
         event.getDrops().clear();
-        PlayerUtil.extinguish(dead);
 
         final Arena arena = arenaManager.getArena(dead);
+        final Arena.Match match = arena.getCurrentMatch();
 
+        arena.removePlayer(dead.getUniqueId());
         dead.setVelocity(new Vector(0, 0, 0));
         dead.spigot().respawn();
-        arena.removePlayer(dead.getUniqueId());
+        PlayerUtil.reset(dead);
+
+        Arena.InventoryData deadData = match.getInventories(dead.getUniqueId());
+        PlayerUtil.setInventory(dead, deadData.getInventoryContents(), deadData.getArmorContents(), true);
 
         final Location lobby = dataManager.getLobby() != null ? dataManager.getLobby() : dead.getWorld().getSpawnLocation();
 
         if (config.getBoolean("teleport-to-latest-location")) {
-            dead.teleport(arena.getCurrentMatch().getLocation(dead.getUniqueId()));
+            dead.teleport(match.getLocation(dead.getUniqueId()));
         } else {
             dead.teleport(lobby);
         }
@@ -111,9 +114,8 @@ public class DuelManager implements Listener {
             Bukkit.broadcastMessage(StringUtil.color(config.getString("on-duel-end").replace("{WINNER}", target.getName()).replace("{LOSER}", dead.getName()).replace("{HEALTH}", String.valueOf(Math.round(target.getHealth()) * 0.5D))));
 
             Calendar calendar = new GregorianCalendar();
-            Arena.Match match = arena.getCurrentMatch();
             match.setEndTimeMillis(System.currentTimeMillis());
-            match.setFinishingHealth(Math.round(target.getHealth()) * 0.5);
+            match.setFinishingHealth(Math.floor(target.getHealth()) * 0.5);
             MatchData matchData = new MatchData(target.getName(), dead.getName(), calendar.getTimeInMillis(), match.getDuration(), match.getFinishingHealth());
             UserData player = dataManager.getUser(dead.getUniqueId(), false);
             UserData opponent = dataManager.getUser(target.getUniqueId(), false);
@@ -127,6 +129,7 @@ public class DuelManager implements Listener {
 
             int delay = config.getInt("delay-until-teleport-on-win");
             final Location last = arena.getCurrentMatch().getLocation(target.getUniqueId());
+            final Arena.InventoryData targetData = match.getInventories(target.getUniqueId());
 
             if (delay > 0) {
                 new BukkitRunnable() {
@@ -138,8 +141,6 @@ public class DuelManager implements Listener {
                         if (!target.isOnline()) {
                             return;
                         }
-
-                        arena.removePlayer(target.getUniqueId());
 
                         if (target.isDead()) {
                             target.spigot().respawn();
@@ -159,7 +160,11 @@ public class DuelManager implements Listener {
                         }
 
                         PlayerUtil.reset(target);
-                        PlayerUtil.extinguish(target);
+
+                        if (!config.getBoolean("requires-cleared-inventory")) {
+                            PlayerUtil.setInventory(target, targetData.getInventoryContents(), targetData.getArmorContents(), false);
+                        }
+
                     }
                 }.runTaskLater(instance, delay * 20L);
             } else {
@@ -177,7 +182,10 @@ public class DuelManager implements Listener {
                 }
 
                 PlayerUtil.reset(target);
-                PlayerUtil.extinguish(target);
+
+                if (!config.getBoolean("requires-cleared-inventory")) {
+                    PlayerUtil.setInventory(target, targetData.getInventoryContents(), targetData.getArmorContents(), false);
+                }
             }
         }
     }
@@ -241,6 +249,15 @@ public class DuelManager implements Listener {
         if (config.getList("disabled-commands").contains(command.split(" ")[0].toLowerCase())) {
             event.setCancelled(true);
             PlayerUtil.pm("&cYou may not use that command while in duel.", player);
+        }
+    }
+
+    @EventHandler
+    public void onFlyToggle(PlayerToggleFlightEvent event) {
+        if (event.isFlying() && arenaManager.isInMatch(event.getPlayer())) {
+            event.setCancelled(true);
+            event.getPlayer().setAllowFlight(false);
+            PlayerUtil.pm("&cYou may not fly while in duel.", event.getPlayer());
         }
     }
 }

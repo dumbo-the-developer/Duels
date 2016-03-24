@@ -4,6 +4,7 @@ import me.realized.duels.utilities.LocationUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
@@ -125,6 +126,7 @@ public class Arena {
 
         private final long start;
         private Map<UUID, Location> lastLocations = new HashMap<>();
+        private Map<UUID, InventoryData> inventories = new HashMap<>();
 
         private long end;
         private double finishingHealth;
@@ -149,12 +151,38 @@ public class Arena {
             this.finishingHealth = finishingHealth;
         }
 
-        public void setLocation(Player player) {
-            lastLocations.put(player.getUniqueId(), player.getLocation());
-        }
-
         public Location getLocation(UUID uuid) {
             return lastLocations.get(uuid);
+        }
+
+        public InventoryData getInventories(UUID uuid) {
+            return inventories.get(uuid);
+        }
+
+        public void setData(Player... players) {
+            for (Player player : players) {
+                lastLocations.put(player.getUniqueId(), player.getLocation());
+                inventories.put(player.getUniqueId(), new InventoryData(player.getInventory().getContents(), player.getInventory().getArmorContents()));
+            }
+        }
+    }
+
+    public class InventoryData {
+
+        private final ItemStack[] armor;
+        private final ItemStack[] inventory;
+
+        public InventoryData(ItemStack[] inventory, ItemStack[] armor) {
+            this.inventory = inventory;
+            this.armor = armor;
+        }
+
+        public ItemStack[] getArmorContents() {
+            return armor;
+        }
+
+        public ItemStack[] getInventoryContents() {
+            return inventory;
         }
     }
 }
