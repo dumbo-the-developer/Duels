@@ -87,7 +87,7 @@ public class ArenaManager {
                         }
 
                         PlayerUtil.pm("&c&l[Duels] Plugin is disabling, matches are ended by default.", player);
-                        PlayerUtil.reset(player);
+                        PlayerUtil.reset(player, false);
 
                         Arena.InventoryData data = match.getInventories(uuid);
 

@@ -64,7 +64,7 @@ public class DuelManager implements Listener {
 
         arena.setUsed(true);
         arena.getCurrentMatch().setData(player, target);
-        PlayerUtil.reset(player, target);
+        PlayerUtil.reset(true, player, target);
         contents.equip(player, target);
         player.teleport(pos1);
         target.teleport(pos2);
@@ -92,7 +92,7 @@ public class DuelManager implements Listener {
         arena.removePlayer(dead.getUniqueId());
         dead.setVelocity(new Vector(0, 0, 0));
         dead.spigot().respawn();
-        PlayerUtil.reset(dead);
+        PlayerUtil.reset(dead, true);
 
         Arena.InventoryData deadData = match.getInventories(dead.getUniqueId());
         PlayerUtil.setInventory(dead, deadData.getInventoryContents(), deadData.getArmorContents(), true);
@@ -159,7 +159,7 @@ public class DuelManager implements Listener {
                             target.teleport(last);
                         }
 
-                        PlayerUtil.reset(target);
+                        PlayerUtil.reset(target, true);
 
                         if (!config.getBoolean("requires-cleared-inventory")) {
                             PlayerUtil.setInventory(target, targetData.getInventoryContents(), targetData.getArmorContents(), false);
@@ -181,7 +181,7 @@ public class DuelManager implements Listener {
                     target.teleport(last);
                 }
 
-                PlayerUtil.reset(target);
+                PlayerUtil.reset(target, true);
 
                 if (!config.getBoolean("requires-cleared-inventory")) {
                     PlayerUtil.setInventory(target, targetData.getInventoryContents(), targetData.getArmorContents(), false);

@@ -38,7 +38,7 @@ public class JSONItem {
 
     public JSONItem(ItemStack item) {
         this.material = item.getType().name();
-        this.amount = item.getAmount();
+        this.amount = item.getAmount() == 0 ? 1 : item.getAmount();
         this.data = item.getDurability();
     }
 

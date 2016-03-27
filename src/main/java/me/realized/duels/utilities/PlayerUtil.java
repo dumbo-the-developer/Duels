@@ -37,7 +37,7 @@ public class PlayerUtil {
         }.runTaskLater(Core.getInstance(), 1L);
     }
 
-    public static void reset(Player player) {
+    public static void reset(Player player, boolean extinguish) {
         for (PotionEffect effect : player.getActivePotionEffects()) {
             player.removePotionEffect(effect.getType());
         }
@@ -45,12 +45,15 @@ public class PlayerUtil {
         player.setHealth(20.0D);
         player.setFoodLevel(20);
         clearInventory(player);
-        extinguish(player);
+
+        if (extinguish) {
+            extinguish(player);
+        }
     }
 
-    public static void reset(Player... players) {
+    public static void reset(boolean extinguish, Player... players) {
         for (Player player : players) {
-            reset(player);
+            reset(player, extinguish);
         }
     }
 
