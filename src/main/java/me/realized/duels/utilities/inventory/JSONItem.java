@@ -236,7 +236,10 @@ public class JSONItem {
 
             if (item.getType().name().contains("LEATHER_")) {
                 LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) item.getItemMeta();
-                result.setColor(DyeColor.getByColor(leatherArmorMeta.getColor()).name());
+
+                if (DyeColor.getByColor(leatherArmorMeta.getColor()) != null) {
+                    result.setColor(DyeColor.getByColor(leatherArmorMeta.getColor()).name());
+                }
             }
         }
 

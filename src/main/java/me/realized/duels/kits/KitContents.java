@@ -1,6 +1,5 @@
 package me.realized.duels.kits;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -17,27 +16,27 @@ public class KitContents {
         for (int i = 0; i < playerInventory.getSize(); i++) {
             ItemStack item = playerInventory.getContents()[i];
 
-            if (item == null || item.getType() == Material.AIR) {
+            if (item == null) {
                 continue;
             }
 
-            inventory.put(i, item);
+            inventory.put(i, item.clone());
         }
 
         if (playerInventory.getHelmet() != null) {
-            armor.put(1, playerInventory.getHelmet());
+            armor.put(1, playerInventory.getHelmet().clone());
         }
 
         if (playerInventory.getChestplate() != null) {
-            armor.put(2, playerInventory.getChestplate());
+            armor.put(2, playerInventory.getChestplate().clone());
         }
 
         if (playerInventory.getLeggings() != null) {
-            armor.put(3, playerInventory.getLeggings());
+            armor.put(3, playerInventory.getLeggings().clone());
         }
 
         if (playerInventory.getBoots() != null) {
-            armor.put(4, playerInventory.getBoots());
+            armor.put(4, playerInventory.getBoots().clone());
         }
     }
 
