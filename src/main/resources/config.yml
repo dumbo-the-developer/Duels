@@ -1,5 +1,12 @@
 # Make sure to read the comments before configuring! It'll be a big help.
 
+# Glitch patches
+patcher:
+  # This might conflict with Essentials if you duel while vanished. Enable them at your own risk.
+  patch-invisible: false
+  # This might conflict with those plugins allowing No Hit Delay. Enable them at your own risk.
+  patch-no-hit-delay: false
+
 # Duel settings
 Dueling:
   # If enabled: Players must have a cleared inventory to execute the command /duel.

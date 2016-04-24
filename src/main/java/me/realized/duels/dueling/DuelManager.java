@@ -18,6 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -72,6 +73,10 @@ public class DuelManager implements Listener {
         arena.addPlayers(player, target);
         PlayerUtil.pm(StringUtil.replaceWithArgs(config.getString("on-request-accept-target"), "{PLAYER}", target.getName(), "{KIT}", kit), player);
         PlayerUtil.pm(StringUtil.replaceWithArgs(config.getString("on-request-accept-sender"), "{PLAYER}", player.getName(), "{KIT}", kit), target);
+
+        if (config.getBoolean("patch-invisible")) {
+            PlayerUtil.toggleVisibility(player, target);
+        }
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
@@ -259,6 +264,27 @@ public class DuelManager implements Listener {
             event.setCancelled(true);
             event.getPlayer().setAllowFlight(false);
             PlayerUtil.pm("&cYou may not fly while in duel.", event.getPlayer());
+        }
+    }
+
+    @EventHandler (priority = EventPriority.LOWEST)
+    public void onDamage(EntityDamageByEntityEvent event) {
+        if (!(event.getDamager() instanceof Player) || !(event.getEntity() instanceof Player)) {
+            return;
+        }
+
+        if (!config.getBoolean("patch-no-hit-delay")) {
+            return;
+        }
+
+        Player damaged = (Player) event.getEntity();
+
+        if (!arenaManager.isInMatch(damaged)) {
+            return;
+        }
+
+        if (damaged.getMaximumNoDamageTicks() != 20) {
+            damaged.setMaximumNoDamageTicks(20);
         }
     }
 }
