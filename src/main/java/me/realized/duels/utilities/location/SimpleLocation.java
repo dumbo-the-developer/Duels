@@ -14,10 +14,10 @@ public class SimpleLocation {
     private float yaw;
 
     public SimpleLocation(World world, double x, double y, double z) {
-        this.world = world.getName();
         this.x = x;
         this.y = y;
         this.z = z;
+        this.world = world.getName();
     }
 
     public SimpleLocation(World world, double x, double y, double z, float pitch, float yaw) {

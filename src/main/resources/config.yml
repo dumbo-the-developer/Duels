@@ -4,8 +4,6 @@
 patcher:
   # This might conflict with Essentials if you duel while vanished. Enable them at your own risk.
   patch-invisible: false
-  # This might conflict with those plugins allowing No Hit Delay. Enable them at your own risk.
-  patch-no-hit-delay: false
 
 # Duel settings
 Dueling:

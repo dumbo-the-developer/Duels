@@ -18,7 +18,9 @@ public class ArenaData {
         this.disabled = arena.isDisabled();
 
         for (Map.Entry<Integer, Location> entry : arena.getPositions().entrySet()) {
-            positions.put(entry.getKey(), new SimpleLocation(entry.getValue()));
+            if (entry.getValue().getWorld() != null) {
+                positions.put(entry.getKey(), new SimpleLocation(entry.getValue()));
+            }
         }
     }
 

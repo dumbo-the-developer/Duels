@@ -11,6 +11,7 @@ import me.realized.duels.kits.KitContents;
 import me.realized.duels.kits.KitManager;
 import me.realized.duels.utilities.PlayerUtil;
 import me.realized.duels.utilities.StringUtil;
+import me.realized.duels.utilities.inventory.Metadata;
 import org.bukkit.*;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
@@ -18,12 +19,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -80,6 +79,19 @@ public class DuelManager implements Listener {
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
+    public void onRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+
+        if (player.hasMetadata("respawn")) {
+            Respawn data = (Respawn) player.getMetadata("respawn").get(0).value();
+            event.setRespawnLocation(data.getRespawnLocation());
+            PlayerUtil.reset(player, false);
+            PlayerUtil.setInventory(player, data.getInventoryData().getInventoryContents(), data.getInventoryData().getArmorContents(), false);
+            player.removeMetadata("respawn", Core.getInstance());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onDeath(PlayerDeathEvent event) {
         Player dead = event.getEntity();
 
@@ -96,19 +108,18 @@ public class DuelManager implements Listener {
         final Arena.Match match = arena.getCurrentMatch();
 
         arena.removePlayer(dead.getUniqueId());
-        dead.setVelocity(new Vector(0, 0, 0));
-        dead.spigot().respawn();
-        PlayerUtil.reset(dead, true);
+        // dead.setVelocity(new Vector(0, 0, 0));
+        // dead.spigot().respawn();
 
         Arena.InventoryData deadData = match.getInventories(dead.getUniqueId());
-        PlayerUtil.setInventory(dead, deadData.getInventoryContents(), deadData.getArmorContents(), true);
+        // PlayerUtil.setInventory(dead, deadData.getInventoryContents(), deadData.getArmorContents(), true);
 
         final Location lobby = dataManager.getLobby() != null ? dataManager.getLobby() : dead.getWorld().getSpawnLocation();
 
         if (config.getBoolean("teleport-to-latest-location")) {
-            dead.teleport(match.getLocation(dead.getUniqueId()));
+            dead.setMetadata("respawn", new Metadata(Core.getInstance(), new Respawn(deadData, match.getLocation(dead.getUniqueId()))));
         } else {
-            dead.teleport(lobby);
+            dead.setMetadata("respawn", new Metadata(Core.getInstance(), new Respawn(deadData, lobby)));
         }
 
         if (!arena.isEmpty()) {
@@ -144,12 +155,7 @@ public class DuelManager implements Listener {
                     public void run() {
                         arena.setUsed(false);
 
-                        if (!target.isOnline()) {
-                            return;
-                        }
-
-                        if (target.isDead()) {
-                            target.spigot().respawn();
+                        if (!target.isOnline() || target.isDead()) {
                             return;
                         }
 
@@ -267,7 +273,9 @@ public class DuelManager implements Listener {
         }
     }
 
-    @EventHandler (priority = EventPriority.LOWEST)
+    /*
+
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onDamage(EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player) || !(event.getEntity() instanceof Player)) {
             return;
@@ -287,4 +295,6 @@ public class DuelManager implements Listener {
             damaged.setMaximumNoDamageTicks(20);
         }
     }
+
+    */
 }

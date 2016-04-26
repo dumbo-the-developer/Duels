@@ -161,8 +161,8 @@ public class Arena {
 
         public void setData(Player... players) {
             for (Player player : players) {
-                lastLocations.put(player.getUniqueId(), player.getLocation());
-                inventories.put(player.getUniqueId(), new InventoryData(player.getInventory().getContents(), player.getInventory().getArmorContents()));
+                lastLocations.put(player.getUniqueId(), player.getLocation().clone());
+                inventories.put(player.getUniqueId(), new InventoryData(player.getInventory().getContents().clone(), player.getInventory().getArmorContents().clone()));
             }
         }
     }
