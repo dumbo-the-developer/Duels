@@ -1,21 +1,22 @@
 package me.realized.duels.event;
 
-import me.realized.duels.kits.KitContents;
+import me.realized.duels.kits.Kit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
 public class KitLoadEvent extends KitEvent {
 
     private static final HandlerList handlers = new HandlerList();
-    private final KitContents contents;
 
-    public KitLoadEvent(String name, KitContents contents, Player player) {
+    private final Kit kit;
+
+    public KitLoadEvent(String name, Kit kit, Player player) {
         super(name, player);
-        this.contents = contents;
+        this.kit = kit;
     }
 
-    public KitContents getContents() {
-        return contents;
+    public Kit getKit() {
+        return kit;
     }
 
     @Override

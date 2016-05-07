@@ -61,7 +61,7 @@ public class DenyCommand extends SubCommand {
         PlayerUtil.pm(StringUtil.replaceWithArgs(config.getString("on-request-deny-target"), "{PLAYER}", target.getName()), player);
         PlayerUtil.pm(StringUtil.replaceWithArgs(config.getString("on-request-deny-sender"), "{PLAYER}", player.getName()), target);
 
-        RequestHandleEvent event = new RequestHandleEvent(request, player, target, RequestHandleEvent.Action.DENY);
+        RequestHandleEvent event = new RequestHandleEvent(request, player, target, RequestHandleEvent.Action.DENIED);
         Bukkit.getPluginManager().callEvent(event);
     }
 }

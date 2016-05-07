@@ -2,7 +2,6 @@ package me.realized.duels;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.commands.BaseCommand;
@@ -15,7 +14,6 @@ import me.realized.duels.data.DataManager;
 import me.realized.duels.dueling.DuelManager;
 import me.realized.duels.dueling.RequestManager;
 import me.realized.duels.kits.KitManager;
-
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 

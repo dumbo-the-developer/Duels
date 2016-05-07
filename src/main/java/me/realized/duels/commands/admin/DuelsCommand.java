@@ -18,7 +18,7 @@ public class DuelsCommand extends BaseCommand {
 
     public DuelsCommand() {
         super("duels", "duels.admin");
-        commands.addAll(Arrays.asList(new EditCommand(), new CreateCommand(), new SetCommand(), new DeleteCommand(), new ListCommand(), new ToggleCommand(), new InfoCommand(), new SavekitCommand(), new DeletekitCommand(), new LoadkitCommand(), new SetlobbyCommand()));
+        commands.addAll(Arrays.asList(new EditCommand(), new CreateCommand(), new SetCommand(), new DeleteCommand(), new ListCommand(), new ToggleCommand(), new InfoCommand(), new SavekitCommand(), new DeletekitCommand(), new LoadkitCommand(), new SetlobbyCommand(), new SetitemCommand()));
     }
 
     @Override

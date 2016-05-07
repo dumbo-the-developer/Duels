@@ -125,8 +125,8 @@ public class Arena {
     public class Match {
 
         private final long start;
-        private Map<UUID, Location> lastLocations = new HashMap<>();
-        private Map<UUID, InventoryData> inventories = new HashMap<>();
+        private final Map<UUID, Location> lastLocations = new HashMap<>();
+        private final Map<UUID, InventoryData> inventories = new HashMap<>();
 
         private long end;
         private double finishingHealth;

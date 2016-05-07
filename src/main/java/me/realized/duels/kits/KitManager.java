@@ -2,10 +2,11 @@ package me.realized.duels.kits;
 
 import com.google.gson.reflect.TypeToken;
 import me.realized.duels.Core;
+import me.realized.duels.data.KitData;
 import me.realized.duels.event.KitCreateEvent;
+import me.realized.duels.event.KitItemChangeEvent;
 import me.realized.duels.event.KitRemoveEvent;
 import me.realized.duels.utilities.inventory.ItemBuilder;
-import me.realized.duels.utilities.inventory.JSONItem;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -13,18 +14,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class KitManager implements Listener {
 
     private final Core instance;
     private final File base;
 
-    private Map<String, KitContents> kits = new HashMap<>();
+    private Map<String, Kit> kits = new HashMap<>();
+    private Map<Integer, String> getBySlot = new HashMap<>();
     private Inventory gui;
 
     public KitManager(Core instance) {
@@ -47,26 +50,11 @@ public class KitManager implements Listener {
 
     public void load() {
         try (InputStreamReader reader = new InputStreamReader(new FileInputStream(base))) {
-            Map<String, Map<Type, Map<Integer, JSONItem>>> loaded = instance.getGson().fromJson(reader, new TypeToken<Map<String, Map<Type, Map<Integer, JSONItem>>>>() {}.getType());
+            Map<String, KitData> loaded = instance.getGson().fromJson(reader, new TypeToken<Map<String, KitData>>() {}.getType());
 
             if (loaded != null) {
-                for (String key : loaded.keySet()) {
-                    Map<Type, Map<Integer, JSONItem>> value = loaded.get(key);
-                    Map<Integer, ItemStack> inventory = new HashMap<>();
-                    Map<Integer, ItemStack> armor = new HashMap<>();
-                    Map<Integer, JSONItem> contents = value.get(Type.INVENTORY);
-
-                    for (Map.Entry<Integer, JSONItem> entry : contents.entrySet()) {
-                        inventory.put(entry.getKey(), entry.getValue().construct());
-                    }
-
-                    contents = value.get(Type.ARMOR);
-
-                    for (Map.Entry<Integer, JSONItem> entry : contents.entrySet()) {
-                        armor.put(entry.getKey(), entry.getValue().construct());
-                    }
-
-                    kits.put(key, new KitContents(inventory, armor));
+                for (Map.Entry<String, KitData> entry : loaded.entrySet()) {
+                    kits.put(entry.getKey(), entry.getValue().toKit());
                 }
             }
         } catch (IOException e) {
@@ -91,25 +79,10 @@ public class KitManager implements Listener {
             }
         }
 
-        Map<String, Map<Type, Map<Integer, JSONItem>>> saved = new HashMap<>();
+        Map<String, KitData> saved = new HashMap<>();
 
-        for (String key : kits.keySet()) {
-            KitContents kit = kits.get(key);
-            Map<Type, Map<Integer, JSONItem>> contents = new HashMap<>();
-            Map<Integer, JSONItem> armor = new HashMap<>();
-            Map<Integer, JSONItem> inventory = new HashMap<>();
-
-            for (Map.Entry<Integer, ItemStack> entry : kit.getArmor().entrySet()) {
-                armor.put(entry.getKey(), JSONItem.fromItemStack(entry.getValue()));
-            }
-
-            for (Map.Entry<Integer, ItemStack> entry : kit.getInventory().entrySet()) {
-                inventory.put(entry.getKey(), JSONItem.fromItemStack(entry.getValue()));
-            }
-
-            contents.put(Type.ARMOR, armor);
-            contents.put(Type.INVENTORY, inventory);
-            saved.put(key, contents);
+        for (Map.Entry<String, Kit> entry : kits.entrySet()) {
+            saved.put(entry.getKey(), new KitData(entry.getValue()));
         }
 
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(base))) {
@@ -120,15 +93,19 @@ public class KitManager implements Listener {
         }
     }
 
-    public void addKit(String name, PlayerInventory inventory) {
-        kits.put(name, new KitContents(inventory));
+    public void addKit(String name, Kit kit) {
+        kits.put(name, kit);
     }
 
     public void removeKit(String name) {
         kits.remove(name);
     }
 
-    public KitContents getKit(String name) {
+    public String getKit(int slot) {
+        return getBySlot.get(slot);
+    }
+
+    public Kit getKit(String name) {
         return kits.get(name);
     }
 
@@ -144,18 +121,17 @@ public class KitManager implements Listener {
             return;
         }
 
-        List<String> kits = new ArrayList<>();
-
-        for (String name : this.kits.keySet()) {
-            kits.add(name);
-        }
+        List<Kit> kits = new ArrayList<>();
+        kits.addAll(this.kits.values());
 
         for (int i = 0; i < gui.getSize(); i++) {
             if (kits.size() - 1 < i) {
                 break;
             }
 
-            gui.setItem(i, ItemBuilder.builder().type(Material.DIAMOND_SWORD).name("&7&l" + kits.get(i)).lore(Arrays.asList("&aClick to send", "&aa duel request", "&awith this kit!")).build());
+            Kit kit = kits.get(i);
+            getBySlot.put(i, kit.getName());
+            gui.setItem(i, kit.getDisplayed());
         }
 
         if (players) {
@@ -177,10 +153,7 @@ public class KitManager implements Listener {
             return result;
         }
 
-        for (String name : kits.keySet()) {
-            result.add(name);
-        }
-
+        result.addAll(kits.keySet());
         return result;
     }
 
@@ -194,7 +167,12 @@ public class KitManager implements Listener {
         refreshGUI(true);
     }
 
-    private enum Type {
+    @EventHandler
+    public void onItemUpdate(KitItemChangeEvent event) {
+        refreshGUI(true);
+    }
+
+    public enum Type {
 
         INVENTORY, ARMOR
     }

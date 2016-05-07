@@ -1,25 +1,27 @@
 package me.realized.duels.utilities.inventory;
 
+import me.realized.duels.utilities.Potion1_9;
+import me.realized.duels.utilities.SpawnEgg1_9;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class JSONItem {
 
     private final String material;
     private final int amount;
     private final short data;
+
+    private String itemData;
 
     private Map<String, Integer> enchantments;
     private String displayName;
@@ -40,6 +42,45 @@ public class JSONItem {
         this.material = item.getType().name();
         this.amount = item.getAmount() == 0 ? 1 : item.getAmount();
         this.data = item.getDurability();
+
+        if (Bukkit.getVersion().contains("1.9")) {
+            if (material.contains("POTION")) {
+                Potion1_9 potion1_9 = Potion1_9.fromItemStack(item);
+
+                if (potion1_9 == null) {
+                    return;
+                }
+
+                StringBuilder data = new StringBuilder();
+                data.append(potion1_9.getType().name()).append("-");
+
+                if (potion1_9.extended()) {
+                    data.append("extended-");
+                }
+
+                if (potion1_9.linger()) {
+                    data.append("linger-");
+                }
+
+                if (potion1_9.splash()) {
+                    data.append("splash-");
+                }
+
+                if (potion1_9.strong()) {
+                    data.append("strong-");
+                }
+
+                this.itemData = data.toString();
+            } else if (material.equals("MONSTER_EGG")) {
+                SpawnEgg1_9 spawnEgg1_9 = SpawnEgg1_9.fromItemStack(item);
+
+                if (spawnEgg1_9 == null) {
+                    return;
+                }
+
+                this.itemData = spawnEgg1_9.getType().name() + "-";
+            }
+        }
     }
 
     private void addEnchantment(String type, int level) {
@@ -97,6 +138,18 @@ public class JSONItem {
     public ItemStack construct() {
         ItemStack item = new ItemStack(Material.getMaterial(this.material), this.amount, this.data);
 
+        if (itemData != null && Bukkit.getVersion().contains("1.9")) {
+            List<String> itemData = Arrays.asList(this.itemData.split("-"));
+
+            if (material.contains("POTION")) {
+                Potion1_9 potion1_9 = new Potion1_9(Potion1_9.PotionType.valueOf(itemData.get(0)), itemData.contains("strong"), itemData.contains("extended"), itemData.contains("linger"), itemData.contains("splash"));
+                item = potion1_9.toItemStack(amount);
+            } else if (material.equals("MONSTER_EGG")) {
+                SpawnEgg1_9 spawnEgg1_9 = new SpawnEgg1_9(EntityType.valueOf(itemData.get(0)));
+                item = spawnEgg1_9.toItemStack(amount);
+            }
+        }
+
         if (enchantments != null && !enchantments.isEmpty()) {
             for (Map.Entry<String, Integer> entry : enchantments.entrySet()) {
                 item.addUnsafeEnchantment(Enchantment.getByName(entry.getKey()), entry.getValue());
@@ -113,7 +166,7 @@ public class JSONItem {
             meta.setLore(lore);
         }
 
-        if (!Bukkit.getBukkitVersion().equals("1.7.10-R0.1-SNAPSHOT") && flags != null && !flags.isEmpty()) {
+        if (!Bukkit.getBukkitVersion().contains("1.7") && flags != null && !flags.isEmpty()) {
             for (String flag : flags) {
                 meta.addItemFlags(ItemFlag.valueOf(flag));
             }

@@ -37,7 +37,7 @@ public class StringUtil {
         if (years > 0) {
             builder.append(years).append(years > 1 ? " years" : " year");
         }
-        
+
         if (months > 0) {
             if (years > 0) {
                 builder.append(" ");
@@ -114,13 +114,5 @@ public class StringUtil {
 
     public static String color(String txt) {
         return ChatColor.translateAlternateColorCodes('&', txt);
-    }
-
-    public static String[] color(String[] txt) {
-        for (int i = 0; i < txt.length; i++) {
-            txt[i] = color(txt[i]);
-        }
-
-        return txt;
     }
 }

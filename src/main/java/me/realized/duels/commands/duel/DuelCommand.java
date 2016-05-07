@@ -14,7 +14,6 @@ import me.realized.duels.kits.KitManager;
 import me.realized.duels.utilities.PlayerUtil;
 import me.realized.duels.utilities.inventory.Metadata;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -51,7 +50,7 @@ public class DuelCommand extends BaseCommand {
         Bukkit.getPluginManager().registerEvents(new ClickListener(), getInstance());
     }
 
-    private class ClickListener implements Listener {
+    class ClickListener implements Listener {
 
         @EventHandler
         public void onClick(InventoryClickEvent event) {
@@ -71,7 +70,7 @@ public class DuelCommand extends BaseCommand {
 
             ItemStack item = event.getCurrentItem();
 
-            if (item == null || item.getType() != Material.DIAMOND_SWORD) {
+            if (item == null || item.getType() == Material.AIR) {
                 return;
             }
 
@@ -95,7 +94,7 @@ public class DuelCommand extends BaseCommand {
                 return;
             }
 
-            String kit = ChatColor.stripColor(item.getItemMeta().getDisplayName());
+            String kit = kitManager.getKit(event.getSlot());
             requestManager.sendRequestTo(player, target, kit);
             player.closeInventory();
             pm(player, config.getString("on-request-send").replace("{PLAYER}", target.getName()).replace("{KIT}", kit));

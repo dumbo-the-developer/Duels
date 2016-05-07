@@ -7,7 +7,7 @@ import me.realized.duels.configuration.Config;
 import me.realized.duels.data.DataManager;
 import me.realized.duels.data.MatchData;
 import me.realized.duels.data.UserData;
-import me.realized.duels.kits.KitContents;
+import me.realized.duels.kits.Kit;
 import me.realized.duels.kits.KitManager;
 import me.realized.duels.utilities.PlayerUtil;
 import me.realized.duels.utilities.StringUtil;
@@ -61,7 +61,7 @@ public class DuelManager implements Listener {
             return;
         }
 
-        KitContents contents = kitManager.getKit(kit);
+        Kit contents = kitManager.getKit(kit);
 
         arena.setUsed(true);
         arena.getCurrentMatch().setData(player, target);

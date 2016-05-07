@@ -2,7 +2,7 @@ package me.realized.duels.commands.admin.subcommands;
 
 import me.realized.duels.commands.SubCommand;
 import me.realized.duels.event.KitLoadEvent;
-import me.realized.duels.kits.KitContents;
+import me.realized.duels.kits.Kit;
 import me.realized.duels.kits.KitManager;
 import me.realized.duels.utilities.Lang;
 import org.bukkit.Bukkit;
@@ -28,7 +28,7 @@ public class LoadkitCommand extends SubCommand {
             return;
         }
 
-        KitContents kit = manager.getKit(name);
+        Kit kit = manager.getKit(name);
         kit.equip(player);
         pm(player, Lang.KIT_LOAD.getMessage().replace("{NAME}", name));
         KitLoadEvent event = new KitLoadEvent(name, kit, player);

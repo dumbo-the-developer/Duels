@@ -14,7 +14,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class PlayerUtil {
 
-    // Patch #1
     public static void toggleVisibility(Player player, Player target) {
         target.hidePlayer(player);
         target.showPlayer(player);

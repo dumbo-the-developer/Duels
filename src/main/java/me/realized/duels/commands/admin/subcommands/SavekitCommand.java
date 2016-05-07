@@ -2,6 +2,7 @@ package me.realized.duels.commands.admin.subcommands;
 
 import me.realized.duels.commands.SubCommand;
 import me.realized.duels.event.KitCreateEvent;
+import me.realized.duels.kits.Kit;
 import me.realized.duels.kits.KitManager;
 import me.realized.duels.utilities.Lang;
 import me.realized.duels.utilities.StringUtil;
@@ -33,7 +34,8 @@ public class SavekitCommand extends SubCommand {
             return;
         }
 
-        manager.addKit(name, player.getInventory());
+        Kit kit = new Kit(name, player.getInventory());
+        manager.addKit(name, kit);
         KitCreateEvent event = new KitCreateEvent(name, player);
         Bukkit.getPluginManager().callEvent(event);
         pm(player, Lang.KIT_CREATE.getMessage().replace("{NAME}", name));

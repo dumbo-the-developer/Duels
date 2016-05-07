@@ -29,6 +29,6 @@ public class RequestHandleEvent extends RequestEvent {
 
     public enum Action {
 
-        ACCEPT, DENY
+        ACCEPTED, DENIED
     }
 }

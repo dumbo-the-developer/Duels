@@ -21,6 +21,7 @@ public enum Lang {
     KIT_CREATE("&7Saved kit &f{NAME}&7!", false),
     KIT_DELETE("&7Deleted kit &f{NAME}&7!", false),
     KIT_LOAD("&7Loaded kit &f{NAME} &7to your inventory.", false),
+    REPLACE_KIT_ITEM("&7Kit &f{NAME}&7's displayed item in Kit Selection GUI was set to your held item.", false),
 
     LIST(Arrays.asList(
             "&b&m------------------------------------",
