@@ -67,6 +67,8 @@ public class DuelManager implements Listener {
         arena.getCurrentMatch().setData(player, target);
         PlayerUtil.reset(true, player, target);
         contents.equip(player, target);
+        player.closeInventory();
+        target.closeInventory();
         player.teleport(pos1);
         target.teleport(pos2);
         arena.addPlayers(player, target);
@@ -108,12 +110,8 @@ public class DuelManager implements Listener {
         final Arena.Match match = arena.getCurrentMatch();
 
         arena.removePlayer(dead.getUniqueId());
-        // dead.setVelocity(new Vector(0, 0, 0));
-        // dead.spigot().respawn();
 
         Arena.InventoryData deadData = match.getInventories(dead.getUniqueId());
-        // PlayerUtil.setInventory(dead, deadData.getInventoryContents(), deadData.getArmorContents(), true);
-
         final Location lobby = dataManager.getLobby() != null ? dataManager.getLobby() : dead.getWorld().getSpawnLocation();
 
         if (config.getBoolean("teleport-to-latest-location")) {
