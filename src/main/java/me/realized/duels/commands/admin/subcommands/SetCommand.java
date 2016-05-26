@@ -43,6 +43,11 @@ public class SetCommand extends SubCommand {
         }
 
         arena.addPosition(position, player.getLocation().clone());
+
+        if (manager.getGUI() != null) {
+            manager.getGUI().update(manager.getArenas());
+        }
+
         pm(player, StringUtil.replaceWithArgs(Lang.ARENA_SET_POSITION.getMessage(), "{POSITION}", position, "{NAME}", arena.getName()));
     }
 }

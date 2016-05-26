@@ -9,26 +9,18 @@ import me.realized.duels.configuration.Config;
 import me.realized.duels.data.DataManager;
 import me.realized.duels.data.UserData;
 import me.realized.duels.dueling.RequestManager;
-import me.realized.duels.event.RequestSendEvent;
+import me.realized.duels.dueling.Settings;
 import me.realized.duels.kits.KitManager;
 import me.realized.duels.utilities.PlayerUtil;
 import me.realized.duels.utilities.inventory.Metadata;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 public class DuelCommand extends BaseCommand {
 
@@ -47,69 +39,6 @@ public class DuelCommand extends BaseCommand {
         this.kitManager = getInstance().getKitManager();
         this.arenaManager = getInstance().getArenaManager();
         this.requestManager = getInstance().getRequestManager();
-        Bukkit.getPluginManager().registerEvents(new ClickListener(), getInstance());
-    }
-
-    class ClickListener implements Listener {
-
-        @EventHandler
-        public void onClick(InventoryClickEvent event) {
-            Player player = (Player) event.getWhoClicked();
-            Inventory top = player.getOpenInventory().getTopInventory();
-            Inventory clicked = event.getClickedInventory();
-
-            if (top == null || clicked == null || !top.getTitle().equals("Kit Selection")) {
-                return;
-            }
-
-            event.setCancelled(true);
-
-            if (!clicked.getTitle().equals(top.getTitle())) {
-                return;
-            }
-
-            ItemStack item = event.getCurrentItem();
-
-            if (item == null || item.getType() == Material.AIR) {
-                return;
-            }
-
-            Object uuid = player.getMetadata("request").get(0).value();
-
-            if (uuid == null || !(uuid instanceof UUID)) {
-                player.closeInventory();
-                return;
-            }
-
-            Player target = Bukkit.getPlayer((UUID) uuid);
-
-            if (target == null) {
-                player.closeInventory();
-                pm(player, "&cThat player is no longer online.");
-                return;
-            }
-
-            if (arenaManager.isInMatch(target)) {
-                pm(player, "&cThat player is already in a match.");
-                return;
-            }
-
-            String kit = kitManager.getKit(event.getSlot());
-            requestManager.sendRequestTo(player, target, kit);
-            player.closeInventory();
-            pm(player, config.getString("on-request-send").replace("{PLAYER}", target.getName()).replace("{KIT}", kit));
-            pm(target, config.getString("on-request-receive").replace("{PLAYER}", player.getName()).replace("{KIT}", kit));
-
-            RequestSendEvent requestSendEvent = new RequestSendEvent(requestManager.getRequestTo(player, target), player, target);
-            Bukkit.getPluginManager().callEvent(requestSendEvent);
-        }
-
-        @EventHandler
-        public void onClose(InventoryCloseEvent event) {
-            if (event.getInventory().getTitle().equals("Kit Selection") && event.getPlayer().hasMetadata("request")) {
-                event.getPlayer().removeMetadata("request", getInstance());
-            }
-        }
     }
 
     @Override
@@ -166,8 +95,8 @@ public class DuelCommand extends BaseCommand {
                 return;
             }
 
-            player.setMetadata("request", new Metadata(getInstance(), target.getUniqueId()));
-            player.openInventory(kitManager.getKitGUI());
+            player.setMetadata("request", new Metadata(getInstance(), new Settings(target.getUniqueId())));
+            player.openInventory(kitManager.getGUI().getFirst());
             return;
         }
 

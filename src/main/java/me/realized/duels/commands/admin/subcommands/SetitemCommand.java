@@ -49,6 +49,7 @@ public class SetitemCommand extends SubCommand {
         ItemStack old = kit.getDisplayed();
         ItemStack _new = held.clone();
         kit.setDisplayed(_new);
+        manager.getGUI().update(manager.getKits());
         pm(player, Lang.REPLACE_KIT_ITEM.getMessage().replace("{NAME}", name));
 
         KitItemChangeEvent event = new KitItemChangeEvent(name, player, old, _new);

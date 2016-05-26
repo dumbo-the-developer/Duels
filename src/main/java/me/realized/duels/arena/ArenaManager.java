@@ -5,11 +5,21 @@ import me.realized.duels.Core;
 import me.realized.duels.configuration.Config;
 import me.realized.duels.data.ArenaData;
 import me.realized.duels.data.DataManager;
+import me.realized.duels.dueling.RequestManager;
+import me.realized.duels.dueling.Settings;
+import me.realized.duels.event.RequestSendEvent;
+import me.realized.duels.gui.GUI;
 import me.realized.duels.utilities.PlayerUtil;
+import me.realized.duels.utilities.inventory.Metadata;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -21,15 +31,18 @@ public class ArenaManager {
 
     private final Core instance;
     private final Config config;
+    private final RequestManager requestManager;
     private final DataManager dataManager;
     private final File base;
     private final Random random = new Random();
 
     private List<Arena> arenas = new ArrayList<>();
+    private GUI<Arena> gui;
 
     public ArenaManager(Core instance) {
         this.instance = instance;
         this.config = instance.getConfiguration();
+        this.requestManager = instance.getRequestManager();
         this.dataManager = instance.getDataManager();
 
         base = new File(instance.getDataFolder(), "arenas.json");
@@ -61,10 +74,90 @@ public class ArenaManager {
             instance.warn("Failed to load arenas from the file! (" + ex.getMessage() + ")");
         }
 
+        if (config.getBoolean("allow-arena-selecting")) {
+            gui = new GUI<>("Arena Selection", arenas, config.getInt("arena-selector"), new GUI.ClickListener() {
+                @Override
+                public void onClick(InventoryClickEvent event) {
+                    Player player = (Player) event.getWhoClicked();
+                    ItemStack item = event.getCurrentItem();
+
+                    if (item == null || item.getType() == Material.AIR) {
+                        return;
+                    }
+
+                    Object value = player.getMetadata("request").get(0).value();
+
+                    if (value == null || !(value instanceof Settings)) {
+                        player.closeInventory();
+                        return;
+                    }
+
+                    Settings settings = (Settings) value;
+                    Player target = Bukkit.getPlayer(settings.getTarget());
+
+                    if (target == null) {
+                        player.closeInventory();
+                        PlayerUtil.pm("&cThat player is no longer online.", player);
+                        return;
+                    }
+
+                    if (isInMatch(target)) {
+                        player.closeInventory();
+                        PlayerUtil.pm("&cThat player is already in a match.", player);
+                        return;
+                    }
+
+                    Arena arena = getArena(player, event.getClickedInventory(), event.getSlot());
+
+                    if (arena == null || arena.isUsed()) {
+                        return;
+                    }
+
+                    settings.setArena(arena.getName());
+                    requestManager.sendRequestTo(player, target, settings);
+                    player.closeInventory();
+                    PlayerUtil.pm(config.getString("on-request-send").replace("{PLAYER}", target.getName()).replace("{KIT}", settings.getKit()).replace("{ARENA}", settings.getArena()), player);
+                    PlayerUtil.pm(config.getString("on-request-receive").replace("{PLAYER}", player.getName()).replace("{KIT}", settings.getKit()).replace("{ARENA}", settings.getArena()), target);
+
+                    RequestSendEvent requestSendEvent = new RequestSendEvent(requestManager.getRequestTo(player, target), player, target);
+                    Bukkit.getPluginManager().callEvent(requestSendEvent);
+                }
+
+                @Override
+                public void onClose(InventoryCloseEvent event) {
+                    Player player = (Player) event.getPlayer();
+
+                    if (gui.isPage(event.getInventory()) && player.hasMetadata("request")) {
+                        player.removeMetadata("request", instance);
+                    }
+                }
+
+                @Override
+                public void onSwitch(Player player, Inventory opened) {
+                    if (player.hasMetadata("request")) {
+                        Object value = player.getMetadata("request").get(0).value();
+                        player.openInventory(opened);
+
+                        if (value == null || !(value instanceof Settings)) {
+                            return;
+                        }
+
+                        player.setMetadata("request", new Metadata(instance, value));
+                    }
+                }
+            });
+
+            instance.getGUIManager().register(gui);
+        }
+
         instance.info("Loaded " + arenas.size() + " arena(s).");
     }
 
     public void save() {
+        if (gui != null) {
+            gui.close("[Duels] All GUIs are automatically closed on plugin disable.");
+        }
+
         List<ArenaData> saved = new ArrayList<>();
         Location toTeleport = dataManager.getLobby() != null ? dataManager.getLobby() : Bukkit.getWorlds().get(0).getSpawnLocation();
 
@@ -138,6 +231,10 @@ public class ArenaManager {
         return null;
     }
 
+    public Arena getArena(Player player, Inventory inventory, int slot) {
+        return gui.getData(player, inventory, slot);
+    }
+
     public Arena getAvailableArena() {
         List<Arena> available = new ArrayList<>();
 
@@ -166,13 +263,25 @@ public class ArenaManager {
 
     public void createArena(String name) {
         arenas.add(new Arena(name, false));
+
+        if (gui != null) {
+            gui.update(arenas);
+        }
     }
 
     public void removeArena(Arena arena) {
         arenas.remove(arena);
+
+        if (gui != null) {
+            gui.update(arenas);
+        }
     }
 
-    public List<String> getArenas() {
+    public List<Arena> getArenas() {
+        return arenas;
+    }
+
+    public List<String> getArenaNames() {
         List<String> result = new ArrayList<>();
 
         if (arenas.isEmpty()) {
@@ -195,5 +304,9 @@ public class ArenaManager {
         }
 
         return result;
+    }
+
+    public GUI<Arena> getGUI() {
+        return gui;
     }
 }

@@ -70,8 +70,8 @@ public class RequestManager {
         return null;
     }
 
-    public void sendRequestTo(Player sender, Player target, String kit) {
-        getRequests(target.getUniqueId()).add(new Request(sender.getUniqueId(), target.getUniqueId(), kit));
+    public void sendRequestTo(Player sender, Player target, Settings settings) {
+        getRequests(target.getUniqueId()).add(new Request(sender.getUniqueId(), target.getUniqueId(), settings));
     }
 
     public void removeRequestFrom(Player sender, Player target) {

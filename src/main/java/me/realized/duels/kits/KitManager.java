@@ -2,18 +2,23 @@ package me.realized.duels.kits;
 
 import com.google.gson.reflect.TypeToken;
 import me.realized.duels.Core;
+import me.realized.duels.arena.ArenaManager;
+import me.realized.duels.configuration.Config;
 import me.realized.duels.data.KitData;
-import me.realized.duels.event.KitCreateEvent;
-import me.realized.duels.event.KitItemChangeEvent;
-import me.realized.duels.event.KitRemoveEvent;
-import me.realized.duels.utilities.inventory.ItemBuilder;
+import me.realized.duels.dueling.RequestManager;
+import me.realized.duels.dueling.Settings;
+import me.realized.duels.event.RequestSendEvent;
+import me.realized.duels.gui.GUI;
+import me.realized.duels.utilities.PlayerUtil;
+import me.realized.duels.utilities.inventory.Metadata;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -24,14 +29,19 @@ import java.util.Map;
 public class KitManager implements Listener {
 
     private final Core instance;
+    private final Config config;
+    private final ArenaManager arenaManager;
+    private final RequestManager requestManager;
     private final File base;
 
     private Map<String, Kit> kits = new HashMap<>();
-    private Map<Integer, String> getBySlot = new HashMap<>();
-    private Inventory gui;
+    private GUI<Kit> gui;
 
     public KitManager(Core instance) {
         this.instance = instance;
+        this.config = instance.getConfiguration();
+        this.arenaManager = instance.getArenaManager();
+        this.requestManager = instance.getRequestManager();
         this.base = new File(instance.getDataFolder(), "kits.json");
 
         try {
@@ -62,23 +72,89 @@ public class KitManager implements Listener {
         }
 
         instance.info("Loaded " + kits.size() + " kit(s).");
+        gui = new GUI<>("Kit Selection", new ArrayList<>(kits.values()), config.getInt("kit-selector"), new GUI.ClickListener() {
 
-        int max = ((kits.size() / 9) * 9 + (kits.size() % 9 > 0 ? 9 : 0));
-        int limited = (max <= 56 ? max : 56) + (max == 0 ? 9 : 0);
-        gui = Bukkit.createInventory(null, limited, "Kit Selection");
-        refreshGUI(false);
+            @Override
+            public void onClick(InventoryClickEvent event) {
+                Player player = (Player) event.getWhoClicked();
+                ItemStack item = event.getCurrentItem();
+
+                if (item == null || item.getType() == Material.AIR) {
+                    return;
+                }
+
+                Object value = player.getMetadata("request").get(0).value();
+
+                if (value == null || !(value instanceof Settings)) {
+                    player.closeInventory();
+                    return;
+                }
+
+                Settings settings = (Settings) value;
+                Player target = Bukkit.getPlayer(settings.getTarget());
+
+                if (target == null) {
+                    player.closeInventory();
+                    PlayerUtil.pm("&cThat player is no longer online.", player);
+                    return;
+                }
+
+                if (arenaManager.isInMatch(target)) {
+                    player.closeInventory();
+                    PlayerUtil.pm("&cThat player is already in a match.", player);
+                    return;
+                }
+
+                Kit kit = getKit(player, event.getClickedInventory(), event.getSlot());
+
+                if (kit == null) {
+                    return;
+                }
+
+                settings.setKit(kit.getName());
+
+                if (!config.getBoolean("allow-arena-selecting")) {
+                    requestManager.sendRequestTo(player, target, settings);
+                    player.closeInventory();
+                    PlayerUtil.pm(config.getString("on-request-send").replace("{PLAYER}", target.getName()).replace("{KIT}", kit.getName()).replace("{ARENA}", "random"), player);
+                    PlayerUtil.pm(config.getString("on-request-receive").replace("{PLAYER}", player.getName()).replace("{KIT}", kit.getName()).replace("{ARENA}", "random"), target);
+
+                    RequestSendEvent requestSendEvent = new RequestSendEvent(requestManager.getRequestTo(player, target), player, target);
+                    Bukkit.getPluginManager().callEvent(requestSendEvent);
+                } else {
+                    onSwitch(player, arenaManager.getGUI().getFirst());
+                }
+            }
+
+            @Override
+            public void onClose(InventoryCloseEvent event) {
+                Player player = (Player) event.getPlayer();
+
+                if (gui.isPage(event.getInventory()) && player.hasMetadata("request")) {
+                    player.removeMetadata("request", instance);
+                }
+            }
+
+            @Override
+            public void onSwitch(Player player, Inventory opened) {
+                if (player.hasMetadata("request")) {
+                    Object value = player.getMetadata("request").get(0).value();
+                    player.openInventory(opened);
+
+                    if (value == null || !(value instanceof Settings)) {
+                        return;
+                    }
+
+                    player.setMetadata("request", new Metadata(instance, value));
+                }
+            }
+        });
+
+        instance.getGUIManager().register(gui);
     }
 
     public void save() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            Inventory top = player.getOpenInventory().getTopInventory();
-
-            if (top != null && top.getTitle().equals("Kit Selection")) {
-                player.closeInventory();
-                player.sendMessage(ChatColor.RED + "[Duels] Closing GUI due to plugin disable.");
-            }
-        }
-
+        gui.close("[Duels] All GUIs are automatically closed on plugin disable.");
         Map<String, KitData> saved = new HashMap<>();
 
         for (Map.Entry<String, Kit> entry : kits.entrySet()) {
@@ -95,57 +171,31 @@ public class KitManager implements Listener {
 
     public void addKit(String name, Kit kit) {
         kits.put(name, kit);
+        gui.update(new ArrayList<>(kits.values()));
     }
 
     public void removeKit(String name) {
         kits.remove(name);
+        gui.update(new ArrayList<>(kits.values()));
     }
 
-    public String getKit(int slot) {
-        return getBySlot.get(slot);
+    public Kit getKit(Player player, Inventory inventory, int slot) {
+        return gui.getData(player, inventory, slot);
     }
 
     public Kit getKit(String name) {
         return kits.get(name);
     }
 
-    public Inventory getKitGUI() {
+    public GUI<Kit> getGUI() {
         return gui;
     }
 
-    private void refreshGUI(boolean players) {
-        gui.clear();
-
-        if (kits.isEmpty()) {
-            gui.setItem(4, ItemBuilder.builder().type(Material.REDSTONE_BLOCK).name("&cNo Kits found!").build());
-            return;
-        }
-
-        List<Kit> kits = new ArrayList<>();
-        kits.addAll(this.kits.values());
-
-        for (int i = 0; i < gui.getSize(); i++) {
-            if (kits.size() - 1 < i) {
-                break;
-            }
-
-            Kit kit = kits.get(i);
-            getBySlot.put(i, kit.getName());
-            gui.setItem(i, kit.getDisplayed());
-        }
-
-        if (players) {
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                Inventory top = player.getOpenInventory().getTopInventory();
-
-                if (top != null && top.getTitle().equals("Kit Selection")) {
-                    player.updateInventory();
-                }
-            }
-        }
+    public List<Kit> getKits() {
+        return new ArrayList<>(kits.values());
     }
 
-    public List<String> getKits() {
+    public List<String> getKitNames() {
         List<String> result = new ArrayList<>();
 
         if (kits.isEmpty()) {
@@ -155,21 +205,6 @@ public class KitManager implements Listener {
 
         result.addAll(kits.keySet());
         return result;
-    }
-
-    @EventHandler
-    public void onCreate(KitCreateEvent event) {
-        refreshGUI(true);
-    }
-
-    @EventHandler
-    public void onRemove(KitRemoveEvent event) {
-        refreshGUI(true);
-    }
-
-    @EventHandler
-    public void onItemUpdate(KitItemChangeEvent event) {
-        refreshGUI(true);
     }
 
     public enum Type {

@@ -1,6 +1,6 @@
 name: Duels
 main: me.realized.duels.Core
-version: 1.0.9
+version: 1.1.0
 author: Realized
 description: An ultimate solution to server owners wanting to create a duel system.
 softdepend: [WorldGuard, Multiverse-Core]
@@ -13,7 +13,7 @@ commands:
      aliases: [1v1]
    stats:
      description: Display stats of yours or others.
-     aliases: [statistics, info]
+     aliases: [statistics, info, duelstats, dstats]
    toggle:
      description: Enable or disable receiving duel requests.
      aliases: [tg]

@@ -5,8 +5,22 @@ patcher:
   # This might conflict with Essentials if you duel while vanished. Enable them at your own risk.
   patch-invisible: false
 
+# GUI settings
+GUI:
+  # Select how many rows should each page of the GUI have.
+  # Note: Excludes the last row which contains 'previous page' & 'next page' buttons.
+  # Must be in range between 1 - 5, otherwise it'll be set to 5 by default.
+  kit-selector: 3
+  arena-selector: 2
+
 # Duel settings
 Dueling:
+  # If enabled: Players will have another GUI open after selecting kit that displays clickable arenas.
+  # They are able to choose which arena they want to play on.
+  # If someone else uses the arena while the request is pending,
+  # the 'arena in use' message will display and the request will be cancelled.
+  allow-arena-selecting: true
+
   # If enabled: Players must have a cleared inventory to execute the command /duel.
   # Player inventories will be restored on duel end if this value is set to 'false'.
   requires-cleared-inventory: true
@@ -84,6 +98,12 @@ Dueling:
   - 'essentials:ecreatehome'
   - 'vault'
   - 'chest'
+  - 'pv'
+  - 'playervaults'
+  - 'playervaults:vault'
+  - 'playervaults:chest'
+  - 'playervaults:pv'
+  - 'playervaults:playervaults'
 
 # DuelZone settings. Requires WorldGuard!
 DuelZone:
@@ -129,8 +149,9 @@ Messages:
   # Placeholders:
   # {PLAYER} - Receiver's name for 'on-request-send', Sender's name for 'on-request-receive'.
   # {KIT} - Name of the kit selected on request send.
-  on-request-send: '&9[Duels] &7Duel request sent to &f{PLAYER} &7with kit &f{KIT}&7.'
-  on-request-receive: '&9[Duels] &7Duel request received from &f{PLAYER} &7with kit &f{KIT}&7. Type &f/duel accept {PLAYER} &7to accept. &e[Expires in 30s]'
+  # {ARENA} - 'random' if arena selecting is disabled, selected arena's name if enabled.
+  on-request-send: '&9[Duels] &7Duel request sent to &f{PLAYER} &7with kit &f{KIT}&7 on arena &f{ARENA}&7.'
+  on-request-receive: '&9[Duels] &7Duel request received from &f{PLAYER} &7with kit &f{KIT}&7 on arena &f{ARENA}&7. Type &f/duel accept {PLAYER} &7to accept. &e[Expires in 30s]'
 
   # Displayed when a duel ends.
   # {WINNER} - Winner's name.
@@ -141,8 +162,10 @@ Messages:
   # Displayed when player accepts a duel request.
   # Placeholders:
   # {PLAYER} - Request acceptor's name for 'on-request-accept-target', sender's name for 'on-request-accept-sender'.
-  on-request-accept-target: '&9[Duels] &7Accepted duel request from &f{PLAYER}&7. Starting match with kit &f{KIT}&7.'
-  on-request-accept-sender: '&9[Duels] &7Your duel request to &f{PLAYER} &7was accepted. Starting match with kit &f{KIT}&7.'
+  # {KIT} - Name of the kit selected on request send.
+  # {ARENA} - 'random' if arena selecting is disabled, selected arena's name if enabled.
+  on-request-accept-target: '&9[Duels] &7Accepted duel request from &f{PLAYER}&7. Starting match with kit &f{KIT}&7 on arena &f{ARENA}&7.'
+  on-request-accept-sender: '&9[Duels] &7Your duel request to &f{PLAYER} &7was accepted. Starting match with kit &f{KIT}&7 on arena &f{ARENA}&7.'
 
   # Displayed when player accepts a duel request.
   # Placeholders:

@@ -1,14 +1,19 @@
 package me.realized.duels.arena;
 
+import me.realized.duels.gui.ICanHandleGUI;
 import me.realized.duels.utilities.LocationUtil;
+import me.realized.duels.utilities.inventory.ItemBuilder;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
 
-public class Arena {
+public class Arena implements ICanHandleGUI {
 
     private final String name;
 
@@ -17,10 +22,12 @@ public class Arena {
     private Map<Integer, Location> positions = new HashMap<>();
     private List<UUID> players = new ArrayList<>();
     private Match current;
+    private ItemStack displayed;
 
     public Arena(String name, boolean disabled) {
         this.name = name;
         this.disabled = disabled;
+        this.displayed = ItemBuilder.builder().type(Material.MAP).name(ChatColor.BLUE + name + ": " + ChatColor.GREEN + "Available").build();
     }
 
     public String getName() {
@@ -32,14 +39,20 @@ public class Arena {
     }
 
     public void setUsed(boolean used) {
+        this.used = used;
+
+        ItemMeta meta = displayed.getItemMeta();
+
         if (!used) {
             this.players.clear();
             this.current = null;
+            meta.setDisplayName(ChatColor.BLUE + name + ": " + ChatColor.GREEN + "Available");
         } else {
             this.current = new Match();
+            meta.setDisplayName(ChatColor.BLUE + name + ": " + ChatColor.RED + "In Use");
         }
 
-        this.used = used;
+        displayed.setItemMeta(meta);
     }
 
     public boolean isDisabled() {
@@ -120,6 +133,16 @@ public class Arena {
         }
 
         return result;
+    }
+
+    @Override
+    public ItemStack toDisplay() {
+        return displayed;
+    }
+
+    @Override
+    public boolean filter() {
+        return !disabled && isValid();
     }
 
     public class Match {

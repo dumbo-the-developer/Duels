@@ -1,5 +1,6 @@
 package me.realized.duels.kits;
 
+import me.realized.duels.gui.ICanHandleGUI;
 import me.realized.duels.utilities.inventory.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -10,7 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Kit {
+public class Kit implements ICanHandleGUI {
 
     private final String name;
     private ItemStack displayed;
@@ -99,5 +100,15 @@ public class Kit {
                 }
             }
         }
+    }
+
+    @Override
+    public ItemStack toDisplay() {
+        return displayed;
+    }
+
+    @Override
+    public boolean filter() {
+        return true;
     }
 }

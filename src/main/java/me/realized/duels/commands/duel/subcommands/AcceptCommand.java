@@ -64,7 +64,7 @@ public class AcceptCommand extends SubCommand {
 
         Request request = requestManager.getRequestFrom(player, target);
         requestManager.removeRequestFrom(player, target);
-        duelManager.startMatch(player, target, request.getKit());
+        duelManager.startMatch(player, target, request);
 
         RequestHandleEvent event = new RequestHandleEvent(request, player, target, RequestHandleEvent.Action.ACCEPTED);
         Bukkit.getPluginManager().callEvent(event);

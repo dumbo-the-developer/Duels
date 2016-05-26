@@ -44,12 +44,23 @@ public class DuelManager implements Listener {
         Bukkit.getPluginManager().registerEvents(this, instance);
     }
 
-    public void startMatch(Player player, Player target, String kit) {
-        Arena arena = arenaManager.getAvailableArena();
+    public void startMatch(Player player, Player target, Request request) {
+        Arena arena;
 
-        if (arena == null) {
-            PlayerUtil.pm("&cNo available arenas were found, please try again later.", player, target);
-            return;
+        if (config.getBoolean("allow-arena-selecting")) {
+            arena = arenaManager.getArena(request.getArena());
+
+            if (arena == null || arena.isUsed()) {
+                PlayerUtil.pm("&cThe selected arena is no longer available, please choose a different arena.", player, target);
+                return;
+            }
+        } else {
+            arena = arenaManager.getAvailableArena();
+
+            if (arena == null) {
+                PlayerUtil.pm("&cNo available arenas were found, please try again later.", player, target);
+                return;
+            }
         }
 
         Location pos1 = arena.getPositions().get(1);
@@ -61,7 +72,8 @@ public class DuelManager implements Listener {
             return;
         }
 
-        Kit contents = kitManager.getKit(kit);
+        Kit contents = kitManager.getKit(request.getKit());
+        String arenaName = request.getArena() != null ? request.getArena() : "random";
 
         arena.setUsed(true);
         arena.getCurrentMatch().setData(player, target);
@@ -72,15 +84,19 @@ public class DuelManager implements Listener {
         player.teleport(pos1);
         target.teleport(pos2);
         arena.addPlayers(player, target);
-        PlayerUtil.pm(StringUtil.replaceWithArgs(config.getString("on-request-accept-target"), "{PLAYER}", target.getName(), "{KIT}", kit), player);
-        PlayerUtil.pm(StringUtil.replaceWithArgs(config.getString("on-request-accept-sender"), "{PLAYER}", player.getName(), "{KIT}", kit), target);
+        PlayerUtil.pm(StringUtil.replaceWithArgs(config.getString("on-request-accept-target"), "{PLAYER}", target.getName(), "{KIT}", request.getKit()).replace("{ARENA}", arenaName), player);
+        PlayerUtil.pm(StringUtil.replaceWithArgs(config.getString("on-request-accept-sender"), "{PLAYER}", player.getName(), "{KIT}", request.getKit()).replace("{ARENA}", arenaName), target);
 
         if (config.getBoolean("patch-invisible")) {
             PlayerUtil.toggleVisibility(player, target);
         }
+
+        if (arenaManager.getGUI() != null) {
+            arenaManager.getGUI().update(arenaManager.getArenas());
+        }
     }
 
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
 
@@ -153,6 +169,10 @@ public class DuelManager implements Listener {
                     public void run() {
                         arena.setUsed(false);
 
+                        if (arenaManager.getGUI() != null) {
+                            arenaManager.getGUI().update(arenaManager.getArenas());
+                        }
+
                         if (!target.isOnline() || target.isDead()) {
                             return;
                         }
@@ -179,6 +199,10 @@ public class DuelManager implements Listener {
                 }.runTaskLater(instance, delay * 20L);
             } else {
                 arena.setUsed(false);
+
+                if (arenaManager.getGUI() != null) {
+                    arenaManager.getGUI().update(arenaManager.getArenas());
+                }
 
                 if (target.isDead()) {
                     target.spigot().respawn();
@@ -270,29 +294,4 @@ public class DuelManager implements Listener {
             PlayerUtil.pm("&cYou may not fly while in duel.", event.getPlayer());
         }
     }
-
-    /*
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onDamage(EntityDamageByEntityEvent event) {
-        if (!(event.getDamager() instanceof Player) || !(event.getEntity() instanceof Player)) {
-            return;
-        }
-
-        if (!config.getBoolean("patch-no-hit-delay")) {
-            return;
-        }
-
-        Player damaged = (Player) event.getEntity();
-
-        if (!arenaManager.isInMatch(damaged)) {
-            return;
-        }
-
-        if (damaged.getMaximumNoDamageTicks() != 20) {
-            damaged.setMaximumNoDamageTicks(20);
-        }
-    }
-
-    */
 }

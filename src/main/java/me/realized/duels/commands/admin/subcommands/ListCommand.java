@@ -24,8 +24,8 @@ public class ListCommand extends SubCommand {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        String arenas = StringUtil.join(arenaManager.getArenas(), "&r, ");
-        String kits = StringUtil.join(kitManager.getKits(), ", ");
+        String arenas = StringUtil.join(arenaManager.getArenaNames(), "&r, ");
+        String kits = StringUtil.join(kitManager.getKitNames(), ", ");
         String lobby = (dataManager.getLobby() != null ? LocationUtil.format(dataManager.getLobby()) : "Lobby not set, using world's spawn location. Set lobby using /duels setlobby");
 
         for (String s : Lang.LIST.getMessages()) {
