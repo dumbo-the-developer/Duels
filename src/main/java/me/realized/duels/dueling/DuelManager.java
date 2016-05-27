@@ -77,12 +77,12 @@ public class DuelManager implements Listener {
 
         arena.setUsed(true);
         arena.getCurrentMatch().setData(player, target);
-        PlayerUtil.reset(true, player, target);
-        contents.equip(player, target);
         player.closeInventory();
         target.closeInventory();
         player.teleport(pos1);
         target.teleport(pos2);
+        PlayerUtil.reset(true, player, target);
+        contents.equip(player, target);
         arena.addPlayers(player, target);
         PlayerUtil.pm(StringUtil.replaceWithArgs(config.getString("on-request-accept-target"), "{PLAYER}", target.getName(), "{KIT}", request.getKit()).replace("{ARENA}", arenaName), player);
         PlayerUtil.pm(StringUtil.replaceWithArgs(config.getString("on-request-accept-sender"), "{PLAYER}", player.getName(), "{KIT}", request.getKit()).replace("{ARENA}", arenaName), target);
