@@ -14,6 +14,8 @@ import me.realized.duels.data.DataManager;
 import me.realized.duels.dueling.DuelManager;
 import me.realized.duels.dueling.RequestManager;
 import me.realized.duels.gui.GUIManager;
+import me.realized.duels.hooks.EssentialsHook;
+import me.realized.duels.hooks.HookManager;
 import me.realized.duels.kits.KitManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -31,6 +33,7 @@ public class Core extends JavaPlugin {
     private WorldGuardPlugin worldguard = null;
     private Logger logger;
     private Config config;
+    private HookManager hookManager;
     private GUIManager guiManager;
     private DuelManager duelManager;
     private DataManager dataManager;
@@ -48,8 +51,10 @@ public class Core extends JavaPlugin {
         logger = Bukkit.getLogger();
         config = new Config(this);
 
-        requestManager = new RequestManager();
+        hookManager = new HookManager();
+        hookManager.register("Essentials", new EssentialsHook(this));
 
+        requestManager = new RequestManager();
         guiManager = new GUIManager(this);
 
         dataManager = new DataManager(this);
@@ -99,6 +104,10 @@ public class Core extends JavaPlugin {
 
     public Config getConfiguration() {
         return config;
+    }
+
+    public HookManager getHookManager() {
+        return hookManager;
     }
 
     public GUIManager getGUIManager() {

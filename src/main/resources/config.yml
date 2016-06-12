@@ -2,8 +2,11 @@
 
 # Glitch patches
 patcher:
-  # This might conflict with Essentials if you duel while vanished. Enable them at your own risk.
-  patch-invisible: false
+  # If enabled: Toggles vanish off if you're vanished. (Essentials)
+  fix-vanish: false
+
+  # if enabled: Disables player returning to arena using /back after the match. (Essentials)
+  fix-back: true
 
 # GUI settings
 GUI:
@@ -88,6 +91,18 @@ Dueling:
   - 'essentials:etpaccept'
   - 'essentials:tpyes'
   - 'essentials:etpyes'
+  - 'tpahere'
+  - 'etpahere'
+  - 'essentials:tpahere'
+  - 'essentials:etpahere'
+  - 'back'
+  - 'eback'
+  - 'return'
+  - 'ereturn'
+  - 'essentials:back'
+  - 'essentials:eback'
+  - 'essentials:return'
+  - 'essentials:ereturn'
   - 'sethome'
   - 'esethome'
   - 'createhome'

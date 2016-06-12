@@ -7,6 +7,8 @@ import me.realized.duels.configuration.Config;
 import me.realized.duels.data.DataManager;
 import me.realized.duels.data.MatchData;
 import me.realized.duels.data.UserData;
+import me.realized.duels.hooks.EssentialsHook;
+import me.realized.duels.hooks.HookManager;
 import me.realized.duels.kits.Kit;
 import me.realized.duels.kits.KitManager;
 import me.realized.duels.utilities.PlayerUtil;
@@ -31,6 +33,7 @@ public class DuelManager implements Listener {
 
     private final Core instance;
     private final Config config;
+    private final EssentialsHook essentialsHook;
     private final DataManager dataManager;
     private final KitManager kitManager;
     private final ArenaManager arenaManager;
@@ -38,6 +41,7 @@ public class DuelManager implements Listener {
     public DuelManager(Core instance) {
         this.instance = instance;
         this.config = instance.getConfiguration();
+        this.essentialsHook = (EssentialsHook) instance.getHookManager().get("Essentials");
         this.dataManager = instance.getDataManager();
         this.kitManager = instance.getKitManager();
         this.arenaManager = instance.getArenaManager();
@@ -81,15 +85,13 @@ public class DuelManager implements Listener {
         target.closeInventory();
         player.teleport(pos1);
         target.teleport(pos2);
+        essentialsHook.setUnvanished(player);
+        essentialsHook.setUnvanished(target);
         PlayerUtil.reset(true, player, target);
         contents.equip(player, target);
         arena.addPlayers(player, target);
         PlayerUtil.pm(StringUtil.replaceWithArgs(config.getString("on-request-accept-target"), "{PLAYER}", target.getName(), "{KIT}", request.getKit()).replace("{ARENA}", arenaName), player);
         PlayerUtil.pm(StringUtil.replaceWithArgs(config.getString("on-request-accept-sender"), "{PLAYER}", player.getName(), "{KIT}", request.getKit()).replace("{ARENA}", arenaName), target);
-
-        if (config.getBoolean("patch-invisible")) {
-            PlayerUtil.toggleVisibility(player, target);
-        }
 
         if (arenaManager.getGUI() != null) {
             arenaManager.getGUI().update(arenaManager.getArenas());
@@ -106,6 +108,7 @@ public class DuelManager implements Listener {
             PlayerUtil.reset(player, false);
             PlayerUtil.setInventory(player, data.getInventoryData().getInventoryContents(), data.getInventoryData().getArmorContents(), false);
             player.removeMetadata("respawn", Core.getInstance());
+            essentialsHook.setBackLocation(player, event.getRespawnLocation());
         }
     }
 
@@ -168,7 +171,6 @@ public class DuelManager implements Listener {
                     @Override
                     public void run() {
                         arena.setUsed(false);
-
                         if (arenaManager.getGUI() != null) {
                             arenaManager.getGUI().update(arenaManager.getArenas());
                         }
@@ -189,6 +191,7 @@ public class DuelManager implements Listener {
                             target.teleport(last);
                         }
 
+                        essentialsHook.setBackLocation(target, target.getLocation());
                         PlayerUtil.reset(target, true);
 
                         if (!config.getBoolean("requires-cleared-inventory")) {
@@ -215,6 +218,7 @@ public class DuelManager implements Listener {
                     target.teleport(last);
                 }
 
+                essentialsHook.setBackLocation(target, target.getLocation());
                 PlayerUtil.reset(target, true);
 
                 if (!config.getBoolean("requires-cleared-inventory")) {

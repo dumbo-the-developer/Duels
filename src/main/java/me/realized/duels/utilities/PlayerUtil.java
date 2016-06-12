@@ -7,7 +7,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -83,6 +85,14 @@ public class PlayerUtil {
     }
 
     private static void clearInventory(Player player) {
+        player.setItemOnCursor(null);
+
+        Inventory top = player.getOpenInventory().getTopInventory();
+
+        if (top != null && top.getType() == InventoryType.CRAFTING) {
+            top.clear();
+        }
+
         player.getInventory().setArmorContents(new ItemStack[4]);
         player.getInventory().clear();
         player.updateInventory();
