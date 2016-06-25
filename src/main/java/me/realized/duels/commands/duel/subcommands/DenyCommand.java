@@ -7,8 +7,7 @@ import me.realized.duels.data.UserData;
 import me.realized.duels.dueling.Request;
 import me.realized.duels.dueling.RequestManager;
 import me.realized.duels.event.RequestHandleEvent;
-import me.realized.duels.utilities.PlayerUtil;
-import me.realized.duels.utilities.StringUtil;
+import me.realized.duels.utilities.Helper;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -58,8 +57,8 @@ public class DenyCommand extends SubCommand {
 
         Request request = requestManager.getRequestFrom(player, target);
         requestManager.removeRequestFrom(player, target);
-        PlayerUtil.pm(StringUtil.replaceWithArgs(config.getString("on-request-deny-target"), "{PLAYER}", target.getName()), player);
-        PlayerUtil.pm(StringUtil.replaceWithArgs(config.getString("on-request-deny-sender"), "{PLAYER}", player.getName()), target);
+        Helper.pm(Helper.replaceWithArgs(config.getString("on-request-deny-target"), "{PLAYER}", target.getName()), player);
+        Helper.pm(Helper.replaceWithArgs(config.getString("on-request-deny-sender"), "{PLAYER}", player.getName()), target);
 
         RequestHandleEvent event = new RequestHandleEvent(request, player, target, RequestHandleEvent.Action.DENIED);
         Bukkit.getPluginManager().callEvent(event);

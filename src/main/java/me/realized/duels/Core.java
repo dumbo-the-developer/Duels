@@ -2,7 +2,6 @@ package me.realized.duels;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.commands.BaseCommand;
 import me.realized.duels.commands.admin.DuelsCommand;
@@ -16,22 +15,17 @@ import me.realized.duels.dueling.RequestManager;
 import me.realized.duels.gui.GUIManager;
 import me.realized.duels.hooks.EssentialsHook;
 import me.realized.duels.hooks.HookManager;
+import me.realized.duels.hooks.WorldGuardHook;
 import me.realized.duels.kits.KitManager;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class Core extends JavaPlugin {
 
-    private static Core instance = null;
-
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    private WorldGuardPlugin worldguard = null;
-    private Logger logger;
     private Config config;
     private HookManager hookManager;
     private GUIManager guiManager;
@@ -43,15 +37,10 @@ public class Core extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
-            worldguard = (WorldGuardPlugin) Bukkit.getPluginManager().getPlugin("WorldGuard");
-        }
-
-        instance = this;
-        logger = Bukkit.getLogger();
         config = new Config(this);
 
         hookManager = new HookManager();
+        hookManager.register("WorldGuard", new WorldGuardHook(this));
         hookManager.register("Essentials", new EssentialsHook(this));
 
         requestManager = new RequestManager();
@@ -87,15 +76,11 @@ public class Core extends JavaPlugin {
     }
 
     public void info(String msg) {
-        logger.info("[Duels] " + msg);
+        getLogger().info(msg);
     }
 
     public void warn(String msg) {
-        logger.warning("[Duels] " + msg);
-    }
-
-    public WorldGuardPlugin getWorldGuard() {
-        return worldguard;
+        getLogger().warning(msg);
     }
 
     public Gson getGson() {
@@ -135,6 +120,6 @@ public class Core extends JavaPlugin {
     }
 
     public static Core getInstance() {
-        return instance;
+        return getPlugin(Core.class);
     }
 }

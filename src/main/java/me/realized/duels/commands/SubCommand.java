@@ -1,7 +1,7 @@
 package me.realized.duels.commands;
 
 import me.realized.duels.Core;
-import me.realized.duels.utilities.StringUtil;
+import me.realized.duels.utilities.Helper;
 import org.bukkit.command.CommandSender;
 
 public abstract class SubCommand {
@@ -40,7 +40,7 @@ public abstract class SubCommand {
     }
 
     protected void pm(CommandSender sender, String msg) {
-        sender.sendMessage(StringUtil.color(msg));
+        sender.sendMessage(Helper.color(msg));
     }
 
     public abstract void execute(CommandSender sender, String[] args);

@@ -6,8 +6,7 @@ import me.realized.duels.configuration.Config;
 import me.realized.duels.data.DataManager;
 import me.realized.duels.data.MatchData;
 import me.realized.duels.data.UserData;
-import me.realized.duels.utilities.ProfileUtil;
-import me.realized.duels.utilities.StringUtil;
+import me.realized.duels.utilities.Helper;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -47,7 +46,7 @@ public class StatsCommand extends BaseCommand {
             return;
         }
 
-        UUID uuid = ProfileUtil.getUUID(args[0]);
+        UUID uuid = Helper.getUUID(args[0]);
 
         if (uuid == null) {
             pm(player, "&cThat player was not found.");
@@ -72,16 +71,16 @@ public class StatsCommand extends BaseCommand {
         List<String> stats = config.getList("stats");
 
         for (String txt : stats) {
-            txt = StringUtil.replaceWithArgs(StringUtil.color(txt), "{NAME}", user.getName(), "{WINS}", wins, "{LOSSES}", losses, "{REQUESTS_ENABLED}", requests);
+            txt = Helper.replaceWithArgs(Helper.color(txt), "{NAME}", user.getName(), "{WINS}", wins, "{LOSSES}", losses, "{REQUESTS_ENABLED}", requests);
             pm(base, txt);
         }
 
         if (config.getBoolean("display-matches")) {
             for (MatchData match : user.getMatches()) {
-                String duration = StringUtil.toHumanReadableTime(match.getDuration());
-                String timeSince = StringUtil.toHumanReadableTime(calendar.getTimeInMillis() - match.getTime());
-                BaseComponent[] messages = TextComponent.fromLegacyText(StringUtil.replaceWithArgs(StringUtil.color(config.getString("match-format")), "{WINNER}", match.getWinner(), "{LOSER}", match.getLoser()));
-                BaseComponent[] hover = TextComponent.fromLegacyText(StringUtil.replaceWithArgs(StringUtil.color(config.getString("match-hover")), "{DURATION}", duration, "{TIME}", timeSince, "{HEALTH}", match.getHealth()));
+                String duration = Helper.toHumanReadableTime(match.getDuration());
+                String timeSince = Helper.toHumanReadableTime(calendar.getTimeInMillis() - match.getTime());
+                BaseComponent[] messages = TextComponent.fromLegacyText(Helper.replaceWithArgs(Helper.color(config.getString("match-format")), "{WINNER}", match.getWinner(), "{LOSER}", match.getLoser()));
+                BaseComponent[] hover = TextComponent.fromLegacyText(Helper.replaceWithArgs(Helper.color(config.getString("match-hover")), "{DURATION}", duration, "{TIME}", timeSince, "{HEALTH}", match.getHealth()));
 
                 for (BaseComponent message : messages) {
                     message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover));

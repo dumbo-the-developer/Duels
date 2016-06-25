@@ -1,9 +1,9 @@
 name: Duels
 main: me.realized.duels.Core
-version: 1.1.2
+version: 1.2.0
 author: Realized
 description: An ultimate solution to server owners wanting to create a duel system.
-softdepend: [WorldGuard, Multiverse-Core]
+softdepend: [WorldGuard, Multiverse-Core, Essentials]
 
 # Multiverse-Core added as soft-depend due to locations being null when Duels is loaded first.
 

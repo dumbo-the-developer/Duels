@@ -3,10 +3,8 @@ package me.realized.duels.commands.admin.subcommands;
 import me.realized.duels.commands.SubCommand;
 import me.realized.duels.data.DataManager;
 import me.realized.duels.data.UserData;
+import me.realized.duels.utilities.Helper;
 import me.realized.duels.utilities.Lang;
-import me.realized.duels.utilities.NumberUtil;
-import me.realized.duels.utilities.ProfileUtil;
-import me.realized.duels.utilities.StringUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.UUID;
@@ -22,7 +20,7 @@ public class EditCommand extends SubCommand {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        UUID uuid = ProfileUtil.getUUID(args[1]);
+        UUID uuid = Helper.getUUID(args[1]);
 
         if (uuid == null) {
             pm(sender, "&cPlayer not found.");
@@ -50,7 +48,7 @@ public class EditCommand extends SubCommand {
 
         UserData.StatsType statsType = UserData.StatsType.valueOf(args[3].toUpperCase());
 
-        if (!NumberUtil.isInt(args[4], false)) {
+        if (!Helper.isInt(args[4], false)) {
             pm(sender, "&c'" + args[4] + "' is not a valid amount.");
             return;
         }
@@ -59,6 +57,6 @@ public class EditCommand extends SubCommand {
 
         target.edit(editType, statsType, amount);
         String action = editType.name().toLowerCase() + " " + amount + " " + statsType.name().toLowerCase();
-        pm(sender, StringUtil.replaceWithArgs(Lang.EDIT.getMessage(), "{PLAYER}", target.getName(), "{ACTION}", action));
+        pm(sender, Helper.replaceWithArgs(Lang.EDIT.getMessage(), "{PLAYER}", target.getName(), "{ACTION}", action));
     }
 }

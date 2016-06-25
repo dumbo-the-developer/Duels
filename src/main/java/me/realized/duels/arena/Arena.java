@@ -1,7 +1,7 @@
 package me.realized.duels.arena;
 
 import me.realized.duels.gui.ICanHandleGUI;
-import me.realized.duels.utilities.LocationUtil;
+import me.realized.duels.utilities.Helper;
 import me.realized.duels.utilities.inventory.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -129,7 +129,7 @@ public class Arena implements ICanHandleGUI {
         }
 
         for (Map.Entry<Integer, Location> entry : positions.entrySet()) {
-            result.add(LocationUtil.format(entry.getValue()));
+            result.add(Helper.format(entry.getValue()));
         }
 
         return result;

@@ -1,7 +1,7 @@
 package me.realized.duels.commands;
 
 import me.realized.duels.Core;
-import me.realized.duels.utilities.StringUtil;
+import me.realized.duels.utilities.Helper;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -33,7 +33,7 @@ public abstract class BaseCommand implements CommandExecutor, TabCompleter {
     }
 
     protected void pm(CommandSender sender, String msg) {
-        sender.sendMessage(StringUtil.color(msg));
+        sender.sendMessage(Helper.color(msg));
     }
 
     @Override

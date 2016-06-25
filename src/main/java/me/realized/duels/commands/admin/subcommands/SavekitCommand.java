@@ -4,8 +4,8 @@ import me.realized.duels.commands.SubCommand;
 import me.realized.duels.event.KitCreateEvent;
 import me.realized.duels.kits.Kit;
 import me.realized.duels.kits.KitManager;
+import me.realized.duels.utilities.Helper;
 import me.realized.duels.utilities.Lang;
-import me.realized.duels.utilities.StringUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -24,7 +24,7 @@ public class SavekitCommand extends SubCommand {
         Player player = (Player) sender;
         String name = args[1];
 
-        if (!StringUtil.isAlphanumeric(name)) {
+        if (!Helper.isAlphanumeric(name)) {
             pm(sender, "&cKit name must be alphanumeric.");
             return;
         }

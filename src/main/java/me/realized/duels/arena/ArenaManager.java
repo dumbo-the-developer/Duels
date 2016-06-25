@@ -9,8 +9,8 @@ import me.realized.duels.dueling.RequestManager;
 import me.realized.duels.dueling.Settings;
 import me.realized.duels.event.RequestSendEvent;
 import me.realized.duels.gui.GUI;
-import me.realized.duels.utilities.PlayerUtil;
-import me.realized.duels.utilities.inventory.Metadata;
+import me.realized.duels.utilities.Helper;
+import me.realized.duels.utilities.Metadata;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -97,13 +97,13 @@ public class ArenaManager {
 
                     if (target == null) {
                         player.closeInventory();
-                        PlayerUtil.pm("&cThat player is no longer online.", player);
+                        Helper.pm("&cThat player is no longer online.", player);
                         return;
                     }
 
                     if (isInMatch(target)) {
                         player.closeInventory();
-                        PlayerUtil.pm("&cThat player is already in a match.", player);
+                        Helper.pm("&cThat player is already in a match.", player);
                         return;
                     }
 
@@ -116,8 +116,8 @@ public class ArenaManager {
                     settings.setArena(arena.getName());
                     requestManager.sendRequestTo(player, target, settings);
                     player.closeInventory();
-                    PlayerUtil.pm(config.getString("on-request-send").replace("{PLAYER}", target.getName()).replace("{KIT}", settings.getKit()).replace("{ARENA}", settings.getArena()), player);
-                    PlayerUtil.pm(config.getString("on-request-receive").replace("{PLAYER}", player.getName()).replace("{KIT}", settings.getKit()).replace("{ARENA}", settings.getArena()), target);
+                    Helper.pm(config.getString("on-request-send").replace("{PLAYER}", target.getName()).replace("{KIT}", settings.getKit()).replace("{ARENA}", settings.getArena()), player);
+                    Helper.pm(config.getString("on-request-receive").replace("{PLAYER}", player.getName()).replace("{KIT}", settings.getKit()).replace("{ARENA}", settings.getArena()), target);
 
                     RequestSendEvent requestSendEvent = new RequestSendEvent(requestManager.getRequestTo(player, target), player, target);
                     Bukkit.getPluginManager().callEvent(requestSendEvent);
@@ -179,16 +179,16 @@ public class ArenaManager {
                             toTeleport = match.getLocation(uuid);
                         }
 
-                        PlayerUtil.pm("&c&l[Duels] Plugin is disabling, matches are ended by default.", player);
-                        PlayerUtil.reset(player, false);
+                        Helper.pm("&c&l[Duels] Plugin is disabling, matches are ended by default.", player);
+                        Helper.reset(player, false);
 
                         Arena.InventoryData data = match.getInventories(uuid);
 
-                        if (!PlayerUtil.canTeleportTo(player, toTeleport)) {
+                        if (!Helper.canTeleportTo(player, toTeleport)) {
                             player.setHealth(0.0D);
                         } else {
                             player.teleport(toTeleport);
-                            PlayerUtil.setInventory(player, data.getInventoryContents(), data.getArmorContents(), false);
+                            Helper.setInventory(player, data.getInventoryContents(), data.getArmorContents(), false);
                         }
                     }
                 }

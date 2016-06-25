@@ -2,8 +2,8 @@ package me.realized.duels.commands.admin.subcommands;
 
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.commands.SubCommand;
+import me.realized.duels.utilities.Helper;
 import me.realized.duels.utilities.Lang;
-import me.realized.duels.utilities.StringUtil;
 import org.bukkit.command.CommandSender;
 
 public class CreateCommand extends SubCommand {
@@ -19,7 +19,7 @@ public class CreateCommand extends SubCommand {
     public void execute(CommandSender sender, String[] args) {
         String name = args[1].toLowerCase();
 
-        if (!StringUtil.isAlphanumeric(name)) {
+        if (!Helper.isAlphanumeric(name)) {
             pm(sender, "&cArena name must be alphanumeric.");
             return;
         }

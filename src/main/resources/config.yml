@@ -5,7 +5,7 @@ patcher:
   # If enabled: Toggles vanish off if you're vanished. (Essentials)
   fix-vanish: false
 
-  # if enabled: Disables player returning to arena using /back after the match. (Essentials)
+  # if enabled: Patches player returning to arena using /back after the match. (Essentials)
   fix-back: true
 
 # GUI settings
@@ -43,9 +43,28 @@ Dueling:
   # Recommended: 'true' if you have any sort of dropped item remover. 'false' if you do not.
   pick-up-item: false
 
+  # If enabled: All commands will be blocked while in duel.
+  # If you wish to whitelist certain commands, add them to 'whitelisted-commands' list.
+  block-all-commands: false
+
+  # Commands in the following list will be exempted
+  # from getting blocked if 'block-all-commands' is enabled.
+  whitelisted-commands:
+  - 'msg'
+  - 'pm'
+  - 'list'
+  - 'w'
+  - 'r'
+  - 'ban'
+  - 'kick'
+  - 'mute'
+  - 'tempban'
+
   # Commands in the following list will be disabled while in duel.
+  # NOTE: If block-all-commands is enabled, this option will not take affect.
   # Recommended: Add all the commands that will allow players to gain advantage while in duel. Examples: /heal, /kit
   # Added most of the known commands to default configuration just to save your time. ;)
+  # If you have too many commands, 'block-all-commands' is another way to go.
   disabled-commands:
   - 'heal'
   - 'eheal'
@@ -133,7 +152,7 @@ Stats:
 
 # Edit messages here! Read the comments above the messages for more information.
 Messages:
-  # Displayed on command: /stats
+  # Displayed when player executes the command: /stats
   # Placeholders:
   # {NAME} - Name of the stats owner.
   # {WINS} - Amount of duel wins.
@@ -188,7 +207,10 @@ Messages:
   on-request-deny-target: '&9[Duels] &7Denied duel request from &f{PLAYER}&7.'
   on-request-deny-sender: '&9[Duels] &7Your duel request to &f{PLAYER} &7was denied.'
 
-  # Displayed when player executes the command /toggle.
+  # Displayed when player executes the command: /toggle
   # Placeholders: none
   on-requests-enable: '&a&lOthers may send you duel requests from now on.'
   on-requests-disable: '&c&lOthers may not send you duel requests from now on.'
+
+  # Displayed when player executes the command: /duel
+  duel-command-usage: 'Send, accept, or deny a duel request.{NEWLINE}/duel [player]{NEWLINE}/duel [accept | deny] [player]'

@@ -10,9 +10,10 @@ import me.realized.duels.data.DataManager;
 import me.realized.duels.data.UserData;
 import me.realized.duels.dueling.RequestManager;
 import me.realized.duels.dueling.Settings;
+import me.realized.duels.hooks.WorldGuardHook;
 import me.realized.duels.kits.KitManager;
-import me.realized.duels.utilities.PlayerUtil;
-import me.realized.duels.utilities.inventory.Metadata;
+import me.realized.duels.utilities.Helper;
+import me.realized.duels.utilities.Metadata;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -25,6 +26,7 @@ import java.util.List;
 public class DuelCommand extends BaseCommand {
 
     private final Config config;
+    private final WorldGuardHook wgHook;
     private final DataManager dataManager;
     private final KitManager kitManager;
     private final ArenaManager arenaManager;
@@ -35,6 +37,7 @@ public class DuelCommand extends BaseCommand {
         super("duel", "duels.duel");
         commands.addAll(Arrays.asList(new AcceptCommand(), new DenyCommand()));
         this.config = getInstance().getConfiguration();
+        this.wgHook = (WorldGuardHook) getInstance().getHookManager().get("WorldGuard");
         this.dataManager = getInstance().getDataManager();
         this.kitManager = getInstance().getKitManager();
         this.arenaManager = getInstance().getArenaManager();
@@ -46,16 +49,16 @@ public class DuelCommand extends BaseCommand {
         Player player = (Player) sender;
 
         if (args.length == 0) {
-            sender.sendMessage("Send, accept, or deny a duel request.\n/duel [player]\n/duel [accept | deny] [player]");
+            pm(sender, config.getString("duel-command-usage"));
             return;
         }
 
-        if (config.getBoolean("requires-cleared-inventory") && !PlayerUtil.hasEmptyInventory(player)) {
+        if (config.getBoolean("requires-cleared-inventory") && !Helper.hasEmptyInventory(player)) {
             pm(sender, "&cYour inventory must be empty to use duel commands.");
             return;
         }
 
-        if (config.getBoolean("enabled") && !PlayerUtil.isInRegion(player, config.getString("region"))) {
+        if (!wgHook.canUseDuelCommands(player)) {
            pm(sender, "&cYou must be in region '" + config.getString("region") + "' to use duel commands.");
            return;
         }
@@ -68,10 +71,10 @@ public class DuelCommand extends BaseCommand {
                 return;
             }
 
-            if (target.getUniqueId().equals(player.getUniqueId())) {
-                pm(sender, "&cYou may not duel yourself.");
-                return;
-            }
+//            if (target.getUniqueId().equals(player.getUniqueId())) {
+//                pm(sender, "&cYou may not duel yourself.");
+//                return;
+//            }
 
             UserData data = dataManager.getUser(target.getUniqueId(), false);
 

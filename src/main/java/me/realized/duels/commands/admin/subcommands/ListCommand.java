@@ -4,9 +4,8 @@ import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.commands.SubCommand;
 import me.realized.duels.data.DataManager;
 import me.realized.duels.kits.KitManager;
+import me.realized.duels.utilities.Helper;
 import me.realized.duels.utilities.Lang;
-import me.realized.duels.utilities.LocationUtil;
-import me.realized.duels.utilities.StringUtil;
 import org.bukkit.command.CommandSender;
 
 public class ListCommand extends SubCommand {
@@ -24,12 +23,12 @@ public class ListCommand extends SubCommand {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        String arenas = StringUtil.join(arenaManager.getArenaNames(), "&r, ");
-        String kits = StringUtil.join(kitManager.getKitNames(), ", ");
-        String lobby = (dataManager.getLobby() != null ? LocationUtil.format(dataManager.getLobby()) : "Lobby not set, using world's spawn location. Set lobby using /duels setlobby");
+        String arenas = Helper.join(arenaManager.getArenaNames(), "&r, ");
+        String kits = Helper.join(kitManager.getKitNames(), ", ");
+        String lobby = (dataManager.getLobby() != null ? Helper.format(dataManager.getLobby()) : "Lobby not set, using world's spawn location. Set lobby using /duels setlobby");
 
         for (String s : Lang.LIST.getMessages()) {
-            pm(sender, StringUtil.replaceWithArgs(s, "{ARENAS}", arenas, "{KITS}", kits, "{LOBBY}", lobby));
+            pm(sender, Helper.replaceWithArgs(s, "{ARENAS}", arenas, "{KITS}", kits, "{LOBBY}", lobby));
         }
     }
 }

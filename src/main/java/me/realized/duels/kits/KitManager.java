@@ -9,8 +9,8 @@ import me.realized.duels.dueling.RequestManager;
 import me.realized.duels.dueling.Settings;
 import me.realized.duels.event.RequestSendEvent;
 import me.realized.duels.gui.GUI;
-import me.realized.duels.utilities.PlayerUtil;
-import me.realized.duels.utilities.inventory.Metadata;
+import me.realized.duels.utilities.Helper;
+import me.realized.duels.utilities.Metadata;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -95,13 +95,13 @@ public class KitManager implements Listener {
 
                 if (target == null) {
                     player.closeInventory();
-                    PlayerUtil.pm("&cThat player is no longer online.", player);
+                    Helper.pm("&cThat player is no longer online.", player);
                     return;
                 }
 
                 if (arenaManager.isInMatch(target)) {
                     player.closeInventory();
-                    PlayerUtil.pm("&cThat player is already in a match.", player);
+                    Helper.pm("&cThat player is already in a match.", player);
                     return;
                 }
 
@@ -116,8 +116,8 @@ public class KitManager implements Listener {
                 if (!config.getBoolean("allow-arena-selecting")) {
                     requestManager.sendRequestTo(player, target, settings);
                     player.closeInventory();
-                    PlayerUtil.pm(config.getString("on-request-send").replace("{PLAYER}", target.getName()).replace("{KIT}", kit.getName()).replace("{ARENA}", "random"), player);
-                    PlayerUtil.pm(config.getString("on-request-receive").replace("{PLAYER}", player.getName()).replace("{KIT}", kit.getName()).replace("{ARENA}", "random"), target);
+                    Helper.pm(config.getString("on-request-send").replace("{PLAYER}", target.getName()).replace("{KIT}", kit.getName()).replace("{ARENA}", "random"), player);
+                    Helper.pm(config.getString("on-request-receive").replace("{PLAYER}", player.getName()).replace("{KIT}", kit.getName()).replace("{ARENA}", "random"), target);
 
                     RequestSendEvent requestSendEvent = new RequestSendEvent(requestManager.getRequestTo(player, target), player, target);
                     Bukkit.getPluginManager().callEvent(requestSendEvent);

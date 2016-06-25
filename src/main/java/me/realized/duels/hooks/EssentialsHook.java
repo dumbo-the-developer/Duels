@@ -2,7 +2,6 @@ package me.realized.duels.hooks;
 
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
-import com.earth2me.essentials.UserData;
 import me.realized.duels.Core;
 import me.realized.duels.configuration.Config;
 import org.bukkit.Location;
@@ -15,6 +14,10 @@ public class EssentialsHook extends PluginHook {
     public EssentialsHook(Core instance) {
         super("Essentials");
         this.config = instance.getConfiguration();
+
+        if (isEnabled()) {
+            instance.info("Hooked into Essentials! 'patcher' options are now functional.");
+        }
     }
 
     public void setUnvanished(Player player) {
@@ -36,7 +39,7 @@ public class EssentialsHook extends PluginHook {
         }
 
         Essentials essentials = (Essentials) getPlugin();
-        UserData user = essentials.getUser(player);
+        User user = essentials.getUser(player);
 
         if (user != null) {
             user.setLastLocation(location);

@@ -1,7 +1,7 @@
 package me.realized.duels.utilities.inventory;
 
-import me.realized.duels.utilities.Potion1_9;
-import me.realized.duels.utilities.SpawnEgg1_9;
+import me.realized.duels.utilities.compat.Potions;
+import me.realized.duels.utilities.compat.SpawnEggs;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -43,42 +43,42 @@ public class JSONItem {
         this.amount = item.getAmount() == 0 ? 1 : item.getAmount();
         this.data = item.getDurability();
 
-        if (Bukkit.getVersion().contains("1.9")) {
+        if (!(Bukkit.getVersion().contains("1.7") && Bukkit.getVersion().contains("1.8"))) {
             if (material.contains("POTION")) {
-                Potion1_9 potion1_9 = Potion1_9.fromItemStack(item);
+                Potions potion = Potions.fromItemStack(item);
 
-                if (potion1_9 == null) {
+                if (potion == null) {
                     return;
                 }
 
                 StringBuilder data = new StringBuilder();
-                data.append(potion1_9.getType().name()).append("-");
+                data.append(potion.getType().name()).append("-");
 
-                if (potion1_9.extended()) {
+                if (potion.extended()) {
                     data.append("extended-");
                 }
 
-                if (potion1_9.linger()) {
+                if (potion.linger()) {
                     data.append("linger-");
                 }
 
-                if (potion1_9.splash()) {
+                if (potion.splash()) {
                     data.append("splash-");
                 }
 
-                if (potion1_9.strong()) {
+                if (potion.strong()) {
                     data.append("strong-");
                 }
 
                 this.itemData = data.toString();
             } else if (material.equals("MONSTER_EGG")) {
-                SpawnEgg1_9 spawnEgg1_9 = SpawnEgg1_9.fromItemStack(item);
+                SpawnEggs spawnEgg = SpawnEggs.fromItemStack(item);
 
-                if (spawnEgg1_9 == null) {
+                if (spawnEgg == null) {
                     return;
                 }
 
-                this.itemData = spawnEgg1_9.getType().name() + "-";
+                this.itemData = spawnEgg.getType().name() + "-";
             }
         }
     }
@@ -142,10 +142,10 @@ public class JSONItem {
             List<String> itemData = Arrays.asList(this.itemData.split("-"));
 
             if (material.contains("POTION")) {
-                Potion1_9 potion1_9 = new Potion1_9(Potion1_9.PotionType.valueOf(itemData.get(0)), itemData.contains("strong"), itemData.contains("extended"), itemData.contains("linger"), itemData.contains("splash"));
-                item = potion1_9.toItemStack(amount);
+                Potions potion = new Potions(Potions.PotionType.valueOf(itemData.get(0)), itemData.contains("strong"), itemData.contains("extended"), itemData.contains("linger"), itemData.contains("splash"));
+                item = potion.toItemStack(amount);
             } else if (material.equals("MONSTER_EGG")) {
-                SpawnEgg1_9 spawnEgg1_9 = new SpawnEgg1_9(EntityType.valueOf(itemData.get(0)));
+                SpawnEggs spawnEgg1_9 = new SpawnEggs(EntityType.valueOf(itemData.get(0)));
                 item = spawnEgg1_9.toItemStack(amount);
             }
         }
@@ -247,7 +247,7 @@ public class JSONItem {
                 result.setLore(meta.getLore());
             }
 
-            if (!Bukkit.getBukkitVersion().equals("1.7.10-R0.1-SNAPSHOT") && !meta.getItemFlags().isEmpty()) {
+            if (!Bukkit.getVersion().contains("1.7") && !meta.getItemFlags().isEmpty()) {
                 for (ItemFlag flag : meta.getItemFlags()) {
                     result.addFlag(flag.name());
                 }

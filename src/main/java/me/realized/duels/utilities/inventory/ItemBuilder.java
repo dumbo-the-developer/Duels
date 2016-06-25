@@ -1,6 +1,6 @@
 package me.realized.duels.utilities.inventory;
 
-import me.realized.duels.utilities.StringUtil;
+import me.realized.duels.utilities.Helper;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -19,7 +19,7 @@ public class ItemBuilder {
 
     public ItemBuilder name(String name) {
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(StringUtil.color(name));
+        meta.setDisplayName(Helper.color(name));
         item.setItemMeta(meta);
         return this;
     }
@@ -28,7 +28,7 @@ public class ItemBuilder {
         List<String> colored = new ArrayList<>();
 
         for (String s : lore) {
-            colored.add(StringUtil.color(s));
+            colored.add(Helper.color(s));
         }
 
         ItemMeta meta = item.getItemMeta();

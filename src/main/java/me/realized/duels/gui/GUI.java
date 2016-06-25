@@ -61,7 +61,13 @@ public class GUI<T> {
             ItemStack next = ItemBuilder.builder().type(Material.PAPER).name("&aNext Page").build();
             ItemStack previous = ItemBuilder.builder().type(Material.PAPER).name("&aPrevious Page").build();
             ItemStack separator = ItemBuilder.builder().type(Material.STAINED_GLASS_PANE).name(" ").build();
-            ItemStack defaultDisplayed = ItemBuilder.builder().type(Material.BARRIER).build();
+            ItemStack defaultDisplayed;
+
+            if (!Bukkit.getVersion().contains("1.7")) {
+                defaultDisplayed = ItemBuilder.builder().type(Material.BARRIER).build();
+            } else {
+                defaultDisplayed = ItemBuilder.builder().type(Material.REDSTONE_BLOCK).build();
+            }
 
             for (int page = 1; page <= total; page++) {
                 Inventory current = Bukkit.createInventory(null, maxInvSize + 9, title + " (page " + page + "/" + total + ")");
@@ -104,7 +110,15 @@ public class GUI<T> {
             }
         } else {
             Inventory current = Bukkit.createInventory(null, 54, title + " (page 1/1)");
-            current.setItem(22, ItemBuilder.builder().type(Material.BARRIER).name(ChatColor.RED + "There was nothing to load to the GUI.").build());
+            ItemStack defaultDisplayed;
+
+            if (!Bukkit.getVersion().contains("1.7")) {
+                defaultDisplayed = ItemBuilder.builder().type(Material.BARRIER).name(ChatColor.RED + "There was nothing to load to the GUI.").build();
+            } else {
+                defaultDisplayed = ItemBuilder.builder().type(Material.REDSTONE_BLOCK).name(ChatColor.RED + "There was nothing to load to the GUI.").build();
+            }
+
+            current.setItem(22, defaultDisplayed);
             pages.put(current, 1);
         }
 

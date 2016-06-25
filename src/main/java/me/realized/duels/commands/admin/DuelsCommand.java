@@ -3,8 +3,8 @@ package me.realized.duels.commands.admin;
 import me.realized.duels.commands.BaseCommand;
 import me.realized.duels.commands.SubCommand;
 import me.realized.duels.commands.admin.subcommands.*;
+import me.realized.duels.utilities.Helper;
 import me.realized.duels.utilities.Lang;
-import me.realized.duels.utilities.StringUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -27,7 +27,7 @@ public class DuelsCommand extends BaseCommand {
             pm(sender, "&b&m------------------------------------------------");
 
             for (SubCommand sub : commands) {
-                pm(sender, StringUtil.replaceWithArgs(Lang.ADMIN_COMMAND_USAGE.getMessage(), "{USAGE}", "/" + getName() + " " + sub.getUsage(), "{DESC}", sub.getDescription()));
+                pm(sender, Helper.replaceWithArgs(Lang.ADMIN_COMMAND_USAGE.getMessage(), "{USAGE}", "/" + getName() + " " + sub.getUsage(), "{DESC}", sub.getDescription()));
             }
 
             pm(sender, "&b&m------------------------------------------------");
@@ -49,7 +49,7 @@ public class DuelsCommand extends BaseCommand {
         }
 
         if (args.length < subCommand.length()) {
-            pm(sender, "&9[Duels] " + StringUtil.replaceWithArgs(Lang.ADMIN_COMMAND_USAGE.getMessage(), "{USAGE}", "/" + getName() + " " + subCommand.getUsage(), "{DESC}", subCommand.getDescription()));
+            pm(sender, "&9[Duels] " + Helper.replaceWithArgs(Lang.ADMIN_COMMAND_USAGE.getMessage(), "{USAGE}", "/" + getName() + " " + subCommand.getUsage(), "{DESC}", subCommand.getDescription()));
             return;
         }
 

@@ -1,6 +1,7 @@
 package me.realized.duels.configuration;
 
 import me.realized.duels.Core;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -10,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 public class Config {
+
+    // TODO: 6/25/16 Implement StaticConfig for future config addons!
 
     private final Core instance;
     private final File base;
@@ -31,7 +34,7 @@ public class Config {
             instance.info("Generated configuration file.");
         }
 
-        if (instance.getWorldGuard() == null) {
+        if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
             instance.warn("WorldGuard was not found! DuelZone will not work properly.");
         }
 

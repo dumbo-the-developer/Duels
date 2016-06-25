@@ -1,11 +1,11 @@
-package me.realized.duels.utilities;
+package me.realized.duels.utilities.compat;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
-public class SpawnEgg1_9 {
+public class SpawnEggs {
 
     private static Class<?> itemStack;
     private static Class<?> nbtTagCompound;
@@ -25,7 +25,7 @@ public class SpawnEgg1_9 {
 
     private final EntityType type;
 
-    public SpawnEgg1_9(EntityType type) {
+    public SpawnEggs(EntityType type) {
         this.type = type;
     }
 
@@ -55,7 +55,7 @@ public class SpawnEgg1_9 {
     }
 
     @SuppressWarnings("deprecation")
-    public static SpawnEgg1_9 fromItemStack(ItemStack item) {
+    public static SpawnEggs fromItemStack(ItemStack item) {
         if (item == null || item.getType() != Material.MONSTER_EGG) {
             throw new IllegalArgumentException("item is not a monster egg");
         }
@@ -70,7 +70,7 @@ public class SpawnEgg1_9 {
                 EntityType type = EntityType.fromName(name);
 
                 if (type != null) {
-                    return new SpawnEgg1_9(type);
+                    return new SpawnEggs(type);
                 }
             }
         } catch (Exception ignored) {}

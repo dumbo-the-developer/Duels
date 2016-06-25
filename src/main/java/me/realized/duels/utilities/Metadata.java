@@ -1,4 +1,4 @@
-package me.realized.duels.utilities.inventory;
+package me.realized.duels.utilities;
 
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;

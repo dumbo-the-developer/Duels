@@ -1,10 +1,10 @@
-package me.realized.duels.utilities;
+package me.realized.duels.utilities.compat;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-public class Potion1_9 {
+public class Potions {
 
     public enum PotionType {
 
@@ -33,7 +33,7 @@ public class Potion1_9 {
     private final PotionType type;
     private final boolean strong, extended, linger, splash;
 
-    public Potion1_9(PotionType type, boolean strong, boolean extended, boolean linger, boolean splash) {
+    public Potions(PotionType type, boolean strong, boolean extended, boolean linger, boolean splash) {
         this.type = type;
         this.strong = strong;
         this.extended = extended;
@@ -192,7 +192,7 @@ public class Potion1_9 {
         }
     }
 
-    public static Potion1_9 fromItemStack(ItemStack item) {
+    public static Potions fromItemStack(ItemStack item) {
         if (item == null || !item.getType().name().contains("POTION")) {
             throw new IllegalArgumentException("item is not a potion");
         }
@@ -288,7 +288,7 @@ public class Potion1_9 {
                         return null;
                 }
 
-                return new Potion1_9(type, strong, _long, item.getType().equals(Material.LINGERING_POTION), item.getType().equals(Material.SPLASH_POTION));
+                return new Potions(type, strong, _long, item.getType().equals(Material.LINGERING_POTION), item.getType().equals(Material.SPLASH_POTION));
             } else {
                 return null;
             }

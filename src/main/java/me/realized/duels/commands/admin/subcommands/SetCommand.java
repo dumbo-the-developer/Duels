@@ -3,9 +3,8 @@ package me.realized.duels.commands.admin.subcommands;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.commands.SubCommand;
+import me.realized.duels.utilities.Helper;
 import me.realized.duels.utilities.Lang;
-import me.realized.duels.utilities.NumberUtil;
-import me.realized.duels.utilities.StringUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -30,7 +29,7 @@ public class SetCommand extends SubCommand {
 
         Arena arena = manager.getArena(name);
 
-        if (!NumberUtil.isInt(args[2], false)) {
+        if (!Helper.isInt(args[2], false)) {
             pm(sender, "&cSpawn positions must be in between range 1 - 2.");
             return;
         }
@@ -48,6 +47,6 @@ public class SetCommand extends SubCommand {
             manager.getGUI().update(manager.getArenas());
         }
 
-        pm(player, StringUtil.replaceWithArgs(Lang.ARENA_SET_POSITION.getMessage(), "{POSITION}", position, "{NAME}", arena.getName()));
+        pm(player, Helper.replaceWithArgs(Lang.ARENA_SET_POSITION.getMessage(), "{POSITION}", position, "{NAME}", arena.getName()));
     }
 }

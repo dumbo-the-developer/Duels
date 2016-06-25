@@ -8,12 +8,10 @@ import me.realized.duels.data.DataManager;
 import me.realized.duels.data.MatchData;
 import me.realized.duels.data.UserData;
 import me.realized.duels.hooks.EssentialsHook;
-import me.realized.duels.hooks.HookManager;
 import me.realized.duels.kits.Kit;
 import me.realized.duels.kits.KitManager;
-import me.realized.duels.utilities.PlayerUtil;
-import me.realized.duels.utilities.StringUtil;
-import me.realized.duels.utilities.inventory.Metadata;
+import me.realized.duels.utilities.Helper;
+import me.realized.duels.utilities.Metadata;
 import org.bukkit.*;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
@@ -55,24 +53,24 @@ public class DuelManager implements Listener {
             arena = arenaManager.getArena(request.getArena());
 
             if (arena == null || arena.isUsed()) {
-                PlayerUtil.pm("&cThe selected arena is no longer available, please choose a different arena.", player, target);
+                Helper.pm("&cThe selected arena is no longer available, please choose a different arena.", player, target);
                 return;
             }
         } else {
             arena = arenaManager.getAvailableArena();
 
             if (arena == null) {
-                PlayerUtil.pm("&cNo available arenas were found, please try again later.", player, target);
+                Helper.pm("&cNo available arenas were found, please try again later.", player, target);
                 return;
             }
         }
 
         Location pos1 = arena.getPositions().get(1);
         Location pos2 = arena.getPositions().get(2);
-        PlayerUtil.refreshChunk(pos1, pos2);
+        Helper.refreshChunk(pos1, pos2);
 
-        if (!PlayerUtil.canTeleportTo(player, pos1) || !PlayerUtil.canTeleportTo(target, pos2)) {
-            PlayerUtil.pm("&cFailed to teleport to the arena! Please contact an administrator.", player, target);
+        if (!Helper.canTeleportTo(player, pos1) || !Helper.canTeleportTo(target, pos2)) {
+            Helper.pm("&cFailed to teleport to the arena! Please contact an administrator.", player, target);
             return;
         }
 
@@ -87,11 +85,11 @@ public class DuelManager implements Listener {
         target.teleport(pos2);
         essentialsHook.setUnvanished(player);
         essentialsHook.setUnvanished(target);
-        PlayerUtil.reset(true, player, target);
+        Helper.reset(true, player, target);
         contents.equip(player, target);
         arena.addPlayers(player, target);
-        PlayerUtil.pm(StringUtil.replaceWithArgs(config.getString("on-request-accept-target"), "{PLAYER}", target.getName(), "{KIT}", request.getKit()).replace("{ARENA}", arenaName), player);
-        PlayerUtil.pm(StringUtil.replaceWithArgs(config.getString("on-request-accept-sender"), "{PLAYER}", player.getName(), "{KIT}", request.getKit()).replace("{ARENA}", arenaName), target);
+        Helper.pm(Helper.replaceWithArgs(config.getString("on-request-accept-target"), "{PLAYER}", target.getName(), "{KIT}", request.getKit()).replace("{ARENA}", arenaName), player);
+        Helper.pm(Helper.replaceWithArgs(config.getString("on-request-accept-sender"), "{PLAYER}", player.getName(), "{KIT}", request.getKit()).replace("{ARENA}", arenaName), target);
 
         if (arenaManager.getGUI() != null) {
             arenaManager.getGUI().update(arenaManager.getArenas());
@@ -105,8 +103,8 @@ public class DuelManager implements Listener {
         if (player.hasMetadata("respawn")) {
             Respawn data = (Respawn) player.getMetadata("respawn").get(0).value();
             event.setRespawnLocation(data.getRespawnLocation());
-            PlayerUtil.reset(player, false);
-            PlayerUtil.setInventory(player, data.getInventoryData().getInventoryContents(), data.getInventoryData().getArmorContents(), false);
+            Helper.reset(player, false);
+            Helper.setInventory(player, data.getInventoryData().getInventoryContents(), data.getInventoryData().getArmorContents(), false);
             player.removeMetadata("respawn", Core.getInstance());
             essentialsHook.setBackLocation(player, event.getRespawnLocation());
         }
@@ -145,7 +143,7 @@ public class DuelManager implements Listener {
             FireworkMeta meta = firework.getFireworkMeta();
             meta.addEffect(FireworkEffect.builder().withColor(Color.RED).with(FireworkEffect.Type.BALL_LARGE).withTrail().build());
             firework.setFireworkMeta(meta);
-            Bukkit.broadcastMessage(StringUtil.color(config.getString("on-duel-end").replace("{WINNER}", target.getName()).replace("{LOSER}", dead.getName()).replace("{HEALTH}", String.valueOf(Math.round(target.getHealth()) * 0.5D))));
+            Bukkit.broadcastMessage(Helper.color(config.getString("on-duel-end").replace("{WINNER}", target.getName()).replace("{LOSER}", dead.getName()).replace("{HEALTH}", String.valueOf(Math.round(target.getHealth()) * 0.5D))));
 
             Calendar calendar = new GregorianCalendar();
             match.setEndTimeMillis(System.currentTimeMillis());
@@ -180,7 +178,7 @@ public class DuelManager implements Listener {
                         }
 
                         if (!config.getBoolean("teleport-to-latest-location")) {
-                            if (!PlayerUtil.canTeleportTo(target, lobby)) {
+                            if (!Helper.canTeleportTo(target, lobby)) {
                                 target.setHealth(0.0D);
                                 target.sendMessage(ChatColor.RED + "[Duels] Your teleportation to lobby was unsuccessful! Setting health to 0.0 just to not glitch the system by letting you stay in the arena. ;)");
                                 return;
@@ -192,10 +190,10 @@ public class DuelManager implements Listener {
                         }
 
                         essentialsHook.setBackLocation(target, target.getLocation());
-                        PlayerUtil.reset(target, true);
+                        Helper.reset(target, true);
 
                         if (!config.getBoolean("requires-cleared-inventory")) {
-                            PlayerUtil.setInventory(target, targetData.getInventoryContents(), targetData.getArmorContents(), false);
+                            Helper.setInventory(target, targetData.getInventoryContents(), targetData.getArmorContents(), false);
                         }
 
                     }
@@ -219,10 +217,10 @@ public class DuelManager implements Listener {
                 }
 
                 essentialsHook.setBackLocation(target, target.getLocation());
-                PlayerUtil.reset(target, true);
+                Helper.reset(target, true);
 
                 if (!config.getBoolean("requires-cleared-inventory")) {
-                    PlayerUtil.setInventory(target, targetData.getInventoryContents(), targetData.getArmorContents(), false);
+                    Helper.setInventory(target, targetData.getInventoryContents(), targetData.getArmorContents(), false);
                 }
             }
         }
@@ -248,7 +246,7 @@ public class DuelManager implements Listener {
         }
 
         event.setCancelled(true);
-        PlayerUtil.pm("&cYou may not teleport while in duel.", player);
+        Helper.pm("&cYou may not teleport while in duel.", player);
     }
 
     @EventHandler
@@ -260,7 +258,7 @@ public class DuelManager implements Listener {
         }
 
         event.setCancelled(true);
-        PlayerUtil.pm("&cYou may not drop items while in duel.", player);
+        Helper.pm("&cYou may not drop items while in duel.", player);
     }
 
     @EventHandler
@@ -277,16 +275,11 @@ public class DuelManager implements Listener {
     @EventHandler
     public void onCommand(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
+        String command = event.getMessage().substring(1).split(" ")[0].toLowerCase();
 
-        if (config.getList("disabled-commands").isEmpty() || !arenaManager.isInMatch(player)) {
-            return;
-        }
-
-        String command = event.getMessage().substring(1);
-
-        if (config.getList("disabled-commands").contains(command.split(" ")[0].toLowerCase())) {
+        if (arenaManager.isInMatch(player) && ((config.getBoolean("block-all-commands") && !config.getList("whitelisted-commands").contains(command)) || (!config.getBoolean("block-all-commands") && config.getList("disabled-commands").contains(command)))) {
             event.setCancelled(true);
-            PlayerUtil.pm("&cYou may not use that command while in duel.", player);
+            Helper.pm("&cYou may not use that command while in duel.", player);
         }
     }
 
@@ -295,7 +288,7 @@ public class DuelManager implements Listener {
         if (event.isFlying() && arenaManager.isInMatch(event.getPlayer())) {
             event.setCancelled(true);
             event.getPlayer().setAllowFlight(false);
-            PlayerUtil.pm("&cYou may not fly while in duel.", event.getPlayer());
+            Helper.pm("&cYou may not fly while in duel.", event.getPlayer());
         }
     }
 }
