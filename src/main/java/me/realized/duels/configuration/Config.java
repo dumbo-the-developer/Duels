@@ -1,7 +1,6 @@
 package me.realized.duels.configuration;
 
 import me.realized.duels.Core;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -32,10 +31,6 @@ public class Config {
         if (!base.exists()) {
             instance.saveResource("config.yml", true);
             instance.info("Generated configuration file.");
-        }
-
-        if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
-            instance.warn("WorldGuard was not found! DuelZone will not work properly.");
         }
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(base);
