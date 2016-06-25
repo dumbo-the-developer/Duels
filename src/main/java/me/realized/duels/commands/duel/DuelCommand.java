@@ -71,10 +71,10 @@ public class DuelCommand extends BaseCommand {
                 return;
             }
 
-//            if (target.getUniqueId().equals(player.getUniqueId())) {
-//                pm(sender, "&cYou may not duel yourself.");
-//                return;
-//            }
+            if (target.getUniqueId().equals(player.getUniqueId())) {
+                pm(sender, "&cYou may not duel yourself.");
+                return;
+            }
 
             UserData data = dataManager.getUser(target.getUniqueId(), false);
 
