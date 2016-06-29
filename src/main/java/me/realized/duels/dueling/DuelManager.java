@@ -26,6 +26,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.UUID;
 
 public class DuelManager implements Listener {
 
@@ -237,9 +238,28 @@ public class DuelManager implements Listener {
         player.setHealth(0.0D);
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onTeleport(PlayerTeleportEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
         Player player = event.getPlayer();
+        Location to = event.getTo();
+
+        if (event.getCause() == PlayerTeleportEvent.TeleportCause.COMMAND && config.getBoolean("fix-teleport") && !player.isOp() && !player.hasPermission("duels.admin") && !arenaManager.isInMatch(player)) {
+            for (Arena arena : arenaManager.getArenas()) {
+                for (UUID uuid : arena.getPlayers()) {
+                    Player arenaPlayer = Bukkit.getPlayer(uuid);
+
+                    if (arenaPlayer != null && arenaPlayer.getLocation().distance(to) < 1.0) {
+                        Helper.pm("&cThat player is currently in a match!", player);
+                        event.setCancelled(true);
+                        return;
+                    }
+                }
+            }
+        }
 
         if (event.getCause() == PlayerTeleportEvent.TeleportCause.ENDER_PEARL || !arenaManager.isInMatch(player)) {
             return;
