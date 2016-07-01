@@ -252,7 +252,7 @@ public class DuelManager implements Listener {
                 for (UUID uuid : arena.getPlayers()) {
                     Player arenaPlayer = Bukkit.getPlayer(uuid);
 
-                    if (arenaPlayer != null && arenaPlayer.getLocation().distance(to) < 1.0) {
+                    if (arenaPlayer != null && arenaPlayer.getWorld().equals(to.getWorld()) && arenaPlayer.getLocation().distance(to) < 1.0) {
                         Helper.pm("&cThat player is currently in a match!", player);
                         event.setCancelled(true);
                         return;
