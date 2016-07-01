@@ -62,6 +62,11 @@ public class AcceptCommand extends SubCommand {
             return;
         }
 
+        if(target.isDead()) {
+            pm(sender, "&cThe player you tried to duel is dead - Try again when they respawn.");
+            return;
+        }
+
         Request request = requestManager.getRequestFrom(player, target);
         requestManager.removeRequestFrom(player, target);
         duelManager.startMatch(player, target, request);
