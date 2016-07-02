@@ -138,7 +138,7 @@ public class JSONItem {
     public ItemStack construct() {
         ItemStack item = new ItemStack(Material.getMaterial(this.material), this.amount, this.data);
 
-        if (itemData != null && Bukkit.getVersion().contains("1.9")) {
+        if (!(Bukkit.getVersion().contains("1.7") && Bukkit.getVersion().contains("1.8")) && itemData != null) {
             List<String> itemData = Arrays.asList(this.itemData.split("-"));
 
             if (material.contains("POTION")) {
