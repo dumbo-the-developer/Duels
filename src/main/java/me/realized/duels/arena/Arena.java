@@ -1,15 +1,17 @@
 package me.realized.duels.arena;
 
+import me.realized.duels.Core;
+import me.realized.duels.configuration.Config;
 import me.realized.duels.gui.ICanHandleGUI;
 import me.realized.duels.utilities.Helper;
 import me.realized.duels.utilities.inventory.ItemBuilder;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
@@ -17,8 +19,9 @@ public class Arena implements ICanHandleGUI {
 
     private final String name;
 
-    private boolean disabled = false;
-    private boolean used = false;
+    private boolean disabled;
+    private boolean used;
+    private boolean counting;
     private Map<Integer, Location> positions = new HashMap<>();
     private List<UUID> players = new ArrayList<>();
     private Match current;
@@ -27,11 +30,33 @@ public class Arena implements ICanHandleGUI {
     public Arena(String name, boolean disabled) {
         this.name = name;
         this.disabled = disabled;
-        this.displayed = ItemBuilder.builder().type(Material.MAP).name(ChatColor.BLUE + name + ": " + ChatColor.GREEN + "Available").build();
+        this.displayed = ItemBuilder.builder().type(Material.MAP).name(Helper.color(Config.getInstance().getAvailableArenaDisplayName()).replace("{NAME}", name)).build();
     }
 
     public String getName() {
         return name;
+    }
+
+    public boolean isCounting() {
+        return counting;
+    }
+
+    private void setCounting(boolean b) {
+        this.counting = b;
+    }
+
+    public void startCountdown() {
+        Config config = Config.getInstance();
+
+        if (!config.isCdEnabled()) {
+            return;
+        }
+
+        List<String> messages = config.getCdMessages();
+
+        if (!messages.isEmpty()) {
+            new CountdownTask(this, messages).runTaskTimer(Core.getInstance(), 0L, 20L);
+        }
     }
 
     public boolean isUsed() {
@@ -46,10 +71,13 @@ public class Arena implements ICanHandleGUI {
         if (!used) {
             this.players.clear();
             this.current = null;
-            meta.setDisplayName(ChatColor.BLUE + name + ": " + ChatColor.GREEN + "Available");
+
+            this.counting = false; // Just in case!
+
+            meta.setDisplayName(Helper.color(Config.getInstance().getAvailableArenaDisplayName()).replace("{NAME}", name));
         } else {
             this.current = new Match();
-            meta.setDisplayName(ChatColor.BLUE + name + ": " + ChatColor.RED + "In Use");
+            meta.setDisplayName(Helper.color(Config.getInstance().getInUseArenaDisplayName()).replace("{NAME}", name));
         }
 
         displayed.setItemMeta(meta);
@@ -72,7 +100,6 @@ public class Arena implements ICanHandleGUI {
         Location pos2 = positions.get(2);
 
         return !(pos1 == null || pos2 == null) && !(pos1.getWorld() == null || pos2.getWorld() == null || !pos1.getWorld().getName().equals(pos2.getWorld().getName()));
-
     }
 
     public List<UUID> getPlayers() {
@@ -133,6 +160,16 @@ public class Arena implements ICanHandleGUI {
         }
 
         return result;
+    }
+
+    public void sendMessage(String msg) {
+        for (UUID uuid : players) {
+            Player player = Bukkit.getPlayer(uuid);
+
+            if (player != null) {
+                Helper.pm(msg, player);
+            }
+        }
     }
 
     @Override
@@ -206,6 +243,31 @@ public class Arena implements ICanHandleGUI {
 
         public ItemStack[] getInventoryContents() {
             return inventory;
+        }
+    }
+
+    class CountdownTask extends BukkitRunnable {
+
+        private final Arena arena;
+        private final List<String> messages;
+
+        private int index = 0;
+
+        public CountdownTask(Arena arena, List<String> messages) {
+            this.arena = arena;
+            this.messages = messages;
+            arena.setCounting(true);
+        }
+
+        @Override
+        public void run() {
+            arena.sendMessage(messages.get(index));
+            index++;
+
+            if (index > messages.size() - 1) {
+                arena.setCounting(false);
+                cancel();
+            }
         }
     }
 }

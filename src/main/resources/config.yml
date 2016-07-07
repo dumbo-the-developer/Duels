@@ -18,6 +18,29 @@ patcher:
   # Players with OP or the permission 'duels.admin' will bypass this function.
   fix-teleport: true
 
+  # If enabled: Blocks opening of another inventory while in duel.
+  # This prevents people exploiting trading systems and such.
+  fix-inventory-open: true
+
+# Countdown settings
+countdown:
+  enabled: true
+
+  # Countdown timer's duration equals to size of this list. (In seconds)
+  messages:
+  - '&7Starting in &f5 &7seconds!'
+  - '&7Starting in &f4 &7seconds!'
+  - '&7Starting in &f3 &7seconds!'
+  - '&7Starting in &f2 &7seconds!'
+  - '&7Starting in &f1 &7second!'
+  - '&7Duel starting now!'
+
+  # While countdown is running, block launching projectiles. (Examples: Arrow, Enderpearl)
+  block-projectile: true
+
+  # While countdown is running, block pvp.
+  block-pvp: true
+
 # GUI settings
 GUI:
   # Select how many rows should each page of the GUI have.
@@ -26,13 +49,32 @@ GUI:
   kit-selector: 3
   arena-selector: 2
 
+  # The displayName of the map item in Arena Selector GUI
+  # displayName for available arenas
+  available-arena-displayname: '&9{NAME}: &aAvailable'
+  # displayName for in use arenas
+  in-use-arena-displayname: '&9{NAME}: &cIn Use'
+
 # Duel settings
 Dueling:
+  # If enabled: Allows certain commands to be executed on match winner and loser.
+  match-end-commands:
+    enabled: false
+    commands:
+    - 'give {WINNER} diamond 1'
+    - 'give {LOSER} dirt 1'
+
   # If enabled: Players will have another GUI open after selecting kit that displays clickable arenas.
   # They are able to choose which arena they want to play on.
   # If someone else uses the arena while the request is pending,
   # the 'arena in use' message will display and the request will be cancelled.
   allow-arena-selecting: true
+
+  # If enabled: Sends a duel request directly on /duel [player] without a kit selection,
+  # Allowing players to use their own inventory for dueling.
+  # Note: If you're using this option, make sure to edit the duel messages so players
+  # will know they'll be using their own items!
+  use-own-inventory: false
 
   # If enabled: Players must have a cleared inventory to execute the command /duel.
   # Player inventories will be restored on duel end if this value is set to 'false'.
@@ -46,12 +88,10 @@ Dueling:
   delay-until-teleport-on-win: 5
 
   # If enabled: Allows players to drop item while in duel.
-  # Recommended: 'true' if you have any sort of dropped item remover. 'false' if you do not.
   drop-item: true
 
   # If enabled: Allows players to pick up item while in duel.
-  # Recommended: 'true' if you have any sort of dropped item remover. 'false' if you do not.
-  pick-up-item: false
+  pick-up-item: true
 
   # If enabled: All commands will be blocked while in duel.
   # If you wish to whitelist certain commands, add them to 'whitelisted-commands' list.
@@ -80,14 +120,6 @@ Dueling:
   - 'eheal'
   - 'essentials:heal'
   - 'essentials:eheal'
-  - 'feed'
-  - 'efeed'
-  - 'eat'
-  - 'eeat'
-  - 'essentials:feed'
-  - 'essentials:efeed'
-  - 'essentials:eat'
-  - 'essentials:eeat'
   - 'kit'
   - 'ekit'
   - 'kits'
@@ -140,6 +172,10 @@ Dueling:
   - 'essentials:esethome'
   - 'essentials:createhome'
   - 'essentials:ecreatehome'
+  - 'spawn'
+  - 'espawn'
+  - 'essentials:spawn'
+  - 'essentials:espawn'
   - 'vault'
   - 'chest'
   - 'pv'

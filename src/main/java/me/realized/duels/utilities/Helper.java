@@ -1,10 +1,8 @@
 package me.realized.duels.utilities;
 
 import me.realized.duels.Core;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -233,9 +231,19 @@ public class Helper {
             player.removePotionEffect(effect.getType());
         }
 
-        player.setHealth(20.0D);
+        player.setHealth(player.getMaxHealth());
         player.setFoodLevel(20);
-        clearInventory(player);
+        player.setItemOnCursor(null);
+
+        Inventory top = player.getOpenInventory().getTopInventory();
+
+        if (top != null && top.getType() == InventoryType.CRAFTING) {
+            top.clear();
+        }
+
+        player.getInventory().setArmorContents(new ItemStack[4]);
+        player.getInventory().clear();
+        player.updateInventory();
 
         if (extinguish) {
             extinguish(player);
@@ -266,20 +274,6 @@ public class Helper {
         }
     }
 
-    private static void clearInventory(Player player) {
-        player.setItemOnCursor(null);
-
-        Inventory top = player.getOpenInventory().getTopInventory();
-
-        if (top != null && top.getType() == InventoryType.CRAFTING) {
-            top.clear();
-        }
-
-        player.getInventory().setArmorContents(new ItemStack[4]);
-        player.getInventory().clear();
-        player.updateInventory();
-    }
-
     public static boolean hasEmptyInventory(Player player) {
         for (ItemStack item : player.getInventory().getArmorContents()) {
             if (item != null && item.getType() != Material.AIR) {
@@ -304,7 +298,23 @@ public class Helper {
                 continue;
             }
 
-            location.getWorld().regenerateChunk(location.getBlockX(), location.getBlockZ());
+            Chunk chunk = location.getChunk();
+
+            if (!chunk.isLoaded()) {
+                chunk.load();
+            }
         }
+    }
+
+    @SuppressWarnings("deprecation")
+    public static void updatePosition(Player player, Location location) {
+        location = location.clone().subtract(0, 1, 0);
+        Block block = location.getBlock();
+
+        if (!block.getType().isSolid()) {
+            return;
+        }
+
+        player.sendBlockChange(location, block.getType(), (byte) 0);
     }
 }

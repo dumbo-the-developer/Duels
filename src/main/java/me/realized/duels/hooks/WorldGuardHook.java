@@ -21,11 +21,11 @@ public class WorldGuardHook extends PluginHook {
     }
 
     public boolean canUseDuelCommands(Player player) {
-        if (!isEnabled() || !config.getBoolean("enabled")) {
+        if (!isEnabled() || !config.isDZEnabled()) {
             return true;
         }
 
-        String name = config.getString("region");
+        String name = config.getDZRegion();
         WorldGuardPlugin worldguard = (WorldGuardPlugin) getPlugin();
         ApplicableRegionSet regions = worldguard.getRegionManager(player.getWorld()).getApplicableRegions(player.getLocation());
 

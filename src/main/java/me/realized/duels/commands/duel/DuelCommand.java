@@ -10,6 +10,7 @@ import me.realized.duels.data.DataManager;
 import me.realized.duels.data.UserData;
 import me.realized.duels.dueling.RequestManager;
 import me.realized.duels.dueling.Settings;
+import me.realized.duels.event.RequestSendEvent;
 import me.realized.duels.hooks.WorldGuardHook;
 import me.realized.duels.kits.KitManager;
 import me.realized.duels.utilities.Helper;
@@ -53,13 +54,13 @@ public class DuelCommand extends BaseCommand {
             return;
         }
 
-        if (config.getBoolean("requires-cleared-inventory") && !Helper.hasEmptyInventory(player)) {
+        if (!config.isUseOwnInventory() && config.isOnlyEmptyInventory() && !Helper.hasEmptyInventory(player)) {
             pm(sender, "&cYour inventory must be empty to use duel commands.");
             return;
         }
 
         if (!wgHook.canUseDuelCommands(player)) {
-           pm(sender, "&cYou must be in region '" + config.getString("region") + "' to use duel commands.");
+           pm(sender, "&cYou must be in region '" + config.getDZRegion() + "' to use duel commands.");
            return;
         }
 
@@ -98,8 +99,17 @@ public class DuelCommand extends BaseCommand {
                 return;
             }
 
-            player.setMetadata("request", new Metadata(getInstance(), new Settings(target.getUniqueId())));
-            player.openInventory(kitManager.getGUI().getFirst());
+            if (!config.isUseOwnInventory()) {
+                player.setMetadata("request", new Metadata(getInstance(), new Settings(target.getUniqueId())));
+                player.openInventory(kitManager.getGUI().getFirst());
+            } else {
+                requestManager.sendRequestTo(player, target, new Settings(target.getUniqueId()));
+                Helper.pm(config.getString("on-request-send").replace("{PLAYER}", target.getName()).replace("{ARENA}", "random"), player);
+                Helper.pm(config.getString("on-request-receive").replace("{PLAYER}", player.getName()).replace("{ARENA}", "random"), target);
+
+                RequestSendEvent requestSendEvent = new RequestSendEvent(requestManager.getRequestTo(player, target), player, target);
+                Bukkit.getPluginManager().callEvent(requestSendEvent);
+            }
             return;
         }
 

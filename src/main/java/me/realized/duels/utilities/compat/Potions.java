@@ -1,6 +1,5 @@
 package me.realized.duels.utilities.compat;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -16,19 +15,9 @@ public class Potions {
         EMPTY, MUNDANE, THICK, AWKWARD
     }
 
-    private static Class<?> itemStack;
-    private static Class<?> nbtTagCompound;
-    private static Class<?> craftItemStack;
-
-    static {
-        final String version = Bukkit.getServer().getClass().getName().split("\\.")[3];
-
-        try {
-            itemStack = Class.forName("net.minecraft.server." + version + ".ItemStack");
-            nbtTagCompound = Class.forName("net.minecraft.server." + version + ".NBTTagCompound");
-            craftItemStack = Class.forName("org.bukkit.craftbukkit." + version + ".inventory.CraftItemStack");
-        } catch (ClassNotFoundException ignored) {}
-    }
+    private static final Class<?> itemStack = CompatHelper.getMinecraftStack();
+    private static final Class<?> nbtTagCompound = CompatHelper.getNBTTagCompound();
+    private static final Class<?> craftItemStack = CompatHelper.getCraftStack();
 
     private final PotionType type;
     private final boolean strong, extended, linger, splash;

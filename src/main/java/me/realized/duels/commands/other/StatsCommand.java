@@ -68,14 +68,14 @@ public class StatsCommand extends BaseCommand {
         String wins = String.valueOf(user.get(UserData.StatsType.WINS));
         String losses = String.valueOf(user.get(UserData.StatsType.LOSSES));
         String requests = String.valueOf(user.canRequest() ? "enabled" : "disabled");
-        List<String> stats = config.getList("stats");
+        List<String> stats = config.getList("stats", String.class);
 
         for (String txt : stats) {
             txt = Helper.replaceWithArgs(Helper.color(txt), "{NAME}", user.getName(), "{WINS}", wins, "{LOSSES}", losses, "{REQUESTS_ENABLED}", requests);
             pm(base, txt);
         }
 
-        if (config.getBoolean("display-matches")) {
+        if (config.isDisplayMatches()) {
             for (MatchData match : user.getMatches()) {
                 String duration = Helper.toHumanReadableTime(match.getDuration());
                 String timeSince = Helper.toHumanReadableTime(calendar.getTimeInMillis() - match.getTime());

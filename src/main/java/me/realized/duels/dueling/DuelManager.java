@@ -12,7 +12,10 @@ import me.realized.duels.kits.Kit;
 import me.realized.duels.kits.KitManager;
 import me.realized.duels.utilities.Helper;
 import me.realized.duels.utilities.Metadata;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
+import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
@@ -20,6 +23,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -50,7 +54,7 @@ public class DuelManager implements Listener {
     public void startMatch(Player player, Player target, Request request) {
         Arena arena;
 
-        if (config.getBoolean("allow-arena-selecting")) {
+        if (!config.isUseOwnInventory() && config.isAllowArenaSelecting()) {
             arena = arenaManager.getArena(request.getArena());
 
             if (arena == null || arena.isUsed()) {
@@ -75,20 +79,26 @@ public class DuelManager implements Listener {
             return;
         }
 
-        Kit contents = kitManager.getKit(request.getKit());
         String arenaName = request.getArena() != null ? request.getArena() : "random";
-
         arena.setUsed(true);
         arena.getCurrentMatch().setData(player, target);
         player.closeInventory();
         target.closeInventory();
+        Helper.updatePosition(player, pos1);
+        Helper.updatePosition(target, pos2);
         player.teleport(pos1);
         target.teleport(pos2);
         essentialsHook.setUnvanished(player);
         essentialsHook.setUnvanished(target);
-        Helper.reset(true, player, target);
-        contents.equip(player, target);
+
+        if (!config.isUseOwnInventory()) {
+            Kit contents = kitManager.getKit(request.getKit());
+            Helper.reset(true, player, target);
+            contents.equip(player, target);
+        }
+
         arena.addPlayers(player, target);
+        arena.startCountdown();
         Helper.pm(Helper.replaceWithArgs(config.getString("on-request-accept-target"), "{PLAYER}", target.getName(), "{KIT}", request.getKit()).replace("{ARENA}", arenaName), player);
         Helper.pm(Helper.replaceWithArgs(config.getString("on-request-accept-sender"), "{PLAYER}", player.getName(), "{KIT}", request.getKit()).replace("{ARENA}", arenaName), target);
 
@@ -104,8 +114,12 @@ public class DuelManager implements Listener {
         if (player.hasMetadata("respawn")) {
             Respawn data = (Respawn) player.getMetadata("respawn").get(0).value();
             event.setRespawnLocation(data.getRespawnLocation());
-            Helper.reset(player, false);
-            Helper.setInventory(player, data.getInventoryData().getInventoryContents(), data.getInventoryData().getArmorContents(), false);
+
+            if (!config.isUseOwnInventory()) {
+                Helper.reset(player, false);
+                Helper.setInventory(player, data.getInventoryData().getInventoryContents(), data.getInventoryData().getArmorContents(), false);
+            }
+
             player.removeMetadata("respawn", Core.getInstance());
             essentialsHook.setBackLocation(player, event.getRespawnLocation());
         }
@@ -113,7 +127,7 @@ public class DuelManager implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDeath(PlayerDeathEvent event) {
-        Player dead = event.getEntity();
+        final Player dead = event.getEntity();
 
         if (!arenaManager.isInMatch(dead)) {
             return;
@@ -132,7 +146,7 @@ public class DuelManager implements Listener {
         Arena.InventoryData deadData = match.getInventories(dead.getUniqueId());
         final Location lobby = dataManager.getLobby() != null ? dataManager.getLobby() : dead.getWorld().getSpawnLocation();
 
-        if (config.getBoolean("teleport-to-latest-location")) {
+        if (config.isTeleportToLastLoc()) {
             dead.setMetadata("respawn", new Metadata(Core.getInstance(), new Respawn(deadData, match.getLocation(dead.getUniqueId()))));
         } else {
             dead.setMetadata("respawn", new Metadata(Core.getInstance(), new Respawn(deadData, lobby)));
@@ -160,7 +174,7 @@ public class DuelManager implements Listener {
                 opponent.edit(UserData.EditType.ADD, UserData.StatsType.WINS, 1);
             }
 
-            int delay = config.getInt("delay-until-teleport-on-win");
+            int delay = config.getTeleportationDelay();
             final Location last = arena.getCurrentMatch().getLocation(target.getUniqueId());
             final Arena.InventoryData targetData = match.getInventories(target.getUniqueId());
 
@@ -169,60 +183,43 @@ public class DuelManager implements Listener {
 
                     @Override
                     public void run() {
-                        arena.setUsed(false);
-                        if (arenaManager.getGUI() != null) {
-                            arenaManager.getGUI().update(arenaManager.getArenas());
-                        }
-
-                        if (!target.isOnline() || target.isDead()) {
-                            return;
-                        }
-
-                        if (!config.getBoolean("teleport-to-latest-location")) {
-                            if (!Helper.canTeleportTo(target, lobby)) {
-                                target.setHealth(0.0D);
-                                target.sendMessage(ChatColor.RED + "[Duels] Your teleportation to lobby was unsuccessful! Setting health to 0.0 just to not glitch the system by letting you stay in the arena. ;)");
-                                return;
-                            }
-
-                            target.teleport(lobby);
-                        } else {
-                            target.teleport(last);
-                        }
-
-                        essentialsHook.setBackLocation(target, target.getLocation());
-                        Helper.reset(target, true);
-
-                        if (!config.getBoolean("requires-cleared-inventory")) {
-                            Helper.setInventory(target, targetData.getInventoryContents(), targetData.getArmorContents(), false);
-                        }
-
+                        handleEnd(arena, dead, target, targetData, lobby, last);
                     }
                 }.runTaskLater(instance, delay * 20L);
             } else {
-                arena.setUsed(false);
+                handleEnd(arena, dead, target, targetData, lobby, last);
+            }
+        }
+    }
 
-                if (arenaManager.getGUI() != null) {
-                    arenaManager.getGUI().update(arenaManager.getArenas());
-                }
+    private void handleEnd(Arena arena, Player dead, Player target, Arena.InventoryData data, Location lobby, Location last) {
+        arena.setUsed(false);
 
-                if (target.isDead()) {
-                    target.spigot().respawn();
-                    return;
-                }
+        if (arenaManager.getGUI() != null) {
+            arenaManager.getGUI().update(arenaManager.getArenas());
+        }
 
-                if (!config.getBoolean("teleport-to-latest-location")) {
-                    target.teleport(lobby);
-                } else {
-                    target.teleport(last);
-                }
+        if (target.isOnline() && !target.isDead()) {
+            if (!config.isTeleportToLastLoc()) {
+                target.teleport(lobby);
+            } else {
+                target.teleport(last);
+            }
 
-                essentialsHook.setBackLocation(target, target.getLocation());
+            essentialsHook.setBackLocation(target, target.getLocation());
+
+            if (!config.isUseOwnInventory()) {
                 Helper.reset(target, true);
 
-                if (!config.getBoolean("requires-cleared-inventory")) {
-                    Helper.setInventory(target, targetData.getInventoryContents(), targetData.getArmorContents(), false);
+                if (!config.isOnlyEmptyInventory()) {
+                    Helper.setInventory(target, data.getInventoryContents(), data.getArmorContents(), false);
                 }
+            }
+        }
+
+        if (config.isMECEnabled()) {
+            for (String command : config.getMECommands()) {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("{WINNER}", target.getName()).replace("{LOSER}", dead.getName()));
             }
         }
     }
@@ -247,7 +244,7 @@ public class DuelManager implements Listener {
         Player player = event.getPlayer();
         Location to = event.getTo();
 
-        if (event.getCause() == PlayerTeleportEvent.TeleportCause.COMMAND && config.getBoolean("fix-teleport") && !player.isOp() && !player.hasPermission("duels.admin") && !arenaManager.isInMatch(player)) {
+        if (event.getCause() == PlayerTeleportEvent.TeleportCause.COMMAND && config.fixTeleport() && !player.isOp() && !player.hasPermission("duels.admin") && !arenaManager.isInMatch(player)) {
             for (Arena arena : arenaManager.getArenas()) {
                 for (UUID uuid : arena.getPlayers()) {
                     Player arenaPlayer = Bukkit.getPlayer(uuid);
@@ -273,7 +270,7 @@ public class DuelManager implements Listener {
     public void onDrop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
 
-        if (config.getBoolean("drop-item") || !arenaManager.isInMatch(player)) {
+        if (config.isDropItem() || !arenaManager.isInMatch(player)) {
             return;
         }
 
@@ -285,7 +282,7 @@ public class DuelManager implements Listener {
     public void onPickup(PlayerPickupItemEvent event) {
         Player player = event.getPlayer();
 
-        if (config.getBoolean("pick-up-item") || !arenaManager.isInMatch(player)) {
+        if (config.isPickUpItem() || !arenaManager.isInMatch(player)) {
             return;
         }
 
@@ -297,7 +294,7 @@ public class DuelManager implements Listener {
         Player player = event.getPlayer();
         String command = event.getMessage().substring(1).split(" ")[0].toLowerCase();
 
-        if (arenaManager.isInMatch(player) && ((config.getBoolean("block-all-commands") && !config.getList("whitelisted-commands").contains(command)) || (!config.getBoolean("block-all-commands") && config.getList("disabled-commands").contains(command)))) {
+        if (arenaManager.isInMatch(player) && ((config.isBlockAllCommands() && !config.getWhitelistedCommands().contains(command)) || (!config.isBlockAllCommands() && config.getDisabledCommands().contains(command)))) {
             event.setCancelled(true);
             Helper.pm("&cYou may not use that command while in duel.", player);
         }
@@ -309,6 +306,33 @@ public class DuelManager implements Listener {
             event.setCancelled(true);
             event.getPlayer().setAllowFlight(false);
             Helper.pm("&cYou may not fly while in duel.", event.getPlayer());
+        }
+    }
+
+    @EventHandler
+    public void onInventoryOpen(InventoryOpenEvent event) {
+        if (config.fixInventoryOpen() && arenaManager.isInMatch((Player) event.getPlayer())) {
+            event.setCancelled(true);
+            Helper.pm("&cYou may not open inventory while in duel.", (Player) event.getPlayer());
+        }
+    }
+
+    class Respawn {
+
+        private final Arena.InventoryData inventoryData;
+        private final Location respawnLocation;
+
+        Respawn(Arena.InventoryData inventoryData, Location respawnLocation) {
+            this.inventoryData = inventoryData;
+            this.respawnLocation = respawnLocation;
+        }
+
+        Arena.InventoryData getInventoryData() {
+            return inventoryData;
+        }
+
+        Location getRespawnLocation() {
+            return respawnLocation;
         }
     }
 }

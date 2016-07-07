@@ -1,27 +1,16 @@
 package me.realized.duels.utilities.compat;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
 public class SpawnEggs {
 
-    private static Class<?> itemStack;
-    private static Class<?> nbtTagCompound;
-    private static Class<?> nbtBase;
-    private static Class<?> craftItemStack;
+    private static final Class<?> itemStack = CompatHelper.getMinecraftStack();
+    private static final Class<?> craftItemStack = CompatHelper.getCraftStack();
+    private static final Class<?> nbtTagCompound = CompatHelper.getNBTTagCompound();
+    private static final Class<?> nbtBase = CompatHelper.getNBTBase();
 
-    static {
-        final String version = Bukkit.getServer().getClass().getName().split("\\.")[3];
-
-        try {
-            itemStack = Class.forName("net.minecraft.server." + version + ".ItemStack");
-            nbtTagCompound = Class.forName("net.minecraft.server." + version + ".NBTTagCompound");
-            nbtBase = Class.forName("net.minecraft.server." + version + ".NBTBase");
-            craftItemStack = Class.forName("org.bukkit.craftbukkit." + version + ".inventory.CraftItemStack");
-        } catch (ClassNotFoundException ignored) {}
-    }
 
     private final EntityType type;
 

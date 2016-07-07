@@ -16,6 +16,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
@@ -27,7 +32,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-public class ArenaManager {
+public class ArenaManager implements Listener {
 
     private final Core instance;
     private final Config config;
@@ -44,6 +49,8 @@ public class ArenaManager {
         this.config = instance.getConfiguration();
         this.requestManager = instance.getRequestManager();
         this.dataManager = instance.getDataManager();
+
+        Bukkit.getPluginManager().registerEvents(this, instance);
 
         base = new File(instance.getDataFolder(), "arenas.json");
 
@@ -74,8 +81,8 @@ public class ArenaManager {
             instance.warn("Failed to load arenas from the file! (" + ex.getMessage() + ")");
         }
 
-        if (config.getBoolean("allow-arena-selecting")) {
-            gui = new GUI<>("Arena Selection", arenas, config.getInt("arena-selector"), new GUI.ClickListener() {
+        if (config.isAllowArenaSelecting()) {
+            gui = new GUI<>("Arena Selection", arenas, config.arenaSelectorRows(), new GUI.ClickListener() {
                 @Override
                 public void onClick(InventoryClickEvent event) {
                     Player player = (Player) event.getWhoClicked();
@@ -175,7 +182,7 @@ public class ArenaManager {
                             continue;
                         }
 
-                        if (config.getBoolean("teleport-to-latest-location")) {
+                        if (config.isTeleportToLastLoc()) {
                             toTeleport = match.getLocation(uuid);
                         }
 
@@ -308,5 +315,45 @@ public class ArenaManager {
 
     public GUI<Arena> getGUI() {
         return gui;
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void on(ProjectileLaunchEvent event) {
+        if (event.isCancelled() || !(event.getEntity().getShooter() instanceof Player) || !config.isCdProjectileBlocked()) {
+            return;
+        }
+
+        Player player = (Player) event.getEntity().getShooter();
+
+        if (!isInMatch(player)) {
+            return;
+        }
+
+        Arena arena = getArena(player);
+
+        if (arena.isCounting()) {
+            Helper.pm("&cYou are not allowed to do this before the match starts.", player);
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void on(EntityDamageByEntityEvent event) {
+        if (event.isCancelled() || !(event.getEntity() instanceof Player && event.getDamager() instanceof Player) || !config.isCdPvPBlocked()) {
+            return;
+        }
+
+        Player player = (Player) event.getDamager();
+
+        if (!isInMatch(player)) {
+            return;
+        }
+
+        Arena arena = getArena(player);
+
+        if (arena.isCounting()) {
+            Helper.pm("&cYou are not allowed to do this before the match starts.", player);
+            event.setCancelled(true);
+        }
     }
 }

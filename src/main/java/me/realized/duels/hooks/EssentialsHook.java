@@ -21,7 +21,7 @@ public class EssentialsHook extends PluginHook {
     }
 
     public void setUnvanished(Player player) {
-        if (!config.getBoolean("fix-vanish") || !isEnabled()) {
+        if (!config.fixVanish() || !isEnabled()) {
             return;
         }
 
@@ -29,12 +29,13 @@ public class EssentialsHook extends PluginHook {
         User user = essentials.getUser(player);
 
         if (user != null) {
+            user.setVanished(true);
             user.setVanished(false);
         }
     }
 
     public void setBackLocation(Player player, Location location) {
-        if (!config.getBoolean("fix-back") || !isEnabled()) {
+        if (!config.fixBack() || !isEnabled()) {
             return;
         }
 

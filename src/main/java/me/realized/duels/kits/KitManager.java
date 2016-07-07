@@ -72,7 +72,7 @@ public class KitManager implements Listener {
         }
 
         instance.info("Loaded " + kits.size() + " kit(s).");
-        gui = new GUI<>("Kit Selection", new ArrayList<>(kits.values()), config.getInt("kit-selector"), new GUI.ClickListener() {
+        gui = new GUI<>("Kit Selection", new ArrayList<>(kits.values()), config.kitSelectorRows(), new GUI.ClickListener() {
 
             @Override
             public void onClick(InventoryClickEvent event) {
@@ -113,7 +113,7 @@ public class KitManager implements Listener {
 
                 settings.setKit(kit.getName());
 
-                if (!config.getBoolean("allow-arena-selecting")) {
+                if (!config.isAllowArenaSelecting()) {
                     requestManager.sendRequestTo(player, target, settings);
                     player.closeInventory();
                     Helper.pm(config.getString("on-request-send").replace("{PLAYER}", target.getName()).replace("{KIT}", kit.getName()).replace("{ARENA}", "random"), player);
