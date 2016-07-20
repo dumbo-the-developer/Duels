@@ -84,6 +84,10 @@ public class JSONItem {
     }
 
     private void addEnchantment(String type, int level) {
+        if (type == null) {
+            return;
+        }
+
         if (enchantments == null) {
             enchantments = new HashMap<>();
         }

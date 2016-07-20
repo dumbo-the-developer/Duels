@@ -110,6 +110,7 @@ public class DuelCommand extends BaseCommand {
                 RequestSendEvent requestSendEvent = new RequestSendEvent(requestManager.getRequestTo(player, target), player, target);
                 Bukkit.getPluginManager().callEvent(requestSendEvent);
             }
+
             return;
         }
 

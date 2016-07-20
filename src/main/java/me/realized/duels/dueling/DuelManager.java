@@ -7,6 +7,8 @@ import me.realized.duels.configuration.Config;
 import me.realized.duels.data.DataManager;
 import me.realized.duels.data.MatchData;
 import me.realized.duels.data.UserData;
+import me.realized.duels.event.MatchEndEvent;
+import me.realized.duels.event.MatchStartEvent;
 import me.realized.duels.hooks.EssentialsHook;
 import me.realized.duels.kits.Kit;
 import me.realized.duels.kits.KitManager;
@@ -28,9 +30,7 @@ import org.bukkit.event.player.*;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.UUID;
+import java.util.*;
 
 public class DuelManager implements Listener {
 
@@ -52,6 +52,7 @@ public class DuelManager implements Listener {
     }
 
     public void startMatch(Player player, Player target, Request request) {
+        boolean random;
         Arena arena;
 
         if (!config.isUseOwnInventory() && config.isAllowArenaSelecting()) {
@@ -61,6 +62,8 @@ public class DuelManager implements Listener {
                 Helper.pm("&cThe selected arena is no longer available, please choose a different arena.", player, target);
                 return;
             }
+
+            random = false;
         } else {
             arena = arenaManager.getAvailableArena();
 
@@ -68,6 +71,8 @@ public class DuelManager implements Listener {
                 Helper.pm("&cNo available arenas were found, please try again later.", player, target);
                 return;
             }
+
+            random = true;
         }
 
         Location pos1 = arena.getPositions().get(1);
@@ -105,6 +110,9 @@ public class DuelManager implements Listener {
         if (arenaManager.getGUI() != null) {
             arenaManager.getGUI().update(arenaManager.getArenas());
         }
+
+        MatchStartEvent event = new MatchStartEvent(Collections.unmodifiableList(arena.getPlayers()), arena, random);
+        Bukkit.getPluginManager().callEvent(event);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -193,12 +201,6 @@ public class DuelManager implements Listener {
     }
 
     private void handleEnd(Arena arena, Player dead, Player target, Arena.InventoryData data, Location lobby, Location last) {
-        arena.setUsed(false);
-
-        if (arenaManager.getGUI() != null) {
-            arenaManager.getGUI().update(arenaManager.getArenas());
-        }
-
         if (target.isOnline() && !target.isDead()) {
             if (!config.isTeleportToLastLoc()) {
                 target.teleport(lobby);
@@ -221,6 +223,15 @@ public class DuelManager implements Listener {
             for (String command : config.getMECommands()) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("{WINNER}", target.getName()).replace("{LOSER}", dead.getName()));
             }
+        }
+
+        MatchEndEvent event = new MatchEndEvent(Collections.unmodifiableList(Arrays.asList(dead.getUniqueId(), target.getUniqueId())), arena);
+        Bukkit.getPluginManager().callEvent(event);
+
+        arena.setUsed(false);
+
+        if (arenaManager.getGUI() != null) {
+            arenaManager.getGUI().update(arenaManager.getArenas());
         }
     }
 
