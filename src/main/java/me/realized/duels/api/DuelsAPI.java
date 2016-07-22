@@ -39,4 +39,14 @@ public class DuelsAPI {
     public static UserData getUser(Player player, boolean force) {
         return instance.getDataManager().getUser(player.getUniqueId(), force);
     }
+
+    /**
+     *
+     * @param player - player to check if in match.
+     *
+     * @return boolean
+     */
+    public static boolean isInMatch(Player player) {
+        return instance.getArenaManager().isInMatch(player);
+    }
 }

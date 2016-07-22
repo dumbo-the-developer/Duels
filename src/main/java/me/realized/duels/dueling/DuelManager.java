@@ -202,6 +202,8 @@ public class DuelManager implements Listener {
 
     private void handleEnd(Arena arena, Player dead, Player target, Arena.InventoryData data, Location lobby, Location last) {
         if (target.isOnline() && !target.isDead()) {
+            arena.removePlayer(target.getUniqueId());
+
             if (!config.isTeleportToLastLoc()) {
                 target.teleport(lobby);
             } else {

@@ -27,10 +27,10 @@ public class SetitemCommand extends SubCommand {
 
         ItemStack held;
 
-        if (Bukkit.getVersion().contains("1.9")) {
-            held = player.getInventory().getItemInMainHand();
-        } else {
+        if (Bukkit.getVersion().contains("1.8") || Bukkit.getVersion().contains("1.7")) {
             held = player.getInventory().getItemInHand();
+        } else {
+            held = player.getInventory().getItemInMainHand();
         }
 
         if (held == null || held.getType() == Material.AIR) {

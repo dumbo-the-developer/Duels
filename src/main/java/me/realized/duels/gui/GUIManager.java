@@ -25,7 +25,7 @@ public class GUIManager implements Listener {
         registered.add(gui);
     }
 
-    @EventHandler (priority = EventPriority.LOWEST)
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void on(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
         Inventory top = player.getOpenInventory().getTopInventory();
@@ -50,7 +50,7 @@ public class GUIManager implements Listener {
         }
     }
 
-    @EventHandler (priority = EventPriority.LOWEST)
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void on(InventoryCloseEvent event) {
         for (GUI gui : registered) {
             if (gui.isPage(event.getInventory())) {
