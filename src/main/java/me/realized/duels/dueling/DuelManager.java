@@ -128,7 +128,7 @@ public class DuelManager implements Listener {
                 Helper.setInventory(player, data.getInventoryData().getInventoryContents(), data.getInventoryData().getArmorContents(), false);
             }
 
-            player.removeMetadata("respawn", Core.getInstance());
+            player.removeMetadata("respawn", instance);
             essentialsHook.setBackLocation(player, event.getRespawnLocation());
         }
     }
@@ -142,9 +142,12 @@ public class DuelManager implements Listener {
         }
 
         event.setDeathMessage(null);
-        event.setKeepLevel(true);
-        event.setDroppedExp(0);
-        event.getDrops().clear();
+
+        if (!config.isUseOwnInventory()) {
+            event.setKeepLevel(true);
+            event.setDroppedExp(0);
+            event.getDrops().clear();
+        }
 
         final Arena arena = arenaManager.getArena(dead);
         final Arena.Match match = arena.getCurrentMatch();
