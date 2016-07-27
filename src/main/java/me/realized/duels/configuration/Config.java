@@ -80,7 +80,7 @@ public class Config {
         this.allowArenaSelecting = config.getBoolean("Dueling.allow-arena-selecting", true);
         this.useOwnInventory = config.getBoolean("Dueling.use-own-inventory", false);
         this.onlyEmptyInventory = config.getBoolean("Dueling.requires-cleared-inventory", true);
-        this.teleportToLastLoc = config.getBoolean("Dueling.teleport-to-last-location", false);
+        this.teleportToLastLoc = config.getBoolean("Dueling.teleport-to-lastest-location", false);
         this.teleportationDelay = config.getInt("Dueling.delay-until-teleport-on-win", 5);
         this.dropItem = config.getBoolean("Dueling.drop-item", true);
         this.pickUpItem = config.getBoolean("Dueling.pickup-item", false);
