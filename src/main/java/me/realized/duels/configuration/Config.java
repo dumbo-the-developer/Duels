@@ -83,7 +83,7 @@ public class Config {
         this.teleportToLastLoc = config.getBoolean("Dueling.teleport-to-latest-location", false);
         this.teleportationDelay = config.getInt("Dueling.delay-until-teleport-on-win", 5);
         this.dropItem = config.getBoolean("Dueling.drop-item", true);
-        this.pickUpItem = config.getBoolean("Dueling.pickup-item", false);
+        this.pickUpItem = config.getBoolean("Dueling.pick-up-item", false);
         this.blockAllCommands = config.getBoolean("Dueling.block-all-commands", false);
         this.whitelistedCommands = config.isList("Dueling.whitelisted-commands") ? config.getStringList("Dueling.whitelisted-commands") : new ArrayList<String>();
         this.disabledCommands = config.isList("Dueling.disabled-commands") ? config.getStringList("Dueling.disabled-commands") : new ArrayList<String>();

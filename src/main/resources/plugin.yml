@@ -1,6 +1,6 @@
 name: Duels
 main: me.realized.duels.Core
-version: 1.3.3
+version: 1.3.4
 author: Realized
 description: An ultimate solution to server owners wanting to create a duel system.
 softdepend: [WorldGuard, Multiverse-Core, Essentials]
