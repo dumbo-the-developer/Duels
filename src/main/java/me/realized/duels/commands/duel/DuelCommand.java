@@ -11,9 +11,9 @@ import me.realized.duels.dueling.Settings;
 import me.realized.duels.event.RequestSendEvent;
 import me.realized.duels.hooks.WorldGuardHook;
 import me.realized.duels.utilities.Helper;
+import me.realized.duels.utilities.Metadata;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -99,8 +99,7 @@ public class DuelCommand extends BaseCommand {
             }
 
             if (!config.isDuelingUseOwnInventory()) {
-                sender.setMetadata("request", new FixedMetadataValue(Core.getInstance(), new Settings(target.getUniqueId(), sender.getLocation().clone())));
-                System.out.println("MetaData set: " + sender.getMetadata("request"));
+                sender.setMetadata("request", new Metadata(Core.getInstance(), new Settings(target.getUniqueId(), sender.getLocation().clone())));
                 sender.openInventory(kitManager.getGUI().getFirst());
             } else {
                 requestManager.sendRequestTo(sender, target, new Settings(target.getUniqueId(), sender.getLocation().clone()));
