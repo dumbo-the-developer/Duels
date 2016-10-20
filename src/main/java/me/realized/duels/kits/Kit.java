@@ -1,6 +1,6 @@
 package me.realized.duels.kits;
 
-import me.realized.duels.gui.ICanHandleGUI;
+import me.realized.duels.utilities.gui.ICanHandleGUI;
 import me.realized.duels.utilities.inventory.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

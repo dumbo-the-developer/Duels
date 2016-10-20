@@ -1,31 +1,27 @@
 package me.realized.duels.commands.admin.subcommands;
 
 import me.realized.duels.arena.Arena;
-import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.commands.SubCommand;
-import me.realized.duels.utilities.Lang;
-import org.bukkit.command.CommandSender;
+import me.realized.duels.utilities.Helper;
+import org.bukkit.entity.Player;
 
 public class ToggleCommand extends SubCommand {
 
-    private final ArenaManager manager;
-
     public ToggleCommand() {
-        super("toggle", "toggle [name]", "Enable/Disable an arena.", 2);
-        this.manager = getInstance().getArenaManager();
+        super("toggle", "toggle [name]", "duels.admin", "Enable/Disable an arena.", 2);
     }
 
     @Override
-    public void execute(CommandSender sender, String[] args) {
-        String name = args[1].toLowerCase();
+    public void execute(Player sender, String[] args) {
+        String name = Helper.join(args, 1, args.length, " ");
 
-        if (manager.getArena(name) == null) {
-            pm(sender, "&cNon-existing arena.");
+        if (arenaManager.getArena(name) == null) {
+            Helper.pm(sender, "Errors.arena-not-found", true);
             return;
         }
 
-        Arena arena = manager.getArena(name);
+        Arena arena = arenaManager.getArena(name);
         arena.setDisabled(!arena.isDisabled());
-        pm(sender, (arena.isDisabled() ? Lang.ARENA_TOGGLE_OFF : Lang.ARENA_TOGGLE_ON).getMessage().replace("{NAME}", name));
+        Helper.pm(sender, (arena.isDisabled() ? "Arenas.disabled" : "Arenas.enabled"), true, "{NAME}", name);
     }
 }

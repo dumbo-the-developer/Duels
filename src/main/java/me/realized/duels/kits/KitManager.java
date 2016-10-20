@@ -3,14 +3,17 @@ package me.realized.duels.kits;
 import com.google.gson.reflect.TypeToken;
 import me.realized.duels.Core;
 import me.realized.duels.arena.ArenaManager;
-import me.realized.duels.configuration.Config;
+import me.realized.duels.configuration.MainConfig;
 import me.realized.duels.data.KitData;
 import me.realized.duels.dueling.RequestManager;
 import me.realized.duels.dueling.Settings;
 import me.realized.duels.event.RequestSendEvent;
-import me.realized.duels.gui.GUI;
 import me.realized.duels.utilities.Helper;
+import me.realized.duels.utilities.ICanHandleReload;
 import me.realized.duels.utilities.Metadata;
+import me.realized.duels.utilities.ReloadType;
+import me.realized.duels.utilities.gui.GUI;
+import me.realized.duels.utilities.gui.GUIListener;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -26,10 +29,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class KitManager implements Listener {
+public class KitManager implements Listener, ICanHandleReload {
 
     private final Core instance;
-    private final Config config;
+    private final MainConfig config;
     private final ArenaManager arenaManager;
     private final RequestManager requestManager;
     private final File base;
@@ -72,7 +75,7 @@ public class KitManager implements Listener {
         }
 
         instance.info("Loaded " + kits.size() + " kit(s).");
-        gui = new GUI<>("Kit Selection", new ArrayList<>(kits.values()), config.kitSelectorRows(), new GUI.ClickListener() {
+        gui = new GUI<>("Kit Selection", new ArrayList<>(kits.values()), config.getGuiKitSelectorRows(), new GUIListener() {
 
             @Override
             public void onClick(InventoryClickEvent event) {
@@ -95,13 +98,13 @@ public class KitManager implements Listener {
 
                 if (target == null) {
                     player.closeInventory();
-                    Helper.pm("&cThat player is no longer online.", player);
+                    Helper.pm(player, "Errors.player-left", true);
                     return;
                 }
 
                 if (arenaManager.isInMatch(target)) {
                     player.closeInventory();
-                    Helper.pm("&cThat player is already in a match.", player);
+                    Helper.pm(player, "Errors.already-in-match.target", true);
                     return;
                 }
 
@@ -113,11 +116,12 @@ public class KitManager implements Listener {
 
                 settings.setKit(kit.getName());
 
-                if (!config.isAllowArenaSelecting()) {
+                if (!config.isDuelingAllowArenaSelecting()) {
                     requestManager.sendRequestTo(player, target, settings);
                     player.closeInventory();
-                    Helper.pm(config.getString("on-request-send").replace("{PLAYER}", target.getName()).replace("{KIT}", kit.getName()).replace("{ARENA}", "random"), player);
-                    Helper.pm(config.getString("on-request-receive").replace("{PLAYER}", player.getName()).replace("{KIT}", kit.getName()).replace("{ARENA}", "random"), target);
+
+                    Helper.pm(player, "Dueling.on-request-send.sender", true, "{PLAYER}", target.getName(), "{KIT}", settings.getKit(), "{ARENA}", "random");
+                    Helper.pm(target, "Dueling.on-request-send.receiver", true, "{PLAYER}", player.getName(), "{KIT}", settings.getKit(), "{ARENA}", "random");
 
                     RequestSendEvent requestSendEvent = new RequestSendEvent(requestManager.getRequestTo(player, target), player, target);
                     Bukkit.getPluginManager().callEvent(requestSendEvent);
@@ -205,6 +209,14 @@ public class KitManager implements Listener {
 
         result.addAll(kits.keySet());
         return result;
+    }
+
+    @Override
+    public void handleReload(ReloadType type) {
+        if (type == ReloadType.STRONG) {
+            save();
+            load();
+        }
     }
 
     public enum Type {

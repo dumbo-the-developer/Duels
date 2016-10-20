@@ -1,13 +1,16 @@
 package me.realized.duels.dueling;
 
+import org.bukkit.Location;
+
 import java.util.UUID;
 
 public class Request {
 
     private final UUID sender;
     private final UUID target;
-    private final String kit;
+    private String kit;
     private final String arena;
+    private final Location base;
     private final long time;
 
     public Request(UUID sender, UUID target, Settings settings) {
@@ -15,6 +18,7 @@ public class Request {
         this.target = target;
         this.kit = settings.getKit();
         this.arena = settings.getArena();
+        this.base = settings.getBase();
         this.time = System.currentTimeMillis();
     }
 
@@ -30,8 +34,16 @@ public class Request {
         return kit;
     }
 
+    public void setKit(String kit) {
+        this.kit = kit;
+    }
+
     public String getArena() {
         return arena;
+    }
+
+    public Location getBase() {
+        return base;
     }
 
     public long getTime() {

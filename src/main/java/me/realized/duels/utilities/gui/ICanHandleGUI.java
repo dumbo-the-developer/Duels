@@ -1,4 +1,4 @@
-package me.realized.duels.gui;
+package me.realized.duels.utilities.gui;
 
 import org.bukkit.inventory.ItemStack;
 

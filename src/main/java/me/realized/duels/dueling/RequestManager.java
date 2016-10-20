@@ -1,10 +1,12 @@
 package me.realized.duels.dueling;
 
+import me.realized.duels.utilities.ICanHandleReload;
+import me.realized.duels.utilities.ReloadType;
 import org.bukkit.entity.Player;
 
 import java.util.*;
 
-public class RequestManager {
+public class RequestManager implements ICanHandleReload {
 
     private Map<UUID, List<Request>> requests = new HashMap<>();
 
@@ -86,6 +88,13 @@ public class RequestManager {
 
             iterator.remove();
             break;
+        }
+    }
+
+    @Override
+    public void handleReload(ReloadType type) {
+        if (type == ReloadType.STRONG) {
+            requests.clear();
         }
     }
 

@@ -1,6 +1,8 @@
 package me.realized.duels.data;
 
 import me.realized.duels.Core;
+import me.realized.duels.utilities.ICanHandleReload;
+import me.realized.duels.utilities.ReloadType;
 import me.realized.duels.utilities.location.SimpleLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -15,7 +17,7 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DataManager implements Listener {
+public class DataManager implements Listener, ICanHandleReload {
 
     private final Core instance;
 
@@ -86,10 +88,6 @@ public class DataManager implements Listener {
         return null;
     }
 
-    private void unloadUser(UUID uuid) {
-        users.remove(uuid);
-    }
-
     private void saveUser(UUID uuid, boolean log) {
         if (users.get(uuid) == null) {
             return;
@@ -144,18 +142,29 @@ public class DataManager implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onJoin(PlayerJoinEvent event) {
-        UserData user = loadUser(event.getPlayer().getUniqueId(), event.getPlayer().getName(), true);
+        Player player = event.getPlayer();
+        UserData user = loadUser(player.getUniqueId(), player.getName(), true);
 
-        if (user != null && !user.getMatches().isEmpty()) {
+        if (user == null) {
+            return;
+        }
+
+        if (!user.getName().equals(player.getName())) {
+            user.setName(player.getName());
+        }
+
+        user.refreshMatches();
+
+        if (!user.getMatches().isEmpty()) {
             Iterator<MatchData> iterator = user.getMatches().iterator();
             Calendar now = new GregorianCalendar();
 
             while (iterator.hasNext()) {
                 MatchData match = iterator.next();
 
-               if (now.getTimeInMillis() - match.getTime() > 604800 * 1000L) {
-                   iterator.remove();
-               }
+                if (now.getTimeInMillis() - match.getTime() > 604800 * 1000L) {
+                    iterator.remove();
+                }
             }
         }
     }
@@ -163,6 +172,14 @@ public class DataManager implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onQuit(PlayerQuitEvent event) {
         saveUser(event.getPlayer().getUniqueId(), true);
-        unloadUser(event.getPlayer().getUniqueId());
+        users.remove(event.getPlayer().getUniqueId());
+    }
+
+    @Override
+    public void handleReload(ReloadType type) {
+        if (type == ReloadType.STRONG) {
+            save();
+            load();
+        }
     }
 }

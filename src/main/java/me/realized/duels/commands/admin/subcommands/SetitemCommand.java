@@ -3,56 +3,49 @@ package me.realized.duels.commands.admin.subcommands;
 import me.realized.duels.commands.SubCommand;
 import me.realized.duels.event.KitItemChangeEvent;
 import me.realized.duels.kits.Kit;
-import me.realized.duels.kits.KitManager;
-import me.realized.duels.utilities.Lang;
+import me.realized.duels.utilities.Helper;
+import me.realized.duels.utilities.compat.CompatHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class SetitemCommand extends SubCommand {
 
-    private final KitManager manager;
-
     public SetitemCommand() {
-        super("setitem", "setitem [name]", "Replaces the displayed item to held item for selected kit.", 2);
-        this.manager = getInstance().getKitManager();
+        super("setitem", "setitem [name]", "duels.admin", "Replaces the displayed item to held item for selected kit.", 2);
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public void execute(CommandSender sender, String[] args) {
-        Player player = (Player) sender;
-
+    public void execute(Player sender, String[] args) {
         ItemStack held;
 
-        if (Bukkit.getVersion().contains("1.8") || Bukkit.getVersion().contains("1.7")) {
-            held = player.getInventory().getItemInHand();
+        if (CompatHelper.isPre1_9()) {
+            held = sender.getInventory().getItemInHand();
         } else {
-            held = player.getInventory().getItemInMainHand();
+            held = sender.getInventory().getItemInMainHand();
         }
 
         if (held == null || held.getType() == Material.AIR) {
-            pm(player, "&cPlease hold an item to use this command.");
+            Helper.pm(sender, "Errors.empty-hand", true);
             return;
         }
 
-        String name = args[1];
+        String name = Helper.join(args, 1, args.length, " ");
 
-        if (manager.getKit(name) == null) {
-            pm(player, "&cA kit with that name was not found.");
+        if (kitManager.getKit(name) == null) {
+            Helper.pm(sender, "Errors.kit-not-found", true);
             return;
         }
 
-        Kit kit = manager.getKit(name);
+        Kit kit = kitManager.getKit(name);
         ItemStack old = kit.getDisplayed();
         ItemStack _new = held.clone();
         kit.setDisplayed(_new);
-        manager.getGUI().update(manager.getKits());
-        pm(player, Lang.REPLACE_KIT_ITEM.getMessage().replace("{NAME}", name));
-
-        KitItemChangeEvent event = new KitItemChangeEvent(name, player, old, _new);
+        kitManager.getGUI().update(kitManager.getKits());
+        Helper.pm(sender, "Kits.set-item", true, "{NAME}", name);
+        KitItemChangeEvent event = new KitItemChangeEvent(name, sender, old, _new);
         Bukkit.getPluginManager().callEvent(event);
     }
 }

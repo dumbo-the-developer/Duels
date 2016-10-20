@@ -3,6 +3,8 @@ package me.realized.duels.utilities.compat;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+import java.lang.reflect.Method;
+
 public class Potions {
 
     public enum PotionType {
@@ -17,7 +19,8 @@ public class Potions {
 
     private static final Class<?> itemStack = CompatHelper.getMinecraftStack();
     private static final Class<?> nbtTagCompound = CompatHelper.getNBTTagCompound();
-    private static final Class<?> craftItemStack = CompatHelper.getCraftStack();
+    private static final Method asNMSCopy = CompatHelper.asNMSCopy();
+    private static final Method asBukkitCopy = CompatHelper.asBukkitCopy();
 
     private final PotionType type;
     private final boolean strong, extended, linger, splash;
@@ -60,7 +63,7 @@ public class Potions {
         }
 
         try {
-            Object stack = craftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, item);
+            Object stack = asNMSCopy.invoke(null, item);
             Object tagCompound = itemStack.getMethod("getTag").invoke(stack);
 
             if (tagCompound == null) {
@@ -175,7 +178,7 @@ public class Potions {
 
             nbtTagCompound.getMethod("setString", String.class, String.class).invoke(tagCompound, "Potion", "minecraft:" + tag);
             itemStack.getMethod("setTag", nbtTagCompound).invoke(stack, tagCompound);
-            return (ItemStack) craftItemStack.getMethod("asBukkitCopy", itemStack).invoke(null, stack);
+            return (ItemStack) asBukkitCopy.invoke(null, stack);
         } catch (Exception e) {
             return null;
         }
@@ -187,7 +190,7 @@ public class Potions {
         }
 
         try {
-            Object stack = craftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, item);
+            Object stack = asNMSCopy.invoke(null, item);
             Object tagCompound = itemStack.getMethod("getTag").invoke(stack);
             Object potion = nbtTagCompound.getMethod("getString", String.class).invoke(tagCompound, "Potion");
 

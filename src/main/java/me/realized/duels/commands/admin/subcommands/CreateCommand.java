@@ -1,35 +1,30 @@
 package me.realized.duels.commands.admin.subcommands;
 
-import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.commands.SubCommand;
 import me.realized.duels.utilities.Helper;
-import me.realized.duels.utilities.Lang;
-import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 public class CreateCommand extends SubCommand {
 
-    private final ArenaManager manager;
-
     public CreateCommand() {
-        super("create", "create [name]", "Create an arena.", 2);
-        this.manager = getInstance().getArenaManager();
+        super("create", "create [name]", "duels.admin", "Create an arena.", 2);
     }
 
     @Override
-    public void execute(CommandSender sender, String[] args) {
-        String name = args[1].toLowerCase();
+    public void execute(Player sender, String[] args) {
+        String name = Helper.join(args, 1, args.length, " ");
 
         if (!Helper.isAlphanumeric(name)) {
-            pm(sender, "&cArena name must be alphanumeric.");
+            Helper.pm(sender, "Errors.must-be-alphanumeric", true);
             return;
         }
 
-        if (manager.getArena(name) != null) {
-            pm(sender, "&cAlready existing arena.");
+        if (arenaManager.getArena(name) != null) {
+            Helper.pm(sender, "Errors.arena-exists", true);
             return;
         }
 
-        manager.createArena(name);
-        pm(sender, Lang.ARENA_CREATE.getMessage().replace("{NAME}", name));
+        arenaManager.createArena(name);
+        Helper.pm(sender, "Arenas.created", true, "{NAME}", name);
     }
 }

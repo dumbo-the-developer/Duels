@@ -1,52 +1,45 @@
 package me.realized.duels.commands.admin.subcommands;
 
 import me.realized.duels.arena.Arena;
-import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.commands.SubCommand;
 import me.realized.duels.utilities.Helper;
-import me.realized.duels.utilities.Lang;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class SetCommand extends SubCommand {
 
-    private final ArenaManager manager;
-
     public SetCommand() {
-        super("set", "set [name] [1 | 2]", "Set spawn position for arena.", 2);
-        this.manager = getInstance().getArenaManager();
+        super("set", "set [name] [1 | 2]", "duels.admin", "Set spawn position for arena.", 2);
     }
 
     @Override
-    public void execute(CommandSender sender, String[] args) {
-        Player player = (Player) sender;
-        String name = args[1].toLowerCase();
+    public void execute(Player sender, String[] args) {
+        String name = Helper.join(args, 1, args.length - 1, " ");
 
-        if (manager.getArena(name) == null) {
-            pm(sender, "&cNon-existing arena.");
+        if (arenaManager.getArena(name) == null) {
+            Helper.pm(sender, "Errors.arena-not-found", true);
             return;
         }
 
-        Arena arena = manager.getArena(name);
+        Arena arena = arenaManager.getArena(name);
 
-        if (!Helper.isInt(args[2], false)) {
-            pm(sender, "&cSpawn positions must be in between range 1 - 2.");
+        if (!Helper.isInt(args[args.length - 1], false)) {
+            Helper.pm(sender, "Errors.invalid-spawnpoint", true);
             return;
         }
 
-        int position = Integer.parseInt(args[2]);
+        int position = Integer.parseInt(args[args.length - 1]);
 
         if (position < 1 || position > 2) {
-            pm(sender, "&cSpawn positions must be in between range 1 - 2.");
+            Helper.pm(sender, "Errors.invalid-spawnpoint", true);
             return;
         }
 
-        arena.addPosition(position, player.getLocation().clone());
+        arena.addPosition(position, sender.getLocation().clone());
 
-        if (manager.getGUI() != null) {
-            manager.getGUI().update(manager.getArenas());
+        if (arenaManager.getGUI() != null) {
+            arenaManager.getGUI().update(arenaManager.getArenas());
         }
 
-        pm(player, Helper.replaceWithArgs(Lang.ARENA_SET_POSITION.getMessage(), "{POSITION}", position, "{NAME}", arena.getName()));
+        Helper.pm(sender, "Arenas.set-spawnpoint", true, "{POSITION}", position, "{NAME}", arena.getName());
     }
 }

@@ -2,15 +2,18 @@ package me.realized.duels.arena;
 
 import com.google.gson.reflect.TypeToken;
 import me.realized.duels.Core;
-import me.realized.duels.configuration.Config;
+import me.realized.duels.configuration.MainConfig;
 import me.realized.duels.data.ArenaData;
 import me.realized.duels.data.DataManager;
 import me.realized.duels.dueling.RequestManager;
 import me.realized.duels.dueling.Settings;
 import me.realized.duels.event.RequestSendEvent;
-import me.realized.duels.gui.GUI;
 import me.realized.duels.utilities.Helper;
-import me.realized.duels.utilities.Metadata;
+import me.realized.duels.utilities.ICanHandleReload;
+import me.realized.duels.utilities.ReloadType;
+import me.realized.duels.utilities.compat.CompatHelper;
+import me.realized.duels.utilities.gui.GUI;
+import me.realized.duels.utilities.gui.GUIListener;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -23,19 +26,18 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
-public class ArenaManager implements Listener {
+public class ArenaManager implements Listener, ICanHandleReload {
 
     private final Core instance;
-    private final Config config;
+    private final MainConfig config;
     private final RequestManager requestManager;
     private final DataManager dataManager;
     private final File base;
@@ -43,6 +45,8 @@ public class ArenaManager implements Listener {
 
     private List<Arena> arenas = new ArrayList<>();
     private GUI<Arena> gui;
+
+    private BukkitTask task;
 
     public ArenaManager(Core instance) {
         this.instance = instance;
@@ -81,8 +85,8 @@ public class ArenaManager implements Listener {
             instance.warn("Failed to load arenas from the file! (" + ex.getMessage() + ")");
         }
 
-        if (config.isAllowArenaSelecting()) {
-            gui = new GUI<>("Arena Selection", arenas, config.arenaSelectorRows(), new GUI.ClickListener() {
+        if (config.isDuelingAllowArenaSelecting()) {
+            gui = new GUI<>("Arena Selection", arenas, config.getGuiArenaSelectorRows(), new GUIListener() {
                 @Override
                 public void onClick(InventoryClickEvent event) {
                     Player player = (Player) event.getWhoClicked();
@@ -104,13 +108,13 @@ public class ArenaManager implements Listener {
 
                     if (target == null) {
                         player.closeInventory();
-                        Helper.pm("&cThat player is no longer online.", player);
+                        Helper.pm(player, "Errors.player-left", true);
                         return;
                     }
 
                     if (isInMatch(target)) {
                         player.closeInventory();
-                        Helper.pm("&cThat player is already in a match.", player);
+                        Helper.pm(player, "Errors.already-in-match.target", true);
                         return;
                     }
 
@@ -123,8 +127,8 @@ public class ArenaManager implements Listener {
                     settings.setArena(arena.getName());
                     requestManager.sendRequestTo(player, target, settings);
                     player.closeInventory();
-                    Helper.pm(config.getString("on-request-send").replace("{PLAYER}", target.getName()).replace("{KIT}", settings.getKit()).replace("{ARENA}", settings.getArena()), player);
-                    Helper.pm(config.getString("on-request-receive").replace("{PLAYER}", player.getName()).replace("{KIT}", settings.getKit()).replace("{ARENA}", settings.getArena()), target);
+                    Helper.pm(player, "Dueling.on-request-send.sender", true, "{PLAYER}", target.getName(), "{KIT}", settings.getKit(), "{ARENA}", settings.getArena());
+                    Helper.pm(target, "Dueling.on-request-send.receiver", true, "{PLAYER}", player.getName(), "{KIT}", settings.getKit(), "{ARENA}", settings.getArena());
 
                     RequestSendEvent requestSendEvent = new RequestSendEvent(requestManager.getRequestTo(player, target), player, target);
                     Bukkit.getPluginManager().callEvent(requestSendEvent);
@@ -140,21 +144,68 @@ public class ArenaManager implements Listener {
                 }
 
                 @Override
-                public void onSwitch(Player player, Inventory opened) {
-                    if (player.hasMetadata("request")) {
-                        Object value = player.getMetadata("request").get(0).value();
-                        player.openInventory(opened);
-
-                        if (value == null || !(value instanceof Settings)) {
-                            return;
-                        }
-
-                        player.setMetadata("request", new Metadata(instance, value));
-                    }
-                }
+                public void onSwitch(Player player, Inventory opened) {}
             });
 
             instance.getGUIManager().register(gui);
+        }
+
+        if (config.isDuelingMatchMaxDurationEnabled()) {
+            task = Bukkit.getScheduler().runTaskTimer(instance, new Runnable() {
+
+                private Location lobby = dataManager.getLobby() != null ? dataManager.getLobby() : Bukkit.getWorlds().get(0).getSpawnLocation();
+
+                @Override
+                public void run() {
+                    for (Arena arena : arenas) {
+                        // Checking if both players are alive, to prevent the case where it will end the match when winner task is running.
+                        if (arena.isUsed() && arena.getPlayers().size() >= 2) {
+                            instance.getSpectatorManager().handleMatchEnd(arena);
+
+                            Arena.Match match = arena.getCurrentMatch();
+
+                            if ((System.currentTimeMillis() - match.getStart()) / 1000L <= config.getDuelingMatchMaxDurationDuration()) {
+                                return;
+                            }
+
+                            Iterator<UUID> iterator = arena.getPlayers().iterator();
+
+                            while (iterator.hasNext()) {
+                                UUID uuid = iterator.next();
+                                iterator.remove();
+
+                                Player player = Bukkit.getPlayer(uuid);
+
+                                if (player == null || player.isDead()) {
+                                    continue;
+                                }
+
+                                if (config.isDuelingTeleportToLatestLocation()) {
+                                    lobby = match.getLocation(uuid);
+                                }
+
+                                Helper.pm(player, "Dueling.max-match-time-reached", true);
+                                Helper.reset(player, false);
+
+                                Arena.InventoryData data = match.getInventories(uuid);
+
+                                if (!Helper.canTeleportTo(player, lobby)) {
+                                    player.setHealth(0.0D);
+                                } else {
+                                    player.teleport(lobby);
+                                    Helper.setInventory(player, data.getInventoryContents(), data.getArmorContents());
+                                }
+                            }
+
+                            arena.setUsed(false);
+
+                            if (gui != null) {
+                                gui.update(arenas);
+                            }
+                        }
+                    }
+                }
+            }, 0L, 20L);
         }
 
         instance.info("Loaded " + arenas.size() + " arena(s).");
@@ -162,17 +213,24 @@ public class ArenaManager implements Listener {
 
     public void save() {
         if (gui != null) {
-            gui.close("[Duels] All GUIs are automatically closed on plugin disable.");
+            gui.close("[Duels] All GUIs are automatically closed on plugin shutdown.");
+        }
+
+        if (task != null) {
+            task.cancel();
+            task = null;
         }
 
         List<ArenaData> saved = new ArrayList<>();
-        Location toTeleport = dataManager.getLobby() != null ? dataManager.getLobby() : Bukkit.getWorlds().get(0).getSpawnLocation();
+        Location lobby = dataManager.getLobby() != null ? dataManager.getLobby() : Bukkit.getWorlds().get(0).getSpawnLocation();
 
         if (!arenas.isEmpty()) {
             for (Arena arena : arenas) {
                 saved.add(new ArenaData(arena));
 
                 if (arena.isUsed()) {
+                    instance.getSpectatorManager().handleMatchEnd(arena);
+
                     Arena.Match match = arena.getCurrentMatch();
 
                     for (UUID uuid : arena.getPlayers()) {
@@ -182,20 +240,20 @@ public class ArenaManager implements Listener {
                             continue;
                         }
 
-                        if (config.isTeleportToLastLoc()) {
-                            toTeleport = match.getLocation(uuid);
+                        if (config.isDuelingTeleportToLatestLocation()) {
+                            lobby = match.getLocation(uuid);
                         }
 
-                        Helper.pm("&c&l[Duels] Plugin is disabling, matches are ended by default.", player);
+                        Helper.pm(player, "&c&l[Duels] Plugin is disabling, matches are ended by default.", false);
                         Helper.reset(player, false);
 
                         Arena.InventoryData data = match.getInventories(uuid);
 
-                        if (!Helper.canTeleportTo(player, toTeleport)) {
+                        if (!Helper.canTeleportTo(player, lobby)) {
                             player.setHealth(0.0D);
                         } else {
-                            player.teleport(toTeleport);
-                            Helper.setInventory(player, data.getInventoryContents(), data.getArmorContents(), false);
+                            player.teleport(lobby);
+                            Helper.setInventory(player, data.getInventoryContents(), data.getArmorContents());
                         }
                     }
                 }
@@ -238,7 +296,7 @@ public class ArenaManager implements Listener {
         return null;
     }
 
-    public Arena getArena(Player player, Inventory inventory, int slot) {
+    private Arena getArena(Player player, Inventory inventory, int slot) {
         return gui.getData(player, inventory, slot);
     }
 
@@ -259,13 +317,7 @@ public class ArenaManager implements Listener {
     }
 
     public boolean isInMatch(Player player) {
-        for (Arena arena : arenas) {
-            if (arena.getPlayers().contains(player.getUniqueId())) {
-                return true;
-            }
-        }
-
-        return false;
+        return getArena(player) != null;
     }
 
     public void createArena(String name) {
@@ -319,41 +371,97 @@ public class ArenaManager implements Listener {
 
     @EventHandler (priority = EventPriority.HIGHEST)
     public void on(ProjectileLaunchEvent event) {
-        if (event.isCancelled() || !(event.getEntity().getShooter() instanceof Player) || !config.isCdProjectileBlocked()) {
+        if (event.isCancelled() || !(event.getEntity().getShooter() instanceof Player) || !config.isCountdownBlockProjectile()) {
             return;
         }
 
         Player player = (Player) event.getEntity().getShooter();
+        Arena arena = getArena(player);
 
-        if (!isInMatch(player)) {
+        if (arena == null) {
             return;
         }
 
-        Arena arena = getArena(player);
-
         if (arena.isCounting()) {
-            Helper.pm("&cYou are not allowed to do this before the match starts.", player);
+            Helper.pm(player, "Errors.blocked-countdown-action", true);
             event.setCancelled(true);
         }
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
     public void on(EntityDamageByEntityEvent event) {
-        if (event.isCancelled() || !(event.getEntity() instanceof Player && event.getDamager() instanceof Player) || !config.isCdPvPBlocked()) {
+        if (!(event.getEntity() instanceof Player && event.getDamager() instanceof Player) || !config.isCountdownBlockPvp()) {
             return;
         }
 
         Player player = (Player) event.getDamager();
+        Arena arena = getArena(player);
 
-        if (!isInMatch(player)) {
+        if (arena == null) {
+            return;
+        }
+        Player damaged = (Player) event.getEntity();
+
+        if (arena.isCounting()) {
+            Helper.pm(player, "Errors.blocked-countdown-action", true);
+            event.setCancelled(true);
+        } else if (event.isCancelled() && config.isPatchesForceAllowPvp() && arena.hasPlayer(damaged)) {
+            event.setCancelled(false);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    @EventHandler
+    public void on(PlayerInteractEvent event) {
+        if (!config.isSoupEnabled() || !event.getAction().name().contains("RIGHT")) {
+            return;
+        }
+
+        Player player = event.getPlayer();
+
+        if (player.getHealth() == player.getMaxHealth()) {
             return;
         }
 
         Arena arena = getArena(player);
 
-        if (arena.isCounting()) {
-            Helper.pm("&cYou are not allowed to do this before the match starts.", player);
-            event.setCancelled(true);
+        if (arena == null || !arena.getName().startsWith(config.getSoupArenasStartingWith())) {
+            return;
+        }
+
+        boolean regen = false;
+
+        if (CompatHelper.isPre1_9()) {
+            if (player.getItemInHand().getType() == Material.MUSHROOM_SOUP) {
+                player.setItemInHand(new ItemStack(Material.BOWL));
+                regen = true;
+            }
+        } else {
+            if (player.getInventory().getItemInMainHand().getType() == Material.MUSHROOM_SOUP) {
+                player.getInventory().setItemInMainHand(new ItemStack(Material.BOWL));
+                regen = true;
+            } else if (player.getInventory().getItemInOffHand().getType() == Material.MUSHROOM_SOUP) {
+                player.getInventory().setItemInOffHand(new ItemStack(Material.BOWL));
+                regen = true;
+            }
+        }
+
+        if (!regen) {
+            return;
+        }
+
+        if (player.getHealth() + config.getSoupHeartsToRegen() * 2.0 <= player.getMaxHealth()) {
+            player.setHealth(player.getHealth() + config.getSoupHeartsToRegen() * 2.0);
+        } else {
+            player.setHealth(player.getHealth() + (player.getMaxHealth() - player.getHealth()));
+        }
+    }
+
+    @Override
+    public void handleReload(ReloadType type) {
+        if (type == ReloadType.STRONG) {
+            save();
+            load();
         }
     }
 }

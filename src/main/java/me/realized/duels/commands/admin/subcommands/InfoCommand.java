@@ -1,36 +1,28 @@
 package me.realized.duels.commands.admin.subcommands;
 
 import me.realized.duels.arena.Arena;
-import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.commands.SubCommand;
 import me.realized.duels.utilities.Helper;
-import me.realized.duels.utilities.Lang;
-import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 public class InfoCommand extends SubCommand {
 
-    private final ArenaManager manager;
-
     public InfoCommand() {
-        super("info", "info [name]", "Show arena information.", 2);
-        this.manager = getInstance().getArenaManager();
+        super("info", "info [name]", "duels.admin", "Show arena information.", 2);
     }
 
     @Override
-    public void execute(CommandSender sender, String[] args) {
-        String name = args[1].toLowerCase();
+    public void execute(Player sender, String[] args) {
+        String name = Helper.join(args, 1, args.length, " ");
 
-        if (manager.getArena(name) == null) {
-            pm(sender, "&cNon-existing arena.");
+        if (arenaManager.getArena(name) == null) {
+            Helper.pm(sender, "Errors.arena-not-found", true);
             return;
         }
 
-        Arena arena = manager.getArena(name);
+        Arena arena = arenaManager.getArena(name);
         String players = Helper.join(arena.getFormattedPlayers(), "&r, ");
         String locations = Helper.join(arena.getFormattedLocations(), "&r, ");
-
-        for (String s : Lang.ARENA_INFO.getMessages()) {
-            pm(sender, Helper.replaceWithArgs(s, "{NAME}", arena.getName(), "{IN_USE}", arena.isUsed(), "{DISABLED}", arena.isDisabled(), "{PLAYERS}", players, "{LOCATIONS}", locations));
-        }
+        Helper.pm(sender, "Arenas.info", true, "{NAME}", arena.getName(), "{DISABLED}", arena.isDisabled(), "{IN_USE}", arena.isUsed(), "{PLAYERS}", players, "{LOCATIONS}", locations);
     }
 }

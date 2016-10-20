@@ -1,5 +1,9 @@
 package me.realized.duels.data;
 
+import me.realized.duels.configuration.ConfigManager;
+import me.realized.duels.configuration.ConfigType;
+import me.realized.duels.configuration.MainConfig;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -7,7 +11,7 @@ import java.util.UUID;
 public class UserData {
 
     private final UUID uuid;
-    private final String name;
+    private String name;
     private int wins = 0;
     private int losses = 0;
     private boolean requests = true;
@@ -26,6 +30,10 @@ public class UserData {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public boolean canRequest() {
         return requests;
     }
@@ -39,11 +47,20 @@ public class UserData {
     }
 
     public void addMatch(MatchData match) {
-        if (matches.size() + 1 > 10) {
-            matches.remove(0);
+        matches.add(match);
+        refreshMatches();
+    }
+
+    public void refreshMatches() {
+        int maxMatches = ((MainConfig) ConfigManager.getConfig(ConfigType.MAIN)).getStatsAmountOfMatches();
+
+        if (maxMatches < 0) {
+            maxMatches = 0;
         }
 
-        matches.add(match);
+        if (matches.size() >= maxMatches) {
+            matches = new ArrayList<>(matches.subList(matches.size() - maxMatches, matches.size()));
+        }
     }
 
     public int get(StatsType type) {

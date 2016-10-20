@@ -6,19 +6,25 @@ import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.commands.BaseCommand;
 import me.realized.duels.commands.admin.DuelsCommand;
 import me.realized.duels.commands.duel.DuelCommand;
+import me.realized.duels.commands.other.SpectateCommand;
 import me.realized.duels.commands.other.StatsCommand;
 import me.realized.duels.commands.other.ToggleCommand;
-import me.realized.duels.configuration.Config;
+import me.realized.duels.configuration.ConfigManager;
+import me.realized.duels.configuration.ConfigType;
+import me.realized.duels.configuration.MainConfig;
+import me.realized.duels.configuration.MessagesConfig;
 import me.realized.duels.data.DataManager;
 import me.realized.duels.dueling.DuelManager;
 import me.realized.duels.dueling.RequestManager;
-import me.realized.duels.gui.GUIManager;
-import me.realized.duels.hooks.EssentialsHook;
-import me.realized.duels.hooks.HookManager;
-import me.realized.duels.hooks.WorldGuardHook;
+import me.realized.duels.dueling.SpectatorManager;
+import me.realized.duels.hooks.*;
 import me.realized.duels.kits.KitManager;
+import me.realized.duels.utilities.ICanHandleReload;
+import me.realized.duels.utilities.ReloadType;
+import me.realized.duels.utilities.gui.GUIManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,38 +32,57 @@ public class Core extends JavaPlugin {
 
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    private Config config;
+    private ConfigManager configManager;
     private HookManager hookManager;
+    private RequestManager requestManager;
     private GUIManager guiManager;
-    private DuelManager duelManager;
     private DataManager dataManager;
     private ArenaManager arenaManager;
-    private RequestManager requestManager;
+    private SpectatorManager spectatorManager;
     private KitManager kitManager;
+    private DuelManager duelManager;
+
+    private final List<ICanHandleReload> reloadables = new ArrayList<>();
 
     @Override
     public void onEnable() {
-        config = new Config(this);
+        configManager = new ConfigManager();
+        configManager.register(ConfigType.MAIN, new MainConfig(this));
+        configManager.register(ConfigType.MESSAGES, new MessagesConfig(this));
+        reloadables.add(configManager);
 
         hookManager = new HookManager();
+        hookManager.register("Factions", new FactionsHook(this));
         hookManager.register("WorldGuard", new WorldGuardHook(this));
         hookManager.register("Essentials", new EssentialsHook(this));
+        hookManager.register("mcMMO", new McMMOHook(this));
 
         requestManager = new RequestManager();
+        reloadables.add(requestManager);
+
         guiManager = new GUIManager(this);
 
         dataManager = new DataManager(this);
         dataManager.load();
+        reloadables.add(dataManager);
 
         arenaManager = new ArenaManager(this);
         arenaManager.load();
+        reloadables.add(arenaManager);
+
+        spectatorManager = new SpectatorManager(this);
 
         kitManager = new KitManager(this);
         kitManager.load();
+        reloadables.add(kitManager);
 
         duelManager = new DuelManager(this);
 
-        registerCommands();
+        List<BaseCommand> commands = Arrays.asList(new StatsCommand(), new DuelsCommand(), new ToggleCommand(), new DuelCommand(), new SpectateCommand());
+
+        for (BaseCommand command : commands) {
+            getCommand(command.getName()).setExecutor(command);
+        }
     }
 
     @Override
@@ -67,11 +92,9 @@ public class Core extends JavaPlugin {
         kitManager.save();
     }
 
-    private void registerCommands() {
-        List<BaseCommand> commands = Arrays.asList(new StatsCommand(), new DuelsCommand(), new ToggleCommand(), new DuelCommand());
-
-        for (BaseCommand command : commands) {
-            command.register();
+    public void reload(ReloadType type) {
+        for (ICanHandleReload reloadable : reloadables) {
+            reloadable.handleReload(type);
         }
     }
 
@@ -87,8 +110,12 @@ public class Core extends JavaPlugin {
         return gson;
     }
 
-    public Config getConfiguration() {
-        return config;
+    public MainConfig getConfiguration() {
+        return (MainConfig) configManager.getConfigByType(ConfigType.MAIN);
+    }
+
+    public ConfigManager getConfigManager() {
+        return configManager;
     }
 
     public HookManager getHookManager() {
@@ -105,6 +132,10 @@ public class Core extends JavaPlugin {
 
     public ArenaManager getArenaManager() {
         return arenaManager;
+    }
+
+    public SpectatorManager getSpectatorManager() {
+        return spectatorManager;
     }
 
     public RequestManager getRequestManager() {

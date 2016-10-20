@@ -1,56 +1,59 @@
 package me.realized.duels.commands;
 
 import me.realized.duels.Core;
+import me.realized.duels.arena.ArenaManager;
+import me.realized.duels.configuration.ConfigType;
+import me.realized.duels.configuration.MainConfig;
+import me.realized.duels.configuration.MessagesConfig;
+import me.realized.duels.data.DataManager;
+import me.realized.duels.dueling.RequestManager;
+import me.realized.duels.dueling.SpectatorManager;
+import me.realized.duels.hooks.HookManager;
+import me.realized.duels.kits.KitManager;
 import me.realized.duels.utilities.Helper;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
-public abstract class BaseCommand implements CommandExecutor, TabCompleter {
+public abstract class BaseCommand implements CommandExecutor {
 
     private final String command;
     private final String permission;
 
-    private transient final Core instance = Core.getInstance();
+    protected final MainConfig config = Core.getInstance().getConfiguration();
+    protected final MessagesConfig messages = (MessagesConfig) Core.getInstance().getConfigManager().getConfigByType(ConfigType.MESSAGES);
+    protected final RequestManager requestManager = Core.getInstance().getRequestManager();
+    protected final DataManager dataManager = Core.getInstance().getDataManager();
+    protected final ArenaManager arenaManager = Core.getInstance().getArenaManager();
+    protected final SpectatorManager spectatorManager = Core.getInstance().getSpectatorManager();
+    protected final KitManager kitManager = Core.getInstance().getKitManager();
+    protected final HookManager hookManager = Core.getInstance().getHookManager();
 
     protected BaseCommand(String command, String permission) {
         this.command = command;
         this.permission = permission;
     }
 
-    protected String getName() {
+    public String getName() {
         return command;
-    }
-
-    protected Core getInstance() {
-        return instance;
-    }
-
-    public void register() {
-        instance.getCommand(command).setExecutor(this);
-    }
-
-    protected void pm(CommandSender sender, String msg) {
-        sender.sendMessage(Helper.color(msg));
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            pm(sender, "&c&lInvalid executor: " + sender.getName());
+            Helper.pm(sender, "&cThis command cannot be ran by " + sender.getName() + ".", false);
             return true;
         }
 
         if (!sender.hasPermission(permission)) {
-            pm(sender, "&cYou do not have permission.");
+            Helper.pm(sender, "Errors.no-permission", true);
             return true;
         }
 
-        execute(sender, args);
+        execute((Player) sender, args);
         return true;
     }
 
-    protected abstract void execute(CommandSender sender, String[] args);
+    protected abstract void execute(Player sender, String[] args);
 }

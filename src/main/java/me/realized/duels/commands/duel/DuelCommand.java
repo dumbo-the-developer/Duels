@@ -1,143 +1,135 @@
 package me.realized.duels.commands.duel;
 
-import me.realized.duels.arena.ArenaManager;
+import me.realized.duels.Core;
 import me.realized.duels.commands.BaseCommand;
 import me.realized.duels.commands.SubCommand;
 import me.realized.duels.commands.duel.subcommands.AcceptCommand;
 import me.realized.duels.commands.duel.subcommands.DenyCommand;
-import me.realized.duels.configuration.Config;
-import me.realized.duels.data.DataManager;
 import me.realized.duels.data.UserData;
 import me.realized.duels.dueling.RequestManager;
 import me.realized.duels.dueling.Settings;
 import me.realized.duels.event.RequestSendEvent;
 import me.realized.duels.hooks.WorldGuardHook;
-import me.realized.duels.kits.KitManager;
 import me.realized.duels.utilities.Helper;
 import me.realized.duels.utilities.Metadata;
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DuelCommand extends BaseCommand {
 
-    private final Config config;
     private final WorldGuardHook wgHook;
-    private final DataManager dataManager;
-    private final KitManager kitManager;
-    private final ArenaManager arenaManager;
-    private final RequestManager requestManager;
-    private final List<SubCommand> commands = new ArrayList<>();
+    private final Map<String, SubCommand> children = new HashMap<>();
 
     public DuelCommand() {
         super("duel", "duels.duel");
-        commands.addAll(Arrays.asList(new AcceptCommand(), new DenyCommand()));
-        this.config = getInstance().getConfiguration();
-        this.wgHook = (WorldGuardHook) getInstance().getHookManager().get("WorldGuard");
-        this.dataManager = getInstance().getDataManager();
-        this.kitManager = getInstance().getKitManager();
-        this.arenaManager = getInstance().getArenaManager();
-        this.requestManager = getInstance().getRequestManager();
+        this.wgHook = (WorldGuardHook) hookManager.get("WorldGuard");
+
+        children.put("accept", new AcceptCommand());
+        children.put("deny", new DenyCommand());
     }
 
     @Override
-    public void execute(CommandSender sender, String[] args) {
-        Player player = (Player) sender;
-
+    public void execute(Player sender, String[] args) {
         if (args.length == 0) {
-            pm(sender, config.getString("duel-command-usage"));
+            Helper.pm(sender, "Commands.duel.usage", true);
             return;
         }
 
-        if (!config.isUseOwnInventory() && config.isOnlyEmptyInventory() && !Helper.hasEmptyInventory(player)) {
-            pm(sender, "&cYour inventory must be empty to use duel commands.");
+        if (!config.isDuelingUseOwnInventory() && config.isDuelingRequiresClearedInventory() && !Helper.hasEmptyInventory(sender)) {
+            Helper.pm(sender, "Errors.empty-inventory-only", true);
             return;
         }
 
-        if (!wgHook.canUseDuelCommands(player)) {
-           pm(sender, "&cYou must be in region '" + config.getDZRegion() + "' to use duel commands.");
+        if (!wgHook.canUseDuelCommands(sender)) {
+            Helper.pm(sender, "Errors.not-in-duelzone", true, "{REGION}", config.getDuelZoneRegion());
            return;
         }
 
-        else if (args.length == 1) {
+        if (args.length == 1) {
             Player target = Bukkit.getPlayerExact(args[0]);
 
             if (target == null) {
-                pm(sender, "&cPlayer not found.");
+                Helper.pm(sender, "Errors.player-not-found", true);
                 return;
             }
 
-            if (target.getUniqueId().equals(player.getUniqueId())) {
-                pm(sender, "&cYou may not duel yourself.");
-                return;
-            }
+            //if (target.getUniqueId().equals(sender.getUniqueId())) {
+            //    Helper.pm(sender, "Errors.cannot-duel-yourself", true);
+            //    return;
+            //}
 
             UserData data = dataManager.getUser(target.getUniqueId(), false);
 
             if (data == null) {
-                pm(sender, "&cPlayer not found.");
+                Helper.pm(sender, "Errors.player-not-found", true);
                 return;
             }
 
             if (!data.canRequest()) {
-                pm(sender, "&cThat player is currently not accepting requests.");
+                Helper.pm(sender, "Errors.has-requests-disabled", true);
                 return;
             }
 
-            if (arenaManager.isInMatch(player) || arenaManager.isInMatch(target)) {
-                pm(player, "&cEither you or that player is already in a match.");
+            if (spectatorManager.isSpectating(sender)) {
+                Helper.pm(sender, "Errors.is-in-spectator-mode.sender", true);
                 return;
             }
 
-            if (requestManager.hasRequestTo(player, target) == RequestManager.Result.FOUND) {
-                pm(sender, "&cYou already have a request sent to " + target.getName() + ".");
+            if (spectatorManager.isSpectating(target)) {
+                Helper.pm(sender, "Errors.is-in-spectator-mode.target", true);
                 return;
             }
 
-            if (!config.isUseOwnInventory()) {
-                player.setMetadata("request", new Metadata(getInstance(), new Settings(target.getUniqueId())));
-                player.openInventory(kitManager.getGUI().getFirst());
+            if (arenaManager.isInMatch(sender)) {
+                Helper.pm(sender, "Errors.already-in-match.sender", true);
+                return;
+            }
+
+            if (arenaManager.isInMatch(target)) {
+                Helper.pm(sender, "Errors.already-in-match.target", true);
+                return;
+            }
+
+            if (requestManager.hasRequestTo(sender, target) == RequestManager.Result.FOUND) {
+                Helper.pm(sender, "Errors.already-requested", true, "{PLAYER}", target.getName());
+                return;
+            }
+
+            if (!config.isDuelingUseOwnInventory()) {
+                sender.setMetadata("request", new Metadata(Core.getInstance(), new Settings(target.getUniqueId(), sender.getLocation().clone())));
+                sender.openInventory(kitManager.getGUI().getFirst());
             } else {
-                requestManager.sendRequestTo(player, target, new Settings(target.getUniqueId()));
-                Helper.pm(config.getString("on-request-send").replace("{PLAYER}", target.getName()).replace("{ARENA}", "random"), player);
-                Helper.pm(config.getString("on-request-receive").replace("{PLAYER}", player.getName()).replace("{ARENA}", "random"), target);
+                requestManager.sendRequestTo(sender, target, new Settings(target.getUniqueId(), sender.getLocation().clone()));
+                Helper.pm(sender, "Dueling.on-request-send.sender", true, "{PLAYER}", target.getName(), "{KIT}", "none", "{ARENA}", "random");
+                Helper.pm(target, "Dueling.on-request-send.receiver", true, "{PLAYER}", sender.getName(), "{KIT}", "none", "{ARENA}", "random");
 
-                RequestSendEvent requestSendEvent = new RequestSendEvent(requestManager.getRequestTo(player, target), player, target);
+                RequestSendEvent requestSendEvent = new RequestSendEvent(requestManager.getRequestTo(sender, target), sender, target);
                 Bukkit.getPluginManager().callEvent(requestSendEvent);
             }
 
             return;
         }
 
-        SubCommand subCommand = null;
+        SubCommand child = children.get(args[0].toLowerCase());
 
-        for (SubCommand command : commands) {
-            if (args[0].equalsIgnoreCase(command.getName())) {
-                subCommand = command;
-                break;
-            }
-        }
-
-        if (subCommand == null) {
-            pm(sender, "&c'" + args[0] + "' is not a valid parent command.");
+        if (child == null) {
+            Helper.pm(sender, "Errors.invalid-sub-command", true, "{ARGUMENT}", args[0]);
             return;
         }
 
-        if (args.length < subCommand.length()) {
-            pm(sender, "&7Usage: &f/" + getName() + " " + subCommand.getUsage() + " - " + subCommand.getDescription());
+        if (!sender.hasPermission(child.getPermission())) {
+            Helper.pm(sender, "Errors.no-permission", true);
             return;
         }
 
-        subCommand.execute(sender, args);
-    }
+        if (args.length < child.length()) {
+            Helper.pm(sender, "Commands.duel.sub-command-usage", true, "{USAGE}", "/" + getName() + " " + child.getUsage(), "{DESCRIPTION}", child.getDescription());
+            return;
+        }
 
-    @Override
-    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
-        return null;
+        child.execute(sender, args);
     }
 }

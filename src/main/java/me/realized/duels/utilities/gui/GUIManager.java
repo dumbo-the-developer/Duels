@@ -1,6 +1,5 @@
-package me.realized.duels.gui;
+package me.realized.duels.utilities.gui;
 
-import me.realized.duels.Core;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -9,15 +8,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class GUIManager implements Listener {
 
-    private final List<GUI> registered = new ArrayList<>();
+    private List<GUI> registered = new ArrayList<>();
 
-    public GUIManager(Core instance) {
+    public GUIManager(JavaPlugin instance) {
         Bukkit.getPluginManager().registerEvents(this, instance);
     }
 

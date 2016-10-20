@@ -4,28 +4,24 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import me.realized.duels.Core;
-import me.realized.duels.configuration.Config;
+import me.realized.duels.configuration.MainConfig;
 import org.bukkit.entity.Player;
 
 public class WorldGuardHook extends PluginHook {
 
-    private final Config config;
+    private final MainConfig config;
 
     public WorldGuardHook(Core instance) {
         super("WorldGuard");
         this.config = instance.getConfiguration();
-
-        if (isEnabled()) {
-            instance.info("Hooked into WorldGuard! 'DuelZone' option is now functional.");
-        }
     }
 
     public boolean canUseDuelCommands(Player player) {
-        if (!isEnabled() || !config.isDZEnabled()) {
+        if (!isEnabled() || !config.isDuelZoneEnabled()) {
             return true;
         }
 
-        String name = config.getDZRegion();
+        String name = config.getDuelZoneRegion();
         WorldGuardPlugin worldguard = (WorldGuardPlugin) getPlugin();
         ApplicableRegionSet regions = worldguard.getRegionManager(player.getWorld()).getApplicableRegions(player.getLocation());
 

@@ -1,13 +1,12 @@
-package me.realized.duels.gui;
+package me.realized.duels.utilities.gui;
 
+import me.realized.duels.utilities.compat.CompatHelper;
 import me.realized.duels.utilities.inventory.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -20,11 +19,11 @@ public class GUI<T> {
 
     private final String title;
     private final int rows;
-    private final ClickListener listener;
+    private final GUIListener listener;
     private final Map<Inventory, Integer> pages = new LinkedHashMap<>();
     private final Map<Integer, T> data = new LinkedHashMap<>();
 
-    public GUI(String title, List<T> entries, int rows, ClickListener listener) {
+    public GUI(String title, List<T> entries, int rows, GUIListener listener) {
         this.title = title;
 
         if (rows < 1 || rows > 5) {
@@ -63,7 +62,7 @@ public class GUI<T> {
             ItemStack separator = ItemBuilder.builder().type(Material.STAINED_GLASS_PANE).name(" ").build();
             ItemStack defaultDisplayed;
 
-            if (!Bukkit.getVersion().contains("1.7")) {
+            if (!CompatHelper.isPre1_8()) {
                 defaultDisplayed = ItemBuilder.builder().type(Material.BARRIER).build();
             } else {
                 defaultDisplayed = ItemBuilder.builder().type(Material.REDSTONE_BLOCK).build();
@@ -112,7 +111,7 @@ public class GUI<T> {
             Inventory current = Bukkit.createInventory(null, 54, title + " (page 1/1)");
             ItemStack defaultDisplayed;
 
-            if (!Bukkit.getVersion().contains("1.7")) {
+            if (!CompatHelper.isPre1_8()) {
                 defaultDisplayed = ItemBuilder.builder().type(Material.BARRIER).name(ChatColor.RED + "There was nothing to load to the GUI.").build();
             } else {
                 defaultDisplayed = ItemBuilder.builder().type(Material.REDSTONE_BLOCK).name(ChatColor.RED + "There was nothing to load to the GUI.").build();
@@ -144,7 +143,7 @@ public class GUI<T> {
         }
     }
 
-    public Inventory getByPage(int page) {
+    private Inventory getByPage(int page) {
         for (Map.Entry<Inventory, Integer> entry : pages.entrySet()) {
             if (entry.getValue() == page) {
                 return entry.getKey();
@@ -156,7 +155,7 @@ public class GUI<T> {
 
     public boolean isPage(Inventory another) {
         for (Inventory inventory : pages.keySet()) {
-            if (another.equals(inventory)) {
+            if (another.getTitle().equals(inventory.getTitle())) {
                 return true;
             }
         }
@@ -206,16 +205,7 @@ public class GUI<T> {
         return pages.keySet().iterator().next();
     }
 
-    protected ClickListener getListener() {
+    GUIListener getListener() {
         return listener;
-    }
-
-    public interface ClickListener {
-
-        void onClick(InventoryClickEvent event);
-
-        void onClose(InventoryCloseEvent event);
-
-        void onSwitch(Player player, Inventory opened);
     }
 }

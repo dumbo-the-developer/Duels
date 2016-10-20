@@ -1,5 +1,6 @@
 package me.realized.duels.hooks;
 
+import me.realized.duels.Core;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
@@ -9,6 +10,10 @@ public class PluginHook {
 
     public PluginHook(String name) {
         this.name = name;
+
+        if (isEnabled()) {
+            Core.getInstance().info("Successfully hooked into " + name + ".");
+        }
     }
 
     public boolean isEnabled() {

@@ -1,8 +1,13 @@
 package me.realized.duels.utilities;
 
 import me.realized.duels.Core;
+import me.realized.duels.arena.Arena;
+import me.realized.duels.configuration.ConfigManager;
+import me.realized.duels.configuration.ConfigType;
+import me.realized.duels.configuration.MessagesConfig;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -11,15 +16,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class Helper {
 
-    private static final Map<String, Profile> uuidCache = new HashMap<>();
+    private static Map<String, Profile> uuidCache = new HashMap<>();
 
     @SuppressWarnings("deprecation")
     public static UUID getUUID(String username) {
@@ -77,10 +79,10 @@ public class Helper {
         }
     }
 
-    private static final Pattern ALPHANUMERIC = Pattern.compile("^[a-zA-Z0-9]*$");
+    private static final Pattern ALPHANUMERIC = Pattern.compile("^[a-zA-Z0-9_-]*$");
 
     public static boolean isAlphanumeric(String input) {
-        return ALPHANUMERIC.matcher(input).matches();
+        return ALPHANUMERIC.matcher(input.replace(" ", "")).matches();
     }
 
     public static String toHumanReadableTime(long ms) {
@@ -172,6 +174,10 @@ public class Helper {
         return txt;
     }
 
+    public static String join(String[] args, int start, int end, String joiner) {
+        return join(Arrays.asList(Arrays.copyOfRange(args, start, end)), joiner);
+    }
+
     public static String join(List<String> list, String joiner) {
         StringBuilder builder = new StringBuilder();
 
@@ -208,12 +214,6 @@ public class Helper {
         Bukkit.getPluginManager().callEvent(event);
         return !(!player.getLocation().equals(location) && event.getFrom().equals(event.getTo())) && !event.isCancelled();
 
-    }
-
-    public static void pm(String msg, Player... players) {
-        for (Player player : players) {
-            player.sendMessage(color(msg));
-        }
     }
 
     private static void extinguish(final Player player) {
@@ -256,22 +256,10 @@ public class Helper {
         }
     }
 
-    public static void setInventory(final Player player, final ItemStack[] inventory, final ItemStack[] armor, boolean delayed) {
-        if (!delayed) {
-            player.getInventory().setContents(inventory);
-            player.getInventory().setArmorContents(armor);
-            player.updateInventory();
-        } else {
-            new BukkitRunnable() {
-
-                @Override
-                public void run() {
-                    player.getInventory().setContents(inventory);
-                    player.getInventory().setArmorContents(armor);
-                    player.updateInventory();
-                }
-            }.runTaskLater(Core.getInstance(), 1L);
-        }
+    public static void setInventory(final Player player, final ItemStack[] inventory, final ItemStack[] armor) {
+        player.getInventory().setContents(inventory);
+        player.getInventory().setArmorContents(armor);
+        player.updateInventory();
     }
 
     public static boolean hasEmptyInventory(Player player) {
@@ -316,5 +304,55 @@ public class Helper {
         }
 
         player.sendBlockChange(location, block.getType(), (byte) 0);
+    }
+
+    public static void pm(CommandSender sender, String in, boolean isConfigMessage, Object... replacers) {
+        if (isConfigMessage) {
+            MessagesConfig messages = (MessagesConfig) ConfigManager.getConfig(ConfigType.MESSAGES);
+            String string = messages.getString(in);
+
+            if (string != null) {
+                sender.sendMessage(color(replaceWithArgs(string, replacers)));
+                return;
+            }
+
+            List<String> list = messages.getList(in);
+
+            if (list != null) {
+                for (String txt : list) {
+                    sender.sendMessage(color(replaceWithArgs(txt, replacers)));
+                }
+            }
+        } else {
+            sender.sendMessage(color(replaceWithArgs(in, replacers)));
+        }
+    }
+
+    public static void broadcast(Arena arena, String in, Object... replacers) {
+        MessagesConfig messages = (MessagesConfig) ConfigManager.getConfig(ConfigType.MESSAGES);
+        String string = messages.getString(in);
+        List<String> list = messages.getList(in);
+
+        if (string != null) {
+            arena.broadcast(color(replaceWithArgs(string, replacers)));
+        } else if (list != null) {
+            for (String txt : list) {
+                arena.broadcast(color(replaceWithArgs(txt, replacers)));
+            }
+        }
+    }
+
+    public static void broadcast(String in, Object... replacers) {
+        MessagesConfig messages = (MessagesConfig) ConfigManager.getConfig(ConfigType.MESSAGES);
+        String string = messages.getString(in);
+        List<String> list = messages.getList(in);
+
+        if (string != null) {
+            Bukkit.broadcastMessage(color(replaceWithArgs(string, replacers)));
+        } else if (list != null) {
+            for (String txt : list) {
+                Bukkit.broadcastMessage(color(replaceWithArgs(txt, replacers)));
+            }
+        }
     }
 }

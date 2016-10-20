@@ -1,5 +1,6 @@
 package me.realized.duels.utilities.inventory;
 
+import me.realized.duels.utilities.compat.CompatHelper;
 import me.realized.duels.utilities.compat.Potions;
 import me.realized.duels.utilities.compat.SpawnEggs;
 import org.bukkit.Bukkit;
@@ -10,8 +11,10 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
+import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 
 import java.util.*;
 
@@ -38,12 +41,12 @@ public class JSONItem {
 
     private String color;
 
-    public JSONItem(ItemStack item) {
+    private JSONItem(ItemStack item) {
         this.material = item.getType().name();
         this.amount = item.getAmount() == 0 ? 1 : item.getAmount();
         this.data = item.getDurability();
 
-        if (!(Bukkit.getVersion().contains("1.7") && Bukkit.getVersion().contains("1.8"))) {
+        if (!CompatHelper.isPre1_9()) {
             if (material.contains("POTION")) {
                 Potions potion = Potions.fromItemStack(item);
 
@@ -79,6 +82,26 @@ public class JSONItem {
                 }
 
                 this.itemData = spawnEgg.getType().name() + "-";
+            } else if (material.equals("TIPPED_ARROW")) {
+                PotionMeta meta = (PotionMeta) item.getItemMeta();
+                PotionData potionData = meta.getBasePotionData();
+
+                if (potionData.getType().getEffectType() == null) {
+                    return;
+                }
+
+                StringBuilder data = new StringBuilder();
+                data.append(potionData.getType().name()).append("-");
+
+                if (potionData.isExtended()) {
+                    data.append("extended-");
+                }
+
+                if (potionData.isUpgraded()) {
+                    data.append("upgraded-");
+                }
+
+                this.itemData = data.toString();
             }
         }
     }
@@ -142,7 +165,7 @@ public class JSONItem {
     public ItemStack construct() {
         ItemStack item = new ItemStack(Material.getMaterial(this.material), this.amount, this.data);
 
-        if (!(Bukkit.getVersion().contains("1.7") && Bukkit.getVersion().contains("1.8")) && itemData != null) {
+        if (!CompatHelper.isPre1_9() && itemData != null) {
             List<String> itemData = Arrays.asList(this.itemData.split("-"));
 
             if (material.contains("POTION")) {
@@ -151,6 +174,11 @@ public class JSONItem {
             } else if (material.equals("MONSTER_EGG")) {
                 SpawnEggs spawnEgg1_9 = new SpawnEggs(EntityType.valueOf(itemData.get(0)));
                 item = spawnEgg1_9.toItemStack(amount);
+            } else if (material.equals("TIPPED_ARROW")) {
+                PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
+                PotionData data = new PotionData(PotionType.valueOf(itemData.get(0)), itemData.contains("extended"), itemData.contains("upgraded"));
+                potionMeta.setBasePotionData(data);
+                item.setItemMeta(potionMeta);
             }
         }
 
@@ -251,7 +279,7 @@ public class JSONItem {
                 result.setLore(meta.getLore());
             }
 
-            if (!Bukkit.getVersion().contains("1.7") && !meta.getItemFlags().isEmpty()) {
+            if (!CompatHelper.isPre1_8() && !meta.getItemFlags().isEmpty()) {
                 for (ItemFlag flag : meta.getItemFlags()) {
                     result.addFlag(flag.name());
                 }

@@ -1,9 +1,11 @@
 package me.realized.duels.arena;
 
 import me.realized.duels.Core;
-import me.realized.duels.configuration.Config;
-import me.realized.duels.gui.ICanHandleGUI;
+import me.realized.duels.configuration.ConfigManager;
+import me.realized.duels.configuration.ConfigType;
+import me.realized.duels.configuration.MainConfig;
 import me.realized.duels.utilities.Helper;
+import me.realized.duels.utilities.gui.ICanHandleGUI;
 import me.realized.duels.utilities.inventory.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -27,10 +29,12 @@ public class Arena implements ICanHandleGUI {
     private Match current;
     private ItemStack displayed;
 
+    private final MainConfig config = (MainConfig) ConfigManager.getConfig(ConfigType.MAIN);
+
     public Arena(String name, boolean disabled) {
         this.name = name;
         this.disabled = disabled;
-        this.displayed = ItemBuilder.builder().type(Material.MAP).name(Helper.color(Config.getInstance().getAvailableArenaDisplayName()).replace("{NAME}", name)).build();
+        this.displayed = ItemBuilder.builder().type(Material.MAP).name(Helper.color(config.getGuiAvailableArenaDisplayname()).replace("{NAME}", name)).build();
     }
 
     public String getName() {
@@ -41,21 +45,15 @@ public class Arena implements ICanHandleGUI {
         return counting;
     }
 
-    private void setCounting(boolean b) {
-        this.counting = b;
-    }
-
     public void startCountdown() {
-        Config config = Config.getInstance();
-
-        if (!config.isCdEnabled()) {
+        if (!config.isCountdownEnabled()) {
             return;
         }
 
-        List<String> messages = config.getCdMessages();
+        List<String> messages = config.getCountdownMessages();
 
         if (!messages.isEmpty()) {
-            new CountdownTask(this, messages).runTaskTimer(Core.getInstance(), 0L, 20L);
+            new CountdownTask(messages).runTaskTimer(Core.getInstance(), 0L, 20L);
         }
     }
 
@@ -69,15 +67,13 @@ public class Arena implements ICanHandleGUI {
         ItemMeta meta = displayed.getItemMeta();
 
         if (!used) {
-            this.players.clear();
-            this.current = null;
-
-            this.counting = false; // Just in case!
-
-            meta.setDisplayName(Helper.color(Config.getInstance().getAvailableArenaDisplayName()).replace("{NAME}", name));
+            players.clear();
+            current = null;
+            counting = false;
+            meta.setDisplayName(Helper.color(config.getGuiAvailableArenaDisplayname()).replace("{NAME}", name));
         } else {
-            this.current = new Match();
-            meta.setDisplayName(Helper.color(Config.getInstance().getInUseArenaDisplayName()).replace("{NAME}", name));
+            current = new Match();
+            meta.setDisplayName(Helper.color(config.getGuiInUseArenaDisplayname()).replace("{NAME}", name));
         }
 
         displayed.setItemMeta(meta);
@@ -98,8 +94,7 @@ public class Arena implements ICanHandleGUI {
     public boolean isValid() {
         Location pos1 = positions.get(1);
         Location pos2 = positions.get(2);
-
-        return !(pos1 == null || pos2 == null) && !(pos1.getWorld() == null || pos2.getWorld() == null || !pos1.getWorld().getName().equals(pos2.getWorld().getName()));
+        return !(pos1 == null || pos2 == null || pos1.getWorld() == null || pos2.getWorld() == null || !pos1.getWorld().getName().equals(pos2.getWorld().getName()));
     }
 
     public List<UUID> getPlayers() {
@@ -110,6 +105,10 @@ public class Arena implements ICanHandleGUI {
         for (Player player : players) {
             this.players.add(player.getUniqueId());
         }
+    }
+
+    public boolean hasPlayer(Player player) {
+        return players.contains(player.getUniqueId());
     }
 
     public void removePlayer(UUID uuid) {
@@ -162,12 +161,12 @@ public class Arena implements ICanHandleGUI {
         return result;
     }
 
-    public void sendMessage(String msg) {
+    public void broadcast(String msg) {
         for (UUID uuid : players) {
             Player player = Bukkit.getPlayer(uuid);
 
             if (player != null) {
-                Helper.pm(msg, player);
+                Helper.pm(player, msg, false);
             }
         }
     }
@@ -191,8 +190,12 @@ public class Arena implements ICanHandleGUI {
         private long end;
         private double finishingHealth;
 
-        public Match() {
+        Match() {
             this.start = System.currentTimeMillis();
+        }
+
+        public long getStart() {
+            return start;
         }
 
         public int getDuration() {
@@ -232,7 +235,7 @@ public class Arena implements ICanHandleGUI {
         private final ItemStack[] armor;
         private final ItemStack[] inventory;
 
-        public InventoryData(ItemStack[] inventory, ItemStack[] armor) {
+        InventoryData(ItemStack[] inventory, ItemStack[] armor) {
             this.inventory = inventory;
             this.armor = armor;
         }
@@ -248,24 +251,22 @@ public class Arena implements ICanHandleGUI {
 
     class CountdownTask extends BukkitRunnable {
 
-        private final Arena arena;
         private final List<String> messages;
 
         private int index = 0;
 
-        public CountdownTask(Arena arena, List<String> messages) {
-            this.arena = arena;
+        CountdownTask(List<String> messages) {
             this.messages = messages;
-            arena.setCounting(true);
+            counting = true;
         }
 
         @Override
         public void run() {
-            arena.sendMessage(messages.get(index));
+            broadcast(messages.get(index));
             index++;
 
-            if (index > messages.size() - 1) {
-                arena.setCounting(false);
+            if (index >= messages.size()) {
+                counting = false;
                 cancel();
             }
         }

@@ -4,75 +4,58 @@ import me.realized.duels.commands.BaseCommand;
 import me.realized.duels.commands.SubCommand;
 import me.realized.duels.commands.admin.subcommands.*;
 import me.realized.duels.utilities.Helper;
-import me.realized.duels.utilities.Lang;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DuelsCommand extends BaseCommand {
 
-    private final List<SubCommand> commands = new ArrayList<>();
+    private final Map<String, SubCommand> children = new HashMap<>();
 
     public DuelsCommand() {
         super("duels", "duels.admin");
-        commands.addAll(Arrays.asList(new EditCommand(), new CreateCommand(), new SetCommand(), new DeleteCommand(), new ListCommand(), new ToggleCommand(), new InfoCommand(), new SavekitCommand(), new DeletekitCommand(), new LoadkitCommand(), new SetlobbyCommand(), new SetitemCommand()));
+
+        children.put("create", new CreateCommand());
+        children.put("delete", new DeleteCommand());
+        children.put("edit", new EditCommand());
+        children.put("info", new InfoCommand());
+        children.put("list", new ListCommand());
+        children.put("loadkit", new LoadkitCommand());
+        children.put("savekit", new SavekitCommand());
+        children.put("deletekit", new DeletekitCommand());
+        children.put("reset", new ResetCommand());
+        children.put("set", new SetCommand());
+        children.put("setitem", new SetitemCommand());
+        children.put("setlobby", new SetlobbyCommand());
+        children.put("toggle", new ToggleCommand());
+        children.put("reload", new ReloadCommand());
     }
 
     @Override
-    public void execute(CommandSender sender, String[] args) {
+    public void execute(Player sender, String[] args) {
         if (args.length == 0) {
-            pm(sender, "&b&m------------------------------------------------");
-
-            for (SubCommand sub : commands) {
-                pm(sender, Helper.replaceWithArgs(Lang.ADMIN_COMMAND_USAGE.getMessage(), "{USAGE}", "/" + getName() + " " + sub.getUsage(), "{DESC}", sub.getDescription()));
-            }
-
-            pm(sender, "&b&m------------------------------------------------");
+            Helper.pm(sender, "Commands.duels.usage", true);
             return;
         }
 
-        SubCommand subCommand = null;
+        SubCommand child = children.get(args[0].toLowerCase());
 
-        for (SubCommand command : commands) {
-            if (args[0].equalsIgnoreCase(command.getName())) {
-                subCommand = command;
-                break;
-            }
-        }
-
-        if (subCommand == null) {
-            pm(sender, "&c'" + args[0] + "' is not a valid parent command.");
+        if (child == null) {
+            Helper.pm(sender, "Errors.invalid-sub-command", true, "{ARGUMENT}", args[0]);
             return;
         }
 
-        if (args.length < subCommand.length()) {
-            pm(sender, "&9[Duels] " + Helper.replaceWithArgs(Lang.ADMIN_COMMAND_USAGE.getMessage(), "{USAGE}", "/" + getName() + " " + subCommand.getUsage(), "{DESC}", subCommand.getDescription()));
+        if (!sender.hasPermission(child.getPermission())) {
+            Helper.pm(sender, "Errors.no-permission", true);
             return;
         }
 
-        subCommand.execute(sender, args);
-    }
-
-    @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
-        if (args.length != 1) {
-            return null;
+        if (args.length < child.length()) {
+            Helper.pm(sender, "Commands.duels.sub-command-usage", true, "{USAGE}", "/" + getName() + " " + child.getUsage(), "{DESCRIPTION}", child.getDescription());
+            return;
         }
 
-        List<String> result = new ArrayList<>();
-        String input = args[0];
-
-        for (SubCommand subCommand : commands) {
-            if (input == null || input.isEmpty()) {
-                result.add(subCommand.getName());
-            } else if (subCommand.getName().startsWith(input)) {
-                result.add(subCommand.getName());
-            }
-        }
-
-        return result;
+        child.execute(sender, args);
     }
 }

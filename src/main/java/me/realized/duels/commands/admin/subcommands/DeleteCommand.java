@@ -1,37 +1,33 @@
 package me.realized.duels.commands.admin.subcommands;
 
 import me.realized.duels.arena.Arena;
-import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.commands.SubCommand;
-import me.realized.duels.utilities.Lang;
-import org.bukkit.command.CommandSender;
+import me.realized.duels.utilities.Helper;
+import org.bukkit.entity.Player;
 
 public class DeleteCommand extends SubCommand {
 
-    private final ArenaManager manager;
-
     public DeleteCommand() {
-        super("delete", "delete [name]", "Remove an arena.", 2);
-        this.manager = getInstance().getArenaManager();
+        super("delete", "delete [name]", "duels.admin", "Remove an arena.", 2);
     }
 
     @Override
-    public void execute(CommandSender sender, String[] args) {
-        String name = args[1].toLowerCase();
+    public void execute(Player sender, String[] args) {
+        String name = Helper.join(args, 1, args.length, " ");
 
-        if (manager.getArena(name) == null) {
-            pm(sender, "&cNon-existing arena.");
+        if (arenaManager.getArena(name) == null) {
+            Helper.pm(sender, "Errors.arena-not-found", true);
             return;
         }
 
-        Arena arena = manager.getArena(name);
+        Arena arena = arenaManager.getArena(name);
 
         if (arena.isUsed()) {
-            pm(sender, "&cThat arena is currently in use. To prevent arena from being used, disable it using /duels toggle [name].");
+            Helper.pm(sender, "Errors.arena-deletion-failed", true);
             return;
         }
 
-        manager.removeArena(arena);
-        pm(sender, Lang.ARENA_DELETE.getMessage().replace("{NAME}", name));
+        arenaManager.removeArena(arena);
+        Helper.pm(sender, "Arenas.deleted", true, "{NAME}", name);
     }
 }

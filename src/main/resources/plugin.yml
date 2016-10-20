@@ -1,11 +1,15 @@
 name: Duels
 main: me.realized.duels.Core
-version: 1.3.4
+version: 2.0.0-SNAPSHOT
+
 author: Realized
+website: https://www.spigotmc.org/resources/duels.20171/
 description: An ultimate solution to server owners wanting to create a duel system.
-softdepend: [WorldGuard, Multiverse-Core, Essentials]
+
+softdepend: [WorldGuard, Multiverse-Core, Essentials, Factions]
 
 # Multiverse-Core added as soft-depend due to locations being null when Duels is loaded first.
+# Add any world management plugins to softdepend list if arena doesn't load properly in the generated world.
 
 commands:
    duel:
@@ -14,6 +18,9 @@ commands:
    stats:
      description: Display stats of yours or others.
      aliases: [statistics, info, duelstats, dstats]
+   spectate:
+     description: Spectate a player in duel.
+     aliases: [spec]
    toggle:
      description: Enable or disable receiving duel requests.
      aliases: [tg]
@@ -25,11 +32,15 @@ permissions:
   duels.*:
     children:
       duels.admin: true
-      duels.duel: true
-      duels.stats: true
-      duels.toggle: true
+
   duels.default:
     children:
       duels.duel: true
       duels.stats: true
       duels.toggle: true
+
+  duels.admin:
+    children:
+      duels.default: true
+      duels.spectate: true
+      duels.spectate.anonymously: true

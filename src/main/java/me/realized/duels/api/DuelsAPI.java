@@ -23,7 +23,7 @@ public class DuelsAPI {
      *
      * @param force - Should we force the load from the files?
      *
-     * @return UserData
+     * @return UserData of the player if exists or null.
      */
     public static UserData getUser(UUID uuid, boolean force) {
         return instance.getDataManager().getUser(uuid, force);
@@ -32,9 +32,9 @@ public class DuelsAPI {
     /**
      * @param player - player to get userdata.
      *
-     * @param force - Should we force the load from the files?
+     * @param force - Force the load from the files if not in cache?
      *
-     * @return UserData
+     * @return UserData of the player if exists or null.
      */
     public static UserData getUser(Player player, boolean force) {
         return instance.getDataManager().getUser(player.getUniqueId(), force);
@@ -44,9 +44,16 @@ public class DuelsAPI {
      *
      * @param player - player to check if in match.
      *
-     * @return boolean
+     * @return whether player is in match or not.
      */
     public static boolean isInMatch(Player player) {
         return instance.getArenaManager().isInMatch(player);
+    }
+
+    /**
+     * @return version of the plugin.
+     */
+    public static String getVersion() {
+        return instance.getDescription().getVersion();
     }
 }
