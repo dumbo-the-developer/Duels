@@ -132,7 +132,7 @@ public class SpectatorManager implements Listener {
         while (iterator.hasNext()) {
             Spectator spectator = iterator.next();
 
-            if (!spectator.getTarget().equals(arena)) {
+            if (!spectator.getTarget().getName().equals(arena.getName())) {
                 continue;
             }
 

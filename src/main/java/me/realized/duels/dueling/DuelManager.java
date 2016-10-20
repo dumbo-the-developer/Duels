@@ -199,6 +199,8 @@ public class DuelManager implements Listener {
 
         if (!arena.isEmpty()) {
             final Player target = Bukkit.getPlayer(arena.getPlayers().get(0));
+            target.setHealth(target.getMaxHealth());
+            target.setFireTicks(0);
             Firework firework = (Firework) target.getWorld().spawnEntity(target.getEyeLocation(), EntityType.FIREWORK);
             FireworkMeta meta = firework.getFireworkMeta();
             meta.addEffect(FireworkEffect.builder().withColor(Color.RED).with(FireworkEffect.Type.BALL_LARGE).withTrail().build());
@@ -207,7 +209,7 @@ public class DuelManager implements Listener {
 
             Calendar calendar = new GregorianCalendar();
             match.setEndTimeMillis(System.currentTimeMillis());
-            match.setFinishingHealth(Math.floor(target.getHealth()) * 0.5);
+            match.setFinishingHealth(Math.round(target.getHealth()) * 0.5);
             MatchData matchData = new MatchData(target.getName(), dead.getName(), calendar.getTimeInMillis(), match.getDuration(), match.getFinishingHealth());
             UserData player = dataManager.getUser(dead.getUniqueId(), false);
             UserData opponent = dataManager.getUser(target.getUniqueId(), false);
@@ -293,7 +295,7 @@ public class DuelManager implements Listener {
         Location from = event.getFrom();
         Location to = event.getTo();
 
-        if (!config.isPatchesStrictTeleportation() && from.distance(to) < 1.0) {
+        if (!config.isPatchesStrictTeleportation() && from.getWorld().equals(to.getWorld()) && from.distance(to) < 1.0) {
             return;
         }
 
