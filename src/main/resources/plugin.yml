@@ -6,7 +6,7 @@ author: Realized
 website: https://www.spigotmc.org/resources/duels.20171/
 description: An ultimate solution to server owners wanting to create a duel system.
 
-softdepend: [WorldGuard, Multiverse-Core, Essentials, Factions]
+softdepend: [WorldGuard, Multiverse-Core, Essentials, Factions, mcMMO]
 
 # Multiverse-Core added as soft-depend due to locations being null when Duels is loaded first.
 # Add any world management plugins to softdepend list if arena doesn't load properly in the generated world.
