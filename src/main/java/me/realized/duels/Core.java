@@ -90,6 +90,7 @@ public class Core extends JavaPlugin {
         dataManager.save();
         arenaManager.save();
         kitManager.save();
+        duelManager.handleDisable();
     }
 
     public void reload(ReloadType type) {

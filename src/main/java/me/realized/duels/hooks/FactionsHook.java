@@ -4,6 +4,7 @@ import com.massivecraft.factions.FPlayer;
 import com.massivecraft.factions.event.PowerLossEvent;
 import me.realized.duels.Core;
 import me.realized.duels.configuration.MainConfig;
+import me.realized.duels.utilities.Storage;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,11 +30,10 @@ public class FactionsHook extends PluginHook implements Listener {
 
         long now = System.currentTimeMillis();
         FPlayer player = event.getfPlayer();
+        Object value = Storage.get(player.getPlayer()).get("lastMatchDeath");
 
-        if (player.getPlayer().hasMetadata("lastMatchDeath")) {
-            long value = (long) player.getPlayer().getMetadata("lastMatchDeath").get(0).value();
-
-            if (now - value < 1000L) {
+        if (value != null) {
+            if (now - (long) value < 1000L) {
                 event.setMessage("");
                 event.setCancelled(true);
             }

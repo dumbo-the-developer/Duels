@@ -31,41 +31,43 @@ public class Helper {
             return profile.getUUID();
         }
 
-        if (Bukkit.getOnlineMode() || Bukkit.spigot().getConfig().getBoolean("settings.bungeecord")) {
-            if (Bukkit.getPlayerExact(username) != null) {
-                return Bukkit.getPlayerExact(username).getUniqueId();
-            }
+        Player online = Bukkit.getPlayerExact(username);
 
-            if (Bukkit.getOfflinePlayer(username).hasPlayedBefore()) {
-                UUID uuid = Bukkit.getOfflinePlayer(username).getUniqueId();
-                uuidCache.put(username, new Profile(uuid));
-                return uuid;
-            }
+        if (online != null) {
+            return online.getUniqueId();
+        }
+
+        OfflinePlayer offline = Bukkit.getOfflinePlayer(username);
+
+        if (offline != null && offline.hasPlayedBefore()) {
+            UUID uuid = offline.getUniqueId();
+            uuidCache.put(username, new Profile(uuid));
+            return uuid;
         }
 
         return null;
     }
 
     private static Profile get(String name) {
-        Profile profile = uuidCache.get(name.toLowerCase());
+        Profile profile = uuidCache.get(name);
 
         if (profile == null) {
             return null;
         }
 
-        if (profile.getTime() + 1000 * 300 - System.currentTimeMillis() <= 0) {
+        if (profile.getTime() + 60000L - System.currentTimeMillis() <= 0) {
             return null;
         }
 
         return profile;
     }
 
-    private static class Profile {
+    static class Profile {
 
         private final long time;
         private final UUID uuid;
 
-        public Profile(UUID uuid) {
+        Profile(UUID uuid) {
             this.time = System.currentTimeMillis();
             this.uuid = uuid;
         }
@@ -210,6 +212,8 @@ public class Helper {
     }
 
     public static boolean canTeleportTo(Player player, Location location) {
+        refreshChunk(location);
+        updatePosition(player, location);
         PlayerTeleportEvent event = new PlayerTeleportEvent(player, player.getLocation(), location);
         Bukkit.getPluginManager().callEvent(event);
         return !(!player.getLocation().equals(location) && event.getFrom().equals(event.getTo())) && !event.isCancelled();

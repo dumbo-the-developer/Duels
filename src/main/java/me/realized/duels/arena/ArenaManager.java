@@ -11,6 +11,7 @@ import me.realized.duels.event.RequestSendEvent;
 import me.realized.duels.utilities.Helper;
 import me.realized.duels.utilities.ICanHandleReload;
 import me.realized.duels.utilities.ReloadType;
+import me.realized.duels.utilities.Storage;
 import me.realized.duels.utilities.compat.CompatHelper;
 import me.realized.duels.utilities.gui.GUI;
 import me.realized.duels.utilities.gui.GUIListener;
@@ -96,7 +97,7 @@ public class ArenaManager implements Listener, ICanHandleReload {
                         return;
                     }
 
-                    Object value = player.getMetadata("request").get(0).value();
+                    Object value = Storage.get(player).get("request");
 
                     if (value == null || !(value instanceof Settings)) {
                         player.closeInventory();
@@ -138,8 +139,8 @@ public class ArenaManager implements Listener, ICanHandleReload {
                 public void onClose(InventoryCloseEvent event) {
                     Player player = (Player) event.getPlayer();
 
-                    if (gui.isPage(event.getInventory()) && player.hasMetadata("request")) {
-                        player.removeMetadata("request", instance);
+                    if (gui.isPage(event.getInventory())) {
+                        Storage.get(player).remove("request");
                     }
                 }
 
