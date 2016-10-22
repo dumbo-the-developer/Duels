@@ -196,14 +196,15 @@ public class DuelManager implements Listener {
         }
 
         event.setDeathMessage(null);
-        Storage.get(dead).set("lastMatchDeath", System.currentTimeMillis());
-        mcMMOHook.enableSkills(dead);
 
         if (!config.isDuelingUseOwnInventory()) {
             event.setKeepLevel(true);
             event.setDroppedExp(0);
             event.getDrops().clear();
         }
+
+        Storage.get(dead).set("lastMatchDeath", System.currentTimeMillis());
+        mcMMOHook.enableSkills(dead);
 
         final Arena.Match match = arena.getCurrentMatch();
 

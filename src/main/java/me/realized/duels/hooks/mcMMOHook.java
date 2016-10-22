@@ -44,10 +44,17 @@ public class McMMOHook extends PluginHook {
     }
 
     public void enableSkills(Player player) {
-        if (!isEnabled() || !config.isPatchesDisableMcMMOInMatch() || !attachments.containsKey(player.getUniqueId())) {
+        if (!isEnabled() || !config.isPatchesDisableMcMMOInMatch()) {
             return;
         }
 
-        player.removeAttachment(attachments.get(player.getUniqueId()));
+        PermissionAttachment attachment = attachments.get(player.getUniqueId());
+
+        if (attachment == null || !attachment.getPermissible().equals(player)) {
+            return;
+        }
+
+        attachments.remove(player.getUniqueId());
+        attachment.remove();
     }
 }

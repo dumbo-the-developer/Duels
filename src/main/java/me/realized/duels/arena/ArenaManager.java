@@ -154,20 +154,21 @@ public class ArenaManager implements Listener, ICanHandleReload {
         if (config.isDuelingMatchMaxDurationEnabled()) {
             task = Bukkit.getScheduler().runTaskTimer(instance, new Runnable() {
 
-                private Location lobby = dataManager.getLobby() != null ? dataManager.getLobby() : Bukkit.getWorlds().get(0).getSpawnLocation();
-
                 @Override
                 public void run() {
+                    Location lobby = dataManager.getLobby() != null ? dataManager.getLobby() : Bukkit.getWorlds().get(0).getSpawnLocation();
+
                     for (Arena arena : arenas) {
                         // Checking if both players are alive, to prevent the case where it will end the match when winner task is running.
-                        if (arena.isUsed() && arena.getPlayers().size() >= 2) {
-                            instance.getSpectatorManager().handleMatchEnd(arena);
 
+                        if (arena.isUsed() && arena.getPlayers().size() >= 2) {
                             Arena.Match match = arena.getCurrentMatch();
 
                             if ((System.currentTimeMillis() - match.getStart()) / 1000L <= config.getDuelingMatchMaxDurationDuration()) {
                                 return;
                             }
+
+                            instance.getSpectatorManager().handleMatchEnd(arena);
 
                             Iterator<UUID> iterator = arena.getPlayers().iterator();
 

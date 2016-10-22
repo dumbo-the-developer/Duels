@@ -14,8 +14,8 @@ public class Storage {
         Storage instance = storage.get(player.getUniqueId());
 
         if (instance == null) {
-            storage.put(player.getUniqueId(), new Storage(player.getUniqueId()));
-            instance = storage.get(player.getUniqueId());
+            instance = new Storage(player.getUniqueId());
+            storage.put(player.getUniqueId(), instance);
         }
 
         return instance;

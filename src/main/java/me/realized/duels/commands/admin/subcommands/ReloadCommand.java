@@ -8,8 +8,6 @@ import org.bukkit.entity.Player;
 
 public class ReloadCommand extends SubCommand {
 
-    // TODO: 10/19/16 Add validation, PreReloadAffect that shows what reloading now will do 
-
     public ReloadCommand() {
         super("reload", "reload [weak]", "duels.admin", "Reloads the plugin completely or only the messages. Append 'weak' to only reload messages file.", 1);
     }
