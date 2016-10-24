@@ -186,6 +186,7 @@ public class Arena implements ICanHandleGUI {
         private final long start;
         private final Map<UUID, Location> lastLocations = new HashMap<>();
         private final Map<UUID, InventoryData> inventories = new HashMap<>();
+        private final Map<UUID, Boolean> dead = new HashMap<>();
 
         private long end;
         private double finishingHealth;
@@ -222,10 +223,19 @@ public class Arena implements ICanHandleGUI {
             return inventories.get(uuid);
         }
 
+        public boolean wasDead(UUID uuid) {
+            return dead.get(uuid);
+        }
+
+        public void setDead(UUID uuid) {
+            dead.put(uuid, true);
+        }
+
         public void setData(Player... players) {
             for (Player player : players) {
                 lastLocations.put(player.getUniqueId(), player.getLocation().clone());
                 inventories.put(player.getUniqueId(), new InventoryData(player.getInventory().getContents().clone(), player.getInventory().getArmorContents().clone()));
+                dead.put(player.getUniqueId(), false);
             }
         }
     }

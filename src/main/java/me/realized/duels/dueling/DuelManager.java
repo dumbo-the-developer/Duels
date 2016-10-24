@@ -16,6 +16,7 @@ import me.realized.duels.kits.Kit;
 import me.realized.duels.kits.KitManager;
 import me.realized.duels.utilities.Helper;
 import me.realized.duels.utilities.Storage;
+import me.realized.duels.utilities.location.Teleport;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
@@ -36,8 +37,11 @@ import java.util.*;
 
 public class DuelManager implements Listener {
 
+    // TODO: 10/23/16 Create LogManager that logs every match info and fail reasons for better debugging.
+
     private final Core instance;
     private final MainConfig config;
+    private final Teleport teleport;
     private final EssentialsHook essentialsHook;
     private final McMMOHook mcMMOHook;
     private final DataManager dataManager;
@@ -48,6 +52,7 @@ public class DuelManager implements Listener {
     public DuelManager(Core instance) {
         this.instance = instance;
         this.config = instance.getConfiguration();
+        this.teleport = instance.getTeleport();
         this.essentialsHook = (EssentialsHook) instance.getHookManager().get("Essentials");
         this.mcMMOHook = (McMMOHook) instance.getHookManager().get("mcMMO");
         this.dataManager = instance.getDataManager();
@@ -94,22 +99,26 @@ public class DuelManager implements Listener {
         target.closeInventory();
         arena.getCurrentMatch().setData(player, target);
 
-        if (!Helper.canTeleportTo(player, pos1) || !player.teleport(pos1)) {
+        if (!teleport.isAuthorizedFor(player, pos1)) {
             Helper.pm(player, "Errors.match-failed", true, "{REASON}", "Failed to teleport " + player.getName() + " to " + Helper.format(pos1));
             Helper.pm(target, "Errors.match-failed", true, "{REASON}", "Failed to teleport " + player.getName() + " to " + Helper.format(pos1));
             arena.setUsed(false);
             return;
         }
 
-        if (!Helper.canTeleportTo(target, pos2) || !target.teleport(pos2)) {
+        if (!teleport.isAuthorizedFor(target, pos2)) {
             Helper.pm(player, "Errors.match-failed", true, "{REASON}", "Failed to teleport " + target.getName() + " to " + Helper.format(pos2));
             Helper.pm(target, "Errors.match-failed", true, "{REASON}", "Failed to teleport " + target.getName() + " to " + Helper.format(pos2));
             arena.setUsed(false);
             return;
         }
 
+        teleport.teleportPlayer(player, pos1);
+        teleport.teleportPlayer(target, pos2);
+
         essentialsHook.setUnvanished(player);
         essentialsHook.setUnvanished(target);
+
         mcMMOHook.disableSkills(player);
         mcMMOHook.disableSkills(target);
 
@@ -188,7 +197,6 @@ public class DuelManager implements Listener {
     @EventHandler (priority = EventPriority.HIGHEST)
     public void on(PlayerDeathEvent event) {
         final Player dead = event.getEntity();
-
         final Arena arena = arenaManager.getArena(dead);
 
         if (arena == null) {
@@ -209,6 +217,7 @@ public class DuelManager implements Listener {
         final Arena.Match match = arena.getCurrentMatch();
 
         arena.removePlayer(dead.getUniqueId());
+        match.setDead(dead.getUniqueId());
 
         Arena.InventoryData deadData = match.getInventories(dead.getUniqueId());
         final Location lobby = dataManager.getLobby() != null ? dataManager.getLobby() : dead.getWorld().getSpawnLocation();
@@ -221,8 +230,6 @@ public class DuelManager implements Listener {
 
         if (!arena.isEmpty()) {
             final Player target = Bukkit.getPlayer(arena.getPlayers().get(0));
-            target.setHealth(target.getMaxHealth());
-            target.setFireTicks(0);
             Firework firework = (Firework) target.getWorld().spawnEntity(target.getEyeLocation(), EntityType.FIREWORK);
             FireworkMeta meta = firework.getFireworkMeta();
             meta.addEffect(FireworkEffect.builder().withColor(Color.RED).with(FireworkEffect.Type.BALL_LARGE).withTrail().build());
@@ -252,28 +259,31 @@ public class DuelManager implements Listener {
 
                     @Override
                     public void run() {
-                        handleEnd(arena, dead, target, targetData, lobby, last);
+                        handleEnd(arena, match, dead, target, targetData, lobby, last);
                     }
                 }.runTaskLater(instance, delay * 20L);
             } else {
-                handleEnd(arena, dead, target, targetData, lobby, last);
+                handleEnd(arena, match, dead, target, targetData, lobby, last);
             }
         }
     }
 
-    private void handleEnd(Arena arena, Player dead, Player target, Arena.InventoryData data, Location lobby, Location last) {
+    private void handleEnd(Arena arena, Arena.Match match, Player dead, Player target, Arena.InventoryData data, Location lobby, Location last) {
         spectatorManager.handleMatchEnd(arena);
 
-        if (target.isOnline() && !target.isDead()) {
+        if (target.isOnline() && !match.wasDead(target.getUniqueId())) {
             arena.removePlayer(target.getUniqueId());
 
-            if (!config.isDuelingTeleportToLatestLocation()) {
-                target.teleport(lobby);
+            Location to = config.isDuelingTeleportToLatestLocation() ? last : lobby;
+
+            if (!teleport.isAuthorizedFor(target, to)) {
+                target.setHealth(0.0D);
+                Helper.pm(target, "&4Teleportation failed! You were killed to prevent staying in the arena.", false);
             } else {
-                target.teleport(last);
+                teleport.teleportPlayer(target, to);
             }
 
-            essentialsHook.setBackLocation(target, target.getLocation());
+            essentialsHook.setBackLocation(target, to);
             mcMMOHook.enableSkills(target);
 
             if (!config.isDuelingUseOwnInventory()) {

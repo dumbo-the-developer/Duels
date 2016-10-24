@@ -38,6 +38,10 @@ Patches:
   # THIS IS AN UNSAFE OPTION, DISABLE IF IT CAUSES ANY ISSUES.
   force-allow-pvp: true
 
+  # If enabled, Duels will attempt to override any teleport cancellation from other plugins for match related teleportation.
+  # THIS IS AN UNSAFE OPTION, DISABLE IF IT CAUSES ANY ISSUES.
+  force-allow-teleportation: true
+
   # If enabled, players must stay still after sending a request.
   # Before the duel starts, Duels will check if player has moved and stop the duel if so.
   # This prevents users moving out of the selected DuelZone region after sending a request.

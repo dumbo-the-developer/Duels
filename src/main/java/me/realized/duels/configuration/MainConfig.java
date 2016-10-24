@@ -18,16 +18,21 @@ public class MainConfig extends Config {
     private boolean patchesDisablePowerLoss;
     private boolean patchesStrictTeleportation;
     private boolean patchesForceAllowPvp;
+    private boolean patchesForceAllowTeleportation;
     private boolean patchesCancelMatchIfMoved;
+
     private boolean countdownEnabled;
     private List<String> countdownMessages;
     private boolean countdownBlockProjectile;
     private boolean countdownBlockPvp;
+
     private int guiKitSelectorRows;
     private int guiArenaSelectorRows;
     private String guiAvailableArenaDisplayname;
     private String guiInUseArenaDisplayname;
+
     private List<String> spectatingWhitelistedCommands;
+
     private boolean duelingMatchMaxDurationEnabled;
     private int duelingMatchMaxDurationDuration;
     private boolean duelingMatchEndCommandsEnabled;
@@ -42,10 +47,13 @@ public class MainConfig extends Config {
     private boolean duelingBlockAllCommands;
     private List<String> duelingWhitelistedCommands;
     private List<String> duelingDisabledCommands;
+
     private boolean duelZoneEnabled;
     private String duelZoneRegion;
+
     private boolean statsDisplayMatches;
     private int statsAmountOfMatches;
+
     private boolean soupEnabled;
     private String soupArenasStartingWith;
     private double soupHeartsToRegen;
@@ -65,6 +73,7 @@ public class MainConfig extends Config {
         this.patchesDisablePowerLoss = base.getBoolean("Patches.disable-power-loss", true);
         this.patchesStrictTeleportation = base.getBoolean("Patches.strict-teleportation", false);
         this.patchesForceAllowPvp = base.getBoolean("Patches.force-allow-pvp", true);
+        this.patchesForceAllowTeleportation = base.getBoolean("Patches.force-allow-teleportation", true);
         this.patchesCancelMatchIfMoved = base.getBoolean("Patches.cancel-match-if-moved", false);
 
         this.countdownEnabled = base.getBoolean("Countdown.enabled", true);
@@ -135,6 +144,10 @@ public class MainConfig extends Config {
 
     public boolean isPatchesForceAllowPvp() {
         return patchesForceAllowPvp;
+    }
+
+    public boolean isPatchesForceAllowTeleportation() {
+        return patchesForceAllowTeleportation;
     }
 
     public boolean isPatchesCancelMatchIfMoved() {

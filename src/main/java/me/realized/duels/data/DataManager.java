@@ -3,6 +3,7 @@ package me.realized.duels.data;
 import me.realized.duels.Core;
 import me.realized.duels.utilities.ICanHandleReload;
 import me.realized.duels.utilities.ReloadType;
+import me.realized.duels.utilities.Storage;
 import me.realized.duels.utilities.location.SimpleLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -173,6 +174,7 @@ public class DataManager implements Listener, ICanHandleReload {
     public void onQuit(PlayerQuitEvent event) {
         saveUser(event.getPlayer().getUniqueId(), true);
         users.remove(event.getPlayer().getUniqueId());
+        Storage.remove(event.getPlayer());
     }
 
     @Override

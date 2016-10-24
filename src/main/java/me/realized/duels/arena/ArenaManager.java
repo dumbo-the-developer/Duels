@@ -15,6 +15,7 @@ import me.realized.duels.utilities.Storage;
 import me.realized.duels.utilities.compat.CompatHelper;
 import me.realized.duels.utilities.gui.GUI;
 import me.realized.duels.utilities.gui.GUIListener;
+import me.realized.duels.utilities.location.Teleport;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -39,6 +40,7 @@ public class ArenaManager implements Listener, ICanHandleReload {
 
     private final Core instance;
     private final MainConfig config;
+    private final Teleport teleport;
     private final RequestManager requestManager;
     private final DataManager dataManager;
     private final File base;
@@ -52,6 +54,7 @@ public class ArenaManager implements Listener, ICanHandleReload {
     public ArenaManager(Core instance) {
         this.instance = instance;
         this.config = instance.getConfiguration();
+        this.teleport = instance.getTeleport();
         this.requestManager = instance.getRequestManager();
         this.dataManager = instance.getDataManager();
 
@@ -159,8 +162,6 @@ public class ArenaManager implements Listener, ICanHandleReload {
                     Location lobby = dataManager.getLobby() != null ? dataManager.getLobby() : Bukkit.getWorlds().get(0).getSpawnLocation();
 
                     for (Arena arena : arenas) {
-                        // Checking if both players are alive, to prevent the case where it will end the match when winner task is running.
-
                         if (arena.isUsed() && arena.getPlayers().size() >= 2) {
                             Arena.Match match = arena.getCurrentMatch();
 
@@ -191,10 +192,15 @@ public class ArenaManager implements Listener, ICanHandleReload {
 
                                 Arena.InventoryData data = match.getInventories(uuid);
 
-                                if (!Helper.canTeleportTo(player, lobby)) {
+                                if (!teleport.isAuthorizedFor(player, lobby)) {
                                     player.setHealth(0.0D);
-                                } else {
-                                    player.teleport(lobby);
+                                    Helper.pm(player, "&4Teleportation failed! You were killed to prevent staying in the arena.", false);
+                                    continue;
+                                }
+
+                                teleport.teleportPlayer(player, lobby);
+
+                                if (!config.isDuelingRequiresClearedInventory()) {
                                     Helper.setInventory(player, data.getInventoryContents(), data.getArmorContents());
                                 }
                             }
@@ -251,10 +257,15 @@ public class ArenaManager implements Listener, ICanHandleReload {
 
                         Arena.InventoryData data = match.getInventories(uuid);
 
-                        if (!Helper.canTeleportTo(player, lobby)) {
+                        if (!teleport.isAuthorizedFor(player, lobby)) {
                             player.setHealth(0.0D);
-                        } else {
-                            player.teleport(lobby);
+                            Helper.pm(player, "&4Teleportation failed! You were killed to prevent staying in the arena.", false);
+                            continue;
+                        }
+
+                        teleport.teleportPlayer(player, lobby);
+
+                        if (!config.isDuelingRequiresClearedInventory()) {
                             Helper.setInventory(player, data.getInventoryContents(), data.getArmorContents());
                         }
                     }
@@ -402,6 +413,7 @@ public class ArenaManager implements Listener, ICanHandleReload {
         if (arena == null) {
             return;
         }
+
         Player damaged = (Player) event.getEntity();
 
         if (arena.isCounting()) {

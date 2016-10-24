@@ -22,6 +22,7 @@ import me.realized.duels.kits.KitManager;
 import me.realized.duels.utilities.ICanHandleReload;
 import me.realized.duels.utilities.ReloadType;
 import me.realized.duels.utilities.gui.GUIManager;
+import me.realized.duels.utilities.location.Teleport;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class Core extends JavaPlugin {
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     private ConfigManager configManager;
+    private Teleport teleport;
     private HookManager hookManager;
     private RequestManager requestManager;
     private GUIManager guiManager;
@@ -50,6 +52,8 @@ public class Core extends JavaPlugin {
         configManager.register(ConfigType.MAIN, new MainConfig(this));
         configManager.register(ConfigType.MESSAGES, new MessagesConfig(this));
         reloadables.add(configManager);
+
+        teleport = new Teleport(this);
 
         hookManager = new HookManager();
         hookManager.register("Factions", new FactionsHook(this));
@@ -149,6 +153,10 @@ public class Core extends JavaPlugin {
 
     public DuelManager getDuelManager() {
         return duelManager;
+    }
+
+    public Teleport getTeleport() {
+        return teleport;
     }
 
     public static Core getInstance() {
