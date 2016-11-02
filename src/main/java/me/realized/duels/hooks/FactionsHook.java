@@ -28,15 +28,14 @@ public class FactionsHook extends PluginHook implements Listener {
             return;
         }
 
-        long now = System.currentTimeMillis();
         FPlayer player = event.getfPlayer();
-        Object value = Storage.get(player.getPlayer()).get("lastMatchDeath");
+        Storage storage = Storage.get(player.getPlayer());
+        Object value = storage.get("matchDeath");
 
         if (value != null) {
-            if (now - (long) value < 1000L) {
-                event.setMessage("");
-                event.setCancelled(true);
-            }
+            storage.remove("matchDeath");
+            event.setMessage("");
+            event.setCancelled(true);
         }
     }
 }

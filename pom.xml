@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.realized</groupId>
     <artifactId>duels</artifactId>
-    <version>2.0.4-SNAPSHOT</version>
+    <version>2.0.5</version>
     <name>Duels</name>
     <description>Everything you need for duels.</description>
 

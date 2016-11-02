@@ -211,7 +211,7 @@ public class DuelManager implements Listener {
             event.getDrops().clear();
         }
 
-        Storage.get(dead).set("lastMatchDeath", System.currentTimeMillis());
+        Storage.get(dead).set("matchDeath", true);
         mcMMOHook.enableSkills(dead);
 
         final Arena.Match match = arena.getCurrentMatch();
@@ -339,7 +339,7 @@ public class DuelManager implements Listener {
                 for (UUID uuid : arena.getPlayers()) {
                     Player player = Bukkit.getPlayer(uuid);
 
-                    if (player != null && player.getWorld().equals(base.getWorld()) && player.getLocation().distance(to) <= 5.0) {
+                    if (player != null && player.getWorld().equals(to.getWorld()) && player.getLocation().distance(to) <= 5.0) {
                         Helper.pm(base, "Errors.already-in-match.target", true);
                         event.setCancelled(true);
                         return;
@@ -350,7 +350,7 @@ public class DuelManager implements Listener {
             for (Spectator spectator : spectatorManager.getSpectators()) {
                 Player player = Bukkit.getPlayer(spectator.getOwner());
 
-                if (player != null && player.getWorld().equals(base.getWorld()) && player.getLocation().distance(to) <= 5.0) {
+                if (player != null && player.getWorld().equals(to.getWorld()) && player.getLocation().distance(to) <= 5.0) {
                     Helper.pm(base, "Errors.is-in-spectator-mode.target", true);
                     event.setCancelled(true);
                     return;

@@ -18,6 +18,8 @@ public class MessagesConfig extends Config {
         handleLoad();
     }
 
+    // TODO: 11/1/16 Test changes.
+
     @Override
     public void handleLoad() {
         // Clearing in case of configuration reload
@@ -31,9 +33,9 @@ public class MessagesConfig extends Config {
                 continue;
             }
 
-            if (value instanceof String) {
+            if (value instanceof String && !((String) value).isEmpty()) {
                 strings.put(path, (String) value);
-            } else {
+            } else if (value instanceof List && !((List) value).isEmpty()){
                 lists.put(path, base.getStringList(path));
             }
         }
