@@ -12,7 +12,6 @@ import me.realized.duels.utilities.Helper;
 import me.realized.duels.utilities.ICanHandleReload;
 import me.realized.duels.utilities.ReloadType;
 import me.realized.duels.utilities.Storage;
-import me.realized.duels.utilities.compat.CompatHelper;
 import me.realized.duels.utilities.gui.GUI;
 import me.realized.duels.utilities.gui.GUIListener;
 import me.realized.duels.utilities.location.Teleport;
@@ -445,7 +444,7 @@ public class ArenaManager implements Listener, ICanHandleReload {
 
         boolean regen = false;
 
-        if (CompatHelper.isPre1_9()) {
+        if (Helper.isPre1_9()) {
             if (player.getItemInHand().getType() == Material.MUSHROOM_SOUP) {
                 player.setItemInHand(new ItemStack(Material.BOWL));
                 regen = true;

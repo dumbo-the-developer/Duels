@@ -8,11 +8,14 @@ import java.lang.reflect.Method;
 
 public class SpawnEggs {
 
-    private static final Class<?> itemStack = CompatHelper.getMinecraftStack();
-    private static final Class<?> nbtTagCompound = CompatHelper.getNBTTagCompound();
-    private static final Class<?> nbtBase = CompatHelper.getNBTBase();
-    private static final Method asNMSCopy = CompatHelper.asNMSCopy();
-    private static final Method asBukkitCopy = CompatHelper.asBukkitCopy();
+    private static final Class<?> itemStack = Reflections.getNMSClass("ItemStack");
+    private static final Class<?> craftItemStack = Reflections.getCBClass("inventory.CraftItemStack");
+
+    private static final Class<?> nbtTagCompound = Reflections.getNMSClass("NBTTagCompound");
+    private static final Class<?> nbtBase = Reflections.getNMSClass("NBTBase");
+
+    private static final Method asNMSCopy = Reflections.getMethod(craftItemStack, "asNMSCopy", ItemStack.class);
+    private static final Method asBukkitCopy = Reflections.getMethod(craftItemStack, "asBukkitCopy", itemStack);
 
     private final EntityType type;
 
@@ -26,6 +29,11 @@ public class SpawnEggs {
 
     @SuppressWarnings("deprecation")
     public ItemStack toItemStack(int amount) {
+        // Because IDE is complaining
+        if (asBukkitCopy == null || asNMSCopy == null) {
+            return null;
+        }
+
         try {
             ItemStack item = new ItemStack(Material.MONSTER_EGG, amount);
             Object stack = asNMSCopy.invoke(null, item);
@@ -47,6 +55,11 @@ public class SpawnEggs {
 
     @SuppressWarnings("deprecation")
     public static SpawnEggs fromItemStack(ItemStack item) {
+        // Because IDE is complaining
+        if (asNMSCopy == null) {
+            return null;
+        }
+
         if (item == null || item.getType() != Material.MONSTER_EGG) {
             throw new IllegalArgumentException("item is not a monster egg");
         }

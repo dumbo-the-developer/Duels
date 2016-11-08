@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 public class SetCommand extends SubCommand {
 
     public SetCommand() {
-        super("set", "set [name] [1 | 2]", "duels.admin", "Set spawn position for arena.", 2);
+        super("set", "set [name] [1 | 2]", "duels.admin", "Set spawn position for arena.", 3);
     }
 
     @Override

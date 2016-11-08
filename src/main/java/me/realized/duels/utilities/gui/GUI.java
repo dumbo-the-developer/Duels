@@ -1,6 +1,6 @@
 package me.realized.duels.utilities.gui;
 
-import me.realized.duels.utilities.compat.CompatHelper;
+import me.realized.duels.utilities.Helper;
 import me.realized.duels.utilities.inventory.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -62,7 +62,7 @@ public class GUI<T> {
             ItemStack separator = ItemBuilder.builder().type(Material.STAINED_GLASS_PANE).name(" ").build();
             ItemStack defaultDisplayed;
 
-            if (!CompatHelper.isPre1_8()) {
+            if (!Helper.isPre1_8()) {
                 defaultDisplayed = ItemBuilder.builder().type(Material.BARRIER).build();
             } else {
                 defaultDisplayed = ItemBuilder.builder().type(Material.REDSTONE_BLOCK).build();
@@ -111,7 +111,7 @@ public class GUI<T> {
             Inventory current = Bukkit.createInventory(null, 54, title + " (page 1/1)");
             ItemStack defaultDisplayed;
 
-            if (!CompatHelper.isPre1_8()) {
+            if (!Helper.isPre1_8()) {
                 defaultDisplayed = ItemBuilder.builder().type(Material.BARRIER).name(ChatColor.RED + "There was nothing to load to the GUI.").build();
             } else {
                 defaultDisplayed = ItemBuilder.builder().type(Material.REDSTONE_BLOCK).name(ChatColor.RED + "There was nothing to load to the GUI.").build();

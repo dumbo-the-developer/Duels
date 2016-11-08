@@ -18,8 +18,6 @@ public class MessagesConfig extends Config {
         handleLoad();
     }
 
-    // TODO: 11/1/16 Test changes.
-
     @Override
     public void handleLoad() {
         // Clearing in case of configuration reload

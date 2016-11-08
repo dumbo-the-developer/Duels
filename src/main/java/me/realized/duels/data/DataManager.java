@@ -1,6 +1,7 @@
 package me.realized.duels.data;
 
 import me.realized.duels.Core;
+import me.realized.duels.event.UserCreateEvent;
 import me.realized.duels.utilities.ICanHandleReload;
 import me.realized.duels.utilities.ReloadType;
 import me.realized.duels.utilities.Storage;
@@ -83,6 +84,9 @@ public class DataManager implements Listener, ICanHandleReload {
         if (generate) {
             UserData user = new UserData(uuid, name);
             users.put(uuid, user);
+
+            UserCreateEvent event = new UserCreateEvent(user);
+            Bukkit.getPluginManager().callEvent(event);
             return user;
         }
 

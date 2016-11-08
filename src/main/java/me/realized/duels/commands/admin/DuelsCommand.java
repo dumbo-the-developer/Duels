@@ -29,6 +29,7 @@ public class DuelsCommand extends BaseCommand {
         children.put("setitem", new SetitemCommand());
         children.put("setlobby", new SetlobbyCommand());
         children.put("toggle", new ToggleCommand());
+        children.put("playsound", new PlaysoundCommand());
         children.put("reload", new ReloadCommand());
     }
 

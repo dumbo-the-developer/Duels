@@ -140,6 +140,7 @@ Commands:
       - '&e/duels setlobby &7- Set duel lobby on your current location.'
       - '&e/duels setitem [name] &7- Replaces the displayed item to held item for selected kit.'
       - '&e/duels reset [player] &7- Completely reset a player''s stats.'
+      - '&e/duels playsound [name] &7- Plays the selected sound if exists in config.'
       - '&e/duels reload [weak] &7- Reloads the plugin completely. Append ''weak'' to only reload messages file.'
       - '&b&m------------------------------------------------'
 
@@ -176,6 +177,7 @@ Errors:
   kit-not-found: '&cNon-existing kit.'
 
   empty-hand: '&cYou must be holding an item to use this command.'
+  sound-not-found: '&cA sound with that name was not found.'
   player-not-found: '&cPlayer not found.'
   player-left: '&cThat player is no longer online.'
   cannot-duel-yourself: '&cYou cannot duel yourself.'

@@ -4,7 +4,6 @@ import me.realized.duels.commands.SubCommand;
 import me.realized.duels.event.KitItemChangeEvent;
 import me.realized.duels.kits.Kit;
 import me.realized.duels.utilities.Helper;
-import me.realized.duels.utilities.compat.CompatHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -21,7 +20,7 @@ public class SetitemCommand extends SubCommand {
     public void execute(Player sender, String[] args) {
         ItemStack held;
 
-        if (CompatHelper.isPre1_9()) {
+        if (Helper.isPre1_9()) {
             held = sender.getInventory().getItemInHand();
         } else {
             held = sender.getInventory().getItemInMainHand();

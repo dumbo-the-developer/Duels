@@ -161,16 +161,6 @@ public class Arena implements ICanHandleGUI {
         return result;
     }
 
-    public void broadcast(String msg) {
-        for (UUID uuid : players) {
-            Player player = Bukkit.getPlayer(uuid);
-
-            if (player != null) {
-                Helper.pm(player, msg, false);
-            }
-        }
-    }
-
     @Override
     public ItemStack toDisplay() {
         return displayed;
@@ -259,7 +249,7 @@ public class Arena implements ICanHandleGUI {
         }
     }
 
-    class CountdownTask extends BukkitRunnable {
+    private class CountdownTask extends BukkitRunnable {
 
         private final List<String> messages;
 
@@ -272,7 +262,8 @@ public class Arena implements ICanHandleGUI {
 
         @Override
         public void run() {
-            broadcast(messages.get(index));
+            // Could use Arena#broadcast, but then Sound options won't get handled
+            Helper.broadcast(Arena.this, messages.get(index), false);
             index++;
 
             if (index >= messages.size()) {

@@ -6,7 +6,6 @@ import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.configuration.MainConfig;
 import me.realized.duels.hooks.EssentialsHook;
 import me.realized.duels.utilities.Helper;
-import me.realized.duels.utilities.compat.CompatHelper;
 import me.realized.duels.utilities.inventory.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -85,7 +84,7 @@ public class SpectatorManager implements Listener {
             return;
         }
 
-        Helper.broadcast(arena, "Spectating.arena-broadcast", "{PLAYER}", base.getName());
+        Helper.broadcast(arena, "Spectating.arena-broadcast", true, "{PLAYER}", base.getName());
     }
 
     private Spectator getByPlayer(Player player) {
@@ -108,10 +107,10 @@ public class SpectatorManager implements Listener {
 
     private void stopSpectating(Player base, Spectator spectator) {
         spectators.remove(spectator);
+        base.teleport(spectator.getBase());
         Helper.reset(base, false);
         base.setFlying(false);
         base.setAllowFlight(false);
-        base.teleport(spectator.getBase());
 
         for (UUID uuid : spectator.getTarget().getPlayers()) {
             Player player = Bukkit.getPlayer(uuid);
@@ -236,7 +235,7 @@ public class SpectatorManager implements Listener {
         Player base = event.getPlayer();
         ItemStack held;
 
-        if (CompatHelper.isPre1_9()) {
+        if (Helper.isPre1_9()) {
             held = base.getInventory().getItemInHand();
         } else {
             held = base.getInventory().getItemInMainHand();

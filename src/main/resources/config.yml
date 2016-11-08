@@ -1,4 +1,4 @@
-# <-> Duels v2 <->
+#   <-> Duels v2 <->
 #
 #
 #   Read the configuration (especially the comments above each option) carefully before PMing me on Spigot,
@@ -283,4 +283,35 @@ Soup:
   # Hearts to regen on soup.
   hearts-to-regen: 3.5
 
+
+
+Sounds:
+  # To hear the sound in-game, use the command /duels playsound [name]
+
+  # Name of your sound
+  countdown-ongoing-sound:
+    # Configure your sound here
+    sound:
+      type: BLOCK_NOTE_PLING
+      pitch: 0.95
+      volume: 3.0
+
+    # When a message in the list is sent to player, the sound will play.
+    # Only messages from Duels will play the sound.
+    # Broadcasts (such as on-match-end) is not supported.
+    on-messages:
+    - '&7Starting in &f5 &7seconds!'
+    - '&7Starting in &f4 &7seconds!'
+    - '&7Starting in &f3 &7seconds!'
+    - '&7Starting in &f2 &7seconds!'
+    - '&7Starting in &f1 &7second!'
+
+  countdown-end-sound:
+    sound:
+      type: BLOCK_NOTE_PLING
+      pitch: 0.5
+      volume: 3.0
+
+    on-messages:
+    - '&7Duel starting now!'
 

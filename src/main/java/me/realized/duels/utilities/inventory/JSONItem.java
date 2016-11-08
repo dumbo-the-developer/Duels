@@ -1,9 +1,10 @@
 package me.realized.duels.utilities.inventory;
 
-import me.realized.duels.utilities.compat.CompatHelper;
+import me.realized.duels.Core;
+import me.realized.duels.utilities.Helper;
+import me.realized.duels.utilities.compat.Attributes;
 import me.realized.duels.utilities.compat.Potions;
 import me.realized.duels.utilities.compat.SpawnEggs;
-import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -25,6 +26,7 @@ public class JSONItem {
     private final short data;
 
     private String itemData;
+    private List<Attributes.AttributeModifier> attributeModifiers;
 
     private Map<String, Integer> enchantments;
     private String displayName;
@@ -46,7 +48,18 @@ public class JSONItem {
         this.amount = item.getAmount() == 0 ? 1 : item.getAmount();
         this.data = item.getDurability();
 
-        if (!CompatHelper.isPre1_9()) {
+        Attributes attributes = new Attributes(item);
+        List<Attributes.AttributeModifier> modifiers = attributes.getModifiers();
+
+        if (!modifiers.isEmpty()) {
+            this.attributeModifiers = new ArrayList<>();
+
+            for (Attributes.AttributeModifier modifier : modifiers) {
+                attributeModifiers.add(modifier);
+            }
+        }
+
+        if (!Helper.isPre1_9()) {
             if (material.contains("POTION")) {
                 Potions potion = Potions.fromItemStack(item);
 
@@ -163,9 +176,24 @@ public class JSONItem {
     }
 
     public ItemStack construct() {
-        ItemStack item = new ItemStack(Material.getMaterial(this.material), this.amount, this.data);
+        Material type = Material.getMaterial(this.material);
 
-        if (!CompatHelper.isPre1_9() && itemData != null) {
+        if (type == null) {
+            Core.getInstance().warn("Error while loading kits: Failed to find material " + this.material + "!");
+            return null;
+        }
+
+        ItemStack item = new ItemStack(type, this.amount, this.data);
+
+        if (attributeModifiers != null) {
+            Attributes attributes = new Attributes(item);
+
+            for (Attributes.AttributeModifier modifier : attributeModifiers) {
+                item = attributes.addModifier(modifier.getName(), modifier.getAttrName(), modifier.getOperation(), modifier.getAmount());
+            }
+        }
+
+        if (!Helper.isPre1_9() && itemData != null) {
             List<String> itemData = Arrays.asList(this.itemData.split("-"));
 
             if (material.contains("POTION")) {
@@ -198,7 +226,7 @@ public class JSONItem {
             meta.setLore(lore);
         }
 
-        if (!Bukkit.getBukkitVersion().contains("1.7") && flags != null && !flags.isEmpty()) {
+        if (!Helper.isPre1_8() && flags != null && !flags.isEmpty()) {
             for (String flag : flags) {
                 meta.addItemFlags(ItemFlag.valueOf(flag));
             }
@@ -279,7 +307,7 @@ public class JSONItem {
                 result.setLore(meta.getLore());
             }
 
-            if (!CompatHelper.isPre1_8() && !meta.getItemFlags().isEmpty()) {
+            if (!Helper.isPre1_8() && !meta.getItemFlags().isEmpty()) {
                 for (ItemFlag flag : meta.getItemFlags()) {
                     result.addFlag(flag.name());
                 }

@@ -4,13 +4,13 @@ import me.realized.duels.Core;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.configuration.ConfigManager;
 import me.realized.duels.configuration.ConfigType;
+import me.realized.duels.configuration.MainConfig;
 import me.realized.duels.configuration.MessagesConfig;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -211,15 +211,6 @@ public class Helper {
         }
     }
 
-    public static boolean canTeleportTo(Player player, Location location) {
-        refreshChunk(location);
-        updatePosition(player, location);
-        PlayerTeleportEvent event = new PlayerTeleportEvent(player, player.getLocation(), location);
-        Bukkit.getPluginManager().callEvent(event);
-        return !(!player.getLocation().equals(location) && event.getFrom().equals(event.getTo())) && !event.isCancelled();
-
-    }
-
     private static void extinguish(final Player player) {
         new BukkitRunnable() {
 
@@ -316,6 +307,7 @@ public class Helper {
             String string = messages.getString(in);
 
             if (string != null) {
+                handleSound(sender, string);
                 sender.sendMessage(color(replaceWithArgs(string, replacers)));
                 return;
             }
@@ -324,25 +316,31 @@ public class Helper {
 
             if (list != null) {
                 for (String txt : list) {
+                    handleSound(sender, txt);
                     sender.sendMessage(color(replaceWithArgs(txt, replacers)));
                 }
             }
         } else {
+            handleSound(sender, in);
             sender.sendMessage(color(replaceWithArgs(in, replacers)));
         }
     }
 
-    public static void broadcast(Arena arena, String in, Object... replacers) {
-        MessagesConfig messages = (MessagesConfig) ConfigManager.getConfig(ConfigType.MESSAGES);
-        String string = messages.getString(in);
-        List<String> list = messages.getList(in);
+    public static void broadcast(Arena arena, String in, boolean isConfigMessage, Object... replacers) {
+        if (isConfigMessage) {
+            MessagesConfig messages = (MessagesConfig) ConfigManager.getConfig(ConfigType.MESSAGES);
+            String string = messages.getString(in);
+            List<String> list = messages.getList(in);
 
-        if (string != null) {
-            arena.broadcast(color(replaceWithArgs(string, replacers)));
-        } else if (list != null) {
-            for (String txt : list) {
-                arena.broadcast(color(replaceWithArgs(txt, replacers)));
+            if (string != null) {
+                handleArenaBroadcast(arena, string, color(replaceWithArgs(string, replacers)));
+            } else if (list != null) {
+                for (String txt : list) {
+                    handleArenaBroadcast(arena, txt, color(replaceWithArgs(txt, replacers)));
+                }
             }
+        } else {
+            handleArenaBroadcast(arena, in, color(replaceWithArgs(in, replacers)));
         }
     }
 
@@ -358,5 +356,36 @@ public class Helper {
                 Bukkit.broadcastMessage(color(replaceWithArgs(txt, replacers)));
             }
         }
+    }
+
+    private static void handleArenaBroadcast(Arena arena, String ogMessage, String message) {
+        for (UUID uuid : arena.getPlayers()) {
+            Player player = Bukkit.getPlayer(uuid);
+
+            if (player != null) {
+                handleSound(player, ogMessage);
+                player.sendMessage(message);
+            }
+        }
+    }
+
+    private static void handleSound(CommandSender sender, String msg) {
+        if (!(sender instanceof Player)) {
+            return;
+        }
+
+        MainConfig config = Core.getInstance().getConfiguration();
+
+        for (MainConfig.CustomSound sound : config.getSounds()) {
+            sound.handleMessage((Player) sender, msg);
+        }
+    }
+
+    public static boolean isPre1_9() {
+        return (Bukkit.getVersion().contains("1.8") || Bukkit.getVersion().contains("1.7"));
+    }
+
+    public static boolean isPre1_8() {
+        return Bukkit.getVersion().contains("1.7");
     }
 }

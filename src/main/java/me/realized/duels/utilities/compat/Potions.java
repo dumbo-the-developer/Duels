@@ -17,10 +17,13 @@ public class Potions {
         EMPTY, MUNDANE, THICK, AWKWARD
     }
 
-    private static final Class<?> itemStack = CompatHelper.getMinecraftStack();
-    private static final Class<?> nbtTagCompound = CompatHelper.getNBTTagCompound();
-    private static final Method asNMSCopy = CompatHelper.asNMSCopy();
-    private static final Method asBukkitCopy = CompatHelper.asBukkitCopy();
+    private static final Class<?> itemStack = Reflections.getNMSClass("ItemStack");
+    private static final Class<?> craftItemStack = Reflections.getCBClass("inventory.CraftItemStack");
+
+    private static final Class<?> nbtTagCompound = Reflections.getNMSClass("NBTTagCompound");
+
+    private static final Method asNMSCopy = Reflections.getMethod(craftItemStack, "asNMSCopy", ItemStack.class);
+    private static final Method asBukkitCopy = Reflections.getMethod(craftItemStack, "asBukkitCopy", itemStack);
 
     private final PotionType type;
     private final boolean strong, extended, linger, splash;
@@ -54,6 +57,11 @@ public class Potions {
     }
 
     public ItemStack toItemStack(int amount) {
+        // Because IDE is complaining
+        if (asBukkitCopy == null || asNMSCopy == null) {
+            return null;
+        }
+
         ItemStack item = new ItemStack(Material.POTION, amount);
 
         if (splash) {
@@ -185,6 +193,10 @@ public class Potions {
     }
 
     public static Potions fromItemStack(ItemStack item) {
+        if (asBukkitCopy == null || asNMSCopy == null) {
+            return null;
+        }
+
         if (item == null || !item.getType().name().contains("POTION")) {
             throw new IllegalArgumentException("item is not a potion");
         }

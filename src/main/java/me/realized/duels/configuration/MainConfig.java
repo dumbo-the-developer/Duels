@@ -2,13 +2,13 @@ package me.realized.duels.configuration;
 
 import me.realized.duels.Core;
 import me.realized.duels.utilities.config.Config;
+import org.bukkit.Sound;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class MainConfig extends Config {
-
-    // Class generated with a simple script :^) Automation is life.
 
     private boolean patchesToggleVanishOnStart;
     private boolean patchesSetBackLocation;
@@ -58,6 +58,8 @@ public class MainConfig extends Config {
     private String soupArenasStartingWith;
     private double soupHeartsToRegen;
 
+    private final Map<String, CustomSound> sounds = new HashMap<>();
+
     public MainConfig(Core instance) {
         super("config.yml", instance);
         handleLoad();
@@ -65,6 +67,8 @@ public class MainConfig extends Config {
 
     @Override
     public void handleLoad() {
+        sounds.clear();
+
         this.patchesToggleVanishOnStart = base.getBoolean("Patches.toggle-vanish-on-start", false);
         this.patchesSetBackLocation = base.getBoolean("Patches.set-back-location", true);
         this.patchesCancelTeleportToPlayersInMatch = base.getBoolean("Patches.cancel-teleport-to-players-in-match", true);
@@ -112,6 +116,34 @@ public class MainConfig extends Config {
         this.soupEnabled = base.getBoolean("Soup.enabled", false);
         this.soupArenasStartingWith = base.getString("Soup.arenas-starting-with", "soup arena");
         this.soupHeartsToRegen = base.getDouble("Soup.hearts-to-regen", 3.5);
+
+        if (base.isConfigurationSection("Sounds")) {
+            for (String name : base.getConfigurationSection("Sounds").getKeys(false)) {
+
+                if (!base.isConfigurationSection("Sounds." + name + ".sound")) {
+                    continue;
+                }
+
+                ConfigurationSection soundSection = base.getConfigurationSection("Sounds." + name + ".sound");
+                String type = soundSection.getString("type");
+                Sound sound = null;
+
+                for (Sound soundInstance : Sound.values()) {
+                    if (soundInstance.name().equalsIgnoreCase(type)) {
+                        sound = soundInstance;
+                        break;
+                    }
+                }
+
+                if (sound == null) {
+                    continue;
+                }
+
+                double pitch = soundSection.getDouble("pitch");
+                double volume = soundSection.getDouble("volume");
+                sounds.put(name, new CustomSound(sound, pitch, volume, base.getStringList("Sounds." + name + ".on-messages")));
+            }
+        }
     }
 
     public boolean isPatchesToggleVanishOnStart() {
@@ -272,5 +304,38 @@ public class MainConfig extends Config {
 
     public double getSoupHeartsToRegen() {
         return soupHeartsToRegen;
+    }
+
+    public CustomSound getSound(String name) {
+        return sounds.get(name);
+    }
+
+    public Collection<CustomSound> getSounds() {
+        return sounds.values();
+    }
+
+    public class CustomSound {
+
+        private final Sound sound;
+        private final double pitch;
+        private final double volume;
+        private final List<String> messages;
+
+        CustomSound(Sound sound, double pitch, double volume, List<String> messages) {
+            this.sound = sound;
+            this.pitch = pitch;
+            this.volume = volume;
+            this.messages = messages;
+        }
+
+        public void handleMessage(Player player, String msg) {
+            if (messages.contains(msg)) {
+                play(player);
+            }
+        }
+
+        public void play(Player player) {
+            player.playSound(player.getLocation(), sound, (float) volume, (float) pitch);
+        }
     }
 }
