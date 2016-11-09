@@ -65,12 +65,12 @@ public class Attributes {
         }
     }
 
-    public ItemStack addModifier(String name, String attrName, int operation, double amount) {
+    public ItemStack addModifier(String name, String attrName, int operation, double amount, String slot) {
         // Example Usage: ItemStack new = new Attributes(old).addModifier("GENERIC_MAX_HEALTH", "generic.maxHealth", 0, 20)
         // setItemInHand(new)
 
         try {
-            Object compound = generateModifier(name, attrName, operation, amount);
+            Object compound = generateModifier(name, attrName, operation, amount, slot);
             Object stack = asNMSCopy.invoke(null, item);
             Object tagCompound = getTag.invoke(stack);
 
@@ -89,7 +89,7 @@ public class Attributes {
         return item;
     }
 
-    private Object generateModifier(String name, String attrName, int operation, double amount) {
+    private Object generateModifier(String name, String attrName, int operation, double amount, String slot) {
         try {
             Object compound = nbtTagCompound.newInstance();
             setString.invoke(compound, "Name", name);
@@ -100,6 +100,11 @@ public class Attributes {
             UUID random = UUID.randomUUID();
             setLong.invoke(compound, "UUIDMost", random.getMostSignificantBits());
             setLong.invoke(compound, "UUIDLeast", random.getLeastSignificantBits());
+
+            if (slot != null && !slot.equals("")) {
+                setString.invoke(compound, "Slot", slot);
+            }
+
             return compound;
         } catch (Exception e) {
             return null;
@@ -120,7 +125,14 @@ public class Attributes {
                 String attrName = (String) getString.invoke(compound, "AttributeName");
                 int operation = (int) getInt.invoke(compound, "Operation");
                 double amount = (double) getDouble.invoke(compound, "Amount");
-                result.add(new AttributeModifier(name, attrName, operation, amount));
+                AttributeModifier modifier = new AttributeModifier(name, attrName, operation, amount);
+                Object slot = getString.invoke(compound, "Slot");
+
+                if (slot != null && !slot.equals("")) {
+                    modifier.setSlot((String) slot);
+                }
+
+                result.add(modifier);
             }
         } catch (Exception ignored) {}
         return result;
@@ -136,12 +148,21 @@ public class Attributes {
         private final String attrName;
         private final int operation;
         private final double amount;
+        private String slot;
 
         public AttributeModifier(String name, String attrName, int operation, double amount) {
             this.name = name;
             this.attrName = attrName;
             this.operation = operation;
             this.amount = amount;
+        }
+
+        public String getSlot() {
+            return slot;
+        }
+
+        public void setSlot(String slot) {
+            this.slot = slot;
         }
 
         public String getName() {

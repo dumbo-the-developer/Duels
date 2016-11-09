@@ -24,10 +24,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class KitManager implements Listener, ICanHandleReload {
 
@@ -77,7 +74,8 @@ public class KitManager implements Listener, ICanHandleReload {
         }
 
         instance.info("Loaded " + kits.size() + " kit(s).");
-        gui = new GUI<>("Kit Selection", new ArrayList<>(kits.values()), config.getGuiKitSelectorRows(), new GUIListener() {
+
+        gui = new GUI<>("Kit Selection", getKits(), config.getGuiKitSelectorRows(), new GUIListener() {
 
             @Override
             public void onClick(InventoryClickEvent event) {
@@ -173,12 +171,12 @@ public class KitManager implements Listener, ICanHandleReload {
 
     public void addKit(String name, Kit kit) {
         kits.put(name, kit);
-        gui.update(new ArrayList<>(kits.values()));
+        gui.update(getKits());
     }
 
     public void removeKit(String name) {
         kits.remove(name);
-        gui.update(new ArrayList<>(kits.values()));
+        gui.update(getKits());
     }
 
     public Kit getKit(Player player, Inventory inventory, int slot) {
@@ -194,7 +192,15 @@ public class KitManager implements Listener, ICanHandleReload {
     }
 
     public List<Kit> getKits() {
-        return new ArrayList<>(kits.values());
+        List<Kit> kits = new ArrayList<>(this.kits.values());
+        Collections.sort(kits, new Comparator<Kit>() {
+            @Override
+            public int compare(Kit kit1, Kit kit2) {
+                return kit1.getName().compareTo(kit2.getName());
+            }
+        });
+
+        return kits;
     }
 
     public List<String> getKitNames() {

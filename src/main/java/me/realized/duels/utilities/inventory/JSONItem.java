@@ -189,7 +189,7 @@ public class JSONItem {
             Attributes attributes = new Attributes(item);
 
             for (Attributes.AttributeModifier modifier : attributeModifiers) {
-                item = attributes.addModifier(modifier.getName(), modifier.getAttrName(), modifier.getOperation(), modifier.getAmount());
+                item = attributes.addModifier(modifier.getName(), modifier.getAttrName(), modifier.getOperation(), modifier.getAmount(), modifier.getSlot());
             }
         }
 

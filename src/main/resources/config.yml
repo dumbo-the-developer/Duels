@@ -292,6 +292,7 @@ Sounds:
   countdown-ongoing-sound:
     # Configure your sound here
     sound:
+      # If your server version is below 1.9, use NOTE_PIANO
       type: BLOCK_NOTE_PLING
       pitch: 0.95
       volume: 3.0
