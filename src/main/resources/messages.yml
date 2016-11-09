@@ -192,6 +192,7 @@ Errors:
   no-request: '&cThat player did not send you a request!'
   alive-only: '&cCannot send a request to dead players.'
   empty-inventory-only: '&cYour inventory must be empty to use duel related commands.'
+  is-in-creative: '&cCannot accept duel requests while in creative mode.'
   blocked-while-in-match:
     teleport: '&cYou may not teleport while in a match.'
     drop-item: '&cYou may not drop items while in duel.'

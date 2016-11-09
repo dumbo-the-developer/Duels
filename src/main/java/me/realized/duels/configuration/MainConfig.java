@@ -20,6 +20,7 @@ public class MainConfig extends Config {
     private boolean patchesForceAllowPvp;
     private boolean patchesForceAllowTeleportation;
     private boolean patchesCancelMatchIfMoved;
+    private boolean patchesDisallowCreativeDueling;
 
     private boolean countdownEnabled;
     private List<String> countdownMessages;
@@ -79,6 +80,7 @@ public class MainConfig extends Config {
         this.patchesForceAllowPvp = base.getBoolean("Patches.force-allow-pvp", true);
         this.patchesForceAllowTeleportation = base.getBoolean("Patches.force-allow-teleportation", true);
         this.patchesCancelMatchIfMoved = base.getBoolean("Patches.cancel-match-if-moved", false);
+        this.patchesDisallowCreativeDueling = base.getBoolean("Patches.disallow-creative-dueling", false);
 
         this.countdownEnabled = base.getBoolean("Countdown.enabled", true);
         this.countdownMessages = base.isList("Countdown.messages") ? base.getStringList("Countdown.messages") : new ArrayList<String>();
@@ -184,6 +186,10 @@ public class MainConfig extends Config {
 
     public boolean isPatchesCancelMatchIfMoved() {
         return patchesCancelMatchIfMoved;
+    }
+
+    public boolean isPatchesDisallowCreativeDueling() {
+        return patchesDisallowCreativeDueling;
     }
 
     public boolean isCountdownEnabled() {

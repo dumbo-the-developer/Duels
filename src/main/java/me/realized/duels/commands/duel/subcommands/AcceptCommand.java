@@ -7,6 +7,7 @@ import me.realized.duels.dueling.RequestManager;
 import me.realized.duels.event.RequestHandleEvent;
 import me.realized.duels.utilities.Helper;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
 public class AcceptCommand extends SubCommand {
@@ -17,6 +18,11 @@ public class AcceptCommand extends SubCommand {
 
     @Override
     public void execute(Player sender, String[] args) {
+        if (config.isPatchesDisallowCreativeDueling() && sender.getGameMode() == GameMode.CREATIVE) {
+            Helper.pm(sender, "Errors.is-in-creative", true);
+            return;
+        }
+
         Player target = Bukkit.getPlayerExact(args[1]);
 
         if (target == null) {

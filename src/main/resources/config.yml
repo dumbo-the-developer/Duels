@@ -50,7 +50,8 @@ Patches:
   # You may edit the sent message in messages.yml.
   cancel-match-if-moved: false
 
-
+  # If enabled, players in creative will not be able to accept duel requests.
+  disallow-creative-dueling: false
 
 
 

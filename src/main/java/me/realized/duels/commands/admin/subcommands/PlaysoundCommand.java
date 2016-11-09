@@ -1,16 +1,11 @@
 package me.realized.duels.commands.admin.subcommands;
 
-import me.realized.duels.Core;
 import me.realized.duels.commands.SubCommand;
 import me.realized.duels.configuration.MainConfig;
 import me.realized.duels.utilities.Helper;
 import org.bukkit.entity.Player;
 
 public class PlaysoundCommand extends SubCommand {
-
-    // The only usage of config in subcommand classes of DuelsCommand.
-    // Might need to move to SubCommand class if used multiple times in classes
-    private final MainConfig config = Core.getInstance().getConfiguration();
 
     public PlaysoundCommand() {
         super("playsound", "playsound [name]", "duels.admin", "Plays the selected sound if exists.", 2);

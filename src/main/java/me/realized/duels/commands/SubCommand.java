@@ -2,6 +2,7 @@ package me.realized.duels.commands;
 
 import me.realized.duels.Core;
 import me.realized.duels.arena.ArenaManager;
+import me.realized.duels.configuration.MainConfig;
 import me.realized.duels.data.DataManager;
 import me.realized.duels.dueling.DuelManager;
 import me.realized.duels.dueling.RequestManager;
@@ -16,6 +17,7 @@ public abstract class SubCommand {
     private final String description;
     private final int length;
 
+    protected final MainConfig config = Core.getInstance().getConfiguration();
     protected final RequestManager requestManager = Core.getInstance().getRequestManager();
     protected final DataManager dataManager = Core.getInstance().getDataManager();
     protected final ArenaManager arenaManager = Core.getInstance().getArenaManager();
