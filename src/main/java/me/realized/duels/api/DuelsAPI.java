@@ -44,14 +44,14 @@ public class DuelsAPI {
      *
      * @param player - player to check if in match.
      *
-     * @return whether player is in match or not.
+     * @return true if player is in match, false otherwise.
      */
     public static boolean isInMatch(Player player) {
         return instance.getArenaManager().isInMatch(player);
     }
 
     /**
-     * @return version of the plugin.
+     * @return version string of the plugin.
      */
     public static String getVersion() {
         return instance.getDescription().getVersion();

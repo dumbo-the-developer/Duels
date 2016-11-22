@@ -1,11 +1,10 @@
 package me.realized.duels.arena;
 
 import me.realized.duels.Core;
-import me.realized.duels.configuration.ConfigManager;
-import me.realized.duels.configuration.ConfigType;
 import me.realized.duels.configuration.MainConfig;
+import me.realized.duels.event.MatchEndEvent;
 import me.realized.duels.utilities.Helper;
-import me.realized.duels.utilities.gui.ICanHandleGUI;
+import me.realized.duels.utilities.gui.GUIItem;
 import me.realized.duels.utilities.inventory.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -17,7 +16,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
-public class Arena implements ICanHandleGUI {
+public class Arena implements GUIItem {
+
+    private static final MainConfig config = Core.getInstance().getConfiguration();
 
     private final String name;
 
@@ -28,8 +29,6 @@ public class Arena implements ICanHandleGUI {
     private List<UUID> players = new ArrayList<>();
     private Match current;
     private ItemStack displayed;
-
-    private final MainConfig config = (MainConfig) ConfigManager.getConfig(ConfigType.MAIN);
 
     public Arena(String name, boolean disabled) {
         this.name = name;
@@ -103,6 +102,10 @@ public class Arena implements ICanHandleGUI {
 
     public void addPlayers(Player... players) {
         for (Player player : players) {
+            if (current != null) {
+                current.setDead(player.getUniqueId(), false);
+            }
+
             this.players.add(player.getUniqueId());
         }
     }
@@ -162,6 +165,22 @@ public class Arena implements ICanHandleGUI {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Arena arena = (Arena) o;
+
+        return name != null ? name.equals(arena.name) : arena.name == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return name != null ? name.hashCode() : 0;
+    }
+
+    @Override
     public ItemStack toDisplay() {
         return displayed;
     }
@@ -174,12 +193,9 @@ public class Arena implements ICanHandleGUI {
     public class Match {
 
         private final long start;
-        private final Map<UUID, Location> lastLocations = new HashMap<>();
-        private final Map<UUID, InventoryData> inventories = new HashMap<>();
         private final Map<UUID, Boolean> dead = new HashMap<>();
 
-        private long end;
-        private double finishingHealth;
+        private MatchEndEvent.EndReason reason = MatchEndEvent.EndReason.OTHER;
 
         Match() {
             this.start = System.currentTimeMillis();
@@ -189,63 +205,32 @@ public class Arena implements ICanHandleGUI {
             return start;
         }
 
-        public int getDuration() {
-            return (int) (end - start);
+        public MatchEndEvent.EndReason getEndReason() {
+            return reason;
         }
 
-        public void setEndTimeMillis(long value) {
-            this.end = value;
+        public void setEndReason(MatchEndEvent.EndReason reason) {
+            if (reason != MatchEndEvent.EndReason.OTHER) {
+                return;
+            }
+
+            this.reason = reason;
         }
 
-        public double getFinishingHealth() {
-            return finishingHealth;
-        }
-
-        public void setFinishingHealth(double finishingHealth) {
-            this.finishingHealth = finishingHealth;
-        }
-
-        public Location getLocation(UUID uuid) {
-            return lastLocations.get(uuid);
-        }
-
-        public InventoryData getInventories(UUID uuid) {
-            return inventories.get(uuid);
+        public long getDuration() {
+            return System.currentTimeMillis() - start;
         }
 
         public boolean wasDead(UUID uuid) {
             return dead.get(uuid);
         }
 
-        public void setDead(UUID uuid) {
-            dead.put(uuid, true);
+        public void setDead(UUID uuid, boolean value) {
+            dead.put(uuid, value);
         }
 
-        public void setData(Player... players) {
-            for (Player player : players) {
-                lastLocations.put(player.getUniqueId(), player.getLocation().clone());
-                inventories.put(player.getUniqueId(), new InventoryData(player.getInventory().getContents().clone(), player.getInventory().getArmorContents().clone()));
-                dead.put(player.getUniqueId(), false);
-            }
-        }
-    }
-
-    public class InventoryData {
-
-        private final ItemStack[] armor;
-        private final ItemStack[] inventory;
-
-        InventoryData(ItemStack[] inventory, ItemStack[] armor) {
-            this.inventory = inventory;
-            this.armor = armor;
-        }
-
-        public ItemStack[] getArmorContents() {
-            return armor;
-        }
-
-        public ItemStack[] getInventoryContents() {
-            return inventory;
+        public Collection<UUID> getMatchStarters() {
+            return dead.keySet();
         }
     }
 
@@ -262,7 +247,6 @@ public class Arena implements ICanHandleGUI {
 
         @Override
         public void run() {
-            // Could use Arena#broadcast, but then Sound options won't get handled
             Helper.broadcast(Arena.this, messages.get(index), false);
             index++;
 

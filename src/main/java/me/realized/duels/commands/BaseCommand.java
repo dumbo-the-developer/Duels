@@ -55,5 +55,5 @@ public abstract class BaseCommand implements CommandExecutor {
         return true;
     }
 
-    protected abstract void execute(Player sender, String[] args);
+    public abstract void execute(Player sender, String[] args);
 }

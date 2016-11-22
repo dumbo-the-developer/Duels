@@ -3,7 +3,7 @@ package me.realized.duels.commands.admin.subcommands;
 import me.realized.duels.Core;
 import me.realized.duels.commands.SubCommand;
 import me.realized.duels.utilities.Helper;
-import me.realized.duels.utilities.ReloadType;
+import me.realized.duels.utilities.Reloadable;
 import org.bukkit.entity.Player;
 
 public class ReloadCommand extends SubCommand {
@@ -17,12 +17,12 @@ public class ReloadCommand extends SubCommand {
         Core instance = Core.getInstance();
 
         if (args.length > 1 && args[1].equalsIgnoreCase("weak")) {
-            instance.reload(ReloadType.WEAK);
+            instance.reload(Reloadable.ReloadType.WEAK);
             Helper.pm(sender, "&a" + instance.getDescription().getFullName() + ": Weak reload complete.", false);
             return;
         }
 
-        instance.reload(ReloadType.STRONG);
+        instance.reload(Reloadable.ReloadType.STRONG);
         Helper.pm(sender, "&a" + instance.getDescription().getFullName() + ": Reload complete.", false);
     }
 }

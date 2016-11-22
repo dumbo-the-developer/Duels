@@ -10,8 +10,15 @@ public class MatchEndEvent extends MatchEvent {
 
     private static final HandlerList handlers = new HandlerList();
 
-    public MatchEndEvent(List<UUID> players, Arena arena) {
+    private final EndReason reason;
+
+    public MatchEndEvent(List<UUID> players, Arena arena, EndReason reason) {
         super(players, arena);
+        this.reason = reason;
+    }
+
+    public EndReason getReason() {
+        return reason;
     }
 
     @Override
@@ -21,5 +28,10 @@ public class MatchEndEvent extends MatchEvent {
 
     public static HandlerList getHandlerList() {
         return handlers;
+    }
+
+    public enum EndReason {
+
+        OPPONENT_QUIT, OPPONENT_DEFEAT, PLUGIN_DISABLE, MAX_TIME_REACHED, OTHER
     }
 }

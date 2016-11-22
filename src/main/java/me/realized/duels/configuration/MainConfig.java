@@ -32,6 +32,7 @@ public class MainConfig extends Config {
     private String guiAvailableArenaDisplayname;
     private String guiInUseArenaDisplayname;
 
+    private boolean spectatingRequiresClearedInventory;
     private List<String> spectatingWhitelistedCommands;
 
     private boolean duelingMatchMaxDurationEnabled;
@@ -50,7 +51,7 @@ public class MainConfig extends Config {
     private List<String> duelingDisabledCommands;
 
     private boolean duelZoneEnabled;
-    private String duelZoneRegion;
+    private List<String> duelZoneRegions;
 
     private boolean statsDisplayMatches;
     private int statsAmountOfMatches;
@@ -92,6 +93,7 @@ public class MainConfig extends Config {
         this.guiAvailableArenaDisplayname = base.getString("GUI.available-arena-displayname", "&9{NAME}: &aAvailable");
         this.guiInUseArenaDisplayname = base.getString("GUI.in-use-arena-displayname", "&9{NAME}: &cIn Use");
 
+        this.spectatingRequiresClearedInventory = base.getBoolean("Spectating.requires-cleared-inventory", false);
         this.spectatingWhitelistedCommands = base.isList("Spectating.whitelisted-commands") ? base.getStringList("Spectating.whitelisted-commands") : new ArrayList<String>();
 
         this.duelingMatchMaxDurationEnabled = base.getBoolean("Dueling.match-max-duration.enabled", true);
@@ -110,7 +112,7 @@ public class MainConfig extends Config {
         this.duelingDisabledCommands = base.isList("Dueling.disabled-commands") ? base.getStringList("Dueling.disabled-commands") : new ArrayList<String>();
 
         this.duelZoneEnabled = base.getBoolean("DuelZone.enabled", false);
-        this.duelZoneRegion = base.getString("DuelZone.region", "spawn");
+        this.duelZoneRegions = base.isList("DuelZone.regions") ? base.getStringList("DuelZone.regions") : Arrays.asList("spawn", "duelspawn");
 
         this.statsDisplayMatches = base.getBoolean("Stats.display-matches", true);
         this.statsAmountOfMatches = base.getInt("Stats.amount-of-matches", 10);
@@ -224,6 +226,10 @@ public class MainConfig extends Config {
         return guiInUseArenaDisplayname;
     }
 
+    public boolean isSpectatingRequiresClearedInventory() {
+        return spectatingRequiresClearedInventory;
+    }
+
     public List<String> getSpectatingWhitelistedCommands() {
         return spectatingWhitelistedCommands;
     }
@@ -288,8 +294,8 @@ public class MainConfig extends Config {
         return duelZoneEnabled;
     }
 
-    public String getDuelZoneRegion() {
-        return duelZoneRegion;
+    public List<String> getDuelZoneRegions() {
+        return duelZoneRegions;
     }
 
     public boolean isStatsDisplayMatches() {

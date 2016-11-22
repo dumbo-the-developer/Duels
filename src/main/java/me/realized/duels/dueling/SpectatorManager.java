@@ -4,12 +4,15 @@ import me.realized.duels.Core;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.configuration.MainConfig;
+import me.realized.duels.data.PlayerData;
+import me.realized.duels.data.PlayerManager;
 import me.realized.duels.hooks.EssentialsHook;
 import me.realized.duels.utilities.Helper;
 import me.realized.duels.utilities.inventory.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -25,17 +28,19 @@ import java.util.List;
 import java.util.UUID;
 
 public class SpectatorManager implements Listener {
-
+    
     private final MainConfig config;
     private final EssentialsHook hook;
-    private final ArenaManager manager;
+    private final PlayerManager playerManager;
+    private final ArenaManager arenaManager;
 
     private List<Spectator> spectators = new ArrayList<>();
 
     public SpectatorManager(Core instance) {
         this.config = instance.getConfiguration();
         this.hook = (EssentialsHook) instance.getHookManager().get("Essentials");
-        this.manager = instance.getArenaManager();
+        this.playerManager = instance.getPlayerManager();
+        this.arenaManager = instance.getArenaManager();
         Bukkit.getPluginManager().registerEvents(this, instance);
     }
 
@@ -45,22 +50,24 @@ public class SpectatorManager implements Listener {
             return;
         }
 
-        if (manager.isInMatch(base)) {
+        if (arenaManager.isInMatch(base)) {
             Helper.pm(base, "Errors.already-in-match.sender", true);
             return;
         }
 
-        Arena arena = manager.getArena(target);
+        Arena arena = arenaManager.getArena(target);
 
         if (arena == null) {
             Helper.pm(base, "Errors.players-in-match-only", true);
             return;
         }
 
+        playerManager.setData(base);
+        Helper.reset(base, true);
         Spectator spectator = new Spectator(base, target.getName(), arena);
 
         // Hide the base player from the players in match
-        for (UUID uuid : arena.getPlayers()) {
+        for (UUID uuid : arena.getCurrentMatch().getMatchStarters()) {
             Player player = Bukkit.getPlayer(uuid);
 
             if (player == null) {
@@ -102,17 +109,25 @@ public class SpectatorManager implements Listener {
     }
 
     public void stopSpectating(Player base) {
-        stopSpectating(base, getByPlayer(base));
+        stopSpectating(base, getByPlayer(base), false);
     }
 
-    private void stopSpectating(Player base, Spectator spectator) {
+    private void stopSpectating(Player base, Spectator spectator, boolean matchEnd) {
         spectators.remove(spectator);
         base.teleport(spectator.getBase());
+        hook.setBackLocation(base, spectator.getBase());
         Helper.reset(base, false);
         base.setFlying(false);
         base.setAllowFlight(false);
 
-        for (UUID uuid : spectator.getTarget().getPlayers()) {
+        PlayerData data = playerManager.getData(base);
+
+        if (data != null) {
+            data.restore(base, !config.isSpectatingRequiresClearedInventory());
+            playerManager.removeData(base);
+        }
+
+        for (UUID uuid : spectator.getTarget().getCurrentMatch().getMatchStarters()) {
             Player player = Bukkit.getPlayer(uuid);
 
             if (player == null) {
@@ -122,7 +137,11 @@ public class SpectatorManager implements Listener {
             player.showPlayer(base);
         }
 
-        Helper.pm(base, "Spectating.stopped-spectating", true, "{PLAYER}", spectator.getSpectatingName());
+        if (!matchEnd) {
+            Helper.pm(base, "Spectating.stopped-spectating", true, "{PLAYER}", spectator.getSpectatingName());
+        } else {
+            Helper.pm(base, "Spectating.spectating-match-ended", true);
+        }
     }
 
     public void handleMatchEnd(Arena arena) {
@@ -131,35 +150,20 @@ public class SpectatorManager implements Listener {
         while (iterator.hasNext()) {
             Spectator spectator = iterator.next();
 
-            if (!spectator.getTarget().getName().equals(arena.getName())) {
+            if (!spectator.getTarget().equals(arena)) {
                 continue;
             }
 
-            Player base = Bukkit.getPlayer(spectator.getOwner());
             iterator.remove();
+
+            Player base = Bukkit.getPlayer(spectator.getOwner());
 
             // Just in case
             if (base == null) {
                 continue;
             }
 
-            Helper.reset(base, false);
-            base.setFlying(false);
-            base.setAllowFlight(false);
-            base.teleport(spectator.getBase());
-            hook.setBackLocation(base, spectator.getBase());
-
-            for (UUID uuid : arena.getPlayers()) {
-                Player player = Bukkit.getPlayer(uuid);
-
-                if (player == null) {
-                    continue;
-                }
-
-                player.showPlayer(base);
-            }
-
-            Helper.pm(base, "Spectating.spectating-match-ended", true);
+            stopSpectating(base, spectator, true);
         }
     }
 
@@ -251,7 +255,7 @@ public class SpectatorManager implements Listener {
             return;
         }
 
-        stopSpectating(base, spectator);
+        stopSpectating(base, spectator, false);
     }
 
     // Listen to spectator quitting, set back to starting location
@@ -295,20 +299,25 @@ public class SpectatorManager implements Listener {
         event.setCancelled(true);
     }
 
-    // Cancel any type of damaging.
     @EventHandler (ignoreCancelled = true)
     public void on(EntityDamageByEntityEvent event) {
-        if (!(event.getDamager() instanceof Player)) {
-            return;
+        if (event.getDamager() instanceof Player) {
+            Player damager = (Player) event.getDamager();
+
+            if (!isSpectating(damager)) {
+                return;
+            }
+
+            Helper.pm(damager, "Errors.cannot-use-while-spectating", true);
+            event.setCancelled(true);
+        } else if (event.getDamager() instanceof Projectile && event.getEntity() instanceof Player) {
+            Player player = (Player) event.getEntity();
+
+            if (!isSpectating(player)) {
+                return;
+            }
+
+            event.setCancelled(true);
         }
-
-        Player damager = (Player) event.getDamager();
-
-        if (!isSpectating(damager)) {
-            return;
-        }
-
-        event.setCancelled(true);
-        Helper.pm(damager, "Errors.cannot-use-while-spectating", true);
     }
 }

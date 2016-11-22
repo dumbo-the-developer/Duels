@@ -12,7 +12,7 @@ public class SpectateCommand extends BaseCommand {
     }
 
     @Override
-    protected void execute(Player sender, String[] args) {
+    public void execute(Player sender, String[] args) {
         if (spectatorManager.isSpectating(sender)) {
             spectatorManager.stopSpectating(sender);
             return;
@@ -23,7 +23,7 @@ public class SpectateCommand extends BaseCommand {
             return;
         }
 
-        if (!Helper.hasEmptyInventory(sender)) {
+        if (config.isSpectatingRequiresClearedInventory() && !Helper.hasEmptyInventory(sender)) {
             Helper.pm(sender, "Errors.empty-inventory-only", true);
             return;
         }

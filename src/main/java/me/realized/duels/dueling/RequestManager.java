@@ -1,12 +1,11 @@
 package me.realized.duels.dueling;
 
-import me.realized.duels.utilities.ICanHandleReload;
-import me.realized.duels.utilities.ReloadType;
+import me.realized.duels.utilities.Reloadable;
 import org.bukkit.entity.Player;
 
 import java.util.*;
 
-public class RequestManager implements ICanHandleReload {
+public class RequestManager implements Reloadable {
 
     private Map<UUID, List<Request>> requests = new HashMap<>();
 

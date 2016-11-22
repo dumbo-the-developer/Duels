@@ -1,6 +1,6 @@
 package me.realized.duels.kits;
 
-import me.realized.duels.utilities.gui.ICanHandleGUI;
+import me.realized.duels.utilities.gui.GUIItem;
 import me.realized.duels.utilities.inventory.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Kit implements ICanHandleGUI {
+public class Kit implements GUIItem {
 
     private final String name;
     private ItemStack displayed;

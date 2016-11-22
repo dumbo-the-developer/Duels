@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.realized</groupId>
     <artifactId>duels</artifactId>
-    <version>2.1.1</version>
+    <version>2.2.0</version>
     <name>Duels</name>
     <description>Everything you need for a duel system in blockgame.</description>
 
@@ -79,7 +79,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.10.2-R0.1-SNAPSHOT</version>
+            <version>1.11-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

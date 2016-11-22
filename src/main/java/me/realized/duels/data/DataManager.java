@@ -2,8 +2,7 @@ package me.realized.duels.data;
 
 import me.realized.duels.Core;
 import me.realized.duels.event.UserCreateEvent;
-import me.realized.duels.utilities.ICanHandleReload;
-import me.realized.duels.utilities.ReloadType;
+import me.realized.duels.utilities.Reloadable;
 import me.realized.duels.utilities.Storage;
 import me.realized.duels.utilities.location.SimpleLocation;
 import org.bukkit.Bukkit;
@@ -17,15 +16,14 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
-public class DataManager implements Listener, ICanHandleReload {
+public class DataManager implements Listener, Reloadable {
 
     private final Core instance;
 
     private File folder;
-    private Map<UUID, UserData> users = new ConcurrentHashMap<>();
-    private Location lobby = null;
+    private Map<UUID, UserData> users = new HashMap<>();
+    private Location lobby;
 
     public DataManager(Core instance) {
         this.instance = instance;
@@ -122,8 +120,6 @@ public class DataManager implements Listener, ICanHandleReload {
     }
 
     public void setLobby(Player player) {
-        this.lobby = player.getLocation().clone();
-
         try {
             File dataFile = new File(instance.getDataFolder(), "lobby.json");
             boolean generated = dataFile.createNewFile();
@@ -136,13 +132,15 @@ public class DataManager implements Listener, ICanHandleReload {
             instance.getGson().toJson(new SimpleLocation(lobby), writer);
             writer.flush();
             writer.close();
+
+            this.lobby = player.getLocation().clone();
         } catch (IOException ex) {
             instance.warn("Failed to save lobby location! (" + ex.getMessage() + ")");
         }
     }
 
     public Location getLobby() {
-        return lobby;
+        return lobby != null ? lobby : Bukkit.getWorlds().get(0).getSpawnLocation();
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -179,6 +177,7 @@ public class DataManager implements Listener, ICanHandleReload {
         saveUser(event.getPlayer().getUniqueId(), true);
         users.remove(event.getPlayer().getUniqueId());
         Storage.remove(event.getPlayer());
+        instance.getPlayerManager().removeData(event.getPlayer());
     }
 
     @Override

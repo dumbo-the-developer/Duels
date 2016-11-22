@@ -47,19 +47,24 @@ public class Attributes {
 
         try {
             Object stack = asNMSCopy.invoke(null, item);
+
+            if (stack == null) {
+                return;
+            }
+
             Object tagCompound = getTag.invoke(stack);
 
             if (tagCompound == null) {
                 tagCompound = nbtTagCompound.newInstance();
             }
 
-            Object nbtList = getList.invoke(tagCompound, "AttributeModifiers", 10);
+            Object attributes = getList.invoke(tagCompound, "AttributeModifiers", 10);
 
-            if (nbtList == null) {
+            if (attributes == null) {
                 return;
             }
 
-            this.list = nbtList;
+            this.list = attributes;
         } catch (Exception e) {
             e.printStackTrace();
         }

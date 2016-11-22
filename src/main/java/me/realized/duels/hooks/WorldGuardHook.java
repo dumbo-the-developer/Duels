@@ -7,6 +7,8 @@ import me.realized.duels.Core;
 import me.realized.duels.configuration.MainConfig;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 public class WorldGuardHook extends PluginHook {
 
     private final MainConfig config;
@@ -21,7 +23,7 @@ public class WorldGuardHook extends PluginHook {
             return true;
         }
 
-        String name = config.getDuelZoneRegion();
+        List<String> allowedRegions = config.getDuelZoneRegions();
         WorldGuardPlugin worldguard = (WorldGuardPlugin) getPlugin();
         ApplicableRegionSet regions = worldguard.getRegionManager(player.getWorld()).getApplicableRegions(player.getLocation());
 
@@ -30,7 +32,7 @@ public class WorldGuardHook extends PluginHook {
         }
 
         for (ProtectedRegion region : regions.getRegions()) {
-            if (region.getId().equals(name)) {
+            if (allowedRegions.contains(region.getId())) {
                 return true;
             }
         }

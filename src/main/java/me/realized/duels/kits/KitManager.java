@@ -9,8 +9,7 @@ import me.realized.duels.dueling.RequestManager;
 import me.realized.duels.dueling.Settings;
 import me.realized.duels.event.RequestSendEvent;
 import me.realized.duels.utilities.Helper;
-import me.realized.duels.utilities.ICanHandleReload;
-import me.realized.duels.utilities.ReloadType;
+import me.realized.duels.utilities.Reloadable;
 import me.realized.duels.utilities.Storage;
 import me.realized.duels.utilities.gui.GUI;
 import me.realized.duels.utilities.gui.GUIListener;
@@ -26,7 +25,7 @@ import org.bukkit.inventory.ItemStack;
 import java.io.*;
 import java.util.*;
 
-public class KitManager implements Listener, ICanHandleReload {
+public class KitManager implements Listener, Reloadable {
 
     private final Core instance;
     private final MainConfig config;

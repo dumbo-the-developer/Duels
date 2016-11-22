@@ -1,14 +1,14 @@
-package me.realized.duels.commands.other;
+package me.realized.duels.commands.duel.subcommands;
 
-import me.realized.duels.commands.BaseCommand;
+import me.realized.duels.commands.SubCommand;
 import me.realized.duels.data.UserData;
 import me.realized.duels.utilities.Helper;
 import org.bukkit.entity.Player;
 
-public class ToggleCommand extends BaseCommand {
+public class ToggleCommand extends SubCommand {
 
     public ToggleCommand() {
-        super("toggle", "duels.toggle");
+        super("toggle", "toggle", "duels.toggle", "Toggle your duel requests.", 1);
     }
 
     @Override

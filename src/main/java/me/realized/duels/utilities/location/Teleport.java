@@ -12,17 +12,22 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
+import java.util.logging.Level;
+
 public class Teleport implements Listener {
 
+    private final Core instance;
     private final MainConfig config;
 
     public Teleport(Core instance) {
+        this.instance = instance;
         this.config = instance.getConfiguration();
         Bukkit.getPluginManager().registerEvents(this, instance);
     }
 
     public boolean isAuthorizedFor(Player base, Location to) {
         if (to == null || to.getWorld() == null) {
+            instance.logToFile(getClass(), base.getUniqueId() + " (" + base.getName() + ") is not authorized to teleport to " + to + "!", Level.WARNING);
             return false;
         }
 
@@ -44,6 +49,10 @@ public class Teleport implements Listener {
         }
 
         base.teleport(to);
+
+        if (!base.getLocation().equals(to)) {
+            instance.logToFile(this, base.getUniqueId() + " (" + base.getName() + ") failed to teleport to " + to + "!", Level.WARNING);
+        }
     }
 
     @EventHandler (priority = EventPriority.MONITOR)

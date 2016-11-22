@@ -33,7 +33,6 @@ public class FactionsHook extends PluginHook implements Listener {
         Object value = storage.get("matchDeath");
 
         if (value != null) {
-            storage.remove("matchDeath");
             event.setMessage("");
             event.setCancelled(true);
         }

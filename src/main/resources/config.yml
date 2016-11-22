@@ -96,6 +96,9 @@ GUI:
 
 Spectating:
 
+  # If enabled, players must have a cleared inventory to execute the command /spectate.
+  requires-cleared-inventory: false
+
   # Players will be able to only use the following commands while in specator mode.
   whitelisted-commands:
   - 'msg'
@@ -260,8 +263,8 @@ DuelZone:
   # If enabled, player must be inside of the region declared below to execute the command /duel.
   enabled: false
 
-  # The region players have to be in to use duel commands.
-  region: spawn
+  # The regions players have to be in to use duel commands.
+  regions: [spawn, duelspawn]
 
 
 
@@ -291,14 +294,14 @@ Sounds:
 
   # Name of your sound
   countdown-ongoing-sound:
-    # Configure your sound here
+    # Configure your sound here.
     sound:
-      # If your server version is below 1.9, use NOTE_PIANO
+      # READ: If your server version is below 1.9, use NOTE_PIANO instead.
       type: BLOCK_NOTE_PLING
       pitch: 0.95
       volume: 3.0
 
-    # When a message in the list is sent to player, the sound will play.
+    # When a message in the list is sent to a player, the sound will play.
     # Only messages from Duels will play the sound.
     # Broadcasts (such as on-match-end) is not supported.
     on-messages:

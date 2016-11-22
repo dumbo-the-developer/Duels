@@ -48,7 +48,7 @@ public class GUI<T> {
         while (iterator.hasNext()) {
             T entry = iterator.next();
 
-            if (entry instanceof ICanHandleGUI && !((ICanHandleGUI) entry).filter()) {
+            if (entry instanceof GUIItem && !((GUIItem) entry).filter()) {
                 iterator.remove();
             }
         }
@@ -95,8 +95,8 @@ public class GUI<T> {
                     T entry = entries.get(start + ((page - 1) * maxInvSize));
                     ItemStack displayed;
 
-                    if (entry instanceof ICanHandleGUI) {
-                        displayed = ((ICanHandleGUI) entry).toDisplay();
+                    if (entry instanceof GUIItem) {
+                        displayed = ((GUIItem) entry).toDisplay();
                         data.put(start + ((page - 1) * maxInvSize), entry);
                     } else {
                         displayed = defaultDisplayed;

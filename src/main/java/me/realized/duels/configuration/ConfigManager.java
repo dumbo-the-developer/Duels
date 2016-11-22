@@ -1,13 +1,12 @@
 package me.realized.duels.configuration;
 
-import me.realized.duels.utilities.ICanHandleReload;
-import me.realized.duels.utilities.ReloadType;
+import me.realized.duels.utilities.Reloadable;
 import me.realized.duels.utilities.config.Config;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class ConfigManager implements ICanHandleReload {
+public class ConfigManager implements Reloadable {
 
     private static ConfigManager instance;
 

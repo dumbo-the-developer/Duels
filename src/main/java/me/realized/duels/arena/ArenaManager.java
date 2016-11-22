@@ -5,19 +5,20 @@ import me.realized.duels.Core;
 import me.realized.duels.configuration.MainConfig;
 import me.realized.duels.data.ArenaData;
 import me.realized.duels.data.DataManager;
+import me.realized.duels.data.PlayerData;
+import me.realized.duels.data.PlayerManager;
 import me.realized.duels.dueling.RequestManager;
 import me.realized.duels.dueling.Settings;
+import me.realized.duels.event.MatchEndEvent;
 import me.realized.duels.event.RequestSendEvent;
 import me.realized.duels.utilities.Helper;
-import me.realized.duels.utilities.ICanHandleReload;
-import me.realized.duels.utilities.ReloadType;
+import me.realized.duels.utilities.Reloadable;
 import me.realized.duels.utilities.Storage;
 import me.realized.duels.utilities.gui.GUI;
 import me.realized.duels.utilities.gui.GUIListener;
 import me.realized.duels.utilities.location.Teleport;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -34,12 +35,14 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
 
-public class ArenaManager implements Listener, ICanHandleReload {
+public class ArenaManager implements Listener, Reloadable {
 
     private final Core instance;
     private final MainConfig config;
     private final Teleport teleport;
+    private final PlayerManager playerManager;
     private final RequestManager requestManager;
     private final DataManager dataManager;
     private final File base;
@@ -54,6 +57,7 @@ public class ArenaManager implements Listener, ICanHandleReload {
         this.instance = instance;
         this.config = instance.getConfiguration();
         this.teleport = instance.getTeleport();
+        this.playerManager = instance.getPlayerManager();
         this.requestManager = instance.getRequestManager();
         this.dataManager = instance.getDataManager();
 
@@ -158,8 +162,6 @@ public class ArenaManager implements Listener, ICanHandleReload {
 
                 @Override
                 public void run() {
-                    Location lobby = dataManager.getLobby() != null ? dataManager.getLobby() : Bukkit.getWorlds().get(0).getSpawnLocation();
-
                     for (Arena arena : arenas) {
                         if (arena.isUsed() && arena.getPlayers().size() >= 2) {
                             Arena.Match match = arena.getCurrentMatch();
@@ -169,8 +171,11 @@ public class ArenaManager implements Listener, ICanHandleReload {
                             }
 
                             instance.getSpectatorManager().handleMatchEnd(arena);
+                            match.setEndReason(MatchEndEvent.EndReason.MAX_TIME_REACHED);
 
                             Iterator<UUID> iterator = arena.getPlayers().iterator();
+
+                            instance.logToFile(this, "Match between " + arena.getFormattedPlayers() + " reached max time limit, ending automatically.", Level.INFO);
 
                             while (iterator.hasNext()) {
                                 UUID uuid = iterator.next();
@@ -182,26 +187,27 @@ public class ArenaManager implements Listener, ICanHandleReload {
                                     continue;
                                 }
 
-                                if (config.isDuelingTeleportToLatestLocation()) {
-                                    lobby = match.getLocation(uuid);
+                                PlayerData data = playerManager.getData(player);
+                                playerManager.removeData(player);
+
+                                if (!config.isDuelingTeleportToLatestLocation()) {
+                                    data.setLocation(dataManager.getLobby());
                                 }
 
                                 Helper.pm(player, "Dueling.max-match-time-reached", true);
-                                Helper.reset(player, false);
 
-                                Arena.InventoryData data = match.getInventories(uuid);
+                                if (!config.isDuelingUseOwnInventory()) {
+                                    Helper.reset(player, false);
+                                }
 
-                                if (!teleport.isAuthorizedFor(player, lobby)) {
+                                if (!teleport.isAuthorizedFor(player, data.getLocation())) {
                                     player.setHealth(0.0D);
                                     Helper.pm(player, "&4Teleportation failed! You were killed to prevent staying in the arena.", false);
                                     continue;
                                 }
 
-                                teleport.teleportPlayer(player, lobby);
-
-                                if (!config.isDuelingRequiresClearedInventory()) {
-                                    Helper.setInventory(player, data.getInventoryContents(), data.getArmorContents());
-                                }
+                                teleport.teleportPlayer(player, data.getLocation());
+                                data.restore(player, !config.isDuelingRequiresClearedInventory());
                             }
 
                             arena.setUsed(false);
@@ -229,16 +235,18 @@ public class ArenaManager implements Listener, ICanHandleReload {
         }
 
         List<ArenaData> saved = new ArrayList<>();
-        Location lobby = dataManager.getLobby() != null ? dataManager.getLobby() : Bukkit.getWorlds().get(0).getSpawnLocation();
 
         if (!arenas.isEmpty()) {
             for (Arena arena : arenas) {
                 saved.add(new ArenaData(arena));
 
                 if (arena.isUsed()) {
-                    instance.getSpectatorManager().handleMatchEnd(arena);
-
                     Arena.Match match = arena.getCurrentMatch();
+
+                    instance.getSpectatorManager().handleMatchEnd(arena);
+                    match.setEndReason(MatchEndEvent.EndReason.PLUGIN_DISABLE);
+
+                    instance.logToFile(this, "Plugin is disabling! Match between " + arena.getFormattedPlayers() + " was ended automatically.", Level.INFO);
 
                     for (UUID uuid : arena.getPlayers()) {
                         Player player = Bukkit.getPlayer(uuid);
@@ -247,26 +255,27 @@ public class ArenaManager implements Listener, ICanHandleReload {
                             continue;
                         }
 
-                        if (config.isDuelingTeleportToLatestLocation()) {
-                            lobby = match.getLocation(uuid);
+                        PlayerData data = playerManager.getData(player);
+                        playerManager.removeData(player);
+
+                        if (!config.isDuelingTeleportToLatestLocation()) {
+                            data.setLocation(dataManager.getLobby());
                         }
 
                         Helper.pm(player, "&c&l[Duels] Plugin is disabling, matches are ended by default.", false);
-                        Helper.reset(player, false);
 
-                        Arena.InventoryData data = match.getInventories(uuid);
+                        if (!config.isDuelingUseOwnInventory()) {
+                            Helper.reset(player, false);
+                        }
 
-                        if (!teleport.isAuthorizedFor(player, lobby)) {
+                        if (!teleport.isAuthorizedFor(player, data.getLocation())) {
                             player.setHealth(0.0D);
                             Helper.pm(player, "&4Teleportation failed! You were killed to prevent staying in the arena.", false);
                             continue;
                         }
 
-                        teleport.teleportPlayer(player, lobby);
-
-                        if (!config.isDuelingRequiresClearedInventory()) {
-                            Helper.setInventory(player, data.getInventoryContents(), data.getArmorContents());
-                        }
+                        teleport.teleportPlayer(player, data.getLocation());
+                        data.restore(player, !config.isDuelingRequiresClearedInventory());
                     }
                 }
             }

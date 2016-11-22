@@ -251,12 +251,6 @@ public class Helper {
         }
     }
 
-    public static void setInventory(final Player player, final ItemStack[] inventory, final ItemStack[] armor) {
-        player.getInventory().setContents(inventory);
-        player.getInventory().setArmorContents(armor);
-        player.updateInventory();
-    }
-
     public static boolean hasEmptyInventory(Player player) {
         for (ItemStack item : player.getInventory().getArmorContents()) {
             if (item != null && item.getType() != Material.AIR) {

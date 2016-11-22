@@ -1,6 +1,6 @@
-package me.realized.duels.commands.other;
+package me.realized.duels.commands.duel.subcommands;
 
-import me.realized.duels.commands.BaseCommand;
+import me.realized.duels.commands.SubCommand;
 import me.realized.duels.data.MatchData;
 import me.realized.duels.data.UserData;
 import me.realized.duels.utilities.Helper;
@@ -13,15 +13,15 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.UUID;
 
-public class StatsCommand extends BaseCommand {
+public class StatsCommand extends SubCommand {
 
     public StatsCommand() {
-        super("stats", "duels.stats");
+        super("stats", "stats", "duels.stats", "View stats of players.", 1);
     }
 
     @Override
     public void execute(Player sender, String[] args) {
-        if (args.length == 0) {
+        if (args.length <= 1) {
             if (dataManager.getUser(sender.getUniqueId(), sender.hasPermission("duels.admin")) == null) {
                 Helper.pm(sender, "&c&lYour data is improperly loaded. Please try re-logging.", false);
                 return;
@@ -33,7 +33,7 @@ public class StatsCommand extends BaseCommand {
             return;
         }
 
-        UUID uuid = Helper.getUUID(args[0]);
+        UUID uuid = Helper.getUUID(args[1]);
 
         if (uuid == null) {
             Helper.pm(sender, "Errors.player-not-found", true);
