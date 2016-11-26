@@ -12,7 +12,7 @@ public class PlayerManager implements Reloadable {
     private final Map<UUID, PlayerData> data = new HashMap<>();
 
     public void setData(Player player) {
-        this.data.put(player.getUniqueId(), new PlayerData(player));
+        data.put(player.getUniqueId(), new PlayerData(player));
     }
 
     public PlayerData getData(Player player) {

@@ -120,10 +120,12 @@ public class DataManager implements Listener, Reloadable {
     }
 
     public Map<UUID, UserData> getUsers() {
-        return users;
+        return Collections.unmodifiableMap(users);
     }
 
     public void setLobby(Player player) {
+        Location lobby = player.getLocation().clone();
+
         try {
             File dataFile = new File(instance.getDataFolder(), "lobby.json");
             boolean generated = dataFile.createNewFile();
@@ -137,7 +139,7 @@ public class DataManager implements Listener, Reloadable {
             writer.flush();
             writer.close();
 
-            this.lobby = player.getLocation().clone();
+            this.lobby = lobby;
         } catch (IOException ex) {
             instance.warn("Failed to save lobby location! (" + ex.getMessage() + ")");
         }
@@ -193,7 +195,6 @@ public class DataManager implements Listener, Reloadable {
         saveUser(event.getPlayer().getUniqueId(), true);
         users.remove(event.getPlayer().getUniqueId());
         Storage.remove(event.getPlayer());
-        instance.getPlayerManager().removeData(event.getPlayer());
     }
 
     @Override

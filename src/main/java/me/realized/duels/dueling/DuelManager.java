@@ -350,8 +350,6 @@ public class DuelManager implements Listener {
 
         arena.getCurrentMatch().setEndReason(MatchEndEvent.EndReason.OPPONENT_QUIT);
         player.setHealth(0.0D);
-
-
     }
 
     @EventHandler (priority = EventPriority.HIGHEST, ignoreCancelled = true)
