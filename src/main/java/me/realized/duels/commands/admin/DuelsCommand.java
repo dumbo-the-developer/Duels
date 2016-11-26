@@ -7,11 +7,15 @@ import me.realized.duels.utilities.Helper;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class DuelsCommand extends BaseCommand {
 
     private final Map<String, SubCommand> children = new HashMap<>();
+
+    private static final Set<String> DEFAULT_CHILDREN = new HashSet<>();
 
     public DuelsCommand() {
         super("duels", "duels.admin");
@@ -31,6 +35,7 @@ public class DuelsCommand extends BaseCommand {
         children.put("toggle", new ToggleCommand());
         children.put("playsound", new PlaysoundCommand());
         children.put("reload", new ReloadCommand());
+        DEFAULT_CHILDREN.addAll(children.keySet());
     }
 
     @Override
@@ -58,5 +63,19 @@ public class DuelsCommand extends BaseCommand {
         }
 
         child.execute(sender, args);
+    }
+
+    public boolean registerChildren(SubCommand command) {
+        if (children.get(command.getName()) != null) {
+            return false;
+        }
+
+        children.put(command.getName(), command);
+        return true;
+    }
+
+    public boolean unregisterChildren(String name) {
+        return !DEFAULT_CHILDREN.contains(name) && children.remove(name) != null;
+
     }
 }

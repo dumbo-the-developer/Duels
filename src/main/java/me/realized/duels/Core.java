@@ -66,6 +66,8 @@ public class Core extends JavaPlugin {
         reloadables.add(playerManager);
 
         hookManager = new HookManager();
+        hookManager.register("CombatTagPlus", new CombatTagPlusHook(this));
+        hookManager.register("MVdWPlaceholderAPI", new MVdWPlaceholderHook(this));
         hookManager.register("Factions", new FactionsHook(this));
         hookManager.register("WorldGuard", new WorldGuardHook(this));
         hookManager.register("Essentials", new EssentialsHook(this));
@@ -187,6 +189,16 @@ public class Core extends JavaPlugin {
 
     public Teleport getTeleport() {
         return teleport;
+    }
+
+    // Allow a custom manager to listen to /duels reload
+    public boolean registerReloadable(Reloadable reloadable) {
+        if (!reloadables.contains(reloadable)) {
+            reloadables.add(reloadable);
+            return true;
+        }
+
+        return false;
     }
 
     public static Core getInstance() {

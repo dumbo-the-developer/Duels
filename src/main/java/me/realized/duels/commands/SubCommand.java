@@ -8,6 +8,7 @@ import me.realized.duels.configuration.MessagesConfig;
 import me.realized.duels.data.DataManager;
 import me.realized.duels.dueling.DuelManager;
 import me.realized.duels.dueling.RequestManager;
+import me.realized.duels.hooks.HookManager;
 import me.realized.duels.kits.KitManager;
 import org.bukkit.entity.Player;
 
@@ -21,6 +22,7 @@ public abstract class SubCommand {
 
     protected final MainConfig config = Core.getInstance().getConfiguration();
     protected final MessagesConfig messages = (MessagesConfig) Core.getInstance().getConfigManager().getConfigByType(ConfigType.MESSAGES);
+    protected final HookManager hookManager = Core.getInstance().getHookManager();
     protected final RequestManager requestManager = Core.getInstance().getRequestManager();
     protected final DataManager dataManager = Core.getInstance().getDataManager();
     protected final ArenaManager arenaManager = Core.getInstance().getArenaManager();

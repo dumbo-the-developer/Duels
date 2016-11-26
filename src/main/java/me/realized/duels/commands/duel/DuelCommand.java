@@ -10,28 +10,35 @@ import me.realized.duels.data.UserData;
 import me.realized.duels.dueling.RequestManager;
 import me.realized.duels.dueling.Settings;
 import me.realized.duels.event.RequestSendEvent;
+import me.realized.duels.hooks.CombatTagPlusHook;
 import me.realized.duels.hooks.WorldGuardHook;
 import me.realized.duels.utilities.Helper;
 import me.realized.duels.utilities.Storage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class DuelCommand extends BaseCommand {
 
     private final WorldGuardHook wgHook;
+    private final CombatTagPlusHook ctHook;
     private final Map<String, SubCommand> children = new HashMap<>();
+
+    private static final Set<String> DEFAULT_CHILDREN = new HashSet<>();
+    private static final Set<String> VALIDATION_BYPASSED_CHILDREN = new HashSet<>();
 
     public DuelCommand() {
         super("duel", "duels.duel");
         this.wgHook = (WorldGuardHook) hookManager.get("WorldGuard");
+        this.ctHook = (CombatTagPlusHook) hookManager.get("CombatTagPlus");
 
         children.put("accept", new AcceptCommand());
         children.put("deny", new DenyCommand());
         children.put("toggle", new ToggleCommand());
         children.put("stats", new StatsCommand());
+        DEFAULT_CHILDREN.addAll(children.keySet());
+        VALIDATION_BYPASSED_CHILDREN.addAll(Arrays.asList("stats", "toggle"));
     }
 
     @Override
@@ -41,14 +48,21 @@ public class DuelCommand extends BaseCommand {
             return;
         }
 
-        if (!config.isDuelingUseOwnInventory() && config.isDuelingRequiresClearedInventory() && !Helper.hasEmptyInventory(sender)) {
-            Helper.pm(sender, "Errors.empty-inventory-only", true);
-            return;
-        }
+        if (!VALIDATION_BYPASSED_CHILDREN.contains(args[0].toLowerCase())) {
+            if (!config.isDuelingUseOwnInventory() && config.isDuelingRequiresClearedInventory() && !Helper.hasEmptyInventory(sender)) {
+                Helper.pm(sender, "Errors.empty-inventory-only", true);
+                return;
+            }
 
-        if (!wgHook.canUseDuelCommands(sender)) {
-            Helper.pm(sender, "Errors.not-in-duelzone", true, "{REGION}", Helper.join(config.getDuelZoneRegions(), ", "));
-           return;
+            if (ctHook.isTagged(sender)) {
+                Helper.pm(sender, "Errors.is-combat-tagged", true);
+                return;
+            }
+
+            if (!wgHook.canUseDuelCommands(sender)) {
+                Helper.pm(sender, "Errors.not-in-duelzone", true, "{REGION}", Helper.join(config.getDuelZoneRegions(), ", "));
+                return;
+            }
         }
 
         SubCommand child = children.get(args[0].toLowerCase());
@@ -132,5 +146,18 @@ public class DuelCommand extends BaseCommand {
             RequestSendEvent requestSendEvent = new RequestSendEvent(requestManager.getRequestTo(sender, target), sender, target);
             Bukkit.getPluginManager().callEvent(requestSendEvent);
         }
+    }
+
+    public boolean registerChildren(SubCommand command) {
+        if (children.get(command.getName()) != null) {
+            return false;
+        }
+
+        children.put(command.getName(), command);
+        return true;
+    }
+
+    public boolean unregisterChildren(String name) {
+        return !DEFAULT_CHILDREN.contains(name) && children.remove(name) != null;
     }
 }

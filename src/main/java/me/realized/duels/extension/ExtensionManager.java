@@ -64,7 +64,6 @@ public class ExtensionManager implements Reloadable {
 
                 extensions.put(extension.getName(), extension);
             }
-
         } catch (Exception e) {
             instance.warn("Failed to load extensions: " + e.getMessage());
         }
@@ -122,7 +121,7 @@ public class ExtensionManager implements Reloadable {
             }
 
             DuelsExtension extension = ((DuelsExtension) extensionClass.newInstance());
-            extension.init(instance, folder, jar);
+            extension.init(instance, new File(folder, extension.getName()), jar);
             extension.setEnabled(true);
             return extension;
         } catch (Exception e) {

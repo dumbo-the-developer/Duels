@@ -53,6 +53,9 @@ Patches:
   # If enabled, players in creative will not be able to accept duel requests.
   disallow-creative-dueling: false
 
+  # If enabled, players in combat (CombatTagPlus) will not be able to send duel requests.
+  disallow-dueling-while-tagged: true
+
 
 
 Countdown:

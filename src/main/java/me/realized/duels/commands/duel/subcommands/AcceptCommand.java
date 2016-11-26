@@ -5,6 +5,7 @@ import me.realized.duels.data.UserData;
 import me.realized.duels.dueling.Request;
 import me.realized.duels.dueling.RequestManager;
 import me.realized.duels.event.RequestHandleEvent;
+import me.realized.duels.hooks.CombatTagPlusHook;
 import me.realized.duels.utilities.Helper;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -12,14 +13,22 @@ import org.bukkit.entity.Player;
 
 public class AcceptCommand extends SubCommand {
 
+    private final CombatTagPlusHook ctHook;
+
     public AcceptCommand() {
         super("accept", "accept [player]", "duels.duel", "Accept a duel request.", 2);
+        this.ctHook = (CombatTagPlusHook) hookManager.get("CombatTagPlus");
     }
 
     @Override
     public void execute(Player sender, String[] args) {
-        if (config.isPatchesDisallowCreativeDueling() && sender.getGameMode() == GameMode.CREATIVE) {
+        if (sender.getGameMode() == GameMode.CREATIVE && config.isPatchesDisallowCreativeDueling()) {
             Helper.pm(sender, "Errors.is-in-creative", true);
+            return;
+        }
+
+        if (ctHook.isTagged(sender)) {
+            Helper.pm(sender, "Errors.is-combat-tagged", true);
             return;
         }
 

@@ -44,22 +44,22 @@ public class SpectatorManager implements Listener {
         Bukkit.getPluginManager().registerEvents(this, instance);
     }
 
-    public void spectate(Player base, Player target) {
+    public boolean spectate(Player base, Player target) {
         if (isSpectating(base)) {
             Helper.pm(base, "Errors.already-spectating", true);
-            return;
+            return false;
         }
 
         if (arenaManager.isInMatch(base)) {
             Helper.pm(base, "Errors.already-in-match.sender", true);
-            return;
+            return false;
         }
 
         Arena arena = arenaManager.getArena(target);
 
         if (arena == null) {
             Helper.pm(base, "Errors.players-in-match-only", true);
-            return;
+            return false;
         }
 
         playerManager.setData(base);
@@ -87,11 +87,11 @@ public class SpectatorManager implements Listener {
         spectators.add(spectator);
         Helper.pm(base, "Spectating.started-spectating", true, "{PLAYER}", target.getName());
 
-        if (base.hasPermission("duels.spectate.anonymously")) {
-            return;
+        if (!base.hasPermission("duels.spectate.anonymously")) {
+            Helper.broadcast(arena, "Spectating.arena-broadcast", true, "{PLAYER}", base.getName());
         }
 
-        Helper.broadcast(arena, "Spectating.arena-broadcast", true, "{PLAYER}", base.getName());
+        return true;
     }
 
     private Spectator getByPlayer(Player player) {

@@ -4,9 +4,7 @@ import me.realized.duels.configuration.ConfigManager;
 import me.realized.duels.configuration.ConfigType;
 import me.realized.duels.configuration.MainConfig;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class UserData {
 
@@ -16,6 +14,7 @@ public class UserData {
     private int losses = 0;
     private boolean requests = true;
     private List<MatchData> matches = new ArrayList<>();
+    private Map<String, Object> data;
 
     public UserData(UUID uuid, String name) {
         this.uuid = uuid;
@@ -61,6 +60,19 @@ public class UserData {
         if (matches.size() >= maxMatches) {
             matches = new ArrayList<>(matches.subList(matches.size() - maxMatches, matches.size()));
         }
+    }
+
+    final Object addData(String key, Object value) {
+        if (data == null) {
+            data = new HashMap<>();
+        }
+
+        return data.put(key, value);
+    }
+
+    final boolean removeData(String key) {
+        return data != null && data.remove(key) != null;
+
     }
 
     public int get(StatsType type) {

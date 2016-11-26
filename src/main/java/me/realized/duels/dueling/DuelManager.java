@@ -61,11 +61,11 @@ public class DuelManager implements Listener {
         Bukkit.getPluginManager().registerEvents(this, instance);
     }
 
-    public void startMatch(Player player, Player target, Request request) {
+    public boolean startMatch(Player player, Player target, Request request) {
         if (config.isPatchesCancelMatchIfMoved() && (target.getLocation().getX() != request.getBase().getX() || target.getLocation().getY() != request.getBase().getY() || target.getLocation().getZ() != request.getBase().getZ())) {
             Helper.pm(player, "Errors.match-failed", true, "{REASON}", target.getName() + " moved after sending request.");
             Helper.pm(target, "Errors.match-failed", true, "{REASON}", target.getName() + " moved after sending request.");
-            return;
+            return false;
         }
 
         final Arena arena;
@@ -76,7 +76,7 @@ public class DuelManager implements Listener {
             if (arena == null || arena.isUsed()) {
                 Helper.pm(player, "Errors.arena-no-longer-available", true);
                 Helper.pm(target, "Errors.arena-no-longer-available", true);
-                return;
+                return false;
             }
         } else {
             arena = arenaManager.getAvailableArena();
@@ -84,7 +84,7 @@ public class DuelManager implements Listener {
             if (arena == null) {
                 Helper.pm(player, "Errors.no-available-arena-found", true);
                 Helper.pm(target, "Errors.no-available-arena-found", true);
-                return;
+                return false;
             }
         }
 
@@ -97,13 +97,13 @@ public class DuelManager implements Listener {
         if (!teleport.isAuthorizedFor(player, pos1)) {
             Helper.pm(player, "Errors.match-failed", true, "{REASON}", "Failed to teleport " + player.getName() + " to " + Helper.format(pos1));
             Helper.pm(target, "Errors.match-failed", true, "{REASON}", "Failed to teleport " + player.getName() + " to " + Helper.format(pos1));
-            return;
+            return false;
         }
 
         if (!teleport.isAuthorizedFor(target, pos2)) {
             Helper.pm(player, "Errors.match-failed", true, "{REASON}", "Failed to teleport " + target.getName() + " to " + Helper.format(pos2));
             Helper.pm(target, "Errors.match-failed", true, "{REASON}", "Failed to teleport " + target.getName() + " to " + Helper.format(pos2));
-            return;
+            return false;
         }
 
         String arenaName = request.getArena() != null ? request.getArena() : "random";
@@ -144,6 +144,7 @@ public class DuelManager implements Listener {
 
         MatchStartEvent event = new MatchStartEvent(Collections.unmodifiableList(arena.getPlayers()), arena, request.getArena() == null);
         Bukkit.getPluginManager().callEvent(event);
+        return true;
     }
 
     public void handleDisable() {
@@ -322,12 +323,12 @@ public class DuelManager implements Listener {
             }
         }
 
-        // Finally, after everything, the arena is back to available state!
-        arena.setUsed(false);
-
         // MatchEndEvent handling
         MatchEndEvent event = new MatchEndEvent(Collections.unmodifiableList(Arrays.asList(dead.getUniqueId(), target.getUniqueId())), arena, match.getEndReason());
         Bukkit.getPluginManager().callEvent(event);
+
+        // Finally, after everything, the arena is back to available state!
+        arena.setUsed(false);
 
         // TODO: 11/22/16 Improve GUI system. Creating new inventories every update just... doesn't seem so efficient.
         if (arenaManager.getGUI() != null) {

@@ -119,6 +119,10 @@ public class DataManager implements Listener, Reloadable {
         return users.get(uuid) != null ? users.get(uuid) : (force ? loadUser(uuid, null, false) : null);
     }
 
+    public Map<UUID, UserData> getUsers() {
+        return users;
+    }
+
     public void setLobby(Player player) {
         try {
             File dataFile = new File(instance.getDataFolder(), "lobby.json");
@@ -170,6 +174,18 @@ public class DataManager implements Listener, Reloadable {
                 }
             }
         }
+    }
+
+    public final Object addData(UserData user, String key, Object value) {
+        if (user == null) {
+            return false;
+        }
+
+        return user.addData(key, value);
+    }
+
+    public final boolean removeData(UserData user, String key) {
+        return user != null && user.removeData(key);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
