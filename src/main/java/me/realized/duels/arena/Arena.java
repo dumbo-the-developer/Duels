@@ -195,6 +195,7 @@ public class Arena implements GUIItem {
         private final long start;
         private final Map<UUID, Boolean> dead = new HashMap<>();
 
+        private String kit;
         private MatchEndEvent.EndReason reason = MatchEndEvent.EndReason.OTHER;
 
         Match() {
@@ -207,6 +208,14 @@ public class Arena implements GUIItem {
 
         public MatchEndEvent.EndReason getEndReason() {
             return reason;
+        }
+
+        public String getKit() {
+            return kit;
+        }
+
+        public void setKit(String kit) {
+            this.kit = kit;
         }
 
         public void setEndReason(MatchEndEvent.EndReason reason) {

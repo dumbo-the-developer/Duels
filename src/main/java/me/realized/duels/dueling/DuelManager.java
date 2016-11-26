@@ -132,6 +132,7 @@ public class DuelManager implements Listener {
             request.setKit("none");
         }
 
+        arena.getCurrentMatch().setKit(request.getKit());
         arena.addPlayers(player, target);
         arena.startCountdown();
 
@@ -240,6 +241,8 @@ public class DuelManager implements Listener {
             deadData.setLocation(dataManager.getLobby());
         }
 
+        essentialsHook.setBackLocation(dead, deadData.getLocation());
+
         // Add storage to be handled later on by RespawnEvent
         Storage.get(dead).set("respawn", deadData);
 
@@ -252,7 +255,7 @@ public class DuelManager implements Listener {
             firework.setFireworkMeta(meta);
 
             // Broadcast end
-            Helper.broadcast("Dueling.on-match-end", "{WINNER}", target.getName(), "{LOSER}", dead.getName(), "{HEALTH}", Math.round(target.getHealth()) * 0.5D);
+            Helper.broadcast("Dueling.on-match-end", "{WINNER}", target.getName(), "{LOSER}", dead.getName(), "{HEALTH}", Math.round(target.getHealth()) * 0.5D, "{KIT}", match.getKit());
 
             // Generate MatchData
             Calendar calendar = new GregorianCalendar();
@@ -347,6 +350,8 @@ public class DuelManager implements Listener {
 
         arena.getCurrentMatch().setEndReason(MatchEndEvent.EndReason.OPPONENT_QUIT);
         player.setHealth(0.0D);
+
+
     }
 
     @EventHandler (priority = EventPriority.HIGHEST, ignoreCancelled = true)

@@ -94,15 +94,15 @@ public class Core extends JavaPlugin {
 
         duelManager = new DuelManager(this);
 
-        extensionManager = new ExtensionManager(this);
-        extensionManager.load();
-        reloadables.add(extensionManager);
-
         List<BaseCommand> commands = Arrays.asList(new DuelsCommand(), new DuelCommand(), new SpectateCommand());
 
         for (BaseCommand command : commands) {
             getCommand(command.getName()).setExecutor(command);
         }
+
+        extensionManager = new ExtensionManager(this);
+        extensionManager.load();
+        reloadables.add(extensionManager);
     }
 
     @Override
