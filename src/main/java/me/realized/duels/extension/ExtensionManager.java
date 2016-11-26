@@ -1,5 +1,6 @@
 package me.realized.duels.extension;
 
+import com.google.common.io.Files;
 import me.realized.duels.Core;
 import me.realized.duels.utilities.Helper;
 import me.realized.duels.utilities.Reloadable;
@@ -122,8 +123,7 @@ public class ExtensionManager implements Reloadable {
             }
 
             DuelsExtension extension = ((DuelsExtension) extensionClass.newInstance());
-            //extension.init(instance, new File(folder, Files.getNameWithoutExtension(jar.getName())), jar);
-            extension.init(instance, new File(folder, extension.getName()), jar);
+            extension.init(instance, new File(folder, Files.getNameWithoutExtension(jar.getName())), jar);
             extension.setEnabled(true);
             return extension;
         } catch (Exception e) {
