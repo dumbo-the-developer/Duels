@@ -17,6 +17,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 public class Helper {
@@ -373,6 +374,13 @@ public class Helper {
         for (MainConfig.CustomSound sound : config.getSounds()) {
             sound.handleMessage((Player) sender, msg);
         }
+    }
+
+    public static void handleException(Object self, Exception ex) {
+        Core.getInstance().logToFile(self, "ERROR: " + ex.getMessage(), Level.WARNING);
+
+        StackTraceElement element = ex.getStackTrace()[0];
+        Core.getInstance().logToFile(self, "occured in " + element.getClassName() + "#" + element.getMethodName() + " at line " + element.getLineNumber(), Level.WARNING);
     }
 
     public static boolean isPre1_9() {

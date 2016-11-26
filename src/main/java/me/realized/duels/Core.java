@@ -135,7 +135,7 @@ public class Core extends JavaPlugin {
         if (level == Level.INFO) {
             logManager.getLogger().info("(" + self.getClass().getSimpleName() + ") " + msg);
         } else {
-            logManager.getLogger().warning(msg);
+            logManager.getLogger().warning("(" + self.getClass().getSimpleName() + ") " +msg);
         }
     }
 
