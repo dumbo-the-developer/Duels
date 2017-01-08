@@ -9,7 +9,6 @@ import me.realized.duels.event.MatchEndEvent;
 import me.realized.duels.event.MatchStartEvent;
 import me.realized.duels.event.RequestSendEvent;
 import me.realized.duels.hooks.EssentialsHook;
-import me.realized.duels.hooks.McMMOHook;
 import me.realized.duels.kits.Kit;
 import me.realized.duels.kits.KitManager;
 import me.realized.duels.utilities.Helper;
@@ -41,7 +40,7 @@ public class DuelManager implements Listener {
     private final Teleport teleport;
     private final PlayerManager playerManager;
     private final EssentialsHook essentialsHook;
-    private final McMMOHook mcMMOHook;
+    private final me.realized.duels.hooks.mcMMOHook mcMMOHook;
     private final DataManager dataManager;
     private final KitManager kitManager;
     private final ArenaManager arenaManager;
@@ -53,7 +52,7 @@ public class DuelManager implements Listener {
         this.teleport = instance.getTeleport();
         this.playerManager = instance.getPlayerManager();
         this.essentialsHook = (EssentialsHook) instance.getHookManager().get("Essentials");
-        this.mcMMOHook = (McMMOHook) instance.getHookManager().get("mcMMO");
+        this.mcMMOHook = (me.realized.duels.hooks.mcMMOHook) instance.getHookManager().get("mcMMO");
         this.dataManager = instance.getDataManager();
         this.kitManager = instance.getKitManager();
         this.arenaManager = instance.getArenaManager();
@@ -211,6 +210,7 @@ public class DuelManager implements Listener {
         }
 
         event.setDeathMessage(null);
+        event.setKeepInventory(false);
 
         if (!config.isDuelingUseOwnInventory()) {
             event.setKeepLevel(true);
@@ -234,14 +234,17 @@ public class DuelManager implements Listener {
 
         // NOTE TO SELF: Replaced from private Respawn class
         final PlayerData deadData = playerManager.getData(dead);
-        playerManager.removeData(dead);
 
-        // set PlayerData's location to lobby if tp-to-latest is disabled.
-        if (!config.isDuelingTeleportToLatestLocation()) {
-            deadData.setLocation(dataManager.getLobby());
+        if (deadData != null) {
+            playerManager.removeData(dead);
+
+            // set PlayerData's location to lobby if tp-to-latest is disabled.
+            if (!config.isDuelingTeleportToLatestLocation()) {
+                deadData.setLocation(dataManager.getLobby());
+            }
+
+            essentialsHook.setBackLocation(dead, deadData.getLocation());
         }
-
-        essentialsHook.setBackLocation(dead, deadData.getLocation());
 
         // Add storage to be handled later on by RespawnEvent
         Storage.get(dead).set("respawn", deadData);

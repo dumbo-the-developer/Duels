@@ -71,7 +71,7 @@ public class Core extends JavaPlugin {
         hookManager.register("Factions", new FactionsHook(this));
         hookManager.register("WorldGuard", new WorldGuardHook(this));
         hookManager.register("Essentials", new EssentialsHook(this));
-        hookManager.register("mcMMO", new McMMOHook(this));
+        hookManager.register("mcMMO", new mcMMOHook(this));
 
         requestManager = new RequestManager();
         reloadables.add(requestManager);

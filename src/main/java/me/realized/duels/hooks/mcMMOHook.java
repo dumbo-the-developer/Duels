@@ -7,7 +7,7 @@ import org.bukkit.permissions.PermissionAttachment;
 
 import java.util.*;
 
-public class McMMOHook extends PluginHook {
+public class mcMMOHook extends PluginHook {
 
     private final Core instance;
     private final MainConfig config;
@@ -15,7 +15,7 @@ public class McMMOHook extends PluginHook {
 
     private Map<UUID, PermissionAttachment> attachments = new HashMap<>();
 
-    public McMMOHook(Core instance) {
+    public mcMMOHook(Core instance) {
         super("mcMMO");
         this.instance = instance;
         this.config = instance.getConfiguration();
