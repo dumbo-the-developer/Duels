@@ -105,6 +105,16 @@ public class DuelManager implements Listener {
             return false;
         }
 
+        if (player.getAllowFlight()) {
+            player.setFlying(false);
+            player.setAllowFlight(false);
+        }
+
+        if (target.getAllowFlight()) {
+            target.setFlying(false);
+            target.setAllowFlight(false);
+        }
+
         String arenaName = request.getArena() != null ? request.getArena() : "random";
         arena.setUsed(true);
 
