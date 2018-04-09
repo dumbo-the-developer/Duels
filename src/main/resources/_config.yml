@@ -1,0 +1,181 @@
+# DO NOT EDIT THIS VALUE!
+config-version: 1
+
+patches:
+  toggle-vanish-on-start: true
+  set-back-location: true
+  cancel-teleport-to-players-in-match: true
+  fix-inventory-open: true
+  disable-mcMMO-in-match: true
+  disable-power-loss: true
+  strict-teleportation: false
+  force-allow-pvp: true
+  force-allow-teleportation: true
+  cancel-match-if-moved: false
+  disallow-creative-dueling: false
+  disallow-dueling-while-tagged: true
+
+countdown:
+  enabled: true
+  messages:
+    - '&7Starting in &f5 &7seconds!'
+    - '&7Starting in &f4 &7seconds!'
+    - '&7Starting in &f3 &7seconds!'
+    - '&7Starting in &f2 &7seconds!'
+    - '&7Starting in &f1 &7second!'
+    - '&7Duel starting now!'
+  block-projectile: true
+  block-pvp: true
+
+gui:
+  kit-selector-rows: 3
+  arena-selector-rows: 2
+  available-arena-displayname: '&9{NAME}: &aAvailable'
+  in-use-arena-displayname: '&9{NAME}: &cIn Use'
+
+spectating:
+  requires-cleared-inventory: false
+  whitelisted-commands:
+    - 'msg'
+    - 'r'
+    - 'w'
+    - 'pm'
+    - 'reply'
+    - 'tell'
+    - 'whisper'
+    - 'list'
+    - 'stats'
+    - 'dstats'
+    - 'duelstats'
+
+dueling:
+  match-max-duration:
+    enabled: true
+    duration: 600
+
+  match-end-commands:
+    enabled: false
+    commands:
+    - 'give {WINNER} diamond 1'
+    - 'give {LOSER} dirt 1'
+
+  allow-arena-selecting: true
+  use-own-inventory: false
+  requires-cleared-inventory: true
+  teleport-to-latest-location: false
+  delay-until-teleport: 5
+  drop-item: false
+  pick-up-item: true
+  block-all-commands: false
+  whitelisted-commands:
+  - 'msg'
+  - 'pm'
+  - 'list'
+  - 'w'
+  - 'r'
+  - 'ban'
+  - 'kick'
+  - 'mute'
+  - 'tempban'
+  disabled-commands:
+  - 'heal'
+  - 'eheal'
+  - 'essentials:heal'
+  - 'essentials:eheal'
+  - 'kit'
+  - 'ekit'
+  - 'kits'
+  - 'ekits'
+  - 'essentials:kit'
+  - 'essentials:ekit'
+  - 'essentials:kits'
+  - 'essentials:ekits'
+  - 'enderchest'
+  - 'echest'
+  - 'eechest'
+  - 'eenderchest'
+  - 'endersee'
+  - 'eendersee'
+  - 'ec'
+  - 'eec'
+  - 'essentials:enderchest'
+  - 'essentials:echest'
+  - 'essentials:eechest'
+  - 'essentials:eenderchest'
+  - 'essentials:endersee'
+  - 'essentials:eendersee'
+  - 'essentials:ec'
+  - 'essentials:eec'
+  - 'tpaccept'
+  - 'etpaccept'
+  - 'tpyes'
+  - 'etpyes'
+  - 'essentials:tpaccept'
+  - 'essentials:etpaccept'
+  - 'essentials:tpyes'
+  - 'essentials:etpyes'
+  - 'tpahere'
+  - 'etpahere'
+  - 'essentials:tpahere'
+  - 'essentials:etpahere'
+  - 'back'
+  - 'eback'
+  - 'return'
+  - 'ereturn'
+  - 'essentials:back'
+  - 'essentials:eback'
+  - 'essentials:return'
+  - 'essentials:ereturn'
+  - 'sethome'
+  - 'esethome'
+  - 'createhome'
+  - 'ecreatehome'
+  - 'essentials:sethome'
+  - 'essentials:esethome'
+  - 'essentials:createhome'
+  - 'essentials:ecreatehome'
+  - 'spawn'
+  - 'espawn'
+  - 'essentials:spawn'
+  - 'essentials:espawn'
+  - 'vault'
+  - 'chest'
+  - 'pv'
+  - 'playervaults'
+  - 'playervaults:vault'
+  - 'playervaults:chest'
+  - 'playervaults:pv'
+  - 'playervaults:playervaults'
+
+duelzone:
+  enabled: false
+  regions: [spawn, duelspawn]
+
+stats:
+  display-matches: true
+  amount-of-matches: 10
+
+soup:
+  enabled: false
+  arenas-starting-with: 'soup arena'
+  hearts-to-regen: 3.5
+
+sounds:
+  countdown-ongoing-sound:
+    sound:
+      type: BLOCK_NOTE_PLING
+      pitch: 0.95
+      volume: 3.0
+    on-messages:
+    - '&7Starting in &f5 &7seconds!'
+    - '&7Starting in &f4 &7seconds!'
+    - '&7Starting in &f3 &7seconds!'
+    - '&7Starting in &f2 &7seconds!'
+    - '&7Starting in &f1 &7second!'
+  countdown-end-sound:
+    sound:
+      type: BLOCK_NOTE_PLING
+      pitch: 0.5
+      volume: 3.0
+    on-messages:
+    - '&7Duel starting now!'
