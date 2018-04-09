@@ -1,19 +1,19 @@
-package me.realized.duels.hooks;
+package me.realized._duels.hooks;
 
 import com.massivecraft.factions.FPlayer;
 import com.massivecraft.factions.event.PowerLossEvent;
-import me.realized.duels.Core;
-import me.realized.duels.configuration.MainConfig;
-import me.realized.duels.utilities.Storage;
+import me.realized._duels.Core;
+import me.realized._duels.configuration.MainConfig;
+import me.realized._duels.utilities.Storage;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-public class FactionsHook extends PluginHook implements Listener {
+public class FactionsUUIDHook extends PluginHook implements Listener {
 
     private final MainConfig config;
 
-    public FactionsHook(Core instance) {
+    public FactionsUUIDHook(Core instance) {
         super("Factions");
         this.config = instance.getConfiguration();
 
