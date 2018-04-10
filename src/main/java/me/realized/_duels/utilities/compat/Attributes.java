@@ -1,5 +1,7 @@
 package me.realized._duels.utilities.compat;
 
+import lombok.Getter;
+import lombok.Setter;
 import me.realized._duels.Core;
 import org.bukkit.inventory.ItemStack;
 
@@ -149,41 +151,23 @@ public class Attributes {
 
     public class AttributeModifier {
 
+        @Getter
         private final String name;
+        @Getter
         private final String attrName;
+        @Getter
         private final int operation;
+        @Getter
         private final double amount;
+        @Getter
+        @Setter
         private String slot;
 
-        public AttributeModifier(String name, String attrName, int operation, double amount) {
+        AttributeModifier(String name, String attrName, int operation, double amount) {
             this.name = name;
             this.attrName = attrName;
             this.operation = operation;
             this.amount = amount;
-        }
-
-        public String getSlot() {
-            return slot;
-        }
-
-        public void setSlot(String slot) {
-            this.slot = slot;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getAttrName() {
-            return attrName;
-        }
-
-        public int getOperation() {
-            return operation;
-        }
-
-        public double getAmount() {
-            return amount;
         }
     }
 }

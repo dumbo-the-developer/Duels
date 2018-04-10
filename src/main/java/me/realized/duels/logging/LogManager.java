@@ -2,7 +2,6 @@ package me.realized.duels.logging;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
@@ -14,8 +13,9 @@ import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.util.DateUtil;
 import me.realized.duels.util.Loadable;
+import me.realized.duels.util.Log.LogSource;
 
-public class LogManager implements Loadable {
+public class LogManager implements Loadable, LogSource {
 
     private final File folder;
 
@@ -68,5 +68,10 @@ public class LogManager implements Loadable {
         for (final Handler handler : logger.getHandlers()) {
             handler.close();
         }
+    }
+
+    @Override
+    public void log(final Level level, final String s) {
+        getLogger().log(level, s);
     }
 }

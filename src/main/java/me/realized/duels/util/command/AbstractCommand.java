@@ -113,10 +113,6 @@ public abstract class AbstractCommand<P extends JavaPlugin> implements TabComple
         });
     }
 
-    protected void handleMessage(final CommandSender sender, final MessageType type, final String... args) {
-        sender.sendMessage(type.defaultMessage.format(args));
-    }
-
     public final void register() {
         final PluginCommand pluginCommand = getCommand();
 
@@ -197,6 +193,10 @@ public abstract class AbstractCommand<P extends JavaPlugin> implements TabComple
     }
 
     protected abstract void execute(final CommandSender sender, final String label, final String[] args);
+
+    protected void handleMessage(final CommandSender sender, final MessageType type, final String... args) {
+        sender.sendMessage(type.defaultMessage.format(args));
+    }
 
     protected enum MessageType {
 

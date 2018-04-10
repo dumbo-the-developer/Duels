@@ -1,43 +1,57 @@
 package me.realized.duels;
 
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import me.realized.duels.api.Duels;
+import me.realized.duels.command.commands.duel.DuelCommand;
+import me.realized.duels.command.commands.duels.DuelsCommand;
+import me.realized.duels.data.UserDataManager;
 import me.realized.duels.logging.LogManager;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
+import me.realized.duels.util.Log.LogSource;
 import me.realized.duels.util.Reloadable;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class DuelsPlugin extends JavaPlugin implements Duels {
+public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
+    @Getter
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private final List<Loadable> loadables = new ArrayList<>();
     private int lastLoad;
 
     @Getter
     private LogManager logManager;
+    @Getter
+    private UserDataManager userManager;
 
     @Override
     public void onEnable() {
-        Log.setSource(this);
+        Log.addSource(this);
         loadables.add(logManager = new LogManager(this));
+        Log.addSource(logManager);
+        loadables.add(userManager = new UserDataManager(this));
 
         if (!load()) {
             getPluginLoader().disablePlugin(this);
             return;
         }
 
-        // commands here
+        new DuelCommand(this).register();
+        new DuelsCommand(this).register();
     }
 
     @Override
     public void onDisable() {
         unload();
-        Log.setSource(null);
+        Log.clearSources();
     }
 
     /**
@@ -139,5 +153,10 @@ public class DuelsPlugin extends JavaPlugin implements Duels {
             .filter(loadable -> loadable instanceof Reloadable)
             .map(loadable -> loadable.getClass().getSimpleName())
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public void log(final Level level, final String s) {
+        getLogger().log(level, s);
     }
 }

@@ -1,23 +1,34 @@
 package me.realized.duels.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.Plugin;
 
 public final class Log {
 
-    private static JavaPlugin source;
+    public interface LogSource {
+
+        void log(final Level level, final String s);
+    }
+
+    private static List<LogSource> sources = new ArrayList<>();
 
     private Log() {}
 
-    public static void setSource(final JavaPlugin plugin) {
-        source = plugin;
+    public static void addSource(final LogSource source) {
+        sources.add(source);
+    }
+
+    public static void clearSources() {
+        sources.clear();
     }
 
     private static void log(final Level level, final String s) {
-        if (source != null) {
-            source.getLogger().log(level, s);
+        for (final LogSource source : sources) {
+            source.log(level, s);
         }
     }
 
@@ -26,8 +37,12 @@ public final class Log {
     }
 
     public static void error(final String s) {
-        if (source != null) {
-            Bukkit.getConsoleSender().sendMessage("[" + source.getName() + "] " + ChatColor.RED + s);
+        for (final LogSource source : sources) {
+            if (source instanceof Plugin) {
+                Bukkit.getConsoleSender().sendMessage("[" + ((Plugin) source).getName() + "] " + ChatColor.RED + s);
+            } else {
+                source.log(Level.SEVERE, s);
+            }
         }
     }
 
