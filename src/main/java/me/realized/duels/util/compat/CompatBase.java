@@ -10,9 +10,6 @@ class CompatBase {
     static final Method AS_BUKKIT_COPY;
     
     static final Class<?> TAG_COMPOUND;
-    static final Class<?> TAG_LIST;
-    static final Class<?> TAG_BASE;
-    
     static final Method GET_TAG;
     static final Method SET_TAG;
     static final Method GET;
@@ -34,11 +31,10 @@ class CompatBase {
         final Class<?> NMS_ITEMSTACK = ReflectionUtil.getNMSClass("ItemStack");
         AS_NMS_COPY = ReflectionUtil.getMethod(CB_ITEMSTACK, "asNMSCopy", ItemStack.class);
         AS_BUKKIT_COPY = ReflectionUtil.getMethod(CB_ITEMSTACK, "asBukkitCopy", NMS_ITEMSTACK);
-        
         TAG_COMPOUND = ReflectionUtil.getNMSClass("NBTTagCompound");
-        TAG_LIST = ReflectionUtil.getNMSClass("NBTTagList");
-        TAG_BASE = ReflectionUtil.getNMSClass("NBTBase");
-        
+
+        final Class<?> TAG_LIST = ReflectionUtil.getNMSClass("NBTTagList");
+        final Class<?> TAG_BASE = ReflectionUtil.getNMSClass("NBTBase");
         GET_TAG = ReflectionUtil.getMethod(NMS_ITEMSTACK, "getTag");
         SET_TAG = ReflectionUtil.getMethod(NMS_ITEMSTACK, "setTag", TAG_COMPOUND);
         SET = ReflectionUtil.getMethod(TAG_COMPOUND, "set", String.class, TAG_BASE);

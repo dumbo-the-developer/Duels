@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import me.realized._duels.Core;
-import me.realized._duels.utilities.Helper;
 import me.realized.duels.util.compat.Attributes;
 import me.realized.duels.util.compat.CompatUtil;
 import me.realized.duels.util.compat.Potions;
@@ -61,60 +59,54 @@ public class ItemData {
 
         if (!CompatUtil.isPre1_9()) {
             if (material.contains("POTION")) {
-                Potions potion = Potions.fromItemStack(item);
+                final Potions potion = Potions.fromItemStack(item);
 
-                if (potion == null) {
-                    return;
+                if (potion != null) {
+                    final StringBuilder data = new StringBuilder();
+                    data.append(potion.getType().name()).append("-");
+
+                    if (potion.isExtended()) {
+                        data.append("extended-");
+                    }
+
+                    if (potion.isLinger()) {
+                        data.append("linger-");
+                    }
+
+                    if (potion.isSplash()) {
+                        data.append("splash-");
+                    }
+
+                    if (potion.isStrong()) {
+                        data.append("strong-");
+                    }
+
+                    this.itemData = data.toString();
                 }
-
-                final StringBuilder data = new StringBuilder();
-                data.append(potion.getType().name()).append("-");
-
-                if (potion.isExtended()) {
-                    data.append("extended-");
-                }
-
-                if (potion.isLinger()) {
-                    data.append("linger-");
-                }
-
-                if (potion.isSplash()) {
-                    data.append("splash-");
-                }
-
-                if (potion.isStrong()) {
-                    data.append("strong-");
-                }
-
-                this.itemData = data.toString();
             } else if (material.equals("MONSTER_EGG")) {
                 final SpawnEggs spawnEgg = SpawnEggs.fromItemStack(item);
 
-                if (spawnEgg == null) {
-                    return;
+                if (spawnEgg != null) {
+                    this.itemData = spawnEgg.getType().name() + "-";
                 }
-
-                this.itemData = spawnEgg.getType().name() + "-";
             } else if (material.equals("TIPPED_ARROW")) {
                 final PotionMeta meta = (PotionMeta) item.getItemMeta();
                 final PotionData potionData = meta.getBasePotionData();
 
-                if (potionData.getType().getEffectType() == null) {
-                    return;
+                if (potionData.getType().getEffectType() != null) {
+                    final StringBuilder data = new StringBuilder();
+                    data.append(potionData.getType().name()).append("-");
+
+                    if (potionData.isExtended()) {
+                        data.append("extended-");
+                    }
+
+                    if (potionData.isUpgraded()) {
+                        data.append("upgraded-");
+                    }
+
+                    this.itemData = data.toString();
                 }
-
-                final StringBuilder data = new StringBuilder();
-                data.append(potionData.getType().name()).append("-");
-
-                if (potionData.isExtended()) {
-                    data.append("extended-");
-                }
-
-                if (potionData.isUpgraded()) {
-                    data.append("upgraded-");
-                }
-
-                this.itemData = data.toString();
             }
         }
 
@@ -137,7 +129,7 @@ public class ItemData {
                 lore = meta.getLore();
             }
 
-            if (!Helper.isPre1_8() && !meta.getItemFlags().isEmpty()) {
+            if (!CompatUtil.isPre1_8() && !meta.getItemFlags().isEmpty()) {
                 this.flags = new ArrayList<>();
 
                 for (final ItemFlag flag : meta.getItemFlags()) {
@@ -154,11 +146,11 @@ public class ItemData {
             }
 
             if (item.getType() == Material.POTION) {
-                this.effects = new HashMap<>();
-
                 final PotionMeta potionMeta = (PotionMeta) meta;
 
                 if (potionMeta.hasCustomEffects()) {
+                    this.effects = new HashMap<>();
+
                     for (final PotionEffect effect : potionMeta.getCustomEffects()) {
                         effects.put(effect.getType().getName(), effect.getDuration() + "-" + effect.getAmplifier());
                     }
@@ -204,8 +196,8 @@ public class ItemData {
             item = new Attributes(item).addModifiers(attributeModifiers);
         }
 
-        if (!Helper.isPre1_9() && itemData != null) {
-            final List<String> args = Arrays.asList(this.itemData.split("-"));
+        if (!CompatUtil.isPre1_9() && itemData != null) {
+            final List<String> args = Arrays.asList(itemData.split("-"));
 
             if (material.contains("POTION")) {
                 item = new Potions(PotionType.valueOf(args.get(0)), args).toItemStack(amount);
@@ -235,7 +227,7 @@ public class ItemData {
             meta.setLore(lore);
         }
 
-        if (!Helper.isPre1_8() && flags != null && !flags.isEmpty()) {
+        if (!CompatUtil.isPre1_8() && flags != null && !flags.isEmpty()) {
             for (final String flag : flags) {
                 meta.addItemFlags(ItemFlag.valueOf(flag));
             }
@@ -250,8 +242,9 @@ public class ItemData {
             final PotionMeta potionMeta = (PotionMeta) meta;
 
             for (final Map.Entry<String, String> entry : effects.entrySet()) {
-                final int duration = Integer.valueOf(entry.getValue().split("-")[0]);
-                final int amplifier = Integer.valueOf(entry.getValue().split("-")[1]);
+                final String[] data = entry.getValue().split("-");
+                final int duration = Integer.valueOf(data[0]);
+                final int amplifier = Integer.valueOf(data[1]);
                 potionMeta.addCustomEffect(new PotionEffect(PotionEffectType.getByName(entry.getKey()), duration, amplifier), true);
             }
         }

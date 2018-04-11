@@ -42,7 +42,7 @@ public class SpawnEggs extends CompatBase {
     }
 
     @SuppressWarnings("deprecation")
-    public static SpawnEggs fromItemStack(ItemStack item) {
+    public static SpawnEggs fromItemStack(final ItemStack item) {
         if (item == null || item.getType() != Material.MONSTER_EGG) {
             return null;
         }
@@ -50,39 +50,46 @@ public class SpawnEggs extends CompatBase {
         try {
             final Object nmsItem = AS_NMS_COPY.invoke(null, item);
             final Object tag = GET_TAG.invoke(nmsItem);
+            System.out.println(tag);
 
             if (tag != null) {
+                System.out.println("2");
                 final Object entityTag = GET_COMPOUND.invoke(tag, "EntityTag");
-                final String name = (String) GET_STRING.invoke(entityTag, "id");
+                final String name = ((String) GET_STRING.invoke(entityTag, "id")).replace("minecraft:", "");
                 final EntityType type = EntityType.fromName(name);
 
                 if (type != null) {
+                    System.out.println("3");
                     return new SpawnEggs(type);
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
         return null;
     }
 
     @SuppressWarnings("deprecation")
     public ItemStack toItemStack(final int amount) {
         try {
-            ItemStack item = new ItemStack(Material.MONSTER_EGG, amount);
-            Object stack = AS_NMS_COPY.invoke(null, item);
-            Object tagCompound = GET_TAG.invoke(stack);
+            final ItemStack item = new ItemStack(Material.MONSTER_EGG, amount);
+            Object nmsItem = AS_NMS_COPY.invoke(null, item);
+            Object tag = GET_TAG.invoke(nmsItem);
 
-            if (tagCompound == null) {
-                tagCompound = TAG_COMPOUND.newInstance();
+            if (tag == null) {
+                tag = TAG_COMPOUND.newInstance();
             }
 
-            Object id = TAG_COMPOUND.newInstance();
+            final Object id = TAG_COMPOUND.newInstance();
             SET_STRING.invoke(id, "id", type.getName());
-            SET.invoke(tagCompound, "EntityTag", id);
-            SET_TAG.invoke(stack, tagCompound);
-            return (ItemStack) AS_BUKKIT_COPY.invoke(null, stack);
+            SET.invoke(tag, "EntityTag", id);
+            SET_TAG.invoke(nmsItem, tag);
+            return (ItemStack) AS_BUKKIT_COPY.invoke(null, nmsItem);
         } catch (Exception ex) {
             ex.printStackTrace();
-            return null;
         }
+
+        return null;
     }
 }

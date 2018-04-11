@@ -116,7 +116,7 @@ public class Potions extends CompatBase {
                     return null;
             }
 
-            return new Potions(type, strong, _long, item.getType().equals(Material.LINGERING_POTION), item.getType().equals(Material.SPLASH_POTION));
+            return new Potions(type, strong, _long, item.getType() == Material.LINGERING_POTION, item.getType() == Material.SPLASH_POTION);
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;

@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import me.realized.duels.util.StringUtil;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
@@ -113,6 +114,10 @@ public abstract class AbstractCommand<P extends JavaPlugin> implements TabComple
         });
     }
 
+    protected boolean isChild(final String name) {
+        return children != null && children.get(name.toLowerCase()) != null;
+    }
+
     public final void register() {
         final PluginCommand pluginCommand = getCommand();
 
@@ -124,6 +129,10 @@ public abstract class AbstractCommand<P extends JavaPlugin> implements TabComple
 
             if (permission != null && !sender.hasPermission(getPermission())) {
                 handleMessage(sender, MessageType.NO_PERMISSION, permission);
+                return true;
+            }
+
+            if (executeFirst(sender, label, args)) {
                 return true;
             }
 
@@ -165,7 +174,7 @@ public abstract class AbstractCommand<P extends JavaPlugin> implements TabComple
     }
 
     private PluginCommand getCommand() {
-        PluginCommand pluginCommand = plugin.getCommand(name);
+        final PluginCommand pluginCommand = plugin.getCommand(name);
 
         if (pluginCommand == null) {
             throw new IllegalArgumentException("Command is not registered in plugin.yml");
@@ -175,7 +184,7 @@ public abstract class AbstractCommand<P extends JavaPlugin> implements TabComple
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, org.bukkit.command.Command command, String alias, String[] args) {
+    public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         if (args.length == 0) {
             return null;
         }
@@ -190,6 +199,10 @@ public abstract class AbstractCommand<P extends JavaPlugin> implements TabComple
         }
 
         return null;
+    }
+
+    protected boolean executeFirst(final CommandSender sender, final String label, final String[] args) {
+        return false;
     }
 
     protected abstract void execute(final CommandSender sender, final String label, final String[] args);

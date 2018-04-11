@@ -10,9 +10,12 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import me.realized.duels.api.Duels;
+import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.command.commands.duel.DuelCommand;
 import me.realized.duels.command.commands.duels.DuelsCommand;
 import me.realized.duels.data.UserDataManager;
+import me.realized.duels.duel.DuelManager;
+import me.realized.duels.kit.KitManager;
 import me.realized.duels.logging.LogManager;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
@@ -31,6 +34,12 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private LogManager logManager;
     @Getter
     private UserDataManager userManager;
+    @Getter
+    private KitManager kitManager;
+    @Getter
+    private ArenaManager arenaManager;
+    @Getter
+    private DuelManager duelManager;
 
     @Override
     public void onEnable() {
@@ -38,6 +47,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(logManager = new LogManager(this));
         Log.addSource(logManager);
         loadables.add(userManager = new UserDataManager(this));
+        loadables.add(kitManager = new KitManager(this));
+        loadables.add(arenaManager = new ArenaManager(this));
+        loadables.add(duelManager = new DuelManager(this));
 
         if (!load()) {
             getPluginLoader().disablePlugin(this);
