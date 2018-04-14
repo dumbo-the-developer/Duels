@@ -2,9 +2,14 @@ package me.realized.duels.command.commands.duel;
 
 import java.util.List;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.cache.Setting;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.command.commands.duel.subcommands.StatsCommand;
-import org.bukkit.Bukkit;
+import me.realized.duels.gui.setting.RequestDetailsButton;
+import me.realized.duels.util.gui.SinglePageGUI;
+import me.realized.duels.util.inventory.InventoryUtil;
+import me.realized.duels.util.inventory.ItemBuilder;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -27,15 +32,25 @@ public class DuelCommand extends BaseCommand {
             return false;
         }
 
-        final Player target = Bukkit.getPlayerExact(args[0]);
+//        final Player target = Bukkit.getPlayerExact(args[0]);
+//
+//        if (target == null) {
+//            sender.sendMessage("Player not found");
+//            return true;
+//        }
 
-        if (target == null) {
-            sender.sendMessage("Player not found");
-            return true;
+        final Setting setting = settingCache.get((Player) sender);
+        setting.setTargetName(args[0]);
+
+        SinglePageGUI gui = setting.getSettingGui();
+
+        if (gui == null) {
+            gui = new SinglePageGUI("Request Settings", 4);
+            InventoryUtil.fillRange(gui.getInventory(), 0, 9, ItemBuilder.of(Material.STAINED_GLASS_PANE).name(" ").build(), false);
+            gui.add(4, new RequestDetailsButton(settingCache));
         }
 
-        sender.sendMessage("duel request sent to " + target.getName());
-        target.sendMessage("duel request from " + sender.getName());
+        gui.open((Player) sender);
         return true;
     }
 

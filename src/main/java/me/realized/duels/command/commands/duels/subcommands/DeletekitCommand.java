@@ -17,14 +17,13 @@ public class DeletekitCommand extends BaseCommand {
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final String name = StringUtils.join(args, " ", 1, args.length);
-        final Optional<Kit> target = kitManager.get(name);
+        final Optional<Kit> target = kitManager.remove(name);
 
         if (!target.isPresent()) {
             sender.sendMessage(name + " is not an existing kit.");
             return;
         }
 
-        target.get().equip((Player) sender);
-        sender.sendMessage("Equipped " + name + "!");
+        sender.sendMessage("Deleted kit '" + name + "'!");
     }
 }

@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import me.realized.duels.api.Duels;
 import me.realized.duels.arena.ArenaManager;
+import me.realized.duels.cache.SettingCache;
 import me.realized.duels.command.commands.duel.DuelCommand;
 import me.realized.duels.command.commands.duels.DuelsCommand;
 import me.realized.duels.data.UserDataManager;
@@ -21,6 +22,7 @@ import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.Log.LogSource;
 import me.realized.duels.util.Reloadable;
+import me.realized.duels.util.gui.GUIListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
@@ -35,11 +37,15 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private UserDataManager userManager;
     @Getter
+    private GUIListener guiListener;
+    @Getter
     private KitManager kitManager;
     @Getter
     private ArenaManager arenaManager;
     @Getter
     private DuelManager duelManager;
+    @Getter
+    private SettingCache settingCache;
 
     @Override
     public void onEnable() {
@@ -47,9 +53,11 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(logManager = new LogManager(this));
         Log.addSource(logManager);
         loadables.add(userManager = new UserDataManager(this));
+        guiListener = new GUIListener(this);
         loadables.add(kitManager = new KitManager(this));
         loadables.add(arenaManager = new ArenaManager(this));
         loadables.add(duelManager = new DuelManager(this));
+        loadables.add(settingCache = new SettingCache());
 
         if (!load()) {
             getPluginLoader().disablePlugin(this);

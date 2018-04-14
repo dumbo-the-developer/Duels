@@ -4,33 +4,31 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
+import me.realized.duels.util.gui.Button;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-public class Kit {
+public class Kit extends Button {
 
     @Getter
     private final String name;
     @Getter
     private final Map<String, Map<Integer, ItemStack>> items = new HashMap<>();
-    @Getter
-    @Setter
-    private ItemStack displayed;
 
-    public Kit(final String name) {
+    public Kit(final String name, final ItemStack displayed) {
+        super(displayed);
         this.name = name;
-        this.displayed = ItemBuilder
-            .of(Material.DIAMOND_SWORD)
-            .name("&7&l" + name)
-            .lore("&aClick to send", "&aa duel request", "&awith this kit!")
-            .build();
     }
 
     public Kit(final String name, final PlayerInventory inventory) {
-        this(name);
+        this(name, ItemBuilder
+            .of(Material.DIAMOND_SWORD)
+            .name("&7&l" + name)
+            .lore("&aClick to send", "&aa duel request", "&awith this kit!")
+            .build());
 
         final Map<Integer, ItemStack> contents = new HashMap<>();
 

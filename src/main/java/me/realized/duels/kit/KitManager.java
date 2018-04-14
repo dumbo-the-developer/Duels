@@ -12,19 +12,25 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.data.KitData;
 import me.realized.duels.util.Loadable;
+import me.realized.duels.util.gui.MultiPageGUI;
 
 public class KitManager implements Loadable {
 
     private final DuelsPlugin plugin;
     private final File file;
     private final Map<String, Kit> kits = new HashMap<>();
+    @Getter
+    private final MultiPageGUI gui;
 
     public KitManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.file = new File(plugin.getDataFolder(), "kits.json");
+        gui = new MultiPageGUI("Kit Selection", 1, kits.values());
+        plugin.getGuiListener().addGUI(gui);
     }
 
     @Override
@@ -43,6 +49,8 @@ public class KitManager implements Loadable {
                 }
             }
         }
+
+        gui.calculatePages();
     }
 
     @Override

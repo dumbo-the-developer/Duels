@@ -23,8 +23,7 @@ public class KitData {
     }
 
     public Kit toKit() {
-        final Kit kit = new Kit(name);
-        kit.setDisplayed(displayed.toItemStack());
+        final Kit kit = new Kit(name, displayed.toItemStack());
 
         for (final Map.Entry<String, Map<Integer, ItemData>> entry : items.entrySet()) {
             final Map<Integer, ItemStack> data = new HashMap<>();

@@ -21,13 +21,6 @@ public class DuelsCommand extends BaseCommand {
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
-        final ItemStack item = ((Player) sender).getItemInHand();
-
-        if (item != null && item.getType() != Material.AIR) {
-            System.out.println(plugin.getGson().toJson(new ItemData(item)));
-        } else if (args.length > 0) {
-            final ItemData data = plugin.getGson().fromJson(StringUtils.join(args, " "), ItemData.class);
-            ((Player) sender).getInventory().addItem(data.toItemStack());
-        }
+        kitManager.getGui().open((Player) sender);
     }
 }

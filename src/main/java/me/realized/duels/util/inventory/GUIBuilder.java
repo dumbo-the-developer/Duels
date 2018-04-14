@@ -13,12 +13,12 @@ public final class GUIBuilder {
 
     private final Inventory gui;
 
-    private GUIBuilder(final String title, final int rows) {
-        this.gui = Bukkit.createInventory(null, rows * 9, title);
+    private GUIBuilder(final String title, final int size) {
+        this.gui = Bukkit.createInventory(null, size, title);
     }
 
-    public static GUIBuilder of(final String title, final int rows) {
-        return new GUIBuilder(title, rows);
+    public static GUIBuilder of(final String title, final int size) {
+        return new GUIBuilder(title, size);
     }
 
     public GUIBuilder set(final int slot, final ItemStack item) {
