@@ -45,7 +45,7 @@ public class KitManager implements Loadable {
 
             if (data != null) {
                 for (final Map.Entry<String, KitData> entry : data.entrySet()) {
-                    kits.put(entry.getKey(), entry.getValue().toKit());
+                    kits.put(entry.getKey(), entry.getValue().toKit(plugin.getSettingCache()));
                 }
             }
         }

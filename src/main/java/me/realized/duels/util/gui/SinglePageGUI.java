@@ -22,8 +22,8 @@ public class SinglePageGUI extends AbstractGUI {
         this(null, title, rows);
     }
 
-    public void add(final int slot, final Button button) {
-        add(inventory, slot, button);
+    public void set(final int slot, final Button button) {
+        set(inventory, slot, button);
     }
 
     public Inventory getInventory() {
@@ -63,8 +63,10 @@ public class SinglePageGUI extends AbstractGUI {
 
         final Optional<Button> cached = of(inventory, event.getSlot());
 
-        if(cached.isPresent()) {
-            cached.get();
+        if (!cached.isPresent()) {
+            return;
         }
+
+        cached.get().onClick(player);
     }
 }

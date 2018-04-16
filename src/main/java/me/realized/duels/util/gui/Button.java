@@ -35,4 +35,6 @@ public class Button implements Updatable {
 
     @Override
     public void update(final Player player) {}
+
+    public void onClick(final Player player) {}
 }

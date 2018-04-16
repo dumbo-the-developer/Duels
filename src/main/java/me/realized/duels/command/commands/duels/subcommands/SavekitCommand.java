@@ -21,7 +21,7 @@ public class SavekitCommand extends BaseCommand {
             return;
         }
 
-        kitManager.save(new Kit(name, ((Player) sender).getInventory()));
+        kitManager.save(new Kit(plugin.getSettingCache(), name, ((Player) sender).getInventory()));
         sender.sendMessage("Saved kit " + name);
     }
 }

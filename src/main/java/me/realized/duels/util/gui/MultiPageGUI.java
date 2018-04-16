@@ -31,10 +31,25 @@ public class MultiPageGUI extends AbstractGUI {
 
     public MultiPageGUI(final String title, final int rows, final Collection<? extends Button> buttons) {
         super(null);
+
+        if (title == null || title.isEmpty()) {
+            throw new IllegalArgumentException("title cannot be null or empty");
+        }
+
         this.title = title;
+
+        if (rows <= 0 || rows > 5) {
+            throw new IllegalArgumentException("rows out of range, must be between 1 - 5");
+        }
+
         this.size = rows * 9 + 9;
         this.prevPageSlot = size - 9;
         this.nextPageSlot = size - 1;
+
+        if (buttons == null) {
+            throw new IllegalArgumentException("buttons cannot be null");
+        }
+
         this.buttons = buttons;
     }
 
@@ -62,7 +77,8 @@ public class MultiPageGUI extends AbstractGUI {
         for (final Button button : buttons) {
             if (i % maxSize == 0) {
                 final Page prev = page;
-                page = new Page(GUIBuilder.of(title + " (" + pageNum + "/" + pages + ")", size).fillRange(prevPageSlot, nextPageSlot + 1, ItemBuilder.of(Material.STAINED_GLASS_PANE).build()).build());
+                page = new Page(GUIBuilder.of(title + " (" + pageNum + "/" + pages + ")", size)
+                    .fillRange(prevPageSlot, nextPageSlot + 1, ItemBuilder.of(Material.STAINED_GLASS_PANE).build()).build());
 
                 if (prev != null) {
                     page.inventory.setItem(prevPageSlot, prevPage);
@@ -76,7 +92,7 @@ public class MultiPageGUI extends AbstractGUI {
                 pageNum++;
             }
 
-            add(page.inventory, slot, button);
+            set(page.inventory, slot, button);
             i++;
             slot++;
         }
@@ -119,11 +135,20 @@ public class MultiPageGUI extends AbstractGUI {
         }
 
         final Page page = result.get();
+        final int slot = event.getSlot();
 
-        if (event.getSlot() == nextPageSlot && page.next != null) {
+        if (slot == nextPageSlot && page.next != null) {
             player.openInventory(page.next.inventory);
-        } else if (event.getSlot() == prevPageSlot && page.previous != null) {
+        } else if (slot == prevPageSlot && page.previous != null) {
             player.openInventory(page.previous.inventory);
+        } else {
+            final Optional<Button> cached = of(clicked, slot);
+
+            if (!cached.isPresent()) {
+                return;
+            }
+
+            cached.get().onClick(player);
         }
     }
 }

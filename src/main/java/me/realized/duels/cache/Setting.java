@@ -29,5 +29,14 @@ public class Setting {
     private boolean itemBetting;
     @Getter
     @Setter
-    private SinglePageGUI settingGui;
+    private SinglePageGUI gui;
+
+    public void reset() {
+        target = null;
+        targetName = null;
+        kit = null;
+        arena = null;
+        bet = 0;
+        itemBetting = false;
+    }
 }

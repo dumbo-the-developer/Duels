@@ -1,5 +1,6 @@
 package me.realized.duels.gui.setting;
 
+import me.realized.duels.DuelsPlugin;
 import me.realized.duels.cache.Setting;
 import me.realized.duels.cache.SettingCache;
 import me.realized.duels.util.gui.Button;
@@ -10,11 +11,12 @@ import org.bukkit.entity.Player;
 public class RequestDetailsButton extends Button {
 
     private static final String[] LORE_TEMPLATE = {"&7Opponent: &f%s", "&7Kit: &9%s", "&7Arena: &9%s", "&7Bet: &6%s", "&7Bet Items: %s"};
+
     private final SettingCache cache;
 
-    public RequestDetailsButton(final SettingCache cache) {
+    public RequestDetailsButton(final DuelsPlugin plugin) {
         super(ItemBuilder.of(Material.SIGN).name("&eRequest Details").build());
-        this.cache = cache;
+        this.cache = plugin.getSettingCache();
     }
 
     @Override

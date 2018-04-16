@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
+import me.realized.duels.cache.Setting;
+import me.realized.duels.cache.SettingCache;
 import me.realized.duels.util.gui.Button;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
@@ -13,18 +15,20 @@ import org.bukkit.inventory.PlayerInventory;
 
 public class Kit extends Button {
 
+    private final SettingCache cache;
     @Getter
     private final String name;
     @Getter
     private final Map<String, Map<Integer, ItemStack>> items = new HashMap<>();
 
-    public Kit(final String name, final ItemStack displayed) {
+    public Kit(final SettingCache cache, final String name, final ItemStack displayed) {
         super(displayed);
+        this.cache = cache;
         this.name = name;
     }
 
-    public Kit(final String name, final PlayerInventory inventory) {
-        this(name, ItemBuilder
+    public Kit(final SettingCache cache, final String name, final PlayerInventory inventory) {
+        this(cache, name, ItemBuilder
             .of(Material.DIAMOND_SWORD)
             .name("&7&l" + name)
             .lore("&aClick to send", "&aa duel request", "&awith this kit!")
@@ -88,5 +92,12 @@ public class Kit extends Button {
                 }
             }
         }
+    }
+
+    @Override
+    public void onClick(final Player player) {
+        final Setting setting = cache.get(player);
+        setting.setKit(this);
+        setting.getGui().open(player);
     }
 }

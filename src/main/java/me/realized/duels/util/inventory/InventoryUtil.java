@@ -14,6 +14,14 @@ public final class InventoryUtil {
         }
     }
 
+    public static void fillSpace(final Inventory inventory, final int from, final int to, final int h, final ItemStack item) {
+        for (int i = 0; i < h; i++) {
+            for (int slot = from; slot < to; slot++) {
+                inventory.setItem(slot + i * 9, item);
+            }
+        }
+    }
+
     public static void fillRange(final Inventory inventory, final int from, final int to, final ItemStack item) {
         fillRange(inventory, from, to, item, true);
     }
@@ -29,15 +37,4 @@ public final class InventoryUtil {
             inventory.setItem(slot, item);
         }
     }
-
-    public static void fillEmpty(final Inventory inventory, final ItemStack item) {
-        for (int slot = 0; slot < inventory.getSize(); slot++) {
-            final ItemStack target = inventory.getItem(slot);
-
-            if (target != null && target.getType() != Material.AIR) {
-                inventory.setItem(slot, item);
-            }
-        }
-    }
-
 }

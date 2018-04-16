@@ -33,7 +33,7 @@ public abstract class AbstractGUI implements Updatable {
         return (buttons = this.buttons.get(inventory)) != null ? Optional.ofNullable(buttons.get(slot)) : Optional.empty();
     }
 
-    public void add(final Inventory inventory, final int slot, final Button button) {
+    public void set(final Inventory inventory, final int slot, final Button button) {
         buttons.computeIfAbsent(inventory, result -> new HashMap<>()).put(slot, button);
         inventory.setItem(slot, button.getDisplayed());
     }
