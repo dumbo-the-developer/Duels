@@ -1,4 +1,4 @@
-package me.realized.duels.gui.setting;
+package me.realized.duels.gui.setting.buttons;
 
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.cache.Setting;
@@ -8,7 +8,7 @@ import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-public class RequestDetailsButton extends Button {
+public class  RequestDetailsButton extends Button {
 
     private static final String[] LORE_TEMPLATE = {"&7Opponent: &f%s", "&7Kit: &9%s", "&7Arena: &9%s", "&7Bet: &6%s", "&7Bet Items: %s"};
 

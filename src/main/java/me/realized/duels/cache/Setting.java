@@ -4,8 +4,9 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import me.realized.duels.arena.Arena;
+import me.realized.duels.gui.setting.SettingGui;
 import me.realized.duels.kit.Kit;
-import me.realized.duels.util.gui.SinglePageGUI;
+import me.realized.duels.util.gui.SinglePageGui;
 
 public class Setting {
 
@@ -29,7 +30,7 @@ public class Setting {
     private boolean itemBetting;
     @Getter
     @Setter
-    private SinglePageGUI gui;
+    private SettingGui gui;
 
     public void reset() {
         target = null;

@@ -6,6 +6,7 @@ import me.realized.duels.command.commands.duels.subcommands.DeletekitCommand;
 import me.realized.duels.command.commands.duels.subcommands.LoadkitCommand;
 import me.realized.duels.command.commands.duels.subcommands.SavekitCommand;
 import me.realized.duels.data.ItemData;
+import me.realized.duels.gui.betting.BettingGui;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -21,6 +22,8 @@ public class DuelsCommand extends BaseCommand {
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
-        kitManager.getGui().open((Player) sender);
+        final BettingGui bettingGui;
+        guiListener.addGui(bettingGui = new BettingGui((Player) sender, (Player) sender));
+        bettingGui.open((Player) sender);
     }
 }

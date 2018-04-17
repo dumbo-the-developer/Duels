@@ -5,14 +5,14 @@ import me.realized.duels.cache.SettingCache;
 import me.realized.duels.data.UserDataManager;
 import me.realized.duels.kit.KitManager;
 import me.realized.duels.util.command.AbstractCommand;
-import me.realized.duels.util.gui.GUIListener;
+import me.realized.duels.util.gui.GuiListener;
 
 public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
 
     protected final DuelsPlugin plugin;
     protected final UserDataManager userManager;
     protected final KitManager kitManager;
-    protected final GUIListener guiListener;
+    protected final GuiListener guiListener;
     protected final SettingCache settingCache;
 
     public BaseCommand(final DuelsPlugin plugin, final String name, final String usage, final String permission, final int length, final boolean playerOnly,

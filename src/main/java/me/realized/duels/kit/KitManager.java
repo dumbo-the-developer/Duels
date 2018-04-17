@@ -16,7 +16,7 @@ import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.data.KitData;
 import me.realized.duels.util.Loadable;
-import me.realized.duels.util.gui.MultiPageGUI;
+import me.realized.duels.util.gui.MultiPageGui;
 
 public class KitManager implements Loadable {
 
@@ -24,13 +24,13 @@ public class KitManager implements Loadable {
     private final File file;
     private final Map<String, Kit> kits = new HashMap<>();
     @Getter
-    private final MultiPageGUI gui;
+    private final MultiPageGui gui;
 
     public KitManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.file = new File(plugin.getDataFolder(), "kits.json");
-        gui = new MultiPageGUI("Kit Selection", 1, kits.values());
-        plugin.getGuiListener().addGUI(gui);
+        gui = new MultiPageGui("Kit Selection", 1, kits.values());
+        plugin.getGuiListener().addGui(gui);
     }
 
     @Override

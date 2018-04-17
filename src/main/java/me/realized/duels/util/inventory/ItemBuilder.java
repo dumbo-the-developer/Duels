@@ -31,8 +31,11 @@ import java.util.Arrays;
 import java.util.List;
 import me.realized.duels.util.StringUtil;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 public final class ItemBuilder {
 
@@ -69,6 +72,16 @@ public final class ItemBuilder {
         ItemMeta meta = result.getItemMeta();
         meta.setLore(StringUtil.color(lore));
         result.setItemMeta(meta);
+        return this;
+    }
+
+    public ItemBuilder head(final Player player) {
+        if (result.getType() == Material.SKULL_ITEM && result.getDurability() == 3) {
+            final SkullMeta meta = (SkullMeta) result.getItemMeta();
+            meta.setOwner(player.getName());
+            result.setItemMeta(meta);
+        }
+
         return this;
     }
 

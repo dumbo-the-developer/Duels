@@ -22,7 +22,7 @@ import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.Log.LogSource;
 import me.realized.duels.util.Reloadable;
-import me.realized.duels.util.gui.GUIListener;
+import me.realized.duels.util.gui.GuiListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
@@ -37,7 +37,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private UserDataManager userManager;
     @Getter
-    private GUIListener guiListener;
+    private GuiListener guiListener;
     @Getter
     private KitManager kitManager;
     @Getter
@@ -53,7 +53,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(logManager = new LogManager(this));
         Log.addSource(logManager);
         loadables.add(userManager = new UserDataManager(this));
-        guiListener = new GUIListener(this);
+        guiListener = new GuiListener(this);
         loadables.add(kitManager = new KitManager(this));
         loadables.add(arenaManager = new ArenaManager(this));
         loadables.add(duelManager = new DuelManager(this));

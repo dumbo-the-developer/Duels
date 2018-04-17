@@ -62,26 +62,11 @@ public class ItemData {
                 final Potions potion = Potions.fromItemStack(item);
 
                 if (potion != null) {
-                    final StringBuilder data = new StringBuilder();
-                    data.append(potion.getType().name()).append("-");
-
-                    if (potion.isExtended()) {
-                        data.append("extended-");
-                    }
-
-                    if (potion.isLinger()) {
-                        data.append("linger-");
-                    }
-
-                    if (potion.isSplash()) {
-                        data.append("splash-");
-                    }
-
-                    if (potion.isStrong()) {
-                        data.append("strong-");
-                    }
-
-                    this.itemData = data.toString();
+                    this.itemData = potion.getType().name() + "-"
+                        + (potion.isExtended() ? "extended-" : "")
+                        + (potion.isLinger() ? "linger-" : "")
+                        + (potion.isSplash() ? "splash-" : "")
+                        + (potion.isStrong() ? "strong-" : "");
                 }
             } else if (material.equals("MONSTER_EGG")) {
                 final SpawnEggs spawnEgg = SpawnEggs.fromItemStack(item);
@@ -94,18 +79,9 @@ public class ItemData {
                 final PotionData potionData = meta.getBasePotionData();
 
                 if (potionData.getType().getEffectType() != null) {
-                    final StringBuilder data = new StringBuilder();
-                    data.append(potionData.getType().name()).append("-");
-
-                    if (potionData.isExtended()) {
-                        data.append("extended-");
-                    }
-
-                    if (potionData.isUpgraded()) {
-                        data.append("upgraded-");
-                    }
-
-                    this.itemData = data.toString();
+                    this.itemData = potionData.getType().name() + "-"
+                        + (potionData.isExtended() ? "extended-" : "")
+                        + (potionData.isUpgraded() ? "upgraded-" : "");
                 }
             }
         }
@@ -212,7 +188,7 @@ public class ItemData {
         }
 
         if (enchantments != null && !enchantments.isEmpty()) {
-            for (Map.Entry<String, Integer> entry : enchantments.entrySet()) {
+            for (final Map.Entry<String, Integer> entry : enchantments.entrySet()) {
                 item.addUnsafeEnchantment(Enchantment.getByName(entry.getKey()), entry.getValue());
             }
         }

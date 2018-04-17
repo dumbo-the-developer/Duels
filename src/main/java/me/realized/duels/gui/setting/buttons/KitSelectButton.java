@@ -1,4 +1,4 @@
-package me.realized.duels.gui.setting;
+package me.realized.duels.gui.setting.buttons;
 
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.cache.Setting;

@@ -9,24 +9,24 @@ import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public final class GUIBuilder {
+public final class InventoryBuilder {
 
     private final Inventory gui;
 
-    private GUIBuilder(final String title, final int size) {
+    private InventoryBuilder(final String title, final int size) {
         this.gui = Bukkit.createInventory(null, size, title);
     }
 
-    public static GUIBuilder of(final String title, final int size) {
-        return new GUIBuilder(title, size);
+    public static InventoryBuilder of(final String title, final int size) {
+        return new InventoryBuilder(title, size);
     }
 
-    public GUIBuilder set(final int slot, final ItemStack item) {
+    public InventoryBuilder set(final int slot, final ItemStack item) {
         gui.setItem(slot, item);
         return this;
     }
 
-    public GUIBuilder fill(final ItemStack item, final int... slots) {
+    public InventoryBuilder fill(final ItemStack item, final int... slots) {
         for (final int slot : slots) {
             gui.setItem(slot, item);
         }
@@ -34,7 +34,7 @@ public final class GUIBuilder {
         return this;
     }
 
-    public GUIBuilder fillRange(final int from, final int to, final ItemStack item) {
+    public InventoryBuilder fillRange(final int from, final int to, final ItemStack item) {
         for (int slot = from; slot < to; slot++) {
             gui.setItem(slot, item);
         }
@@ -42,7 +42,7 @@ public final class GUIBuilder {
         return this;
     }
 
-    public GUIBuilder fillEmpty(final ItemStack item) {
+    public InventoryBuilder fillEmpty(final ItemStack item) {
         for (int slot = 0; slot < gui.getSize(); slot++) {
             final ItemStack target = gui.getItem(slot);
 
@@ -54,7 +54,7 @@ public final class GUIBuilder {
         return this;
     }
 
-    public GUIBuilder pattern(final Pattern pattern) {
+    public InventoryBuilder pattern(final Pattern pattern) {
         pattern.apply(gui);
         return this;
     }

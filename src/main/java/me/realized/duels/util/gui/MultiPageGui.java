@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import me.realized.duels.util.inventory.GUIBuilder;
+import me.realized.duels.util.inventory.InventoryBuilder;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -12,7 +12,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class MultiPageGUI extends AbstractGUI {
+public class MultiPageGui extends AbstractGui {
 
     private class Page {
 
@@ -29,7 +29,7 @@ public class MultiPageGUI extends AbstractGUI {
     private final Collection<? extends Button> buttons;
     private final List<Page> pages = new ArrayList<>();
 
-    public MultiPageGUI(final String title, final int rows, final Collection<? extends Button> buttons) {
+    public MultiPageGui(final String title, final int rows, final Collection<? extends Button> buttons) {
         super(null);
 
         if (title == null || title.isEmpty()) {
@@ -63,7 +63,7 @@ public class MultiPageGUI extends AbstractGUI {
 
         if (pages == 0) {
             this.pages.add(new Page(
-                GUIBuilder.of(title, 18)
+                InventoryBuilder.of(title, 18)
                     .set(4, ItemBuilder.of(Material.REDSTONE_BLOCK).name("&cThis page is empty.").build())
                     .fillRange(9, 18, ItemBuilder.of(Material.STAINED_GLASS_PANE).build()).build()));
             return;
@@ -77,7 +77,7 @@ public class MultiPageGUI extends AbstractGUI {
         for (final Button button : buttons) {
             if (i % maxSize == 0) {
                 final Page prev = page;
-                page = new Page(GUIBuilder.of(title + " (" + pageNum + "/" + pages + ")", size)
+                page = new Page(InventoryBuilder.of(title + " (" + pageNum + "/" + pages + ")", size)
                     .fillRange(prevPageSlot, nextPageSlot + 1, ItemBuilder.of(Material.STAINED_GLASS_PANE).build()).build());
 
                 if (prev != null) {

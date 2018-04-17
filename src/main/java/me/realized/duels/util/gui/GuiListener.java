@@ -13,25 +13,25 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class GUIListener implements Listener {
+public class GuiListener implements Listener {
 
-    private final Multimap<UUID, AbstractGUI> privateGuis = HashMultimap.create();
-    private final List<AbstractGUI> publicGuis = new ArrayList<>();
+    private final Multimap<UUID, AbstractGui> privateGuis = HashMultimap.create();
+    private final List<AbstractGui> publicGuis = new ArrayList<>();
 
-    public GUIListener(final JavaPlugin plugin) {
+    public GuiListener(final JavaPlugin plugin) {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
-    public void addGUI(final AbstractGUI gui) {
+    public void addGui(final AbstractGui gui) {
         publicGuis.add(gui);
     }
 
-    public void addGUI(final Player player, final AbstractGUI gui) {
+    public void addGui(final Player player, final AbstractGui gui) {
         privateGuis.put(player.getUniqueId(), gui);
     }
 
-    private List<AbstractGUI> get(final Player player) {
-        final List<AbstractGUI> guis = new ArrayList<>(publicGuis);
+    private List<AbstractGui> get(final Player player) {
+        final List<AbstractGui> guis = new ArrayList<>(publicGuis);
 
         if (privateGuis.containsKey(player.getUniqueId())) {
             guis.addAll(privateGuis.get(player.getUniqueId()));
@@ -49,7 +49,7 @@ public class GUIListener implements Listener {
             return;
         }
 
-        for (final AbstractGUI gui : get(player)) {
+        for (final AbstractGui gui : get(player)) {
             if (gui.isPart(top)) {
                 gui.on(player, top, event);
                 break;
@@ -62,9 +62,9 @@ public class GUIListener implements Listener {
         final Player player = (Player) event.getWhoClicked();
         final Inventory inventory = event.getInventory();
 
-        for (final AbstractGUI gui : get(player)) {
+        for (final AbstractGui gui : get(player)) {
             if (gui.isPart(inventory)) {
-                event.setCancelled(true);
+                gui.on(player, event.getRawSlots(), event);
                 break;
             }
         }

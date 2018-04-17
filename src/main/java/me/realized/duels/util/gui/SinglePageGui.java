@@ -9,25 +9,21 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class SinglePageGUI extends AbstractGUI {
+public class SinglePageGui extends AbstractGui {
 
-    private final Inventory inventory;
+    protected final Inventory inventory;
 
-    public SinglePageGUI(final AbstractGUI parent, final String title, final int rows) {
+    public SinglePageGui(final AbstractGui parent, final String title, final int rows) {
         super(parent);
         this.inventory = Bukkit.createInventory(null, rows * 9, StringUtil.color(title));
     }
 
-    public SinglePageGUI(final String title, final int rows) {
+    public SinglePageGui(final String title, final int rows) {
         this(null, title, rows);
     }
 
     public void set(final int slot, final Button button) {
         set(inventory, slot, button);
-    }
-
-    public Inventory getInventory() {
-        return inventory;
     }
 
     @Override
