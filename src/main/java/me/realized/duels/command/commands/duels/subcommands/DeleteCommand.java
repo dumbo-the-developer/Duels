@@ -2,26 +2,24 @@ package me.realized.duels.command.commands.duels.subcommands;
 
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
-import me.realized.duels.kit.Kit;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
-public class SavekitCommand extends BaseCommand {
+public class DeleteCommand extends BaseCommand {
 
-    public SavekitCommand(final DuelsPlugin plugin) {
-        super(plugin, "savekit", "savekit [name]", null, 2, true);
+    public DeleteCommand(final DuelsPlugin plugin) {
+        super(plugin, "delete", "delete [name]", null, 2, false);
     }
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final String name = StringUtils.join(args, " ", 1, args.length);
 
-        if (kitManager.get(name).isPresent()) {
+        if (!arenaManager.remove(name)) {
+            // send msg
             return;
         }
 
-        kitManager.save((Player) sender, name);
-        sender.sendMessage("Saved kit " + name);
+        sender.sendMessage("Deleted arena '" + name + "'!");
     }
 }

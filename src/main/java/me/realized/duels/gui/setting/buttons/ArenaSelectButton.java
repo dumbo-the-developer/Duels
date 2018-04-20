@@ -4,7 +4,6 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.cache.Setting;
 import me.realized.duels.cache.SettingCache;
-import me.realized.duels.kit.KitManager;
 import me.realized.duels.util.gui.Button;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
@@ -30,5 +29,7 @@ public class ArenaSelectButton extends Button {
     }
 
     @Override
-    public void onClick(final Player player) {}
+    public void onClick(final Player player) {
+        arenaManager.getGui().open(player);
+    }
 }

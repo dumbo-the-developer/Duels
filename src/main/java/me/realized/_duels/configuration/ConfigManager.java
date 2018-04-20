@@ -1,10 +1,9 @@
 package me.realized._duels.configuration;
 
-import me.realized._duels.utilities.Reloadable;
-import me.realized._duels.utilities.config.Config;
-
 import java.util.HashMap;
 import java.util.Map;
+import me.realized._duels.utilities.Reloadable;
+import me.realized._duels.utilities.config.Config;
 
 public class ConfigManager implements Reloadable {
 

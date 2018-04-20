@@ -3,7 +3,6 @@ package me.realized.duels.kit;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
-import lombok.Setter;
 import me.realized.duels.cache.Setting;
 import me.realized.duels.cache.SettingCache;
 import me.realized.duels.util.gui.Button;

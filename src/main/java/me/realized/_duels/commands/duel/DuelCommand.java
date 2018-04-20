@@ -1,5 +1,10 @@
 package me.realized._duels.commands.duel;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import me.realized._duels.commands.BaseCommand;
 import me.realized._duels.commands.SubCommand;
 import me.realized._duels.commands.duel.subcommands.AcceptCommand;
@@ -16,8 +21,6 @@ import me.realized._duels.utilities.Helper;
 import me.realized._duels.utilities.Storage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-
-import java.util.*;
 
 public class DuelCommand extends BaseCommand {
 

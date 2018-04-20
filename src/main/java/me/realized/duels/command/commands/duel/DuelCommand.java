@@ -6,7 +6,7 @@ import me.realized.duels.cache.Setting;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.command.commands.duel.subcommands.StatsCommand;
 import me.realized.duels.gui.setting.SettingGui;
-import me.realized.duels.util.gui.SinglePageGui;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -29,21 +29,21 @@ public class DuelCommand extends BaseCommand {
             return false;
         }
 
-//        final Player target = Bukkit.getPlayerExact(args[0]);
-//
-//        if (target == null) {
-//            sender.sendMessage("Player not found");
-//            return true;
-//        }
+        final Player target = Bukkit.getPlayerExact(args[0]);
+
+        if (target == null) {
+            sender.sendMessage("Player not found");
+            return true;
+        }
 
         final Player player = (Player) sender;
         final Setting setting = settingCache.get(player);
 
-        if (setting.getTargetName() != null && !setting.getTargetName().equals(args[0])) {
+        if (setting.getTarget() != null && !setting.getTarget().equals(target.getUniqueId())) {
             setting.reset();
         }
 
-        setting.setTargetName(args[0]);
+        setting.setTarget(target.getUniqueId());
 
         SettingGui gui = setting.getGui();
 

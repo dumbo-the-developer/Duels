@@ -1,12 +1,16 @@
 package me.realized._duels.configuration;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import me.realized._duels.Core;
 import me.realized._duels.utilities.config.Config;
 import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-
-import java.util.*;
 
 public class MainConfig extends Config {
 

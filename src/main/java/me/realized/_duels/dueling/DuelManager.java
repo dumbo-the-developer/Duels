@@ -1,10 +1,20 @@
 package me.realized._duels.dueling;
 
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.GregorianCalendar;
+import java.util.UUID;
+import java.util.logging.Level;
 import me.realized._duels.Core;
 import me.realized._duels.arena.Arena;
 import me.realized._duels.arena.ArenaManager;
 import me.realized._duels.configuration.MainConfig;
-import me.realized._duels.data.*;
+import me.realized._duels.data.DataManager;
+import me.realized._duels.data.MatchData;
+import me.realized._duels.data.PlayerData;
+import me.realized._duels.data.PlayerManager;
+import me.realized._duels.data.UserData;
 import me.realized._duels.event.MatchEndEvent;
 import me.realized._duels.event.MatchStartEvent;
 import me.realized._duels.event.RequestSendEvent;
@@ -26,12 +36,15 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import java.util.*;
-import java.util.logging.Level;
 
 public class DuelManager implements Listener {
 

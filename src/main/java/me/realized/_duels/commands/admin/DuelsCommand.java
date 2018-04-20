@@ -1,15 +1,28 @@
 package me.realized._duels.commands.admin;
 
-import me.realized._duels.commands.BaseCommand;
-import me.realized._duels.commands.SubCommand;
-import me.realized._duels.commands.admin.subcommands.*;
-import me.realized._duels.utilities.Helper;
-import org.bukkit.entity.Player;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import me.realized._duels.commands.BaseCommand;
+import me.realized._duels.commands.SubCommand;
+import me.realized._duels.commands.admin.subcommands.CreateCommand;
+import me.realized._duels.commands.admin.subcommands.DeleteCommand;
+import me.realized._duels.commands.admin.subcommands.DeletekitCommand;
+import me.realized._duels.commands.admin.subcommands.EditCommand;
+import me.realized._duels.commands.admin.subcommands.InfoCommand;
+import me.realized._duels.commands.admin.subcommands.ListCommand;
+import me.realized._duels.commands.admin.subcommands.LoadkitCommand;
+import me.realized._duels.commands.admin.subcommands.PlaysoundCommand;
+import me.realized._duels.commands.admin.subcommands.ReloadCommand;
+import me.realized._duels.commands.admin.subcommands.ResetCommand;
+import me.realized._duels.commands.admin.subcommands.SavekitCommand;
+import me.realized._duels.commands.admin.subcommands.SetCommand;
+import me.realized._duels.commands.admin.subcommands.SetitemCommand;
+import me.realized._duels.commands.admin.subcommands.SetlobbyCommand;
+import me.realized._duels.commands.admin.subcommands.ToggleCommand;
+import me.realized._duels.utilities.Helper;
+import org.bukkit.entity.Player;
 
 public class DuelsCommand extends BaseCommand {
 

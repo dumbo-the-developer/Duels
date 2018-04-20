@@ -1,10 +1,9 @@
 package me.realized._duels.utilities.compat;
 
+import java.lang.reflect.Method;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
-
-import java.lang.reflect.Method;
 
 public class SpawnEggs {
 

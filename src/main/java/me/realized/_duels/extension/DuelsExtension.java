@@ -1,9 +1,8 @@
 package me.realized._duels.extension;
 
 import com.google.common.io.Files;
-import me.realized._duels.Core;
-
 import java.io.File;
+import me.realized._duels.Core;
 
 public abstract class DuelsExtension {
 

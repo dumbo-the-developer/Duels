@@ -3,12 +3,11 @@ package me.realized._duels.hooks;
 import be.maximvdw.placeholderapi.PlaceholderAPI;
 import be.maximvdw.placeholderapi.PlaceholderReplaceEvent;
 import be.maximvdw.placeholderapi.PlaceholderReplacer;
+import java.util.Arrays;
+import java.util.List;
 import me.realized._duels.Core;
 import me.realized._duels.data.UserData;
 import org.bukkit.entity.Player;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class MVdWPlaceholderHook extends PluginHook implements PlaceholderReplacer {
 

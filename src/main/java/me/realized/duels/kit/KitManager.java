@@ -17,6 +17,7 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.data.KitData;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.gui.MultiPageGui;
+import org.bukkit.entity.Player;
 
 public class KitManager implements Loadable {
 
@@ -85,7 +86,7 @@ public class KitManager implements Loadable {
         return Optional.ofNullable(kits.remove(name));
     }
 
-    public void save(final Kit kit) {
-        kits.put(kit.getName(), kit);
+    public void save(final Player player, final String name) {
+        kits.put(name, new Kit(plugin.getSettingCache(), name, player.getInventory()));
     }
 }

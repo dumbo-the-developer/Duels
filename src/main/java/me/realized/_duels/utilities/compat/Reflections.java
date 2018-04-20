@@ -1,11 +1,10 @@
 package me.realized._duels.utilities.compat;
 
-import me.realized._duels.Core;
-import org.bukkit.Bukkit;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import me.realized._duels.Core;
+import org.bukkit.Bukkit;
 
 public class Reflections {
 

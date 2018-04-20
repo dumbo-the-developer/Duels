@@ -1,10 +1,6 @@
 package me.realized._duels.extension;
 
 import com.google.common.io.Files;
-import me.realized._duels.Core;
-import me.realized._duels.utilities.Helper;
-import me.realized._duels.utilities.Reloadable;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.net.URL;
@@ -13,6 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
+import me.realized._duels.Core;
+import me.realized._duels.utilities.Helper;
+import me.realized._duels.utilities.Reloadable;
 
 public class ExtensionManager implements Reloadable {
 

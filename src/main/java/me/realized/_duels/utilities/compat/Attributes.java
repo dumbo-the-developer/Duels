@@ -1,14 +1,13 @@
 package me.realized._duels.utilities.compat;
 
-import lombok.Getter;
-import lombok.Setter;
-import me.realized._duels.Core;
-import org.bukkit.inventory.ItemStack;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import lombok.Getter;
+import lombok.Setter;
+import me.realized._duels.Core;
+import org.bukkit.inventory.ItemStack;
 
 public class Attributes {
 

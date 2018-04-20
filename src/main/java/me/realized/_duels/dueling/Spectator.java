@@ -1,10 +1,9 @@
 package me.realized._duels.dueling;
 
+import java.util.UUID;
 import me.realized._duels.arena.Arena;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-
-import java.util.UUID;
 
 class Spectator {
 

@@ -1,10 +1,9 @@
 package me.realized._duels.event;
 
-import me.realized._duels.arena.Arena;
-import org.bukkit.event.HandlerList;
-
 import java.util.List;
 import java.util.UUID;
+import me.realized._duels.arena.Arena;
+import org.bukkit.event.HandlerList;
 
 public class MatchStartEvent extends MatchEvent {
 

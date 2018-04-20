@@ -1,5 +1,6 @@
 package me.realized._duels.utilities.location;
 
+import java.util.logging.Level;
 import me.realized._duels.Core;
 import me.realized._duels.configuration.MainConfig;
 import me.realized._duels.utilities.Helper;
@@ -11,8 +12,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
-
-import java.util.logging.Level;
 
 public class Teleport implements Listener {
 

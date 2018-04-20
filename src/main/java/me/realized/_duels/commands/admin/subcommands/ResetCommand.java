@@ -1,11 +1,10 @@
 package me.realized._duels.commands.admin.subcommands;
 
+import java.util.UUID;
 import me.realized._duels.commands.SubCommand;
 import me.realized._duels.data.UserData;
 import me.realized._duels.utilities.Helper;
 import org.bukkit.entity.Player;
-
-import java.util.UUID;
 
 public class ResetCommand extends SubCommand {
 

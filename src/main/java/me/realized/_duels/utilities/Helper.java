@@ -1,12 +1,24 @@
 package me.realized._duels.utilities;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.regex.Pattern;
 import me.realized._duels.Core;
 import me.realized._duels.arena.Arena;
 import me.realized._duels.configuration.ConfigManager;
 import me.realized._duels.configuration.ConfigType;
 import me.realized._duels.configuration.MainConfig;
 import me.realized._duels.configuration.MessagesConfig;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -15,10 +27,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import java.util.*;
-import java.util.logging.Level;
-import java.util.regex.Pattern;
 
 public class Helper {
 

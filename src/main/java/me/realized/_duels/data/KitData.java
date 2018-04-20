@@ -1,12 +1,11 @@
 package me.realized._duels.data;
 
+import java.util.HashMap;
+import java.util.Map;
 import me.realized._duels.kits.Kit;
 import me.realized._duels.kits.KitManager;
 import me.realized._duels.utilities.inventory.JSONItem;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class KitData {
 

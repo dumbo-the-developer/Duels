@@ -1,5 +1,11 @@
 package me.realized._duels.arena;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import me.realized._duels.Core;
 import me.realized._duels.configuration.MainConfig;
 import me.realized._duels.event.MatchEndEvent;
@@ -13,8 +19,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import java.util.*;
 
 public class Arena implements GUIItem {
 

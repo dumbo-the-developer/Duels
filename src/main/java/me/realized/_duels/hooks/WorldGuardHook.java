@@ -3,11 +3,10 @@ package me.realized._duels.hooks;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import java.util.List;
 import me.realized._duels.Core;
 import me.realized._duels.configuration.MainConfig;
 import org.bukkit.entity.Player;
-
-import java.util.List;
 
 public class WorldGuardHook extends PluginHook {
 

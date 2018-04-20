@@ -1,12 +1,11 @@
 package me.realized._duels.configuration;
 
-import me.realized._duels.Core;
-import me.realized._duels.utilities.config.Config;
-import org.bukkit.configuration.MemorySection;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import me.realized._duels.Core;
+import me.realized._duels.utilities.config.Config;
+import org.bukkit.configuration.MemorySection;
 
 public class MessagesConfig extends Config {
 

@@ -1,10 +1,9 @@
 package me.realized._duels.api;
 
+import java.util.UUID;
 import me.realized._duels.Core;
 import me.realized._duels.data.UserData;
 import org.bukkit.entity.Player;
-
-import java.util.UUID;
 
 /**
  * todo: fixxxxxxx

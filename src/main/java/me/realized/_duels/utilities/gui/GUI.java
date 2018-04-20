@@ -1,5 +1,11 @@
 package me.realized._duels.utilities.gui;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import me.realized._duels.utilities.Helper;
 import me.realized._duels.utilities.inventory.ItemBuilder;
 import org.bukkit.Bukkit;
@@ -9,8 +15,6 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.*;
 
 public class GUI<T> {
 

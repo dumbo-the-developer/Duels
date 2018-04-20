@@ -1,8 +1,6 @@
 package me.realized.duels.util.gui;
 
 import java.util.Arrays;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import lombok.Getter;
 import me.realized.duels.util.StringUtil;
 import org.bukkit.entity.Player;

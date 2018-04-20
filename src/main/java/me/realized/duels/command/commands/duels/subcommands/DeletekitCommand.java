@@ -6,7 +6,6 @@ import me.realized.duels.command.BaseCommand;
 import me.realized.duels.kit.Kit;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 public class DeletekitCommand extends BaseCommand {
 

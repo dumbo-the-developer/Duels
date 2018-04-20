@@ -26,6 +26,14 @@ public class SinglePageGui extends AbstractGui {
         set(inventory, slot, button);
     }
 
+    public void set(final int from, final int to, final int h, final Button button) {
+        for (int i = 0; i < h; i++) {
+            for (int slot = from; slot < to; slot++) {
+                set(inventory, slot, button);
+            }
+        }
+    }
+
     @Override
     public void open(final Player player) {
         update(player);

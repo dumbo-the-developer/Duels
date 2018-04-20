@@ -1,11 +1,10 @@
 package me.realized._duels.data;
 
+import java.util.HashMap;
+import java.util.Map;
 import me.realized._duels.arena.Arena;
 import me.realized._duels.utilities.location.SimpleLocation;
 import org.bukkit.Location;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class ArenaData {
 

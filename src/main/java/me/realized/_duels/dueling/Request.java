@@ -1,8 +1,7 @@
 package me.realized._duels.dueling;
 
-import org.bukkit.Location;
-
 import java.util.UUID;
+import org.bukkit.Location;
 
 public class Request {
 

@@ -1,15 +1,14 @@
 package me.realized._duels.kits;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import me.realized._duels.utilities.gui.GUIItem;
 import me.realized._duels.utilities.inventory.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Kit implements GUIItem {
 

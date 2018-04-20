@@ -8,23 +8,42 @@ import java.util.Objects;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
+import me.realized.duels.cache.Setting;
+import me.realized.duels.cache.SettingCache;
+import me.realized.duels.util.gui.Button;
+import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
 
-public class Arena {
+public class Arena extends Button {
 
+    private final SettingCache cache;
     @Getter
     private final String name;
-    private final Map<Integer, Location> positions = new HashMap<>();
+    @Getter
+    private Map<Integer, Location> positions = new HashMap<>();
     private final List<UUID> players = new ArrayList<>();
     @Getter
     @Setter
     private boolean disabled, used;
 
-    public Arena(final String name) {
+    public Arena(final SettingCache cache, final String name) {
+        super(ItemBuilder.of(Material.EMPTY_MAP).name("&e" + name).build());
+        this.cache = cache;
         this.name = name;
     }
 
+    public void setPosition(final int pos, final Location location) {
+        positions.put(pos, location);
+    }
 
+    @Override
+    public void onClick(final Player player) {
+        final Setting setting = cache.get(player);
+        setting.setArena(this);
+        setting.getGui().open(player);
+    }
 
     @Override
     public boolean equals(final Object other) {

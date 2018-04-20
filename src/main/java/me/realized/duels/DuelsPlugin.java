@@ -39,13 +39,13 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private GuiListener guiListener;
     @Getter
-    private KitManager kitManager;
-    @Getter
     private ArenaManager arenaManager;
     @Getter
-    private DuelManager duelManager;
+    private KitManager kitManager;
     @Getter
     private SettingCache settingCache;
+    @Getter
+    private DuelManager duelManager;
 
     @Override
     public void onEnable() {
@@ -54,10 +54,10 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         Log.addSource(logManager);
         loadables.add(userManager = new UserDataManager(this));
         guiListener = new GuiListener(this);
-        loadables.add(kitManager = new KitManager(this));
         loadables.add(arenaManager = new ArenaManager(this));
-        loadables.add(duelManager = new DuelManager(this));
+        loadables.add(kitManager = new KitManager(this));
         loadables.add(settingCache = new SettingCache());
+        loadables.add(duelManager = new DuelManager(this));
 
         if (!load()) {
             getPluginLoader().disablePlugin(this);

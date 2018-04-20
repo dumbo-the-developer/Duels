@@ -1,5 +1,8 @@
 package me.realized._duels.commands.duel.subcommands;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.UUID;
 import me.realized._duels.commands.SubCommand;
 import me.realized._duels.data.MatchData;
 import me.realized._duels.data.UserData;
@@ -8,10 +11,6 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
-
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.UUID;
 
 public class StatsCommand extends SubCommand {
 

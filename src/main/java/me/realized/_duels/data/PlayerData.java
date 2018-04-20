@@ -1,12 +1,11 @@
 package me.realized._duels.data;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class PlayerData {
 

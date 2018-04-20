@@ -2,6 +2,10 @@ package me.realized._duels;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Level;
 import me.realized._duels.arena.ArenaManager;
 import me.realized._duels.commands.BaseCommand;
 import me.realized._duels.commands.admin.DuelsCommand;
@@ -17,18 +21,19 @@ import me.realized._duels.dueling.DuelManager;
 import me.realized._duels.dueling.RequestManager;
 import me.realized._duels.dueling.SpectatorManager;
 import me.realized._duels.extension.ExtensionManager;
-import me.realized._duels.hooks.*;
+import me.realized._duels.hooks.CombatTagPlusHook;
+import me.realized._duels.hooks.EssentialsHook;
+import me.realized._duels.hooks.FactionsUUIDHook;
+import me.realized._duels.hooks.HookManager;
+import me.realized._duels.hooks.MVdWPlaceholderHook;
+import me.realized._duels.hooks.WorldGuardHook;
+import me.realized._duels.hooks.mcMMOHook;
 import me.realized._duels.kits.KitManager;
 import me.realized._duels.logging.LogManager;
 import me.realized._duels.utilities.Reloadable;
 import me.realized._duels.utilities.gui.GUIManager;
 import me.realized._duels.utilities.location.Teleport;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Level;
 
 public class Core extends JavaPlugin {
 

@@ -23,7 +23,7 @@ public class  RequestDetailsButton extends Button {
     public void update(final Player player) {
         final Setting setting = cache.get(player);
         final String[] lore = LORE_TEMPLATE.clone();
-        lore[0] = String.format(lore[0], setting.getTargetName());
+        lore[0] = String.format(lore[0], setting.getTarget());
         lore[1] = String.format(lore[1], setting.getKit() != null ? setting.getKit().getName() : "Random");
         lore[2] = String.format(lore[2], setting.getArena() != null ? setting.getArena().getName() : "Random");
         lore[3] = String.format(lore[3], "$" + setting.getBet());

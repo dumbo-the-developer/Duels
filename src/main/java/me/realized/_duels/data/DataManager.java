@@ -1,5 +1,19 @@
 package me.realized._duels.data;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.UUID;
 import me.realized._duels.Core;
 import me.realized._duels.event.UserCreateEvent;
 import me.realized._duels.utilities.Reloadable;
@@ -13,9 +27,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-
-import java.io.*;
-import java.util.*;
 
 public class DataManager implements Listener, Reloadable {
 

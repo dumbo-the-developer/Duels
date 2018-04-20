@@ -1,6 +1,19 @@
 package me.realized._duels.arena;
 
 import com.google.gson.reflect.TypeToken;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
+import java.util.logging.Level;
 import me.realized._duels.Core;
 import me.realized._duels.configuration.MainConfig;
 import me.realized._duels.data.ArenaData;
@@ -32,10 +45,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
-
-import java.io.*;
-import java.util.*;
-import java.util.logging.Level;
 
 public class ArenaManager implements Listener, Reloadable {
 

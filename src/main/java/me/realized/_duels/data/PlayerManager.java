@@ -1,11 +1,10 @@
 package me.realized._duels.data;
 
-import me.realized._duels.utilities.Reloadable;
-import org.bukkit.entity.Player;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import me.realized._duels.utilities.Reloadable;
+import org.bukkit.entity.Player;
 
 public class PlayerManager implements Reloadable {
 

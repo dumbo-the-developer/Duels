@@ -1,10 +1,9 @@
 package me.realized._duels.utilities.config;
 
+import java.io.File;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.io.File;
 
 public abstract class Config {
     private final String fileName;

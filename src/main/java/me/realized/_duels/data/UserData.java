@@ -1,10 +1,13 @@
 package me.realized._duels.data;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import me.realized._duels.configuration.ConfigManager;
 import me.realized._duels.configuration.ConfigType;
 import me.realized._duels.configuration.MainConfig;
-
-import java.util.*;
 
 public class UserData {
 

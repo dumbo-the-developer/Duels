@@ -1,9 +1,13 @@
 package me.realized._duels.dueling;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import me.realized._duels.utilities.Reloadable;
 import org.bukkit.entity.Player;
-
-import java.util.*;
 
 public class RequestManager implements Reloadable {
 
