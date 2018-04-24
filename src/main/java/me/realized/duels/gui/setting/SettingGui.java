@@ -8,7 +8,7 @@ import me.realized.duels.gui.setting.buttons.KitSelectButton;
 import me.realized.duels.gui.setting.buttons.RequestDetailsButton;
 import me.realized.duels.gui.setting.buttons.RequestSendButton;
 import me.realized.duels.util.gui.SinglePageGui;
-import me.realized.duels.util.inventory.InventoryUtil;
+import me.realized.duels.util.inventory.Slots;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -19,9 +19,9 @@ public class SettingGui extends SinglePageGui {
         super("Request Settings", 3);
 
         final ItemStack spacing = ItemBuilder.of(Material.STAINED_GLASS_PANE).name(" ").build();
-        InventoryUtil.fillRange(inventory, 2, 7, spacing);
-        InventoryUtil.fillRange(inventory, 11, 16, spacing);
-        InventoryUtil.fillRange(inventory, 20, 25, spacing);
+        Slots.fill(2, 7, slot -> inventory.setItem(slot, spacing));
+        Slots.fill(11, 16, slot -> inventory.setItem(slot, spacing));
+        Slots.fill(20, 25, slot -> inventory.setItem(slot, spacing));
 
         set(4, new RequestDetailsButton(plugin));
         set(12, new KitSelectButton(plugin));

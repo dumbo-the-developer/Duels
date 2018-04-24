@@ -4,6 +4,8 @@ import java.util.List;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.cache.Setting;
 import me.realized.duels.command.BaseCommand;
+import me.realized.duels.command.commands.duel.subcommands.AcceptCommand;
+import me.realized.duels.command.commands.duel.subcommands.DenyCommand;
 import me.realized.duels.command.commands.duel.subcommands.StatsCommand;
 import me.realized.duels.gui.setting.SettingGui;
 import org.bukkit.Bukkit;
@@ -15,7 +17,7 @@ public class DuelCommand extends BaseCommand {
 
     public DuelCommand(final DuelsPlugin plugin) {
         super(plugin, "duel", "duels.duel", true);
-        child(new StatsCommand(plugin));
+        child(new StatsCommand(plugin), new AcceptCommand(plugin), new DenyCommand(plugin));
     }
 
     @Override
@@ -37,6 +39,12 @@ public class DuelCommand extends BaseCommand {
         }
 
         final Player player = (Player) sender;
+
+        if (requestManager.has(player, target)) {
+            player.sendMessage("You already have a request sent to " + target.getName());
+            return true;
+        }
+
         final Setting setting = settingCache.get(player);
 
         if (setting.getTarget() != null && !setting.getTarget().equals(target.getUniqueId())) {
@@ -60,6 +68,7 @@ public class DuelCommand extends BaseCommand {
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {}
 
+    // Disables default TabCompleter
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         return null;

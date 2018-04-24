@@ -1,7 +1,9 @@
 package me.realized.duels.duel;
 
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.request.Request;
 import me.realized.duels.util.Loadable;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -23,6 +25,10 @@ public class DuelManager implements Loadable, Listener {
 
     @Override
     public void handleUnload() throws Exception {
+
+    }
+
+    public void startMatch(final Player first, final Player second, final Request request) {
 
     }
 

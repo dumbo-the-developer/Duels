@@ -30,8 +30,6 @@ public class MultiPageGui extends AbstractGui {
     private final List<Page> pages = new ArrayList<>();
 
     public MultiPageGui(final String title, final int rows, final Collection<? extends Button> buttons) {
-        super(null);
-
         if (title == null || title.isEmpty()) {
             throw new IllegalArgumentException("title cannot be null or empty");
         }
@@ -63,9 +61,11 @@ public class MultiPageGui extends AbstractGui {
 
         if (pages == 0) {
             this.pages.add(new Page(
-                InventoryBuilder.of(title, 18)
+                InventoryBuilder
+                    .of(title, 18)
                     .set(4, ItemBuilder.of(Material.REDSTONE_BLOCK).name("&cThis page is empty.").build())
-                    .fillRange(9, 18, ItemBuilder.of(Material.STAINED_GLASS_PANE).build()).build()));
+                    .fillRange(9, 18, ItemBuilder.of(Material.STAINED_GLASS_PANE).name(" ").build()).build())
+            );
             return;
         }
 
@@ -77,8 +77,10 @@ public class MultiPageGui extends AbstractGui {
         for (final Button button : buttons) {
             if (i % maxSize == 0) {
                 final Page prev = page;
-                page = new Page(InventoryBuilder.of(title + " (" + pageNum + "/" + pages + ")", size)
-                    .fillRange(prevPageSlot, nextPageSlot + 1, ItemBuilder.of(Material.STAINED_GLASS_PANE).build()).build());
+                page = new Page(
+                    InventoryBuilder.of(title + " (" + pageNum + "/" + pages + ")", size)
+                    .fillRange(prevPageSlot, nextPageSlot + 1, ItemBuilder.of(Material.STAINED_GLASS_PANE).name(" ").build()).build()
+                );
 
                 if (prev != null) {
                     page.inventory.setItem(prevPageSlot, prevPage);
@@ -142,7 +144,7 @@ public class MultiPageGui extends AbstractGui {
         } else if (slot == prevPageSlot && page.previous != null) {
             player.openInventory(page.previous.inventory);
         } else {
-            final Optional<Button> cached = of(clicked, slot);
+            final Optional<Button> cached = get(clicked, slot);
 
             if (!cached.isPresent()) {
                 return;

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import lombok.Getter;
+import me.realized.duels.util.inventory.Slots;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -12,17 +12,7 @@ import org.bukkit.inventory.Inventory;
 
 public abstract class AbstractGui implements Updatable {
 
-    @Getter
-    private final AbstractGui parent;
     private final Map<Inventory, Map<Integer, Button>> buttons = new HashMap<>();
-
-    public AbstractGui(final AbstractGui parent) {
-        this.parent = parent;
-    }
-
-    public AbstractGui() {
-        this(null);
-    }
 
     public abstract void open(final Player player);
 
@@ -34,7 +24,7 @@ public abstract class AbstractGui implements Updatable {
         event.setCancelled(true);
     }
 
-    public Optional<Button> of(final Inventory inventory, final int slot) {
+    public Optional<Button> get(final Inventory inventory, final int slot) {
         final Map<Integer, Button> buttons;
         return (buttons = this.buttons.get(inventory)) != null ? Optional.ofNullable(buttons.get(slot)) : Optional.empty();
     }
@@ -44,10 +34,12 @@ public abstract class AbstractGui implements Updatable {
         inventory.setItem(slot, button.getDisplayed());
     }
 
-    public void openParent(final Player player) {
-        if (parent != null) {
-            parent.open(player);
-        }
+    public void set(final Inventory inventory, final int from, final int to, final int height, final Button button) {
+        Slots.fill(from, to, height, slot -> set(inventory, slot, button));
+    }
+
+    public void set(final Inventory inventory, final int from, final int to, final Button button) {
+        Slots.fill(from, to, slot -> set(inventory, slot, button));
     }
 
     @Override

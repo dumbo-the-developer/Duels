@@ -4,7 +4,9 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.cache.SettingCache;
 import me.realized.duels.data.UserDataManager;
+import me.realized.duels.duel.DuelManager;
 import me.realized.duels.kit.KitManager;
+import me.realized.duels.request.RequestManager;
 import me.realized.duels.util.command.AbstractCommand;
 import me.realized.duels.util.gui.GuiListener;
 
@@ -16,6 +18,8 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
     protected final ArenaManager arenaManager;
     protected final KitManager kitManager;
     protected final SettingCache settingCache;
+    protected final DuelManager duelManager;
+    protected final RequestManager requestManager;
 
     public BaseCommand(final DuelsPlugin plugin, final String name, final String usage, final String permission, final int length, final boolean playerOnly,
         final String... aliases) {
@@ -26,6 +30,8 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
         this.arenaManager = plugin.getArenaManager();
         this.kitManager = plugin.getKitManager();
         this.settingCache = plugin.getSettingCache();
+        this.duelManager = plugin.getDuelManager();
+        this.requestManager = plugin.getRequestManager();
     }
 
     public BaseCommand(final DuelsPlugin plugin, final String name, final String permission, final boolean playerOnly) {

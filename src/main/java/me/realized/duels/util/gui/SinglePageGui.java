@@ -2,7 +2,7 @@ package me.realized.duels.util.gui;
 
 import java.util.Optional;
 import me.realized.duels.util.StringUtil;
-import org.bukkit.Bukkit;
+import me.realized.duels.util.inventory.InventoryBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -13,25 +13,16 @@ public class SinglePageGui extends AbstractGui {
 
     protected final Inventory inventory;
 
-    public SinglePageGui(final AbstractGui parent, final String title, final int rows) {
-        super(parent);
-        this.inventory = Bukkit.createInventory(null, rows * 9, StringUtil.color(title));
-    }
-
     public SinglePageGui(final String title, final int rows) {
-        this(null, title, rows);
+        this.inventory = InventoryBuilder.of(StringUtil.color(title), rows * 9).build();
     }
 
-    public void set(final int slot, final Button button) {
+    protected void set(final int slot, final Button button) {
         set(inventory, slot, button);
     }
 
-    public void set(final int from, final int to, final int h, final Button button) {
-        for (int i = 0; i < h; i++) {
-            for (int slot = from; slot < to; slot++) {
-                set(inventory, slot, button);
-            }
-        }
+    protected void set(final int from, final int to, final int height, final Button button) {
+        set(inventory, from, to, height, button);
     }
 
     @Override
@@ -65,7 +56,7 @@ public class SinglePageGui extends AbstractGui {
             return;
         }
 
-        final Optional<Button> cached = of(inventory, event.getSlot());
+        final Optional<Button> cached = get(inventory, event.getSlot());
 
         if (!cached.isPresent()) {
             return;
