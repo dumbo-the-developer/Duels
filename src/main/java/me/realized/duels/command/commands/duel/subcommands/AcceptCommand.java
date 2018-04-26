@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 public class AcceptCommand extends BaseCommand {
 
     public AcceptCommand(final DuelsPlugin plugin) {
-        super(plugin, "accept", "accept [player]", null, 2, true);
+        super(plugin, "accept", "accept [player]", "Accepts a duel request.", null, 2, true);
     }
 
     @Override

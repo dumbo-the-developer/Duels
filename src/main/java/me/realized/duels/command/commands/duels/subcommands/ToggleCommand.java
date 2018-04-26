@@ -10,7 +10,7 @@ import org.bukkit.command.CommandSender;
 public class ToggleCommand extends BaseCommand {
 
     public ToggleCommand(final DuelsPlugin plugin) {
-        super(plugin, "toggle", "toggle [name]", null, 2, false);
+        super(plugin, "toggle", "toggle [name]", "Enables or disables an arena.", null, 2, false);
     }
 
     @Override

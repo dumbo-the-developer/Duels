@@ -1,10 +1,10 @@
 package me.realized.duels.arena;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,7 +23,7 @@ public class Arena extends Button {
     private final String name;
     @Getter
     private Map<Integer, Location> positions = new HashMap<>();
-    private final List<UUID> players = new ArrayList<>();
+    private final Set<UUID> players = new HashSet<>();
     @Getter
     @Setter
     private boolean disabled, used;
@@ -32,6 +32,18 @@ public class Arena extends Button {
         super(ItemBuilder.of(Material.EMPTY_MAP).name("&e" + name).build());
         this.cache = cache;
         this.name = name;
+    }
+
+    public boolean isAvailable() {
+        return !disabled && !used && positions.get(1) != null && positions.get(2) != null;
+    }
+
+    public boolean hasPlayer(final Player player) {
+        return players.contains(player.getUniqueId());
+    }
+
+    public void addPlayer(final Player player) {
+        players.add(player.getUniqueId());
     }
 
     public void setPosition(final int pos, final Location location) {

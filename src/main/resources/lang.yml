@@ -1,0 +1,58 @@
+# DO NOT EDIT THIS VALUE!
+config-version: 1
+
+# Define placeholders usable in any message below.
+# Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
+STRINGS:
+  PREFIX: '&9[Duels] '
+  LINE: '&b&m------------------------------------------------'
+
+ERROR:
+  no-permission: '&cNope! You are missing the permission ''%permission%'' to do this.'
+  player-not-found: '&c%name% is not online.'
+  invalid-sub-command: '&c''%argument%'' is not a valid sub command. Please type ''/%command%'' for help.'
+  target-is-self: '&cYou cannot duel yourself.'
+
+  already-has-request: '&cYou already have a request sent to %player%.'
+
+COMMAND:
+  duel:
+    usage:
+    - 'Sends a duel request to player.'
+    - '/duel [player]'
+    - 'Accepts or declines a duel request from player.'
+    - '/duel [accept | deny] [player]'
+    stats:
+      displayed:
+      - '&7Displaying stats of &f%player% &7-'
+      - '&71v1 Wins: &f%wins%'
+      - '&71v1 Losses: &f%losses%'
+      - '&71v1 Requests: &f%requests_enabled%'
+      - '&7Latest 1v1 matches -'
+      match-format: '&a{WINNER} &fvs &c{LOSER} &6[Hover Me!]'
+      hover-message:
+      - '&7Duration: &f{DURATION}'
+      - '&7Time: &f{TIME} ago'
+      - '&7Health: &d&l{HEALTH} ♥'
+
+  duels:
+    usage:
+    - '{LINE}'
+    - '&e/duels edit [player] [add:remove:set] [wins:losses] [quantity] &7- Edit player''s stats.'
+    - '&e/duels create [name] &7- Create an arena.'
+    - '&e/duels set [name] [1 | 2] &7- Set spawn position for arena.'
+    - '&e/duels delete [name] &7- Remove an arena.'
+    - '&e/duels list &7- Displays the lobby location and lists arenas and kits.'
+    - '&e/duels toggle [name] &7- Enable/Disable an arena.'
+    - '&e/duels info [name] &7- Show arena information.'
+    - '&e/duels savekit [name] &7- Save a new kit with your inventory contents.'
+    - '&e/duels deletekit [name] &7- Delete a kit with the given name.'
+    - '&e/duels loadkit [name] &7- Load a kit with the given name.'
+    - '&e/duels setlobby &7- Set duel lobby on your current location.'
+    - '&e/duels setitem [name] &7- Replaces the displayed item to held item for selected kit.'
+    - '&e/duels reset [player] &7- Completely reset a player''s stats.'
+    - '&e/duels playsound [name] &7- Plays the selected sound if exists in config.'
+    - '&e/duels reload [weak] &7- Reloads the plugin completely. Append ''weak'' to only reload messages file.'
+    - '{LINE}'
+
+  sub-command-usage: '{PREFIX} &e/%command% %usage% &7- %description%'

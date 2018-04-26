@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 public class LoadkitCommand extends BaseCommand {
 
     public LoadkitCommand(final DuelsPlugin plugin) {
-        super(plugin, "loadkit", "loadkit [name]", null, 2, true);
+        super(plugin, "loadkit", "loadkit [name]", "Loads the selected kit to your inventory.", null, 2, true);
     }
 
     @Override

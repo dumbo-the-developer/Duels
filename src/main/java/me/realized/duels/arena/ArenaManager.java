@@ -12,10 +12,13 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.data.ArenaData;
 import me.realized.duels.util.Loadable;
+import me.realized.duels.util.Log;
 import me.realized.duels.util.gui.MultiPageGui;
 import org.bukkit.entity.Player;
 
@@ -49,6 +52,7 @@ public class ArenaManager implements Loadable {
             }
         }
 
+        Log.info("Loaded " + arenas.size() + " arena(s).");
         gui.calculatePages();
     }
 
@@ -89,6 +93,16 @@ public class ArenaManager implements Loadable {
     }
 
     public boolean isInMatch(final Player player) {
-        return false;
+        return arenas.stream().anyMatch(arena -> arena.hasPlayer(player));
+    }
+
+    public Arena randomArena() {
+        final List<Arena> available = arenas.stream().filter(Arena::isAvailable).collect(Collectors.toList());
+
+        if (available.isEmpty()) {
+            return null;
+        }
+
+        return available.get(ThreadLocalRandom.current().nextInt(available.size()));
     }
 }

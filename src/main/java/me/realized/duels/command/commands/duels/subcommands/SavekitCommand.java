@@ -2,7 +2,6 @@ package me.realized.duels.command.commands.duels.subcommands;
 
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
-import me.realized.duels.kit.Kit;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -10,7 +9,7 @@ import org.bukkit.entity.Player;
 public class SavekitCommand extends BaseCommand {
 
     public SavekitCommand(final DuelsPlugin plugin) {
-        super(plugin, "savekit", "savekit [name]", null, 2, true);
+        super(plugin, "savekit", "savekit [name]", "Saves a kit with given name.", null, 2, true);
     }
 
     @Override

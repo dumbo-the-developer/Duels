@@ -14,6 +14,7 @@ import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.cache.SettingCache;
 import me.realized.duels.command.commands.duel.DuelCommand;
 import me.realized.duels.command.commands.duels.DuelsCommand;
+import me.realized.duels.config.Lang;
 import me.realized.duels.data.UserDataManager;
 import me.realized.duels.duel.DuelManager;
 import me.realized.duels.kit.KitManager;
@@ -36,6 +37,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private LogManager logManager;
     @Getter
+    private Lang lang;
+    @Getter
     private UserDataManager userManager;
     @Getter
     private GuiListener guiListener;
@@ -55,6 +58,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         Log.addSource(this);
         loadables.add(logManager = new LogManager(this));
         Log.addSource(logManager);
+        loadables.add(lang = new Lang(this));
         loadables.add(userManager = new UserDataManager(this));
         guiListener = new GuiListener(this);
         loadables.add(arenaManager = new ArenaManager(this));

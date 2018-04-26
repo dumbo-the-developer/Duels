@@ -23,10 +23,11 @@ public class DuelCommand extends BaseCommand {
     @Override
     protected boolean executeFirst(final CommandSender sender, final String label, final String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("/duel [name]");
+            lang.sendMessage(sender, "COMMAND.duel.usage");
             return true;
         }
 
+        // Proceed to child command execution if given argument is a name of a child command
         if (isChild(args[0])) {
             return false;
         }
@@ -34,14 +35,19 @@ public class DuelCommand extends BaseCommand {
         final Player target = Bukkit.getPlayerExact(args[0]);
 
         if (target == null) {
-            sender.sendMessage("Player not found");
+            lang.sendMessage(sender, "ERROR.player-not-found", "name", args[0]);
             return true;
         }
 
         final Player player = (Player) sender;
 
+//        if (player.equals(target)) {
+//            lang.sendMessage(sender, "ERROR.target-is-self");
+//            return true;
+//        }
+
         if (requestManager.has(player, target)) {
-            player.sendMessage("You already have a request sent to " + target.getName());
+            lang.sendMessage(sender, "ERROR.already-has-request", "player", target.getName());
             return true;
         }
 

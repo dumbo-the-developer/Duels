@@ -1,4 +1,4 @@
 package me.realized.duels.command.commands;
 
-public class TestCommand {
+public class SpectateCommand {
 }

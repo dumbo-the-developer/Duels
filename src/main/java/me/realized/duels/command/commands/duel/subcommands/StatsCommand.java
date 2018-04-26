@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 public class StatsCommand extends BaseCommand {
 
     public StatsCommand(final DuelsPlugin plugin) {
-        super(plugin, "stats", null, null, 1, true);
+        super(plugin, "stats", null, null, "Displays your duel stats.", 1, true);
     }
 
     @Override

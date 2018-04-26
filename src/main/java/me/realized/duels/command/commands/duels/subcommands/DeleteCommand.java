@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 public class DeleteCommand extends BaseCommand {
 
     public DeleteCommand(final DuelsPlugin plugin) {
-        super(plugin, "delete", "delete [name]", null, 2, false);
+        super(plugin, "delete", "delete [name]", "Deletes an arena.", null, 2, false);
     }
 
     @Override

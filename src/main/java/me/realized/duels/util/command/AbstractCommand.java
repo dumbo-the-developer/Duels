@@ -52,6 +52,8 @@ public abstract class AbstractCommand<P extends JavaPlugin> implements TabComple
     @Getter
     private final String usage;
     @Getter
+    private final String description;
+    @Getter
     private final String permission;
     @Getter
     private final boolean playerOnly;
@@ -62,11 +64,12 @@ public abstract class AbstractCommand<P extends JavaPlugin> implements TabComple
 
     private Map<String, AbstractCommand<P>> children;
 
-    public AbstractCommand(final P plugin, final String name, final String usage, final String permission, final int length,
+    public AbstractCommand(final P plugin, final String name, final String usage, final String description, final String permission, final int length,
         final boolean playerOnly, final String... aliases) {
         this.plugin = plugin;
         this.name = name;
         this.usage = usage;
+        this.description = description;
         this.permission = permission;
         this.length = length;
         this.playerOnly = playerOnly;
@@ -155,7 +158,7 @@ public abstract class AbstractCommand<P extends JavaPlugin> implements TabComple
                 }
 
                 if (args.length < child.length) {
-                    handleMessage(sender, MessageType.SUB_COMMAND_USAGE, label, child.getUsage());
+                    handleMessage(sender, MessageType.SUB_COMMAND_USAGE, label, child.getUsage(), child.getDescription());
                     return true;
                 }
 
@@ -216,7 +219,7 @@ public abstract class AbstractCommand<P extends JavaPlugin> implements TabComple
         PLAYER_ONLY("&cThis command can only be executed by a player!"),
         NO_PERMISSION("&cYou need the following permission: {0}"),
         SUB_COMMAND_INVALID("&c''{1}'' is not a valid sub command. Type /{0} for help."),
-        SUB_COMMAND_USAGE("&cUsage: /{0} {1}");
+        SUB_COMMAND_USAGE("&cUsage: /{0} {1} - {2}");
 
         private final MessageFormat defaultMessage;
 

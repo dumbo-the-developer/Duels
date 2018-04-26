@@ -16,6 +16,7 @@ import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.data.KitData;
 import me.realized.duels.util.Loadable;
+import me.realized.duels.util.Log;
 import me.realized.duels.util.gui.MultiPageGui;
 import org.bukkit.entity.Player;
 
@@ -51,6 +52,7 @@ public class KitManager implements Loadable {
             }
         }
 
+        Log.info("Loaded " + kits.size() + " kit(s).");
         gui.calculatePages();
     }
 

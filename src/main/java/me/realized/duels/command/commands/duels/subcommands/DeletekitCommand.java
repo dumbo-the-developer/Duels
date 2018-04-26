@@ -10,7 +10,7 @@ import org.bukkit.command.CommandSender;
 public class DeletekitCommand extends BaseCommand {
 
     public DeletekitCommand(final DuelsPlugin plugin) {
-        super(plugin, "deletekit", "deletekit [name]", null, 2, false);
+        super(plugin, "deletekit", "deletekit [name]", "Deletes a kit.", null, 2, false);
     }
 
     @Override

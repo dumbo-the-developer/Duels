@@ -1,12 +1,12 @@
 package me.realized.duels.util.gui;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
 import lombok.Getter;
 import me.realized.duels.util.StringUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.util.Consumer;
 
 public class Button implements Updatable {
 
