@@ -1,9 +1,6 @@
 package me.realized.duels.util.inventory;
 
 import java.util.function.Consumer;
-import org.bukkit.Material;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 public final class Slots {
 

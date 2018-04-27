@@ -8,8 +8,8 @@ import me.realized.duels.gui.setting.buttons.KitSelectButton;
 import me.realized.duels.gui.setting.buttons.RequestDetailsButton;
 import me.realized.duels.gui.setting.buttons.RequestSendButton;
 import me.realized.duels.util.gui.SinglePageGui;
-import me.realized.duels.util.inventory.Slots;
 import me.realized.duels.util.inventory.ItemBuilder;
+import me.realized.duels.util.inventory.Slots;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 

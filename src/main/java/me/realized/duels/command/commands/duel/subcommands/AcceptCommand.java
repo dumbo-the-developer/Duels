@@ -20,14 +20,14 @@ public class AcceptCommand extends BaseCommand {
         final Player target = Bukkit.getPlayerExact(args[1]);
 
         if (target == null) {
-            sender.sendMessage("Player not found");
+            lang.sendMessage(sender, "ERROR.player-not-found", "name", args[1]);
             return;
         }
 
         final Request request;
 
         if ((request = requestManager.remove(target, player)) == null) {
-            sender.sendMessage("You do not have a request from " + target.getName());
+            lang.sendMessage(sender, "ERROR.no-request", "player", target.getName());
             return;
         }
 

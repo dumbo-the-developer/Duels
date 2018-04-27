@@ -26,8 +26,9 @@ public class GuiListener implements Listener {
         publicGuis.add(gui);
     }
 
-    public void addGui(final Player player, final AbstractGui gui) {
+    public <T extends AbstractGui> T addGui(final Player player, final T gui) {
         privateGuis.put(player.getUniqueId(), gui);
+        return gui;
     }
 
     private List<AbstractGui> get(final Player player) {

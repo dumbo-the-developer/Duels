@@ -36,11 +36,12 @@ public class DuelManager implements Loadable, Listener {
         final Setting setting = request.getSetting();
         final Arena arena = setting.getArena() != null ? setting.getArena() : arenaManager.randomArena();
 
-        if (arena == null) {
+        if (arena == null || !arena.isAvailable()) {
             tempMsg("The arena is currently unavailable, please try again later.", first, second);
             return;
         }
 
+        arena.setUsed(true);
         first.teleport(arena.getPositions().get(1));
         arena.addPlayer(first);
         second.teleport(arena.getPositions().get(2));

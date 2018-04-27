@@ -63,7 +63,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         guiListener = new GuiListener(this);
         loadables.add(arenaManager = new ArenaManager(this));
         loadables.add(kitManager = new KitManager(this));
-        loadables.add(settingCache = new SettingCache());
+        loadables.add(settingCache = new SettingCache(this));
         loadables.add(duelManager = new DuelManager(this));
         loadables.add(requestManager = new RequestManager(this));
 

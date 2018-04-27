@@ -17,7 +17,6 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
     protected final DuelsPlugin plugin;
     protected final Lang lang;
     protected final UserDataManager userManager;
-    protected final GuiListener guiListener;
     protected final ArenaManager arenaManager;
     protected final KitManager kitManager;
     protected final SettingCache settingCache;
@@ -30,7 +29,6 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
         this.plugin = plugin;
         this.lang = plugin.getLang();
         this.userManager = plugin.getUserManager();
-        this.guiListener = plugin.getGuiListener();
         this.arenaManager = plugin.getArenaManager();
         this.kitManager = plugin.getKitManager();
         this.settingCache = plugin.getSettingCache();

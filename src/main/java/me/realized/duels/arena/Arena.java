@@ -54,7 +54,7 @@ public class Arena extends Button {
     public void onClick(final Player player) {
         final Setting setting = cache.get(player);
         setting.setArena(this);
-        setting.getGui().open(player);
+        setting.openGui(player);
     }
 
     @Override

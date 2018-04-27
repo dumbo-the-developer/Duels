@@ -7,6 +7,7 @@ import me.realized.duels.cache.Setting;
 import me.realized.duels.cache.SettingCache;
 import me.realized.duels.util.gui.Button;
 import me.realized.duels.util.inventory.ItemBuilder;
+import org.apache.commons.lang3.ArrayUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -49,20 +50,14 @@ public class Kit extends Button {
 
         final Map<Integer, ItemStack> armorContents = new HashMap<>();
 
-        if (inventory.getHelmet() != null) {
-            armorContents.put(1, inventory.getHelmet().clone());
-        }
+        for (int i = inventory.getArmorContents().length - 1; i >= 0; i--) {
+            final ItemStack item = inventory.getArmorContents()[i];
 
-        if (inventory.getChestplate() != null) {
-            armorContents.put(2, inventory.getChestplate().clone());
-        }
+            if (item == null || item.getType() == Material.AIR) {
+                continue;
+            }
 
-        if (inventory.getLeggings() != null) {
-            armorContents.put(3, inventory.getLeggings().clone());
-        }
-
-        if (inventory.getBoots() != null) {
-            armorContents.put(4, inventory.getBoots().clone());
+            armorContents.put(4 - i, inventory.getArmorContents()[i].clone());
         }
 
         items.put("ARMOR", armorContents);
@@ -74,22 +69,9 @@ public class Kit extends Button {
                 player.getInventory().setItem(entry.getKey(), entry.getValue().clone());
             }
 
-            for (final Map.Entry<Integer, ItemStack> entry : items.get("ARMOR").entrySet()) {
-                switch (entry.getKey()) {
-                    case 1:
-                        player.getInventory().setHelmet(entry.getValue().clone());
-                        break;
-                    case 2:
-                        player.getInventory().setChestplate(entry.getValue().clone());
-                        break;
-                    case 3:
-                        player.getInventory().setLeggings(entry.getValue().clone());
-                        break;
-                    case 4:
-                        player.getInventory().setBoots(entry.getValue().clone());
-                        break;
-                }
-            }
+            final ItemStack[] armor = items.get("ARMOR").values().toArray(new ItemStack[4]);
+            ArrayUtils.reverse(armor);
+            player.getInventory().setArmorContents(armor);
         }
     }
 
@@ -97,6 +79,6 @@ public class Kit extends Button {
     public void onClick(final Player player) {
         final Setting setting = cache.get(player);
         setting.setKit(this);
-        setting.getGui().open(player);
+        setting.openGui(player);
     }
 }

@@ -4,12 +4,12 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.cache.Setting;
 import me.realized.duels.cache.SettingCache;
-import me.realized.duels.util.gui.Button;
+import me.realized.duels.gui.BaseButton;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-public class ArenaSelectButton extends Button {
+public class ArenaSelectButton extends BaseButton {
 
     private static final String LORE_TEMPLATE = "&7Selected Arena: &9%s";
 
@@ -17,7 +17,7 @@ public class ArenaSelectButton extends Button {
     private final SettingCache cache;
 
     public ArenaSelectButton(final DuelsPlugin plugin) {
-        super(ItemBuilder.of(Material.EMPTY_MAP).name("&eArena Selection").build());
+        super(plugin, ItemBuilder.of(Material.EMPTY_MAP).name("&eArena Selection").build());
         this.arenaManager = plugin.getArenaManager();
         this.cache = plugin.getSettingCache();
     }

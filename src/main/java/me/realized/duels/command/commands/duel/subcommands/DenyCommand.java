@@ -3,7 +3,6 @@ package me.realized.duels.command.commands.duel.subcommands;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -19,16 +18,16 @@ public class DenyCommand extends BaseCommand {
         final Player target = Bukkit.getPlayerExact(args[1]);
 
         if (target == null) {
-            sender.sendMessage("Player not found");
+            lang.sendMessage(sender, "ERROR.player-not-found", "name", args[1]);
             return;
         }
 
         if (requestManager.remove(target, player) == null) {
-            sender.sendMessage("You do not have a request from " + target.getName());
+            lang.sendMessage(sender, "ERROR.no-request", "player", target.getName());
             return;
         }
 
-        sender.sendMessage("Denied request from " + target.getName());
-        target.sendMessage(ChatColor.RED + sender.getName() + " denied your request");
+        lang.sendMessage(target, "COMMAND.duel.request.denied.sender", "player", player.getName());
+        lang.sendMessage(player, "COMMAND.duel.request.denied.receiver", "player", target.getName());
     }
 }

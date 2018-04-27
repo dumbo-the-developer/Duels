@@ -7,7 +7,6 @@ import me.realized.duels.command.BaseCommand;
 import me.realized.duels.command.commands.duel.subcommands.AcceptCommand;
 import me.realized.duels.command.commands.duel.subcommands.DenyCommand;
 import me.realized.duels.command.commands.duel.subcommands.StatsCommand;
-import me.realized.duels.gui.setting.SettingGui;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -52,22 +51,8 @@ public class DuelCommand extends BaseCommand {
         }
 
         final Setting setting = settingCache.get(player);
-
-        if (setting.getTarget() != null && !setting.getTarget().equals(target.getUniqueId())) {
-            setting.reset();
-        }
-
-        setting.setTarget(target.getUniqueId());
-
-        SettingGui gui = setting.getGui();
-
-        if (gui == null) {
-            gui = new SettingGui(plugin);
-            guiListener.addGui(player, gui);
-            setting.setGui(gui);
-        }
-
-        gui.open(player);
+        setting.setTarget(target);
+        setting.openGui(player);
         return true;
     }
 
