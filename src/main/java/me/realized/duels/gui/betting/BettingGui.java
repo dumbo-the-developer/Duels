@@ -1,17 +1,29 @@
 package me.realized.duels.gui.betting;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import me.realized.duels.DuelsPlugin;
+import me.realized.duels.cache.Setting;
+import me.realized.duels.duel.DuelManager;
+import me.realized.duels.gui.betting.buttons.DetailsButton;
+import me.realized.duels.gui.betting.buttons.HeadButton;
+import me.realized.duels.gui.betting.buttons.StateButton;
 import me.realized.duels.util.gui.AbstractGui;
+import me.realized.duels.util.gui.Button;
 import me.realized.duels.util.inventory.InventoryBuilder;
 import me.realized.duels.util.inventory.ItemBuilder;
 import me.realized.duels.util.inventory.Slots;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 public class BettingGui extends AbstractGui {
 
@@ -36,38 +48,78 @@ public class BettingGui extends AbstractGui {
 
             return false;
         }
+
+        public List<ItemStack> collect() {
+            final List<ItemStack> result = new ArrayList<>();
+            Slots.doFor(start, end, height, slot -> result.add(inventory.getItem(slot)));
+            return result;
+        }
     }
 
-    private Section[] sections = {
+    private final Section[] sections = {
         new Section(9, 13, 4),
         new Section(14, 18, 4)
     };
 
-    private final UUID first, second;
+    private final DuelManager duelManager;
+    private final Setting setting;
     private final Inventory inventory;
+    private final UUID first, second;
+    private boolean firstReady, secondReady;
 
-    public BettingGui(final Player first, final Player second) {
+    public BettingGui(final DuelsPlugin plugin, final Setting setting, final Player first, final Player second) {
+        this.duelManager = plugin.getDuelManager();
+        this.setting = setting;
         this.inventory = InventoryBuilder.of("Winner Takes All!", 54).build();
         this.first = first.getUniqueId();
         this.second = second.getUniqueId();
-        Slots.fill(13, 14, 5, slot -> inventory.setItem(slot, ItemBuilder.of(Material.IRON_FENCE).name(" ").build()));
-        Slots.fill(0, 3, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 1).name(" ").build()));
-        Slots.fill(45, 48, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 1).name(" ").build()));
-        Slots.fill(6, 9, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 11).name(" ").build()));
-        Slots.fill(51, 54, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 11).name(" ").build()));
-        inventory.setItem(48, ItemBuilder.of(Material.SKULL_ITEM, 1, (short) 3).head(first).build());
-        inventory.setItem(50, ItemBuilder.of(Material.SKULL_ITEM, 1, (short) 3).head(second).build());
-        inventory.setItem(3, ItemBuilder.of(Material.INK_SACK, 1, (short) 8).name("&7&lNOT READY").build());
-        inventory.setItem(5, ItemBuilder.of(Material.INK_SACK, 1, (short) 10).name("&a&lREADY").build());
-        inventory.setItem(4, ItemBuilder.of(Material.SIGN).name("&eMatch Details").build());
+        Slots.doFor(13, 14, 5, slot -> inventory.setItem(slot, ItemBuilder.of(Material.IRON_FENCE).name(" ").build()));
+        Slots.doFor(0, 3, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 1).name(" ").build()));
+        Slots.doFor(45, 48, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 1).name(" ").build()));
+        Slots.doFor(6, 9, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 11).name(" ").build()));
+        Slots.doFor(51, 54, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 11).name(" ").build()));
+        set(inventory, 48, new HeadButton(plugin, first));
+        set(inventory, 50, new HeadButton(plugin, second));
+        set(inventory, 3, new StateButton(plugin, this, first));
+        set(inventory, 5, new StateButton(plugin, this, second));
+        set(inventory, 4, new DetailsButton(plugin, setting));
     }
 
-    private Section getSection(final Player player) {
-        return player.getUniqueId().equals(first) ? sections[0] : (player.getUniqueId().equals(second) ? sections[1] : null);
+    private boolean isFirst(final Player player) {
+        return player.getUniqueId().equals(first);
+    }
+
+    public Section getSection(final Player player) {
+        return isFirst(player) ? sections[0] : sections[1];
+    }
+
+    private boolean isReady(final Player player) {
+        return isFirst(player) ? firstReady : secondReady;
+    }
+
+    public void setReady(final Player player) {
+        if (isFirst(player)) {
+            firstReady = true;
+        } else {
+            secondReady = true;
+        }
+
+        if (firstReady && secondReady) {
+            final Player first = Bukkit.getPlayer(this.first);
+            first.closeInventory();
+            final Player second = Bukkit.getPlayer(this.second);
+            second.closeInventory();
+            duelManager.startMatch(first, second, setting);
+        }
+    }
+
+    public void update(final Player player, final Button button) {
+        update(player, inventory, button);
     }
 
     @Override
     public void open(final Player player) {
+        update(player);
         player.openInventory(inventory);
     }
 
@@ -101,9 +153,19 @@ public class BettingGui extends AbstractGui {
             return;
         }
 
-        if (!section.isPart(slot)) {
-            event.setCancelled(true);
+        if (!isReady(player) && section.isPart(slot)) {
+            return;
         }
+
+        event.setCancelled(true);
+
+        final Optional<Button> cached = get(inventory, event.getSlot());
+
+        if (!cached.isPresent()) {
+            return;
+        }
+
+        cached.get().onClick(player);
     }
 
     @Override
@@ -130,7 +192,7 @@ public class BettingGui extends AbstractGui {
             }
         }
 
-        if (in && (out || outSec)) {
+        if (in && (isReady(player)|| out || outSec)) {
             event.setCancelled(true);
         }
     }

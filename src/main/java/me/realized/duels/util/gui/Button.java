@@ -4,9 +4,11 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 import lombok.Getter;
 import me.realized.duels.util.StringUtil;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 public class Button implements Updatable {
 
@@ -29,6 +31,14 @@ public class Button implements Updatable {
 
     protected void setLore(final String... lore) {
         editMeta(meta -> meta.setLore(StringUtil.color(Arrays.asList(lore))));
+    }
+
+    protected void setOwner(final String name) {
+        editMeta(meta -> {
+            if (displayed.getType() == Material.SKULL_ITEM && displayed.getDurability() == 3) {
+                ((SkullMeta) meta).setOwner(name);
+            }
+        });
     }
 
     @Override

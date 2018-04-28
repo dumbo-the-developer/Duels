@@ -55,8 +55,8 @@ COMMAND:
         - '&c- &7Item Betting: &r%item_betting%'
         - '{LINE}'
       accepted:
-        sender: '{PREFIX} &7'
-        receiver: ''
+        sender: '{PREFIX} &f%player% &7has accepted your duel request.'
+        receiver: '{PREFIX} &7Accepted duel request from &f%player%&7.'
       denied:
         sender: '{PREFIX} &7Your duel request to &f%player% &7was denied.'
         receiver: '{PREFIX} &7Denied duel request from &f%player%&7.'

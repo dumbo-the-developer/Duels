@@ -44,6 +44,6 @@ public class RequestSendButton extends BaseButton {
         lang.sendMessage(player, "COMMAND.duel.request.sent.sender",
             "player", target.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
         lang.sendMessage(target, "COMMAND.duel.request.sent.receiver",
-            "player", target.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
+            "player", player.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
     }
 }

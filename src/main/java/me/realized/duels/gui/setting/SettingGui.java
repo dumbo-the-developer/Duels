@@ -19,9 +19,9 @@ public class SettingGui extends SinglePageGui {
         super("Request Settings", 3);
 
         final ItemStack spacing = ItemBuilder.of(Material.STAINED_GLASS_PANE).name(" ").build();
-        Slots.fill(2, 7, slot -> inventory.setItem(slot, spacing));
-        Slots.fill(11, 16, slot -> inventory.setItem(slot, spacing));
-        Slots.fill(20, 25, slot -> inventory.setItem(slot, spacing));
+        Slots.doFor(2, 7, slot -> inventory.setItem(slot, spacing));
+        Slots.doFor(11, 16, slot -> inventory.setItem(slot, spacing));
+        Slots.doFor(20, 25, slot -> inventory.setItem(slot, spacing));
 
         set(4, new RequestDetailsButton(plugin));
         set(12, new KitSelectButton(plugin));

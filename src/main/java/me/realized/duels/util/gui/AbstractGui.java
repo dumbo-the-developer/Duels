@@ -35,11 +35,28 @@ public abstract class AbstractGui implements Updatable {
     }
 
     public void set(final Inventory inventory, final int from, final int to, final int height, final Button button) {
-        Slots.fill(from, to, height, slot -> set(inventory, slot, button));
+        Slots.doFor(from, to, height, slot -> set(inventory, slot, button));
     }
 
     public void set(final Inventory inventory, final int from, final int to, final Button button) {
-        Slots.fill(from, to, slot -> set(inventory, slot, button));
+        Slots.doFor(from, to, slot -> set(inventory, slot, button));
+    }
+
+    public void update(final Player player, final Inventory inventory, final Button button) {
+        final Map<Integer, Button> cached = buttons.get(inventory);
+
+        if (cached == null) {
+            return;
+        }
+
+        button.update(player);
+
+        for (final Map.Entry<Integer, Button> entry : cached.entrySet()) {
+            if (entry.getValue().equals(button)) {
+                inventory.setItem(entry.getKey(), button.getDisplayed());
+                return;
+            }
+        }
     }
 
     @Override

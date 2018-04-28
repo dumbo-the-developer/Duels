@@ -40,10 +40,10 @@ public class DuelCommand extends BaseCommand {
 
         final Player player = (Player) sender;
 
-//        if (player.equals(target)) {
-//            lang.sendMessage(sender, "ERROR.target-is-self");
-//            return true;
-//        }
+        if (player.equals(target)) {
+            lang.sendMessage(sender, "ERROR.target-is-self");
+            return true;
+        }
 
         if (requestManager.has(player, target)) {
             lang.sendMessage(sender, "ERROR.already-has-request", "player", target.getName());

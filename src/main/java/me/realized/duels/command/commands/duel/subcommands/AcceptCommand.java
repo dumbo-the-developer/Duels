@@ -1,9 +1,10 @@
 package me.realized.duels.command.commands.duel.subcommands;
 
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.cache.Setting;
 import me.realized.duels.command.BaseCommand;
+import me.realized.duels.gui.betting.BettingGui;
 import me.realized.duels.request.Request;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -31,8 +32,20 @@ public class AcceptCommand extends BaseCommand {
             return;
         }
 
-        sender.sendMessage("Accepted request from " + target.getName());
-        target.sendMessage(ChatColor.GREEN + sender.getName() + " accepted your request");
-        duelManager.startMatch(player, target, request);
+        final Setting setting = request.getSetting();
+        final String kit = setting.getKit() != null ? setting.getKit().getName() : "Random";
+        final String arena = setting.getArena() != null ? setting.getArena().getName() : "Random";
+        final double betAmount = setting.getBet();
+        final String itemBetting = setting.isItemBetting() ? "&aenabled" : "&cdisabled";
+
+        lang.sendMessage(target, "COMMAND.duel.request.accepted.sender",
+            "player", player.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
+        lang.sendMessage(player, "COMMAND.duel.request.accepted.receiver",
+            "player", target.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
+        final BettingGui gui = new BettingGui(plugin, setting, target, player);
+        gui.open(player);
+        gui.open(target);
+        plugin.getGuiListener().addGui(player, gui);
+        plugin.getGuiListener().addGui(target, gui);
     }
 }

@@ -37,8 +37,6 @@ public class Attributes extends CompatBase {
         } catch (Exception ignored) {}
     }
 
-    // Example Usage: ItemStack new = new Attributes(old).addModifier("GENERIC_MAX_HEALTH", "generic.maxHealth", 0, 20)
-    // setItemInHand(new)
     public ItemStack addModifiers(final List<AttributeData> attributes) {
         try {
             for (final AttributeData data : attributes) {

@@ -16,8 +16,7 @@ public class Request {
 
     Request(final Player target, final Setting setting) {
         this.target = target.getUniqueId();
-        // clone settings to prevent weird issues
-        this.setting = setting;
+        this.setting = setting.lightCopy();
         this.creation = System.currentTimeMillis();
     }
 }

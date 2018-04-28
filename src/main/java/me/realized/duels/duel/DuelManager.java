@@ -4,7 +4,6 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.cache.Setting;
-import me.realized.duels.request.Request;
 import me.realized.duels.util.Loadable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -32,8 +31,7 @@ public class DuelManager implements Loadable, Listener {
 
     }
 
-    public void startMatch(final Player first, final Player second, final Request request) {
-        final Setting setting = request.getSetting();
+    public void startMatch(final Player first, final Player second, final Setting setting) {
         final Arena arena = setting.getArena() != null ? setting.getArena() : arenaManager.randomArena();
 
         if (arena == null || !arena.isAvailable()) {
@@ -53,6 +51,7 @@ public class DuelManager implements Loadable, Listener {
 
         tempMsg("Duel started!", first, second);
     }
+
 
     private void tempMsg(final String msg, final Player... players) {
         for (final Player player : players) {
