@@ -1,7 +1,9 @@
 package me.realized.duels.gui.betting;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -49,9 +51,9 @@ public class BettingGui extends AbstractGui {
             return false;
         }
 
-        public List<ItemStack> collect() {
+        private List<ItemStack> collect() {
             final List<ItemStack> result = new ArrayList<>();
-            Slots.doFor(start, end, height, slot -> result.add(inventory.getItem(slot)));
+            Slots.run(start, end, height, slot -> result.add(inventory.getItem(slot)));
             return result;
         }
     }
@@ -73,11 +75,11 @@ public class BettingGui extends AbstractGui {
         this.inventory = InventoryBuilder.of("Winner Takes All!", 54).build();
         this.first = first.getUniqueId();
         this.second = second.getUniqueId();
-        Slots.doFor(13, 14, 5, slot -> inventory.setItem(slot, ItemBuilder.of(Material.IRON_FENCE).name(" ").build()));
-        Slots.doFor(0, 3, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 1).name(" ").build()));
-        Slots.doFor(45, 48, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 1).name(" ").build()));
-        Slots.doFor(6, 9, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 11).name(" ").build()));
-        Slots.doFor(51, 54, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 11).name(" ").build()));
+        Slots.run(13, 14, 5, slot -> inventory.setItem(slot, ItemBuilder.of(Material.IRON_FENCE).name(" ").build()));
+        Slots.run(0, 3, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 1).name(" ").build()));
+        Slots.run(45, 48, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 1).name(" ").build()));
+        Slots.run(6, 9, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 11).name(" ").build()));
+        Slots.run(51, 54, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 11).name(" ").build()));
         set(inventory, 48, new HeadButton(plugin, first));
         set(inventory, 50, new HeadButton(plugin, second));
         set(inventory, 3, new StateButton(plugin, this, first));
@@ -93,7 +95,7 @@ public class BettingGui extends AbstractGui {
         return isFirst(player) ? sections[0] : sections[1];
     }
 
-    private boolean isReady(final Player player) {
+    public boolean isReady(final Player player) {
         return isFirst(player) ? firstReady : secondReady;
     }
 
@@ -107,9 +109,14 @@ public class BettingGui extends AbstractGui {
         if (firstReady && secondReady) {
             final Player first = Bukkit.getPlayer(this.first);
             first.closeInventory();
+
             final Player second = Bukkit.getPlayer(this.second);
             second.closeInventory();
-            duelManager.startMatch(first, second, setting);
+
+            final Map<UUID, List<ItemStack>> items = new HashMap<>();
+            items.put(first.getUniqueId(), getSection(first).collect());
+            items.put(second.getUniqueId(), getSection(second).collect());
+            duelManager.startMatch(first, second, setting, items);
         }
     }
 
@@ -118,9 +125,11 @@ public class BettingGui extends AbstractGui {
     }
 
     @Override
-    public void open(final Player player) {
-        update(player);
-        player.openInventory(inventory);
+    public void open(final Player... players) {
+        for (final Player player : players) {
+            update(player);
+            player.openInventory(inventory);
+        }
     }
 
     @Override

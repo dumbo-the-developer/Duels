@@ -26,9 +26,11 @@ public class SinglePageGui extends AbstractGui {
     }
 
     @Override
-    public void open(final Player player) {
-        update(player);
-        player.openInventory(inventory);
+    public void open(final Player... players) {
+        for (final Player player : players) {
+            update(player);
+            player.openInventory(inventory);
+        }
     }
 
     @Override

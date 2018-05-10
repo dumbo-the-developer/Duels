@@ -22,6 +22,8 @@ COMMAND:
     usage:
     - 'Sends a duel request to player.'
     - '/duel [player]'
+    - 'Sends a duel request with specified bet amount.'
+    - '/duel [player] [amount]'
     - 'Accepts or declines a duel request from player.'
     - '/duel [accept | deny] [player]'
     stats:

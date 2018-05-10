@@ -21,11 +21,11 @@ public class StateButton extends BaseButton {
 
     @Override
     public void onClick(final Player player) {
-        if (getDisplayed().getDurability() == (short) 8 && player.getUniqueId().equals(owner)) {
+        if (!gui.isReady(player) && player.getUniqueId().equals(owner)) {
             getDisplayed().setDurability((short) 10);
             setDisplayName("&a&lREADY");
-            gui.setReady(player);
             gui.update(player, this);
+            gui.setReady(player);
         }
     }
 }

@@ -22,7 +22,7 @@ public class Setting {
     private Arena arena;
     @Getter
     @Setter
-    private double bet;
+    private int bet;
     @Getter
     @Setter
     private boolean itemBetting;

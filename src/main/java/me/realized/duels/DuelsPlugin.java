@@ -17,6 +17,7 @@ import me.realized.duels.command.commands.duels.DuelsCommand;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.UserDataManager;
 import me.realized.duels.duel.DuelManager;
+import me.realized.duels.hooks.HookManager;
 import me.realized.duels.kit.KitManager;
 import me.realized.duels.logging.LogManager;
 import me.realized.duels.request.RequestManager;
@@ -52,6 +53,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private DuelManager duelManager;
     @Getter
     private RequestManager requestManager;
+    @Getter
+    private HookManager hookManager;
 
     @Override
     public void onEnable() {
@@ -66,7 +69,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(settingCache = new SettingCache(this));
         loadables.add(duelManager = new DuelManager(this));
         loadables.add(requestManager = new RequestManager(this));
-
+        loadables.add(hookManager = new HookManager(this));
         if (!load()) {
             getPluginLoader().disablePlugin(this);
             return;

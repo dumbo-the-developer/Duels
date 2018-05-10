@@ -31,6 +31,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import me.realized.duels.util.Loadable;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -68,7 +69,7 @@ public abstract class AbstractHookManager<P extends JavaPlugin> implements Loada
         return false;
     }
 
-    public <T extends PluginHook<P>> T getHook(Class<T> clazz) {
-        return clazz != null ? clazz.cast(hooks.get(clazz)) : null;
+    public <T extends PluginHook<P>> Optional<T> getHook(Class<T> clazz) {
+        return Optional.ofNullable(clazz != null ? clazz.cast(hooks.get(clazz)) : null);
     }
 }

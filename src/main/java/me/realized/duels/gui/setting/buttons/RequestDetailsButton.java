@@ -10,8 +10,8 @@ import org.bukkit.entity.Player;
 
 public class RequestDetailsButton extends BaseButton {
 
-    private static final String[] LORE_TEMPLATE = {"&7Opponent: &f%s", "&7Kit: &9%s", "&7Arena: &9%s", "&7Bet: &6%s", "&7Bet Items: %s", " ",
-        "&7To set or change", "&7the bet amount, type:", "&e/duel %s [amount]"};
+    private static final String[] LORE_TEMPLATE = {"&7Opponent: &f%s", "&7Kit: &9%s", "&7Arena: &9%s", "&7Bet Items: %s", "&7Bet: &6%s", " ",
+        "&7To change the bet", "&7amount, please type", "&a/duel %s [amount]"};
 
     public RequestDetailsButton(final DuelsPlugin plugin) {
         super(plugin, ItemBuilder.of(Material.SIGN).name("&eRequest Details").build());
@@ -33,9 +33,9 @@ public class RequestDetailsButton extends BaseButton {
         lore[0] = String.format(lore[0], target.getName());
         lore[1] = String.format(lore[1], setting.getKit() != null ? setting.getKit().getName() : "Random");
         lore[2] = String.format(lore[2], setting.getArena() != null ? setting.getArena().getName() : "Random");
-        lore[3] = String.format(lore[3], "$" + setting.getBet());
-        lore[4] = String.format(lore[4], setting.isItemBetting() ? "&aenabled" : "&cdisabled");
-        lore[8] = String.format(lore[0], target.getName());
+        lore[3] = String.format(lore[3], setting.isItemBetting() ? "&aenabled" : "&cdisabled");
+        lore[4] = String.format(lore[4], "$" + setting.getBet());
+        lore[8] = String.format(lore[8], target.getName());
         setLore(lore);
     }
 }

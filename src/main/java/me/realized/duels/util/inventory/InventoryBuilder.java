@@ -22,7 +22,7 @@ public final class InventoryBuilder {
     }
 
     public InventoryBuilder fillRange(final int from, final int to, final ItemStack item) {
-        Slots.doFor(from, to, slot -> inventory.setItem(slot, item));
+        Slots.run(from, to, slot -> inventory.setItem(slot, item));
         return this;
     }
 

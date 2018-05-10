@@ -6,10 +6,10 @@ import me.realized.duels.cache.SettingCache;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.UserDataManager;
 import me.realized.duels.duel.DuelManager;
+import me.realized.duels.hooks.HookManager;
 import me.realized.duels.kit.KitManager;
 import me.realized.duels.request.RequestManager;
 import me.realized.duels.util.command.AbstractCommand;
-import me.realized.duels.util.gui.GuiListener;
 import org.bukkit.command.CommandSender;
 
 public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
@@ -22,6 +22,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
     protected final SettingCache settingCache;
     protected final DuelManager duelManager;
     protected final RequestManager requestManager;
+    protected final HookManager hookManager;
 
     public BaseCommand(final DuelsPlugin plugin, final String name, final String usage, final String description, final String permission, final int length, final boolean playerOnly,
         final String... aliases) {
@@ -34,6 +35,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
         this.settingCache = plugin.getSettingCache();
         this.duelManager = plugin.getDuelManager();
         this.requestManager = plugin.getRequestManager();
+        this.hookManager = plugin.getHookManager();
     }
 
     public BaseCommand(final DuelsPlugin plugin, final String name, final String permission, final boolean playerOnly) {

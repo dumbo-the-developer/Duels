@@ -1,7 +1,7 @@
 package me.realized.duels.command.commands.duels.subcommands;
 
 import java.util.Optional;
-import java.util.OptionalLong;
+import java.util.OptionalInt;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.command.BaseCommand;
@@ -25,7 +25,7 @@ public class SetCommand extends BaseCommand {
             return;
         }
 
-        final OptionalLong pos = NumberUtil.parseLong(args[args.length - 1]);
+        final OptionalInt pos = NumberUtil.parseInt(args[args.length - 1]);
 
         if (!pos.isPresent()) {
             // send msg
@@ -33,7 +33,7 @@ public class SetCommand extends BaseCommand {
         }
 
         final Arena arena = result.get();
-        arena.setPosition((int) pos.getAsLong(), ((Player) sender).getLocation().clone());
-        sender.sendMessage("Set pos " + pos.getAsLong() + " for arena '" + arena.getName() + "'!");
+        arena.setPosition(pos.getAsInt(), ((Player) sender).getLocation().clone());
+        sender.sendMessage("Set pos " + pos.getAsInt() + " for arena '" + arena.getName() + "'!");
     }
 }

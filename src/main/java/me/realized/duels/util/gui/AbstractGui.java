@@ -14,7 +14,7 @@ public abstract class AbstractGui implements Updatable {
 
     private final Map<Inventory, Map<Integer, Button>> buttons = new HashMap<>();
 
-    public abstract void open(final Player player);
+    public abstract void open(final Player... players);
 
     public abstract boolean isPart(final Inventory inventory);
 
@@ -35,11 +35,11 @@ public abstract class AbstractGui implements Updatable {
     }
 
     public void set(final Inventory inventory, final int from, final int to, final int height, final Button button) {
-        Slots.doFor(from, to, height, slot -> set(inventory, slot, button));
+        Slots.run(from, to, height, slot -> set(inventory, slot, button));
     }
 
     public void set(final Inventory inventory, final int from, final int to, final Button button) {
-        Slots.doFor(from, to, slot -> set(inventory, slot, button));
+        Slots.run(from, to, slot -> set(inventory, slot, button));
     }
 
     public void update(final Player player, final Inventory inventory, final Button button) {

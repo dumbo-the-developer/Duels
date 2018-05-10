@@ -2,6 +2,7 @@ package me.realized.duels.arena;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -10,11 +11,13 @@ import lombok.Getter;
 import lombok.Setter;
 import me.realized.duels.cache.Setting;
 import me.realized.duels.cache.SettingCache;
+import me.realized.duels.kit.Kit;
 import me.realized.duels.util.gui.Button;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class Arena extends Button {
 
@@ -26,7 +29,11 @@ public class Arena extends Button {
     private final Set<UUID> players = new HashSet<>();
     @Getter
     @Setter
-    private boolean disabled, used;
+    private boolean disabled;
+    @Getter
+    private boolean used;
+    @Getter
+    private Match current;
 
     public Arena(final SettingCache cache, final String name) {
         super(ItemBuilder.of(Material.EMPTY_MAP).name("&e" + name).build());
@@ -48,6 +55,18 @@ public class Arena extends Button {
 
     public void setPosition(final int pos, final Location location) {
         positions.put(pos, location);
+    }
+
+    public void setUsed(final boolean used) {
+        this.used = used;
+
+        if (!used) {
+            this.current = null;
+        }
+    }
+
+    public void setMatch(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet) {
+        this.current = new Match(kit, items, bet);
     }
 
     @Override

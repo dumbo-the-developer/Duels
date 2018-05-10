@@ -1,6 +1,9 @@
 # DO NOT EDIT THIS VALUE!
 config-version: 1
 
+# If enabled, a notification and the download link will be printed on console whenever an update is available.
+check-for-updates: true
+
 patches:
   toggle-vanish-on-start: true
   set-back-location: true
@@ -15,26 +18,40 @@ patches:
   disallow-creative-dueling: false
   disallow-dueling-while-tagged: true
 
-countdown:
-  enabled: true
-  messages:
-    - '&7Starting in &f5 &7seconds!'
-    - '&7Starting in &f4 &7seconds!'
-    - '&7Starting in &f3 &7seconds!'
-    - '&7Starting in &f2 &7seconds!'
-    - '&7Starting in &f1 &7second!'
-    - '&7Duel starting now!'
-  block-projectile: true
-  block-pvp: true
+setting:
+  # Allow players to choose an arena to duel in the Setting GUI.
+  allow-arena-selecting: true
+  # Use player's own inventory in a duel. If enabled, kit selecting will be disabled!
+  use-own-inventory:
+    enabled: false
+    # Prevent players dropping their inventory items on death.
+    keep-items: false
+  # Force players to have a cleared inventory to send or accept a duel request.
+  requires-cleared-inventory: true
 
-gui:
-  kit-selector-rows: 3
-  arena-selector-rows: 2
-  available-arena-displayname: '&9{NAME}: &aAvailable'
-  in-use-arena-displayname: '&9{NAME}: &cIn Use'
+duel:
+  match:
+    # The max duration of a match, in minutes. -1 to set it to infinite!
+    max-duration: -1
+    # Commands to run at the end of the match. {WINNER} for the winner's name, and {LOSER} for the loser's name.
+    end-commands:
+      enabled: false
+      commands:
+      - 'give {WINNER} diamond 1'
+      - 'give {LOSER} dirt 1'
 
-spectating:
-  requires-cleared-inventory: false
+  # If set to 'true', after the duel, players will be teleported to the location where they were at before the duel instead of duel lobby.
+  teleport-to-last-location: false
+  # The delay (seconds) to wait before teleporting the winner of the duel to their last location / duel lobby.
+  teleport-delay: 5
+  # Prevent players from dropping their inventory items while in a duel.
+  prevent-item-drop: false
+  # Prevent players from picking up items on ground while in a duel.
+  prevent-item-pickup: true
+  # Prevent players from teleporting while in a duel.
+  prevent-teleportation: false
+  # If set to 'true', only commands listed in 'whitelisted-commands' will be usable while in a duel.
+  block-all-commands: false
   whitelisted-commands:
     - 'msg'
     - 'r'
@@ -44,40 +61,13 @@ spectating:
     - 'tell'
     - 'whisper'
     - 'list'
-    - 'stats'
-    - 'dstats'
-    - 'duelstats'
-
-dueling:
-  match-max-duration:
-    enabled: true
-    duration: 600
-
-  match-end-commands:
-    enabled: false
-    commands:
-    - 'give {WINNER} diamond 1'
-    - 'give {LOSER} dirt 1'
-
-  allow-arena-selecting: true
-  use-own-inventory: false
-  requires-cleared-inventory: true
-  teleport-to-latest-location: false
-  delay-until-teleport: 5
-  drop-item: false
-  pick-up-item: true
-  block-all-commands: false
-  whitelisted-commands:
-  - 'msg'
-  - 'pm'
-  - 'list'
-  - 'w'
-  - 'r'
-  - 'ban'
-  - 'kick'
-  - 'mute'
-  - 'tempban'
-  disabled-commands:
+    - 'ban'
+    - 'kick'
+    - 'mute'
+    - 'tempban'
+  # List of commands to block while in a duel.
+  # NOTE: 'block-all-commands' option must be disabled in order for this option to take effect.
+  blacklisted-commands:
   - 'heal'
   - 'eheal'
   - 'essentials:heal'
@@ -146,6 +136,50 @@ dueling:
   - 'playervaults:chest'
   - 'playervaults:pv'
   - 'playervaults:playervaults'
+
+spectate:
+  # Require players to have a cleared inventory to start spectating.
+  requires-cleared-inventory: false
+  # Only the commands listed below will be usable while spectating.
+  whitelisted-commands:
+    - 'msg'
+    - 'r'
+    - 'w'
+    - 'pm'
+    - 'reply'
+    - 'tell'
+    - 'whisper'
+    - 'list'
+    - 'ban'
+    - 'kick'
+    - 'mute'
+    - 'tempban'
+
+guis:
+  setting:
+    boi: ''
+  item-betting: ''
+  kit-selector: ''
+  arena-selector: ''
+
+countdown:
+  enabled: true
+  messages:
+    - '&7Starting in &f5 &7seconds!'
+    - '&7Starting in &f4 &7seconds!'
+    - '&7Starting in &f3 &7seconds!'
+    - '&7Starting in &f2 &7seconds!'
+    - '&7Starting in &f1 &7second!'
+    - '&7Duel starting now!'
+  block-projectile: true
+  block-pvp: true
+  block-movement: true
+
+gui:
+  kit-selector-rows: 3
+  arena-selector-rows: 2
+  available-arena-displayname: '&9{NAME}: &aAvailable'
+  in-use-arena-displayname: '&9{NAME}: &cIn Use'
 
 duelzone:
   enabled: false

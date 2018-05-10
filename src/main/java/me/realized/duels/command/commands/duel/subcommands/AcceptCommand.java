@@ -42,10 +42,14 @@ public class AcceptCommand extends BaseCommand {
             "player", player.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
         lang.sendMessage(player, "COMMAND.duel.request.accepted.receiver",
             "player", target.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
-        final BettingGui gui = new BettingGui(plugin, setting, target, player);
-        gui.open(player);
-        gui.open(target);
-        plugin.getGuiListener().addGui(player, gui);
-        plugin.getGuiListener().addGui(target, gui);
+
+        if (setting.isItemBetting()) {
+            final BettingGui gui = new BettingGui(plugin, setting, target, player);
+            plugin.getGuiListener().addGui(player, gui);
+            plugin.getGuiListener().addGui(target, gui);
+            gui.open(player, target);
+        } else {
+            duelManager.startMatch(player, target, setting, null);
+        }
     }
 }

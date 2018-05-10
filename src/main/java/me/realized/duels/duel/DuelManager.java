@@ -1,5 +1,8 @@
 package me.realized.duels.duel;
 
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.arena.ArenaManager;
@@ -9,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 
 public class DuelManager implements Loadable, Listener {
 
@@ -31,7 +35,8 @@ public class DuelManager implements Loadable, Listener {
 
     }
 
-    public void startMatch(final Player first, final Player second, final Setting setting) {
+    // Make sure to check for everything again before actually starting the match!
+    public void startMatch(final Player first, final Player second, final Setting setting, final Map<UUID, List<ItemStack>> items) {
         final Arena arena = setting.getArena() != null ? setting.getArena() : arenaManager.randomArena();
 
         if (arena == null || !arena.isAvailable()) {
@@ -40,6 +45,7 @@ public class DuelManager implements Loadable, Listener {
         }
 
         arena.setUsed(true);
+        arena.setMatch(setting.getKit(), items, setting.getBet());
         first.teleport(arena.getPositions().get(1));
         arena.addPlayer(first);
         second.teleport(arena.getPositions().get(2));

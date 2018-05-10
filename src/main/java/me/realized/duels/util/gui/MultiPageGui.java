@@ -101,8 +101,10 @@ public class MultiPageGui extends AbstractGui {
     }
 
     @Override
-    public void open(final Player player) {
-        player.openInventory(pages.get(0).inventory);
+    public void open(final Player... players) {
+        for (final Player player : players) {
+            player.openInventory(pages.get(0).inventory);
+        }
     }
 
     @Override

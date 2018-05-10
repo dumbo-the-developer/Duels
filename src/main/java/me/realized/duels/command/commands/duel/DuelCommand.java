@@ -1,22 +1,29 @@
 package me.realized.duels.command.commands.duel;
 
 import java.util.List;
+import java.util.OptionalInt;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.cache.Setting;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.command.commands.duel.subcommands.AcceptCommand;
 import me.realized.duels.command.commands.duel.subcommands.DenyCommand;
 import me.realized.duels.command.commands.duel.subcommands.StatsCommand;
+import me.realized.duels.hooks.VaultHook;
+import me.realized.duels.util.NumberUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class DuelCommand extends BaseCommand {
 
+    private final VaultHook vaultHook;
+
     public DuelCommand(final DuelsPlugin plugin) {
         super(plugin, "duel", "duels.duel", true);
         child(new StatsCommand(plugin), new AcceptCommand(plugin), new DenyCommand(plugin));
+        this.vaultHook = hookManager.getHook(VaultHook.class).orElse(null);
     }
 
     @Override
@@ -26,7 +33,6 @@ public class DuelCommand extends BaseCommand {
             return true;
         }
 
-        // Proceed to child command execution if given argument is a name of a child command
         if (isChild(args[0])) {
             return false;
         }
@@ -40,10 +46,10 @@ public class DuelCommand extends BaseCommand {
 
         final Player player = (Player) sender;
 
-        if (player.equals(target)) {
-            lang.sendMessage(sender, "ERROR.target-is-self");
-            return true;
-        }
+//        if (player.equals(target)) {
+//            lang.sendMessage(sender, "ERROR.target-is-self");
+//            return true;
+//        }
 
         if (requestManager.has(player, target)) {
             lang.sendMessage(sender, "ERROR.already-has-request", "player", target.getName());
@@ -51,6 +57,28 @@ public class DuelCommand extends BaseCommand {
         }
 
         final Setting setting = settingCache.get(player);
+
+        if (args.length > 1) {
+            if (vaultHook == null || !vaultHook.hasEconomy()) {
+                sender.sendMessage(ChatColor.RED + "Betting is currently disabled.");
+                return true;
+            }
+
+            final OptionalInt amount = NumberUtil.parseInt(args[1]);
+
+            if (!amount.isPresent()) {
+                sender.sendMessage(ChatColor.RED + "Invalid amount!");
+                return true;
+            }
+
+            if (!vaultHook.getEconomy().has(player, amount.getAsInt())) {
+                sender.sendMessage(ChatColor.RED + "You do not have enough to bet!");
+                return true;
+            }
+
+            setting.setBet(amount.getAsInt());
+        }
+
         setting.setTarget(target);
         setting.openGui(player);
         return true;
