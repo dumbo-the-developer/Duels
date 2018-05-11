@@ -3,6 +3,7 @@ package me.realized.duels.command;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.cache.SettingCache;
+import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.UserDataManager;
 import me.realized.duels.duel.DuelManager;
@@ -15,6 +16,7 @@ import org.bukkit.command.CommandSender;
 public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
 
     protected final DuelsPlugin plugin;
+    protected final Config config;
     protected final Lang lang;
     protected final UserDataManager userManager;
     protected final ArenaManager arenaManager;
@@ -28,6 +30,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
         final String... aliases) {
         super(plugin, name, usage, description, permission, length, playerOnly, aliases);
         this.plugin = plugin;
+        this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
         this.userManager = plugin.getUserManager();
         this.arenaManager = plugin.getArenaManager();

@@ -10,6 +10,7 @@ import me.realized.duels.command.commands.duel.subcommands.DenyCommand;
 import me.realized.duels.command.commands.duel.subcommands.StatsCommand;
 import me.realized.duels.hooks.VaultHook;
 import me.realized.duels.util.NumberUtil;
+import me.realized.duels.util.inventory.InventoryUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -37,14 +38,19 @@ public class DuelCommand extends BaseCommand {
             return false;
         }
 
+        final Player player = (Player) sender;
+
+        if (config.isRequiresClearedInventory() && InventoryUtil.hasItem(player)) {
+            lang.sendMessage(sender, "ERROR.inventory-not-empty");
+            return true;
+        }
+
         final Player target = Bukkit.getPlayerExact(args[0]);
 
         if (target == null) {
             lang.sendMessage(sender, "ERROR.player-not-found", "name", args[0]);
             return true;
         }
-
-        final Player player = (Player) sender;
 
 //        if (player.equals(target)) {
 //            lang.sendMessage(sender, "ERROR.target-is-self");

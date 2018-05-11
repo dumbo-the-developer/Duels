@@ -5,6 +5,7 @@ import me.realized.duels.cache.Setting;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.gui.betting.BettingGui;
 import me.realized.duels.request.Request;
+import me.realized.duels.util.inventory.InventoryUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -18,6 +19,12 @@ public class AcceptCommand extends BaseCommand {
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final Player player = (Player) sender;
+
+        if (config.isRequiresClearedInventory() && InventoryUtil.hasItem(player)) {
+            lang.sendMessage(sender, "ERROR.inventory-not-empty");
+            return;
+        }
+
         final Player target = Bukkit.getPlayerExact(args[1]);
 
         if (target == null) {

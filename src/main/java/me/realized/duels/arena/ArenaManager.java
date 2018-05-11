@@ -12,6 +12,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -48,7 +49,7 @@ public class ArenaManager implements Loadable {
             final List<ArenaData> data = plugin.getGson().fromJson(reader, new TypeToken<List<ArenaData>>() {}.getType());
 
             if (data != null) {
-                data.forEach(arenaData -> arenas.add(arenaData.toArena(plugin.getSettingCache())));
+                data.forEach(arenaData -> arenas.add(arenaData.toArena(plugin)));
             }
         }
 
@@ -89,11 +90,17 @@ public class ArenaManager implements Loadable {
     }
 
     public void save(final String name) {
-        arenas.add(new Arena(plugin.getSettingCache(), name));
+        arenas.add(new Arena(plugin, name));
     }
 
     public boolean isInMatch(final Player player) {
         return arenas.stream().anyMatch(arena -> arena.hasPlayer(player));
+    }
+
+    public List<UUID> getAllPlayers() {
+        final List<UUID> result = new ArrayList<>();
+        arenas.forEach(arena -> result.addAll(arena.getPlayers()));
+        return result;
     }
 
     public Arena randomArena() {

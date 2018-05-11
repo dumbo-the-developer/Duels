@@ -3,32 +3,31 @@ package me.realized.duels.kit;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
+import me.realized.duels.DuelsPlugin;
 import me.realized.duels.cache.Setting;
-import me.realized.duels.cache.SettingCache;
-import me.realized.duels.util.gui.Button;
+import me.realized.duels.gui.BaseButton;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.apache.commons.lang3.ArrayUtils;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-public class Kit extends Button {
+public class Kit extends BaseButton {
 
-    private final SettingCache cache;
     @Getter
     private final String name;
     @Getter
     private final Map<String, Map<Integer, ItemStack>> items = new HashMap<>();
 
-    public Kit(final SettingCache cache, final String name, final ItemStack displayed) {
-        super(displayed);
-        this.cache = cache;
+    public Kit(final DuelsPlugin plugin, final String name, final ItemStack displayed) {
+        super(plugin, displayed);
         this.name = name;
     }
 
-    public Kit(final SettingCache cache, final String name, final PlayerInventory inventory) {
-        this(cache, name, ItemBuilder
+    public Kit(final DuelsPlugin plugin, final String name, final PlayerInventory inventory) {
+        this(plugin, name, ItemBuilder
             .of(Material.DIAMOND_SWORD)
             .name("&7&l" + name)
             .lore("&aClick to send", "&aa duel request", "&awith this kit!")
@@ -77,8 +76,9 @@ public class Kit extends Button {
 
     @Override
     public void onClick(final Player player) {
-        final Setting setting = cache.get(player);
+        final Setting setting = settingCache.get(player);
         setting.setKit(this);
         setting.openGui(player);
+        player.sendMessage(ChatColor.GREEN + "Selected Kit: " + name);
     }
 }

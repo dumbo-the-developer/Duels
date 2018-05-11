@@ -47,7 +47,7 @@ public class KitManager implements Loadable {
 
             if (data != null) {
                 for (final Map.Entry<String, KitData> entry : data.entrySet()) {
-                    kits.put(entry.getKey(), entry.getValue().toKit(plugin.getSettingCache()));
+                    kits.put(entry.getKey(), entry.getValue().toKit(plugin));
                 }
             }
         }
@@ -89,6 +89,6 @@ public class KitManager implements Loadable {
     }
 
     public void save(final Player player, final String name) {
-        kits.put(name, new Kit(plugin.getSettingCache(), name, player.getInventory()));
+        kits.put(name, new Kit(plugin, name, player.getInventory()));
     }
 }

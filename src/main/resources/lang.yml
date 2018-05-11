@@ -13,7 +13,8 @@ ERROR:
   no-longer-online: '&cThat player is no longer online.'
   invalid-sub-command: '&c''%argument%'' is not a valid sub command. Please type ''/%command%'' for help.'
   target-is-self: '&cYou cannot duel yourself.'
-
+  inventory-not-empty: '&cYou must have a cleared inventory to use this command.'
+  patch-prevent-teleportation: '&cCannot teleport to a player in a duel.'
   already-has-request: '&cYou already have a request sent to %player%.'
   no-request: '&cYou do not have a request from %player%.'
 
@@ -84,3 +85,11 @@ COMMAND:
     - '{LINE}'
 
   sub-command-usage: '{PREFIX} &e/%command% %usage% &7- %description%'
+
+SETTING:
+
+DUEL:
+  prevent-item-drop: '&cYou cannot drop items while in a duel.'
+  prevent-item-pickup: '&cYou cannot pick up items while in a duel.'
+  prevent-command: '&cYou cannot use ''%command%'' while in a duel.'
+  prevent-teleportation: '&cYou cannot teleport while in a duel.'

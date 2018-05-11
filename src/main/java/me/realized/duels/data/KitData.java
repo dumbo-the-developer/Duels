@@ -2,7 +2,7 @@ package me.realized.duels.data;
 
 import java.util.HashMap;
 import java.util.Map;
-import me.realized.duels.cache.SettingCache;
+import me.realized.duels.DuelsPlugin;
 import me.realized.duels.kit.Kit;
 import org.bukkit.inventory.ItemStack;
 
@@ -23,8 +23,8 @@ public class KitData {
         }
     }
 
-    public Kit toKit(final SettingCache cache) {
-        final Kit kit = new Kit(cache, name, displayed.toItemStack());
+    public Kit toKit(final DuelsPlugin plugin) {
+        final Kit kit = new Kit(plugin, name, displayed.toItemStack());
 
         for (final Map.Entry<String, Map<Integer, ItemData>> entry : items.entrySet()) {
             final Map<Integer, ItemStack> data = new HashMap<>();

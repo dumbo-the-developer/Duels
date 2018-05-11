@@ -48,8 +48,13 @@ duel:
   prevent-item-drop: false
   # Prevent players from picking up items on ground while in a duel.
   prevent-item-pickup: true
-  # Prevent players from teleporting while in a duel.
-  prevent-teleportation: false
+  # Prevent players from teleporting out of the arena while in a duel.
+  # NOTE: Teleportation by enderpearl is excluded from prevention.
+  limit-teleportation:
+    enabled: true
+    # The max distance players can teleport while in a duel. '-1' to prevent all teleportation.
+    # NOTE: If players are getting stuck, try increasing this value.
+    distance-allowed: 5.0
   # If set to 'true', only commands listed in 'whitelisted-commands' will be usable while in a duel.
   block-all-commands: false
   whitelisted-commands:

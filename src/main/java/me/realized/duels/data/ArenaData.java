@@ -2,8 +2,8 @@ package me.realized.duels.data;
 
 import java.util.HashMap;
 import java.util.Map;
+import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
-import me.realized.duels.cache.SettingCache;
 import org.bukkit.Location;
 
 public class ArenaData {
@@ -21,8 +21,8 @@ public class ArenaData {
         }
     }
 
-    public Arena toArena(final SettingCache cache) {
-        final Arena arena = new Arena(cache, name);
+    public Arena toArena(final DuelsPlugin plugin) {
+        final Arena arena = new Arena(plugin, name);
         arena.setDisabled(disabled);
 
         for (final Map.Entry<Integer, LocationData> entry : positions.entrySet()) {

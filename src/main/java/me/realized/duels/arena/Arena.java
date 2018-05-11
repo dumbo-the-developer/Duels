@@ -9,23 +9,24 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
+import me.realized.duels.DuelsPlugin;
 import me.realized.duels.cache.Setting;
-import me.realized.duels.cache.SettingCache;
+import me.realized.duels.gui.BaseButton;
 import me.realized.duels.kit.Kit;
-import me.realized.duels.util.gui.Button;
 import me.realized.duels.util.inventory.ItemBuilder;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class Arena extends Button {
+public class Arena extends BaseButton {
 
-    private final SettingCache cache;
     @Getter
     private final String name;
     @Getter
     private Map<Integer, Location> positions = new HashMap<>();
+    @Getter
     private final Set<UUID> players = new HashSet<>();
     @Getter
     @Setter
@@ -35,9 +36,8 @@ public class Arena extends Button {
     @Getter
     private Match current;
 
-    public Arena(final SettingCache cache, final String name) {
-        super(ItemBuilder.of(Material.EMPTY_MAP).name("&e" + name).build());
-        this.cache = cache;
+    public Arena(final DuelsPlugin plugin, final String name) {
+        super(plugin, ItemBuilder.of(Material.EMPTY_MAP).name("&e" + name).build());
         this.name = name;
     }
 
@@ -71,9 +71,10 @@ public class Arena extends Button {
 
     @Override
     public void onClick(final Player player) {
-        final Setting setting = cache.get(player);
+        final Setting setting = settingCache.get(player);
         setting.setArena(this);
         setting.openGui(player);
+        player.sendMessage(ChatColor.GREEN + "Selected Arena: " + name);
     }
 
     @Override
