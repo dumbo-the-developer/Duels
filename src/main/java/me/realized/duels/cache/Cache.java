@@ -18,10 +18,10 @@ public abstract class Cache<V> implements Loadable {
         cache.clear();
     }
 
-    protected abstract V instance(final Player player);
+    abstract V create(final Player player);
 
     public V get(final Player player) {
-        return cache.computeIfAbsent(player.getUniqueId(), result -> instance(player));
+        return cache.computeIfAbsent(player.getUniqueId(), result -> create(player));
     }
 
     public void invalidate(final Player player) {

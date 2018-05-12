@@ -12,6 +12,7 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.data.KitData;
@@ -86,6 +87,15 @@ public class KitManager implements Loadable {
 
     public Optional<Kit> remove(final String name) {
         return Optional.ofNullable(kits.remove(name));
+    }
+
+    public Kit randomKit() {
+        if (kits.isEmpty()) {
+            return null;
+        }
+
+        final Kit[] kits = this.kits.values().toArray(new Kit[this.kits.size()]);
+        return kits[ThreadLocalRandom.current().nextInt(kits.length)];
     }
 
     public void save(final Player player, final String name) {

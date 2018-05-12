@@ -62,16 +62,14 @@ public class Kit extends BaseButton {
         items.put("ARMOR", armorContents);
     }
 
-    public void equip(final Player... players) {
-        for (final Player player : players) {
-            for (final Map.Entry<Integer, ItemStack> entry : items.get("INVENTORY").entrySet()) {
-                player.getInventory().setItem(entry.getKey(), entry.getValue().clone());
-            }
-
-            final ItemStack[] armor = items.get("ARMOR").values().toArray(new ItemStack[4]);
-            ArrayUtils.reverse(armor);
-            player.getInventory().setArmorContents(armor);
+    public void equip(final Player player) {
+        for (final Map.Entry<Integer, ItemStack> entry : items.get("INVENTORY").entrySet()) {
+            player.getInventory().setItem(entry.getKey(), entry.getValue().clone());
         }
+
+        final ItemStack[] armor = items.get("ARMOR").values().toArray(new ItemStack[4]);
+        ArrayUtils.reverse(armor);
+        player.getInventory().setArmorContents(armor);
     }
 
     @Override

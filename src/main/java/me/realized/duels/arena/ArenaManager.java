@@ -85,6 +85,10 @@ public class ArenaManager implements Loadable {
         return arenas.stream().filter(arena -> arena.getName().equals(name)).findFirst();
     }
 
+    public Optional<Arena> get(final Player player) {
+        return arenas.stream().filter(arena -> arena.hasPlayer(player)).findFirst();
+    }
+
     public boolean remove(final String name) {
         return get(name).map(arenas::remove).orElse(false);
     }
@@ -94,7 +98,7 @@ public class ArenaManager implements Loadable {
     }
 
     public boolean isInMatch(final Player player) {
-        return arenas.stream().anyMatch(arena -> arena.hasPlayer(player));
+        return get(player).isPresent();
     }
 
     public List<UUID> getAllPlayers() {

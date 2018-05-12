@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import me.realized.duels.api.Duels;
 import me.realized.duels.arena.ArenaManager;
+import me.realized.duels.cache.PlayerDataCache;
 import me.realized.duels.cache.SettingCache;
 import me.realized.duels.command.commands.duel.DuelCommand;
 import me.realized.duels.command.commands.duels.DuelsCommand;
@@ -53,6 +54,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private SettingCache settingCache;
     @Getter
+    private PlayerDataCache playerDataCache;
+    @Getter
     private DuelManager duelManager;
     @Getter
     private RequestManager requestManager;
@@ -71,6 +74,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(arenaManager = new ArenaManager(this));
         loadables.add(kitManager = new KitManager(this));
         loadables.add(settingCache = new SettingCache(this));
+        loadables.add(playerDataCache = new PlayerDataCache());
         loadables.add(duelManager = new DuelManager(this));
         loadables.add(requestManager = new RequestManager(this));
         loadables.add(hookManager = new HookManager(this));

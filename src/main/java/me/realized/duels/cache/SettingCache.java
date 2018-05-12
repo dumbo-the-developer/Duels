@@ -12,7 +12,7 @@ public class SettingCache extends Cache<Setting> {
     }
 
     @Override
-    protected Setting instance(final Player player) {
+    Setting create(final Player player) {
         return new Setting(plugin);
     }
 }
