@@ -76,6 +76,7 @@ public class UserDataManager implements Loadable, Listener {
 
                 callback.accept(Optional.of(data));
             } catch (IOException ex) {
+                callback.accept(Optional.empty());
                 ex.printStackTrace();
                 Log.error("An error occured while loading userdata of " + player.getName() + ": " + ex.getMessage());
             }

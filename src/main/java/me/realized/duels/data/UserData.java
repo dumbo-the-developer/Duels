@@ -32,6 +32,18 @@ public class UserData implements User {
         this.name = player.getName();
     }
 
+    public void addWin() {
+        wins++;
+    }
+
+    public void addLoss() {
+        losses++;
+    }
+
+    public void addMatch(final MatchData matchData) {
+        matches.add(matchData);
+    }
+
     @Override
     public String toString() {
         return "UserData{" +

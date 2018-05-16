@@ -53,6 +53,14 @@ public class Arena extends BaseButton {
         players.add(player.getUniqueId());
     }
 
+    public void removePlayer(final Player player) {
+        players.remove(player.getUniqueId());
+    }
+
+    public UUID getFirst() {
+        return players.iterator().next();
+    }
+
     public void setPosition(final int pos, final Location location) {
         positions.put(pos, location);
     }
@@ -61,6 +69,7 @@ public class Arena extends BaseButton {
         this.used = used;
 
         if (!used) {
+            this.players.clear();
             this.current = null;
         }
     }
