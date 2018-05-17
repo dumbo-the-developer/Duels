@@ -8,7 +8,7 @@ public interface MatchInfo {
 
     long getTime();
 
-    int getDuration();
+    long getDuration();
 
     double getHealth();
 }

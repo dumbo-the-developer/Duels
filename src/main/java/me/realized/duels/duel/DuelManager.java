@@ -18,11 +18,13 @@ import me.realized.duels.data.UserData;
 import me.realized.duels.data.UserDataManager;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.kit.KitManager;
+import me.realized.duels.spectate.SpectateManager;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.PlayerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -34,23 +36,29 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class DuelManager implements Loadable, Listener {
 
+    private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
     private final UserDataManager userDataManager;
     private final ArenaManager arenaManager;
     private final KitManager kitManager;
     private final PlayerDataCache playerDataCache;
+    private final SpectateManager spectateManager;
 
     public DuelManager(final DuelsPlugin plugin) {
+        this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
         this.userDataManager = plugin.getUserManager();
         this.arenaManager = plugin.getArenaManager();
         this.kitManager = plugin.getKitManager();
         this.playerDataCache = plugin.getPlayerDataCache();
+        this.spectateManager = plugin.getSpectateManager();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -176,15 +184,35 @@ public class DuelManager implements Loadable, Listener {
             user.addMatch(matchData);
         });
 
-        // Set loser as spectator
-        arena.setUsed(false);
+        // Display title if 1.8, otherwise message
+        player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 10, 10));
+        spectateManager.startSpectating(player, winner);
+        plugin.doSyncAfter(() -> {
+            Bukkit.broadcastMessage("Boo");
+            arena.setUsed(false);
+        }, config.getTeleportDelay() * 20L);
     }
 
-    
-    // TODO: 16/05/2018 Handle case of arena player damaging non-arena player
+
     @EventHandler (ignoreCancelled = true)
     public void on(final EntityDamageByEntityEvent event) {
+        final Player player;
 
+        if (event.getDamager() instanceof Player) {
+            player = (Player) event.getDamager();
+        } else if (event.getDamager() instanceof Projectile && ((Projectile) event.getDamager()).getShooter() instanceof Player) {
+            player = (Player) ((Projectile) event.getDamager()).getShooter();
+        } else {
+            return;
+        }
+
+        final Optional<Arena> result = arenaManager.get(player);
+
+        if (!result.isPresent() || result.get().has(event.getEntity().getUniqueId())) {
+            return;
+        }
+
+        event.setCancelled(true);
     }
 
 
@@ -230,13 +258,16 @@ public class DuelManager implements Loadable, Listener {
     }
 
 
+    // TODO: 17/05/2018 Check if teleportCause == SPECTATE
     @EventHandler (priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void on(PlayerTeleportEvent event) {
         final Player player = event.getPlayer();
         final Location to = event.getTo();
 
-        // TODO: 11/05/2018 Add spectators to getAllPlayers collection
-        for (final UUID uuid : arenaManager.getAllPlayers()) {
+        final List<UUID> players = arenaManager.getAllPlayers();
+        players.addAll(spectateManager.getAllPlayers());
+
+        for (final UUID uuid : players) {
             final Player target = Bukkit.getPlayer(uuid);
 
             if (target == null || !isSimilar(target.getLocation(), to)) {

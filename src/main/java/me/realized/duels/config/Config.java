@@ -47,6 +47,11 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private List<String> blacklistedCommands;
 
+    @Getter
+    private boolean specRequiresClearedInventory;
+    @Getter
+    private List<String> specWhitelistedCommands;
+
     public Config(final DuelsPlugin plugin) {
         super(plugin, "_config");
     }
@@ -71,5 +76,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         blockAllCommands = configuration.getBoolean("duel.block-all-commands", false);
         whitelistedCommands = configuration.getStringList("duel.whitelisted-commands");
         blacklistedCommands = configuration.getStringList("duel.blacklisted-commands");
+        specRequiresClearedInventory = configuration.getBoolean("spectate.requires-cleared-inventory", false);
+        specWhitelistedCommands = configuration.getStringList("spectate.whitelisted-commands");
     }
 }

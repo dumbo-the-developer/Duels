@@ -6,8 +6,7 @@ import me.realized._duels.data.UserData;
 import org.bukkit.entity.Player;
 
 /**
- * todo: fixxxxxxx
- * @deprecated As of v3.0.0. Use {@link Core} instead.
+ * @deprecated As of v3.0.0. Use {@link Duels} instead.
  *
  * A static API for Duels.
  *

@@ -45,8 +45,12 @@ public class Arena extends BaseButton {
         return !disabled && !used && positions.get(1) != null && positions.get(2) != null;
     }
 
+    public boolean has(final UUID uuid) {
+        return players.contains(uuid);
+    }
+
     public boolean hasPlayer(final Player player) {
-        return players.contains(player.getUniqueId());
+        return has(player.getUniqueId());
     }
 
     public void addPlayer(final Player player) {

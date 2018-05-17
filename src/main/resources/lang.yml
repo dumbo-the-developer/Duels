@@ -17,6 +17,13 @@ ERROR:
   patch-prevent-teleportation: '&cCannot teleport to a player in a duel.'
   already-has-request: '&cYou already have a request sent to %player%.'
   no-request: '&cYou do not have a request from %player%.'
+  already-in-match:
+    sender: '&cYou cannot do this while in a duel.'
+    target: '&c%player% is already in a duel.'
+  already-spectating:
+    sender: '&cYou cannot do this while in spectator mode.'
+    target: '&c%player% is in spectator mode.'
+  not-in-match: '&c%player% is not in a duel.'
 
 COMMAND:
   duel:
@@ -87,6 +94,17 @@ COMMAND:
   sub-command-usage: '{PREFIX} &e/%command% %usage% &7- %description%'
 
 SETTING:
+
+
+SPECTATE:
+  start: '{PREFIX} &7You are now spectating &f%player%&7.'
+  arena-broadcast: '{PREFIX} &f%player% &7is now spectating the match!'
+  stop: '{PREFIX} &7You are no longer spectating &f%player%&7.'
+  prevent-item-drop: '&cYou cannot drop items while in spectator mode.'
+  prevent-command: '&cYou cannot use ''%command%'' while in spectator mode.'
+  prevent-teleportation: '&cYou cannot teleport while in spectator mode.'
+  prevent-attack: '&cYou cannot do this while in spectator mode.'
+
 
 DUEL:
   prevent-item-drop: '&cYou cannot drop items while in a duel.'

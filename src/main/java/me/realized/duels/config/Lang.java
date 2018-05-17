@@ -1,18 +1,23 @@
 package me.realized.duels.config;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.config.AbstractConfiguration;
 import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 
 public class Lang extends AbstractConfiguration<DuelsPlugin> {
 
@@ -75,15 +80,31 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> {
         messages.clear();
     }
 
-    public void sendMessage(final CommandSender receiver,  final String key, final Object... replacers) {
+    public void sendMessage(final CommandSender receiver, final String key, final Object... replacers) {
+        final Optional<String> message = getMessage(key, replacers);
+        message.ifPresent(receiver::sendMessage);
+    }
+
+    public void sendMessage(final Collection<UUID> receivers, final String key, final Object... replacers) {
+        final Optional<String> message = getMessage(key, replacers);
+        message.ifPresent(s -> receivers.forEach(uuid -> {
+            final Player player = Bukkit.getPlayer(uuid);
+
+            if (player != null) {
+                player.sendMessage(s);
+            }
+        }));
+    }
+
+    private Optional<String> getMessage(final String key, final Object... replacers) {
         final String message = messages.get(key);
 
         if (message == null) {
             Log.error(this, "Failed to send message: provided key '" + key + "' has no assigned value");
-            return;
+            return Optional.empty();
         }
 
-        receiver.sendMessage(StringUtil.color(replace(message, replacers)));
+        return Optional.of(StringUtil.color(replace(message, replacers)));
     }
 
     private String replace(String message, final Object... replacers) {

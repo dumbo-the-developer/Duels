@@ -23,6 +23,7 @@ import me.realized.duels.hooks.HookManager;
 import me.realized.duels.kit.KitManager;
 import me.realized.duels.logging.LogManager;
 import me.realized.duels.request.RequestManager;
+import me.realized.duels.spectate.SpectateManager;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.Log.LogSource;
@@ -56,6 +57,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private PlayerDataCache playerDataCache;
     @Getter
+    private SpectateManager spectateManager;
+    @Getter
     private DuelManager duelManager;
     @Getter
     private RequestManager requestManager;
@@ -75,6 +78,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(kitManager = new KitManager(this));
         loadables.add(settingCache = new SettingCache(this));
         loadables.add(playerDataCache = new PlayerDataCache());
+        loadables.add(spectateManager = new SpectateManager(this));
         loadables.add(duelManager = new DuelManager(this));
         loadables.add(requestManager = new RequestManager(this));
         loadables.add(hookManager = new HookManager(this));

@@ -18,6 +18,8 @@ public class PlayerData {
     @Getter
     @Setter
     private Location location;
+    @Getter
+    private boolean available;
 
     PlayerData() {}
 
@@ -28,13 +30,19 @@ public class PlayerData {
         this.health = player.getHealth();
         this.hunger = player.getFoodLevel();
         this.location = player.getLocation().clone();
+        this.available = true;
     }
 
     public void restore(final Player player) {
+        if (!available) {
+            return;
+        }
+
         player.addPotionEffects(effects);
         player.setHealth(health);
         player.setFoodLevel(hunger);
         player.getInventory().setArmorContents(armor);
         player.getInventory().setContents(inventory);
+        this.available = false;
     }
 }
