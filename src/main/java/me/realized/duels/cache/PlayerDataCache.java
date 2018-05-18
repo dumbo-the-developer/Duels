@@ -6,6 +6,6 @@ public class PlayerDataCache extends Cache<PlayerData> {
 
     @Override
     PlayerData create(final Player player) {
-        return new PlayerData();
+        return new PlayerData(player);
     }
 }

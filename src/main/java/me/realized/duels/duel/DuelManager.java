@@ -9,6 +9,7 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.arena.Match;
+import me.realized.duels.cache.PlayerData;
 import me.realized.duels.cache.PlayerDataCache;
 import me.realized.duels.cache.Setting;
 import me.realized.duels.config.Config;
@@ -30,14 +31,15 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 public class DuelManager implements Loadable, Listener {
 
@@ -63,13 +65,13 @@ public class DuelManager implements Loadable, Listener {
     }
 
     @Override
-    public void handleLoad() throws Exception {
+    public void handleLoad() {
 
     }
 
     @Override
-    public void handleUnload() throws Exception {
-
+    public void handleUnload() {
+        Bukkit.getOnlinePlayers().stream().filter(Player::isDead).forEach(this::forceRespawn);
     }
 
     // todo: Make sure to check for everything again before actually starting the match
@@ -96,49 +98,102 @@ public class DuelManager implements Loadable, Listener {
         }
 
         player.closeInventory();
-        player.teleport(location);
-        arena.addPlayer(player);
 
         if (!config.isUseOwnInventoryEnabled()) {
+            playerDataCache.put(player);
             PlayerUtil.reset(player);
-            playerDataCache.get(player).init(player);
 
             if (kit != null) {
                 kit.equip(player);
             }
         }
+
+        player.teleport(location);
+        arena.addPlayer(player);
     }
 
-//    @EventHandler
-//    public void on(final PlayerDeathEvent event) {
-//        final Player player = event.getEntity();
-//        System.out.println(player.getName() + " ded");
-//        final Optional<Arena> result = arenaManager.get(player);
-//
-//        if (!result.isPresent()) {
-//            return;
-//        }
-//
-//        event.setDeathMessage(null);
-//        event.setKeepInventory(config.isUseOwnInventoryEnabled() && config.isUseOwnInventoryKeepItems());
-//
-//        if (!config.isUseOwnInventoryEnabled()) {
-//            event.setKeepLevel(true);
-//            event.setDroppedExp(0);
-//            event.getDrops().clear();
-//        }
-//
-//        final Arena arena = result.get();
-//        arena.removePlayer(player);
-//
-//        if (arena.getPlayers().size() > 0) {
-//            final Player target = Bukkit.getPlayer(arena.getFirst());
-//
-//        }
-//
-//        final Match match = arena.getCurrent();
-//        arena.setUsed(false);
-//    }
+    @EventHandler
+    public void on(final PlayerDeathEvent event) {
+        final Player player = event.getEntity();
+        final Optional<Arena> result = arenaManager.get(player);
+
+        if (!result.isPresent()) {
+            return;
+        }
+
+        event.setDeathMessage(null);
+        event.setKeepInventory(config.isUseOwnInventoryEnabled() && config.isUseOwnInventoryKeepItems());
+
+        if (!config.isUseOwnInventoryEnabled()) {
+            event.setKeepLevel(true);
+            event.setDroppedExp(0);
+            event.getDrops().clear();
+        }
+
+        final Arena arena = result.get();
+        arena.removePlayer(player);
+        plugin.doSyncAfter(() -> {
+            if (arena.getPlayers().isEmpty()) {
+                Bukkit.broadcastMessage("Tie game");
+                arena.setUsed(false);
+                return;
+            }
+
+            if (arena.getPlayers().size() == 1) {
+                final Player winner = Bukkit.getPlayer(arena.getFirst());
+                final Match match = arena.getCurrent();
+                final long duration = System.currentTimeMillis() - match.getCreation();
+                final long time = new GregorianCalendar().getTimeInMillis();
+                final double health = Math.ceil(winner.getHealth()) * 0.5;
+                final MatchData matchData = new MatchData(winner.getName(), player.getName(), time, duration, health);
+                Optional<UserData> cached = userDataManager.get(player);
+                cached.ifPresent(user -> {
+                    user.addLoss();
+                    user.addMatch(matchData);
+                });
+                cached = userDataManager.get(winner);
+                cached.ifPresent(user -> {
+                    user.addWin();
+                    user.addMatch(matchData);
+                });
+
+                plugin.doSyncAfter(() -> {
+                    // check if player is online before adding bet items. If not, add to PlayerData
+                    // Add money without teleport delay.
+                    Bukkit.broadcastMessage("Winner = " + winner.getName());
+                    arena.setUsed(false);
+                }, config.getTeleportDelay() * 20L);
+            }
+        }, 1L);
+    }
+
+    private void forceRespawn(final Player player) {
+        final Optional<PlayerData> cached = playerDataCache.remove(player);
+
+        if (cached.isPresent()) {
+            final PlayerData data = cached.get();
+            player.spigot().respawn();
+            player.teleport(data.getLocation());
+            PlayerUtil.reset(player);
+            data.restore(player);
+        }
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void on(final PlayerRespawnEvent event) {
+        final Player player = event.getPlayer();
+        final Optional<PlayerData> cached = playerDataCache.remove(player);
+
+        if (cached.isPresent()) {
+            final PlayerData data = cached.get();
+            event.setRespawnLocation(data.getLocation());
+//            essentialsHook.setBackLocation(player, event.getRespawnLocation());
+            plugin.doSyncAfter(() -> {
+                PlayerUtil.reset(player);
+                data.restore(player);
+            }, 1L);
+        }
+    }
 
     @EventHandler (ignoreCancelled = true)
     public void on(final EntityDamageEvent event) {
@@ -155,42 +210,11 @@ public class DuelManager implements Loadable, Listener {
 
         final Arena arena = result.get();
 
-        if (arena.getPlayers().size() < 2) {
-            event.setCancelled(true);
+        if (arena.getPlayers().size() > 1) {
             return;
         }
 
-        if (player.getHealth() - event.getFinalDamage() > 0) {
-            return;
-        }
-
-        event.setDamage(0);
-        arena.removePlayer(player);
-
-        final Match match = arena.getCurrent();
-        final Player winner = Bukkit.getPlayer(arena.getFirst());
-        final long duration = System.currentTimeMillis() - match.getCreation();
-        final long time = new GregorianCalendar().getTimeInMillis();
-        final double health = Math.ceil(winner.getHealth()) * 0.5;
-        final MatchData matchData = new MatchData(winner.getName(), player.getName(), time, duration, health);
-        Optional<UserData> cached = userDataManager.get(player);
-        cached.ifPresent(user -> {
-            user.addLoss();
-            user.addMatch(matchData);
-        });
-        cached = userDataManager.get(winner);
-        cached.ifPresent(user -> {
-            user.addWin();
-            user.addMatch(matchData);
-        });
-
-        // Display title if 1.8, otherwise message
-        player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 10, 10));
-        spectateManager.startSpectating(player, winner);
-        plugin.doSyncAfter(() -> {
-            Bukkit.broadcastMessage("Boo");
-            arena.setUsed(false);
-        }, config.getTeleportDelay() * 20L);
+        event.setCancelled(true);
     }
 
 
@@ -216,10 +240,15 @@ public class DuelManager implements Loadable, Listener {
     }
 
 
-    // TODO: 16/05/2018 Handle case of player logging out while in match
     @EventHandler
     public void on(final PlayerQuitEvent event) {
+        final Player player = event.getPlayer();
 
+        if (!arenaManager.isInMatch(player)) {
+            return;
+        }
+
+        player.setHealth(0);
     }
 
 
@@ -258,25 +287,26 @@ public class DuelManager implements Loadable, Listener {
     }
 
 
-    // TODO: 17/05/2018 Check if teleportCause == SPECTATE
     @EventHandler (priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void on(PlayerTeleportEvent event) {
         final Player player = event.getPlayer();
         final Location to = event.getTo();
 
-        final List<UUID> players = arenaManager.getAllPlayers();
-        players.addAll(spectateManager.getAllPlayers());
+        if (event.getCause() != TeleportCause.SPECTATE) {
+            final List<UUID> players = arenaManager.getAllPlayers();
+            players.addAll(spectateManager.getAllPlayers());
 
-        for (final UUID uuid : players) {
-            final Player target = Bukkit.getPlayer(uuid);
+            for (final UUID uuid : players) {
+                final Player target = Bukkit.getPlayer(uuid);
 
-            if (target == null || !isSimilar(target.getLocation(), to)) {
-                continue;
+                if (target == null || !isSimilar(target.getLocation(), to)) {
+                    continue;
+                }
+
+                event.setCancelled(true);
+                lang.sendMessage(player, "ERROR.patch-prevent-teleportation");
+                return;
             }
-
-            event.setCancelled(true);
-            lang.sendMessage(player, "ERROR.patch-prevent-teleportation");
-            return;
         }
 
         if (!config.isLimitTeleportEnabled() || event.getCause() == PlayerTeleportEvent.TeleportCause.ENDER_PEARL || !arenaManager.isInMatch(player)) {

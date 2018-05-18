@@ -23,7 +23,7 @@ public class ArenaSelectButton extends BaseButton {
             return;
         }
 
-        final Setting setting = settingCache.get(player);
+        final Setting setting = settingCache.getSafely(player);
         setLore(String.format(LORE_TEMPLATE, setting.getArena() != null ? setting.getArena().getName() : "Random"));
     }
 

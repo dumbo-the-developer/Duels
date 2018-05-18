@@ -50,16 +50,13 @@ public class SpawnEggs extends CompatBase {
         try {
             final Object nmsItem = AS_NMS_COPY.invoke(null, item);
             final Object tag = GET_TAG.invoke(nmsItem);
-            System.out.println(tag);
 
             if (tag != null) {
-                System.out.println("2");
                 final Object entityTag = GET_COMPOUND.invoke(tag, "EntityTag");
                 final String name = ((String) GET_STRING.invoke(entityTag, "id")).replace("minecraft:", "");
                 final EntityType type = EntityType.fromName(name);
 
                 if (type != null) {
-                    System.out.println("3");
                     return new SpawnEggs(type);
                 }
             }

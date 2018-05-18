@@ -8,6 +8,7 @@ import me.realized.duels.command.BaseCommand;
 import me.realized.duels.command.commands.duel.subcommands.AcceptCommand;
 import me.realized.duels.command.commands.duel.subcommands.DenyCommand;
 import me.realized.duels.command.commands.duel.subcommands.StatsCommand;
+import me.realized.duels.command.commands.duel.subcommands.ToggleCommand;
 import me.realized.duels.hooks.VaultHook;
 import me.realized.duels.util.NumberUtil;
 import me.realized.duels.util.inventory.InventoryUtil;
@@ -23,7 +24,7 @@ public class DuelCommand extends BaseCommand {
 
     public DuelCommand(final DuelsPlugin plugin) {
         super(plugin, "duel", "duels.duel", true);
-        child(new StatsCommand(plugin), new AcceptCommand(plugin), new DenyCommand(plugin));
+        child(new AcceptCommand(plugin), new DenyCommand(plugin), new StatsCommand(plugin), new ToggleCommand(plugin));
         this.vaultHook = hookManager.getHook(VaultHook.class).orElse(null);
     }
 
@@ -62,9 +63,9 @@ public class DuelCommand extends BaseCommand {
             return true;
         }
 
-        final Setting setting = settingCache.get(player);
+        final Setting setting = settingCache.getSafely(player);
 
-        if (args.length > 1) {
+        if (config.isAllowMoneyBetting() && args.length > 1) {
             if (vaultHook == null || !vaultHook.hasEconomy()) {
                 sender.sendMessage(ChatColor.RED + "Betting is currently disabled.");
                 return true;

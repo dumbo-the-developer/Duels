@@ -27,6 +27,7 @@
 
 package me.realized.duels.util;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import org.bukkit.Bukkit;
 
@@ -62,6 +63,15 @@ public final class ReflectionUtil {
         try {
             return clazz.getMethod(name, parameters);
         } catch (NoSuchMethodException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Field getField(final Class<?> clazz, final String name) {
+        try {
+            return clazz.getField(name);
+        } catch (NoSuchFieldException ex) {
             ex.printStackTrace();
             return null;
         }

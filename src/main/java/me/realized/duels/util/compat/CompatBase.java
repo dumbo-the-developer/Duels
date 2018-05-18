@@ -1,5 +1,6 @@
 package me.realized.duels.util.compat;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import me.realized.duels.util.ReflectionUtil;
 import org.bukkit.inventory.ItemStack;
@@ -25,6 +26,9 @@ class CompatBase {
     static final Method SET_DOUBLE;
     static final Method SET_LONG;
     static final Method GET_COMPOUND;
+
+    static final Method GET_HANDLE;
+    static Field COLLIDES_WITH_ENTITIES;
     
     static {
         final Class<?> CB_ITEMSTACK = ReflectionUtil.getCBClass("inventory.CraftItemStack");
@@ -50,5 +54,12 @@ class CompatBase {
         SET_DOUBLE = ReflectionUtil.getMethod(TAG_COMPOUND, "setDouble", String.class, double.class);
         SET_LONG = ReflectionUtil.getMethod(TAG_COMPOUND, "setLong", String.class, long.class);
         GET_COMPOUND = ReflectionUtil.getMethod(TAG_COMPOUND, "getCompound", String.class);
+        final Class<?> CB_PLAYER = ReflectionUtil.getCBClass("entity.CraftPlayer");
+        GET_HANDLE = ReflectionUtil.getMethod(CB_PLAYER, "getHandle");
+
+        if (CompatUtil.isPre_1_10()) {
+            final Class<?> NMS_PLAYER = ReflectionUtil.getNMSClass("EntityPlayer");
+            COLLIDES_WITH_ENTITIES = ReflectionUtil.getField(NMS_PLAYER, "collidesWithEntities");
+        }
     }
 }

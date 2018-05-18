@@ -13,6 +13,7 @@ import me.realized.duels.api.Duels;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.cache.PlayerDataCache;
 import me.realized.duels.cache.SettingCache;
+import me.realized.duels.command.commands.SpectateCommand;
 import me.realized.duels.command.commands.duel.DuelCommand;
 import me.realized.duels.command.commands.duels.DuelsCommand;
 import me.realized.duels.config.Config;
@@ -30,8 +31,13 @@ import me.realized.duels.util.Log.LogSource;
 import me.realized.duels.util.Reloadable;
 import me.realized.duels.util.gui.GuiListener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.inventivetalent.update.spiget.SpigetUpdate;
+import org.inventivetalent.update.spiget.UpdateCallback;
+import org.inventivetalent.update.spiget.comparator.VersionComparator;
 
 public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
+
+    private static final int RESOURCE_ID = 20171;
 
     @Getter
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -89,6 +95,29 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
         new DuelCommand(this).register();
         new DuelsCommand(this).register();
+        new SpectateCommand(this).register();
+
+        if (!configuration.isCheckForUpdates()) {
+            return;
+        }
+
+        final SpigetUpdate updateChecker = new SpigetUpdate(this, RESOURCE_ID);
+        updateChecker.setVersionComparator(VersionComparator.SEM_VER_SNAPSHOT);
+        updateChecker.checkForUpdate(new UpdateCallback() {
+            @Override
+            public void updateAvailable(final String newVersion, final String downloadUrl, final boolean hasDirectDownload) {
+                Log.info("===============================================");
+                Log.info("An update for " + getName() + " is available!");
+                Log.info("Download " + getName() + " v" + newVersion + " here:");
+                Log.info(downloadUrl);
+                Log.info("===============================================");
+            }
+
+            @Override
+            public void upToDate() {
+                Log.info("No updates were available. You are on the latest version!");
+            }
+        });
     }
 
     @Override

@@ -15,6 +15,7 @@ import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.PlayerUtil;
+import me.realized.duels.util.compat.Collisions;
 import me.realized.duels.util.compat.CompatUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -87,10 +88,8 @@ public class SpectateManager implements Loadable, Listener {
             return;
         }
 
-        final PlayerData playerData = playerDataCache.get(player);
-
-        if (!playerData.isAvailable()) {
-            playerData.init(player);
+        if (!playerDataCache.get(player).isPresent()) {
+            playerDataCache.put(player);
         }
 
         PlayerUtil.reset(player);
@@ -108,6 +107,7 @@ public class SpectateManager implements Loadable, Listener {
         player.getInventory().setItem(8, ItemBuilder.builder().type(Material.PAPER).name("&cStop Spectating").build());
         player.setAllowFlight(true);
         player.setFlying(true);
+        Collisions.setCollidable(player, false);
         spectators.put(player.getUniqueId(), new Spectator(player, target, arena));
 
         if (player.hasPermission("duels.spectate.anonymously") || silent) {
@@ -132,10 +132,20 @@ public class SpectateManager implements Loadable, Listener {
         PlayerUtil.reset(player);
 
         final Spectator spectator = found.get();
-        player.teleport(spectator.getOrigin());
         player.setFlying(false);
         player.setAllowFlight(false);
-        playerDataCache.get(player).restore(player);
+        Collisions.setCollidable(player, true);
+
+        final Optional<PlayerData> cached = playerDataCache.remove(player);
+
+        if (cached.isPresent()) {
+            final PlayerData playerData = cached.get();
+            player.teleport(playerData.getLocation());
+            playerData.restore(player);
+        } else {
+            // teleport to lobby?
+        }
+
         spectator.getArena().getPlayers().forEach(uuid -> {
             final Player arenaPlayer = Bukkit.getPlayer(uuid);
 
@@ -163,7 +173,7 @@ public class SpectateManager implements Loadable, Listener {
         final Player player = event.getPlayer();
         final ItemStack held = CompatUtil.isPre1_9() ? player.getItemInHand() : player.getInventory().getItemInMainHand();
 
-        if (held == null || held.getType() != Material.REDSTONE) {
+        if (held == null || held.getType() != Material.PAPER) {
             return;
         }
 

@@ -10,6 +10,7 @@ import me.realized.duels.duel.DuelManager;
 import me.realized.duels.hooks.HookManager;
 import me.realized.duels.kit.KitManager;
 import me.realized.duels.request.RequestManager;
+import me.realized.duels.spectate.SpectateManager;
 import me.realized.duels.util.command.AbstractCommand;
 import org.bukkit.command.CommandSender;
 
@@ -22,6 +23,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
     protected final ArenaManager arenaManager;
     protected final KitManager kitManager;
     protected final SettingCache settingCache;
+    protected final SpectateManager spectateManager;
     protected final DuelManager duelManager;
     protected final RequestManager requestManager;
     protected final HookManager hookManager;
@@ -36,6 +38,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
         this.arenaManager = plugin.getArenaManager();
         this.kitManager = plugin.getKitManager();
         this.settingCache = plugin.getSettingCache();
+        this.spectateManager = plugin.getSpectateManager();
         this.duelManager = plugin.getDuelManager();
         this.requestManager = plugin.getRequestManager();
         this.hookManager = plugin.getHookManager();

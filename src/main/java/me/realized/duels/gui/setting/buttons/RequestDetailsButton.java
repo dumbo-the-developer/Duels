@@ -19,7 +19,7 @@ public class RequestDetailsButton extends BaseButton {
 
     @Override
     public void update(final Player player) {
-        final Setting setting = settingCache.get(player);
+        final Setting setting = settingCache.getSafely(player);
         final Player target = Bukkit.getPlayer(setting.getTarget());
 
         if (target == null) {

@@ -70,11 +70,12 @@ public class Kit extends BaseButton {
         final ItemStack[] armor = items.get("ARMOR").values().toArray(new ItemStack[4]);
         ArrayUtils.reverse(armor);
         player.getInventory().setArmorContents(armor);
+        player.updateInventory();
     }
 
     @Override
     public void onClick(final Player player) {
-        final Setting setting = settingCache.get(player);
+        final Setting setting = settingCache.getSafely(player);
         setting.setKit(this);
         setting.openGui(player);
         player.sendMessage(ChatColor.GREEN + "Selected Kit: " + name);

@@ -16,12 +16,15 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean allowArenaSelecting;
     @Getter
+    private boolean allowItemBetting;
+    @Getter
+    private boolean allowMoneyBetting;
+    @Getter
     private boolean useOwnInventoryEnabled;
     @Getter
     private boolean useOwnInventoryKeepItems;
     @Getter
     private boolean requiresClearedInventory;
-
     @Getter
     private int maxDuration;
     @Getter
@@ -60,10 +63,12 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     protected void loadValues(final FileConfiguration configuration) {
         version = configuration.getInt("config-version");
         checkForUpdates = configuration.getBoolean("check-for-updates", true);
-        allowArenaSelecting = configuration.getBoolean("setting.allow-arena-selecting", true);
-        useOwnInventoryEnabled = configuration.getBoolean("setting.use-own-inventory.enabled", false);
-        useOwnInventoryKeepItems = configuration.getBoolean("setting.use-own-inventory.keep-items", false);
-        requiresClearedInventory = configuration.getBoolean("setting.requires-cleared-inventory", true);
+        allowArenaSelecting = configuration.getBoolean("duel.allow-arena-selecting", true);
+        allowItemBetting = configuration.getBoolean("duel.allow-item-betting", true);
+        allowMoneyBetting = configuration.getBoolean("duel.allow-money-betting", true);
+        useOwnInventoryEnabled = configuration.getBoolean("duel.use-own-inventory.enabled", false);
+        useOwnInventoryKeepItems = configuration.getBoolean("duel.use-own-inventory.keep-items", false);
+        requiresClearedInventory = configuration.getBoolean("duel.requires-cleared-inventory", true);
         maxDuration = configuration.getInt("duel.match.max-duration", -1);
         endCommandsEnabled = configuration.getBoolean("duel.match.end-commands.enabled", false);
         endCommands = configuration.getStringList("duel.match.end-commands.commands");

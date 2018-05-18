@@ -18,10 +18,15 @@ patches:
   disallow-creative-dueling: false
   disallow-dueling-while-tagged: true
 
-setting:
+duel:
   # Allow players to choose an arena to duel in the Setting GUI.
   allow-arena-selecting: true
-  # Use player's own inventory in a duel. If enabled, kit selecting will be disabled!
+  # Allow players to enable or disable item betting in the Setting GUI.
+  allow-item-betting: true
+  # Allow players to bet money by using the command /duels [player] [bet amount].
+  allow-money-betting: true
+  # Use player's own inventory in a duel.
+  # NOTE: If this option is enabled, Kit Selecting will be disabled in the Settings GUI.
   use-own-inventory:
     enabled: false
     # Prevent players dropping their inventory items on death.
@@ -29,7 +34,6 @@ setting:
   # Force players to have a cleared inventory to send or accept a duel request.
   requires-cleared-inventory: true
 
-duel:
   match:
     # The max duration of a match, in minutes. -1 to set it to infinite!
     max-duration: -1

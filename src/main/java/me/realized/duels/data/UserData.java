@@ -21,7 +21,6 @@ public class UserData implements User {
     @Getter
     @Setter
     private int losses;
-    @Getter
     @Setter
     private boolean requests = true;
     @Getter
@@ -42,6 +41,10 @@ public class UserData implements User {
 
     public void addMatch(final MatchData matchData) {
         matches.add(matchData);
+    }
+
+    public boolean canRequest() {
+        return requests;
     }
 
     @Override

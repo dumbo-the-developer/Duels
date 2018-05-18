@@ -8,6 +8,7 @@ STRINGS:
   LINE: '&b&m---------------------------------------'
 
 ERROR:
+  data-load-failure: '&cCould not load your duel stats. Please contact an administrator.'
   no-permission: '&cNope! You are missing the permission ''%permission%'' to do this.'
   player-not-found: '&c%name% is not online.'
   no-longer-online: '&cThat player is no longer online.'
@@ -28,24 +29,11 @@ ERROR:
 COMMAND:
   duel:
     usage:
-    - 'Sends a duel request to player.'
-    - '/duel [player]'
-    - 'Sends a duel request with specified bet amount.'
-    - '/duel [player] [amount]'
-    - 'Accepts or declines a duel request from player.'
-    - '/duel [accept | deny] [player]'
-    stats:
-      displayed:
-      - '&7Displaying stats of &f%player% &7-'
-      - '&71v1 Wins: &f%wins%'
-      - '&71v1 Losses: &f%losses%'
-      - '&71v1 Requests: &f%requests_enabled%'
-      - '&7Latest 1v1 matches -'
-      match-format: '&a{WINNER} &fvs &c{LOSER} &6[Hover Me!]'
-      hover-message:
-      - '&7Duration: &f{DURATION}'
-      - '&7Time: &f{TIME} ago'
-      - '&7Health: &d&l{HEALTH} ♥'
+    - '/duel [player] - Sends a duel request to player.'
+    - '/duel [player] [amount] - Sends a duel request with given bet.'
+    - '/duel [accept | deny] [player] - Accepts or declines a duel request.'
+    - '/duel stats [player] - Displays your duel stats.'
+    - '/duel toggle - Enable or disable receiving duel requests.'
     request:
       sent:
         sender:
@@ -70,6 +58,21 @@ COMMAND:
       denied:
         sender: '{PREFIX} &7Your duel request to &f%player% &7was denied.'
         receiver: '{PREFIX} &7Denied duel request from &f%player%&7.'
+    stats:
+      displayed:
+      - '&7Displaying stats of &f%player% &7-'
+      - '&71v1 Wins: &f%wins%'
+      - '&71v1 Losses: &f%losses%'
+      - '&71v1 Requests: &f%requests_enabled%'
+      - '&7Latest 1v1 matches -'
+      match-format: '&a{WINNER} &fvs &c{LOSER} &6[Hover Me!]'
+      hover-message:
+      - '&7Duration: &f{DURATION}'
+      - '&7Time: &f{TIME} ago'
+      - '&7Health: &d&l{HEALTH} ♥'
+    toggle:
+      enabled: '{PREFIX} &7Duel requests has been &aenabled&7.'
+      disabled: '{PREFIX} &7Duel requests has been &cenabled&7.'
 
   duels:
     usage:
@@ -90,6 +93,11 @@ COMMAND:
     - '&e/duels playsound [name] &7- Plays the selected sound if exists in config.'
     - '&e/duels reload [weak] &7- Reloads the plugin completely. Append ''weak'' to only reload messages file.'
     - '{LINE}'
+
+  spectate:
+    usage:
+    - 'Spectate a duel.'
+    - '/spectate [player]'
 
   sub-command-usage: '{PREFIX} &e/%command% %usage% &7- %description%'
 

@@ -84,7 +84,7 @@ public class Arena extends BaseButton {
 
     @Override
     public void onClick(final Player player) {
-        final Setting setting = settingCache.get(player);
+        final Setting setting = settingCache.getSafely(player);
         setting.setArena(this);
         setting.openGui(player);
         player.sendMessage(ChatColor.GREEN + "Selected Arena: " + name);

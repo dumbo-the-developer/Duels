@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 public class Setting {
 
     private final DuelsPlugin plugin;
+
     @Getter
     private UUID target;
     @Getter

@@ -4,7 +4,6 @@ import java.util.Objects;
 import java.util.UUID;
 import lombok.Getter;
 import me.realized.duels.arena.Arena;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class Spectator {
@@ -12,15 +11,12 @@ public class Spectator {
     @Getter
     private final UUID owner;
     @Getter
-    private final Location origin;
-    @Getter
     private final String targetName;
     @Getter
     private final Arena arena;
 
     Spectator(final Player owner, final Player target, final Arena arena) {
         this.owner = owner.getUniqueId();
-        this.origin = owner.getLocation().clone();
         this.targetName = target.getName();
         this.arena = arena;
     }

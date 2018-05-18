@@ -8,6 +8,12 @@ public interface User {
 
     String getName();
 
+    int getWins();
+
+    int getLosses();
+
+    boolean canRequest();
+
     void setWins(final int wins);
 
     void setLosses(final int losses);

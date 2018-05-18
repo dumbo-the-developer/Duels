@@ -16,7 +16,7 @@ public class RequestSendButton extends BaseButton {
 
     @Override
     public void onClick(final Player player) {
-        final Setting setting = settingCache.get(player);
+        final Setting setting = settingCache.getSafely(player);
 
         if (setting.getTarget() == null) {
             setting.reset();

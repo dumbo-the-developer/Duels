@@ -6,6 +6,10 @@ public final class CompatUtil {
 
     private CompatUtil() {}
 
+    public static boolean isPre_1_10() {
+        return (Bukkit.getVersion().contains("1.9") || isPre1_9());
+    }
+
     public static boolean isPre1_9() {
         return (Bukkit.getVersion().contains("1.8") || isPre1_8());
     }
