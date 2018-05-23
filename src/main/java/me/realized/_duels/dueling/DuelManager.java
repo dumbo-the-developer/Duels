@@ -1,3 +1,28 @@
+/*
+ * This file is part of Duels, licensed under the MIT License.
+ *
+ * Copyright (c) Realized
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.realized._duels.dueling;
 
 import java.util.Arrays;
@@ -74,7 +99,8 @@ public class DuelManager implements Listener {
     }
 
     public boolean startMatch(Player player, Player target, Request request) {
-        if (config.isPatchesCancelMatchIfMoved() && (target.getLocation().getX() != request.getBase().getX() || target.getLocation().getY() != request.getBase().getY() || target.getLocation().getZ() != request.getBase().getZ())) {
+        if (config.isPatchesCancelMatchIfMoved() && (target.getLocation().getX() != request.getBase().getX() || target.getLocation().getY() != request.getBase().getY()
+            || target.getLocation().getZ() != request.getBase().getZ())) {
             Helper.pm(player, "Errors.match-failed", true, "{REASON}", target.getName() + " moved after sending request.");
             Helper.pm(target, "Errors.match-failed", true, "{REASON}", target.getName() + " moved after sending request.");
             return false;
@@ -173,7 +199,8 @@ public class DuelManager implements Listener {
     public void handleDisable() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.isDead() && handlePlayerRespawn(player)) {
-                instance.logToFile(this, "Player " + player.getUniqueId() + " (" + player.getName() + ") was force-respawned with inventoryData due to plugin disable.", Level.INFO);
+                instance.logToFile(this, "Player " + player.getUniqueId() + " (" + player.getName() + ") was force-respawned with inventoryData due to plugin disable.",
+                    Level.INFO);
             }
         }
     }
@@ -223,7 +250,7 @@ public class DuelManager implements Listener {
         }
     }
 
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void on(PlayerDeathEvent event) {
         final Player dead = event.getEntity();
         final Arena arena = arenaManager.getArena(dead);
@@ -281,11 +308,13 @@ public class DuelManager implements Listener {
             firework.setFireworkMeta(meta);
 
             // Broadcast end
-            Helper.broadcast("Dueling.on-match-end", "{WINNER}", target.getName(), "{LOSER}", dead.getName(), "{HEALTH}", Math.round(target.getHealth()) * 0.5D, "{KIT}", match.getKit());
+            Helper.broadcast("Dueling.on-match-end", "{WINNER}", target.getName(), "{LOSER}", dead.getName(), "{HEALTH}", Math.round(target.getHealth()) * 0.5D, "{KIT}",
+                match.getKit());
 
             // Generate MatchData
             Calendar calendar = new GregorianCalendar();
-            MatchData matchData = new MatchData(target.getName(), dead.getName(), calendar.getTimeInMillis(), (int) match.getDuration(), Math.round(target.getHealth()) * 0.5);
+            MatchData matchData = new MatchData(target.getName(), dead.getName(), calendar.getTimeInMillis(), (int) match.getDuration(),
+                Math.round(target.getHealth()) * 0.5);
             UserData player = dataManager.getUser(dead.getUniqueId(), false);
             UserData opponent = dataManager.getUser(target.getUniqueId(), false);
 
@@ -378,7 +407,7 @@ public class DuelManager implements Listener {
         player.setHealth(0.0D);
     }
 
-    @EventHandler (priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void on(PlayerTeleportEvent event) {
         Player base = event.getPlayer();
         Location from = event.getFrom();
@@ -390,7 +419,8 @@ public class DuelManager implements Listener {
 
         PlayerTeleportEvent.TeleportCause cause = event.getCause();
 
-        if (cause == PlayerTeleportEvent.TeleportCause.COMMAND && config.isPatchesCancelTeleportToPlayersInMatch() && !base.isOp() && !base.hasPermission("duels.admin") && !arenaManager.isInMatch(base)) {
+        if (cause == PlayerTeleportEvent.TeleportCause.COMMAND && config.isPatchesCancelTeleportToPlayersInMatch() && !base.isOp() && !base.hasPermission("duels.admin")
+            && !arenaManager.isInMatch(base)) {
             for (Arena arena : arenaManager.getArenas()) {
                 for (UUID uuid : arena.getPlayers()) {
                     Player player = Bukkit.getPlayer(uuid);
@@ -450,7 +480,8 @@ public class DuelManager implements Listener {
         Player player = event.getPlayer();
         String command = event.getMessage().substring(1).split(" ")[0].toLowerCase();
 
-        if (arenaManager.isInMatch(player) && ((config.isDuelingBlockAllCommands() && !config.getDuelingWhitelistedCommands().contains(command)) || (!config.isDuelingBlockAllCommands() && config.getDuelingDisabledCommands().contains(command)))) {
+        if (arenaManager.isInMatch(player) && ((config.isDuelingBlockAllCommands() && !config.getDuelingWhitelistedCommands().contains(command)) || (
+            !config.isDuelingBlockAllCommands() && config.getDuelingDisabledCommands().contains(command)))) {
             event.setCancelled(true);
             Helper.pm(player, "Errors.blocked-while-in-match.command", true);
         }

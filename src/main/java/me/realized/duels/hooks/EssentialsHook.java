@@ -23,29 +23,46 @@
  * SOFTWARE.
  */
 
-package me.realized._duels.commands.duel.subcommands;
+package me.realized.duels.hooks;
 
-import me.realized._duels.commands.SubCommand;
-import me.realized._duels.data.UserData;
-import me.realized._duels.utilities.Helper;
+import com.earth2me.essentials.Essentials;
+import com.earth2me.essentials.User;
+import me.realized.duels.DuelsPlugin;
+import me.realized.duels.util.hook.PluginHook;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-public class ToggleCommand extends SubCommand {
+public class EssentialsHook extends PluginHook<DuelsPlugin> {
 
-    public ToggleCommand() {
-        super("toggle", "toggle", "duels.toggle", "Toggle your duel requests.", 1);
+    public EssentialsHook(final DuelsPlugin plugin) {
+        super(plugin, "Essentials");
     }
 
-    @Override
-    public void execute(Player sender, String[] args) {
-        UserData data = dataManager.getUser(sender.getUniqueId(), true);
+    public void setUnvanished(final Player player) {
+//        if (!config.isPatchesToggleVanishOnStart()) {
+//            return;
+//        }
 
-        if (data == null) {
-            Helper.pm(sender, "&c&lYour data is improperly loaded. Please try re-logging.", false);
-            return;
+        final Essentials essentials = (Essentials) getPlugin();
+        final User user = essentials.getUser(player);
+
+        if (user != null && user.isVanished()) {
+            user.setVanished(false);
+            user.setVanished(true);
+            user.setVanished(false);
         }
+    }
 
-        data.setRequestEnabled(!data.canRequest());
-        Helper.pm(sender, (data.canRequest() ? "Toggle.enabled" : "Toggle.disabled"), true);
+    public void setBackLocation(final Player player, final Location location) {
+//        if (!config.isPatchesSetBackLocation()) {
+//            return;
+//        }
+
+        final Essentials essentials = (Essentials) getPlugin();
+        final User user = essentials.getUser(player);
+
+        if (user != null) {
+            user.setLastLocation(location);
+        }
     }
 }

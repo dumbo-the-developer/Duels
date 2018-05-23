@@ -1,3 +1,28 @@
+/*
+ * This file is part of Duels, licensed under the MIT License.
+ *
+ * Copyright (c) Realized
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.realized._duels.configuration;
 
 import java.util.ArrayList;
@@ -14,6 +39,7 @@ import org.bukkit.entity.Player;
 
 public class MainConfig extends Config {
 
+    private final Map<String, CustomSound> sounds = new HashMap<>();
     private boolean patchesToggleVanishOnStart;
     private boolean patchesSetBackLocation;
     private boolean patchesCancelTeleportToPlayersInMatch;
@@ -26,20 +52,16 @@ public class MainConfig extends Config {
     private boolean patchesCancelMatchIfMoved;
     private boolean patchesDisallowCreativeDueling;
     private boolean patchesDisallowDuelingWhileTagged;
-
     private boolean countdownEnabled;
     private List<String> countdownMessages;
     private boolean countdownBlockProjectile;
     private boolean countdownBlockPvp;
-
     private int guiKitSelectorRows;
     private int guiArenaSelectorRows;
     private String guiAvailableArenaDisplayname;
     private String guiInUseArenaDisplayname;
-
     private boolean spectatingRequiresClearedInventory;
     private List<String> spectatingWhitelistedCommands;
-
     private boolean duelingMatchMaxDurationEnabled;
     private int duelingMatchMaxDurationDuration;
     private boolean duelingMatchEndCommandsEnabled;
@@ -54,18 +76,13 @@ public class MainConfig extends Config {
     private boolean duelingBlockAllCommands;
     private List<String> duelingWhitelistedCommands;
     private List<String> duelingDisabledCommands;
-
     private boolean duelZoneEnabled;
     private List<String> duelZoneRegions;
-
     private boolean statsDisplayMatches;
     private int statsAmountOfMatches;
-
     private boolean soupEnabled;
     private String soupArenasStartingWith;
     private double soupHeartsToRegen;
-
-    private final Map<String, CustomSound> sounds = new HashMap<>();
 
     public MainConfig(Core instance) {
         super("config.yml", instance);
@@ -100,12 +117,14 @@ public class MainConfig extends Config {
         this.guiInUseArenaDisplayname = base.getString("GUI.in-use-arena-displayname", "&9{NAME}: &cIn Use");
 
         this.spectatingRequiresClearedInventory = base.getBoolean("Spectating.requires-cleared-inventory", false);
-        this.spectatingWhitelistedCommands = base.isList("Spectating.whitelisted-commands") ? base.getStringList("Spectating.whitelisted-commands") : new ArrayList<String>();
+        this.spectatingWhitelistedCommands =
+            base.isList("Spectating.whitelisted-commands") ? base.getStringList("Spectating.whitelisted-commands") : new ArrayList<String>();
 
         this.duelingMatchMaxDurationEnabled = base.getBoolean("Dueling.match-max-duration.enabled", true);
         this.duelingMatchMaxDurationDuration = base.getInt("Dueling.match-max-duration.duration", 600);
         this.duelingMatchEndCommandsEnabled = base.getBoolean("Dueling.match-end-commands.enabled", false);
-        this.duelingMatchEndCommandsCommands = base.isList("Dueling.match-end-commands.commands") ? base.getStringList("Dueling.match-end-commands.commands") : new ArrayList<String>();
+        this.duelingMatchEndCommandsCommands =
+            base.isList("Dueling.match-end-commands.commands") ? base.getStringList("Dueling.match-end-commands.commands") : new ArrayList<String>();
         this.duelingAllowArenaSelecting = base.getBoolean("Dueling.allow-arena-selecting", true);
         this.duelingUseOwnInventory = base.getBoolean("Dueling.use-own-inventory", false);
         this.duelingRequiresClearedInventory = base.getBoolean("Dueling.requires-cleared-inventory", true);

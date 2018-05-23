@@ -1,3 +1,28 @@
+/*
+ * This file is part of Duels, licensed under the MIT License.
+ *
+ * Copyright (c) Realized
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.realized.duels.util.gui;
 
 import java.util.ArrayList;
@@ -11,25 +36,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 
-public class MultiPageGui extends AbstractGui {
-
-    private class Page {
-
-        private Page previous, next;
-        private final Inventory inventory;
-
-        private Page(final Inventory inventory) {
-            this.inventory = inventory;
-        }
-    }
+public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
 
     private final String title;
     private final int size, prevPageSlot, nextPageSlot;
     private final Collection<? extends Button> buttons;
     private final List<Page> pages = new ArrayList<>();
 
-    public MultiPageGui(final String title, final int rows, final Collection<? extends Button> buttons) {
+    public MultiPageGui(final P plugin, final String title, final int rows, final Collection<? extends Button> buttons) {
+        super(plugin);
         if (title == null || title.isEmpty()) {
             throw new IllegalArgumentException("title cannot be null or empty");
         }
@@ -79,7 +96,7 @@ public class MultiPageGui extends AbstractGui {
                 final Page prev = page;
                 page = new Page(
                     InventoryBuilder.of(title + " (" + pageNum + "/" + pages + ")", size)
-                    .fillRange(prevPageSlot, nextPageSlot + 1, ItemBuilder.of(Material.STAINED_GLASS_PANE).name(" ").build()).build()
+                        .fillRange(prevPageSlot, nextPageSlot + 1, ItemBuilder.of(Material.STAINED_GLASS_PANE).name(" ").build()).build()
                 );
 
                 if (prev != null) {
@@ -153,6 +170,16 @@ public class MultiPageGui extends AbstractGui {
             }
 
             cached.get().onClick(player);
+        }
+    }
+
+    private class Page {
+
+        private final Inventory inventory;
+        private Page previous, next;
+
+        private Page(final Inventory inventory) {
+            this.inventory = inventory;
         }
     }
 }

@@ -1,3 +1,28 @@
+/*
+ * This file is part of Duels, licensed under the MIT License.
+ *
+ * Copyright (c) Realized
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.realized.duels.duel;
 
 import java.util.GregorianCalendar;
@@ -17,6 +42,7 @@ import me.realized.duels.config.Lang;
 import me.realized.duels.data.MatchData;
 import me.realized.duels.data.UserData;
 import me.realized.duels.data.UserDataManager;
+import me.realized.duels.hooks.VaultHook;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.kit.KitManager;
 import me.realized.duels.spectate.SpectateManager;
@@ -65,13 +91,20 @@ public class DuelManager implements Loadable, Listener {
     }
 
     @Override
-    public void handleLoad() {
-
-    }
+    public void handleLoad() {}
 
     @Override
     public void handleUnload() {
         Bukkit.getOnlinePlayers().stream().filter(Player::isDead).forEach(this::forceRespawn);
+    }
+
+    private void forceRespawn(final Player player) {
+        playerDataCache.remove(player).ifPresent(data -> {
+            player.spigot().respawn();
+            player.teleport(data.getLocation());
+            PlayerUtil.reset(player);
+            data.restore(player);
+        });
     }
 
     // todo: Make sure to check for everything again before actually starting the match
@@ -79,9 +112,30 @@ public class DuelManager implements Loadable, Listener {
         final Arena arena = setting.getArena() != null ? setting.getArena() : arenaManager.randomArena();
 
         if (arena == null || !arena.isAvailable()) {
-            first.sendMessage("The arena is currently unavailable, please try again later.");
-            second.sendMessage("The arena is currently unavailable, please try again later.");
+            lang.sendMessage(first, "DUEL.arena-in-use");
+            lang.sendMessage(second, "DUEL.arena-in-use");
+
+            if (items != null) {
+                items.get(first.getUniqueId()).forEach(item -> first.getInventory().addItem(item));
+                items.get(second.getUniqueId()).forEach(item -> second.getInventory().addItem(item));
+            }
+
             return;
+        }
+
+        final int bet = setting.getBet();
+        final Optional<VaultHook> foundVHook = plugin.getHookManager().getHook(VaultHook.class);
+        final VaultHook vaultHook;
+
+        if (bet > 0 && foundVHook.isPresent() && (vaultHook = foundVHook.get()).hasEconomy()) {
+            if (!vaultHook.getEconomy().has(first, bet) || !vaultHook.getEconomy().has(second, bet)) {
+                lang.sendMessage(first, "DUEL.not-enough-money");
+                lang.sendMessage(second, "DUEL.not-enough-money");
+                return;
+            }
+
+            vaultHook.getEconomy().withdrawPlayer(first, bet);
+            vaultHook.getEconomy().withdrawPlayer(second, bet);
         }
 
         final Kit kit = setting.getKit() != null ? setting.getKit() : kitManager.randomKit();
@@ -109,8 +163,9 @@ public class DuelManager implements Loadable, Listener {
         }
 
         player.teleport(location);
-        arena.addPlayer(player);
+        arena.add(player);
     }
+
 
     @EventHandler
     public void on(final PlayerDeathEvent event) {
@@ -131,55 +186,42 @@ public class DuelManager implements Loadable, Listener {
         }
 
         final Arena arena = result.get();
-        arena.removePlayer(player);
+        arena.remove(player);
         plugin.doSyncAfter(() -> {
-            if (arena.getPlayers().isEmpty()) {
+            if (arena.size() == 0) {
                 Bukkit.broadcastMessage("Tie game");
                 arena.setUsed(false);
                 return;
             }
 
-            if (arena.getPlayers().size() == 1) {
-                final Player winner = Bukkit.getPlayer(arena.getFirst());
-                final Match match = arena.getCurrent();
-                final long duration = System.currentTimeMillis() - match.getCreation();
-                final long time = new GregorianCalendar().getTimeInMillis();
-                final double health = Math.ceil(winner.getHealth()) * 0.5;
-                final MatchData matchData = new MatchData(winner.getName(), player.getName(), time, duration, health);
-                Optional<UserData> cached = userDataManager.get(player);
-                cached.ifPresent(user -> {
-                    user.addLoss();
-                    user.addMatch(matchData);
-                });
-                cached = userDataManager.get(winner);
-                cached.ifPresent(user -> {
-                    user.addWin();
-                    user.addMatch(matchData);
-                });
+            final Player winner = Bukkit.getPlayer(arena.getFirst());
+            final Match match = arena.getCurrent();
+            final long duration = System.currentTimeMillis() - match.getCreation();
+            final long time = new GregorianCalendar().getTimeInMillis();
+            final double health = Math.ceil(winner.getHealth()) * 0.5;
+            final MatchData matchData = new MatchData(winner.getName(), player.getName(), time, duration, health);
+            Optional<UserData> cached = userDataManager.get(player);
+            cached.ifPresent(user -> {
+                user.addLoss();
+                user.addMatch(matchData);
+            });
+            cached = userDataManager.get(winner);
+            cached.ifPresent(user -> {
+                user.addWin();
+                user.addMatch(matchData);
+            });
 
-                plugin.doSyncAfter(() -> {
-                    // check if player is online before adding bet items. If not, add to PlayerData
-                    // Add money without teleport delay.
-                    Bukkit.broadcastMessage("Winner = " + winner.getName());
-                    arena.setUsed(false);
-                }, config.getTeleportDelay() * 20L);
-            }
+            plugin.doSyncAfter(() -> {
+                // check if player is online before adding bet items. If not, add to PlayerData
+                // Add money without teleport delay.
+                Bukkit.broadcastMessage("Winner = " + winner.getName());
+                arena.setUsed(false);
+            }, config.getTeleportDelay() * 20L);
         }, 1L);
     }
 
-    private void forceRespawn(final Player player) {
-        final Optional<PlayerData> cached = playerDataCache.remove(player);
 
-        if (cached.isPresent()) {
-            final PlayerData data = cached.get();
-            player.spigot().respawn();
-            player.teleport(data.getLocation());
-            PlayerUtil.reset(player);
-            data.restore(player);
-        }
-    }
-
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void on(final PlayerRespawnEvent event) {
         final Player player = event.getPlayer();
         final Optional<PlayerData> cached = playerDataCache.remove(player);
@@ -195,7 +237,7 @@ public class DuelManager implements Loadable, Listener {
         }
     }
 
-    @EventHandler (ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true)
     public void on(final EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Player)) {
             return;
@@ -210,7 +252,7 @@ public class DuelManager implements Loadable, Listener {
 
         final Arena arena = result.get();
 
-        if (arena.getPlayers().size() > 1) {
+        if (arena.size() > 1) {
             return;
         }
 
@@ -218,7 +260,7 @@ public class DuelManager implements Loadable, Listener {
     }
 
 
-    @EventHandler (ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true)
     public void on(final EntityDamageByEntityEvent event) {
         final Player player;
 
@@ -252,7 +294,7 @@ public class DuelManager implements Loadable, Listener {
     }
 
 
-    @EventHandler (ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true)
     public void on(final PlayerDropItemEvent event) {
         if (!config.isPreventItemDrop() || !arenaManager.isInMatch(event.getPlayer())) {
             return;
@@ -263,7 +305,7 @@ public class DuelManager implements Loadable, Listener {
     }
 
 
-    @EventHandler (ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true)
     public void on(final PlayerPickupItemEvent event) {
         if (!config.isPreventItemPickup() || !arenaManager.isInMatch(event.getPlayer())) {
             return;
@@ -274,11 +316,12 @@ public class DuelManager implements Loadable, Listener {
     }
 
 
-    @EventHandler (ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true)
     public void on(final PlayerCommandPreprocessEvent event) {
         final String command = event.getMessage().substring(1).split(" ")[0].toLowerCase();
 
-        if (!arenaManager.isInMatch(event.getPlayer()) || (config.isBlockAllCommands() ? config.getWhitelistedCommands().contains(command) : !config.getBlacklistedCommands().contains(command))) {
+        if (!arenaManager.isInMatch(event.getPlayer()) || (config.isBlockAllCommands() ? config.getWhitelistedCommands().contains(command)
+            : !config.getBlacklistedCommands().contains(command))) {
             return;
         }
 
@@ -287,7 +330,7 @@ public class DuelManager implements Loadable, Listener {
     }
 
 
-    @EventHandler (priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void on(PlayerTeleportEvent event) {
         final Player player = event.getPlayer();
         final Location to = event.getTo();

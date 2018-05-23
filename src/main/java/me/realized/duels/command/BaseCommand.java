@@ -1,7 +1,33 @@
+/*
+ * This file is part of Duels, licensed under the MIT License.
+ *
+ * Copyright (c) Realized
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.realized.duels.command;
 
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManager;
+import me.realized.duels.betting.BettingManager;
 import me.realized.duels.cache.SettingCache;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
@@ -24,11 +50,13 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
     protected final KitManager kitManager;
     protected final SettingCache settingCache;
     protected final SpectateManager spectateManager;
+    protected final BettingManager bettingManager;
     protected final DuelManager duelManager;
     protected final RequestManager requestManager;
     protected final HookManager hookManager;
 
-    public BaseCommand(final DuelsPlugin plugin, final String name, final String usage, final String description, final String permission, final int length, final boolean playerOnly,
+    public BaseCommand(final DuelsPlugin plugin, final String name, final String usage, final String description, final String permission, final int length,
+        final boolean playerOnly,
         final String... aliases) {
         super(plugin, name, usage, description, permission, length, playerOnly, aliases);
         this.plugin = plugin;
@@ -39,6 +67,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
         this.kitManager = plugin.getKitManager();
         this.settingCache = plugin.getSettingCache();
         this.spectateManager = plugin.getSpectateManager();
+        this.bettingManager = plugin.getBettingManager();
         this.duelManager = plugin.getDuelManager();
         this.requestManager = plugin.getRequestManager();
         this.hookManager = plugin.getHookManager();

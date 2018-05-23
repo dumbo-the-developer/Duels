@@ -1,3 +1,28 @@
+/*
+ * This file is part of Duels, licensed under the MIT License.
+ *
+ * Copyright (c) Realized
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.realized.duels.util.gui;
 
 import com.google.common.collect.HashMultimap;
@@ -9,24 +34,25 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class GuiListener implements Listener {
+public class GuiListener<P extends JavaPlugin> implements Listener {
 
-    private final Multimap<UUID, AbstractGui> privateGuis = HashMultimap.create();
-    private final List<AbstractGui> publicGuis = new ArrayList<>();
+    private final Multimap<UUID, AbstractGui<P>> privateGuis = HashMultimap.create();
+    private final List<AbstractGui<P>> publicGuis = new ArrayList<>();
 
-    public GuiListener(final JavaPlugin plugin) {
+    public GuiListener(final P plugin) {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
-    public void addGui(final AbstractGui gui) {
+    public void addGui(final AbstractGui<P> gui) {
         publicGuis.add(gui);
     }
 
-    public <T extends AbstractGui> T addGui(final Player player, final T gui) {
+    public <T extends AbstractGui<P>> T addGui(final Player player, final T gui) {
         privateGuis.put(player.getUniqueId(), gui);
         return gui;
     }
@@ -66,6 +92,19 @@ public class GuiListener implements Listener {
         for (final AbstractGui gui : get(player)) {
             if (gui.isPart(inventory)) {
                 gui.on(player, event.getRawSlots(), event);
+                break;
+            }
+        }
+    }
+
+    @EventHandler
+    public void on(final InventoryCloseEvent event) {
+        final Player player = (Player) event.getPlayer();
+        final Inventory inventory = event.getInventory();
+
+        for (final AbstractGui gui : get(player)) {
+            if (gui.isPart(inventory)) {
+                gui.on(player, event.getInventory(), event);
                 break;
             }
         }

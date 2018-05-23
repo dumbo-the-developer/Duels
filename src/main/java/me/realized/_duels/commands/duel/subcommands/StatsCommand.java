@@ -1,3 +1,28 @@
+/*
+ * This file is part of Duels, licensed under the MIT License.
+ *
+ * Copyright (c) Realized
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.realized._duels.commands.duel.subcommands;
 
 import java.util.Calendar;
@@ -49,7 +74,7 @@ public class StatsCommand extends SubCommand {
         target.refreshMatches();
         displayStats(sender, target);
     }
-    
+
     private void displayStats(Player base, UserData user) {
         Calendar calendar = new GregorianCalendar();
         String wins = String.valueOf(user.get(UserData.StatsType.WINS));
@@ -62,8 +87,11 @@ public class StatsCommand extends SubCommand {
                 MatchData match = user.getMatches().get(i);
                 String duration = Helper.toHumanReadableTime(match.getDuration());
                 String timeSince = Helper.toHumanReadableTime(calendar.getTimeInMillis() - match.getTime());
-                BaseComponent[] text = TextComponent.fromLegacyText(Helper.replaceWithArgs(Helper.color(messages.getString("Stats.match-format")), "{WINNER}", match.getWinner(), "{LOSER}", match.getLoser()));
-                BaseComponent[] hover = TextComponent.fromLegacyText(Helper.replaceWithArgs(Helper.color(Helper.join(messages.getList("Stats.match-hover"), "\n")), "{DURATION}", duration, "{TIME}", timeSince, "{HEALTH}", match.getHealth()));
+                BaseComponent[] text = TextComponent.fromLegacyText(
+                    Helper.replaceWithArgs(Helper.color(messages.getString("Stats.match-format")), "{WINNER}", match.getWinner(), "{LOSER}", match.getLoser()));
+                BaseComponent[] hover = TextComponent.fromLegacyText(Helper
+                    .replaceWithArgs(Helper.color(Helper.join(messages.getList("Stats.match-hover"), "\n")), "{DURATION}", duration, "{TIME}", timeSince, "{HEALTH}",
+                        match.getHealth()));
 
                 for (BaseComponent line : text) {
                     line.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover));

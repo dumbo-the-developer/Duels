@@ -1,3 +1,28 @@
+/*
+ * This file is part of Duels, licensed under the MIT License.
+ *
+ * Copyright (c) Realized
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.realized.duels.gui.betting;
 
 import java.util.ArrayList;
@@ -23,53 +48,24 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class BettingGui extends AbstractGui {
-
-    private class Section {
-
-        private final int start, end, height;
-
-        Section(final int start, final int end, final int height) {
-            this.start = start;
-            this.end = end;
-            this.height = height;
-        }
-
-        private boolean isPart(final int slot) {
-            for (int y = 0; y < height; y++) {
-                for (int x = start; x < end; x++) {
-                    if (x + y * 9 == slot) {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        private List<ItemStack> collect() {
-            final List<ItemStack> result = new ArrayList<>();
-            Slots.run(start, end, height, slot -> result.add(inventory.getItem(slot)));
-            return result;
-        }
-    }
+public class BettingGui extends AbstractGui<DuelsPlugin> {
 
     private final Section[] sections = {
         new Section(9, 13, 4),
         new Section(14, 18, 4)
     };
-
     private final DuelManager duelManager;
     private final Setting setting;
     private final Inventory inventory;
     private final UUID first, second;
     private boolean firstReady, secondReady;
-
     public BettingGui(final DuelsPlugin plugin, final Setting setting, final Player first, final Player second) {
+        super(plugin);
         this.duelManager = plugin.getDuelManager();
         this.setting = setting;
         this.inventory = InventoryBuilder.of("Winner Takes All!", 54).build();
@@ -168,7 +164,7 @@ public class BettingGui extends AbstractGui {
 
         event.setCancelled(true);
 
-        final Optional<Button> cached = get(inventory, event.getSlot());
+        final Optional<Button<DuelsPlugin>> cached = get(inventory, event.getSlot());
 
         if (!cached.isPresent()) {
             return;
@@ -201,8 +197,42 @@ public class BettingGui extends AbstractGui {
             }
         }
 
-        if (in && (isReady(player)|| out || outSec)) {
+        if (in && (isReady(player) || out || outSec)) {
             event.setCancelled(true);
+        }
+    }
+
+    @Override
+    public void on(final Player player, final Inventory inventory, final InventoryCloseEvent event) {
+
+    }
+
+    private class Section {
+
+        private final int start, end, height;
+
+        Section(final int start, final int end, final int height) {
+            this.start = start;
+            this.end = end;
+            this.height = height;
+        }
+
+        private boolean isPart(final int slot) {
+            for (int y = 0; y < height; y++) {
+                for (int x = start; x < end; x++) {
+                    if (x + y * 9 == slot) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private List<ItemStack> collect() {
+            final List<ItemStack> result = new ArrayList<>();
+            Slots.run(start, end, height, slot -> result.add(inventory.getItem(slot)));
+            return result;
         }
     }
 }

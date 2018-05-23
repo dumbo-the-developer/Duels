@@ -1,3 +1,28 @@
+/*
+ * This file is part of Duels, licensed under the MIT License.
+ *
+ * Copyright (c) Realized
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.realized._duels.dueling;
 
 import java.util.ArrayList;
@@ -32,7 +57,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class SpectatorManager implements Listener {
-    
+
     private final MainConfig config;
     private final EssentialsHook hook;
     private final PlayerManager playerManager;
@@ -176,7 +201,7 @@ public class SpectatorManager implements Listener {
     }
 
     // Cancel any command except whitelisted commands while in spectator mode.
-    @EventHandler (priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void on(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
 
@@ -186,7 +211,8 @@ public class SpectatorManager implements Listener {
 
         String command = event.getMessage().substring(1).split(" ")[0].toLowerCase();
 
-        if (command.isEmpty() || command.equalsIgnoreCase("spectate") || command.equalsIgnoreCase("spec") || config.getSpectatingWhitelistedCommands().contains(command)) {
+        if (command.isEmpty() || command.equalsIgnoreCase("spectate") || command.equalsIgnoreCase("spec") || config.getSpectatingWhitelistedCommands()
+            .contains(command)) {
             return;
         }
 
@@ -195,7 +221,7 @@ public class SpectatorManager implements Listener {
     }
 
     // Cancel any type of teleportation in spectator mode.
-    @EventHandler (priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void on(PlayerTeleportEvent event) {
         Player player = event.getPlayer();
 
@@ -208,7 +234,7 @@ public class SpectatorManager implements Listener {
     }
 
     // Cancel dropping item while spectating.
-    @EventHandler (ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true)
     public void on(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
 
@@ -221,7 +247,7 @@ public class SpectatorManager implements Listener {
     }
 
     // Cancel pickup while spectating.
-    @EventHandler (ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true)
     public void on(PlayerPickupItemEvent event) {
         Player player = event.getPlayer();
 
@@ -268,7 +294,7 @@ public class SpectatorManager implements Listener {
         Player base = event.getPlayer();
         Spectator spectator = getByPlayer(base);
 
-       if (spectator == null) {
+        if (spectator == null) {
             return;
         }
 
@@ -281,7 +307,7 @@ public class SpectatorManager implements Listener {
     }
 
     // Listen to any type of inventory interaction
-    @EventHandler (ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true)
     public void on(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
 
@@ -303,7 +329,7 @@ public class SpectatorManager implements Listener {
         event.setCancelled(true);
     }
 
-    @EventHandler (ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true)
     public void on(EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Player) {
             Player damager = (Player) event.getDamager();

@@ -1,3 +1,28 @@
+/*
+ * This file is part of Duels, licensed under the MIT License.
+ *
+ * Copyright (c) Realized
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.realized._duels.arena;
 
 import com.google.gson.reflect.TypeToken;
@@ -334,7 +359,7 @@ public class ArenaManager implements Listener, Reloadable {
         List<Arena> available = new ArrayList<>();
 
         for (Arena arena : arenas) {
-            if (!arena.isDisabled()  && arena.isValid() && !arena.isUsed()) {
+            if (!arena.isDisabled() && arena.isValid() && !arena.isUsed()) {
                 available.add(arena);
             }
         }
@@ -399,7 +424,7 @@ public class ArenaManager implements Listener, Reloadable {
         return gui;
     }
 
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void on(ProjectileLaunchEvent event) {
         if (event.isCancelled() || !(event.getEntity().getShooter() instanceof Player) || !config.isCountdownBlockProjectile()) {
             return;
@@ -418,7 +443,7 @@ public class ArenaManager implements Listener, Reloadable {
         }
     }
 
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void on(EntityDamageByEntityEvent event) {
         if (!(event.getEntity() instanceof Player && event.getDamager() instanceof Player) || !config.isCountdownBlockPvp()) {
             return;

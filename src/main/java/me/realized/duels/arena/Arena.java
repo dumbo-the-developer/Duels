@@ -1,3 +1,28 @@
+/*
+ * This file is part of Duels, licensed under the MIT License.
+ *
+ * Copyright (c) Realized
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.realized.duels.arena;
 
 import java.util.HashMap;
@@ -25,9 +50,9 @@ public class Arena extends BaseButton {
     @Getter
     private final String name;
     @Getter
-    private Map<Integer, Location> positions = new HashMap<>();
-    @Getter
     private final Set<UUID> players = new HashSet<>();
+    @Getter
+    private Map<Integer, Location> positions = new HashMap<>();
     @Getter
     @Setter
     private boolean disabled;
@@ -45,30 +70,6 @@ public class Arena extends BaseButton {
         return !disabled && !used && positions.get(1) != null && positions.get(2) != null;
     }
 
-    public boolean has(final UUID uuid) {
-        return players.contains(uuid);
-    }
-
-    public boolean hasPlayer(final Player player) {
-        return has(player.getUniqueId());
-    }
-
-    public void addPlayer(final Player player) {
-        players.add(player.getUniqueId());
-    }
-
-    public void removePlayer(final Player player) {
-        players.remove(player.getUniqueId());
-    }
-
-    public UUID getFirst() {
-        return players.iterator().next();
-    }
-
-    public void setPosition(final int pos, final Location location) {
-        positions.put(pos, location);
-    }
-
     public void setUsed(final boolean used) {
         this.used = used;
 
@@ -76,6 +77,34 @@ public class Arena extends BaseButton {
             this.players.clear();
             this.current = null;
         }
+    }
+
+    public void setPosition(final int pos, final Location location) {
+        positions.put(pos, location);
+    }
+
+    public boolean has(final UUID uuid) {
+        return players.contains(uuid);
+    }
+
+    public boolean has(final Player player) {
+        return has(player.getUniqueId());
+    }
+
+    public void add(final Player player) {
+        players.add(player.getUniqueId());
+    }
+
+    public void remove(final Player player) {
+        players.remove(player.getUniqueId());
+    }
+
+    public int size() {
+        return players.size();
+    }
+
+    public UUID getFirst() {
+        return players.iterator().next();
     }
 
     public void setMatch(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet) {

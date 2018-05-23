@@ -1,3 +1,28 @@
+/*
+ * This file is part of Duels, licensed under the MIT License.
+ *
+ * Copyright (c) Realized
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package me.realized._duels.utilities.inventory;
 
 import java.util.ArrayList;
@@ -123,6 +148,82 @@ public class JSONItem {
         }
     }
 
+    public static JSONItem fromItemStack(ItemStack item) {
+        if (item == null) {
+            return null;
+        }
+
+        JSONItem result = new JSONItem(item);
+
+        if (!item.getEnchantments().isEmpty()) {
+            for (Map.Entry<Enchantment, Integer> entry : item.getEnchantments().entrySet()) {
+                result.addEnchantment(entry.getKey().getName(), entry.getValue());
+            }
+        }
+
+        if (item.hasItemMeta()) {
+            ItemMeta meta = item.getItemMeta();
+
+            if (meta.hasDisplayName()) {
+                result.setDisplayName(meta.getDisplayName());
+            }
+
+            if (meta.hasLore()) {
+                result.setLore(meta.getLore());
+            }
+
+            if (!Helper.isPre1_8() && !meta.getItemFlags().isEmpty()) {
+                for (ItemFlag flag : meta.getItemFlags()) {
+                    result.addFlag(flag.name());
+                }
+            }
+
+            if (item.getType() == Material.SKULL_ITEM && item.getDurability() == 3) {
+                SkullMeta skullMeta = (SkullMeta) item.getItemMeta();
+
+                if (skullMeta.hasOwner()) {
+                    result.setOwner(skullMeta.getOwner());
+                }
+            }
+
+            if (item.getType() == Material.POTION) {
+                PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
+
+                if (potionMeta.hasCustomEffects()) {
+                    for (PotionEffect effect : potionMeta.getCustomEffects()) {
+                        result.addEffect(effect.getType().getName(), effect.getDuration() + "-" + effect.getAmplifier());
+                    }
+                }
+            }
+
+            if (item.getType() == Material.WRITTEN_BOOK) {
+                BookMeta bookMeta = (BookMeta) item.getItemMeta();
+
+                if (bookMeta.hasAuthor()) {
+                    result.setAuthor(bookMeta.getAuthor());
+                }
+
+                if (bookMeta.hasTitle()) {
+                    result.setTitle(bookMeta.getTitle());
+                }
+
+                if (bookMeta.hasPages()) {
+                    result.setContents(bookMeta.getPages());
+                }
+            }
+
+            if (item.getType().name().contains("LEATHER_")) {
+                LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) item.getItemMeta();
+
+                if (DyeColor.getByColor(leatherArmorMeta.getColor()) != null) {
+                    result.setColor(DyeColor.getByColor(leatherArmorMeta.getColor()).name());
+                }
+            }
+        }
+
+        return result;
+    }
+
     private void addEnchantment(String type, int level) {
         if (type == null) {
             return;
@@ -201,7 +302,8 @@ public class JSONItem {
             List<String> itemData = Arrays.asList(this.itemData.split("-"));
 
             if (material.contains("POTION")) {
-                Potions potion = new Potions(Potions.PotionType.valueOf(itemData.get(0)), itemData.contains("strong"), itemData.contains("extended"), itemData.contains("linger"), itemData.contains("splash"));
+                Potions potion = new Potions(Potions.PotionType.valueOf(itemData.get(0)), itemData.contains("strong"), itemData.contains("extended"),
+                    itemData.contains("linger"), itemData.contains("splash"));
                 item = potion.toItemStack(amount);
             } else if (material.equals("MONSTER_EGG")) {
                 SpawnEggs spawnEgg1_9 = new SpawnEggs(EntityType.valueOf(itemData.get(0)));
@@ -285,81 +387,5 @@ public class JSONItem {
         }
 
         return item;
-    }
-
-    public static JSONItem fromItemStack(ItemStack item) {
-        if (item == null) {
-            return null;
-        }
-
-        JSONItem result = new JSONItem(item);
-
-        if (!item.getEnchantments().isEmpty()) {
-            for (Map.Entry<Enchantment, Integer> entry : item.getEnchantments().entrySet()) {
-                result.addEnchantment(entry.getKey().getName(), entry.getValue());
-            }
-        }
-
-        if (item.hasItemMeta()) {
-            ItemMeta meta = item.getItemMeta();
-
-            if (meta.hasDisplayName()) {
-                result.setDisplayName(meta.getDisplayName());
-            }
-
-            if (meta.hasLore()) {
-                result.setLore(meta.getLore());
-            }
-
-            if (!Helper.isPre1_8() && !meta.getItemFlags().isEmpty()) {
-                for (ItemFlag flag : meta.getItemFlags()) {
-                    result.addFlag(flag.name());
-                }
-            }
-
-            if (item.getType() == Material.SKULL_ITEM && item.getDurability() == 3) {
-                SkullMeta skullMeta = (SkullMeta) item.getItemMeta();
-
-                if (skullMeta.hasOwner()) {
-                    result.setOwner(skullMeta.getOwner());
-                }
-            }
-
-            if (item.getType() == Material.POTION) {
-                PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-
-                if (potionMeta.hasCustomEffects()) {
-                    for (PotionEffect effect : potionMeta.getCustomEffects()) {
-                        result.addEffect(effect.getType().getName(), effect.getDuration() + "-" + effect.getAmplifier());
-                    }
-                }
-            }
-
-            if (item.getType() == Material.WRITTEN_BOOK) {
-                BookMeta bookMeta = (BookMeta) item.getItemMeta();
-
-                if (bookMeta.hasAuthor()) {
-                    result.setAuthor(bookMeta.getAuthor());
-                }
-
-                if (bookMeta.hasTitle()) {
-                    result.setTitle(bookMeta.getTitle());
-                }
-
-                if (bookMeta.hasPages()) {
-                    result.setContents(bookMeta.getPages());
-                }
-            }
-
-            if (item.getType().name().contains("LEATHER_")) {
-                LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) item.getItemMeta();
-
-                if (DyeColor.getByColor(leatherArmorMeta.getColor()) != null) {
-                    result.setColor(DyeColor.getByColor(leatherArmorMeta.getColor()).name());
-                }
-            }
-        }
-
-        return result;
     }
 }

@@ -101,7 +101,14 @@ COMMAND:
 
   sub-command-usage: '{PREFIX} &e/%command% %usage% &7- %description%'
 
-SETTING:
+
+DUEL:
+  prevent-item-drop: '&cYou cannot drop items while in a duel.'
+  prevent-item-pickup: '&cYou cannot pick up items while in a duel.'
+  prevent-command: '&cYou cannot use ''%command%'' while in a duel.'
+  prevent-teleportation: '&cYou cannot teleport while in a duel.'
+  arena-in-use: '&cThat arena is already in use. Please select a different arena.'
+  not-enough-money: '&cCould not start the match: Yours or your opponent''s balance lacks $%bet%.'
 
 
 SPECTATE:
@@ -112,10 +119,3 @@ SPECTATE:
   prevent-command: '&cYou cannot use ''%command%'' while in spectator mode.'
   prevent-teleportation: '&cYou cannot teleport while in spectator mode.'
   prevent-attack: '&cYou cannot do this while in spectator mode.'
-
-
-DUEL:
-  prevent-item-drop: '&cYou cannot drop items while in a duel.'
-  prevent-item-pickup: '&cYou cannot pick up items while in a duel.'
-  prevent-command: '&cYou cannot use ''%command%'' while in a duel.'
-  prevent-teleportation: '&cYou cannot teleport while in a duel.'
