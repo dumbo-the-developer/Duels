@@ -37,7 +37,6 @@ import lombok.Getter;
 import me.realized.duels.api.Duels;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.betting.BettingManager;
-import me.realized.duels.cache.PlayerDataCache;
 import me.realized.duels.cache.SettingCache;
 import me.realized.duels.command.commands.SpectateCommand;
 import me.realized.duels.command.commands.duel.DuelCommand;
@@ -87,8 +86,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private SettingCache settingCache;
     @Getter
-    private PlayerDataCache playerDataCache;
-    @Getter
     private SpectateManager spectateManager;
     @Getter
     private BettingManager bettingManager;
@@ -107,11 +104,10 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(configuration = new Config(this));
         loadables.add(lang = new Lang(this));
         loadables.add(userManager = new UserDataManager(this));
-        guiListener = new GuiListener<>(this);
+        loadables.add(guiListener = new GuiListener<>(this));
         loadables.add(arenaManager = new ArenaManager(this));
         loadables.add(kitManager = new KitManager(this));
         loadables.add(settingCache = new SettingCache(this));
-        loadables.add(playerDataCache = new PlayerDataCache());
         loadables.add(spectateManager = new SpectateManager(this));
         loadables.add(bettingManager = new BettingManager(this));
         loadables.add(duelManager = new DuelManager(this));

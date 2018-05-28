@@ -25,11 +25,13 @@
 
 package me.realized.duels.arena;
 
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
@@ -50,14 +52,11 @@ public class Arena extends BaseButton {
     @Getter
     private final String name;
     @Getter
-    private final Set<UUID> players = new HashSet<>();
-    @Getter
     private Map<Integer, Location> positions = new HashMap<>();
     @Getter
     @Setter
     private boolean disabled;
-    @Getter
-    private boolean used;
+
     @Getter
     private Match current;
 
@@ -67,48 +66,63 @@ public class Arena extends BaseButton {
     }
 
     public boolean isAvailable() {
-        return !disabled && !used && positions.get(1) != null && positions.get(2) != null;
+        return !disabled && !isUsed() && positions.get(1) != null && positions.get(2) != null;
     }
 
-    public void setUsed(final boolean used) {
-        this.used = used;
+    public boolean isUsed() {
+        return current != null;
+    }
 
-        if (!used) {
-            this.players.clear();
-            this.current = null;
+    public void startMatch(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet) {
+        this.current = new Match(kit, items, bet);
+    }
+
+    public void endMatch() {
+        current = null;
+    }
+
+    public boolean has(final Player player) {
+        return current != null && !current.getPlayers().getOrDefault(player, true);
+    }
+
+    public void add(final Player player) {
+        if (current == null) {
+            return;
         }
+
+        current.getPlayers().put(player, false);
+    }
+
+    public void remove(final Player player) {
+        if (current == null || !current.getPlayers().containsKey(player)) {
+            return;
+        }
+
+        current.getPlayers().put(player, true);
+    }
+
+    public int size() {
+        return current != null ? (int) current.getPlayers().entrySet().stream().filter(entry -> !entry.getValue()).count() : 0;
+    }
+
+    public Player getFirst() {
+        if (current != null) {
+            final Optional<Entry<Player, Boolean>> winner = current.getPlayers().entrySet().stream().filter(entry -> !entry.getValue()).findFirst();
+
+            if (winner.isPresent()) {
+                return winner.get().getKey();
+            }
+        }
+
+        return null;
     }
 
     public void setPosition(final int pos, final Location location) {
         positions.put(pos, location);
     }
 
-    public boolean has(final UUID uuid) {
-        return players.contains(uuid);
-    }
-
-    public boolean has(final Player player) {
-        return has(player.getUniqueId());
-    }
-
-    public void add(final Player player) {
-        players.add(player.getUniqueId());
-    }
-
-    public void remove(final Player player) {
-        players.remove(player.getUniqueId());
-    }
-
-    public int size() {
-        return players.size();
-    }
-
-    public UUID getFirst() {
-        return players.iterator().next();
-    }
-
-    public void setMatch(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet) {
-        this.current = new Match(kit, items, bet);
+    public Set<Player> getPlayers() {
+        return current != null ? current.getPlayers().keySet() : Collections.emptySet();
     }
 
     @Override

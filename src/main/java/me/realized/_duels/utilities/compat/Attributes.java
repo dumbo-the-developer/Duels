@@ -36,8 +36,6 @@ import org.bukkit.inventory.ItemStack;
 
 public class Attributes {
 
-    // TODO: 11/8/16 Use a NBT Library in the future. This class can probably be optimized a lot, but lack of time
-
     private static final Class<?> itemStack = Reflections.getNMSClass("ItemStack");
     private static final Class<?> craftItemStack = Reflections.getCBClass("inventory.CraftItemStack");
 

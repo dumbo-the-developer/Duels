@@ -388,7 +388,6 @@ public class DuelManager implements Listener {
         // Finally, after everything, the arena is back to available state!
         arena.setUsed(false);
 
-        // TODO: 11/22/16 Improve GUI system. Creating new inventories every update just... doesn't seem so efficient.
         if (arenaManager.getGUI() != null) {
             arenaManager.getGUI().update(arenaManager.getArenas());
         }

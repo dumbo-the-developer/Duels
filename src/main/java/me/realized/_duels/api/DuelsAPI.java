@@ -31,7 +31,6 @@ import me.realized._duels.data.UserData;
 import org.bukkit.entity.Player;
 
 /**
- * todo: fixxxxxxx
  *
  * @author Realized
  * @deprecated As of v3.0.0. Use {@link Core} instead.

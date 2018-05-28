@@ -29,20 +29,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import me.realized._duels.utilities.inventory.ItemBuilder;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.cache.PlayerData;
-import me.realized.duels.cache.PlayerDataCache;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.PlayerUtil;
 import me.realized.duels.util.compat.Collisions;
 import me.realized.duels.util.compat.CompatUtil;
-import org.bukkit.Bukkit;
+import me.realized.duels.util.meta.MetadataUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -62,18 +60,18 @@ import org.bukkit.inventory.ItemStack;
 
 public class SpectateManager implements Loadable, Listener {
 
+    private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
     private final ArenaManager arenaManager;
-    private final PlayerDataCache playerDataCache;
 
-    private final Map<UUID, Spectator> spectators = new HashMap<>();
+    private final Map<Player, Spectator> spectators = new HashMap<>();
 
     public SpectateManager(final DuelsPlugin plugin) {
+        this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
         this.arenaManager = plugin.getArenaManager();
-        this.playerDataCache = plugin.getPlayerDataCache();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -88,14 +86,14 @@ public class SpectateManager implements Loadable, Listener {
     }
 
     public Optional<Spectator> get(final Player player) {
-        return Optional.ofNullable(spectators.get(player.getUniqueId()));
+        return Optional.ofNullable(spectators.get(player));
     }
 
     public boolean isSpectating(final Player player) {
         return get(player).isPresent();
     }
 
-    public void startSpectating(final Player player, final Player target, final boolean silent) {
+    private void startSpectating(final Player player, final Player target, final boolean silent) {
         if (isSpectating(player)) {
             lang.sendMessage(player, "ERROR.already-spectating.sender");
             return;
@@ -113,17 +111,15 @@ public class SpectateManager implements Loadable, Listener {
             return;
         }
 
-        if (!playerDataCache.get(player).isPresent()) {
-            playerDataCache.put(player);
+        if (!MetadataUtil.get(plugin, player, PlayerData.METADATA_KEY).isPresent()) {
+            MetadataUtil.put(plugin, player, PlayerData.METADATA_KEY, new PlayerData(player).to());
         }
 
         PlayerUtil.reset(player);
 
         final Arena arena = found.get();
-        arena.getPlayers().forEach(uuid -> {
-            final Player arenaPlayer = Bukkit.getPlayer(uuid);
-
-            if (arenaPlayer != null && arenaPlayer.canSee(player)) {
+        arena.getCurrent().getPlayers().keySet().forEach(arenaPlayer -> {
+            if (arenaPlayer.isOnline() && arenaPlayer.canSee(player)) {
                 arenaPlayer.hidePlayer(player);
             }
         });
@@ -133,13 +129,14 @@ public class SpectateManager implements Loadable, Listener {
         player.setAllowFlight(true);
         player.setFlying(true);
         Collisions.setCollidable(player, false);
-        spectators.put(player.getUniqueId(), new Spectator(player, target, arena));
+        spectators.put(player, new Spectator(player, target, arena));
 
         if (player.hasPermission("duels.spectate.anonymously") || silent) {
             return;
         }
 
-        lang.sendMessage(arena.getPlayers(), "SPECTATE.arena-broadcast", true, "player", player.getName());
+        arena.getCurrent().getPlayers().keySet().stream().filter(Player::isOnline)
+            .forEach(arenaPlayer -> lang.sendMessage(arenaPlayer, "SPECTATE.arena-broadcast", true, "player", player.getName()));
     }
 
     public void startSpectating(final Player player, final Player target) {
@@ -153,7 +150,7 @@ public class SpectateManager implements Loadable, Listener {
             return;
         }
 
-        spectators.remove(player.getUniqueId());
+        spectators.remove(player);
         PlayerUtil.reset(player);
 
         final Spectator spectator = found.get();
@@ -161,7 +158,7 @@ public class SpectateManager implements Loadable, Listener {
         player.setAllowFlight(false);
         Collisions.setCollidable(player, true);
 
-        final Optional<PlayerData> cached = playerDataCache.remove(player);
+        final Optional<PlayerData> cached = PlayerData.from(MetadataUtil.removeAndGet(plugin, player, PlayerData.METADATA_KEY).orElse(null));
 
         if (cached.isPresent()) {
             final PlayerData playerData = cached.get();
@@ -171,10 +168,8 @@ public class SpectateManager implements Loadable, Listener {
             // teleport to lobby?
         }
 
-        spectator.getArena().getPlayers().forEach(uuid -> {
-            final Player arenaPlayer = Bukkit.getPlayer(uuid);
-
-            if (arenaPlayer != null && arenaPlayer.canSee(player)) {
+        spectator.getArena().getCurrent().getPlayers().keySet().forEach(arenaPlayer -> {
+            if (arenaPlayer.isOnline()) {
                 arenaPlayer.showPlayer(player);
             }
         });
@@ -184,7 +179,7 @@ public class SpectateManager implements Loadable, Listener {
         }
     }
 
-    public Set<UUID> getAllPlayers() {
+    public Set<Player> getAllPlayers() {
         return spectators.keySet();
     }
 

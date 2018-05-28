@@ -37,7 +37,6 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -126,8 +125,8 @@ public class ArenaManager implements Loadable {
         return get(player).isPresent();
     }
 
-    public List<UUID> getAllPlayers() {
-        final List<UUID> result = new ArrayList<>();
+    public List<Player> getAllPlayers() {
+        final List<Player> result = new ArrayList<>();
         arenas.forEach(arena -> result.addAll(arena.getPlayers()));
         return result;
     }

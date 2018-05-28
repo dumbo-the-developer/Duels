@@ -34,15 +34,18 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.config.Lang;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
+import me.realized.duels.util.profile.ProfileUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -52,10 +55,15 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class UserDataManager implements Loadable, Listener {
 
+    // TODO: 23/05/2018 Find a way to load all userdata to a cache to support command/sign/hologram leaderboard
+    // TODO: 27/05/2018 Use ConcurrentHashMap
     private final DuelsPlugin plugin;
     private final Lang lang;
     private final File folder;
-    private final Map<UUID, UserData> users = new HashMap<>();
+    private final Map<UUID, UserData> users = new ConcurrentHashMap<>();
+
+    @Getter
+    private volatile boolean loaded;
 
     public UserDataManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -71,12 +79,46 @@ public class UserDataManager implements Loadable, Listener {
 
     @Override
     public void handleLoad() {
-        loadUsers(Bukkit.getOnlinePlayers());
+        plugin.doAsync(() -> {
+            final File[] files = folder.listFiles();
+
+            if (files != null && files.length > 0) {
+                for (final File file : files) {
+                    final String fileName = file.getName();
+
+                    if (!fileName.endsWith(".yml")) {
+                        continue;
+                    }
+
+                    final String name = fileName.substring(0, fileName.length() - 4);
+
+                    if (!ProfileUtil.isUUID(name)) {
+                        continue;
+                    }
+
+                    final UUID uuid = UUID.fromString(name);
+
+                    if (users.containsKey(uuid)) {
+                        continue;
+                    }
+
+                    try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
+                        users.put(uuid, plugin.getGson().fromJson(reader, UserData.class));
+                    } catch (IOException ex) {
+                        plugin.getLogManager().log(Level.SEVERE, "Failed to load data of " + uuid + ": " + ex.getMessage());
+                    }
+                }
+            }
+
+            loaded = true;
+        });
     }
 
     @Override
     public void handleUnload() {
+        loaded = false;
         saveUsers(Bukkit.getOnlinePlayers());
+        users.clear();
     }
 
     public Optional<UserData> get(final UUID uuid) {
@@ -85,12 +127,6 @@ public class UserDataManager implements Loadable, Listener {
 
     public Optional<UserData> get(final Player player) {
         return get(player.getUniqueId());
-    }
-
-    private void loadUsers(final Collection<? extends Player> players) {
-        for (final Player player : players) {
-            tryLoad(player).ifPresent(data -> users.put(player.getUniqueId(), data));
-        }
     }
 
     private void saveUsers(final Collection<? extends Player> players) {

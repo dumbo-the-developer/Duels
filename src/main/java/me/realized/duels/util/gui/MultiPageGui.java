@@ -130,6 +130,11 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
     }
 
     @Override
+    public boolean hasViewers() {
+        return pages.stream().anyMatch(page -> !page.inventory.getViewers().isEmpty());
+    }
+
+    @Override
     public void on(final Player player, final Inventory top, final InventoryClickEvent event) {
         final Inventory clicked = event.getClickedInventory();
 
@@ -163,7 +168,7 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
         } else if (slot == prevPageSlot && page.previous != null) {
             player.openInventory(page.previous.inventory);
         } else {
-            final Optional<Button> cached = get(clicked, slot);
+            final Optional<Button<P>> cached = get(clicked, slot);
 
             if (!cached.isPresent()) {
                 return;

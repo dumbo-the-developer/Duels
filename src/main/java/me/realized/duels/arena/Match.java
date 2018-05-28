@@ -25,17 +25,21 @@
 
 package me.realized.duels.arena;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import me.realized.duels.kit.Kit;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class Match {
 
     @Getter
     private final long creation;
+    @Getter
+    private final Map<Player, Boolean> players = new HashMap<>();
     @Getter
     private final Kit kit;
     @Getter

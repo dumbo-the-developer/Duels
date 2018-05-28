@@ -23,14 +23,29 @@
  * SOFTWARE.
  */
 
-package me.realized.duels.cache;
+package me.realized.duels.util;
 
-import org.bukkit.entity.Player;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 
-public class PlayerDataCache extends Cache<PlayerData> {
+public final class CollectionUtil {
 
-    @Override
-    PlayerData create(final Player player) {
-        return new PlayerData(player);
+    private CollectionUtil() {}
+
+    public static <T> Collection<T> tryConvert(final Collection<?> collection, Class<T> clazz) {
+        final Collection<T> result = new ArrayList<>();
+        collection.forEach(element -> {
+            if (clazz.isInstance(element)) {
+                result.add(clazz.cast(element));
+            }
+        });
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <K, V> Map<K, V> tryConvert(final Map<?, ?> map, final Class<K> key, final Class<V> value) {
+        map.entrySet().removeIf(entry -> !key.isInstance(entry.getKey()) || !value.isInstance(entry.getValue()));
+        return (Map<K, V>) map;
     }
 }

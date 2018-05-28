@@ -84,7 +84,7 @@ public class Setting {
         (this.gui != null ? this.gui : (this.gui = plugin.getGuiListener().addGui(player, new SettingGui(plugin)))).open(player);
     }
 
-    // Don't copy the gui since it won't be required to start a match
+    // Don't copy the gui since it won't be required to start a match.
     public Setting lightCopy() {
         final Setting copy = new Setting(plugin);
         copy.target = target;

@@ -26,13 +26,19 @@
 package me.realized.duels.cache;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import lombok.Getter;
+import me.realized.duels.util.CollectionUtil;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
 public class PlayerData {
+
+    public static final String METADATA_KEY = PlayerData.class.getSimpleName();
 
     private final ItemStack[] inventory;
     private final ItemStack[] armor;
@@ -43,7 +49,7 @@ public class PlayerData {
     @Getter
     private final Location location;
 
-    PlayerData(final Player player) {
+    public PlayerData(final Player player) {
         this.inventory = player.getInventory().getContents().clone();
         this.armor = player.getInventory().getArmorContents().clone();
         this.effects = player.getActivePotionEffects();
@@ -52,12 +58,49 @@ public class PlayerData {
         this.location = player.getLocation().clone();
     }
 
+    private PlayerData(final ItemStack[] inventory, final ItemStack[] armor, final Collection<?> effects, final double health, final int hunger,
+        final Location location) {
+        this.inventory = inventory;
+        this.armor = armor;
+        this.effects = CollectionUtil.tryConvert(effects, PotionEffect.class);
+        this.health = health;
+        this.hunger = hunger;
+        this.location = location;
+    }
+
     public void restore(final Player player) {
         player.addPotionEffects(effects);
         player.setHealth(health);
         player.setFoodLevel(hunger);
         player.getInventory().setArmorContents(armor);
-        player.getInventory().setContents(inventory);
+
+        for (final ItemStack item : inventory) {
+            if (item != null) {
+                player.getInventory().addItem(item);
+            }
+        }
         player.updateInventory();
+    }
+
+    public Map<String, Object> to() {
+        final Map<String, Object> data = new HashMap<>();
+        data.put("inventory", inventory);
+        data.put("armor", armor);
+        data.put("effects", effects);
+        data.put("health", health);
+        data.put("hunger", hunger);
+        data.put("location", location);
+        return data;
+    }
+
+    public static Optional<PlayerData> from(final Object value) {
+        if (value == null || !(value instanceof Map)) {
+            return Optional.empty();
+        }
+
+        final Map data = (Map) value;
+        return Optional
+            .of(new PlayerData((ItemStack[]) data.get("inventory"), (ItemStack[]) data.get("armor"), (Collection<?>) data.get("effects"), (double) data.get("health"),
+                (int) data.get("hunger"), (Location) data.get("location")));
     }
 }

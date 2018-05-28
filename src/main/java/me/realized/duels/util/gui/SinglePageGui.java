@@ -44,11 +44,11 @@ public class SinglePageGui<P extends JavaPlugin> extends AbstractGui<P> {
         this.inventory = InventoryBuilder.of(StringUtil.color(title), rows * 9).build();
     }
 
-    protected void set(final int slot, final Button button) {
+    protected void set(final int slot, final Button<P> button) {
         set(inventory, slot, button);
     }
 
-    protected void set(final int from, final int to, final int height, final Button button) {
+    protected void set(final int from, final int to, final int height, final Button<P> button) {
         set(inventory, from, to, height, button);
     }
 
@@ -63,6 +63,11 @@ public class SinglePageGui<P extends JavaPlugin> extends AbstractGui<P> {
     @Override
     public boolean isPart(final Inventory inventory) {
         return inventory.equals(this.inventory);
+    }
+
+    @Override
+    public boolean hasViewers() {
+        return !inventory.getViewers().isEmpty();
     }
 
     @Override
@@ -85,7 +90,7 @@ public class SinglePageGui<P extends JavaPlugin> extends AbstractGui<P> {
             return;
         }
 
-        final Optional<Button> cached = get(inventory, event.getSlot());
+        final Optional<Button<P>> cached = get(inventory, event.getSlot());
 
         if (!cached.isPresent()) {
             return;

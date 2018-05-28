@@ -50,6 +50,8 @@ public abstract class AbstractGui<P extends JavaPlugin> implements Updatable {
 
     public abstract boolean isPart(final Inventory inventory);
 
+    public abstract boolean hasViewers();
+
     public abstract void on(final Player player, final Inventory top, final InventoryClickEvent event);
 
     public void on(final Player player, final Inventory inventory, final InventoryCloseEvent event) {}

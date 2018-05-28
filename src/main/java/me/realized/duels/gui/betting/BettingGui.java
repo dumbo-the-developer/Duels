@@ -40,6 +40,7 @@ import me.realized.duels.gui.betting.buttons.HeadButton;
 import me.realized.duels.gui.betting.buttons.StateButton;
 import me.realized.duels.util.gui.AbstractGui;
 import me.realized.duels.util.gui.Button;
+import me.realized.duels.util.gui.GuiListener;
 import me.realized.duels.util.inventory.InventoryBuilder;
 import me.realized.duels.util.inventory.ItemBuilder;
 import me.realized.duels.util.inventory.Slots;
@@ -59,6 +60,7 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
         new Section(9, 13, 4),
         new Section(14, 18, 4)
     };
+    private final GuiListener<DuelsPlugin> guiListener;
     private final DuelManager duelManager;
     private final Setting setting;
     private final Inventory inventory;
@@ -66,6 +68,7 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
     private boolean firstReady, secondReady;
     public BettingGui(final DuelsPlugin plugin, final Setting setting, final Player first, final Player second) {
         super(plugin);
+        this.guiListener = plugin.getGuiListener();
         this.duelManager = plugin.getDuelManager();
         this.setting = setting;
         this.inventory = InventoryBuilder.of("Winner Takes All!", 54).build();
@@ -76,11 +79,11 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
         Slots.run(45, 48, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 1).name(" ").build()));
         Slots.run(6, 9, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 11).name(" ").build()));
         Slots.run(51, 54, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 11).name(" ").build()));
+        set(inventory, 3, new StateButton(plugin, this, first));
+        set(inventory, 4, new DetailsButton(plugin, setting));
+        set(inventory, 5, new StateButton(plugin, this, second));
         set(inventory, 48, new HeadButton(plugin, first));
         set(inventory, 50, new HeadButton(plugin, second));
-        set(inventory, 3, new StateButton(plugin, this, first));
-        set(inventory, 5, new StateButton(plugin, this, second));
-        set(inventory, 4, new DetailsButton(plugin, setting));
     }
 
     private boolean isFirst(final Player player) {
@@ -104,10 +107,11 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
 
         if (firstReady && secondReady) {
             final Player first = Bukkit.getPlayer(this.first);
-            first.closeInventory();
-
             final Player second = Bukkit.getPlayer(this.second);
+            first.closeInventory();
             second.closeInventory();
+            guiListener.removeGui(first, this);
+            guiListener.removeGui(second, this);
 
             final Map<UUID, List<ItemStack>> items = new HashMap<>();
             items.put(first.getUniqueId(), getSection(first).collect());
@@ -116,7 +120,7 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
         }
     }
 
-    public void update(final Player player, final Button button) {
+    public void update(final Player player, final Button<DuelsPlugin> button) {
         update(player, inventory, button);
     }
 
@@ -134,10 +138,20 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
     }
 
     @Override
+    public boolean hasViewers() {
+        return !inventory.getViewers().isEmpty();
+    }
+
+    @Override
     public void on(final Player player, final Inventory top, final InventoryClickEvent event) {
         final Inventory clicked = event.getClickedInventory();
 
         if (clicked == null) {
+            return;
+        }
+
+        if (firstReady && secondReady) {
+            event.setCancelled(true);
             return;
         }
 
@@ -204,7 +218,23 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
 
     @Override
     public void on(final Player player, final Inventory inventory, final InventoryCloseEvent event) {
+        if (firstReady && secondReady) {
+            return;
+        }
 
+        final Player first = Bukkit.getPlayer(this.first);
+        final Player second = Bukkit.getPlayer(this.second);
+
+        if (first.equals(player)) {
+            plugin.doSync(second::closeInventory);
+        } else {
+            plugin.doSync(first::closeInventory);
+        }
+
+        guiListener.removeGui(first, this);
+        guiListener.removeGui(second, this);
+        getSection(first).collect().forEach(item -> first.getInventory().addItem(item));
+        getSection(second).collect().forEach(item -> second.getInventory().addItem(item));
     }
 
     private class Section {
@@ -231,7 +261,13 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
 
         private List<ItemStack> collect() {
             final List<ItemStack> result = new ArrayList<>();
-            Slots.run(start, end, height, slot -> result.add(inventory.getItem(slot)));
+            Slots.run(start, end, height, slot -> {
+                final ItemStack item = inventory.getItem(slot);
+
+                if (item != null && item.getType() != Material.AIR) {
+                    result.add(item);
+                }
+            });
             return result;
         }
     }
