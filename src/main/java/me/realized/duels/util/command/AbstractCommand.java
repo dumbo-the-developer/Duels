@@ -74,6 +74,7 @@ public abstract class AbstractCommand<P extends JavaPlugin> implements TabComple
 
         final List<String> names = Lists.newArrayList(aliases);
         names.add(name);
+
         this.aliases = Collections.unmodifiableList(names);
     }
 

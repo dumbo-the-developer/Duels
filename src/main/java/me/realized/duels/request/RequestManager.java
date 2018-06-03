@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.cache.Setting;
+import me.realized.duels.setting.Setting;
 import me.realized.duels.util.Loadable;
 import org.bukkit.entity.Player;
 

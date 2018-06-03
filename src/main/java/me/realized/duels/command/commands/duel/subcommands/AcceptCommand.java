@@ -26,9 +26,9 @@
 package me.realized.duels.command.commands.duel.subcommands;
 
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.cache.Setting;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.request.Request;
+import me.realized.duels.setting.Setting;
 import me.realized.duels.util.inventory.InventoryUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -37,7 +37,7 @@ import org.bukkit.entity.Player;
 public class AcceptCommand extends BaseCommand {
 
     public AcceptCommand(final DuelsPlugin plugin) {
-        super(plugin, "accept", "accept [player]", "Accepts a duel request.", null, 2, true);
+        super(plugin, "accept", "accept [player]", "Accepts a duel request.", 2);
     }
 
     @Override
@@ -49,6 +49,11 @@ public class AcceptCommand extends BaseCommand {
             return;
         }
 
+        if (arenaManager.isInMatch(player)) {
+            lang.sendMessage(sender, "ERROR.already-in-match.sender");
+            return;
+        }
+
         final Player target = Bukkit.getPlayerExact(args[1]);
 
         if (target == null) {
@@ -56,10 +61,15 @@ public class AcceptCommand extends BaseCommand {
             return;
         }
 
-        final Request request;
+        final Request request = requestManager.remove(target, player);
 
-        if ((request = requestManager.remove(target, player)) == null) {
+        if (request == null) {
             lang.sendMessage(sender, "ERROR.no-request", "player", target.getName());
+            return;
+        }
+
+        if (arenaManager.isInMatch(target)) {
+            lang.sendMessage(sender, "ERROR.already-in-match.target", "player", target.getName());
             return;
         }
 

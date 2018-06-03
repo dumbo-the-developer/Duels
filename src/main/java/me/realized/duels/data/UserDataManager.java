@@ -34,15 +34,19 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.config.Lang;
+import me.realized.duels.util.Entry;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.profile.ProfileUtil;
@@ -55,8 +59,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class UserDataManager implements Loadable, Listener {
 
-    // TODO: 23/05/2018 Find a way to load all userdata to a cache to support command/sign/hologram leaderboard
-    // TODO: 27/05/2018 Use ConcurrentHashMap
+    // TODO: 23/05/2018 Implement command/sign/hologram leaderboard in an addon/extension/external plugin
     private final DuelsPlugin plugin;
     private final Lang lang;
     private final File folder;
@@ -86,11 +89,11 @@ public class UserDataManager implements Loadable, Listener {
                 for (final File file : files) {
                     final String fileName = file.getName();
 
-                    if (!fileName.endsWith(".yml")) {
+                    if (!fileName.endsWith(".json")) {
                         continue;
                     }
 
-                    final String name = fileName.substring(0, fileName.length() - 4);
+                    final String name = fileName.substring(0, fileName.length() - 5);
 
                     if (!ProfileUtil.isUUID(name)) {
                         continue;
@@ -121,79 +124,92 @@ public class UserDataManager implements Loadable, Listener {
         users.clear();
     }
 
-    public Optional<UserData> get(final UUID uuid) {
-        return Optional.ofNullable(users.get(uuid));
+    public UserData get(final UUID uuid) {
+        return users.get(uuid);
     }
 
-    public Optional<UserData> get(final Player player) {
+    public UserData get(final Player player) {
         return get(player.getUniqueId());
+    }
+
+    // TODO: 28/05/2018 This will be available in the API
+    public <V> List<Entry<String, V>> sortedEntries(final Function<UserData, V> function, final Comparator<Entry<String, V>> comparator) {
+        return users.values().stream().map(data -> new Entry<>(data.getName(), function.apply(data))).sorted(comparator).collect(Collectors.toList());
     }
 
     private void saveUsers(final Collection<? extends Player> players) {
         for (final Player player : players) {
-            Optional.ofNullable(users.remove(player.getUniqueId())).ifPresent(data -> trySave(player, data));
+            final UserData user = users.remove(player.getUniqueId());
+
+            if (user != null) {
+                trySave(player, user);
+            }
         }
     }
 
-    private Optional<UserData> tryLoad(final Player player) {
+    private UserData tryLoad(final Player player) {
         final File file = new File(folder, player.getUniqueId() + ".json");
 
         if (!file.exists()) {
-            return Optional.of(new UserData(player));
+            return new UserData(player);
         }
 
         try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
-            final UserData data = plugin.getGson().fromJson(reader, UserData.class);
+            final UserData user = plugin.getGson().fromJson(reader, UserData.class);
 
-            if (!player.getName().equals(data.getName())) {
-                data.setName(player.getName());
+            if (!player.getName().equals(user.getName())) {
+                user.setName(player.getName());
             }
 
-            return Optional.of(data);
+            return user;
         } catch (IOException ex) {
             ex.printStackTrace();
             Log.error("An error occured while loading userdata of " + player.getName() + ": " + ex.getMessage());
         }
 
-        return Optional.empty();
+        return null;
     }
 
     private void trySave(final Player player, final UserData data) {
         final File file = new File(folder, player.getUniqueId() + ".json");
 
-        if (!file.exists()) {
-            try {
+        try {
+            if (!file.exists()) {
                 file.createNewFile();
-
-                try (Writer writer = new OutputStreamWriter(new FileOutputStream(file))) {
-                    plugin.getGson().toJson(data, writer);
-                    writer.flush();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                Log.error("An error occured while saving userdata of " + player.getName() + ": " + ex.getMessage());
             }
+
+            try (Writer writer = new OutputStreamWriter(new FileOutputStream(file))) {
+                plugin.getGson().toJson(data, writer);
+                writer.flush();
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            Log.error("An error occured while saving userdata of " + player.getName() + ": " + ex.getMessage());
         }
     }
 
-    private void loadUser(final Player player, final Consumer<Optional<UserData>> callback) {
+    private void loadUser(final Player player, final Consumer<UserData> callback) {
         plugin.doAsync(() -> callback.accept(tryLoad(player)));
     }
 
     @EventHandler
     public void on(final PlayerJoinEvent event) {
-        loadUser(event.getPlayer(), result -> {
-            if (!result.isPresent()) {
+        loadUser(event.getPlayer(), userData -> {
+            if (userData == null) {
                 lang.sendMessage(event.getPlayer(), "ERROR.data-load-failure");
                 return;
             }
 
-            plugin.doSync(() -> users.put(event.getPlayer().getUniqueId(), result.get()));
+            plugin.doSync(() -> users.put(event.getPlayer().getUniqueId(), userData));
         });
     }
 
     @EventHandler
     public void on(final PlayerQuitEvent event) {
-        Optional.ofNullable(users.remove(event.getPlayer().getUniqueId())).ifPresent(data -> plugin.doAsync(() -> trySave(event.getPlayer(), data)));
+        final UserData user = users.remove(event.getPlayer().getUniqueId());
+
+        if (user != null) {
+            plugin.doAsync(() -> trySave(event.getPlayer(), user));
+        }
     }
 }

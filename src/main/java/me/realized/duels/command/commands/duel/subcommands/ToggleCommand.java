@@ -25,7 +25,6 @@
 
 package me.realized.duels.command.commands.duel.subcommands;
 
-import java.util.Optional;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.data.UserData;
@@ -35,20 +34,19 @@ import org.bukkit.entity.Player;
 public class ToggleCommand extends BaseCommand {
 
     public ToggleCommand(final DuelsPlugin plugin) {
-        super(plugin, "toggle", "toggle", "Toggle your duel requests.", "duels.toggle", 1, true);
+        super(plugin, "toggle", "duels.toggle");
     }
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
-        final Optional<UserData> cached = userManager.get((Player) sender);
+        final UserData user = userManager.get((Player) sender);
 
-        if (!cached.isPresent()) {
+        if (user == null) {
             lang.sendMessage(sender, "ERROR.data-load-failure");
             return;
         }
 
-        final UserData data = cached.get();
-        data.setRequests(!data.canRequest());
-        lang.sendMessage(sender, "COMMAND.duel.toggle." + (data.canRequest() ? "enabled" : "disabled"));
+        user.setRequests(!user.canRequest());
+        lang.sendMessage(sender, "COMMAND.duel.toggle." + (user.canRequest() ? "enabled" : "disabled"));
     }
 }

@@ -41,7 +41,7 @@ public class SavekitCommand extends BaseCommand {
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final String name = StringUtils.join(args, " ", 1, args.length);
 
-        if (kitManager.get(name).isPresent()) {
+        if (kitManager.get(name) != null) {
             return;
         }
 

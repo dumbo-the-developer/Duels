@@ -28,7 +28,6 @@ package me.realized.duels.command;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.betting.BettingManager;
-import me.realized.duels.cache.SettingCache;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.UserDataManager;
@@ -36,6 +35,7 @@ import me.realized.duels.duel.DuelManager;
 import me.realized.duels.hooks.HookManager;
 import me.realized.duels.kit.KitManager;
 import me.realized.duels.request.RequestManager;
+import me.realized.duels.setting.SettingManager;
 import me.realized.duels.spectate.SpectateManager;
 import me.realized.duels.util.command.AbstractCommand;
 import org.bukkit.command.CommandSender;
@@ -48,16 +48,18 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
     protected final UserDataManager userManager;
     protected final ArenaManager arenaManager;
     protected final KitManager kitManager;
-    protected final SettingCache settingCache;
+    protected final SettingManager settingManager;
     protected final SpectateManager spectateManager;
     protected final BettingManager bettingManager;
     protected final DuelManager duelManager;
     protected final RequestManager requestManager;
     protected final HookManager hookManager;
 
+    /**
+     * Constructor for sub command
+     */
     public BaseCommand(final DuelsPlugin plugin, final String name, final String usage, final String description, final String permission, final int length,
-        final boolean playerOnly,
-        final String... aliases) {
+        final boolean playerOnly, final String... aliases) {
         super(plugin, name, usage, description, permission, length, playerOnly, aliases);
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
@@ -65,7 +67,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
         this.userManager = plugin.getUserManager();
         this.arenaManager = plugin.getArenaManager();
         this.kitManager = plugin.getKitManager();
-        this.settingCache = plugin.getSettingCache();
+        this.settingManager = plugin.getSettingManager();
         this.spectateManager = plugin.getSpectateManager();
         this.bettingManager = plugin.getBettingManager();
         this.duelManager = plugin.getDuelManager();
@@ -73,6 +75,23 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
         this.hookManager = plugin.getHookManager();
     }
 
+    /**
+     * Constructor for sub command with parent permission & playerOnly check
+     */
+    public BaseCommand(final DuelsPlugin plugin, final String name, final String usage, final String description, final int length, final String... aliases) {
+        this(plugin, name, usage, description, null, length, true, aliases);
+    }
+
+    /**
+     * Constructor for sub command with no description & usage due to length = 1
+     */
+    public BaseCommand(final DuelsPlugin plugin, final String name, final String permission, final String... aliases) {
+        this(plugin, name, null, null, permission, 1, true, aliases);
+    }
+
+    /**
+     * Constructor for parent command
+     */
     public BaseCommand(final DuelsPlugin plugin, final String name, final String permission, final boolean playerOnly) {
         this(plugin, name, null, null, permission, -1, playerOnly);
     }

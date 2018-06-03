@@ -29,15 +29,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.cache.Setting;
 import me.realized.duels.duel.DuelManager;
 import me.realized.duels.gui.betting.buttons.DetailsButton;
 import me.realized.duels.gui.betting.buttons.HeadButton;
 import me.realized.duels.gui.betting.buttons.StateButton;
+import me.realized.duels.setting.Setting;
 import me.realized.duels.util.gui.AbstractGui;
 import me.realized.duels.util.gui.Button;
 import me.realized.duels.util.gui.GuiListener;
@@ -66,6 +65,7 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
     private final Inventory inventory;
     private final UUID first, second;
     private boolean firstReady, secondReady;
+
     public BettingGui(final DuelsPlugin plugin, final Setting setting, final Player first, final Player second) {
         super(plugin);
         this.guiListener = plugin.getGuiListener();
@@ -143,6 +143,11 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
     }
 
     @Override
+    public boolean removeIfEmpty() {
+        return true;
+    }
+
+    @Override
     public void on(final Player player, final Inventory top, final InventoryClickEvent event) {
         final Inventory clicked = event.getClickedInventory();
 
@@ -178,13 +183,13 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
 
         event.setCancelled(true);
 
-        final Optional<Button<DuelsPlugin>> cached = get(inventory, event.getSlot());
+        final Button<DuelsPlugin> button = get(inventory, event.getSlot());
 
-        if (!cached.isPresent()) {
+        if (button == null) {
             return;
         }
 
-        cached.get().onClick(player);
+        button.onClick(player);
     }
 
     @Override
@@ -225,6 +230,7 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
         final Player first = Bukkit.getPlayer(this.first);
         final Player second = Bukkit.getPlayer(this.second);
 
+        // TODO: 04/06/2018 Might cause dupe glitch!
         if (first.equals(player)) {
             plugin.doSync(second::closeInventory);
         } else {

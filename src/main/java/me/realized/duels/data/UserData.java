@@ -30,10 +30,9 @@ import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
-import me.realized.duels.api.User;
 import org.bukkit.entity.Player;
 
-public class UserData implements User {
+public class UserData {
 
     @Getter
     private final UUID uuid;

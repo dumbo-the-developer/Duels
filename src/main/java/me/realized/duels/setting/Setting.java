@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-package me.realized.duels.cache;
+package me.realized.duels.setting;
 
 import java.util.UUID;
 import lombok.Getter;

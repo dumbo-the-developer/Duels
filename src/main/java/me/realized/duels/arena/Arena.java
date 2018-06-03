@@ -31,15 +31,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.cache.Setting;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.kit.Kit;
+import me.realized.duels.setting.Setting;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -56,9 +55,8 @@ public class Arena extends BaseButton {
     @Getter
     @Setter
     private boolean disabled;
-
     @Getter
-    private Match current;
+    private Match match;
 
     public Arena(final DuelsPlugin plugin, final String name) {
         super(plugin, ItemBuilder.of(Material.EMPTY_MAP).name("&e" + name).build());
@@ -70,66 +68,55 @@ public class Arena extends BaseButton {
     }
 
     public boolean isUsed() {
-        return current != null;
+        return match != null;
     }
 
     public void startMatch(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet) {
-        this.current = new Match(kit, items, bet);
+        this.match = new Match(kit, items, bet);
     }
 
     public void endMatch() {
-        current = null;
+        match = null;
     }
 
     public boolean has(final Player player) {
-        return current != null && !current.getPlayers().getOrDefault(player, true);
+        return isUsed() && !match.getPlayerMap().getOrDefault(player, true);
     }
 
     public void add(final Player player) {
-        if (current == null) {
-            return;
+        if (isUsed()) {
+            match.getPlayerMap().put(player, false);
         }
-
-        current.getPlayers().put(player, false);
     }
 
     public void remove(final Player player) {
-        if (current == null || !current.getPlayers().containsKey(player)) {
-            return;
+        if (isUsed() && match.getPlayerMap().containsKey(player)) {
+            match.getPlayerMap().put(player, true);
         }
-
-        current.getPlayers().put(player, true);
     }
 
     public int size() {
-        return current != null ? (int) current.getPlayers().entrySet().stream().filter(entry -> !entry.getValue()).count() : 0;
+        return isUsed() ? (int) match.getPlayerMap().entrySet().stream().filter(entry -> !entry.getValue()).count() : 0;
     }
 
-    public Player getFirst() {
-        if (current != null) {
-            final Optional<Entry<Player, Boolean>> winner = current.getPlayers().entrySet().stream().filter(entry -> !entry.getValue()).findFirst();
+    public Player first() {
+        return isUsed() ? match.getPlayerMap().entrySet().stream().filter(entry -> !entry.getValue()).findFirst().map(Entry::getKey).orElse(null) : null;
+    }
 
-            if (winner.isPresent()) {
-                return winner.get().getKey();
-            }
-        }
-
-        return null;
+    public Set<Player> getPlayers() {
+        return isUsed() ? match.getPlayers() : Collections.emptySet();
     }
 
     public void setPosition(final int pos, final Location location) {
         positions.put(pos, location);
     }
 
-    public Set<Player> getPlayers() {
-        return current != null ? current.getPlayers().keySet() : Collections.emptySet();
-    }
-
     @Override
     public void onClick(final Player player) {
-        final Setting setting = settingCache.getSafely(player);
+        final Setting setting = settingManager.getSafely(player);
         setting.setArena(this);
         setting.openGui(player);
+        // todo: replace to config message
         player.sendMessage(ChatColor.GREEN + "Selected Arena: " + name);
     }
 

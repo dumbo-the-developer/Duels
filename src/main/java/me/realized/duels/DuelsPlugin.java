@@ -30,14 +30,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import me.realized.duels.api.Duels;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.betting.BettingManager;
-import me.realized.duels.cache.SettingCache;
 import me.realized.duels.command.commands.SpectateCommand;
 import me.realized.duels.command.commands.duel.DuelCommand;
 import me.realized.duels.command.commands.duels.DuelsCommand;
@@ -49,7 +47,9 @@ import me.realized.duels.hooks.HookManager;
 import me.realized.duels.kit.KitManager;
 import me.realized.duels.logging.LogManager;
 import me.realized.duels.request.RequestManager;
+import me.realized.duels.setting.SettingManager;
 import me.realized.duels.spectate.SpectateManager;
+import me.realized.duels.teleport.Teleport;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.Log.LogSource;
@@ -84,7 +84,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private KitManager kitManager;
     @Getter
-    private SettingCache settingCache;
+    private SettingManager settingManager;
     @Getter
     private SpectateManager spectateManager;
     @Getter
@@ -95,6 +95,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private RequestManager requestManager;
     @Getter
     private HookManager hookManager;
+    @Getter
+    private Teleport teleport;
 
     @Override
     public void onEnable() {
@@ -107,12 +109,13 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(guiListener = new GuiListener<>(this));
         loadables.add(arenaManager = new ArenaManager(this));
         loadables.add(kitManager = new KitManager(this));
-        loadables.add(settingCache = new SettingCache(this));
+        loadables.add(settingManager = new SettingManager(this));
         loadables.add(spectateManager = new SpectateManager(this));
         loadables.add(bettingManager = new BettingManager(this));
         loadables.add(duelManager = new DuelManager(this));
         loadables.add(requestManager = new RequestManager(this));
         loadables.add(hookManager = new HookManager(this));
+        loadables.add(teleport = new Teleport(this));
 
         if (!load()) {
             getPluginLoader().disablePlugin(this);
@@ -242,8 +245,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         }
     }
 
-    public Optional<Loadable> find(final String name) {
-        return loadables.stream().filter(loadable -> loadable.getClass().getSimpleName().equalsIgnoreCase(name)).findFirst();
+    public Loadable find(final String name) {
+        return loadables.stream().filter(loadable -> loadable.getClass().getSimpleName().equalsIgnoreCase(name)).findFirst().orElse(null);
     }
 
     public List<String> getReloadables() {

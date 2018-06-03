@@ -25,7 +25,6 @@
 
 package me.realized.duels.command.commands.duels.subcommands;
 
-import java.util.Optional;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.command.BaseCommand;
@@ -40,14 +39,18 @@ public class ToggleCommand extends BaseCommand {
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
-        final Optional<Arena> result = arenaManager.get(StringUtils.join(args, " ", 1, args.length));
+        final Arena arena = arenaManager.get(StringUtils.join(args, " ", 1, args.length));
 
-        if (!result.isPresent()) {
-            // send msg
+        if (arena == null) {
+            // send message
             return;
         }
 
-        final Arena arena = result.get();
+        if (arena.isUsed()) {
+            // send message
+            return;
+        }
+
         arena.setDisabled(!arena.isDisabled());
         sender.sendMessage("Arena '" + arena.getName() + "' is now " + (arena.isDisabled() ? "disabled" : "enabled") + "!");
     }

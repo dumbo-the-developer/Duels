@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import me.realized.duels.DuelsPlugin;
@@ -106,30 +105,40 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> {
     }
 
     public void sendMessage(final CommandSender receiver, final String key, final Object... replacers) {
-        final Optional<String> message = getMessage(key, replacers);
-        message.ifPresent(receiver::sendMessage);
+        final String message = getMessage(key, replacers);
+
+        if (message == null) {
+            return;
+        }
+
+        receiver.sendMessage(message);
     }
 
     public void sendMessage(final Collection<UUID> receivers, final String key, final Object... replacers) {
-        final Optional<String> message = getMessage(key, replacers);
-        message.ifPresent(s -> receivers.forEach(uuid -> {
+        final String message = getMessage(key, replacers);
+
+        if (message == null) {
+            return;
+        }
+
+        receivers.forEach(uuid -> {
             final Player player = Bukkit.getPlayer(uuid);
 
             if (player != null) {
-                player.sendMessage(s);
+                player.sendMessage(message);
             }
-        }));
+        });
     }
 
-    private Optional<String> getMessage(final String key, final Object... replacers) {
+    private String getMessage(final String key, final Object... replacers) {
         final String message = messages.get(key);
 
         if (message == null) {
             Log.error(this, "Failed to send message: provided key '" + key + "' has no assigned value");
-            return Optional.empty();
+            return null;
         }
 
-        return Optional.of(StringUtil.color(replace(message, replacers)));
+        return StringUtil.color(replace(message, replacers));
     }
 
     private String replace(String message, final Object... replacers) {

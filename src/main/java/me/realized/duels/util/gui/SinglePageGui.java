@@ -25,7 +25,6 @@
 
 package me.realized.duels.util.gui;
 
-import java.util.Optional;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.inventory.InventoryBuilder;
 import org.bukkit.Material;
@@ -90,12 +89,12 @@ public class SinglePageGui<P extends JavaPlugin> extends AbstractGui<P> {
             return;
         }
 
-        final Optional<Button<P>> cached = get(inventory, event.getSlot());
+        final Button<P> button = get(inventory, event.getSlot());
 
-        if (!cached.isPresent()) {
+        if (button == null) {
             return;
         }
 
-        cached.get().onClick(player);
+        button.onClick(player);
     }
 }

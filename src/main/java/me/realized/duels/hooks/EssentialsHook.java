@@ -54,10 +54,6 @@ public class EssentialsHook extends PluginHook<DuelsPlugin> {
     }
 
     public void setBackLocation(final Player player, final Location location) {
-//        if (!config.isPatchesSetBackLocation()) {
-//            return;
-//        }
-
         final Essentials essentials = (Essentials) getPlugin();
         final User user = essentials.getUser(player);
 

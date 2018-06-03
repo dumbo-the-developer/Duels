@@ -23,32 +23,32 @@
  * SOFTWARE.
  */
 
-package me.realized.duels.command.commands.duels.subcommands;
+package me.realized.duels.util.metadata;
 
-import me.realized.duels.DuelsPlugin;
-import me.realized.duels.command.BaseCommand;
-import me.realized.duels.kit.Kit;
-import org.apache.commons.lang.StringUtils;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
+import org.bukkit.plugin.Plugin;
 
-public class LoadkitCommand extends BaseCommand {
+public final class MetadataUtil {
 
-    public LoadkitCommand(final DuelsPlugin plugin) {
-        super(plugin, "loadkit", "loadkit [name]", "Loads the selected kit to your inventory.", null, 2, true);
+    private MetadataUtil() {}
+
+    public static Object get(final Plugin plugin, final Player player, final String key) {
+        return player.getMetadata(key).stream().filter(value -> value.getOwningPlugin().equals(plugin)).findFirst().map(MetadataValue::value).orElse(null);
     }
 
-    @Override
-    protected void execute(final CommandSender sender, final String label, final String[] args) {
-        final String name = StringUtils.join(args, " ", 1, args.length);
-        final Kit kit = kitManager.get(name);
+    public static void put(final Plugin plugin, final Player player, final String key, final Object data) {
+        player.setMetadata(key, new FixedMetadataValue(plugin, data));
+    }
 
-        if (kit == null) {
-            sender.sendMessage(name + " is not an existing kit.");
-            return;
-        }
+    public static void remove(final Plugin plugin, final Player player, final String key) {
+        player.removeMetadata(key, plugin);
+    }
 
-        kit.equip((Player) sender);
-        sender.sendMessage("Equipped " + name + "!");
+    public static Object removeAndGet(final Plugin plugin, final Player player, final String key) {
+        final Object value = get(plugin, player, key);
+        remove(plugin, player, key);
+        return value;
     }
 }

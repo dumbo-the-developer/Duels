@@ -40,6 +40,7 @@ import me.realized.duels.util.DateUtil;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log.LogSource;
 
+// TODO: 02/06/2018 Fix, currrently generates multiple log files in a single day
 public class LogManager implements Loadable, LogSource {
 
     private final File folder;

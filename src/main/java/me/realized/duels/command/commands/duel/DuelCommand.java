@@ -26,15 +26,14 @@
 package me.realized.duels.command.commands.duel;
 
 import java.util.List;
-import java.util.OptionalInt;
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.cache.Setting;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.command.commands.duel.subcommands.AcceptCommand;
 import me.realized.duels.command.commands.duel.subcommands.DenyCommand;
 import me.realized.duels.command.commands.duel.subcommands.StatsCommand;
 import me.realized.duels.command.commands.duel.subcommands.ToggleCommand;
 import me.realized.duels.hooks.VaultHook;
+import me.realized.duels.setting.Setting;
 import me.realized.duels.util.NumberUtil;
 import me.realized.duels.util.inventory.InventoryUtil;
 import org.bukkit.Bukkit;
@@ -45,12 +44,12 @@ import org.bukkit.entity.Player;
 
 public class DuelCommand extends BaseCommand {
 
-    private final VaultHook vaultHook;
+    private final VaultHook vault;
 
     public DuelCommand(final DuelsPlugin plugin) {
         super(plugin, "duel", "duels.duel", true);
         child(new AcceptCommand(plugin), new DenyCommand(plugin), new StatsCommand(plugin), new ToggleCommand(plugin));
-        this.vaultHook = hookManager.getHook(VaultHook.class).orElse(null);
+        this.vault = hookManager.getHook(VaultHook.class);
     }
 
     @Override
@@ -71,6 +70,11 @@ public class DuelCommand extends BaseCommand {
             return true;
         }
 
+        if (arenaManager.isInMatch(player)) {
+            lang.sendMessage(sender, "ERROR.already-in-match.sender");
+            return true;
+        }
+
         final Player target = Bukkit.getPlayerExact(args[0]);
 
         if (target == null) {
@@ -83,32 +87,33 @@ public class DuelCommand extends BaseCommand {
             return true;
         }
 
+
         if (requestManager.has(player, target)) {
             lang.sendMessage(sender, "ERROR.already-has-request", "player", target.getName());
             return true;
         }
 
-        final Setting setting = settingCache.getSafely(player);
+        if (arenaManager.isInMatch(target)) {
+            lang.sendMessage(sender, "ERROR.already-in-match.target", "player", target.getName());
+            return true;
+        }
+
+        final Setting setting = settingManager.getSafely(player);
 
         if (config.isAllowMoneyBetting() && args.length > 1) {
-            if (vaultHook == null || !vaultHook.hasEconomy()) {
+            final int amount = NumberUtil.parseInt(args[1]).orElse(0);
+
+            if (vault == null || vault.getEconomy() == null) {
                 sender.sendMessage(ChatColor.RED + "Betting is currently disabled.");
                 return true;
             }
 
-            final OptionalInt amount = NumberUtil.parseInt(args[1]);
-
-            if (!amount.isPresent()) {
-                sender.sendMessage(ChatColor.RED + "Invalid amount!");
-                return true;
-            }
-
-            if (!vaultHook.getEconomy().has(player, amount.getAsInt())) {
+            if (!vault.getEconomy().has(player, amount)) {
                 sender.sendMessage(ChatColor.RED + "You do not have enough money to bet!");
                 return true;
             }
 
-            setting.setBet(amount.getAsInt());
+            setting.setBet(amount);
         }
 
         setting.setTarget(target);

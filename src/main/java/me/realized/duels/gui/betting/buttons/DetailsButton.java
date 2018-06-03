@@ -26,8 +26,8 @@
 package me.realized.duels.gui.betting.buttons;
 
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.cache.Setting;
 import me.realized.duels.gui.BaseButton;
+import me.realized.duels.setting.Setting;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

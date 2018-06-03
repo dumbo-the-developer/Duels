@@ -4,6 +4,7 @@ config-version: 1
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
 STRINGS:
+# todo try a new prefix/message colorization in v3?
   PREFIX: '&9[Duels]'
   LINE: '&b&m---------------------------------------'
 

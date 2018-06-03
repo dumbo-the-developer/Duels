@@ -25,31 +25,33 @@
 
 package me.realized.duels.duel;
 
-import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.arena.Match;
-import me.realized.duels.cache.PlayerData;
-import me.realized.duels.cache.Setting;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.MatchData;
+import me.realized.duels.data.PlayerData;
+import me.realized.duels.data.UserData;
 import me.realized.duels.data.UserDataManager;
+import me.realized.duels.hooks.EssentialsHook;
 import me.realized.duels.hooks.VaultHook;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.kit.KitManager;
+import me.realized.duels.setting.Setting;
 import me.realized.duels.spectate.SpectateManager;
+import me.realized.duels.teleport.Teleport;
 import me.realized.duels.util.CollectionUtil;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.PlayerUtil;
-import me.realized.duels.util.meta.MetadataUtil;
-import org.apache.commons.lang.ArrayUtils;
+import me.realized.duels.util.metadata.MetadataUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -76,7 +78,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 
 public class DuelManager implements Loadable, Listener {
-    
+
     private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
@@ -84,6 +86,10 @@ public class DuelManager implements Loadable, Listener {
     private final ArenaManager arenaManager;
     private final KitManager kitManager;
     private final SpectateManager spectateManager;
+
+    private Teleport teleport;
+    private VaultHook vault;
+    private EssentialsHook essentials;
 
     public DuelManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -97,18 +103,24 @@ public class DuelManager implements Loadable, Listener {
     }
 
     @Override
-    public void handleLoad() {}
+    public void handleLoad() {
+        this.teleport = plugin.getTeleport();
+        this.vault = plugin.getHookManager().getHook(VaultHook.class);
+        this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
+    }
 
-    // TODO: 26/05/2018 Implement EssentialsHook#setBackLocation for death handlers
     @Override
     public void handleUnload() {
-        Bukkit.getOnlinePlayers().stream().filter(Player::isDead)
-            .forEach(player -> MetadataUtil.removeAndGet(plugin, player, PlayerData.METADATA_KEY).ifPresent(value -> PlayerData.from(value).ifPresent(data -> {
+        Bukkit.getOnlinePlayers().stream().filter(Player::isDead).forEach(player -> {
+            final PlayerData data = PlayerData.from(MetadataUtil.removeAndGet(plugin, player, PlayerData.METADATA_KEY));
+
+            if (data != null) {
                 player.spigot().respawn();
-                player.teleport(data.getLocation());
+                teleport.tryTeleport(player, data.getLocation());
                 PlayerUtil.reset(player);
                 data.restore(player);
-            })));
+            }
+        });
     }
 
     // todo: Make sure to check for everything again before actually starting the match!
@@ -120,26 +132,23 @@ public class DuelManager implements Loadable, Listener {
             lang.sendMessage(second, "DUEL.arena-in-use");
 
             if (items != null) {
-                items.get(first.getUniqueId()).forEach(item -> first.getInventory().addItem(item));
-                items.get(second.getUniqueId()).forEach(item -> second.getInventory().addItem(item));
+                items.get(first.getUniqueId()).stream().filter(Objects::nonNull).forEach(item -> first.getInventory().addItem(item));
+                items.get(second.getUniqueId()).stream().filter(Objects::nonNull).forEach(item -> second.getInventory().addItem(item));
             }
-
             return;
         }
 
         final int bet = setting.getBet();
-        final Optional<VaultHook> foundVHook = plugin.getHookManager().getHook(VaultHook.class);
-        final VaultHook vaultHook;
 
-        if (bet > 0 && foundVHook.isPresent() && (vaultHook = foundVHook.get()).hasEconomy()) {
-            if (!vaultHook.getEconomy().has(first, bet) || !vaultHook.getEconomy().has(second, bet)) {
+        if (bet > 0 && vault != null && vault.getEconomy() != null) {
+            if (!vault.getEconomy().has(first, bet) || !vault.getEconomy().has(second, bet)) {
                 lang.sendMessage(first, "DUEL.not-enough-money");
                 lang.sendMessage(second, "DUEL.not-enough-money");
                 return;
             }
 
-            vaultHook.getEconomy().withdrawPlayer(first, bet);
-            vaultHook.getEconomy().withdrawPlayer(second, bet);
+            vault.remove(first, bet);
+            vault.remove(second, bet);
         }
 
         final Kit kit = setting.getKit() != null ? setting.getKit() : kitManager.randomKit();
@@ -165,18 +174,17 @@ public class DuelManager implements Loadable, Listener {
             }
         }
 
-        player.teleport(location);
+        teleport.tryTeleport(player, location);
         arena.add(player);
     }
 
 
-    // TODO: 23/05/2018 Properly ending the match while blocking every edge case is the highest priority
     @EventHandler(priority = EventPriority.HIGHEST)
     public void on(final PlayerDeathEvent event) {
         final Player player = event.getEntity();
-        final Optional<Arena> result = arenaManager.get(player);
+        final Arena arena = arenaManager.get(player);
 
-        if (!result.isPresent()) {
+        if (arena == null) {
             return;
         }
 
@@ -188,7 +196,6 @@ public class DuelManager implements Loadable, Listener {
             event.getDrops().clear();
         }
 
-        final Arena arena = result.get();
         arena.remove(player);
 
         // Call end task only on the first death
@@ -196,43 +203,24 @@ public class DuelManager implements Loadable, Listener {
             return;
         }
 
-        // Check if match has ended after a tick to handle a tie match (setHealth(0) called on both players in same tick)
         plugin.doSyncAfter(() -> {
-            final Match match = arena.getCurrent();
+            final Match match = arena.getMatch();
 
             if (arena.size() == 0) {
                 final int bet = match.getBet();
-                final Optional<VaultHook> foundVHook = plugin.getHookManager().getHook(VaultHook.class);
-                final VaultHook vaultHook = foundVHook.orElse(null);
 
-                match.getPlayers().keySet().forEach(matchPlayer -> {
-                    if (bet > 0 && vaultHook != null && vaultHook.hasEconomy()) {
-                        vaultHook.getEconomy().depositPlayer(matchPlayer, bet);
+                match.getPlayers().forEach(matchPlayer -> {
+                    if (vault != null) {
+                        vault.add(matchPlayer, bet);
                     }
 
-                    if (match.getItems() != null) {
-                        final List<ItemStack> items = match.getItems().get(matchPlayer.getUniqueId());
+                    final List<ItemStack> items = match.getItems(matchPlayer);
 
-                        // Note to self: This block can also handle both players logging out at the same time.
-                        if (matchPlayer.isDead()) {
-                            MetadataUtil.get(plugin, matchPlayer, PlayerData.METADATA_KEY).ifPresent(value -> {
-                                final Map<String, Object> data = CollectionUtil.tryConvert((Map) value, String.class, Object.class);
-                                ItemStack[] inventory = (ItemStack[]) data.get("inventory");
-
-                                for (final ItemStack item : items) {
-                                    inventory = (ItemStack[]) ArrayUtils.add(inventory, item);
-                                }
-
-                                data.put("inventory", inventory);
-                            });
-                        } else {
-                            // Note to self: Unsure if this case will ever be called, since player has to respawn instantly after a tick.
-                            items.forEach(item -> {
-                                if (item != null) {
-                                    player.getInventory().addItem(item);
-                                }
-                            });
-                        }
+                    if (matchPlayer.isDead()) {
+                        addItems(MetadataUtil.get(plugin, matchPlayer, PlayerData.METADATA_KEY), items);
+                    } else {
+                        // Note to self: Unsure if this case will ever be called, since player has to respawn instantly after a tick.
+                        items.stream().filter(Objects::nonNull).forEach(item -> player.getInventory().addItem(item));
                     }
                 });
 
@@ -241,72 +229,60 @@ public class DuelManager implements Loadable, Listener {
                 return;
             }
 
-            final Player winner = arena.getFirst();
+            final Player winner = arena.first();
             final Firework firework = (Firework) winner.getWorld().spawnEntity(winner.getEyeLocation(), EntityType.FIREWORK);
             final FireworkMeta meta = firework.getFireworkMeta();
             meta.addEffect(FireworkEffect.builder().withColor(Color.RED).with(FireworkEffect.Type.BALL_LARGE).withTrail().build());
             firework.setFireworkMeta(meta);
 
-            final long duration = System.currentTimeMillis() - match.getCreation();
+            final long duration = System.currentTimeMillis() - match.getStart();
             final long time = new GregorianCalendar().getTimeInMillis();
             final double health = Math.ceil(winner.getHealth()) * 0.5;
             final MatchData matchData = new MatchData(winner.getName(), player.getName(), time, duration, health);
-            userDataManager.get(player).ifPresent(user -> {
+            UserData user = userDataManager.get(player);
+
+            if (user != null) {
                 user.addLoss();
                 user.addMatch(matchData);
-            });
-            userDataManager.get(winner).ifPresent(user -> {
+            }
+
+            user = userDataManager.get(winner);
+
+            if (user != null) {
                 user.addWin();
                 user.addMatch(matchData);
-            });
+            }
+
             plugin.doSyncAfter(() -> {
                 arena.remove(winner);
 
-                final int bet = match.getBet();
-                final Optional<VaultHook> foundVHook = plugin.getHookManager().getHook(VaultHook.class);
-                final VaultHook vaultHook = foundVHook.orElse(null);
-
-                if (bet > 0 && vaultHook != null && vaultHook.hasEconomy()) {
-                    vaultHook.getEconomy().depositPlayer(winner, bet * 2);
+                if (vault != null) {
+                    vault.add(winner, match.getBet() * 2);
                 }
 
-                final List<ItemStack> items = new ArrayList<>();
-
-                if (match.getItems() != null) {
-                    match.getItems().values().forEach(items::addAll);
-                }
-
-                final Optional<Object> value = MetadataUtil.get(plugin, winner, PlayerData.METADATA_KEY);
+                final List<ItemStack> items = match.getItems();
+                final Object value = MetadataUtil.get(plugin, winner, PlayerData.METADATA_KEY);
 
                 if (winner.isDead()) {
-                    if (value.isPresent()) {
-                        final Map<String, Object> data = CollectionUtil.tryConvert((Map) value.get(), String.class, Object.class);
-                        ItemStack[] inventory = (ItemStack[]) data.get("inventory");
-
-                        for (final ItemStack item : items) {
-                            inventory = (ItemStack[]) ArrayUtils.add(inventory, item);
-                        }
-
-                        data.put("inventory", inventory);
-                    }
+                    addItems(value, items);
                 } else if (winner.isOnline()) {
-                    MetadataUtil.remove(plugin, player, PlayerData.METADATA_KEY);
-                    final PlayerData data = value.isPresent() ? PlayerData.from(value.get()).orElse(null) : null;
+                    MetadataUtil.remove(plugin, winner, PlayerData.METADATA_KEY);
+                    // todo: Handle case of use-own-inventory later
+                    PlayerUtil.reset(winner);
+
+                    final PlayerData data = PlayerData.from(value);
 
                     if (data != null) {
-                        winner.teleport(data.getLocation());
-                        PlayerUtil.reset(winner);
-                        // Handle case of use-own-inventory later
+                        teleport.tryTeleport(winner, data.getLocation(), failed -> {
+                            failed.setHealth(0);
+                            failed.sendMessage(ChatColor.RED + "Teleportation failed! You were killed to prevent staying in the arena.");
+                        });
                         data.restore(winner);
                     } else {
-                        // teleport to lobby
+                        // todo: teleport to lobby
                     }
 
-                    items.forEach(item -> {
-                        if (item != null) {
-                            winner.getInventory().addItem(item);
-                        }
-                    });
+                    items.stream().filter(Objects::nonNull).forEach(item -> winner.getInventory().addItem(item));
                 }
 
                 if (config.isEndCommandsEnabled()) {
@@ -321,19 +297,33 @@ public class DuelManager implements Loadable, Listener {
         }, 1L);
     }
 
+    private void addItems(final Object value, final List<ItemStack> items) {
+        if (value != null && value instanceof Map) {
+            final Map<String, Object> map = CollectionUtil.convert((Map) value, String.class, Object.class);
+            final List<ItemStack> inventory = CollectionUtil.convert((List) map.get("inventory"), ItemStack.class);
+            inventory.addAll(items);
+            map.put("inventory", inventory);
+        }
+    }
+
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void on(final PlayerRespawnEvent event) {
         final Player player = event.getPlayer();
+        final PlayerData data = PlayerData.from(MetadataUtil.removeAndGet(plugin, player, PlayerData.METADATA_KEY));
 
-        MetadataUtil.removeAndGet(plugin, player, PlayerData.METADATA_KEY).ifPresent(value -> PlayerData.from(value).ifPresent(data -> {
+        if (data != null) {
             event.setRespawnLocation(data.getLocation());
-//            essentialsHook.setBackLocation(player, event.getRespawnLocation());
+
+            if (essentials != null) {
+                essentials.setBackLocation(player, event.getRespawnLocation());
+            }
+
             plugin.doSyncAfter(() -> {
                 PlayerUtil.reset(player);
                 data.restore(player);
             }, 1L);
-        }));
+        }
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -343,13 +333,11 @@ public class DuelManager implements Loadable, Listener {
         }
 
         final Player player = (Player) event.getEntity();
-        final Optional<Arena> result = arenaManager.get(player);
+        final Arena arena = arenaManager.get(player);
 
-        if (!result.isPresent()) {
+        if (arena == null) {
             return;
         }
-
-        final Arena arena = result.get();
 
         if (arena.size() > 1) {
             return;
@@ -371,9 +359,9 @@ public class DuelManager implements Loadable, Listener {
             return;
         }
 
-        final Optional<Arena> result = arenaManager.get(player);
+        final Arena arena = arenaManager.get(player);
 
-        if (!result.isPresent() || (event.getEntity() instanceof Player && result.get().has((Player) event.getEntity()))) {
+        if (arena == null || (event.getEntity() instanceof Player && arena.has((Player) event.getEntity()))) {
             return;
         }
 
@@ -435,8 +423,8 @@ public class DuelManager implements Loadable, Listener {
         final Location to = event.getTo();
 
         if (event.getCause() != TeleportCause.SPECTATE) {
-            final List<Player> players = arenaManager.getAllPlayers();
-            players.addAll(spectateManager.getAllPlayers());
+            final Set<Player> players = arenaManager.getPlayers();
+            players.addAll(spectateManager.getPlayers());
 
             for (final Player target : players) {
                 if (!target.isOnline() || !isSimilar(target.getLocation(), to)) {

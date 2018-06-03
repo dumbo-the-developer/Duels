@@ -23,12 +23,14 @@
  * SOFTWARE.
  */
 
-package me.realized.duels.cache;
+package me.realized.duels.data;
 
+import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import lombok.Getter;
 import me.realized.duels.util.CollectionUtil;
 import org.bukkit.Location;
@@ -40,7 +42,7 @@ public class PlayerData {
 
     public static final String METADATA_KEY = PlayerData.class.getSimpleName();
 
-    private final ItemStack[] inventory;
+    private final List<ItemStack> inventory;
     private final ItemStack[] armor;
     private final Collection<PotionEffect> effects;
     private final double health;
@@ -50,7 +52,7 @@ public class PlayerData {
     private final Location location;
 
     public PlayerData(final Player player) {
-        this.inventory = player.getInventory().getContents().clone();
+        this.inventory = Lists.newArrayList(player.getInventory().getContents().clone());
         this.armor = player.getInventory().getArmorContents().clone();
         this.effects = player.getActivePotionEffects();
         this.health = player.getHealth();
@@ -58,14 +60,19 @@ public class PlayerData {
         this.location = player.getLocation().clone();
     }
 
-    private PlayerData(final ItemStack[] inventory, final ItemStack[] armor, final Collection<?> effects, final double health, final int hunger,
+    private PlayerData(final List<?> inventory, final ItemStack[] armor, final Collection<?> effects, final double health, final int hunger,
         final Location location) {
-        this.inventory = inventory;
+        this.inventory = CollectionUtil.convert(inventory, ItemStack.class);
         this.armor = armor;
-        this.effects = CollectionUtil.tryConvert(effects, PotionEffect.class);
+        this.effects = CollectionUtil.convert(effects, PotionEffect.class);
         this.health = health;
         this.hunger = hunger;
         this.location = location;
+    }
+
+    private PlayerData(final Map data) {
+        this((List<?>) data.get("inventory"), (ItemStack[]) data.get("armor"), (Collection<?>) data.get("effects"), (double) data.get("health"),
+            (int) data.get("hunger"), (Location) data.get("location"));
     }
 
     public void restore(final Player player) {
@@ -73,12 +80,7 @@ public class PlayerData {
         player.setHealth(health);
         player.setFoodLevel(hunger);
         player.getInventory().setArmorContents(armor);
-
-        for (final ItemStack item : inventory) {
-            if (item != null) {
-                player.getInventory().addItem(item);
-            }
-        }
+        inventory.stream().filter(Objects::nonNull).forEach(item -> player.getInventory().addItem(item));
         player.updateInventory();
     }
 
@@ -93,14 +95,11 @@ public class PlayerData {
         return data;
     }
 
-    public static Optional<PlayerData> from(final Object value) {
+    public static PlayerData from(final Object value) {
         if (value == null || !(value instanceof Map)) {
-            return Optional.empty();
+            return null;
         }
 
-        final Map data = (Map) value;
-        return Optional
-            .of(new PlayerData((ItemStack[]) data.get("inventory"), (ItemStack[]) data.get("armor"), (Collection<?>) data.get("effects"), (double) data.get("health"),
-                (int) data.get("hunger"), (Location) data.get("location")));
+        return new PlayerData((Map) value);
     }
 }

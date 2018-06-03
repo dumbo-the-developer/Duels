@@ -25,7 +25,6 @@
 
 package me.realized.duels.command.commands.duels.subcommands;
 
-import java.util.Optional;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.kit.Kit;
@@ -41,9 +40,9 @@ public class DeletekitCommand extends BaseCommand {
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final String name = StringUtils.join(args, " ", 1, args.length);
-        final Optional<Kit> target = kitManager.remove(name);
+        final Kit removed = kitManager.remove(name);
 
-        if (!target.isPresent()) {
+        if (removed == null) {
             sender.sendMessage(name + " is not an existing kit.");
             return;
         }

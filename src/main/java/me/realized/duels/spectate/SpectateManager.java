@@ -27,20 +27,19 @@ package me.realized.duels.spectate;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import me.realized._duels.utilities.inventory.ItemBuilder;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.arena.ArenaManager;
-import me.realized.duels.cache.PlayerData;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
+import me.realized.duels.data.PlayerData;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.PlayerUtil;
 import me.realized.duels.util.compat.Collisions;
 import me.realized.duels.util.compat.CompatUtil;
-import me.realized.duels.util.meta.MetadataUtil;
+import me.realized.duels.util.inventory.ItemBuilder;
+import me.realized.duels.util.metadata.MetadataUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -76,24 +75,24 @@ public class SpectateManager implements Loadable, Listener {
     }
 
     @Override
-    public void handleLoad() throws Exception {
+    public void handleLoad() {
 
     }
 
     @Override
-    public void handleUnload() throws Exception {
+    public void handleUnload() {
 
     }
 
-    public Optional<Spectator> get(final Player player) {
-        return Optional.ofNullable(spectators.get(player));
+    public Spectator get(final Player player) {
+        return spectators.get(player);
     }
 
     public boolean isSpectating(final Player player) {
-        return get(player).isPresent();
+        return get(player) != null;
     }
 
-    private void startSpectating(final Player player, final Player target, final boolean silent) {
+    public void startSpectating(final Player player, final Player target) {
         if (isSpectating(player)) {
             lang.sendMessage(player, "ERROR.already-spectating.sender");
             return;
@@ -104,71 +103,61 @@ public class SpectateManager implements Loadable, Listener {
             return;
         }
 
-        final Optional<Arena> found = arenaManager.get(target);
+        final Arena arena = arenaManager.get(target);
 
-        if (!found.isPresent()) {
+        if (arena == null) {
             lang.sendMessage(player, "ERROR.not-in-match", "player", target.getName());
             return;
         }
 
-        if (!MetadataUtil.get(plugin, player, PlayerData.METADATA_KEY).isPresent()) {
+        if (MetadataUtil.get(plugin, player, PlayerData.METADATA_KEY) == null) {
             MetadataUtil.put(plugin, player, PlayerData.METADATA_KEY, new PlayerData(player).to());
         }
 
         PlayerUtil.reset(player);
-
-        final Arena arena = found.get();
-        arena.getCurrent().getPlayers().keySet().forEach(arenaPlayer -> {
+        arena.getMatch().getPlayers().forEach(arenaPlayer -> {
             if (arenaPlayer.isOnline() && arenaPlayer.canSee(player)) {
                 arenaPlayer.hidePlayer(player);
             }
         });
-
         player.teleport(target, PlayerTeleportEvent.TeleportCause.SPECTATE);
-        player.getInventory().setItem(8, ItemBuilder.builder().type(Material.PAPER).name("&cStop Spectating").build());
+        player.getInventory().setItem(8, ItemBuilder.of(Material.PAPER).name("&cStop Spectating").build());
         player.setAllowFlight(true);
         player.setFlying(true);
         Collisions.setCollidable(player, false);
         spectators.put(player, new Spectator(player, target, arena));
 
-        if (player.hasPermission("duels.spectate.anonymously") || silent) {
+        if (player.hasPermission("duels.spectate.anonymously")) {
             return;
         }
 
-        arena.getCurrent().getPlayers().keySet().stream().filter(Player::isOnline)
+        arena.getMatch().getPlayers().stream().filter(Player::isOnline)
             .forEach(arenaPlayer -> lang.sendMessage(arenaPlayer, "SPECTATE.arena-broadcast", true, "player", player.getName()));
     }
 
-    public void startSpectating(final Player player, final Player target) {
-        startSpectating(player, target, false);
-    }
-
     public void stopSpectating(final Player player, final boolean end) {
-        final Optional<Spectator> found = get(player);
+        final Spectator spectator = get(player);
 
-        if (!found.isPresent()) {
+        if (spectator == null) {
             return;
         }
 
         spectators.remove(player);
         PlayerUtil.reset(player);
-
-        final Spectator spectator = found.get();
         player.setFlying(false);
         player.setAllowFlight(false);
         Collisions.setCollidable(player, true);
 
-        final Optional<PlayerData> cached = PlayerData.from(MetadataUtil.removeAndGet(plugin, player, PlayerData.METADATA_KEY).orElse(null));
+        final PlayerData data = PlayerData.from(MetadataUtil.removeAndGet(plugin, player, PlayerData.METADATA_KEY));
 
-        if (cached.isPresent()) {
-            final PlayerData playerData = cached.get();
-            player.teleport(playerData.getLocation());
-            playerData.restore(player);
+        if (data != null) {
+            player.teleport(data.getLocation());
+            data.restore(player);
         } else {
             // teleport to lobby?
         }
 
-        spectator.getArena().getCurrent().getPlayers().keySet().forEach(arenaPlayer -> {
+        spectator.getArena().getMatch().getPlayers().forEach(arenaPlayer -> {
             if (arenaPlayer.isOnline()) {
                 arenaPlayer.showPlayer(player);
             }
@@ -179,7 +168,7 @@ public class SpectateManager implements Loadable, Listener {
         }
     }
 
-    public Set<Player> getAllPlayers() {
+    public Set<Player> getPlayers() {
         return spectators.keySet();
     }
 

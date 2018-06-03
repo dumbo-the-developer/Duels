@@ -29,8 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.cache.Setting;
 import me.realized.duels.gui.BaseButton;
+import me.realized.duels.setting.Setting;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bukkit.ChatColor;
@@ -100,7 +100,7 @@ public class Kit extends BaseButton {
 
     @Override
     public void onClick(final Player player) {
-        final Setting setting = settingCache.getSafely(player);
+        final Setting setting = settingManager.getSafely(player);
         setting.setKit(this);
         setting.openGui(player);
         player.sendMessage(ChatColor.GREEN + "Selected Kit: " + name);

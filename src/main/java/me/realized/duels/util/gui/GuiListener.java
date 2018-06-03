@@ -143,7 +143,7 @@ public class GuiListener<P extends JavaPlugin> implements Loadable, Listener {
                     return;
                 }
 
-                guis.removeIf(privateGui -> !privateGui.equals(gui) && !privateGui.hasViewers());
+                guis.removeIf(privateGui -> privateGui.removeIfEmpty() && !privateGui.equals(gui) && !privateGui.hasViewers());
                 break;
             }
         }

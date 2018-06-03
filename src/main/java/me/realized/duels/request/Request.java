@@ -27,7 +27,7 @@ package me.realized.duels.request;
 
 import java.util.UUID;
 import lombok.Getter;
-import me.realized.duels.cache.Setting;
+import me.realized.duels.setting.Setting;
 import org.bukkit.entity.Player;
 
 public class Request {

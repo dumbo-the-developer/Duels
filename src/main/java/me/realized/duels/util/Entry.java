@@ -23,25 +23,19 @@
  * SOFTWARE.
  */
 
-package me.realized.duels.api;
+package me.realized.duels.util;
 
-import java.util.UUID;
+import lombok.Getter;
 
-public interface User {
+public class Entry<K, V> {
 
-    UUID getUuid();
+    @Getter
+    private final K key;
+    @Getter
+    private final V value;
 
-    String getName();
-
-    int getWins();
-
-    void setWins(final int wins);
-
-    int getLosses();
-
-    void setLosses(final int losses);
-
-    boolean canRequest();
-
-    void setRequests(final boolean requests);
+    public Entry(final K key, final V value) {
+        this.key = key;
+        this.value = value;
+    }
 }

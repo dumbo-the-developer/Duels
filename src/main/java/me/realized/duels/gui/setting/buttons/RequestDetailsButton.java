@@ -26,8 +26,8 @@
 package me.realized.duels.gui.setting.buttons;
 
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.cache.Setting;
 import me.realized.duels.gui.BaseButton;
+import me.realized.duels.setting.Setting;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -44,7 +44,7 @@ public class RequestDetailsButton extends BaseButton {
 
     @Override
     public void update(final Player player) {
-        final Setting setting = settingCache.getSafely(player);
+        final Setting setting = settingManager.getSafely(player);
         final Player target = Bukkit.getPlayer(setting.getTarget());
 
         if (target == null) {

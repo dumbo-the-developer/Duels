@@ -36,7 +36,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -58,7 +58,8 @@ public class ArenaManager implements Loadable {
     public ArenaManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.file = new File(plugin.getDataFolder(), "arenas.json");
-        gui = new MultiPageGui<>(plugin, "Kit Selection", 1, arenas);
+        // TODO: 03/06/2018 Replace to config message vv
+        gui = new MultiPageGui<>(plugin, "Arena Selection", 1, arenas);
         plugin.getGuiListener().addGui(gui);
     }
 
@@ -105,16 +106,16 @@ public class ArenaManager implements Loadable {
         arenas.clear();
     }
 
-    public Optional<Arena> get(final String name) {
-        return arenas.stream().filter(arena -> arena.getName().equals(name)).findFirst();
+    public Arena get(final String name) {
+        return arenas.stream().filter(arena -> arena.getName().equals(name)).findFirst().orElse(null);
     }
 
-    public Optional<Arena> get(final Player player) {
-        return arenas.stream().filter(arena -> arena.has(player)).findFirst();
+    public Arena get(final Player player) {
+        return arenas.stream().filter(arena -> arena.has(player)).findFirst().orElse(null);
     }
 
     public boolean remove(final String name) {
-        return get(name).map(arenas::remove).orElse(false);
+        return arenas.removeIf(arena -> arena.getName().equals(name));
     }
 
     public void save(final String name) {
@@ -122,13 +123,11 @@ public class ArenaManager implements Loadable {
     }
 
     public boolean isInMatch(final Player player) {
-        return get(player).isPresent();
+        return get(player) != null;
     }
 
-    public List<Player> getAllPlayers() {
-        final List<Player> result = new ArrayList<>();
-        arenas.forEach(arena -> result.addAll(arena.getPlayers()));
-        return result;
+    public Set<Player> getPlayers() {
+        return arenas.stream().flatMap(arena -> arena.getPlayers().stream()).collect(Collectors.toSet());
     }
 
     public Arena randomArena() {

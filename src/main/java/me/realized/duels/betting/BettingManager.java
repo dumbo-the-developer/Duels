@@ -26,8 +26,8 @@
 package me.realized.duels.betting;
 
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.cache.Setting;
 import me.realized.duels.gui.betting.BettingGui;
+import me.realized.duels.setting.Setting;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.gui.GuiListener;
 import org.bukkit.entity.Player;

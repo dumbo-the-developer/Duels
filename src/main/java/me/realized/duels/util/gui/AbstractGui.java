@@ -27,7 +27,6 @@ package me.realized.duels.util.gui;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import me.realized.duels.util.inventory.Slots;
 import org.bukkit.entity.Player;
@@ -52,6 +51,10 @@ public abstract class AbstractGui<P extends JavaPlugin> implements Updatable {
 
     public abstract boolean hasViewers();
 
+    public boolean removeIfEmpty() {
+        return false;
+    }
+
     public abstract void on(final Player player, final Inventory top, final InventoryClickEvent event);
 
     public void on(final Player player, final Inventory inventory, final InventoryCloseEvent event) {}
@@ -60,9 +63,9 @@ public abstract class AbstractGui<P extends JavaPlugin> implements Updatable {
         event.setCancelled(true);
     }
 
-    public Optional<Button<P>> get(final Inventory inventory, final int slot) {
+    public Button<P> get(final Inventory inventory, final int slot) {
         final Map<Integer, Button<P>> buttons;
-        return (buttons = this.buttons.get(inventory)) != null ? Optional.ofNullable(buttons.get(slot)) : Optional.empty();
+        return (buttons = this.buttons.get(inventory)) != null ? buttons.get(slot) : null;
     }
 
     public void set(final Inventory inventory, final int slot, final Button<P> button) {

@@ -26,8 +26,8 @@
 package me.realized.duels.gui.setting.buttons;
 
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.cache.Setting;
 import me.realized.duels.gui.BaseButton;
+import me.realized.duels.setting.Setting;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -48,7 +48,7 @@ public class ArenaSelectButton extends BaseButton {
             return;
         }
 
-        final Setting setting = settingCache.getSafely(player);
+        final Setting setting = settingManager.getSafely(player);
         setLore(String.format(LORE_TEMPLATE, setting.getArena() != null ? setting.getArena().getName() : "Random"));
     }
 

@@ -36,7 +36,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
@@ -57,6 +56,7 @@ public class KitManager implements Loadable {
     public KitManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.file = new File(plugin.getDataFolder(), "kits.json");
+        // TODO: 04/06/2018 Replace to config message
         gui = new MultiPageGui<>(plugin, "Kit Selection", 1, kits.values());
         plugin.getGuiListener().addGui(gui);
     }
@@ -106,12 +106,12 @@ public class KitManager implements Loadable {
         kits.clear();
     }
 
-    public Optional<Kit> get(final String name) {
-        return Optional.ofNullable(kits.get(name));
+    public Kit get(final String name) {
+        return kits.get(name);
     }
 
-    public Optional<Kit> remove(final String name) {
-        return Optional.ofNullable(kits.remove(name));
+    public Kit remove(final String name) {
+        return kits.remove(name);
     }
 
     public Kit randomKit() {

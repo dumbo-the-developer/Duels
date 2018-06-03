@@ -28,7 +28,6 @@ package me.realized.duels.util.gui;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import me.realized.duels.util.inventory.InventoryBuilder;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
@@ -42,10 +41,10 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
 
     private final String title;
     private final int size, prevPageSlot, nextPageSlot;
-    private final Collection<? extends Button> buttons;
+    private final Collection<? extends Button<P>> buttons;
     private final List<Page> pages = new ArrayList<>();
 
-    public MultiPageGui(final P plugin, final String title, final int rows, final Collection<? extends Button> buttons) {
+    public MultiPageGui(final P plugin, final String title, final int rows, final Collection<? extends Button<P>> buttons) {
         super(plugin);
         if (title == null || title.isEmpty()) {
             throw new IllegalArgumentException("title cannot be null or empty");
@@ -91,7 +90,7 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
         int slot = 0;
         Page page = null;
 
-        for (final Button button : buttons) {
+        for (final Button<P> button : buttons) {
             if (i % maxSize == 0) {
                 final Page prev = page;
                 page = new Page(
@@ -154,13 +153,12 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
             return;
         }
 
-        final Optional<Page> result = pages.stream().filter(page -> page.inventory.equals(clicked)).findFirst();
+        final Page page = pages.stream().filter(element -> element.inventory.equals(clicked)).findFirst().orElse(null);
 
-        if (!result.isPresent()) {
+        if (page == null) {
             return;
         }
 
-        final Page page = result.get();
         final int slot = event.getSlot();
 
         if (slot == nextPageSlot && page.next != null) {
@@ -168,13 +166,13 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
         } else if (slot == prevPageSlot && page.previous != null) {
             player.openInventory(page.previous.inventory);
         } else {
-            final Optional<Button<P>> cached = get(clicked, slot);
+            final Button<P> button = get(clicked, slot);
 
-            if (!cached.isPresent()) {
+            if (button == null) {
                 return;
             }
 
-            cached.get().onClick(player);
+            button.onClick(player);
         }
     }
 

@@ -40,7 +40,7 @@ public class CreateCommand extends BaseCommand {
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final String name = StringUtils.join(args, " ", 1, args.length);
 
-        if (arenaManager.get(name).isPresent()) {
+        if (arenaManager.get(name) != null) {
             // send msg
             return;
         }
