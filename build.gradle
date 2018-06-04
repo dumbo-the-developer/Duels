@@ -1,6 +1,3 @@
-import org.apache.tools.ant.filters.ReplaceTokens
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 buildscript {
     repositories {
         jcenter()
@@ -11,122 +8,58 @@ buildscript {
     }
 }
 
-group 'me.realized'
-version '3.0.0-SNAPSHOT'
-
-apply plugin: 'java'
-apply plugin: 'com.github.johnrengelman.shadow'
-
-project.tasks.assemble.dependsOn project.tasks.shadowJar
-jar.enabled = false
-
-compileJava.options.encoding = 'UTF-8'
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
-jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+allprojects {
+    group 'me.realized.duels'
+    version '3.0.0-SNAPSHOT'
 }
 
-shadowJar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'com.github.johnrengelman.shadow'
 
-processResources {
-    from(sourceSets.main.resources.srcDirs) {
-        include '**/*.yml'
-        filter(ReplaceTokens, tokens: [VERSION: project.version])
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    repositories {
+        repositories {
+            mavenLocal()
+            mavenCentral()
+
+            maven {
+                name 'spigot-repo'
+                url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots'
+            }
+
+
+            maven {
+                name 'vault-repo'
+                url 'http://nexus.hc.to/content/repositories/pub_releases'
+            }
+
+            maven {
+                name 'mvdw-repo'
+                url 'http://repo.mvdw-software.be/content/groups/public/'
+            }
+
+            maven {
+                name 'clip-repo'
+                url 'http://repo.extendedclip.com/content/repositories/placeholderapi/'
+            }
+
+            maven {
+                name 'sk89q-repo'
+                url 'http://maven.sk89q.com/repo/'
+            }
+
+            maven {
+                name 'byteflux-repo'
+                url 'http://repo.byteflux.net/repository/maven-releases'
+            }
+
+            maven {
+                name 'inventive-repo'
+                url 'https://repo.inventivetalent.org/content/groups/public/'
+            }
+        }
     }
-}
-
-artifacts {
-    archives jar
-}
-
-clean.doFirst {
-    delete "$rootDir/out/"
-}
-
-tasks.withType(ShadowJar) {
-    destinationDir = file("$rootDir/out/")
-}
-
-tasks.withType(Jar) {
-    destinationDir = file("$rootDir/out/")
-}
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-
-    maven {
-        name 'spigot-repo'
-        url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots'
-    }
-
-    maven {
-        name 'vault-repo'
-        url 'http://nexus.hc.to/content/repositories/pub_releases'
-    }
-
-    maven {
-        name 'mvdw-repo'
-        url 'http://repo.mvdw-software.be/content/groups/public/'
-    }
-
-    maven {
-        name 'clip-repo'
-        url 'http://repo.extendedclip.com/content/repositories/placeholderapi/'
-    }
-
-    maven {
-        name 'sk89q-repo'
-        url 'http://maven.sk89q.com/repo/'
-    }
-
-    maven {
-        name 'byteflux-repo'
-        url 'http://repo.byteflux.net/repository/maven-releases'
-    }
-
-    maven {
-        name 'inventive-repo'
-        url 'https://repo.inventivetalent.org/content/groups/public/'
-    }
-}
-
-dependencies {
-    // todo: Add unavailable dependencies to local lib folder
-    compile 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
-    compile 'org.spigotmc:spigot:1.12.2-R0.1-SNAPSHOT'
-    compile 'net.milkbowl.vault:VaultAPI:1.6'
-    compile 'me.clip:placeholderapi:2.8.4'
-    compile 'com.sk89q:worldguard:6.1.1-SNAPSHOT'
-    compile 'net.ess3:EssentialsX:2.0.1'
-    compile 'net.minelink:CombatTagPlus:1.3.1'
-    compile(group: 'com.massivecraft', name: 'Factions', version: '1.6.9.5-U0.1.14') {
-        exclude(module: 'fanciful')
-    }
-    compile 'org.projectlombok:lombok:1.16.20'
-
-    compile 'com.google.code.gson:gson:2.8.2'
-    compile 'be.maximvdw:MVdWPlaceholderAPI:2.5.1-SNAPSHOT'
-    compile 'org.inventivetalent.spiget-update:bukkit:1.4.0'
-}
-
-shadowJar {
-    baseName = 'Duels'
-    classifier = null
-
-    // todo: remove later
-    exclude "me/realized/_duels/**"
-
-    dependencies {
-        include(dependency('com.google.code.gson:.*'))
-        include(dependency('be.maximvdw:.*'))
-        include(dependency('org.inventivetalent.spiget-update:.*'))
-    }
-
-    relocate 'org.inventivetalent.update.spiget', 'me.realized.duels.shaded.org.inventivetalent.update.spiget'
 }

@@ -1,0 +1,11 @@
+dependencies {
+    compile 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
+    compile 'org.spigotmc:spigot:1.12.2-R0.1-SNAPSHOT'
+    compile 'org.projectlombok:lombok:1.16.20'
+}
+
+shadowJar {
+    archiveName = project.name + '-' + project.version + '.jar'
+}
+
+build.dependsOn(shadowJar)
