@@ -27,8 +27,10 @@ package me.realized.duels.kit;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.api.event.kit.KitEquipEvent;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.setting.Setting;
 import me.realized.duels.util.inventory.ItemBuilder;
@@ -39,7 +41,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-public class Kit extends BaseButton {
+public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
 
     @Getter
     private final String name;
@@ -87,7 +89,15 @@ public class Kit extends BaseButton {
         items.put("ARMOR", armorContents);
     }
 
-    public void equip(final Player player) {
+    @Override
+    public void equip(@Nonnull final Player player) {
+        final KitEquipEvent event = new KitEquipEvent(player, this);
+        plugin.getServer().getPluginManager().callEvent(event);
+
+        if (event.isCancelled()) {
+            return;
+        }
+
         for (final Map.Entry<Integer, ItemStack> entry : items.get("INVENTORY").entrySet()) {
             player.getInventory().setItem(entry.getKey(), entry.getValue().clone());
         }

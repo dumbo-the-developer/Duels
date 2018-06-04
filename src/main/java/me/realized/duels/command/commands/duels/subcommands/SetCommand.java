@@ -56,7 +56,7 @@ public class SetCommand extends BaseCommand {
             return;
         }
 
-        arena.setPosition(pos.getAsInt(), ((Player) sender).getLocation().clone());
+        arena.setPosition(sender, pos.getAsInt(), ((Player) sender).getLocation().clone());
         sender.sendMessage("Set pos " + pos.getAsInt() + " for arena '" + arena.getName() + "'!");
     }
 }

@@ -23,53 +23,46 @@
  * SOFTWARE.
  */
 
-package me.realized.duels.request;
+package me.realized.duels.api.event.match;
 
 import java.util.UUID;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.Getter;
-import me.realized.duels.api.arena.Arena;
-import me.realized.duels.api.kit.Kit;
-import me.realized.duels.setting.Setting;
-import org.bukkit.entity.Player;
+import me.realized.duels.api.match.Match;
+import org.bukkit.event.HandlerList;
 
-public class Request implements me.realized.duels.api.request.Request {
+public class MatchEndEvent extends MatchEvent {
+
+    private static final HandlerList handlers = new HandlerList();
 
     @Getter
-    private final UUID sender;
+    private final UUID winner, loser;
     @Getter
-    private final UUID target;
-    @Getter
-    private final Setting setting;
-    @Getter
-    private final long creation;
+    private final Reason reason;
 
-    Request(final Player sender, final Player target, final Setting setting) {
-        this.sender = sender.getUniqueId();
-        this.target = target.getUniqueId();
-        this.setting = setting.lightCopy();
-        this.creation = System.currentTimeMillis();
-    }
-
-    @Nullable
-    @Override
-    public Kit getKit() {
-        return setting.getKit();
-    }
-
-    @Nullable
-    @Override
-    public Arena getArena() {
-        return setting.getArena();
+    public MatchEndEvent(final Match match, @Nullable final UUID winner, @Nullable final UUID loser, @Nonnull final Reason reason) {
+        super(match);
+        this.winner = winner;
+        this.loser = loser;
+        this.reason = reason;
     }
 
     @Override
-    public boolean canBetItems() {
-        return setting.isItemBetting();
+    public HandlerList getHandlers() {
+        return handlers;
     }
 
-    @Override
-    public int getBet() {
-        return setting.getBet();
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
+    public enum Reason {
+
+        OPPONENT_DEFEAT,
+        TIE,
+        MAX_TIME_REACHED,
+        PLUGIN_DISABLE,
+        OTHER
     }
 }

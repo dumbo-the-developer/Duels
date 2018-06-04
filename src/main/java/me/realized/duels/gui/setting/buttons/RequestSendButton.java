@@ -59,7 +59,10 @@ public class RequestSendButton extends BaseButton {
         }
 
         player.closeInventory();
-        requestManager.send(player, target, setting);
+
+        if (!requestManager.send(player, target, setting)) {
+            return;
+        }
 
         final String kit = setting.getKit() != null ? setting.getKit().getName() : "Random";
         final String arena = setting.getArena() != null ? setting.getArena().getName() : "Random";

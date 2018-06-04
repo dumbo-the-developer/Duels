@@ -39,15 +39,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.api.event.arena.ArenaCreateEvent;
+import me.realized.duels.api.event.arena.ArenaRemoveEvent;
 import me.realized.duels.data.ArenaData;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.gui.MultiPageGui;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class ArenaManager implements Loadable {
+public class ArenaManager implements Loadable, me.realized.duels.api.arena.ArenaManager {
 
     private final DuelsPlugin plugin;
     private final File file;
@@ -106,23 +111,39 @@ public class ArenaManager implements Loadable {
         arenas.clear();
     }
 
-    public Arena get(final String name) {
+    @Nullable
+    @Override
+    public Arena get(@Nonnull final String name) {
         return arenas.stream().filter(arena -> arena.getName().equals(name)).findFirst().orElse(null);
     }
 
-    public Arena get(final Player player) {
+    @Nullable
+    @Override
+    public Arena get(@Nonnull final Player player) {
         return arenas.stream().filter(arena -> arena.has(player)).findFirst().orElse(null);
     }
 
-    public boolean remove(final String name) {
-        return arenas.removeIf(arena -> arena.getName().equals(name));
+    public boolean remove(final CommandSender source, final String name) {
+        return arenas.removeIf(arena -> {
+            if (arena.getName().equals(name)) {
+                final ArenaRemoveEvent event = new ArenaRemoveEvent(source, arena);
+                plugin.getServer().getPluginManager().callEvent(event);
+                return true;
+            }
+
+            return false;
+        });
     }
 
-    public void save(final String name) {
-        arenas.add(new Arena(plugin, name));
+    public void create(final CommandSender source, final String name) {
+        final Arena arena = new Arena(plugin, name);
+        arenas.add(arena);
+        final ArenaCreateEvent event = new ArenaCreateEvent(source, arena);
+        plugin.getServer().getPluginManager().callEvent(event);
     }
 
-    public boolean isInMatch(final Player player) {
+    @Override
+    public boolean isInMatch(@Nonnull final Player player) {
         return get(player) != null;
     }
 

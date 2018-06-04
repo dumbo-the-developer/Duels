@@ -45,7 +45,7 @@ public class SavekitCommand extends BaseCommand {
             return;
         }
 
-        kitManager.save((Player) sender, name);
+        kitManager.create((Player) sender, name);
         sender.sendMessage("Saved kit " + name);
     }
 }

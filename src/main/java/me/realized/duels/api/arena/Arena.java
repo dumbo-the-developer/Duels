@@ -23,53 +23,37 @@
  * SOFTWARE.
  */
 
-package me.realized.duels.request;
+package me.realized.duels.api.arena;
 
-import java.util.UUID;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import lombok.Getter;
-import me.realized.duels.api.arena.Arena;
-import me.realized.duels.api.kit.Kit;
-import me.realized.duels.setting.Setting;
+import me.realized.duels.api.match.Match;
+import org.bukkit.Location;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class Request implements me.realized.duels.api.request.Request {
+public interface Arena {
 
-    @Getter
-    private final UUID sender;
-    @Getter
-    private final UUID target;
-    @Getter
-    private final Setting setting;
-    @Getter
-    private final long creation;
-
-    Request(final Player sender, final Player target, final Setting setting) {
-        this.sender = sender.getUniqueId();
-        this.target = target.getUniqueId();
-        this.setting = setting.lightCopy();
-        this.creation = System.currentTimeMillis();
-    }
+    @Nonnull
+    String getName();
 
     @Nullable
-    @Override
-    public Kit getKit() {
-        return setting.getKit();
-    }
+    Location getPosition(final int pos);
+
+    void setPosition(@Nullable final CommandSender source, final int pos, @Nonnull final Location location);
+
+    void setPosition(final int pos, @Nonnull final Location location);
+
+    boolean isDisabled();
+
+    void setDisabled(@Nullable final CommandSender source, final boolean disabled);
+
+    void setDisabled(final boolean disabled);
+
+    boolean isUsed();
+
+    boolean has(@Nonnull final Player player);
 
     @Nullable
-    @Override
-    public Arena getArena() {
-        return setting.getArena();
-    }
-
-    @Override
-    public boolean canBetItems() {
-        return setting.isItemBetting();
-    }
-
-    @Override
-    public int getBet() {
-        return setting.getBet();
-    }
+    Match getMatch();
 }

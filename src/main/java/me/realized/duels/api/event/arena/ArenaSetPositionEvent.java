@@ -23,53 +23,43 @@
  * SOFTWARE.
  */
 
-package me.realized.duels.request;
+package me.realized.duels.api.event.arena;
 
-import java.util.UUID;
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 import lombok.Getter;
+import lombok.Setter;
 import me.realized.duels.api.arena.Arena;
-import me.realized.duels.api.kit.Kit;
-import me.realized.duels.setting.Setting;
-import org.bukkit.entity.Player;
+import org.bukkit.Location;
+import org.bukkit.command.CommandSender;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.HandlerList;
 
-public class Request implements me.realized.duels.api.request.Request {
+public class ArenaSetPositionEvent extends ArenaEvent implements Cancellable {
+
+    private static final HandlerList handlers = new HandlerList();
 
     @Getter
-    private final UUID sender;
+    @Setter
+    private boolean cancelled;
     @Getter
-    private final UUID target;
+    @Setter
+    private int pos;
     @Getter
-    private final Setting setting;
-    @Getter
-    private final long creation;
+    @Setter
+    private Location location;
 
-    Request(final Player sender, final Player target, final Setting setting) {
-        this.sender = sender.getUniqueId();
-        this.target = target.getUniqueId();
-        this.setting = setting.lightCopy();
-        this.creation = System.currentTimeMillis();
-    }
-
-    @Nullable
-    @Override
-    public Kit getKit() {
-        return setting.getKit();
-    }
-
-    @Nullable
-    @Override
-    public Arena getArena() {
-        return setting.getArena();
+    public ArenaSetPositionEvent(final CommandSender source, final Arena arena, final int pos, @Nonnull final Location location) {
+        super(source, arena);
+        this.pos = pos;
+        this.location = location;
     }
 
     @Override
-    public boolean canBetItems() {
-        return setting.isItemBetting();
+    public HandlerList getHandlers() {
+        return handlers;
     }
 
-    @Override
-    public int getBet() {
-        return setting.getBet();
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 }

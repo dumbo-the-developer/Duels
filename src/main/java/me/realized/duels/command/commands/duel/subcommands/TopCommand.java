@@ -23,53 +23,20 @@
  * SOFTWARE.
  */
 
-package me.realized.duels.request;
+package me.realized.duels.command.commands.duel.subcommands;
 
-import java.util.UUID;
-import javax.annotation.Nullable;
-import lombok.Getter;
-import me.realized.duels.api.arena.Arena;
-import me.realized.duels.api.kit.Kit;
-import me.realized.duels.setting.Setting;
-import org.bukkit.entity.Player;
+import me.realized.duels.DuelsPlugin;
+import me.realized.duels.command.BaseCommand;
+import org.bukkit.command.CommandSender;
 
-public class Request implements me.realized.duels.api.request.Request {
+public class TopCommand extends BaseCommand {
 
-    @Getter
-    private final UUID sender;
-    @Getter
-    private final UUID target;
-    @Getter
-    private final Setting setting;
-    @Getter
-    private final long creation;
-
-    Request(final Player sender, final Player target, final Setting setting) {
-        this.sender = sender.getUniqueId();
-        this.target = target.getUniqueId();
-        this.setting = setting.lightCopy();
-        this.creation = System.currentTimeMillis();
-    }
-
-    @Nullable
-    @Override
-    public Kit getKit() {
-        return setting.getKit();
-    }
-
-    @Nullable
-    @Override
-    public Arena getArena() {
-        return setting.getArena();
+    public TopCommand(final DuelsPlugin plugin) {
+        super(plugin, "top", "Displays top duel wins & losses.", "duels.top", 2);
     }
 
     @Override
-    public boolean canBetItems() {
-        return setting.isItemBetting();
-    }
+    protected void execute(final CommandSender sender, final String label, final String[] args) {
 
-    @Override
-    public int getBet() {
-        return setting.getBet();
     }
 }

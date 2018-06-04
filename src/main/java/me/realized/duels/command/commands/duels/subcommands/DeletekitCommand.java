@@ -40,7 +40,7 @@ public class DeletekitCommand extends BaseCommand {
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final String name = StringUtils.join(args, " ", 1, args.length);
-        final Kit removed = kitManager.remove(name);
+        final Kit removed = kitManager.remove(sender, name);
 
         if (removed == null) {
             sender.sendMessage(name + " is not an existing kit.");

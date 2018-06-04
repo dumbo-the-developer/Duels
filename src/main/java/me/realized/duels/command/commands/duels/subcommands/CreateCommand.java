@@ -45,6 +45,6 @@ public class CreateCommand extends BaseCommand {
             return;
         }
 
-        arenaManager.save(name);
+        arenaManager.create(sender, name);
     }
 }

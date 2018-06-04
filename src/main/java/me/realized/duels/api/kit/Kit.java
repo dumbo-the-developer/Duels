@@ -23,21 +23,15 @@
  * SOFTWARE.
  */
 
-package me.realized.duels.cache;
+package me.realized.duels.api.kit;
 
-import me.realized.duels.DuelsPlugin;
+import javax.annotation.Nonnull;
 import org.bukkit.entity.Player;
 
-public class SettingCache extends Cache<Setting> {
+public interface Kit {
 
-    private final DuelsPlugin plugin;
+    @Nonnull
+    String getName();
 
-    public SettingCache(final DuelsPlugin plugin) {
-        this.plugin = plugin;
-    }
-
-    @Override
-    Setting create(final Player player) {
-        return new Setting(plugin);
-    }
+    void equip(@Nonnull final Player player);
 }

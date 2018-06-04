@@ -23,19 +23,37 @@
  * SOFTWARE.
  */
 
-package me.realized.duels.util;
+package me.realized.duels.api.event.kit;
 
+import javax.annotation.Nonnull;
 import lombok.Getter;
+import lombok.Setter;
+import me.realized.duels.api.kit.Kit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.HandlerList;
 
-public class Entry<K, V> {
+public class KitEquipEvent extends KitEvent implements Cancellable {
+
+    private static final HandlerList handlers = new HandlerList();
 
     @Getter
-    private final K key;
+    private final Player source;
     @Getter
-    private final V value;
+    @Setter
+    private boolean cancelled;
 
-    public Entry(final K key, final V value) {
-        this.key = key;
-        this.value = value;
+    public KitEquipEvent(@Nonnull final Player source, final Kit kit) {
+        super(source, kit);
+        this.source = source;
+    }
+
+    @Override
+    public HandlerList getHandlers() {
+        return handlers;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 }

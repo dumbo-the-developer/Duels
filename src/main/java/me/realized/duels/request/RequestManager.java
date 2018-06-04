@@ -29,15 +29,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.api.event.request.RequestSendEvent;
 import me.realized.duels.setting.Setting;
 import me.realized.duels.util.Loadable;
 import org.bukkit.entity.Player;
 
 public class RequestManager implements Loadable {
 
+    private final DuelsPlugin plugin;
     private final Map<UUID, Map<UUID, Request>> requests = new HashMap<>();
 
-    public RequestManager(final DuelsPlugin plugin) {}
+    public RequestManager(final DuelsPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public void handleLoad() throws Exception {
@@ -60,8 +64,17 @@ public class RequestManager implements Loadable {
         return cached;
     }
 
-    public void send(final Player sender, final Player target, final Setting setting) {
-        get(sender, true).put(target.getUniqueId(), new Request(target, setting));
+    public boolean send(final Player sender, final Player target, final Setting setting) {
+        final Request request = new Request(sender, target, setting);
+        final RequestSendEvent event = new RequestSendEvent(sender, target, request);
+        plugin.getServer().getPluginManager().callEvent(event);
+
+        if (event.isCancelled()) {
+            return false;
+        }
+
+        get(sender, true).put(target.getUniqueId(), request);
+        return true;
     }
 
     public boolean has(final Player sender, final Player target) {

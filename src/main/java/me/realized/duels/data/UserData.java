@@ -26,13 +26,15 @@
 package me.realized.duels.data;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
+import me.realized.duels.api.user.User;
 import org.bukkit.entity.Player;
 
-public class UserData {
+public class UserData implements User {
 
     @Getter
     private final UUID uuid;
@@ -47,7 +49,6 @@ public class UserData {
     private int losses;
     @Setter
     private boolean requests = true;
-    @Getter
     private List<MatchData> matches = new ArrayList<>();
 
     public UserData(final Player player) {
@@ -61,6 +62,11 @@ public class UserData {
 
     public void addLoss() {
         losses++;
+    }
+
+    @Override
+    public List<MatchData> getMatches() {
+        return Collections.unmodifiableList(matches);
     }
 
     public void addMatch(final MatchData matchData) {

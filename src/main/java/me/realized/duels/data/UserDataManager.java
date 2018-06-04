@@ -43,10 +43,14 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.api.event.user.UserCreateEvent;
+import me.realized.duels.api.user.User;
+import me.realized.duels.api.user.UserManager;
 import me.realized.duels.config.Lang;
-import me.realized.duels.util.Entry;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.profile.ProfileUtil;
@@ -57,7 +61,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public class UserDataManager implements Loadable, Listener {
+public class UserDataManager implements Loadable, Listener, UserManager {
 
     // TODO: 23/05/2018 Implement command/sign/hologram leaderboard in an addon/extension/external plugin
     private final DuelsPlugin plugin;
@@ -124,17 +128,21 @@ public class UserDataManager implements Loadable, Listener {
         users.clear();
     }
 
-    public UserData get(final UUID uuid) {
+    @Nullable
+    @Override
+    public UserData get(@Nonnull final UUID uuid) {
         return users.get(uuid);
     }
 
-    public UserData get(final Player player) {
+    @Nullable
+    @Override
+    public UserData get(@Nonnull final Player player) {
         return get(player.getUniqueId());
     }
 
-    // TODO: 28/05/2018 This will be available in the API
-    public <V> List<Entry<String, V>> sortedEntries(final Function<UserData, V> function, final Comparator<Entry<String, V>> comparator) {
-        return users.values().stream().map(data -> new Entry<>(data.getName(), function.apply(data))).sorted(comparator).collect(Collectors.toList());
+    @Override
+    public <V> List<SortedEntry<String, V>> sorted(final Function<User, V> function, final Comparator<SortedEntry<String, V>> comparator) {
+        return users.values().stream().map(data -> new SortedEntry<>(data.getName(), function.apply(data))).sorted(comparator).collect(Collectors.toList());
     }
 
     private void saveUsers(final Collection<? extends Player> players) {
@@ -151,7 +159,9 @@ public class UserDataManager implements Loadable, Listener {
         final File file = new File(folder, player.getUniqueId() + ".json");
 
         if (!file.exists()) {
-            return new UserData(player);
+            final UserData user = new UserData(player);
+            plugin.getServer().getPluginManager().callEvent(new UserCreateEvent(user));
+            return user;
         }
 
         try (Reader reader = new InputStreamReader(new FileInputStream(file))) {

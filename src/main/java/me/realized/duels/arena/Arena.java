@@ -33,9 +33,12 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import lombok.Getter;
-import lombok.Setter;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.api.event.arena.ArenaSetPositionEvent;
+import me.realized.duels.api.event.arena.ArenaStateChangeEvent;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.setting.Setting;
@@ -43,17 +46,17 @@ import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class Arena extends BaseButton {
+public class Arena extends BaseButton implements me.realized.duels.api.arena.Arena {
 
     @Getter
     private final String name;
     @Getter
     private Map<Integer, Location> positions = new HashMap<>();
     @Getter
-    @Setter
     private boolean disabled;
     @Getter
     private Match match;
@@ -63,23 +66,67 @@ public class Arena extends BaseButton {
         this.name = name;
     }
 
-    public boolean isAvailable() {
-        return !disabled && !isUsed() && positions.get(1) != null && positions.get(2) != null;
+    @Nullable
+    @Override
+    public Location getPosition(final int pos) {
+        return positions.get(pos);
     }
 
+    @Override
+    public void setPosition(@Nullable final CommandSender source, final int pos, @Nonnull final Location location) {
+        final ArenaSetPositionEvent event = new ArenaSetPositionEvent(source, this, pos, location);
+        plugin.getServer().getPluginManager().callEvent(event);
+
+        if (event.isCancelled()) {
+            return;
+        }
+
+        positions.put(pos, location);
+    }
+
+    @Override
+    public void setPosition(final int pos, @Nonnull final Location location) {
+        setPosition(null, pos, location);
+    }
+
+    @Override
+    public void setDisabled(@Nullable final CommandSender source, final boolean disabled) {
+        final ArenaStateChangeEvent event = new ArenaStateChangeEvent(source, this, disabled);
+        plugin.getServer().getPluginManager().callEvent(event);
+
+        if (event.isCancelled()) {
+            return;
+        }
+
+        this.disabled = event.isDisabled();
+    }
+
+    @Override
+    public void setDisabled(final boolean disabled) {
+        setDisabled(null, disabled);
+    }
+
+    @Override
     public boolean isUsed() {
         return match != null;
     }
 
+    public boolean isAvailable() {
+        return !disabled && !isUsed() && positions.get(1) != null && positions.get(2) != null;
+    }
+
     public void startMatch(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet) {
         this.match = new Match(kit, items, bet);
+
+
     }
 
     public void endMatch() {
         match = null;
     }
 
-    public boolean has(final Player player) {
+    @Override
+    public boolean has(@Nonnull final Player player) {
         return isUsed() && !match.getPlayerMap().getOrDefault(player, true);
     }
 
@@ -105,10 +152,6 @@ public class Arena extends BaseButton {
 
     public Set<Player> getPlayers() {
         return isUsed() ? match.getPlayers() : Collections.emptySet();
-    }
-
-    public void setPosition(final int pos, final Location location) {
-        positions.put(pos, location);
     }
 
     @Override

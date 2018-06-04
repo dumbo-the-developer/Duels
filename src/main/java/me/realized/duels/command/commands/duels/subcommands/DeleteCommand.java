@@ -40,7 +40,7 @@ public class DeleteCommand extends BaseCommand {
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final String name = StringUtils.join(args, " ", 1, args.length);
 
-        if (!arenaManager.remove(name)) {
+        if (!arenaManager.remove(sender, name)) {
             // send msg
             return;
         }

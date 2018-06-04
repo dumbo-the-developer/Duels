@@ -32,6 +32,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.api.event.match.MatchEndEvent;
+import me.realized.duels.api.event.match.MatchEndEvent.Reason;
+import me.realized.duels.api.event.match.MatchStartEvent;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.arena.Match;
@@ -109,6 +112,7 @@ public class DuelManager implements Loadable, Listener {
         this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
     }
 
+    // TODO: 04/06/2018 Handle ending match on plugin disable & max duration reach
     @Override
     public void handleUnload() {
         Bukkit.getOnlinePlayers().stream().filter(Player::isDead).forEach(player -> {
@@ -155,6 +159,9 @@ public class DuelManager implements Loadable, Listener {
         arena.startMatch(kit, items, setting.getBet());
         handlePlayer(first, arena, kit, arena.getPositions().get(1));
         handlePlayer(second, arena, kit, arena.getPositions().get(2));
+
+        final MatchStartEvent event = new MatchStartEvent(arena.getMatch(), first, second);
+        plugin.getServer().getPluginManager().callEvent(event);
     }
 
     private void handlePlayer(final Player player, final Arena arena, final Kit kit, final Location location) {
@@ -206,6 +213,10 @@ public class DuelManager implements Loadable, Listener {
         plugin.doSyncAfter(() -> {
             final Match match = arena.getMatch();
 
+            if (match == null) {
+                return;
+            }
+
             if (arena.size() == 0) {
                 final int bet = match.getBet();
 
@@ -225,6 +236,9 @@ public class DuelManager implements Loadable, Listener {
                 });
 
                 Bukkit.broadcastMessage(ChatColor.BLUE + "Tie Game!");
+
+                final MatchEndEvent endEvent = new MatchEndEvent(arena.getMatch(), null,null, Reason.TIE);
+                plugin.getServer().getPluginManager().callEvent(endEvent);
                 arena.endMatch();
                 return;
             }
@@ -292,6 +306,9 @@ public class DuelManager implements Loadable, Listener {
                 }
 
                 Bukkit.broadcastMessage("Winner = " + winner.getName());
+
+                final MatchEndEvent endEvent = new MatchEndEvent(arena.getMatch(), winner.getUniqueId(), player.getUniqueId(), Reason.OPPONENT_DEFEAT);
+                plugin.getServer().getPluginManager().callEvent(endEvent);
                 arena.endMatch();
             }, config.getTeleportDelay() * 20L);
         }, 1L);

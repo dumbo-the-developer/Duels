@@ -26,8 +26,9 @@
 package me.realized.duels.data;
 
 import lombok.Getter;
+import me.realized.duels.api.user.MatchInfo;
 
-public class MatchData {
+public class MatchData implements MatchInfo {
 
     @Getter
     private final String winner;
@@ -46,6 +47,11 @@ public class MatchData {
         this.time = time;
         this.duration = duration;
         this.health = health;
+    }
+
+    @Override
+    public long getCreation() {
+        return time;
     }
 
     @Override

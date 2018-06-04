@@ -23,53 +23,44 @@
  * SOFTWARE.
  */
 
-package me.realized.duels.request;
+package me.realized.duels.api.event.request;
 
-import java.util.UUID;
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 import lombok.Getter;
-import me.realized.duels.api.arena.Arena;
-import me.realized.duels.api.kit.Kit;
-import me.realized.duels.setting.Setting;
+import lombok.Setter;
+import me.realized.duels.api.event.SourcedEvent;
+import me.realized.duels.api.request.Request;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.HandlerList;
 
-public class Request implements me.realized.duels.api.request.Request {
+public class RequestSendEvent extends SourcedEvent implements Cancellable {
+
+    private static final HandlerList handlers = new HandlerList();
 
     @Getter
-    private final UUID sender;
+    private final Player source;
     @Getter
-    private final UUID target;
+    private final Player target;
     @Getter
-    private final Setting setting;
+    private final Request request;
     @Getter
-    private final long creation;
+    @Setter
+    private boolean cancelled;
 
-    Request(final Player sender, final Player target, final Setting setting) {
-        this.sender = sender.getUniqueId();
-        this.target = target.getUniqueId();
-        this.setting = setting.lightCopy();
-        this.creation = System.currentTimeMillis();
-    }
-
-    @Nullable
-    @Override
-    public Kit getKit() {
-        return setting.getKit();
-    }
-
-    @Nullable
-    @Override
-    public Arena getArena() {
-        return setting.getArena();
+    public RequestSendEvent(@Nonnull final Player source, @Nonnull Player target, @Nonnull Request request) {
+        super(source);
+        this.source = source;
+        this.target = target;
+        this.request = request;
     }
 
     @Override
-    public boolean canBetItems() {
-        return setting.isItemBetting();
+    public HandlerList getHandlers() {
+        return handlers;
     }
 
-    @Override
-    public int getBet() {
-        return setting.getBet();
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 }

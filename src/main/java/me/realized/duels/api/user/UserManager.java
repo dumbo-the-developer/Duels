@@ -23,53 +23,37 @@
  * SOFTWARE.
  */
 
-package me.realized.duels.request;
+package me.realized.duels.api.user;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.Getter;
-import me.realized.duels.api.arena.Arena;
-import me.realized.duels.api.kit.Kit;
-import me.realized.duels.setting.Setting;
 import org.bukkit.entity.Player;
 
-public class Request implements me.realized.duels.api.request.Request {
-
-    @Getter
-    private final UUID sender;
-    @Getter
-    private final UUID target;
-    @Getter
-    private final Setting setting;
-    @Getter
-    private final long creation;
-
-    Request(final Player sender, final Player target, final Setting setting) {
-        this.sender = sender.getUniqueId();
-        this.target = target.getUniqueId();
-        this.setting = setting.lightCopy();
-        this.creation = System.currentTimeMillis();
-    }
+public interface UserManager {
 
     @Nullable
-    @Override
-    public Kit getKit() {
-        return setting.getKit();
-    }
+    User get(@Nonnull final UUID uuid);
 
     @Nullable
-    @Override
-    public Arena getArena() {
-        return setting.getArena();
-    }
+    User get(@Nonnull final Player player);
 
-    @Override
-    public boolean canBetItems() {
-        return setting.isItemBetting();
-    }
+    <V> List<SortedEntry<String, V>> sorted(final Function<User, V> function, final Comparator<SortedEntry<String, V>> comparator);
 
-    @Override
-    public int getBet() {
-        return setting.getBet();
+    class SortedEntry<K, V> {
+
+        @Getter
+        private final K key;
+        @Getter
+        private final V value;
+
+        public SortedEntry(final K key, final V value) {
+            this.key = key;
+            this.value = value;
+        }
     }
 }

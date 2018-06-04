@@ -51,7 +51,7 @@ public class ToggleCommand extends BaseCommand {
             return;
         }
 
-        arena.setDisabled(!arena.isDisabled());
+        arena.setDisabled(sender, !arena.isDisabled());
         sender.sendMessage("Arena '" + arena.getName() + "' is now " + (arena.isDisabled() ? "disabled" : "enabled") + "!");
     }
 }

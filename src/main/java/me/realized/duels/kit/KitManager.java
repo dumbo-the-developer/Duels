@@ -37,15 +37,20 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.api.event.kit.KitCreateEvent;
+import me.realized.duels.api.event.kit.KitRemoveEvent;
 import me.realized.duels.data.KitData;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.gui.MultiPageGui;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class KitManager implements Loadable {
+public class KitManager implements Loadable, me.realized.duels.api.kit.KitManager {
 
     private final DuelsPlugin plugin;
     private final File file;
@@ -106,12 +111,44 @@ public class KitManager implements Loadable {
         kits.clear();
     }
 
-    public Kit get(final String name) {
+    @Nullable
+    @Override
+    public Kit get(@Nonnull final String name) {
         return kits.get(name);
     }
 
-    public Kit remove(final String name) {
-        return kits.remove(name);
+    @Nullable
+    @Override
+    public Kit create(@Nonnull final Player creator, @Nonnull final String name) {
+        if (kits.containsKey(name)) {
+            return null;
+        }
+
+        final Kit kit = new Kit(plugin, name, creator.getInventory());
+        kits.put(name, kit);
+        final KitCreateEvent event = new KitCreateEvent(creator, kit);
+        plugin.getServer().getPluginManager().callEvent(event);
+        return kit;
+    }
+
+    @Nullable
+    @Override
+    public Kit remove(@Nullable CommandSender source, @Nonnull final String name) {
+        final Kit kit = kits.remove(name);
+
+        if (kit == null) {
+            return null;
+        }
+
+        final KitRemoveEvent event = new KitRemoveEvent(source, kit);
+        plugin.getServer().getPluginManager().callEvent(event);
+        return kit;
+    }
+
+    @Nullable
+    @Override
+    public Kit remove(@Nonnull final String name) {
+        return remove(null, name);
     }
 
     public Kit randomKit() {
@@ -121,9 +158,5 @@ public class KitManager implements Loadable {
 
         final Kit[] kits = this.kits.values().toArray(new Kit[this.kits.size()]);
         return kits[ThreadLocalRandom.current().nextInt(kits.length)];
-    }
-
-    public void save(final Player player, final String name) {
-        kits.put(name, new Kit(plugin, name, player.getInventory()));
     }
 }

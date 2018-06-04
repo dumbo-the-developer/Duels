@@ -23,53 +23,29 @@
  * SOFTWARE.
  */
 
-package me.realized.duels.request;
+package me.realized.duels.api.request;
 
 import java.util.UUID;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import lombok.Getter;
 import me.realized.duels.api.arena.Arena;
 import me.realized.duels.api.kit.Kit;
-import me.realized.duels.setting.Setting;
-import org.bukkit.entity.Player;
 
-public class Request implements me.realized.duels.api.request.Request {
+public interface Request {
 
-    @Getter
-    private final UUID sender;
-    @Getter
-    private final UUID target;
-    @Getter
-    private final Setting setting;
-    @Getter
-    private final long creation;
+    @Nonnull
+    UUID getSender();
 
-    Request(final Player sender, final Player target, final Setting setting) {
-        this.sender = sender.getUniqueId();
-        this.target = target.getUniqueId();
-        this.setting = setting.lightCopy();
-        this.creation = System.currentTimeMillis();
-    }
+    @Nonnull
+    UUID getTarget();
 
     @Nullable
-    @Override
-    public Kit getKit() {
-        return setting.getKit();
-    }
+    Kit getKit();
 
     @Nullable
-    @Override
-    public Arena getArena() {
-        return setting.getArena();
-    }
+    Arena getArena();
 
-    @Override
-    public boolean canBetItems() {
-        return setting.isItemBetting();
-    }
+    boolean canBetItems();
 
-    @Override
-    public int getBet() {
-        return setting.getBet();
-    }
+    int getBet();
 }

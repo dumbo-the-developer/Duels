@@ -33,12 +33,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import lombok.Getter;
+import lombok.Setter;
+import me.realized.duels.api.event.match.MatchEndEvent.Reason;
 import me.realized.duels.kit.Kit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class Match {
+public class Match implements me.realized.duels.api.match.Match {
 
     @Getter
     private final long start;
@@ -48,6 +51,9 @@ public class Match {
     @Getter
     private final int bet;
     private final Map<Player, Boolean> players = new HashMap<>();
+    @Getter
+    @Setter
+    private Reason reason = Reason.OTHER;
 
     Match(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet) {
         this.start = System.currentTimeMillis();
@@ -64,7 +70,7 @@ public class Match {
         return players.keySet();
     }
 
-    public List<ItemStack> getItems(final Player player) {
+    public List<ItemStack> getItems(@Nonnull final Player player) {
         if (this.items == null) {
             return Collections.emptyList();
         }
@@ -75,14 +81,5 @@ public class Match {
 
     public List<ItemStack> getItems() {
         return items != null ? items.values().stream().flatMap(Collection::stream).collect(Collectors.toList()) : Collections.emptyList();
-    }
-
-    public enum EndReason {
-
-        OPPONENT_QUIT,
-        OPPONENT_DEFEAT,
-        PLUGIN_DISABLE,
-        MAX_TIME_REACHED,
-        OTHER
     }
 }
