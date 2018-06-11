@@ -28,6 +28,7 @@ package me.realized.duels.util.compat;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import me.realized.duels.util.ReflectionUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 
 class CompatBase {
@@ -53,7 +54,9 @@ class CompatBase {
     static final Method GET_COMPOUND;
 
     static final Method GET_HANDLE;
-    static Field COLLIDES_WITH_ENTITIES;
+    static final Field COLLIDES_WITH_ENTITIES;
+
+    static final Method GET_ONLINE_PLAYERS;
 
     static {
         final Class<?> CB_ITEMSTACK = ReflectionUtil.getCBClass("inventory.CraftItemStack");
@@ -85,6 +88,10 @@ class CompatBase {
         if (CompatUtil.isPre_1_10()) {
             final Class<?> NMS_PLAYER = ReflectionUtil.getNMSClass("EntityPlayer");
             COLLIDES_WITH_ENTITIES = ReflectionUtil.getField(NMS_PLAYER, "collidesWithEntities");
+        } else {
+            COLLIDES_WITH_ENTITIES = null;
         }
+
+        GET_ONLINE_PLAYERS = ReflectionUtil.getMethod(Bukkit.class, "getOnlinePlayers");
     }
 }

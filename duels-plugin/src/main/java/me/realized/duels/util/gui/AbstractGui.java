@@ -36,7 +36,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public abstract class AbstractGui<P extends JavaPlugin> implements Updatable {
+public abstract class AbstractGui<P extends JavaPlugin> {
 
     protected final P plugin;
     private final Map<Inventory, Map<Integer, Button<P>>> buttons = new HashMap<>();
@@ -98,7 +98,6 @@ public abstract class AbstractGui<P extends JavaPlugin> implements Updatable {
         }
     }
 
-    @Override
     public void update(final Player player) {
         buttons.forEach((inventory, data) -> data.forEach((slot, button) -> {
             button.update(player);

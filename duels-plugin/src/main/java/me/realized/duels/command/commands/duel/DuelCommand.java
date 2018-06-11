@@ -32,6 +32,7 @@ import me.realized.duels.command.commands.duel.subcommands.AcceptCommand;
 import me.realized.duels.command.commands.duel.subcommands.DenyCommand;
 import me.realized.duels.command.commands.duel.subcommands.StatsCommand;
 import me.realized.duels.command.commands.duel.subcommands.ToggleCommand;
+import me.realized.duels.command.commands.duel.subcommands.TopCommand;
 import me.realized.duels.hooks.VaultHook;
 import me.realized.duels.setting.Setting;
 import me.realized.duels.util.NumberUtil;
@@ -48,7 +49,7 @@ public class DuelCommand extends BaseCommand {
 
     public DuelCommand(final DuelsPlugin plugin) {
         super(plugin, "duel", "duels.duel", true);
-        child(new AcceptCommand(plugin), new DenyCommand(plugin), new StatsCommand(plugin), new ToggleCommand(plugin));
+        child(new AcceptCommand(plugin), new DenyCommand(plugin), new StatsCommand(plugin), new ToggleCommand(plugin), new TopCommand(plugin));
         this.vault = hookManager.getHook(VaultHook.class);
     }
 
@@ -77,7 +78,7 @@ public class DuelCommand extends BaseCommand {
 
         final Player target = Bukkit.getPlayerExact(args[0]);
 
-        if (target == null) {
+        if (target == null || !player.canSee(target)) {
             lang.sendMessage(sender, "ERROR.player-not-found", "name", args[0]);
             return true;
         }
@@ -86,7 +87,6 @@ public class DuelCommand extends BaseCommand {
             lang.sendMessage(sender, "ERROR.target-is-self");
             return true;
         }
-
 
         if (requestManager.has(player, target)) {
             lang.sendMessage(sender, "ERROR.already-has-request", "player", target.getName());

@@ -31,6 +31,7 @@ import me.realized.duels.command.commands.duels.subcommands.CreateCommand;
 import me.realized.duels.command.commands.duels.subcommands.DeleteCommand;
 import me.realized.duels.command.commands.duels.subcommands.DeletekitCommand;
 import me.realized.duels.command.commands.duels.subcommands.LoadkitCommand;
+import me.realized.duels.command.commands.duels.subcommands.ReloadCommand;
 import me.realized.duels.command.commands.duels.subcommands.SavekitCommand;
 import me.realized.duels.command.commands.duels.subcommands.SetCommand;
 import me.realized.duels.command.commands.duels.subcommands.ToggleCommand;
@@ -47,7 +48,8 @@ public class DuelsCommand extends BaseCommand {
             new CreateCommand(plugin),
             new DeleteCommand(plugin),
             new SetCommand(plugin),
-            new ToggleCommand(plugin)
+            new ToggleCommand(plugin),
+            new ReloadCommand(plugin)
         );
     }
 

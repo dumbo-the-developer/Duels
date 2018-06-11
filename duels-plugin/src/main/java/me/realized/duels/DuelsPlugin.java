@@ -46,6 +46,8 @@ import me.realized.duels.duel.DuelManager;
 import me.realized.duels.hooks.HookManager;
 import me.realized.duels.kit.KitManager;
 import me.realized.duels.logging.LogManager;
+import me.realized.duels.patches.KitItemListener;
+import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.request.RequestManager;
 import me.realized.duels.setting.SettingManager;
 import me.realized.duels.spectate.SpectateManager;
@@ -86,6 +88,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private SettingManager settingManager;
     @Getter
+    private PlayerInfoManager playerManager;
+    @Getter
     private SpectateManager spectateManager;
     @Getter
     private BettingManager bettingManager;
@@ -110,12 +114,14 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(arenaManager = new ArenaManager(this));
         loadables.add(kitManager = new KitManager(this));
         loadables.add(settingManager = new SettingManager(this));
+        loadables.add(playerManager = new PlayerInfoManager(this));
         loadables.add(spectateManager = new SpectateManager(this));
         loadables.add(bettingManager = new BettingManager(this));
         loadables.add(duelManager = new DuelManager(this));
         loadables.add(requestManager = new RequestManager(this));
         loadables.add(hookManager = new HookManager(this));
         loadables.add(teleport = new Teleport(this));
+        new KitItemListener(this);
 
         if (!load()) {
             getPluginLoader().disablePlugin(this);
@@ -214,6 +220,14 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     public void doAsync(final Runnable runnable) {
         getServer().getScheduler().runTaskAsynchronously(this, runnable);
+    }
+
+    public void doAsyncRepeat(final Runnable runnable, final long delay, final long period) {
+        getServer().getScheduler().runTaskTimerAsynchronously(this, runnable, delay, period);
+    }
+
+    public void cancelTask(final int taskId) {
+        getServer().getScheduler().cancelTask(taskId);
     }
 
     @Override

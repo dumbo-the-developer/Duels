@@ -31,19 +31,22 @@ import java.util.Set;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.arena.ArenaManager;
+import me.realized.duels.arena.Match;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
-import me.realized.duels.data.PlayerData;
+import me.realized.duels.hooks.EssentialsHook;
+import me.realized.duels.player.PlayerInfo;
+import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.PlayerUtil;
 import me.realized.duels.util.compat.Collisions;
 import me.realized.duels.util.compat.CompatUtil;
 import me.realized.duels.util.inventory.ItemBuilder;
-import me.realized.duels.util.metadata.MetadataUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -54,6 +57,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -63,20 +67,23 @@ public class SpectateManager implements Loadable, Listener {
     private final Config config;
     private final Lang lang;
     private final ArenaManager arenaManager;
-
+    private final PlayerInfoManager playerManager;
     private final Map<Player, Spectator> spectators = new HashMap<>();
+
+    private EssentialsHook essentials;
 
     public SpectateManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
         this.arenaManager = plugin.getArenaManager();
+        this.playerManager = plugin.getPlayerManager();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @Override
     public void handleLoad() {
-
+        this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
     }
 
     @Override
@@ -110,16 +117,19 @@ public class SpectateManager implements Loadable, Listener {
             return;
         }
 
-        if (MetadataUtil.get(plugin, player, PlayerData.METADATA_KEY) == null) {
-            MetadataUtil.put(plugin, player, PlayerData.METADATA_KEY, new PlayerData(player).to());
+        playerManager.put(player, new PlayerInfo(player, !config.isSpecRequiresClearedInventory()));
+        PlayerUtil.reset(player);
+
+        final Match match = arena.getMatch();
+
+        if (match != null) {
+            match.getPlayers().forEach(arenaPlayer -> {
+                if (arenaPlayer.isOnline() && arenaPlayer.canSee(player)) {
+                    arenaPlayer.hidePlayer(player);
+                }
+            });
         }
 
-        PlayerUtil.reset(player);
-        arena.getMatch().getPlayers().forEach(arenaPlayer -> {
-            if (arenaPlayer.isOnline() && arenaPlayer.canSee(player)) {
-                arenaPlayer.hidePlayer(player);
-            }
-        });
         player.teleport(target, PlayerTeleportEvent.TeleportCause.SPECTATE);
         player.getInventory().setItem(8, ItemBuilder.of(Material.PAPER).name("&cStop Spectating").build());
         player.setAllowFlight(true);
@@ -148,20 +158,25 @@ public class SpectateManager implements Loadable, Listener {
         player.setAllowFlight(false);
         Collisions.setCollidable(player, true);
 
-        final PlayerData data = PlayerData.from(MetadataUtil.removeAndGet(plugin, player, PlayerData.METADATA_KEY));
+        final PlayerInfo info = playerManager.removeAndGet(player);
 
-        if (data != null) {
-            player.teleport(data.getLocation());
-            data.restore(player);
+        if (info != null) {
+            // TODO: 09/06/2018 implement Teleport
+            player.teleport(info.getLocation());
+            info.restore(player);
         } else {
             // teleport to lobby?
         }
 
-        spectator.getArena().getMatch().getPlayers().forEach(arenaPlayer -> {
-            if (arenaPlayer.isOnline()) {
-                arenaPlayer.showPlayer(player);
-            }
-        });
+        final Match match = spectator.getArena().getMatch();
+
+        if (match != null) {
+            match.getPlayers().forEach(arenaPlayer -> {
+                if (arenaPlayer.isOnline()) {
+                    arenaPlayer.showPlayer(player);
+                }
+            });
+        }
 
         if (!end) {
             lang.sendMessage(player, "SPECTATE.stop", "player", spectator.getTargetName());
@@ -172,6 +187,24 @@ public class SpectateManager implements Loadable, Listener {
         return spectators.keySet();
     }
 
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void on(final PlayerRespawnEvent event) {
+        final Player player = event.getPlayer();
+        final PlayerInfo info = playerManager.removeAndGet(player);
+
+        if (info != null) {
+            event.setRespawnLocation(info.getLocation());
+
+            if (essentials != null) {
+                essentials.setBackLocation(player, event.getRespawnLocation());
+            }
+
+            plugin.doSyncAfter(() -> {
+                PlayerUtil.reset(player);
+                info.restore(player);
+            }, 1L);
+        }
+    }
 
     @EventHandler
     public void on(final PlayerInteractEvent event) {

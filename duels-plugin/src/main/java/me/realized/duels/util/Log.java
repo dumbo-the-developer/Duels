@@ -34,7 +34,7 @@ import org.bukkit.plugin.Plugin;
 
 public final class Log {
 
-    private static List<LogSource> sources = new ArrayList<>();
+    private static final List<LogSource> sources = new ArrayList<>();
 
     private Log() {}
 
@@ -46,14 +46,16 @@ public final class Log {
         sources.clear();
     }
 
-    private static void log(final Level level, final String s) {
+    public static void info(final String s) {
         for (final LogSource source : sources) {
-            source.log(level, s);
+            source.log(Level.INFO, s);
         }
     }
 
-    public static void info(final String s) {
-        log(Level.INFO, s);
+    public static void info(final Loadable loadable, final String s) {
+        for (final LogSource source : sources) {
+            source.log(Level.INFO, loadable.getClass().getSimpleName() + ": " + s);
+        }
     }
 
     public static void error(final String s) {

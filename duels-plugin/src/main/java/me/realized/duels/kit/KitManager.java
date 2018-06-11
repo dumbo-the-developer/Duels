@@ -83,7 +83,7 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
             }
         }
 
-        Log.info("Loaded " + kits.size() + " kit(s).");
+        Log.info(this, "Loaded " + kits.size() + " kit(s).");
         gui.calculatePages();
     }
 

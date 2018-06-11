@@ -44,6 +44,7 @@ import me.realized._duels.event.UserCreateEvent;
 import me.realized._duels.utilities.Reloadable;
 import me.realized._duels.utilities.Storage;
 import me.realized._duels.utilities.location.SimpleLocation;
+import me.realized.duels.util.compat.Players;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -86,7 +87,7 @@ public class DataManager implements Listener, Reloadable {
             }
         }
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Players.getOnlinePlayers()) {
             loadUser(player.getUniqueId(), player.getName(), true);
         }
     }

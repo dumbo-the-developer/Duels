@@ -49,7 +49,7 @@ public class UserData implements User {
     private int losses;
     @Setter
     private boolean requests = true;
-    private List<MatchData> matches = new ArrayList<>();
+    private final List<MatchData> matches = new ArrayList<>();
 
     public UserData(final Player player) {
         this.uuid = player.getUniqueId();
@@ -70,6 +70,10 @@ public class UserData implements User {
     }
 
     public void addMatch(final MatchData matchData) {
+        if (matches.size() >= 10) {
+            matches.remove(0);
+        }
+
         matches.add(matchData);
     }
 

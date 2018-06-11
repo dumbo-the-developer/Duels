@@ -4,9 +4,9 @@ config-version: 1
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
 STRINGS:
-# todo try a new prefix/message colorization in v3?
   PREFIX: '&9[Duels]'
-  LINE: '&b&m---------------------------------------'
+  LINE: '&9&m------------------------------------&r'
+  HALF_LINE: '&9&m------------------&r'
 
 ERROR:
   data-load-failure: '&cCould not load your duel stats. Please contact an administrator.'
@@ -26,15 +26,19 @@ ERROR:
     sender: '&cYou cannot do this while in spectator mode.'
     target: '&c%player% is in spectator mode.'
   not-in-match: '&c%player% is not in a duel.'
+  no-data-available: '&cThere were no data available.'
 
 COMMAND:
   duel:
     usage:
-    - '/duel [player] - Sends a duel request to player.'
-    - '/duel [player] [amount] - Sends a duel request with given bet.'
-    - '/duel [accept | deny] [player] - Accepts or declines a duel request.'
-    - '/duel stats [player] - Displays your duel stats.'
-    - '/duel toggle - Enable or disable receiving duel requests.'
+    - '{LINE}'
+    - '&f/duel [player] &e- &7Sends a duel request to selected player.'
+    - '&f/duel [player] [amount] &e- &7Sends a duel request with given bet.'
+    - '&f/duel [accept | deny] [player] &e- &7Accepts or denies a duel request.'
+    - '&f/duel stats [player] &e- &7Displays your duel stats.'
+    - '&f/duel toggle &e- &7Enable or disable receiving duel requests.'
+    - '&f/duel top [wins|losses] &e- &7Displays top duel wins & losses.'
+    - '{LINE}'
     request:
       sent:
         sender:
@@ -42,7 +46,7 @@ COMMAND:
         - '&7Duel request sent to &f%player%&7.'
         - '&c- &7Kit: &9%kit%'
         - '&c- &7Arena: &e%arena%'
-        - '&c- &7Bet Amount: &6$%bet_amount%'
+        - '&c- &7Bet: &6$%bet_amount%'
         - '&c- &7Item Betting: &r%item_betting%'
         - '{LINE}'
         receiver:
@@ -50,57 +54,70 @@ COMMAND:
         - '&7Duel request received from &f%player%&7.'
         - '&c- &7Kit: &9%kit%'
         - '&c- &7Arena: &e%arena%'
-        - '&c- &7Bet Amount: &6$%bet_amount%'
+        - '&c- &7Bet: &6$%bet_amount%'
         - '&c- &7Item Betting: &r%item_betting%'
-        - '{LINE}'
+        clickable-text:
+          info: '&7Click to '
+          accept: '&a&l[ACCEPT] '
+          deny: '&c&l[DENY]'
+          extra: '{LINE}'
       accepted:
         sender: '{PREFIX} &f%player% &7has accepted your duel request.'
-        receiver: '{PREFIX} &7Accepted duel request from &f%player%&7.'
+        receiver: '{PREFIX} &7Accepted the duel request from &f%player%&7.'
       denied:
         sender: '{PREFIX} &7Your duel request to &f%player% &7was denied.'
-        receiver: '{PREFIX} &7Denied duel request from &f%player%&7.'
+        receiver: '{PREFIX} &7Denied the duel request from &f%player%&7.'
     stats:
       displayed:
-      - '&7Displaying stats of &f%player% &7-'
-      - '&71v1 Wins: &f%wins%'
-      - '&71v1 Losses: &f%losses%'
-      - '&71v1 Requests: &f%requests_enabled%'
-      - '&7Latest 1v1 matches -'
-      match-format: '&a{WINNER} &fvs &c{LOSER} &6[Hover Me!]'
-      hover-message:
-      - '&7Duration: &f{DURATION}'
-      - '&7Time: &f{TIME} ago'
-      - '&7Health: &d&l{HEALTH} ♥'
+      - '{LINE}'
+      - '&7Stats of &f%player% &e-'
+      - '&7Wins: &a%wins%'
+      - '&7Losses: &c%losses%'
+      - '&7W/L Ratio: &b%wl_ratio%'
+      - '&7Requests: &r%requests_enabled%'
+      - '&7Recent Matches &e-'
+      match-format: '&a%winner% &fvs &c%loser% &6[Hover Me!]'
+      hover-text:
+      - '&7Duration: &f%duration%'
+      - '&7Time: &f%time% ago'
+      - '&7Health: &d&l%health% ♥'
+      extra: '{LINE}'
     toggle:
       enabled: '{PREFIX} &7Duel requests has been &aenabled&7.'
-      disabled: '{PREFIX} &7Duel requests has been &cenabled&7.'
+      disabled: '{PREFIX} &7Duel requests has been &cdisabled&7.'
+    top:
+      next-update: '{PREFIX} &7Next update: &f%remaining%'
+      header: '{HALF_LINE} &7Top &f10 &7%type% {HALF_LINE}'
+      display-format: '&e%rank%. &f%name% &e- &f%score% &7%type%'
+      footer: '{HALF_LINE} &7Top &f10 &7%type% {HALF_LINE}'
 
   duels:
     usage:
     - '{LINE}'
-    - '&e/duels edit [player] [add:remove:set] [wins:losses] [quantity] &7- Edit player''s stats.'
-    - '&e/duels create [name] &7- Create an arena.'
-    - '&e/duels set [name] [1 | 2] &7- Set spawn position for arena.'
-    - '&e/duels delete [name] &7- Remove an arena.'
-    - '&e/duels list &7- Displays the lobby location and lists arenas and kits.'
-    - '&e/duels toggle [name] &7- Enable/Disable an arena.'
-    - '&e/duels info [name] &7- Show arena information.'
-    - '&e/duels savekit [name] &7- Save a new kit with your inventory contents.'
-    - '&e/duels deletekit [name] &7- Delete a kit with the given name.'
-    - '&e/duels loadkit [name] &7- Load a kit with the given name.'
-    - '&e/duels setlobby &7- Set duel lobby on your current location.'
-    - '&e/duels setitem [name] &7- Replaces the displayed item to held item for selected kit.'
-    - '&e/duels reset [player] &7- Completely reset a player''s stats.'
-    - '&e/duels playsound [name] &7- Plays the selected sound if exists in config.'
-    - '&e/duels reload [weak] &7- Reloads the plugin completely. Append ''weak'' to only reload messages file.'
+    - '&f/duels edit [player] [add|remove|set] [wins|losses] [quantity] &e- &7Edit player''s stats.'
+    - '&f/duels create [name] &e- &7Create an arena.'
+    - '&f/duels set [name] [1|2] &e- &7Set spawn position for arena.'
+    - '&f/duels delete [name] &e- &7Remove an arena.'
+    - '&f/duels list &e- &7Displays the lobby location and lists arenas and kits.'
+    - '&f/duels toggle [name] &e- &7Enable/Disable an arena.'
+    - '&f/duels info [name] &e- &7Show arena information.'
+    - '&f/duels savekit [name] &e- &7Save a new kit with your inventory contents.'
+    - '&f/duels deletekit [name] &e- &7Delete a kit with the given name.'
+    - '&f/duels loadkit [name] &e- &7Load a kit with the given name.'
+    - '&f/duels setlobby &e- &7Set duel lobby on your current location.'
+    - '&f/duels setitem [name] &e- &7Replaces the displayed item to held item for selected kit.'
+    - '&f/duels reset [player] &e- &7Completely reset a player''s stats.'
+    - '&f/duels playsound [name] &e- &7Plays the selected sound if exists in config.'
+    - '&f/duels reload [module] &e- &7Reloads the plugin or the selected mdule.'
     - '{LINE}'
 
   spectate:
     usage:
-    - 'Spectate a duel.'
-    - '/spectate [player]'
+    - '{LINE}'
+    - '&f/spectate [player] &e- &7Spectates the target player.'
+    - '{LINE}'
 
-  sub-command-usage: '{PREFIX} &e/%command% %usage% &7- %description%'
+  sub-command-usage: '{PREFIX} &f/%command% %usage% &e- &7%description%'
 
 
 DUEL:
@@ -110,7 +127,9 @@ DUEL:
   prevent-teleportation: '&cYou cannot teleport while in a duel.'
   arena-in-use: '&cThat arena is already in use. Please select a different arena.'
   not-enough-money: '&cCould not start the match: Yours or your opponent''s balance lacks $%bet%.'
-
+  on-select:
+    arena: '{PREFIX} &7Selected Arena: &f%arena%'
+    kit: '{PREFIX} &7Selected Kit: &f%kit%'
 
 SPECTATE:
   start: '{PREFIX} &7You are now spectating &f%player%&7.'

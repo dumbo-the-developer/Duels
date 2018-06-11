@@ -90,7 +90,7 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
         return player.getUniqueId().equals(first);
     }
 
-    public Section getSection(final Player player) {
+    private Section getSection(final Player player) {
         return isFirst(player) ? sections[0] : sections[1];
     }
 

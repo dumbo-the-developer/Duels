@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -40,13 +39,13 @@ import me.realized.duels.util.DateUtil;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log.LogSource;
 
-// TODO: 02/06/2018 Fix, currrently generates multiple log files in a single day
 public class LogManager implements Loadable, LogSource {
 
     private final File folder;
 
     @Getter
     private final Logger logger = Logger.getAnonymousLogger();
+    private FileHandler handler;
 
     public LogManager(final DuelsPlugin plugin) {
         final File dataFolder = plugin.getDataFolder();
@@ -60,21 +59,20 @@ public class LogManager implements Loadable, LogSource {
         if (!folder.exists()) {
             folder.mkdir();
         }
+
+        logger.setLevel(Level.ALL);
+        logger.setUseParentHandlers(false);
     }
 
     @Override
     public void handleLoad() throws IOException {
-        logger.setLevel(Level.ALL);
-        logger.setUseParentHandlers(false);
-        closeHandlers();
-
         final File file = new File(folder, DateUtil.formatDate(new Date()) + ".log");
 
         if (!file.exists()) {
             file.createNewFile();
         }
 
-        final FileHandler handler = new FileHandler(file.getCanonicalPath(), true);
+        handler = new FileHandler(file.getCanonicalPath(), true);
         handler.setLevel(Level.ALL);
         handler.setFormatter(new Formatter() {
             @Override
@@ -87,17 +85,21 @@ public class LogManager implements Loadable, LogSource {
 
     @Override
     public void handleUnload() {
-        closeHandlers();
-    }
-
-    private void closeHandlers() {
-        for (final Handler handler : logger.getHandlers()) {
-            handler.close();
+        if (handler == null) {
+            return;
         }
+
+        handler.close();
+        logger.removeHandler(handler);
+        handler = null;
     }
 
     @Override
     public void log(final Level level, final String s) {
+        if (handler == null) {
+            return;
+        }
+
         getLogger().log(level, s);
     }
 }

@@ -178,105 +178,43 @@ public class Potions extends CompatBase {
                     potionType = "awkward";
                     break;
                 case NIGHT_VISION:
-                    if (extended) {
-                        potionType = "long_night_vision";
-                    } else {
-                        potionType = "night_vision";
-                    }
+                    potionType = extended ? "long_night_vision" : "night_vision";
                     break;
                 case INVISIBILITY:
-                    if (extended) {
-                        potionType = "long_invisibility";
-                    } else {
-                        potionType = "invisibility";
-                    }
+                    potionType = extended ? "long_invisibility" : "invisibility";
                     break;
                 case JUMP:
-                    if (extended) {
-                        potionType = "long_leaping";
-                    } else if (strong) {
-                        potionType = "strong_leaping";
-                    } else {
-                        potionType = "leaping";
-                    }
+                    potionType = extended ? "long_leaping" : (strong ? "strong_leaping" : "leaping");
                     break;
                 case FIRE_RESISTANCE:
-                    if (extended) {
-                        potionType = "long_fire_resistance";
-                    } else {
-                        potionType = "fire_resistance";
-                    }
+                    potionType = extended ? "long_fire_resistance" : "fire_resistance";
                     break;
                 case SPEED:
-                    if (extended) {
-                        potionType = "long_swiftness";
-                    } else if (strong) {
-                        potionType = "strong_swiftness";
-                    } else {
-                        potionType = "swiftness";
-                    }
+                    potionType = extended ? "long_swiftness" : (strong ? "strong_swiftness" : "swiftness");
                     break;
                 case SLOWNESS:
-                    if (extended) {
-                        potionType = "long_slowness";
-                    } else {
-                        potionType = "slowness";
-                    }
+                    potionType = extended ? "long_slowness" : "slowness";
                     break;
                 case WATER_BREATHING:
-                    if (extended) {
-                        potionType = "long_water_breathing";
-                    } else {
-                        potionType = "water_breathing";
-                    }
+                    potionType = extended ? "long_water_breathing" : "water_breathing";
                     break;
                 case INSTANT_HEAL:
-                    if (strong) {
-                        potionType = "strong_healing";
-                    } else {
-                        potionType = "healing";
-                    }
+                    potionType = strong ? "strong_healing" : "healing";
                     break;
                 case INSTANT_DAMAGE:
-                    if (strong) {
-                        potionType = "strong_harming";
-                    } else {
-                        potionType = "harming";
-                    }
+                    potionType = strong ? "strong_harming" : "harming";
                     break;
                 case POISON:
-                    if (extended) {
-                        potionType = "long_poison";
-                    } else if (strong) {
-                        potionType = "strong_poison";
-                    } else {
-                        potionType = "poison";
-                    }
+                    potionType = extended ? "long_poison" : (strong ? "strong_poison" : "poison");
                     break;
                 case REGEN:
-                    if (extended) {
-                        potionType = "long_regeneration";
-                    } else if (strong) {
-                        potionType = "strong_regeneration";
-                    } else {
-                        potionType = "regeneration";
-                    }
+                    potionType = extended ? "long_regeneration" : (strong ? "strong_regeneration" : "regeneration");
                     break;
                 case STRENGTH:
-                    if (extended) {
-                        potionType = "long_strength";
-                    } else if (strong) {
-                        potionType = "strong_strength";
-                    } else {
-                        potionType = "strength";
-                    }
+                    potionType = extended ? "long_strength": (strong ? "strong_strength" : "strength");
                     break;
                 case WEAKNESS:
-                    if (extended) {
-                        potionType = "long_weakness";
-                    } else {
-                        potionType = "weakness";
-                    }
+                    potionType = extended ? "long_weakness" : "weakness";
                     break;
                 case LUCK:
                     potionType = "luck";

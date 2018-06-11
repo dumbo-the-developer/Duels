@@ -34,6 +34,7 @@ import me.realized.duels.util.compat.Attributes;
 import me.realized.duels.util.compat.CompatUtil;
 import me.realized.duels.util.compat.Potions;
 import me.realized.duels.util.compat.SpawnEggs;
+import me.realized.duels.util.compat.Tags;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -275,6 +276,6 @@ public class ItemData {
         }
 
         item.setItemMeta(meta);
-        return item;
+        return Tags.setKey(item, "KitItem");
     }
 }

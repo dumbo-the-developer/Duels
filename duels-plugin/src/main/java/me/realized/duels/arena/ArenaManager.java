@@ -45,23 +45,34 @@ import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.arena.ArenaCreateEvent;
 import me.realized.duels.api.event.arena.ArenaRemoveEvent;
+import me.realized.duels.config.Config;
 import me.realized.duels.data.ArenaData;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.gui.MultiPageGui;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.projectiles.ProjectileSource;
 
-public class ArenaManager implements Loadable, me.realized.duels.api.arena.ArenaManager {
+public class ArenaManager implements Loadable, me.realized.duels.api.arena.ArenaManager, Listener {
 
     private final DuelsPlugin plugin;
+    private final Config config;
     private final File file;
+    @Getter
     private final List<Arena> arenas = new ArrayList<>();
     @Getter
     private final MultiPageGui<DuelsPlugin> gui;
 
     public ArenaManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
+        this.config = plugin.getConfiguration();
         this.file = new File(plugin.getDataFolder(), "arenas.json");
         // TODO: 03/06/2018 Replace to config message vv
         gui = new MultiPageGui<>(plugin, "Arena Selection", 1, arenas);
@@ -70,6 +81,10 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
 
     @Override
     public void handleLoad() throws IOException {
+        if (config.isCdEnabled()) {
+            plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        }
+
         if (!file.exists()) {
             file.createNewFile();
             return;
@@ -83,7 +98,7 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
             }
         }
 
-        Log.info("Loaded " + arenas.size() + " arena(s).");
+        Log.info(this, "Loaded " + arenas.size() + " arena(s).");
         gui.calculatePages();
     }
 
@@ -159,5 +174,56 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
         }
 
         return available.get(ThreadLocalRandom.current().nextInt(available.size()));
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void on(final EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player)) {
+            return;
+        }
+
+        final Arena arena = get((Player) event.getEntity());
+
+        if (arena == null || !arena.isCounting()) {
+            return;
+        }
+
+        event.setCancelled(true);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void on(final ProjectileLaunchEvent event) {
+        final ProjectileSource shooter = event.getEntity().getShooter();
+
+        if (shooter == null || !(shooter instanceof Player)) {
+            return;
+        }
+
+        final Arena arena = get((Player) shooter);
+
+        if (arena == null || !arena.isCounting()) {
+            return;
+        }
+
+        event.setCancelled(true);
+        // TODO: 06/06/2018 add message
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void on(final PlayerMoveEvent event) {
+        final Location from = event.getFrom();
+        final Location to = event.getTo();
+
+        if (from.getBlockX() == to.getBlockX() && from.getBlockY() == to.getBlockY() && from.getBlockZ() == to.getBlockZ()) {
+            return;
+        }
+
+        final Arena arena = get(event.getPlayer());
+
+        if (arena == null || !arena.isCounting()) {
+            return;
+        }
+
+        event.setTo(event.getFrom());
     }
 }

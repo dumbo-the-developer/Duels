@@ -25,10 +25,8 @@
 
 package me.realized.duels.api.user;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.Getter;
@@ -42,18 +40,25 @@ public interface UserManager {
     @Nullable
     User get(@Nonnull final Player player);
 
-    <V> List<SortedEntry<String, V>> sorted(final Function<User, V> function, final Comparator<SortedEntry<String, V>> comparator);
+    List<SortedEntry<String, Integer>> getTopWins();
 
-    class SortedEntry<K, V> {
+    List<SortedEntry<String, Integer>> getTopLosses();
+
+    class SortedEntry<K, V extends Comparable<V>> implements Comparable<SortedEntry<K, V>> {
 
         @Getter
         private final K key;
         @Getter
         private final V value;
 
-        public SortedEntry(final K key, final V value) {
+        public SortedEntry(@Nonnull final K key, @Nonnull final V value) {
             this.key = key;
             this.value = value;
+        }
+
+        @Override
+        public int compareTo(@Nonnull final SortedEntry<K, V> other) {
+            return value.compareTo(other.value);
         }
     }
 }

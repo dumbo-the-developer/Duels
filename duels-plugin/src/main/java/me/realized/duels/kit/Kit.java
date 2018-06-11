@@ -34,8 +34,7 @@ import me.realized.duels.api.event.kit.KitEquipEvent;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.setting.Setting;
 import me.realized.duels.util.inventory.ItemBuilder;
-import org.apache.commons.lang3.ArrayUtils;
-import org.bukkit.ChatColor;
+import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -113,6 +112,6 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
         final Setting setting = settingManager.getSafely(player);
         setting.setKit(this);
         setting.openGui(player);
-        player.sendMessage(ChatColor.GREEN + "Selected Kit: " + name);
+        lang.sendMessage(player, "DUEL.on-select.kit", "kit", name);
     }
 }

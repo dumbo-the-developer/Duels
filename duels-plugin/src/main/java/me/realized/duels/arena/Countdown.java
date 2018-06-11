@@ -23,34 +23,32 @@
  * SOFTWARE.
  */
 
-package me.realized.duels.gui;
+package me.realized.duels.arena;
 
-import me.realized.duels.DuelsPlugin;
-import me.realized.duels.arena.ArenaManager;
-import me.realized.duels.config.Config;
-import me.realized.duels.config.Lang;
-import me.realized.duels.kit.KitManager;
-import me.realized.duels.request.RequestManager;
-import me.realized.duels.setting.SettingManager;
-import me.realized.duels.util.gui.Button;
-import org.bukkit.inventory.ItemStack;
+import com.google.common.collect.Lists;
+import java.util.List;
+import me.realized.duels.util.StringUtil;
+import org.bukkit.scheduler.BukkitRunnable;
 
-public abstract class BaseButton extends Button<DuelsPlugin> {
+class Countdown extends BukkitRunnable {
 
-    protected final Config config;
-    protected final Lang lang;
-    protected final ArenaManager arenaManager;
-    protected final KitManager kitManager;
-    protected final SettingManager settingManager;
-    protected final RequestManager requestManager;
+    private final Arena arena;
+    private final List<String> messages;
 
-    protected BaseButton(final DuelsPlugin plugin, final ItemStack displayed) {
-        super(plugin, displayed);
-        this.config = plugin.getConfiguration();
-        this.lang = plugin.getLang();
-        this.arenaManager = plugin.getArenaManager();
-        this.kitManager = plugin.getKitManager();
-        this.settingManager = plugin.getSettingManager();
-        this.requestManager = plugin.getRequestManager();
+    Countdown(final Arena arena, final List<String> messages) {
+        this.arena = arena;
+        this.messages = Lists.newArrayList(messages);
+    }
+
+    @Override
+    public void run() {
+        if (messages.isEmpty()) {
+            cancel();
+            arena.setCountdown(null);
+            return;
+        }
+
+        final String message = StringUtil.color(messages.remove(0));
+        arena.getPlayers().forEach(player -> player.sendMessage(message));
     }
 }

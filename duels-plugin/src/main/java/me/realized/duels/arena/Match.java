@@ -70,6 +70,10 @@ public class Match implements me.realized.duels.api.match.Match {
         return players.keySet();
     }
 
+    public boolean isDead(final Player player) {
+        return players.getOrDefault(player, true);
+    }
+
     public List<ItemStack> getItems(@Nonnull final Player player) {
         if (this.items == null) {
             return Collections.emptyList();

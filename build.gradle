@@ -9,7 +9,7 @@ buildscript {
 }
 
 allprojects {
-    group 'me.realized.duels'
+    group 'me.realized'
     version '3.0.0-SNAPSHOT'
 }
 
@@ -21,45 +21,53 @@ subprojects {
     targetCompatibility = 1.8
 
     repositories {
-        repositories {
-            mavenLocal()
-            mavenCentral()
+        mavenLocal()
+        mavenCentral()
 
-            maven {
-                name 'spigot-repo'
-                url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots'
-            }
-
-
-            maven {
-                name 'vault-repo'
-                url 'http://nexus.hc.to/content/repositories/pub_releases'
-            }
-
-            maven {
-                name 'mvdw-repo'
-                url 'http://repo.mvdw-software.be/content/groups/public/'
-            }
-
-            maven {
-                name 'clip-repo'
-                url 'http://repo.extendedclip.com/content/repositories/placeholderapi/'
-            }
-
-            maven {
-                name 'sk89q-repo'
-                url 'http://maven.sk89q.com/repo/'
-            }
-
-            maven {
-                name 'byteflux-repo'
-                url 'http://repo.byteflux.net/repository/maven-releases'
-            }
-
-            maven {
-                name 'inventive-repo'
-                url 'https://repo.inventivetalent.org/content/groups/public/'
-            }
+        maven {
+            name 'spigot-repo'
+            url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots'
         }
+
+        maven {
+            name 'vault-repo'
+            url 'http://nexus.hc.to/content/repositories/pub_releases'
+        }
+
+        maven {
+            name 'mvdw-repo'
+            url 'http://repo.mvdw-software.be/content/groups/public/'
+        }
+
+        maven {
+            name 'clip-repo'
+            url 'http://repo.extendedclip.com/content/repositories/placeholderapi/'
+        }
+
+        maven {
+            name 'sk89q-repo'
+            url 'http://maven.sk89q.com/repo/'
+        }
+
+        maven {
+            name 'byteflux-repo'
+            url 'http://repo.byteflux.net/repository/maven-releases'
+        }
+
+        maven {
+            name 'inventive-repo'
+            url 'https://repo.inventivetalent.org/content/groups/public/'
+        }
+
+        flatDir {
+            dirs "$rootDir/libs/"
+        }
+    }
+
+    dependencies {
+        compile 'org.projectlombok:lombok:1.16.20'
+        compile 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
+        compile 'org.spigotmc:spigot:1.12.2-R0.1-SNAPSHOT'
+//        compile name:'spigot-1.7'
     }
 }

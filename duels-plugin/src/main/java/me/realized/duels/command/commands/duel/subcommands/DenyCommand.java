@@ -42,7 +42,7 @@ public class DenyCommand extends BaseCommand {
         final Player player = (Player) sender;
         final Player target = Bukkit.getPlayerExact(args[1]);
 
-        if (target == null) {
+        if (target == null || !player.canSee(target)) {
             lang.sendMessage(sender, "ERROR.player-not-found", "name", args[1]);
             return;
         }

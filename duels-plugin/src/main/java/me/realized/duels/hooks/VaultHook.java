@@ -25,6 +25,7 @@
 
 package me.realized.duels.hooks;
 
+import java.util.Arrays;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.util.Log;
@@ -51,15 +52,29 @@ public class VaultHook extends PluginHook<DuelsPlugin> {
         economy = provider.getProvider();
     }
 
-    public void add(final Player player, final int amount) {
+    public boolean has(final int amount, final Player... players) {
+        if (economy == null) {
+            return false;
+        }
+
+        for (final Player player : players) {
+            if (!economy.has(player, amount)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public void add(final int amount, final Player... players) {
         if (amount > 0 && economy != null) {
-            economy.depositPlayer(player, amount);
+            Arrays.stream(players).forEach(player -> economy.depositPlayer(player, amount));
         }
     }
 
-    public void remove(final Player player, final int amount) {
+    public void remove(final int amount, final Player... players) {
         if (amount > 0 && economy != null) {
-            economy.withdrawPlayer(player, amount);
+            Arrays.stream(players).forEach(player -> economy.withdrawPlayer(player, amount));
         }
     }
 }

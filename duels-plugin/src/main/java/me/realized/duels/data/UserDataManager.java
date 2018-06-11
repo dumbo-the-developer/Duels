@@ -39,9 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -51,10 +49,11 @@ import me.realized.duels.api.event.user.UserCreateEvent;
 import me.realized.duels.api.user.User;
 import me.realized.duels.api.user.UserManager;
 import me.realized.duels.config.Lang;
+import me.realized.duels.util.DateUtil;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
+import me.realized.duels.util.compat.Players;
 import me.realized.duels.util.profile.ProfileUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -63,7 +62,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class UserDataManager implements Loadable, Listener, UserManager {
 
-    // TODO: 23/05/2018 Implement command/sign/hologram leaderboard in an addon/extension/external plugin
     private final DuelsPlugin plugin;
     private final Lang lang;
     private final File folder;
@@ -71,6 +69,12 @@ public class UserDataManager implements Loadable, Listener, UserManager {
 
     @Getter
     private volatile boolean loaded;
+    @Getter
+    private volatile List<SortedEntry<String, Integer>> topWins;
+    private volatile long winsLastUpdate;
+    @Getter
+    private volatile List<SortedEntry<String, Integer>> topLosses;
+    private volatile long lossesLastUpdate;
 
     public UserDataManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -112,20 +116,41 @@ public class UserDataManager implements Loadable, Listener, UserManager {
                     try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
                         users.put(uuid, plugin.getGson().fromJson(reader, UserData.class));
                     } catch (IOException ex) {
-                        plugin.getLogManager().log(Level.SEVERE, "Failed to load data of " + uuid + ": " + ex.getMessage());
+                        Log.error("Failed to load data of " + uuid + ": " + ex.getMessage());
                     }
                 }
             }
 
             loaded = true;
         });
+
+        plugin.doAsyncRepeat(() -> {
+            if (!loaded) {
+                return;
+            }
+
+            List<SortedEntry<String, Integer>> result = sorted(User::getWins);
+            topWins = result.size() > 10 ? result.subList(0, 10) : result;
+            winsLastUpdate = System.currentTimeMillis();
+            result = sorted(User::getLosses);
+            topLosses = result.size() > 10 ? result.subList(0, 10) : result;
+            lossesLastUpdate = System.currentTimeMillis();
+        }, 20L * 5, 20L * 60);
     }
 
     @Override
     public void handleUnload() {
         loaded = false;
-        saveUsers(Bukkit.getOnlinePlayers());
+        saveUsers(Players.getOnlinePlayers());
         users.clear();
+    }
+
+    public String getNextWinsUpdate() {
+        return DateUtil.format((winsLastUpdate + 1000L * 60L - System.currentTimeMillis()) / 1000L);
+    }
+
+    public String getNextLossesUpdate() {
+        return DateUtil.format((lossesLastUpdate + 1000L * 60L - System.currentTimeMillis()) / 1000L);
     }
 
     @Nullable
@@ -140,9 +165,8 @@ public class UserDataManager implements Loadable, Listener, UserManager {
         return get(player.getUniqueId());
     }
 
-    @Override
-    public <V> List<SortedEntry<String, V>> sorted(final Function<User, V> function, final Comparator<SortedEntry<String, V>> comparator) {
-        return users.values().stream().map(data -> new SortedEntry<>(data.getName(), function.apply(data))).sorted(comparator).collect(Collectors.toList());
+    private <V extends Comparable<V>> List<SortedEntry<String, V>> sorted(final Function<User, V> function) {
+        return users.values().stream().map(data -> new SortedEntry<>(data.getName(), function.apply(data))).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
     }
 
     private void saveUsers(final Collection<? extends Player> players) {
@@ -198,19 +222,23 @@ public class UserDataManager implements Loadable, Listener, UserManager {
         }
     }
 
-    private void loadUser(final Player player, final Consumer<UserData> callback) {
-        plugin.doAsync(() -> callback.accept(tryLoad(player)));
-    }
-
     @EventHandler
     public void on(final PlayerJoinEvent event) {
-        loadUser(event.getPlayer(), userData -> {
-            if (userData == null) {
+        final Player player = event.getPlayer();
+
+        if (users.containsKey(player.getUniqueId())) {
+            return;
+        }
+
+        plugin.doAsync(() -> {
+            final UserData data = tryLoad(player);
+
+            if (data == null) {
                 lang.sendMessage(event.getPlayer(), "ERROR.data-load-failure");
                 return;
             }
 
-            plugin.doSync(() -> users.put(event.getPlayer().getUniqueId(), userData));
+            users.put(event.getPlayer().getUniqueId(), data);
         });
     }
 

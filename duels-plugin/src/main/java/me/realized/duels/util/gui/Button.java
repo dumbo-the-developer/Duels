@@ -36,7 +36,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class Button<P extends JavaPlugin> implements Updatable {
+public class Button<P extends JavaPlugin> {
 
     protected final P plugin;
     @Getter
@@ -69,7 +69,6 @@ public class Button<P extends JavaPlugin> implements Updatable {
         });
     }
 
-    @Override
     public void update(final Player player) {}
 
     public void onClick(final Player player) {}

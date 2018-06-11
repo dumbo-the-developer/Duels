@@ -26,24 +26,22 @@
 package me.realized.duels.config;
 
 import java.io.IOException;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.regex.Pattern;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.util.Log;
+import me.realized.duels.util.Reloadable;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.config.AbstractConfiguration;
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
 
-public class Lang extends AbstractConfiguration<DuelsPlugin> {
+public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadable {
 
     private final Map<String, String> messages = new HashMap<>();
 
@@ -114,27 +112,26 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> {
         receiver.sendMessage(message);
     }
 
-    public void sendMessage(final Collection<UUID> receivers, final String key, final Object... replacers) {
-        final String message = getMessage(key, replacers);
+    public void sendMessage(final String key, final CommandSender... receivers) {
+        final String message = getMessage(key);
 
         if (message == null) {
             return;
         }
 
-        receivers.forEach(uuid -> {
-            final Player player = Bukkit.getPlayer(uuid);
-
-            if (player != null) {
-                player.sendMessage(message);
-            }
-        });
+        Arrays.stream(receivers).forEach(receiver -> receiver.sendMessage(message));
     }
 
-    private String getMessage(final String key, final Object... replacers) {
+    public String getMessage(final String key, final Object... replacers) {
         final String message = messages.get(key);
 
         if (message == null) {
             Log.error(this, "Failed to send message: provided key '" + key + "' has no assigned value");
+            return null;
+        }
+
+        // Allows disabling any message by setting it to ''
+        if (message.isEmpty()) {
             return null;
         }
 

@@ -38,6 +38,7 @@ public class HookManager extends AbstractHookManager<DuelsPlugin> {
     public void handleLoad() {
         register("Vault", VaultHook.class);
         register("Essentials", EssentialsHook.class);
+        register("MVdWPlaceholderAPI", MVdWPlaceholderHook.class);
     }
 
     @Override

@@ -35,7 +35,9 @@ import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.arena.ArenaSetPositionEvent;
 import me.realized.duels.api.event.arena.ArenaStateChangeEvent;
@@ -43,7 +45,6 @@ import me.realized.duels.gui.BaseButton;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.setting.Setting;
 import me.realized.duels.util.inventory.ItemBuilder;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -60,6 +61,9 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
     private boolean disabled;
     @Getter
     private Match match;
+    @Getter(value = AccessLevel.PACKAGE)
+    @Setter(value = AccessLevel.PACKAGE)
+    private Countdown countdown;
 
     public Arena(final DuelsPlugin plugin, final String name) {
         super(plugin, ItemBuilder.of(Material.EMPTY_MAP).name("&e" + name).build());
@@ -117,12 +121,19 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
 
     public void startMatch(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet) {
         this.match = new Match(kit, items, bet);
-
-
     }
 
     public void endMatch() {
         match = null;
+    }
+
+    public void startCountdown() {
+        this.countdown = new Countdown(this, config.getCdMessages());
+        countdown.runTaskTimer(plugin, 0L, 20L);
+    }
+
+    boolean isCounting() {
+        return countdown != null;
     }
 
     @Override
@@ -159,8 +170,7 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
         final Setting setting = settingManager.getSafely(player);
         setting.setArena(this);
         setting.openGui(player);
-        // todo: replace to config message
-        player.sendMessage(ChatColor.GREEN + "Selected Arena: " + name);
+        lang.sendMessage(player, "DUEL.on-select.arena", "arena", name);
     }
 
     @Override
