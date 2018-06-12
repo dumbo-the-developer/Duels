@@ -146,6 +146,15 @@ duel:
   - 'playervaults:pv'
   - 'playervaults:playervaults'
 
+rating:
+  # The K factor is a measure of how strong a match will impact the players’ ratings.
+  # Source: https://metinmediamath.wordpress.com/2013/11/27/how-to-calculate-the-elo-rating-including-example/
+  k-factor: 32
+  # The default rating for all kits.
+  default-rating: 1400
+  # If enabled, only matches started through the queue system will modify ratings of the players.
+  queue-matches-only: true
+
 spectate:
   # Require players to have a cleared inventory to start spectating.
   requires-cleared-inventory: false

@@ -27,6 +27,7 @@ package me.realized.duels.command.commands.duel.subcommands;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Map;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.data.MatchData;
@@ -75,6 +76,12 @@ public class StatsCommand extends BaseCommand {
         if (user == null) {
             // boi
             return;
+        }
+
+        final Map<String, Integer> rating = user.getRating();
+
+        if (rating != null) {
+            rating.forEach((name, value) -> sender.sendMessage(name + ": " + value + " Rating"));
         }
 
         final String wins = String.valueOf(user.getWins());

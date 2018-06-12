@@ -30,7 +30,7 @@ import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.betting.BettingManager;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
-import me.realized.duels.data.UserDataManager;
+import me.realized.duels.data.UserManager;
 import me.realized.duels.duel.DuelManager;
 import me.realized.duels.hooks.HookManager;
 import me.realized.duels.kit.KitManager;
@@ -45,7 +45,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
     protected final DuelsPlugin plugin;
     protected final Config config;
     protected final Lang lang;
-    protected final UserDataManager userManager;
+    protected final UserManager userManager;
     protected final ArenaManager arenaManager;
     protected final KitManager kitManager;
     protected final SettingManager settingManager;

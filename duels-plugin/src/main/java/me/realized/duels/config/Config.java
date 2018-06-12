@@ -76,6 +76,13 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private List<String> blacklistedCommands;
 
     @Getter
+    private int kFactor;
+    @Getter
+    private int defaultRating;
+    @Getter
+    private boolean queueMatchesOnly;
+
+    @Getter
     private boolean specRequiresClearedInventory;
     @Getter
     private List<String> specWhitelistedCommands;
@@ -117,6 +124,9 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         blockAllCommands = configuration.getBoolean("duel.block-all-commands", false);
         whitelistedCommands = configuration.getStringList("duel.whitelisted-commands");
         blacklistedCommands = configuration.getStringList("duel.blacklisted-commands");
+        kFactor = configuration.getInt("rating.k-factor", 32);
+        defaultRating = configuration.getInt("rating.default-rating", 1400);
+        queueMatchesOnly = configuration.getBoolean("rating.queue-matches-only", true);
         specRequiresClearedInventory = configuration.getBoolean("spectate.requires-cleared-inventory", false);
         specWhitelistedCommands = configuration.getStringList("spectate.whitelisted-commands");
         cdEnabled = configuration.getBoolean("countdown.enabled", true);

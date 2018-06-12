@@ -27,6 +27,7 @@ package me.realized.duels.api.user;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.Getter;
@@ -44,6 +45,8 @@ public interface UserManager {
 
     List<SortedEntry<String, Integer>> getTopLosses();
 
+    <V extends Comparable<V>> List<SortedEntry<String, V>> sorted(@Nonnull final Function<User, V> function);
+
     class SortedEntry<K, V extends Comparable<V>> implements Comparable<SortedEntry<K, V>> {
 
         @Getter
@@ -59,6 +62,11 @@ public interface UserManager {
         @Override
         public int compareTo(@Nonnull final SortedEntry<K, V> other) {
             return value.compareTo(other.value);
+        }
+
+        @Override
+        public String toString() {
+            return "SortedEntry{" + "key=" + key + ", value=" + value + '}';
         }
     }
 }

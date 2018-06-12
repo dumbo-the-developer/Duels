@@ -28,6 +28,7 @@ package me.realized.duels;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -41,12 +42,12 @@ import me.realized.duels.command.commands.duel.DuelCommand;
 import me.realized.duels.command.commands.duels.DuelsCommand;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
-import me.realized.duels.data.UserDataManager;
+import me.realized.duels.data.UserManager;
 import me.realized.duels.duel.DuelManager;
+import me.realized.duels.extra.KitItemListener;
 import me.realized.duels.hooks.HookManager;
 import me.realized.duels.kit.KitManager;
 import me.realized.duels.logging.LogManager;
-import me.realized.duels.patches.KitItemListener;
 import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.request.RequestManager;
 import me.realized.duels.setting.SettingManager;
@@ -67,7 +68,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private static final int RESOURCE_ID = 20171;
 
     @Getter
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private final Gson gson = new GsonBuilder().excludeFieldsWithModifiers(Modifier.TRANSIENT).setPrettyPrinting().create();
     private final List<Loadable> loadables = new ArrayList<>();
     private int lastLoad;
 
@@ -78,7 +79,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private Lang lang;
     @Getter
-    private UserDataManager userManager;
+    private UserManager userManager;
     @Getter
     private GuiListener<DuelsPlugin> guiListener;
     @Getter
@@ -109,7 +110,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         Log.addSource(logManager);
         loadables.add(configuration = new Config(this));
         loadables.add(lang = new Lang(this));
-        loadables.add(userManager = new UserDataManager(this));
+        loadables.add(userManager = new UserManager(this));
         loadables.add(guiListener = new GuiListener<>(this));
         loadables.add(arenaManager = new ArenaManager(this));
         loadables.add(kitManager = new KitManager(this));

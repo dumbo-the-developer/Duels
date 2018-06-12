@@ -42,13 +42,12 @@ class Countdown extends BukkitRunnable {
 
     @Override
     public void run() {
+        final String message = StringUtil.color(messages.remove(0));
+        arena.getPlayers().forEach(player -> player.sendMessage(message));
+
         if (messages.isEmpty()) {
             cancel();
             arena.setCountdown(null);
-            return;
         }
-
-        final String message = StringUtil.color(messages.remove(0));
-        arena.getPlayers().forEach(player -> player.sendMessage(message));
     }
 }

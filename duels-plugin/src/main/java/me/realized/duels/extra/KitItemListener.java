@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-package me.realized.duels.patches;
+package me.realized.duels.extra;
 
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManager;
@@ -36,7 +36,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 public class KitItemListener implements Listener {
 
@@ -50,8 +52,9 @@ public class KitItemListener implements Listener {
     @EventHandler
     public void on(final InventoryClickEvent event) {
         final Player player = (Player) event.getWhoClicked();
+        final Inventory clicked = event.getClickedInventory();
 
-        if (arenaManager.isInMatch(player)) {
+        if (clicked == null || !(clicked instanceof PlayerInventory) || arenaManager.isInMatch(player)) {
             return;
         }
 

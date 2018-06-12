@@ -128,7 +128,13 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
     }
 
     public void startCountdown() {
-        this.countdown = new Countdown(this, config.getCdMessages());
+        final List<String> messages = config.getCdMessages();
+
+        if (messages.isEmpty()) {
+            return;
+        }
+
+        this.countdown = new Countdown(this, messages);
         countdown.runTaskTimer(plugin, 0L, 20L);
     }
 

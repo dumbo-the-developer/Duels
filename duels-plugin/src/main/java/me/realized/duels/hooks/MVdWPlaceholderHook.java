@@ -30,13 +30,13 @@ import be.maximvdw.placeholderapi.PlaceholderReplaceEvent;
 import be.maximvdw.placeholderapi.PlaceholderReplacer;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.data.UserData;
-import me.realized.duels.data.UserDataManager;
+import me.realized.duels.data.UserManager;
 import me.realized.duels.util.hook.PluginHook;
 import org.bukkit.entity.Player;
 
 public class MVdWPlaceholderHook extends PluginHook<DuelsPlugin> {
 
-    private final UserDataManager userDataManager;
+    private final UserManager userDataManager;
 
     public MVdWPlaceholderHook(final DuelsPlugin plugin) {
         super(plugin, "MVdWPlaceholderAPI");

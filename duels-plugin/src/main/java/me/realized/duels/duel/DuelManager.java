@@ -43,7 +43,7 @@ import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.MatchData;
 import me.realized.duels.data.UserData;
-import me.realized.duels.data.UserDataManager;
+import me.realized.duels.data.UserManager;
 import me.realized.duels.hooks.VaultHook;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.kit.KitManager;
@@ -54,6 +54,7 @@ import me.realized.duels.spectate.SpectateManager;
 import me.realized.duels.teleport.Teleport;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.PlayerUtil;
+import me.realized.duels.util.RatingUtil;
 import me.realized.duels.util.compat.Players;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -84,7 +85,7 @@ public class DuelManager implements Loadable, Listener {
     private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
-    private final UserDataManager userDataManager;
+    private final UserManager userDataManager;
     private final ArenaManager arenaManager;
     private final KitManager kitManager;
     private final PlayerInfoManager playerManager;
@@ -253,6 +254,12 @@ public class DuelManager implements Loadable, Listener {
         }
     }
 
+    private void addItems(final PlayerInfo info, final List<ItemStack> items) {
+        if (info != null) {
+            info.getInventory().addAll(items);
+        }
+    }
+
     public void startMatch(final Player first, final Player second, final Setting setting, final Map<UUID, List<ItemStack>> items) {
         final Arena arena = setting.getArena() != null ? setting.getArena() : arenaManager.randomArena();
 
@@ -374,20 +381,7 @@ public class DuelManager implements Loadable, Listener {
             final long time = new GregorianCalendar().getTimeInMillis();
             final double health = Math.ceil(winner.getHealth()) * 0.5;
             final MatchData matchData = new MatchData(winner.getName(), player.getName(), time, duration, health);
-            UserData user = userDataManager.get(player);
-
-            if (user != null) {
-                user.addLoss();
-                user.addMatch(matchData);
-            }
-
-            user = userDataManager.get(winner);
-
-            if (user != null) {
-                user.addWin();
-                user.addMatch(matchData);
-            }
-
+            handleUsers(match.getKit(), userDataManager.get(winner), userDataManager.get(player), matchData);
             plugin.doSyncAfter(() -> {
                 handleWinner(winner, arena, match);
 
@@ -406,9 +400,20 @@ public class DuelManager implements Loadable, Listener {
         }, 1L);
     }
 
-    private void addItems(final PlayerInfo info, final List<ItemStack> items) {
-        if (info != null) {
-            info.getInventory().addAll(items);
+    private void handleUsers(final Kit kit, final UserData winner, final UserData loser, final MatchData match) {
+        if (winner != null && loser != null) {
+            winner.addWin();
+            loser.addLoss();
+            winner.addMatch(match);
+            loser.addMatch(match);
+
+            if (kit != null) {
+                final int winnerRating = winner.getRating(kit);
+                final int loserRating = loser.getRating(kit);
+                final int change = RatingUtil.getChange(config.getKFactor(), winnerRating, loserRating);
+                winner.setRating(kit.getName(), winnerRating + change);
+                loser.setRating(kit.getName(), loserRating - change);
+            }
         }
     }
 

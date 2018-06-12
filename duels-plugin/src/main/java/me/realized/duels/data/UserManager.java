@@ -47,7 +47,7 @@ import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.user.UserCreateEvent;
 import me.realized.duels.api.user.User;
-import me.realized.duels.api.user.UserManager;
+import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.util.DateUtil;
 import me.realized.duels.util.Loadable;
@@ -60,12 +60,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public class UserDataManager implements Loadable, Listener, UserManager {
+public class UserManager implements Loadable, Listener, me.realized.duels.api.user.UserManager {
 
     private final DuelsPlugin plugin;
+    private final Config config;
     private final Lang lang;
     private final File folder;
     private final Map<UUID, UserData> users = new ConcurrentHashMap<>();
+
+    private volatile int defaultRating;
+    private volatile int maxDisplayMatches;
 
     @Getter
     private volatile boolean loaded;
@@ -76,8 +80,9 @@ public class UserDataManager implements Loadable, Listener, UserManager {
     private volatile List<SortedEntry<String, Integer>> topLosses;
     private volatile long lossesLastUpdate;
 
-    public UserDataManager(final DuelsPlugin plugin) {
+    public UserManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
+        this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
         this.folder = new File(plugin.getDataFolder(), "users");
 
@@ -90,6 +95,9 @@ public class UserDataManager implements Loadable, Listener, UserManager {
 
     @Override
     public void handleLoad() {
+        this.defaultRating = config.getDefaultRating();
+        this.maxDisplayMatches = 10;
+
         plugin.doAsync(() -> {
             final File[] files = folder.listFiles();
 
@@ -114,7 +122,11 @@ public class UserDataManager implements Loadable, Listener, UserManager {
                     }
 
                     try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
-                        users.put(uuid, plugin.getGson().fromJson(reader, UserData.class));
+                        final UserData user = plugin.getGson().fromJson(reader, UserData.class);
+                        user.defaultRating = defaultRating;
+                        user.maxDisplayMatches = maxDisplayMatches;
+                        // Player might have logged in while reading the file
+                        users.putIfAbsent(uuid, user);
                     } catch (IOException ex) {
                         Log.error("Failed to load data of " + uuid + ": " + ex.getMessage());
                     }
@@ -165,8 +177,12 @@ public class UserDataManager implements Loadable, Listener, UserManager {
         return get(player.getUniqueId());
     }
 
-    private <V extends Comparable<V>> List<SortedEntry<String, V>> sorted(final Function<User, V> function) {
-        return users.values().stream().map(data -> new SortedEntry<>(data.getName(), function.apply(data))).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+    @Override
+    public <V extends Comparable<V>> List<SortedEntry<String, V>> sorted(@Nonnull final Function<User, V> function) {
+        return users.values().stream()
+            .map(data -> new SortedEntry<>(data.getName(), function.apply(data)))
+            .sorted(Comparator.reverseOrder())
+            .collect(Collectors.toList());
     }
 
     private void saveUsers(final Collection<? extends Player> players) {
@@ -184,7 +200,9 @@ public class UserDataManager implements Loadable, Listener, UserManager {
 
         if (!file.exists()) {
             final UserData user = new UserData(player);
-            plugin.getServer().getPluginManager().callEvent(new UserCreateEvent(user));
+            user.defaultRating = defaultRating;
+            user.maxDisplayMatches = maxDisplayMatches;
+            plugin.doSync(() -> plugin.getServer().getPluginManager().callEvent(new UserCreateEvent(user)));
             return user;
         }
 
@@ -199,9 +217,8 @@ public class UserDataManager implements Loadable, Listener, UserManager {
         } catch (IOException ex) {
             ex.printStackTrace();
             Log.error("An error occured while loading userdata of " + player.getName() + ": " + ex.getMessage());
+            return null;
         }
-
-        return null;
     }
 
     private void trySave(final Player player, final UserData data) {
@@ -225,8 +242,13 @@ public class UserDataManager implements Loadable, Listener, UserManager {
     @EventHandler
     public void on(final PlayerJoinEvent event) {
         final Player player = event.getPlayer();
+        final UserData user = users.get(player.getUniqueId());
 
-        if (users.containsKey(player.getUniqueId())) {
+        if (user != null) {
+            if (!player.getName().equals(user.getName())) {
+                user.setName(player.getName());
+            }
+
             return;
         }
 
