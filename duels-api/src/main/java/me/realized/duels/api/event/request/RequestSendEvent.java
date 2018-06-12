@@ -34,6 +34,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
+/**
+ * Called when a player sends a Request to a player.
+ */
 public class RequestSendEvent extends SourcedEvent implements Cancellable {
 
     private static final HandlerList handlers = new HandlerList();

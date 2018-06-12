@@ -152,7 +152,7 @@ rating:
   k-factor: 32
   # The default rating for all kits.
   default-rating: 1400
-  # If enabled, only matches started through the queue system will modify ratings of the players.
+  # If enabled, only matches started through the queue system will modify the rating of the players.
   queue-matches-only: true
 
 spectate:

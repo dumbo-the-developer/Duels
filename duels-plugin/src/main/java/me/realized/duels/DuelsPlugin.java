@@ -51,6 +51,7 @@ import me.realized.duels.logging.LogManager;
 import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.request.RequestManager;
 import me.realized.duels.setting.SettingManager;
+import me.realized.duels.shaded.bstats.Metrics;
 import me.realized.duels.spectate.SpectateManager;
 import me.realized.duels.teleport.Teleport;
 import me.realized.duels.util.Loadable;
@@ -132,6 +133,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         new DuelCommand(this).register();
         new DuelsCommand(this).register();
         new SpectateCommand(this).register();
+
+        new Metrics(this);
 
         if (!configuration.isCheckForUpdates()) {
             return;

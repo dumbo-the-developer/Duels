@@ -32,6 +32,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
+/**
+ * Called when an Arena is enabled or disabled.
+ *
+ * @see Arena#setDisabled(CommandSender, boolean)
+ */
 public class ArenaStateChangeEvent extends ArenaEvent implements Cancellable {
 
     private static final HandlerList handlers = new HandlerList();

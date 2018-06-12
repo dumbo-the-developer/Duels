@@ -35,17 +35,50 @@ import org.bukkit.entity.Player;
 
 public interface UserManager {
 
+    /**
+     * @param uuid UUID to search through the user Map
+     * @return User with the given UUID if exists, otherwise null
+     */
     @Nullable
     User get(@Nonnull final UUID uuid);
 
+
+    /**
+     * Calls {@link #get(UUID)} with {@link Player#getUniqueId()}.
+     *
+     * @see #get(UUID)
+     */
     @Nullable
     User get(@Nonnull final Player player);
 
+
+    /**
+     * Method is thread-safe.
+     *
+     * @return List of name and wins for the top 10 on the wins leaderboard or null if the leaderboard is loading/updating
+     */
     List<SortedEntry<String, Integer>> getTopWins();
 
+
+    /**
+     * Method is thread-safe.
+     *
+     * @return List of name and wins for the top 10 on the losses leaderboard or null if the leaderboard is loading/updating
+     */
     List<SortedEntry<String, Integer>> getTopLosses();
 
+
+    /**
+     * Calling this method will iterate through all the users, collect them in a list as a new instance of SortedEntry, and then sort.
+     * Refrain from calling this method on the main server thread to prevent blocking.
+     *
+     * Method is thread-safe.
+     *
+     * @param function Function to retrieve the Comparable value from the users
+     * @return List of SortedEntry with User's name and the value from function, ordered in reverse order
+     */
     <V extends Comparable<V>> List<SortedEntry<String, V>> sorted(@Nonnull final Function<User, V> function);
+
 
     class SortedEntry<K, V extends Comparable<V>> implements Comparable<SortedEntry<K, V>> {
 

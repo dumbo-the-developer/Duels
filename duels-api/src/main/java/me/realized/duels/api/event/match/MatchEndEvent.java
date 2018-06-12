@@ -32,6 +32,9 @@ import lombok.Getter;
 import me.realized.duels.api.match.Match;
 import org.bukkit.event.HandlerList;
 
+/**
+ * Called when a Match is ending.
+ */
 public class MatchEndEvent extends MatchEvent {
 
     private static final HandlerList handlers = new HandlerList();

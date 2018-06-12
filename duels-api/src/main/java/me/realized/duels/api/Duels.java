@@ -37,5 +37,11 @@ public interface Duels {
 
     KitManager getKitManager();
 
+    /**
+     * Reloads the plugin.
+     *
+     * @return true if reload was successful, otherwise false
+     */
     boolean reload();
+
 }

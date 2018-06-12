@@ -34,6 +34,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -142,10 +143,10 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
             }
 
             List<SortedEntry<String, Integer>> result = sorted(User::getWins);
-            topWins = result.size() > 10 ? result.subList(0, 10) : result;
+            topWins = Collections.unmodifiableList(result.size() > 10 ? result.subList(0, 10) : result);
             winsLastUpdate = System.currentTimeMillis();
             result = sorted(User::getLosses);
-            topLosses = result.size() > 10 ? result.subList(0, 10) : result;
+            topLosses = Collections.unmodifiableList(result.size() > 10 ? result.subList(0, 10) : result);
             lossesLastUpdate = System.currentTimeMillis();
         }, 20L * 5, 20L * 60);
     }

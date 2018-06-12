@@ -31,6 +31,9 @@ import me.realized.duels.api.match.Match;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
+/**
+ * Called when a Match has started.
+ */
 public class MatchStartEvent extends MatchEvent {
 
     private static final HandlerList handlers = new HandlerList();

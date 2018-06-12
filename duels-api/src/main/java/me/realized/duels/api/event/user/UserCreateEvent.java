@@ -31,6 +31,9 @@ import me.realized.duels.api.user.User;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
+/**
+ * Called when a new User is created.
+ */
 public class UserCreateEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();

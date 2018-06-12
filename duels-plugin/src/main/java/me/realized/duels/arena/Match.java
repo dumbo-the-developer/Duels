@@ -74,6 +74,7 @@ public class Match implements me.realized.duels.api.match.Match {
         return players.getOrDefault(player, true);
     }
 
+    @Override
     public List<ItemStack> getItems(@Nonnull final Player player) {
         if (this.items == null) {
             return Collections.emptyList();

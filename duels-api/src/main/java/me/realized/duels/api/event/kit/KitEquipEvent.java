@@ -33,6 +33,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
+/**
+ * Called when a player equips a Kit.
+ *
+ * @see Kit#equip(Player)
+ */
 public class KitEquipEvent extends KitEvent implements Cancellable {
 
     private static final HandlerList handlers = new HandlerList();

@@ -29,6 +29,9 @@ import me.realized.duels.api.arena.Arena;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
 
+/**
+ * Called when an Arena is created.
+ */
 public class ArenaCreateEvent extends ArenaEvent {
 
     private static final HandlerList handlers = new HandlerList();

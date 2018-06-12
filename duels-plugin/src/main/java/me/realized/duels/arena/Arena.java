@@ -77,7 +77,7 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
     }
 
     @Override
-    public void setPosition(@Nullable final CommandSender source, final int pos, @Nonnull final Location location) {
+    public void setPosition(@Nullable final Player source, final int pos, @Nonnull final Location location) {
         final ArenaSetPositionEvent event = new ArenaSetPositionEvent(source, this, pos, location);
         plugin.getServer().getPluginManager().callEvent(event);
 
