@@ -44,6 +44,10 @@ public class GuiListener<P extends JavaPlugin> implements Loadable, Listener {
         return gui;
     }
 
+    public void removeGui(final AbstractGui<P> gui) {
+        publicGuis.remove(gui);
+    }
+
     public void removeGui(final Player player, final AbstractGui<P> gui) {
         final Collection<AbstractGui<P>> guis = privateGuis.asMap().get(player.getUniqueId());
 

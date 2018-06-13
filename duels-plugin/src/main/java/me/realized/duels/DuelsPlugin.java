@@ -12,6 +12,7 @@ import lombok.Getter;
 import me.realized.duels.api.Duels;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.betting.BettingManager;
+import me.realized.duels.command.commands.InventoryViewCommand;
 import me.realized.duels.command.commands.SpectateCommand;
 import me.realized.duels.command.commands.duel.DuelCommand;
 import me.realized.duels.command.commands.duels.DuelsCommand;
@@ -21,6 +22,7 @@ import me.realized.duels.data.UserManager;
 import me.realized.duels.duel.DuelManager;
 import me.realized.duels.extra.KitItemListener;
 import me.realized.duels.hooks.HookManager;
+import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.KitManager;
 import me.realized.duels.logging.LogManager;
 import me.realized.duels.player.PlayerInfoManager;
@@ -71,6 +73,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private BettingManager bettingManager;
     @Getter
+    private InventoryManager inventoryManager;
+    @Getter
     private DuelManager duelManager;
     @Getter
     private RequestManager requestManager;
@@ -94,6 +98,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(playerManager = new PlayerInfoManager(this));
         loadables.add(spectateManager = new SpectateManager(this));
         loadables.add(bettingManager = new BettingManager(this));
+        loadables.add(inventoryManager = new InventoryManager(this));
         loadables.add(duelManager = new DuelManager(this));
         loadables.add(requestManager = new RequestManager(this));
         loadables.add(hookManager = new HookManager(this));
@@ -108,6 +113,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         new DuelCommand(this).register();
         new DuelsCommand(this).register();
         new SpectateCommand(this).register();
+        new InventoryViewCommand(this).register();
 
         new Metrics(this);
 

@@ -67,6 +67,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private List<String> cdMessages;
     @Getter
+    private List<String> titles;
+    @Getter
     private boolean preventMovement;
     @Getter
     private boolean preventLaunchProjectile;
@@ -106,6 +108,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         specWhitelistedCommands = configuration.getStringList("spectate.whitelisted-commands");
         cdEnabled = configuration.getBoolean("countdown.enabled", true);
         cdMessages = configuration.getStringList("countdown.messages");
+        titles = configuration.getStringList("countdown.titles");
         preventMovement = configuration.getBoolean("countdown.prevent.movement", true);
         preventLaunchProjectile = configuration.getBoolean("countdown.prevent.launch-projectile", true);
         preventPvp = configuration.getBoolean("countdown.prevent.pvp", true);

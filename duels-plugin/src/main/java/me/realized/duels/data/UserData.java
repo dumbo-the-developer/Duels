@@ -60,7 +60,7 @@ public class UserData implements User {
 
     @Override
     public int getRating(@Nonnull final Kit kit) {
-        return rating != null ? rating.getOrDefault(name, defaultRating) : defaultRating;
+        return this.rating != null ? this.rating.getOrDefault(kit.getName(), defaultRating) : defaultRating;
     }
 
     public void setRating(final String name, final int rating) {
@@ -68,6 +68,7 @@ public class UserData implements User {
             this.rating = new ConcurrentHashMap<>();
         }
 
+        System.out.println(this.name + ": " + name + " set to " + rating);
         this.rating.put(name, rating);
     }
 

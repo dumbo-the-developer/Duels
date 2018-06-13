@@ -183,6 +183,14 @@ countdown:
     - '&7Starting in &f2 &7seconds!'
     - '&7Starting in &f1 &7second!'
     - '&7Duel starting now!'
+  # This list must have the same size as above list. Titles will only display in 1.8 or above!
+  titles:
+    - '&a&l5'
+    - '&a&l4'
+    - '&e&l3'
+    - '&6&l2'
+    - '&c&l1'
+    - '&f&lGO!'
   prevent:
     movement: true
     launch-projectile: true

@@ -1,5 +1,6 @@
 package me.realized.duels.util;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import org.bukkit.Bukkit;
@@ -46,6 +47,15 @@ public final class ReflectionUtil {
             return clazz.getField(name);
         } catch (NoSuchFieldException ex) {
             ex.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Constructor<?> getConstructor(final Class<?> clazz, final Class<?>... parameters) {
+        try {
+            return clazz.getConstructor(parameters);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
             return null;
         }
     }

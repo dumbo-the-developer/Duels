@@ -1,5 +1,6 @@
 package me.realized.duels.duel;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -20,6 +21,7 @@ import me.realized.duels.data.MatchData;
 import me.realized.duels.data.UserData;
 import me.realized.duels.data.UserManager;
 import me.realized.duels.hooks.VaultHook;
+import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.kit.KitManager;
 import me.realized.duels.player.PlayerInfo;
@@ -30,7 +32,11 @@ import me.realized.duels.teleport.Teleport;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.PlayerUtil;
 import me.realized.duels.util.RatingUtil;
+import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.compat.Players;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -65,6 +71,7 @@ public class DuelManager implements Loadable, Listener {
     private final KitManager kitManager;
     private final PlayerInfoManager playerManager;
     private final SpectateManager spectateManager;
+    private final InventoryManager inventoryManager;
 
     private Teleport teleport;
     private VaultHook vault;
@@ -79,6 +86,7 @@ public class DuelManager implements Loadable, Listener {
         this.kitManager = plugin.getKitManager();
         this.playerManager = plugin.getPlayerManager();
         this.spectateManager = plugin.getSpectateManager();
+        this.inventoryManager = plugin.getInventoryManager();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -100,9 +108,8 @@ public class DuelManager implements Loadable, Listener {
 
                     for (final Player player : match.getPlayers()) {
                         handleTiePlayer(player, arena, match, true);
+                        lang.sendMessage(player, "DUEL.on-end.tie");
                     }
-
-                    Bukkit.broadcastMessage(ChatColor.GOLD + "Max duration reached!");
 
                     final MatchEndEvent endEvent = new MatchEndEvent(arena.getMatch(), null, null, Reason.MAX_TIME_REACHED);
                     plugin.getServer().getPluginManager().callEvent(endEvent);
@@ -141,7 +148,7 @@ public class DuelManager implements Loadable, Listener {
                 }
             }
 
-            Bukkit.broadcastMessage(ChatColor.RED + "Plugin is disabling!");
+            arena.getPlayers().forEach(player -> lang.sendMessage(player, "DUEL.on-end.plugin-disable"));
 
             final MatchEndEvent endEvent = new MatchEndEvent(arena.getMatch(), null, null, Reason.PLUGIN_DISABLE);
             plugin.getServer().getPluginManager().callEvent(endEvent);
@@ -239,7 +246,7 @@ public class DuelManager implements Loadable, Listener {
         final Arena arena = setting.getArena() != null ? setting.getArena() : arenaManager.randomArena();
 
         if (arena == null || !arena.isAvailable()) {
-            lang.sendMessage(first, "DUEL.arena-in-use", first, second);
+            lang.sendMessage("DUEL.arena-in-use", first, second);
             refundItems(items, first, second);
             return;
         }
@@ -272,6 +279,8 @@ public class DuelManager implements Loadable, Listener {
         int position = 0;
 
         for (final Player player : players) {
+            inventoryManager.remove(player);
+
             if (player.getAllowFlight()) {
                 player.setFlying(false);
                 player.setAllowFlight(false);
@@ -314,6 +323,7 @@ public class DuelManager implements Loadable, Listener {
             return;
         }
 
+        inventoryManager.create(player);
         event.setKeepInventory(config.isUseOwnInventoryEnabled() && config.isUseOwnInventoryKeepItems());
 
         if (!config.isUseOwnInventoryEnabled()) {
@@ -337,8 +347,11 @@ public class DuelManager implements Loadable, Listener {
             }
 
             if (arena.size() == 0) {
-                match.getPlayers().forEach(matchPlayer -> handleTiePlayer(matchPlayer, arena, match, false));
-                Bukkit.broadcastMessage(ChatColor.BLUE + "Tie Game!");
+                match.getPlayers().forEach(matchPlayer -> {
+                    handleTiePlayer(matchPlayer, arena, match, false);
+                    lang.sendMessage(matchPlayer, "DUEL.on-end.tie");
+                });
+                handleInventories(match);
 
                 final MatchEndEvent endEvent = new MatchEndEvent(arena.getMatch(), null, null, Reason.TIE);
                 plugin.getServer().getPluginManager().callEvent(endEvent);
@@ -347,14 +360,22 @@ public class DuelManager implements Loadable, Listener {
             }
 
             final Player winner = arena.first();
+            inventoryManager.create(winner);
+
             final Firework firework = (Firework) winner.getWorld().spawnEntity(winner.getEyeLocation(), EntityType.FIREWORK);
             final FireworkMeta meta = firework.getFireworkMeta();
             meta.addEffect(FireworkEffect.builder().withColor(Color.RED).with(FireworkEffect.Type.BALL_LARGE).withTrail().build());
             firework.setFireworkMeta(meta);
 
+            final double health = Math.ceil(winner.getHealth()) * 0.5;
+            final String kit = match.getKit() != null ? match.getKit().getName() : "none";
+
+            match.getPlayers().forEach(matchPlayer -> lang.sendMessage(matchPlayer, "DUEL.on-end.opponent-defeat",
+                "winner", winner.getName(), "loser", player.getName(), "health", health, "kit", kit, "arena", arena.getName()));
+            handleInventories(match);
+
             final long duration = System.currentTimeMillis() - match.getStart();
             final long time = new GregorianCalendar().getTimeInMillis();
-            final double health = Math.ceil(winner.getHealth()) * 0.5;
             final MatchData matchData = new MatchData(winner.getName(), player.getName(), time, duration, health);
             handleUsers(match.getKit(), userDataManager.get(winner), userDataManager.get(player), matchData);
             plugin.doSyncAfter(() -> {
@@ -366,13 +387,35 @@ public class DuelManager implements Loadable, Listener {
                     }
                 }
 
-                Bukkit.broadcastMessage("Winner = " + winner.getName());
-
                 final MatchEndEvent endEvent = new MatchEndEvent(arena.getMatch(), winner.getUniqueId(), player.getUniqueId(), Reason.OPPONENT_DEFEAT);
                 plugin.getServer().getPluginManager().callEvent(endEvent);
                 arena.endMatch();
             }, config.getTeleportDelay() * 20L);
         }, 1L);
+    }
+
+    private void handleInventories(final Match match) {
+        String color = lang.getMessage("DUEL.inventories.name-color");
+        color = color != null ? color : "";
+        final List<BaseComponent> allComponents = new ArrayList<>();
+        boolean start = true;
+
+        for (final Player arenaPlayer : match.getPlayers()) {
+            if (!start) {
+                allComponents.add(new TextComponent(StringUtil.color(color + ", ")));
+            } else {
+                start = false;
+            }
+
+            final TextComponent component = new TextComponent(StringUtil.color(color + arenaPlayer.getName()));
+            component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/inventoryview " + arenaPlayer.getUniqueId()));
+            allComponents.add(component);
+        }
+
+        match.getPlayers().forEach(matchPlayer -> {
+            lang.sendMessage(matchPlayer, "DUEL.inventories.message");
+            matchPlayer.spigot().sendMessage(allComponents.toArray(new BaseComponent[allComponents.size()]));
+        });
     }
 
     private void handleUsers(final Kit kit, final UserData winner, final UserData loser, final MatchData match) {

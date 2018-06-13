@@ -15,6 +15,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+// TODO: 13/06/2018 Bypass for duels.admin + sendMessage
 public class KitItemListener implements Listener {
 
     private final ArenaManager arenaManager;
@@ -35,7 +36,7 @@ public class KitItemListener implements Listener {
 
         ItemStack item = event.getCurrentItem();
 
-        if (item == null || item.getType() == Material.AIR || Tags.hasNoKey(item, "KitItem")) {
+        if (item == null || item.getType() == Material.AIR || Tags.hasNoKey(item, "DuelsKitContent")) {
             return;
         }
 
@@ -52,7 +53,7 @@ public class KitItemListener implements Listener {
 
         final ItemStack item = event.getItem();
 
-        if (item.getType() == Material.AIR || Tags.hasNoKey(item, "KitItem")) {
+        if (item.getType() == Material.AIR || Tags.hasNoKey(item, "DuelsKitContent")) {
             return;
         }
 
@@ -68,7 +69,7 @@ public class KitItemListener implements Listener {
 
         final Item item = event.getItem();
 
-        if (item.getItemStack().getType() == Material.AIR || Tags.hasNoKey(item.getItemStack(), "KitItem")) {
+        if (item.getItemStack().getType() == Material.AIR || Tags.hasNoKey(item.getItemStack(), "DuelsKitContent")) {
             return;
         }
 

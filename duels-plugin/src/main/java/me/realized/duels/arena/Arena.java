@@ -109,7 +109,7 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
             return;
         }
 
-        this.countdown = new Countdown(this, messages);
+        this.countdown = new Countdown(this, messages, config.getTitles());
         countdown.runTaskTimer(plugin, 0L, 20L);
     }
 

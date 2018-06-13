@@ -44,7 +44,13 @@ public final class Tags extends CompatBase {
             }
 
             final Object tag = GET_TAG.invoke(nmsItem);
-            return tag == null || GET_STRING.invoke(tag, key) == null;
+
+            if (tag == null) {
+                return true;
+            }
+
+            final String identifier = (String) GET_STRING.invoke(tag, key);
+            return identifier == null || !identifier.equals("true");
         } catch (Exception ex) {
             ex.printStackTrace();
             return true;

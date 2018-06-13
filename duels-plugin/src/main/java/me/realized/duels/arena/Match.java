@@ -10,8 +10,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.Getter;
-import lombok.Setter;
-import me.realized.duels.api.event.match.MatchEndEvent.Reason;
 import me.realized.duels.kit.Kit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -26,9 +24,6 @@ public class Match implements me.realized.duels.api.match.Match {
     @Getter
     private final int bet;
     private final Map<Player, Boolean> players = new HashMap<>();
-    @Getter
-    @Setter
-    private Reason reason = Reason.OTHER;
 
     Match(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet) {
         this.start = System.currentTimeMillis();

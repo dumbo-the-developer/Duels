@@ -44,18 +44,18 @@ COMMAND:
         sender:
         - '{LINE}'
         - '&7Duel request sent to &f%player%&7.'
-        - '&c- &7Kit: &9%kit%'
-        - '&c- &7Arena: &e%arena%'
-        - '&c- &7Bet: &6$%bet_amount%'
-        - '&c- &7Item Betting: &r%item_betting%'
+        - '&6- &7Kit: &9%kit%'
+        - '&6- &7Arena: &e%arena%'
+        - '&6- &7Bet: &6$%bet_amount%'
+        - '&6- &7Item Betting: &r%item_betting%'
         - '{LINE}'
         receiver:
         - '{LINE}'
         - '&7Duel request received from &f%player%&7.'
-        - '&c- &7Kit: &9%kit%'
-        - '&c- &7Arena: &e%arena%'
-        - '&c- &7Bet: &6$%bet_amount%'
-        - '&c- &7Item Betting: &r%item_betting%'
+        - '&6- &7Kit: &9%kit%'
+        - '&6- &7Arena: &e%arena%'
+        - '&6- &7Bet: &6$%bet_amount%'
+        - '&6- &7Item Betting: &r%item_betting%'
         clickable-text:
           info: '&7Click to '
           accept: '&a&l[ACCEPT] '
@@ -130,6 +130,13 @@ DUEL:
   on-select:
     arena: '{PREFIX} &7Selected Arena: &f%arena%'
     kit: '{PREFIX} &7Selected Kit: &f%kit%'
+  on-end:
+    tie: '{PREFIX} &7Tie Game!'
+    plugin-disable: '{PREFIX} &cPlugin is disabling! Ending match automatically.'
+    opponent-defeat: '{PREFIX} &f%winner%&7(&d&l%health%♥&7) has defeated &f%loser% &7with kit &9%kit% &7on arena &e%arena%&7'
+  inventories:
+    message: '&6Inventories (click the name to view):'
+    name-color: '&e'
 
 SPECTATE:
   start: '{PREFIX} &7You are now spectating &f%player%&7.'

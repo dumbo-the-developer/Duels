@@ -8,7 +8,9 @@ import me.realized.duels.kit.KitManager;
 import me.realized.duels.request.RequestManager;
 import me.realized.duels.setting.SettingManager;
 import me.realized.duels.util.gui.Button;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public abstract class BaseButton extends Button<DuelsPlugin> {
 
@@ -21,6 +23,13 @@ public abstract class BaseButton extends Button<DuelsPlugin> {
 
     protected BaseButton(final DuelsPlugin plugin, final ItemStack displayed) {
         super(plugin, displayed);
+
+        if (displayed.hasItemMeta()) {
+            final ItemMeta meta = displayed.getItemMeta();
+            meta.addItemFlags(ItemFlag.values());
+            displayed.setItemMeta(meta);
+        }
+
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
         this.arenaManager = plugin.getArenaManager();

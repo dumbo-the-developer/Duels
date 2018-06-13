@@ -40,7 +40,6 @@ public class MatchEndEvent extends MatchEvent {
         OPPONENT_DEFEAT,
         TIE,
         MAX_TIME_REACHED,
-        PLUGIN_DISABLE,
-        OTHER
+        PLUGIN_DISABLE
     }
 }

@@ -29,9 +29,16 @@ class CompatBase {
     static final Method GET_COMPOUND;
 
     static final Method GET_HANDLE;
+    static final Field PLAYER_CONNECTION;
+    static final Method SEND_PACKET;
     static final Field COLLIDES_WITH_ENTITIES;
 
     static final Method GET_ONLINE_PLAYERS;
+
+    static final Class<?> TITLE_PACKET;
+    static final Class<?> TITLE_ACTIONS;
+    static final Class<?> CHAT_COMPONENT;
+    static final Class<?> CHAT_SERIALIZER;
 
     static {
         final Class<?> CB_ITEMSTACK = ReflectionUtil.getCBClass("inventory.CraftItemStack");
@@ -57,16 +64,22 @@ class CompatBase {
         SET_DOUBLE = ReflectionUtil.getMethod(TAG_COMPOUND, "setDouble", String.class, double.class);
         SET_LONG = ReflectionUtil.getMethod(TAG_COMPOUND, "setLong", String.class, long.class);
         GET_COMPOUND = ReflectionUtil.getMethod(TAG_COMPOUND, "getCompound", String.class);
+
         final Class<?> CB_PLAYER = ReflectionUtil.getCBClass("entity.CraftPlayer");
         GET_HANDLE = ReflectionUtil.getMethod(CB_PLAYER, "getHandle");
 
-        if (CompatUtil.isPre_1_10()) {
-            final Class<?> NMS_PLAYER = ReflectionUtil.getNMSClass("EntityPlayer");
-            COLLIDES_WITH_ENTITIES = ReflectionUtil.getField(NMS_PLAYER, "collidesWithEntities");
-        } else {
-            COLLIDES_WITH_ENTITIES = null;
-        }
+        final Class<?> NMS_PLAYER = ReflectionUtil.getNMSClass("EntityPlayer");
+        PLAYER_CONNECTION = ReflectionUtil.getField(NMS_PLAYER, "playerConnection");
+        SEND_PACKET = ReflectionUtil.getMethod(ReflectionUtil.getNMSClass("PlayerConnection"), "sendPacket", ReflectionUtil.getNMSClass("Packet"));
+
+        COLLIDES_WITH_ENTITIES = CompatUtil.isPre_1_10() ? ReflectionUtil.getField(NMS_PLAYER, "collidesWithEntities") : null;
 
         GET_ONLINE_PLAYERS = ReflectionUtil.getMethod(Bukkit.class, "getOnlinePlayers");
+
+        TITLE_PACKET = ReflectionUtil.getNMSClass("PacketPlayOutTitle");
+        TITLE_ACTIONS = ReflectionUtil.getNMSClass("PacketPlayOutTitle$EnumTitleAction");
+        CHAT_COMPONENT = ReflectionUtil.getNMSClass("IChatBaseComponent");
+        CHAT_SERIALIZER = ReflectionUtil.getNMSClass("ChatComponentText");
+
     }
 }

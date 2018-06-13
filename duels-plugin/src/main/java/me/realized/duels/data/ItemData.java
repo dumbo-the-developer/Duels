@@ -251,6 +251,6 @@ public class ItemData {
         }
 
         item.setItemMeta(meta);
-        return Tags.setKey(item, "KitItem");
+        return Tags.setKey(item, "DuelsKitContent");
     }
 }
