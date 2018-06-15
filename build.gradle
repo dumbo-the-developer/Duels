@@ -21,12 +21,16 @@ subprojects {
     targetCompatibility = 1.8
 
     repositories {
-        mavenLocal()
         mavenCentral()
 
         maven {
             name 'spigot-repo'
             url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots'
+        }
+
+        maven {
+            name 'bungeecord-repo'
+            url 'https://oss.sonatype.org/content/repositories/snapshots'
         }
 
         maven {
@@ -50,11 +54,6 @@ subprojects {
         }
 
         maven {
-            name 'byteflux-repo'
-            url 'http://repo.byteflux.net/repository/maven-releases'
-        }
-
-        maven {
             name 'inventive-repo'
             url 'https://repo.inventivetalent.org/content/groups/public/'
         }
@@ -66,8 +65,7 @@ subprojects {
 
     dependencies {
         compile 'org.projectlombok:lombok:1.16.20'
+        compile 'com.google.code.findbugs:jsr305:3.0.2'
         compile 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
-        compile 'org.spigotmc:spigot:1.12.2-R0.1-SNAPSHOT'
-//        compile name:'spigot-1.7'
     }
 }

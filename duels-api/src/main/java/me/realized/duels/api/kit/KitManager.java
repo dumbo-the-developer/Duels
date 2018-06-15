@@ -21,7 +21,7 @@ public interface KitManager {
      * Calls {@link KitCreateEvent} on successful creation.
      *
      * @param creator Player who is the creator of this kit
-     * @param name Name of the kit
+     * @param name Name of the kit. Requires to be alphanumeric (underscore is allowed).
      * @return The newly created kit or null if a kit with given name already exists
      */
     @Nullable

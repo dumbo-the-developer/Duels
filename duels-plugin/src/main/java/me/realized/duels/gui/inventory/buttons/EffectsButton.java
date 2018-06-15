@@ -4,10 +4,12 @@ import java.util.stream.Collectors;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.util.StringUtil;
+import me.realized.duels.util.compat.CompatUtil;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 
 public class EffectsButton extends BaseButton {
 
@@ -20,5 +22,10 @@ public class EffectsButton extends BaseButton {
                     + " "
                     + StringUtil.toRoman(effect.getAmplifier() + 1)
                     + " (" + (effect.getDuration() / 20) + "s)")).collect(Collectors.toList())).build());
+        editMeta(meta -> {
+            if (!CompatUtil.isPre1_8()) {
+                meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+            }
+        });
     }
 }

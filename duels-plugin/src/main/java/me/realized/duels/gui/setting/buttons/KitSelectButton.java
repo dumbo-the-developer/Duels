@@ -24,7 +24,7 @@ public class KitSelectButton extends BaseButton {
         }
 
         final Setting setting = settingManager.getSafely(player);
-        setLore(String.format(LORE_TEMPLATE, setting.getKit() != null ? setting.getKit().getName() : "Random"));
+        setLore(String.format(LORE_TEMPLATE, setting.getKit() != null ? setting.getKit().getName() : "Not Selected"));
     }
 
     @Override

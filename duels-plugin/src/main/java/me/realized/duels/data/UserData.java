@@ -68,7 +68,6 @@ public class UserData implements User {
             this.rating = new ConcurrentHashMap<>();
         }
 
-        System.out.println(this.name + ": " + name + " set to " + rating);
         this.rating.put(name, rating);
     }
 

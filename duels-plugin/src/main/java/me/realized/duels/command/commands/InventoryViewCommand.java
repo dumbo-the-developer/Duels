@@ -18,7 +18,6 @@ public class InventoryViewCommand extends BaseCommand {
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         if (args.length == 0) {
-            inventoryManager.create((Player) sender);
             sender.sendMessage(StringUtil.color("&cUsage: /inventoryview [uuid]"));
             return;
         }

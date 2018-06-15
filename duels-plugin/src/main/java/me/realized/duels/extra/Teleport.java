@@ -1,8 +1,10 @@
-package me.realized.duels.teleport;
+package me.realized.duels.extra;
 
 import java.util.function.Consumer;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.hooks.CombatTagPlusHook;
 import me.realized.duels.hooks.EssentialsHook;
+import me.realized.duels.hooks.PvPManagerHook;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.metadata.MetadataUtil;
@@ -24,6 +26,8 @@ public final class Teleport implements Loadable, Listener {
     private final DuelsPlugin plugin;
 
     private EssentialsHook essentials;
+    private CombatTagPlusHook combatTagPlus;
+    private PvPManagerHook pvpManager;
 
     public Teleport(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -33,6 +37,8 @@ public final class Teleport implements Loadable, Listener {
     @Override
     public void handleLoad() {
         this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
+        this.combatTagPlus = plugin.getHookManager().getHook(CombatTagPlusHook.class);
+        this.pvpManager = plugin.getHookManager().getHook(PvPManagerHook.class);
     }
 
     @Override
@@ -50,6 +56,14 @@ public final class Teleport implements Loadable, Listener {
 
         if (essentials != null) {
             essentials.setBackLocation(player, location);
+        }
+
+        if (combatTagPlus != null) {
+            combatTagPlus.removeTag(player);
+        }
+
+        if (pvpManager != null) {
+            pvpManager.removeTag(player);
         }
 
         final Chunk chunk = location.getChunk();

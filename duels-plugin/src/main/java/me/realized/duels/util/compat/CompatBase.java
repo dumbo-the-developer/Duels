@@ -76,10 +76,11 @@ class CompatBase {
 
         GET_ONLINE_PLAYERS = ReflectionUtil.getMethod(Bukkit.class, "getOnlinePlayers");
 
-        TITLE_PACKET = ReflectionUtil.getNMSClass("PacketPlayOutTitle");
-        TITLE_ACTIONS = ReflectionUtil.getNMSClass("PacketPlayOutTitle$EnumTitleAction");
-        CHAT_COMPONENT = ReflectionUtil.getNMSClass("IChatBaseComponent");
-        CHAT_SERIALIZER = ReflectionUtil.getNMSClass("ChatComponentText");
+        boolean pre1_8 = CompatUtil.isPre1_8();
+        TITLE_PACKET = !pre1_8 ? ReflectionUtil.getNMSClass("PacketPlayOutTitle") : null;
+        TITLE_ACTIONS = !pre1_8 ? ReflectionUtil.getNMSClass("PacketPlayOutTitle$EnumTitleAction") : null;
+        CHAT_COMPONENT = !pre1_8 ? ReflectionUtil.getNMSClass("IChatBaseComponent") : null;
+        CHAT_SERIALIZER = !pre1_8 ? ReflectionUtil.getNMSClass("ChatComponentText") : null;
 
     }
 }

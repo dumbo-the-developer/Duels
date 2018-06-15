@@ -1,15 +1,11 @@
 package me.realized.duels.gui.setting.buttons;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.setting.Setting;
+import me.realized.duels.util.TextBuilder;
 import me.realized.duels.util.inventory.ItemBuilder;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.ClickEvent.Action;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -39,13 +35,18 @@ public class RequestSendButton extends BaseButton {
             return;
         }
 
+        if (!config.isUseOwnInventoryEnabled() && setting.getKit() == null) {
+            lang.sendMessage(player, "DUEL.no-selected-kit");
+            return;
+        }
+
         player.closeInventory();
 
         if (!requestManager.send(player, target, setting)) {
             return;
         }
 
-        final String kit = setting.getKit() != null ? setting.getKit().getName() : "Random";
+        final String kit = setting.getKit() != null ? setting.getKit().getName() : "Not Selected";
         final String arena = setting.getArena() != null ? setting.getArena().getName() : "Random";
         final int betAmount = setting.getBet();
         final String itemBetting = setting.isItemBetting() ? "&aenabled" : "&cdisabled";
@@ -56,37 +57,12 @@ public class RequestSendButton extends BaseButton {
             "player", player.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
 
         final String path = "COMMAND.duel.request.sent.clickable-text.";
-        final String[] messages = {lang.getMessage(path + "accept"), lang.getMessage(path + "deny")};
-        final String[] commands = {"accept " + player.getName(), "deny " + player.getName()};
-        final String info = lang.getMessage(path + "info");
 
-        if (info == null) {
-            return;
-        }
-
-        final List<BaseComponent> allComponents = new ArrayList<>(Arrays.asList(TextComponent.fromLegacyText(info)));
-
-        for (int i = 0; i < messages.length; i++) {
-            final String message = messages[i];
-
-            if (message == null) {
-                continue;
-            }
-
-            final BaseComponent[] components = TextComponent.fromLegacyText(message);
-
-            for (final BaseComponent component : components) {
-                component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/duel " + commands[i]));
-                allComponents.add(component);
-            }
-        }
-
-        target.spigot().sendMessage(allComponents.toArray(new BaseComponent[allComponents.size()]));
-
-        final BaseComponent[] components;
-
-        if ((components = TextComponent.fromLegacyText(lang.getMessage(path + "extra"))) != null) {
-            target.spigot().sendMessage(components);
-        }
+        TextBuilder
+            .of(lang.getMessage(path + "info"))
+            .add(lang.getMessage(path + "accept"), Action.RUN_COMMAND, "/duel accept " + player.getName())
+            .add(lang.getMessage(path + "deny"), Action.RUN_COMMAND, "/duel deny " + player.getName())
+            .send(target);
+        TextBuilder.of(lang.getMessage(path + "extra")).send(target);
     }
 }

@@ -22,6 +22,7 @@ import me.realized.duels.api.event.arena.ArenaCreateEvent;
 import me.realized.duels.api.event.arena.ArenaRemoveEvent;
 import me.realized.duels.config.Config;
 import me.realized.duels.data.ArenaData;
+import me.realized.duels.kit.Kit;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.gui.MultiPageGui;
@@ -141,8 +142,10 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
         return arenas.stream().flatMap(arena -> arena.getPlayers().stream()).collect(Collectors.toSet());
     }
 
-    public Arena randomArena() {
-        final List<Arena> available = arenas.stream().filter(Arena::isAvailable).collect(Collectors.toList());
+    public Arena randomArena(final Kit kit) {
+        final List<Arena> available = arenas.stream()
+            .filter(arena -> (kit == null || !kit.isArenaSpecific() || kit.canUse(arena)) && arena.isAvailable())
+            .collect(Collectors.toList());
 
         if (available.isEmpty()) {
             return null;

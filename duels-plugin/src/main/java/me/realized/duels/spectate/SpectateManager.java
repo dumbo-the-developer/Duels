@@ -21,7 +21,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -32,7 +31,6 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -105,12 +103,14 @@ public class SpectateManager implements Loadable, Listener {
             });
         }
 
-        player.teleport(target, PlayerTeleportEvent.TeleportCause.SPECTATE);
+        final Spectator spectator = new Spectator(player, target, arena);
+        spectators.put(player, spectator);
+        player.teleport(target);
+        spectator.setTeleported(true);
         player.getInventory().setItem(8, ItemBuilder.of(Material.PAPER).name("&cStop Spectating").build());
         player.setAllowFlight(true);
         player.setFlying(true);
         Collisions.setCollidable(player, false);
-        spectators.put(player, new Spectator(player, target, arena));
 
         if (player.hasPermission("duels.spectate.anonymously")) {
             return;
@@ -162,25 +162,6 @@ public class SpectateManager implements Loadable, Listener {
         return spectators.keySet();
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void on(final PlayerRespawnEvent event) {
-        final Player player = event.getPlayer();
-        final PlayerInfo info = playerManager.removeAndGet(player);
-
-        if (info != null) {
-            event.setRespawnLocation(info.getLocation());
-
-            if (essentials != null) {
-                essentials.setBackLocation(player, event.getRespawnLocation());
-            }
-
-            plugin.doSyncAfter(() -> {
-                PlayerUtil.reset(player);
-                info.restore(player);
-            }, 1L);
-        }
-    }
-
     @EventHandler
     public void on(final PlayerInteractEvent event) {
         if (!event.getAction().name().startsWith("RIGHT")) {
@@ -226,8 +207,9 @@ public class SpectateManager implements Loadable, Listener {
     @EventHandler(ignoreCancelled = true)
     public void on(final PlayerTeleportEvent event) {
         final Player player = event.getPlayer();
+        final Spectator spectator = get(player);
 
-        if (!isSpectating(player)) {
+        if (spectator == null || !spectator.isTeleported()) {
             return;
         }
 

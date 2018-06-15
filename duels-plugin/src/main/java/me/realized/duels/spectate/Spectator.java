@@ -3,6 +3,7 @@ package me.realized.duels.spectate;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.Getter;
+import lombok.Setter;
 import me.realized.duels.arena.Arena;
 import org.bukkit.entity.Player;
 
@@ -14,6 +15,9 @@ public class Spectator {
     private final String targetName;
     @Getter
     private final Arena arena;
+    @Getter
+    @Setter
+    private boolean teleported;
 
     Spectator(final Player owner, final Player target, final Arena arena) {
         this.owner = owner.getUniqueId();

@@ -32,7 +32,7 @@ public final class Titles extends CompatBase {
                 ex.printStackTrace();
             }
         } else {
-            player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
+            player.sendTitle(StringUtil.color(title), subtitle != null ? StringUtil.color(subtitle) : null, fadeIn, stay, fadeOut);
         }
     }
 }

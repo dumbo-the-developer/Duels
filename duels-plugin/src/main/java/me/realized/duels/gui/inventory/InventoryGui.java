@@ -1,5 +1,6 @@
 package me.realized.duels.gui.inventory;
 
+import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.gui.inventory.buttons.EffectsButton;
 import me.realized.duels.gui.inventory.buttons.HeadButton;
@@ -16,8 +17,13 @@ import org.bukkit.inventory.ItemStack;
 
 public class InventoryGui extends SinglePageGui<DuelsPlugin> {
 
+    @Getter
+    private final long creation;
+
     public InventoryGui(final DuelsPlugin plugin, final Player player) {
         super(plugin, StringUtil.color("&e" + player.getName()), 6);
+        this.creation = System.currentTimeMillis();
+
         final ItemStack spacing = ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 7).name(" ").build();
         Slots.run(0, 9, slot -> inventory.setItem(slot, spacing));
         set(4, new HeadButton(plugin, player));

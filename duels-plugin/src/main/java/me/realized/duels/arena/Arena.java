@@ -91,7 +91,7 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
     }
 
     public boolean isAvailable() {
-        return !disabled && !isUsed() && positions.get(1) != null && positions.get(2) != null;
+        return !isDisabled() && !isUsed() && getPosition(1) != null && getPosition(2) != null;
     }
 
     public void startMatch(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet) {

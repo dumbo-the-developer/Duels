@@ -44,7 +44,7 @@ COMMAND:
         sender:
         - '{LINE}'
         - '&7Duel request sent to &f%player%&7.'
-        - '&6- &7Kit: &9%kit%'
+        - '&6- &7Kit: &3%kit%'
         - '&6- &7Arena: &e%arena%'
         - '&6- &7Bet: &6$%bet_amount%'
         - '&6- &7Item Betting: &r%item_betting%'
@@ -52,7 +52,7 @@ COMMAND:
         receiver:
         - '{LINE}'
         - '&7Duel request received from &f%player%&7.'
-        - '&6- &7Kit: &9%kit%'
+        - '&6- &7Kit: &3%kit%'
         - '&6- &7Arena: &e%arena%'
         - '&6- &7Bet: &6$%bet_amount%'
         - '&6- &7Item Betting: &r%item_betting%'
@@ -125,6 +125,8 @@ DUEL:
   prevent-item-pickup: '&cYou cannot pick up items while in a duel.'
   prevent-command: '&cYou cannot use ''%command%'' while in a duel.'
   prevent-teleportation: '&cYou cannot teleport while in a duel.'
+  no-selected-kit: '&cPlease select a kit.'
+  no-available-arenas: '&cThere were no arenas available. Please try again later.'
   arena-in-use: '&cThat arena is already in use. Please select a different arena.'
   not-enough-money: '&cCould not start the match: Yours or your opponent''s balance lacks $%bet%.'
   on-select:
@@ -133,10 +135,11 @@ DUEL:
   on-end:
     tie: '{PREFIX} &7Tie Game!'
     plugin-disable: '{PREFIX} &cPlugin is disabling! Ending match automatically.'
-    opponent-defeat: '{PREFIX} &f%winner%&7(&d&l%health%♥&7) has defeated &f%loser% &7with kit &9%kit% &7on arena &e%arena%&7'
+    opponent-defeat: '{PREFIX} &f%winner%&7(&d%health%♥&7) has defeated &f%loser% &7with kit &3%kit% &7on arena &e%arena%&7.'
   inventories:
-    message: '&6Inventories (click the name to view):'
-    name-color: '&e'
+    message: '&7Inventories (click on the name to view): '
+    name-color: '&b'
+  rating-change: '&7Rating Change: &a%winner% +%change% (%winner_rating%) &c%loser% -%change% (%loser_rating%)'
 
 SPECTATE:
   start: '{PREFIX} &7You are now spectating &f%player%&7.'

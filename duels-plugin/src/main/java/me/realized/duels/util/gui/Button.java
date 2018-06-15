@@ -22,7 +22,7 @@ public class Button<P extends JavaPlugin> {
         this.displayed = displayed;
     }
 
-    private void editMeta(final Consumer<ItemMeta> consumer) {
+    protected void editMeta(final Consumer<ItemMeta> consumer) {
         final ItemMeta meta = getDisplayed().getItemMeta();
         consumer.accept(meta);
         getDisplayed().setItemMeta(meta);

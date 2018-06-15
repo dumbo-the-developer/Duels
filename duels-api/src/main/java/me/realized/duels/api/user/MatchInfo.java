@@ -2,6 +2,7 @@ package me.realized.duels.api.user;
 
 import java.util.GregorianCalendar;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public interface MatchInfo {
 
@@ -17,6 +18,13 @@ public interface MatchInfo {
      */
     @Nonnull
     String getLoser();
+
+
+    /**
+     * @return Name of the kit used in this match or null if useOwnInventory was enabled for this match
+     */
+    @Nullable
+    String getKit();
 
 
     /**

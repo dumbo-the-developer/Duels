@@ -31,7 +31,7 @@ public class RequestDetailsButton extends BaseButton {
 
         final String[] lore = LORE_TEMPLATE.clone();
         lore[0] = String.format(lore[0], target.getName());
-        lore[1] = String.format(lore[1], setting.getKit() != null ? setting.getKit().getName() : "Random");
+        lore[1] = String.format(lore[1], setting.getKit() != null ? setting.getKit().getName() : "Not Selected");
         lore[2] = String.format(lore[2], setting.getArena() != null ? setting.getArena().getName() : "Random");
         lore[3] = String.format(lore[3], setting.isItemBetting() ? "&aenabled" : "&cdisabled");
         lore[4] = String.format(lore[4], "$" + setting.getBet());

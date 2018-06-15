@@ -20,7 +20,9 @@ import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.UserManager;
 import me.realized.duels.duel.DuelManager;
+import me.realized.duels.extra.DamageListener;
 import me.realized.duels.extra.KitItemListener;
+import me.realized.duels.extra.Teleport;
 import me.realized.duels.hooks.HookManager;
 import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.KitManager;
@@ -30,7 +32,6 @@ import me.realized.duels.request.RequestManager;
 import me.realized.duels.setting.SettingManager;
 import me.realized.duels.shaded.bstats.Metrics;
 import me.realized.duels.spectate.SpectateManager;
-import me.realized.duels.teleport.Teleport;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.Log.LogSource;
@@ -104,6 +105,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(hookManager = new HookManager(this));
         loadables.add(teleport = new Teleport(this));
         new KitItemListener(this);
+        new DamageListener(this);
 
         if (!load()) {
             getPluginLoader().disablePlugin(this);

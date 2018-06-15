@@ -12,7 +12,7 @@ import org.bukkit.command.CommandSender;
 public class ReloadCommand extends BaseCommand {
 
     public ReloadCommand(final DuelsPlugin plugin) {
-        super(plugin, "reload", null);
+        super(plugin, "reload", null, null, null, 1, false);
     }
 
     @Override

@@ -10,11 +10,15 @@ public class KitData {
 
     private final String name;
     private final ItemData displayed;
+    private final boolean usePermission;
+    private final boolean arenaSpecific;
     private final Map<String, Map<Integer, ItemData>> items = new HashMap<>();
 
     public KitData(final Kit kit) {
         this.name = kit.getName();
         this.displayed = new ItemData(kit.getDisplayed());
+        this.usePermission = kit.isUsePermission();
+        this.arenaSpecific = kit.isArenaSpecific();
 
         for (final Map.Entry<String, Map<Integer, ItemStack>> entry : kit.getItems().entrySet()) {
             final Map<Integer, ItemData> data = new HashMap<>();
@@ -24,7 +28,7 @@ public class KitData {
     }
 
     public Kit toKit(final DuelsPlugin plugin) {
-        final Kit kit = new Kit(plugin, name, displayed.toItemStack());
+        final Kit kit = new Kit(plugin, name, displayed.toItemStack(), usePermission, arenaSpecific);
 
         for (final Map.Entry<String, Map<Integer, ItemData>> entry : items.entrySet()) {
             final Map<Integer, ItemStack> data = new HashMap<>();

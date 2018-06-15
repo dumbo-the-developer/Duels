@@ -3,10 +3,12 @@ package me.realized.duels.util;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import org.bukkit.ChatColor;
 
 public final class StringUtil {
 
+    private static final Pattern ALPHANUMERIC = Pattern.compile("^[a-zA-Z0-9_]*$");
     private final static TreeMap<Integer, String> ROMAN_NUMERALS = new TreeMap<>();
 
     static {
@@ -61,5 +63,9 @@ public final class StringUtil {
     public static List<String> color(final List<String> input, final Function<String, String> function) {
         input.replaceAll(s -> s = color(function != null ? function.apply(s) : s));
         return input;
+    }
+
+    public static boolean isAlphanumeric(String input) {
+        return ALPHANUMERIC.matcher(input.replace(" ", "")).matches();
     }
 }

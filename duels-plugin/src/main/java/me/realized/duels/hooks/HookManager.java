@@ -14,6 +14,9 @@ public class HookManager extends AbstractHookManager<DuelsPlugin> {
         register("Vault", VaultHook.class);
         register("Essentials", EssentialsHook.class);
         register("MVdWPlaceholderAPI", MVdWPlaceholderHook.class);
+        register("PvPManager", PvPManagerHook.class);
+        register("CombatTagPlus", CombatTagPlusHook.class);
+        register("Factions", FactionsHook.class);
     }
 
     @Override

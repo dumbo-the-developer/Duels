@@ -8,9 +8,8 @@ import me.realized.duels.command.BaseCommand;
 import me.realized.duels.data.MatchData;
 import me.realized.duels.data.UserData;
 import me.realized.duels.util.DateUtil;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import me.realized.duels.util.TextBuilder;
+import net.md_5.bungee.api.chat.HoverEvent.Action;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -68,30 +67,13 @@ public class StatsCommand extends BaseCommand {
 
         final Calendar calendar = new GregorianCalendar();
 
-        for (int i = user.getMatches().size() - 1; i >= 0; i--) {
-            final MatchData match = user.getMatches().get(i);
+        for (final MatchData match : user.getMatches()) {
             final String duration = DateUtil.formatMilliseconds(match.getDuration());
             final String timeSince = DateUtil.formatMilliseconds(calendar.getTimeInMillis() - match.getTime());
-            String message = lang.getMessage("COMMAND.duel.stats.match-format", "winner", match.getWinner(), "loser", match.getLoser());
-
-            if (message == null) {
-                break;
-            }
-
-            final BaseComponent[] text = TextComponent.fromLegacyText(message);
-            message = lang.getMessage("COMMAND.duel.stats.hover-text", "duration", duration, "time", timeSince, "health", match.getHealth());
-
-            if (message == null) {
-                break;
-            }
-
-            final BaseComponent[] hoverText = TextComponent.fromLegacyText(message);
-
-            for (final BaseComponent component : text) {
-                component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText));
-            }
-
-            sender.spigot().sendMessage(text);
+            TextBuilder
+                .of(lang.getMessage("COMMAND.duel.stats.match-format", "winner", match.getWinner(), "loser", match.getLoser()))
+                .setHoverEvent(Action.SHOW_TEXT, lang.getMessage("COMMAND.duel.stats.hover-text", "duration", duration, "time", timeSince, "health", match.getHealth()))
+                .send(sender);
         }
     }
 }

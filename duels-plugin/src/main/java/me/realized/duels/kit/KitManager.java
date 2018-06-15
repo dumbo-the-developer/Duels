@@ -21,6 +21,7 @@ import me.realized.duels.api.event.kit.KitRemoveEvent;
 import me.realized.duels.data.KitData;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
+import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.gui.MultiPageGui;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -53,6 +54,11 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
 
             if (data != null) {
                 for (final Map.Entry<String, KitData> entry : data.entrySet()) {
+                    if (!StringUtil.isAlphanumeric(entry.getKey())) {
+                        Log.error(this, "Excluding kit '" + entry.getKey() + "' from load: Name is not alphanumeric.");
+                        continue;
+                    }
+
                     kits.put(entry.getKey(), entry.getValue().toKit(plugin));
                 }
             }
@@ -95,7 +101,7 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
     @Nullable
     @Override
     public Kit create(@Nonnull final Player creator, @Nonnull final String name) {
-        if (kits.containsKey(name)) {
+        if (!StringUtil.isAlphanumeric(name) || kits.containsKey(name)) {
             return null;
         }
 

@@ -4,8 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import lombok.Getter;
+import lombok.Setter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.kit.KitEquipEvent;
+import me.realized.duels.arena.Arena;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.setting.Setting;
 import me.realized.duels.util.inventory.ItemBuilder;
@@ -20,19 +22,27 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
     @Getter
     private final String name;
     @Getter
+    @Setter
+    private boolean usePermission;
+    @Getter
+    @Setter
+    private boolean arenaSpecific;
+    @Getter
     private final Map<String, Map<Integer, ItemStack>> items = new HashMap<>();
 
-    public Kit(final DuelsPlugin plugin, final String name, final ItemStack displayed) {
-        super(plugin, displayed);
-        this.name = name;
-    }
-
-    public Kit(final DuelsPlugin plugin, final String name, final PlayerInventory inventory) {
-        this(plugin, name, ItemBuilder
+    public Kit(final DuelsPlugin plugin, final String name, final ItemStack displayed, final boolean usePermission, final boolean arenaSpecific) {
+        super(plugin, displayed != null ? displayed : ItemBuilder
             .of(Material.DIAMOND_SWORD)
             .name("&7&l" + name)
             .lore("&aClick to send", "&aa duel request", "&awith this kit!")
             .build());
+        this.name = name;
+        this.usePermission = usePermission;
+        this.arenaSpecific = arenaSpecific;
+    }
+
+    public Kit(final DuelsPlugin plugin, final String name, final PlayerInventory inventory) {
+        this(plugin, name, null, false, false);
 
         final Map<Integer, ItemStack> contents = new HashMap<>();
 
@@ -63,6 +73,10 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
         items.put("ARMOR", armorContents);
     }
 
+    public boolean canUse(final Arena arena) {
+        return arena.getName().startsWith(getName() + "_");
+    }
+
     @Override
     public void equip(@Nonnull final Player player) {
         final KitEquipEvent event = new KitEquipEvent(player, this);
@@ -84,6 +98,13 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
 
     @Override
     public void onClick(final Player player) {
+        final String permission = "duels.kits." + name.replace(" ", "-").toLowerCase();
+
+        if (usePermission && !player.hasPermission("duels.kits.*") && !player.hasPermission(permission)) {
+            lang.sendMessage(player, "ERROR.no-permission", "permission", permission);
+            return;
+        }
+
         final Setting setting = settingManager.getSafely(player);
         setting.setKit(this);
         setting.openGui(player);
