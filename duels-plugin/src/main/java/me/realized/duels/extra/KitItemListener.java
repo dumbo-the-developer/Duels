@@ -15,7 +15,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-// TODO: 13/06/2018 Bypass for duels.admin + sendMessage
+// TODO: 13/06/2018 sendMessage
 public class KitItemListener implements Listener {
 
     private final ArenaManager arenaManager;
@@ -28,15 +28,20 @@ public class KitItemListener implements Listener {
     @EventHandler
     public void on(final InventoryClickEvent event) {
         final Player player = (Player) event.getWhoClicked();
-        final Inventory clicked = event.getClickedInventory();
 
-        if (clicked == null || !(clicked instanceof PlayerInventory) || arenaManager.isInMatch(player)) {
+        if (!shouldCancel(player)) {
             return;
         }
 
-        ItemStack item = event.getCurrentItem();
+        final Inventory clicked = event.getClickedInventory();
 
-        if (item == null || item.getType() == Material.AIR || Tags.hasNoKey(item, "DuelsKitContent")) {
+        if (clicked == null || !(clicked instanceof PlayerInventory)) {
+            return;
+        }
+
+        final ItemStack item = event.getCurrentItem();
+
+        if (!isKitItem(item)) {
             return;
         }
 
@@ -47,13 +52,13 @@ public class KitItemListener implements Listener {
     public void on(final PlayerInteractEvent event) {
         final Player player = event.getPlayer();
 
-        if (!event.hasItem() || arenaManager.isInMatch(player)) {
+        if (!shouldCancel(player)) {
             return;
         }
 
         final ItemStack item = event.getItem();
 
-        if (item.getType() == Material.AIR || Tags.hasNoKey(item, "DuelsKitContent")) {
+        if (!isKitItem(item)) {
             return;
         }
 
@@ -63,17 +68,27 @@ public class KitItemListener implements Listener {
 
     @EventHandler
     public void on(final PlayerPickupItemEvent event) {
-        if (arenaManager.isInMatch(event.getPlayer())) {
+        final Player player = event.getPlayer();
+
+        if (!shouldCancel(player)) {
             return;
         }
 
         final Item item = event.getItem();
 
-        if (item.getItemStack().getType() == Material.AIR || Tags.hasNoKey(item.getItemStack(), "DuelsKitContent")) {
+        if (!isKitItem(item.getItemStack())) {
             return;
         }
 
         event.setCancelled(true);
         item.remove();
+    }
+
+    private boolean shouldCancel(final Player player) {
+        return !player.isOp() && !player.hasPermission(Permissions.ADMIN) && !arenaManager.isInMatch(player);
+    }
+
+    private boolean isKitItem(final ItemStack item) {
+        return item != null && item.getType() != Material.AIR && Tags.hasKey(item, "DuelsKitContent");
     }
 }

@@ -22,7 +22,9 @@ import me.realized.duels.data.UserManager;
 import me.realized.duels.duel.DuelManager;
 import me.realized.duels.extra.DamageListener;
 import me.realized.duels.extra.KitItemListener;
+import me.realized.duels.extra.PotionListener;
 import me.realized.duels.extra.Teleport;
+import me.realized.duels.extra.TeleportListener;
 import me.realized.duels.hooks.HookManager;
 import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.KitManager;
@@ -102,10 +104,12 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(inventoryManager = new InventoryManager(this));
         loadables.add(duelManager = new DuelManager(this));
         loadables.add(requestManager = new RequestManager(this));
-        loadables.add(hookManager = new HookManager(this));
+        hookManager = new HookManager(this);
         loadables.add(teleport = new Teleport(this));
         new KitItemListener(this);
         new DamageListener(this);
+        new PotionListener(this);
+        new TeleportListener(this);
 
         if (!load()) {
             getPluginLoader().disablePlugin(this);

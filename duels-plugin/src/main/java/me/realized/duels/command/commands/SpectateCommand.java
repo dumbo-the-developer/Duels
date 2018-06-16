@@ -2,6 +2,7 @@ package me.realized.duels.command.commands;
 
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
+import me.realized.duels.extra.Permissions;
 import me.realized.duels.util.inventory.InventoryUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -10,7 +11,7 @@ import org.bukkit.entity.Player;
 public class SpectateCommand extends BaseCommand {
 
     public SpectateCommand(final DuelsPlugin plugin) {
-        super(plugin, "spectate", "duels.spectate", true);
+        super(plugin, "spectate", Permissions.SPECTATE, true);
     }
 
     @Override

@@ -10,12 +10,13 @@ import me.realized.duels.command.commands.duels.subcommands.ReloadCommand;
 import me.realized.duels.command.commands.duels.subcommands.SavekitCommand;
 import me.realized.duels.command.commands.duels.subcommands.SetCommand;
 import me.realized.duels.command.commands.duels.subcommands.ToggleCommand;
+import me.realized.duels.extra.Permissions;
 import org.bukkit.command.CommandSender;
 
 public class DuelsCommand extends BaseCommand {
 
     public DuelsCommand(final DuelsPlugin plugin) {
-        super(plugin, "duels", "duels.admin", false);
+        super(plugin, "duels", Permissions.ADMIN, false);
         child(
             new SavekitCommand(plugin),
             new DeletekitCommand(plugin),

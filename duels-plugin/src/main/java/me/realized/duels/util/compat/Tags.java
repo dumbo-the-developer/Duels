@@ -31,29 +31,23 @@ public final class Tags extends CompatBase {
         }
     }
 
-    public static boolean hasNoKey(final ItemStack item, final String key) {
+    public static boolean hasKey(final ItemStack item, final String key) {
         if (item == null) {
-            return true;
+            return false;
         }
 
         try {
             final Object nmsItem = AS_NMS_COPY.invoke(null, item);
 
             if (nmsItem == null) {
-                return true;
+                return false;
             }
 
             final Object tag = GET_TAG.invoke(nmsItem);
-
-            if (tag == null) {
-                return true;
-            }
-
-            final String identifier = (String) GET_STRING.invoke(tag, key);
-            return identifier == null || !identifier.equals("true");
+            return tag != null && GET_STRING.invoke(tag, key).equals("true");
         } catch (Exception ex) {
             ex.printStackTrace();
-            return true;
+            return false;
         }
     }
 }

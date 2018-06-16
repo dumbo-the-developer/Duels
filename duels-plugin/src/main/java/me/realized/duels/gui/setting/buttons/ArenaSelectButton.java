@@ -1,6 +1,7 @@
 package me.realized.duels.gui.setting.buttons;
 
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.extra.Permissions;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.setting.Setting;
 import me.realized.duels.util.inventory.ItemBuilder;
@@ -18,8 +19,13 @@ public class ArenaSelectButton extends BaseButton {
 
     @Override
     public void update(final Player player) {
-        if (!config.isAllowArenaSelecting()) {
+        if (!config.isArenaSelectingEnabled()) {
             setLore("&cThis option is currently unavailable.");
+            return;
+        }
+
+        if (config.isArenaSelectingUsePermission() && !player.hasPermission(Permissions.ARENA_SELECTING)) {
+            setLore("&cYou do not have permission to use this option.");
             return;
         }
 
@@ -29,8 +35,13 @@ public class ArenaSelectButton extends BaseButton {
 
     @Override
     public void onClick(final Player player) {
-        if (!config.isAllowArenaSelecting()) {
+        if (!config.isArenaSelectingEnabled()) {
             player.sendMessage(ChatColor.RED + "This option is currently unavailable.");
+            return;
+        }
+
+        if (config.isArenaSelectingUsePermission() && !player.hasPermission(Permissions.ARENA_SELECTING)) {
+            lang.sendMessage(player, "ERROR.no-permission", "permission", Permissions.ARENA_SELECTING);
             return;
         }
 

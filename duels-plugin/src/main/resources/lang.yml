@@ -9,14 +9,14 @@ STRINGS:
   HALF_LINE: '&9&m------------------&r'
 
 ERROR:
-  data-load-failure: '&cCould not load your duel stats. Please contact an administrator.'
-  no-permission: '&cNope! You are missing the permission ''%permission%'' to do this.'
-  player-not-found: '&c%name% is not online.'
-  no-longer-online: '&cThat player is no longer online.'
-  invalid-sub-command: '&c''%argument%'' is not a valid sub command. Please type ''/%command%'' for help.'
-  target-is-self: '&cYou cannot duel yourself.'
-  inventory-not-empty: '&cYou must have a cleared inventory to use this command.'
-  patch-prevent-teleportation: '&cCannot teleport to a player in a duel.'
+  data-load-failure: '{PREFIX} &cCould not load your duel stats. Please contact an administrator.'
+  no-permission: '{PREFIX} &cNope! You are lacking the following permission: ''%permission%'''
+  player-not-found: '{PREFIX} &c%name% is not online.'
+  no-longer-online: '{PREFIX} &cThat player is no longer online.'
+  invalid-sub-command: '{PREFIX} &c''%argument%'' is not a valid sub command. Please type ''/%command%'' for help.'
+  target-is-self: '{PREFIX} &cYou cannot duel yourself.'
+  inventory-not-empty: '{PREFIX} &cYou must have a cleared inventory to use this command.'
+  prevent-teleportation: '{PREFIX} &cCannot teleport to a player in a duel.'
   already-has-request: '&cYou already have a request sent to %player%.'
   no-request: '&cYou do not have a request from %player%.'
   already-in-match:

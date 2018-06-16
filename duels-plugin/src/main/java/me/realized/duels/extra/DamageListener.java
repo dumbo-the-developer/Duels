@@ -15,7 +15,10 @@ public class DamageListener implements Listener {
 
     public DamageListener(final DuelsPlugin plugin) {
         this.arenaManager = plugin.getArenaManager();
-        plugin.doSyncAfter(() -> plugin.getServer().getPluginManager().registerEvents(this, plugin), 1L);
+
+        if (plugin.getConfiguration().isForceAllowCombat()) {
+            plugin.doSyncAfter(() -> plugin.getServer().getPluginManager().registerEvents(this, plugin), 1L);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

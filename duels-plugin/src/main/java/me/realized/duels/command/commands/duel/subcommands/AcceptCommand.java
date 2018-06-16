@@ -6,6 +6,7 @@ import me.realized.duels.request.Request;
 import me.realized.duels.setting.Setting;
 import me.realized.duels.util.inventory.InventoryUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -21,6 +22,11 @@ public class AcceptCommand extends BaseCommand {
 
         if (config.isRequiresClearedInventory() && InventoryUtil.hasItem(player)) {
             lang.sendMessage(sender, "ERROR.inventory-not-empty");
+            return;
+        }
+
+        if (config.isPreventCreativeMode() && player.getGameMode() == GameMode.CREATIVE) {
+            // TODO: 16/06/2018 send msg
             return;
         }
 

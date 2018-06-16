@@ -8,12 +8,14 @@ import me.realized.duels.command.commands.duel.subcommands.DenyCommand;
 import me.realized.duels.command.commands.duel.subcommands.StatsCommand;
 import me.realized.duels.command.commands.duel.subcommands.ToggleCommand;
 import me.realized.duels.command.commands.duel.subcommands.TopCommand;
+import me.realized.duels.extra.Permissions;
 import me.realized.duels.hooks.VaultHook;
 import me.realized.duels.setting.Setting;
 import me.realized.duels.util.NumberUtil;
 import me.realized.duels.util.inventory.InventoryUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -46,6 +48,11 @@ public class DuelCommand extends BaseCommand {
             return true;
         }
 
+        if (config.isPreventCreativeMode() && player.getGameMode() == GameMode.CREATIVE) {
+            // TODO: 16/06/2018 send msg
+            return true;
+        }
+
         if (arenaManager.isInMatch(player)) {
             lang.sendMessage(sender, "ERROR.already-in-match.sender");
             return true;
@@ -75,7 +82,12 @@ public class DuelCommand extends BaseCommand {
 
         final Setting setting = settingManager.getSafely(player);
 
-        if (config.isAllowMoneyBetting() && args.length > 1) {
+        if (config.isMoneyBettingEnabled() && args.length > 1) {
+            if (config.isMoneyBettingUsePermission() && !player.hasPermission(Permissions.MONEY_BETTING)) {
+                lang.sendMessage(player, "ERROR.no-permission", "permission", Permissions.MONEY_BETTING);
+                return true;
+            }
+
             final int amount = NumberUtil.parseInt(args[1]).orElse(0);
 
             if (vault == null || vault.getEconomy() == null) {

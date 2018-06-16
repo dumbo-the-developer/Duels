@@ -3,13 +3,14 @@ package me.realized.duels.command.commands.duel.subcommands;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.data.UserData;
+import me.realized.duels.extra.Permissions;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class ToggleCommand extends BaseCommand {
 
     public ToggleCommand(final DuelsPlugin plugin) {
-        super(plugin, "toggle", "duels.toggle");
+        super(plugin, "toggle", Permissions.TOGGLE);
     }
 
     @Override

@@ -3,6 +3,7 @@ package me.realized.duels.command.commands;
 import java.util.UUID;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
+import me.realized.duels.extra.Permissions;
 import me.realized.duels.gui.inventory.InventoryGui;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.profile.ProfileUtil;
@@ -12,7 +13,7 @@ import org.bukkit.entity.Player;
 public class InventoryViewCommand extends BaseCommand {
 
     public InventoryViewCommand(final DuelsPlugin plugin) {
-        super(plugin, "inventoryview", "duels.duel", true);
+        super(plugin, "inventoryview", Permissions.DUEL, true);
     }
 
     @Override

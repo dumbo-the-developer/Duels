@@ -4,12 +4,13 @@ import java.util.List;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.user.UserManager.SortedEntry;
 import me.realized.duels.command.BaseCommand;
+import me.realized.duels.extra.Permissions;
 import org.bukkit.command.CommandSender;
 
 public class TopCommand extends BaseCommand {
 
     public TopCommand(final DuelsPlugin plugin) {
-        super(plugin, "top", "top [wins|losses]", "Displays top duel wins & losses.", "duels.top", 2, true);
+        super(plugin, "top", "top [wins|losses]", "Displays top duel wins & losses.", Permissions.TOP, 2, true);
     }
 
     @Override

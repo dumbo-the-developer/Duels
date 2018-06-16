@@ -5,7 +5,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.match.MatchEndEvent;
@@ -22,13 +21,13 @@ import me.realized.duels.data.UserManager;
 import me.realized.duels.extra.Teleport;
 import me.realized.duels.hooks.EssentialsHook;
 import me.realized.duels.hooks.FactionsHook;
+import me.realized.duels.hooks.McMMOHook;
 import me.realized.duels.hooks.VaultHook;
 import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.player.PlayerInfo;
 import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.setting.Setting;
-import me.realized.duels.spectate.SpectateManager;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.PlayerUtil;
 import me.realized.duels.util.RatingUtil;
@@ -52,6 +51,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
@@ -70,13 +70,12 @@ public class DuelManager implements Loadable {
     private final UserManager userDataManager;
     private final ArenaManager arenaManager;
     private final PlayerInfoManager playerManager;
-    private final SpectateManager spectateManager;
     private final InventoryManager inventoryManager;
 
     private Teleport teleport;
     private VaultHook vault;
     private EssentialsHook essentials;
-    private FactionsHook factions;
+    private McMMOHook mcMMO;
     private int durationCheckTask;
 
     public DuelManager(final DuelsPlugin plugin) {
@@ -86,7 +85,6 @@ public class DuelManager implements Loadable {
         this.userDataManager = plugin.getUserManager();
         this.arenaManager = plugin.getArenaManager();
         this.playerManager = plugin.getPlayerManager();
-        this.spectateManager = plugin.getSpectateManager();
         this.inventoryManager = plugin.getInventoryManager();
         plugin.getServer().getPluginManager().registerEvents(new DuelListener(), plugin);
     }
@@ -96,7 +94,7 @@ public class DuelManager implements Loadable {
         this.teleport = plugin.getTeleport();
         this.vault = plugin.getHookManager().getHook(VaultHook.class);
         this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
-        this.factions = plugin.getHookManager().getHook(FactionsHook.class);
+        this.mcMMO = plugin.getHookManager().getHook(McMMOHook.class);
 
         if (config.getMaxDuration() > 0) {
             this.durationCheckTask = plugin.doSyncRepeat(() -> {
@@ -177,6 +175,10 @@ public class DuelManager implements Loadable {
             vault.add(match.getBet(), player);
         }
 
+        if (mcMMO != null) {
+            mcMMO.enableSkills(player);
+        }
+
         if (alive && !config.isUseOwnInventoryEnabled()) {
             PlayerUtil.reset(player);
         }
@@ -212,6 +214,10 @@ public class DuelManager implements Loadable {
 
         if (vault != null) {
             vault.add(match.getBet() * 2, player);
+        }
+
+        if (mcMMO != null) {
+            mcMMO.enableSkills(player);
         }
 
         final List<ItemStack> items = match.getItems();
@@ -309,6 +315,15 @@ public class DuelManager implements Loadable {
             }
 
             teleport.tryTeleport(player, locations.get(++position));
+
+            if (essentials != null) {
+                essentials.tryUnvanish(player);
+            }
+
+            if (mcMMO != null) {
+                mcMMO.disableSkills(player);
+            }
+
             arena.add(player);
         }
     }
@@ -366,10 +381,6 @@ public class DuelManager implements Loadable {
         }
     }
 
-    private boolean isSimilar(final Location first, final Location second) {
-        return Math.abs(first.getX() - second.getX()) + Math.abs(first.getY() - second.getY()) + Math.abs(first.getZ() - second.getZ()) < 5;
-    }
-
     // Separating out the listener fixes weird error with 1.7 spigot
     private class DuelListener implements Listener {
 
@@ -383,6 +394,11 @@ public class DuelManager implements Loadable {
             }
 
             MetadataUtil.put(plugin, player, FactionsHook.METADATA_KEY, true);
+
+            if (mcMMO != null) {
+                mcMMO.enableSkills(player);
+            }
+
             inventoryManager.create(player);
             event.setKeepInventory(config.isUseOwnInventoryEnabled() && config.isUseOwnInventoryKeepItems());
 
@@ -454,6 +470,7 @@ public class DuelManager implements Loadable {
             }, 1L);
         }
 
+
         @EventHandler(priority = EventPriority.HIGHEST)
         public void on(final PlayerRespawnEvent event) {
             final Player player = event.getPlayer();
@@ -478,6 +495,7 @@ public class DuelManager implements Loadable {
             }
         }
 
+
         @EventHandler(ignoreCancelled = true)
         public void on(final EntityDamageEvent event) {
             if (!(event.getEntity() instanceof Player)) {
@@ -497,6 +515,7 @@ public class DuelManager implements Loadable {
 
             event.setCancelled(true);
         }
+
 
         @EventHandler(ignoreCancelled = true)
         public void on(final EntityDamageByEntityEvent event) {
@@ -566,28 +585,12 @@ public class DuelManager implements Loadable {
             lang.sendMessage(event.getPlayer(), "DUEL.prevent-command", "command", event.getMessage());
         }
 
-        @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+        @EventHandler(ignoreCancelled = true)
         public void on(PlayerTeleportEvent event) {
             final Player player = event.getPlayer();
             final Location to = event.getTo();
-            final boolean inMatch = arenaManager.isInMatch(player);
 
-            if (!inMatch && !spectateManager.isSpectating(player)) {
-                final Set<Player> players = arenaManager.getPlayers();
-                players.addAll(spectateManager.getPlayers());
-
-                for (final Player target : players) {
-                    if (player.equals(target) || !target.isOnline() || !isSimilar(target.getLocation(), to)) {
-                        continue;
-                    }
-
-                    event.setCancelled(true);
-                    lang.sendMessage(player, "ERROR.patch-prevent-teleportation");
-                    return;
-                }
-            }
-
-            if (!config.isLimitTeleportEnabled() || event.getCause() == TeleportCause.ENDER_PEARL || !inMatch) {
+            if (!config.isLimitTeleportEnabled() || event.getCause() == TeleportCause.ENDER_PEARL || !arenaManager.isInMatch(player)) {
                 return;
             }
 
@@ -600,5 +603,21 @@ public class DuelManager implements Loadable {
             event.setCancelled(true);
             lang.sendMessage(player, "DUEL.prevent-teleportation");
         }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void on(final InventoryOpenEvent event) {
+        if (!config.isPreventInventoryOpen()) {
+            return;
+        }
+
+        final Player player = (Player) event.getPlayer();
+
+        if (!arenaManager.isInMatch(player)) {
+            return;
+        }
+        
+        event.setCancelled(true);
+        // TODO: 16/06/2018 send msg
     }
 }

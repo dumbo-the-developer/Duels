@@ -9,6 +9,7 @@ import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.arena.Match;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
+import me.realized.duels.extra.Permissions;
 import me.realized.duels.hooks.EssentialsHook;
 import me.realized.duels.player.PlayerInfo;
 import me.realized.duels.player.PlayerInfoManager;
@@ -112,12 +113,11 @@ public class SpectateManager implements Loadable, Listener {
         player.setFlying(true);
         Collisions.setCollidable(player, false);
 
-        if (player.hasPermission("duels.spectate.anonymously")) {
+        if (player.hasPermission(Permissions.SPEC_ANON)) {
             return;
         }
 
-        arena.getMatch().getPlayers().stream().filter(Player::isOnline)
-            .forEach(arenaPlayer -> lang.sendMessage(arenaPlayer, "SPECTATE.arena-broadcast", true, "player", player.getName()));
+        arena.getMatch().getPlayers().forEach(matchPlayer -> lang.sendMessage(matchPlayer, "SPECTATE.arena-broadcast", true, "player", player.getName()));
     }
 
     public void stopSpectating(final Player player, final boolean end) {

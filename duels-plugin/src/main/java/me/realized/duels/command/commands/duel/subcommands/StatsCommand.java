@@ -7,6 +7,7 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.data.MatchData;
 import me.realized.duels.data.UserData;
+import me.realized.duels.extra.Permissions;
 import me.realized.duels.util.DateUtil;
 import me.realized.duels.util.TextBuilder;
 import net.md_5.bungee.api.chat.HoverEvent.Action;
@@ -17,7 +18,7 @@ import org.bukkit.entity.Player;
 public class StatsCommand extends BaseCommand {
 
     public StatsCommand(final DuelsPlugin plugin) {
-        super(plugin, "stats", "duels.stats");
+        super(plugin, "stats", Permissions.STATS);
     }
 
     @Override
@@ -25,8 +26,8 @@ public class StatsCommand extends BaseCommand {
         final Player player = (Player) sender;
 
         if (args.length > getLength()) {
-            if (!sender.hasPermission(getPermission() + ".others")) {
-                lang.sendMessage(sender, "ERROR.no-permission", "permission", getPermission() + ".others");
+            if (!sender.hasPermission(Permissions.STATS_OTHERS)) {
+                lang.sendMessage(sender, "ERROR.no-permission", "permission", Permissions.STATS_OTHERS);
                 return;
             }
 

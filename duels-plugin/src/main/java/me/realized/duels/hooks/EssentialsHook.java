@@ -13,17 +13,15 @@ public class EssentialsHook extends PluginHook<DuelsPlugin> {
         super(plugin, "Essentials");
     }
 
-    public void setUnvanished(final Player player) {
-//        if (!config.isPatchesToggleVanishOnStart()) {
-//            return;
-//        }
+    public void tryUnvanish(final Player player) {
+        if (!plugin.getConfiguration().isForceUnvanish()) {
+            return;
+        }
 
         final Essentials essentials = (Essentials) getPlugin();
         final User user = essentials.getUser(player);
 
         if (user != null && user.isVanished()) {
-            user.setVanished(false);
-            user.setVanished(true);
             user.setVanished(false);
         }
     }

@@ -14,11 +14,17 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean checkForUpdates;
 
     @Getter
-    private boolean allowArenaSelecting;
+    private boolean arenaSelectingEnabled;
     @Getter
-    private boolean allowItemBetting;
+    private boolean arenaSelectingUsePermission;
     @Getter
-    private boolean allowMoneyBetting;
+    private boolean itemBettingEnabled;
+    @Getter
+    private boolean itemBettingUsePermission;
+    @Getter
+    private boolean moneyBettingEnabled;
+    @Getter
+    private boolean moneyBettingUsePermission;
     @Getter
     private boolean useOwnInventoryEnabled;
     @Getter
@@ -26,11 +32,25 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean requiresClearedInventory;
     @Getter
+    private boolean preventCreativeMode;
+    @Getter
     private int maxDuration;
     @Getter
     private boolean endCommandsEnabled;
     @Getter
     private List<String> endCommands;
+    @Getter
+    private boolean preventInventoryOpen;
+    @Getter
+    private boolean removeEmptyBottle;
+    @Getter
+    private boolean preventTpToMatchPlayers;
+    @Getter
+    private boolean preventMcMMO;
+    @Getter
+    private boolean forceAllowCombat;
+    @Getter
+    private boolean forceUnvanish;
     @Getter
     private boolean teleportToLastLocation;
     @Getter
@@ -83,15 +103,26 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     protected void loadValues(final FileConfiguration configuration) {
         version = configuration.getInt("config-version");
         checkForUpdates = configuration.getBoolean("check-for-updates", true);
-        allowArenaSelecting = configuration.getBoolean("duel.allow-arena-selecting", true);
-        allowItemBetting = configuration.getBoolean("duel.allow-item-betting", true);
-        allowMoneyBetting = configuration.getBoolean("duel.allow-money-betting", true);
+        arenaSelectingEnabled = configuration.getBoolean("duel.arena-selecting.enabled", true);
+        arenaSelectingUsePermission = configuration.getBoolean("duel.arena-selecting.use-permission", false);
+        itemBettingEnabled = configuration.getBoolean("duel.item-betting.enabled", true);
+        itemBettingUsePermission = configuration.getBoolean("duel.item-betting.use-permission", false);
+        moneyBettingEnabled = configuration.getBoolean("duel.money-betting.enabled", true);
+        moneyBettingUsePermission = configuration.getBoolean("duel.money-betting.use-permission", false);
+
         useOwnInventoryEnabled = configuration.getBoolean("duel.use-own-inventory.enabled", false);
         useOwnInventoryKeepItems = configuration.getBoolean("duel.use-own-inventory.keep-items", false);
         requiresClearedInventory = configuration.getBoolean("duel.requires-cleared-inventory", true);
+        preventCreativeMode = configuration.getBoolean("duel.prevent-creative-mode", true);
         maxDuration = configuration.getInt("duel.match.max-duration", -1);
         endCommandsEnabled = configuration.getBoolean("duel.match.end-commands.enabled", false);
         endCommands = configuration.getStringList("duel.match.end-commands.commands");
+        preventInventoryOpen = configuration.getBoolean("duel.prevent-inventory-open", true);
+        removeEmptyBottle = configuration.getBoolean("duel.remove-empty-bottle", true);
+        preventTpToMatchPlayers = configuration.getBoolean("duel.prevent-teleport-to-match-players", true);
+        preventMcMMO = configuration.getBoolean("duel.prevent-mcmmo-skills", true);
+        forceAllowCombat = configuration.getBoolean("duel.force-allow-combat", true);
+        forceUnvanish = configuration.getBoolean("duel.force-unvanish", true);
         teleportToLastLocation = configuration.getBoolean("duel.teleport-to-last-location", false);
         teleportDelay = configuration.getInt("duel.teleport-delay", 5);
         preventItemDrop = configuration.getBoolean("duel.prevent-item-drop", false);

@@ -8,6 +8,7 @@ import lombok.Setter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.kit.KitEquipEvent;
 import me.realized.duels.arena.Arena;
+import me.realized.duels.extra.Permissions;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.setting.Setting;
 import me.realized.duels.util.inventory.ItemBuilder;
@@ -98,9 +99,9 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
 
     @Override
     public void onClick(final Player player) {
-        final String permission = "duels.kits." + name.replace(" ", "-").toLowerCase();
+        final String permission = String.format(Permissions.KIT, name.replace(" ", "-").toLowerCase());
 
-        if (usePermission && !player.hasPermission("duels.kits.*") && !player.hasPermission(permission)) {
+        if (usePermission && !player.hasPermission(Permissions.KIT_ALL) && !player.hasPermission(permission)) {
             lang.sendMessage(player, "ERROR.no-permission", "permission", permission);
             return;
         }
