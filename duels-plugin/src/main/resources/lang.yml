@@ -7,6 +7,7 @@ STRINGS:
   PREFIX: '&9[Duels]'
   LINE: '&9&m------------------------------------&r'
   HALF_LINE: '&9&m------------------&r'
+  FAIL_PREFIX: '&cFailed to start the match:'
 
 ERROR:
   data-load-failure: '{PREFIX} &cCould not load your duel stats. Please contact an administrator.'
@@ -125,10 +126,12 @@ DUEL:
   prevent-item-pickup: '&cYou cannot pick up items while in a duel.'
   prevent-command: '&cYou cannot use ''%command%'' while in a duel.'
   prevent-teleportation: '&cYou cannot teleport while in a duel.'
-  no-selected-kit: '&cPlease select a kit.'
-  no-available-arenas: '&cThere were no arenas available. Please try again later.'
-  arena-in-use: '&cThat arena is already in use. Please select a different arena.'
-  not-enough-money: '&cCould not start the match: Yours or your opponent''s balance lacks $%bet%.'
+  start-failure:
+    no-kit-selected: '{FAIL_PREFIX} No kit was selected!'
+    player-moved: '{FAIL_PREFIX} You or your opponent moved after sending/accepting the request!'
+    no-arena-available: '{FAIL_PREFIX} No arena is currently available. Please try again later.'
+    arena-in-use: '{FAIL_PREFIX} That arena is already in use. Please select a different arena.'
+    not-enough-money: '{FAIL_PREFIX} You or your opponent lacks $%bet%.'
   on-select:
     arena: '{PREFIX} &7Selected Arena: &f%arena%'
     kit: '{PREFIX} &7Selected Kit: &f%kit%'

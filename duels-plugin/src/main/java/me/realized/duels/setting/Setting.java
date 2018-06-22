@@ -7,6 +7,7 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.gui.setting.SettingGui;
 import me.realized.duels.kit.Kit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class Setting {
@@ -27,10 +28,17 @@ public class Setting {
     @Getter
     @Setter
     private boolean itemBetting;
-    private SettingGui gui;
+    private final SettingGui gui;
+    @Getter
+    private Location[] locations = new Location[2];
+
+    public Setting(final DuelsPlugin plugin, final Player player) {
+        this.plugin = plugin;
+        this.gui = player != null ? plugin.getGuiListener().addGui(player, new SettingGui(plugin)) : null;
+    }
 
     public Setting(final DuelsPlugin plugin) {
-        this.plugin = plugin;
+        this(plugin, null);
     }
 
     public void reset() {
@@ -56,10 +64,10 @@ public class Setting {
     }
 
     public void openGui(final Player player) {
-        (this.gui != null ? this.gui : (this.gui = plugin.getGuiListener().addGui(player, new SettingGui(plugin)))).open(player);
+        gui.open(player);
     }
 
-    // Don't copy the gui since it won't be required to start a match.
+    // Don't copy the gui since it won't be required to start a match
     public Setting lightCopy() {
         final Setting copy = new Setting(plugin);
         copy.target = target;
@@ -67,6 +75,7 @@ public class Setting {
         copy.arena = arena;
         copy.bet = bet;
         copy.itemBetting = itemBetting;
+        copy.locations = locations;
         return copy;
     }
 }

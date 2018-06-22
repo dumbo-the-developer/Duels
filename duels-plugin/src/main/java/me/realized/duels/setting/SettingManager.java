@@ -25,7 +25,7 @@ public class SettingManager implements Loadable {
     }
 
     public Setting getSafely(final Player player) {
-        return cache.computeIfAbsent(player.getUniqueId(), result -> new Setting(plugin));
+        return cache.computeIfAbsent(player.getUniqueId(), result -> new Setting(plugin, player));
     }
 
     public Setting remove(final Player player) {

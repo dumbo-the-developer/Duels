@@ -10,6 +10,7 @@ import me.realized.duels.duel.DuelManager;
 import me.realized.duels.hooks.HookManager;
 import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.KitManager;
+import me.realized.duels.queue.QueueManager;
 import me.realized.duels.request.RequestManager;
 import me.realized.duels.setting.SettingManager;
 import me.realized.duels.spectate.SpectateManager;
@@ -24,6 +25,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
     protected final UserManager userManager;
     protected final ArenaManager arenaManager;
     protected final KitManager kitManager;
+    protected final QueueManager queueManager;
     protected final SettingManager settingManager;
     protected final SpectateManager spectateManager;
     protected final BettingManager bettingManager;
@@ -44,6 +46,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
         this.userManager = plugin.getUserManager();
         this.arenaManager = plugin.getArenaManager();
         this.kitManager = plugin.getKitManager();
+        this.queueManager = plugin.getQueueManager();
         this.settingManager = plugin.getSettingManager();
         this.spectateManager = plugin.getSpectateManager();
         this.bettingManager = plugin.getBettingManager();

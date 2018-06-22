@@ -66,15 +66,20 @@ public class StatsCommand extends BaseCommand {
         lang.sendMessage(sender, "COMMAND.duel.stats.displayed",
             "player", user.getName(), "wins", wins, "losses", losses, "wl_ratio", wlRatio, "requests_enabled", requests);
 
-        final Calendar calendar = new GregorianCalendar();
+        if (config.isDisplayPastMatches()) {
+            final Calendar calendar = new GregorianCalendar();
 
-        for (final MatchData match : user.getMatches()) {
-            final String duration = DateUtil.formatMilliseconds(match.getDuration());
-            final String timeSince = DateUtil.formatMilliseconds(calendar.getTimeInMillis() - match.getTime());
-            TextBuilder
-                .of(lang.getMessage("COMMAND.duel.stats.match-format", "winner", match.getWinner(), "loser", match.getLoser()))
-                .setHoverEvent(Action.SHOW_TEXT, lang.getMessage("COMMAND.duel.stats.hover-text", "duration", duration, "time", timeSince, "health", match.getHealth()))
-                .send(sender);
+            for (final MatchData match : user.getMatches()) {
+                final String duration = DateUtil.formatMilliseconds(match.getDuration());
+                final String timeSince = DateUtil.formatMilliseconds(calendar.getTimeInMillis() - match.getTime());
+                TextBuilder
+                    .of(lang.getMessage("COMMAND.duel.stats.match-format", "winner", match.getWinner(), "loser", match.getLoser()))
+                    .setHoverEvent(Action.SHOW_TEXT,
+                        lang.getMessage("COMMAND.duel.stats.hover-text", "duration", duration, "time", timeSince, "health", match.getHealth()))
+                    .send(sender);
+            }
         }
+
+        lang.sendMessage(sender, "COMMAND.duel.stats.extra");
     }
 }

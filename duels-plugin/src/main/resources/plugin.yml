@@ -19,8 +19,6 @@ commands:
    spectate:
      description: Spectate a player in duel.
      aliases: [spec]
-   inventoryview:
-     description: View inventories after match.
 
 permissions:
   duels.*:

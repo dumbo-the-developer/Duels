@@ -1,194 +1,128 @@
-#   <-> Duels v2 <->
-#
-#
-#   Read the configuration (especially the comments above each option) carefully before PMing me on Spigot,
-#   you'll probably find what you were looking for.
-#
-#
+# DO NOT EDIT THIS VALUE!
+config-version: 1
 
+# If enabled, a notification and the download link will be printed on console whenever an update is available.
+check-for-updates: true
 
-Patches:
-
-  # Patch to known glitch with Essentials Vanish where you can't see the player even after unvanish.
-  toggle-vanish-on-start: true
-
-  # Patches an exploit with Essentials' /back command which allowed players to return to arena.
-  set-back-location: true
-
-  # Patches an exploit with Essentials' /tpa command which allowed players to teleport others to them.
-  # Players with OP, duels.admin permission, or spectator mode will bypass the cancellation.
-  cancel-teleport-to-players-in-match: true
-  
-  # Prevents exploit with chest access plugins or trading systems by cancelling InventoryOpen in a match.
-  # Add every command and their aliases to disabled-commands is another way to patch the issue.
-  fix-inventory-open: true
-
-  # mcMMO: Prevents use of skills & abilities in a match.
-  disable-mcMMO-in-match: true
-
-  # Factions: Prevents player power loss from dying in a match.
-  disable-power-loss: true
-
-  # For v2.0 and above, teleportation with distance under 1.0 is not cancelled due to lagbacks.
-  # Enable this patch to cancel any teleportation.
-  strict-teleportation: false
-
-  # If enabled, Duels will try to override any entity damage cancellation from other plugins if players are dueling.
-  # For example, enabling this will allow players in same faction to duel.
-  # THIS IS AN UNSAFE OPTION, DISABLE IF IT CAUSES ANY ISSUES.
-  force-allow-pvp: true
-
-  # If enabled, Duels will attempt to override any teleport cancellation from other plugins for match related teleportation.
-  # THIS IS AN UNSAFE OPTION, DISABLE IF IT CAUSES ANY ISSUES.
-  force-allow-teleportation: true
-
-  # If enabled, players must stay still after sending a request.
-  # Before the duel starts, Duels will check if player has moved and stop the duel if so.
-  # This prevents users moving out of the selected DuelZone region after sending a request.
-  # Duels will send a message after they send a duel request to someone
-  # in order to notify them to stay still.
-  # You may edit the sent message in messages.yml.
-  cancel-match-if-moved: false
-
-  # If enabled, players in creative will not be able to accept duel requests.
-  disallow-creative-dueling: false
-
-  # If enabled, players in combat (CombatTagPlus) will not be able to send duel requests.
-  disallow-dueling-while-tagged: true
-
-
-
-Countdown:
-
-  # Enable countdown?
-  enabled: true
-
-  # Countdown timer's duration equals to the length of the list below. (in seconds)
-  messages:
-  - '&7Starting in &f5 &7seconds!'
-  - '&7Starting in &f4 &7seconds!'
-  - '&7Starting in &f3 &7seconds!'
-  - '&7Starting in &f2 &7seconds!'
-  - '&7Starting in &f1 &7second!'
-  - '&7Duel starting now!'
-
-  # While countdown is running, block launching projectiles. (Examples: Arrow, Enderpearl)
-  block-projectile: true
-
-  # While countdown is running, block pvp.
-  block-pvp: true
-
-
-
-
-GUI:
-
-  # Select how many rows should each page of the GUI have.
-  # Excludes the last row which contains 'previous page' & 'next page' buttons.
-  # Must be in range between 1 - 5.
-  kit-selector-rows: 3
-  arena-selector-rows: 2
-
-  # The display name of the map item in Arena Selector GUI.
-  # display name for available arenas
-  available-arena-displayname: '&9{NAME}: &aAvailable'
-  # display name for in use arenas
-  in-use-arena-displayname: '&9{NAME}: &cIn Use'
-
-
-
-Spectating:
-
-  # If enabled, players must have a cleared inventory to execute the command /spectate.
-  requires-cleared-inventory: false
-
-  # Players will be able to only use the following commands while in specator mode.
-  whitelisted-commands:
-  - 'msg'
-  - 'r'
-  - 'w'
-  - 'pm'
-  - 'reply'
-  - 'tell'
-  - 'whisper'
-  - 'list'
-  - 'stats'
-  - 'dstats'
-  - 'duelstats'
-
-
-
-Dueling:
-
-  # If enabled, match will automatically end after selected amount of seconds.
-  match-max-duration:
-    
-    # Enable match max duration?
-    enabled: true
-
-    # The max duration for a match.
-    duration: 600
-
-  # If enabled, allows certain commands to be executed to winner and loser at the end of the match.
-  match-end-commands:
-
-    # Enable match end commands?
-    enabled: false
-
-    # Commands to be executed.
-    # Available placeholder(s): {WINNER}, {LOSER}
-    commands:
-    - 'give {WINNER} diamond 1'
-    - 'give {LOSER} dirt 1'
-
-  # If enabled, players will have another GUI open after selecting kit that displays all arenas.
-  # You can select from an arena from the list if available.
-  # If someone else uses the arena while the request is pending,
-  # the 'arena in use' message will display and the request will be cancelled.
-  allow-arena-selecting: true
-
-  # If enabled, players can send duel request directly without a kit or arena selection GUI popping up.
-  # This will allow players to use their own inventory for dueling.
-  # IMPORTANT: If you're using this option, make sure to edit the duel messages so players
-  # will know they'll be using their own items!
-  use-own-inventory: false
-
-  # If enabled, players must have a cleared inventory to execute the command /duel.
-  # IMPORTANT: Player inventories will be restored on duel end if this value is set to 'false'.
+request:
+  # Force players to have a cleared inventory to send or accept a duel request.
   requires-cleared-inventory: true
 
-  # If enabled, players will be teleported to the latest location they were at before the start of the match after the duel.
-  teleport-to-latest-location: false
+  # Prevent players in creative mode from dueling.
+  prevent-creative-mode: false
 
-  # On duel end, winner will be teleported after following amount of seconds to spawn / latest location if enabled.
-  delay-until-teleport: 5
+  # Allow players to choose an arena to duel in the Setting GUI.
+  arena-selecting:
+    enabled: true
 
-  # Allows players to drop item while in duel, if enabled.
-  drop-item: false
+    # If enabled, only players with the permission 'duels.use.arena-select' will be allowed to use the arena selector.
+    use-permission: false
 
-  # Allows players to pick up item while in duel, if enabled.
-  pick-up-item: true
+  # Allow players to enable or disable item betting in the Setting GUI.
+  item-betting:
+    enabled: true
 
-  # All commands will be blocked while in duel, if enabled.
-  # If you wish to whitelist certain commands, add them to 'whitelisted-commands' list.
+    # If enabled, only players with the permission 'duels.use.item-betting' will be allowed to enable item betting.
+    use-permission: false
+
+  # Allow players to bet money by using the command /duels [player] [bet amount].
+  money-betting:
+    enabled: true
+
+    # If enabled, only players with the permission 'duels.use.money-betting' will be allowed to bet money.
+    use-permission: false
+
+  # Request expiration in seconds.
+  expiration: 30
+
+duel:
+  # Use player's own inventory in a duel.
+  # NOTE: If this option is enabled, Kit Selecting will be disabled in the Settings GUI.
+  use-own-inventory:
+    enabled: false
+
+    # Prevent players dropping their inventory items on death.
+    keep-items: false
+
+  # Force players to have a cleared inventory to send or accept a duel request.
+  requires-cleared-inventory: true
+
+  # Prevent players in creative mode from dueling.
+  prevent-creative-mode: false
+
+  match:
+    # The max duration of a match in minutes. -1 to set it to infinite!
+    max-duration: -1
+
+    # Commands to run at the end of the match. {WINNER} for the winner's name, and {LOSER} for the loser's name.
+    end-commands:
+      enabled: false
+      commands:
+      - 'give {WINNER} diamond 1'
+      - 'give {LOSER} dirt 1'
+
+  # Prevent opening inventories while in duel.
+  prevent-inventory-open: true
+
+  # If enabled, the empty bottle will be automatically removed after consuming a potion.
+  remove-empty-bottle: true
+
+  # If enabled, players will not be able to teleport to players in duel. This was implemented to patch an exploit regarding the /tpa command.
+  # BYPASS PERMISSION: duels.teleport.bypass
+  prevent-teleport-to-match-players: true
+
+  # Prevent mcMMO skills and abilities from being used in a duel.
+  prevent-mcmmo-skills: true
+
+  # If enabled, players in the same faction will be able to attack each other while in a duel.
+  force-allow-combat: true
+
+  # If enabled, players in vanish will be unvanished at the start of the duel. (Essentials Vanish)
+  force-unvanish: true
+
+  # Cancel match from starting if the
+  cancel-if-moved: false
+
+  # If set to 'true', after the duel, players will be teleported to the location where they were at before the duel instead of duel lobby.
+  teleport-to-last-location: false
+
+  # The delay (seconds) to wait before teleporting the winner of the duel to their last location / duel lobby.
+  teleport-delay: 5
+
+  # Prevent players from dropping their inventory items while in a duel.
+  prevent-item-drop: false
+
+  # Prevent players from picking up items on ground while in a duel.
+  prevent-item-pickup: true
+
+  # Prevent players from teleporting out of the arena while in a duel.
+  # NOTE: Teleportation caused by an enderpearl is excluded from prevention.
+  limit-teleportation:
+    enabled: true
+
+    # The max distance players can teleport while in a duel. '-1' to prevent all teleportation.
+    # NOTE: If players are getting stuck, try increasing this value.
+    distance-allowed: 5.0
+
+  # If set to 'true', only commands listed in 'whitelisted-commands' will be usable while in a duel.
   block-all-commands: false
-
-  # Commands in the following list will be exempted from getting blocked if 'block-all-commands' is enabled.
   whitelisted-commands:
-  - 'msg'
-  - 'pm'
-  - 'list'
-  - 'w'
-  - 'r'
-  - 'ban'
-  - 'kick'
-  - 'mute'
-  - 'tempban'
+    - 'msg'
+    - 'r'
+    - 'w'
+    - 'pm'
+    - 'reply'
+    - 'tell'
+    - 'whisper'
+    - 'list'
+    - 'ban'
+    - 'kick'
+    - 'mute'
+    - 'tempban'
 
-  # Commands in the following list will be disabled while in duel.
-  # IMPORTANT: If block-all-commands is enabled, this option will not take affect.
-  # If you have too many commands, 'block-all-commands' is probably a better option.
-  disabled-commands:
+  # List of commands to block while in a duel.
+  # NOTE: 'block-all-commands' option must be disabled in order for this option to take effect.
+  blacklisted-commands:
   - 'heal'
   - 'eheal'
   - 'essentials:heal'
@@ -259,67 +193,139 @@ Dueling:
   - 'playervaults:playervaults'
 
 
+rating:
+  enabled: true
 
-# Required plugin(s): WorldGuard
-DuelZone:
+  # "The K factor is a measure of how strong a match will impact the players’ ratings."
+  # Source: https://metinmediamath.wordpress.com/2013/11/27/how-to-calculate-the-elo-rating-including-example/
+  k-factor: 32
 
-  # If enabled, player must be inside of the region declared below to execute the command /duel.
-  enabled: false
+  # The default rating for all kits.
+  default-rating: 1400
 
-  # The regions players have to be in to use duel commands.
-  regions: [spawn, duelspawn]
-
-
-
-Stats:
-  # If enabled: Displays player's latest matches when /stats is executed.
-  display-matches: true
-
-  # Amount of matches to display if option above is enabled.
-  amount-of-matches: 10
+  # If enabled, only matches started through the queue system will modify the rating of the players.
+  queue-matches-only: false
 
 
+spectate:
+  # Require players to have a cleared inventory to start spectating.
+  requires-cleared-inventory: false
 
-Soup:
-  # Enable Soup?
-  enabled: false
+  # Only the commands listed below will be usable while spectating.
+  whitelisted-commands:
+    - 'msg'
+    - 'r'
+    - 'w'
+    - 'pm'
+    - 'reply'
+    - 'tell'
+    - 'whisper'
+    - 'list'
+    - 'ban'
+    - 'kick'
+    - 'mute'
+    - 'tempban'
 
-  # If enabled, arenas with name starting with the value below will have Soup Regen enabled.
-  arenas-starting-with: 'soup arena'
 
-  # Hearts to regen on soup.
-  hearts-to-regen: 3.5
-
-
-
-Sounds:
-  # To hear the sound in-game, use the command /duels playsound [name]
-
-  # Name of your sound
-  countdown-ongoing-sound:
-    # Configure your sound here.
-    sound:
-      # READ: If your server version is below 1.9, use NOTE_PIANO instead.
-      type: BLOCK_NOTE_PLING
-      pitch: 0.95
-      volume: 3.0
-
-    # When a message in the list is sent to a player, the sound will play.
-    # Only messages from Duels will play the sound.
-    # Broadcasts (such as on-match-end) is not supported.
-    on-messages:
+countdown:
+  # If enabled, a countdown will occur for the length of the messages list.
+  enabled: true
+  messages:
     - '&7Starting in &f5 &7seconds!'
     - '&7Starting in &f4 &7seconds!'
     - '&7Starting in &f3 &7seconds!'
     - '&7Starting in &f2 &7seconds!'
     - '&7Starting in &f1 &7second!'
+    - '&7Now in a match against &f%opponent%&7(&a%opponent_rating%&7) with kit &3%kit%'
 
-  countdown-end-sound:
-    sound:
-      type: BLOCK_NOTE_PLING
-      pitch: 0.5
-      volume: 3.0
+  # This list must have the same size as above list.
+  # NOTE: Titles will only display in 1.8 or above!
+  titles:
+    - '&f&l5'
+    - '&f&l4'
+    - '&e&l3'
+    - '&6&l2'
+    - '&c&l1'
+    - '&a&lGO!'
 
-    on-messages:
-    - '&7Duel starting now!'
+  # Determine which actions to prevent while countdown is ongoing.
+  prevent:
+    movement: true
+    launch-projectile: true
+    pvp: true
 
+
+stats:
+  # If enabled, past matches of a player will be displayed when the command /duel stats is executed.
+  display-past-matches: true
+
+  # Max amount of matches to display & store in the userdata file.
+  matches-to-display: 10
+
+
+soup:
+  # If enabled, arenas with their name starting with 'soup arena' will have soup consuming enabled.
+  enabled: true
+  # This is the value an arena's name must start with in order to have soup consuming enabled.
+  arena-name-starting-with: 'soup arena'
+  # Amount of hearts to regenerate on soup[ consume.
+  hearts-to-regen: 3.5
+
+
+duelzone:
+  # If enabled, players will be able to use duel related commands only in the regions listed below.
+  enabled: false
+  # List of regions to allow dueling.
+  regions: [spawn, lobby]
+
+
+sounds:
+  # Remove this sound if your server version is above 1.8!
+  countdown-ongoing-sound-1-8:
+    type: NOTE_PIANO
+    pitch: 0.95
+    volume: 1.0
+    trigger-messages:
+    - '&7Starting in &f5 &7seconds!'
+    - '&7Starting in &f4 &7seconds!'
+    - '&7Starting in &f3 &7seconds!'
+    - '&7Starting in &f2 &7seconds!'
+    - '&7Starting in &f1 &7second!'
+  # Remove this sound if your server version is 1.8 or lower!
+  countdown-ongoing-sound-1-9:
+    type: BLOCK_NOTE_PLING
+    pitch: 0.95
+    volume: 1.0
+    trigger-messages:
+    - '&7Starting in &f5 &7seconds!'
+    - '&7Starting in &f4 &7seconds!'
+    - '&7Starting in &f3 &7seconds!'
+    - '&7Starting in &f2 &7seconds!'
+    - '&7Starting in &f1 &7second!'
+  # Remove this sound if your server version is above 1.8!
+  countdown-end-sound-1-8:
+    type: NOTE_PIANO
+    pitch: 1.9
+    volume: 1.0
+    trigger-messages:
+    - '&7Now in a match against &f%opponent%&7(&a%opponent_rating%&7) with kit &3%kit%'
+  # Remove this sound if your server version is 1.8 or lower!
+  countdown-end-sound-1-9:
+    type: BLOCK_NOTE_PLING
+    pitch: 1.9
+    volume: 1.0
+    trigger-messages:
+    - '&7Now in a match against &f%opponent%&7(&a%opponent_rating%&7) with kit &3%kit%'
+
+guis:
+  setting:
+    boi: ''
+  item-betting: ''
+  kit-selector: ''
+  arena-selector: ''
+
+gui:
+  kit-selector-rows: 3
+  arena-selector-rows: 2
+  available-arena-displayname: '&9{NAME}: &aAvailable'
+  in-use-arena-displayname: '&9{NAME}: &cIn Use'

@@ -12,7 +12,6 @@ public class CombatTagPlusHook extends PluginHook<DuelsPlugin> {
     }
 
     public void removeTag(final Player player) {
-        final CombatTagPlus plugin = (CombatTagPlus) getPlugin();
-        plugin.getTagManager().untag(player.getUniqueId());
+        ((CombatTagPlus) getPlugin()).getTagManager().untag(player.getUniqueId());
     }
 }

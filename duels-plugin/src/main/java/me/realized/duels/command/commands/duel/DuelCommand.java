@@ -5,11 +5,14 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.command.commands.duel.subcommands.AcceptCommand;
 import me.realized.duels.command.commands.duel.subcommands.DenyCommand;
+import me.realized.duels.command.commands.duel.subcommands.InventoryCommand;
 import me.realized.duels.command.commands.duel.subcommands.StatsCommand;
 import me.realized.duels.command.commands.duel.subcommands.ToggleCommand;
 import me.realized.duels.command.commands.duel.subcommands.TopCommand;
+import me.realized.duels.command.commands.duel.subcommands.VersionCommand;
 import me.realized.duels.extra.Permissions;
 import me.realized.duels.hooks.VaultHook;
+import me.realized.duels.hooks.WorldGuardHook;
 import me.realized.duels.setting.Setting;
 import me.realized.duels.util.NumberUtil;
 import me.realized.duels.util.inventory.InventoryUtil;
@@ -22,11 +25,21 @@ import org.bukkit.entity.Player;
 
 public class DuelCommand extends BaseCommand {
 
+    private final WorldGuardHook worldGuard;
     private final VaultHook vault;
 
     public DuelCommand(final DuelsPlugin plugin) {
         super(plugin, "duel", "duels.duel", true);
-        child(new AcceptCommand(plugin), new DenyCommand(plugin), new StatsCommand(plugin), new ToggleCommand(plugin), new TopCommand(plugin));
+        child(
+            new AcceptCommand(plugin),
+            new DenyCommand(plugin),
+            new StatsCommand(plugin),
+            new ToggleCommand(plugin),
+            new TopCommand(plugin),
+            new InventoryCommand(plugin),
+            new VersionCommand(plugin)
+        );
+        this.worldGuard = hookManager.getHook(WorldGuardHook.class);
         this.vault = hookManager.getHook(VaultHook.class);
     }
 
@@ -49,6 +62,11 @@ public class DuelCommand extends BaseCommand {
         }
 
         if (config.isPreventCreativeMode() && player.getGameMode() == GameMode.CREATIVE) {
+            // TODO: 16/06/2018 send msg
+            return true;
+        }
+
+        if (config.isDuelZoneEnabled() && worldGuard != null && !worldGuard.inDuelZone(player)) {
             // TODO: 16/06/2018 send msg
             return true;
         }
@@ -81,6 +99,7 @@ public class DuelCommand extends BaseCommand {
         }
 
         final Setting setting = settingManager.getSafely(player);
+        setting.setBet(0);
 
         if (config.isMoneyBettingEnabled() && args.length > 1) {
             if (config.isMoneyBettingUsePermission() && !player.hasPermission(Permissions.MONEY_BETTING)) {
@@ -104,7 +123,12 @@ public class DuelCommand extends BaseCommand {
         }
 
         setting.setTarget(target);
-        setting.openGui(player);
+
+        if (config.isUseOwnInventoryEnabled()) {
+            setting.openGui(player);
+        } else {
+            kitManager.getGui().open(player);
+        }
         return true;
     }
 

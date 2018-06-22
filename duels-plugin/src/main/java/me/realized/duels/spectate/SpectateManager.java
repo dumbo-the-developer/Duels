@@ -10,13 +10,13 @@ import me.realized.duels.arena.Match;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.extra.Permissions;
-import me.realized.duels.hooks.EssentialsHook;
+import me.realized.duels.extra.Teleport;
 import me.realized.duels.player.PlayerInfo;
 import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.PlayerUtil;
+import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.compat.Collisions;
-import me.realized.duels.util.compat.CompatUtil;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -44,7 +44,7 @@ public class SpectateManager implements Loadable, Listener {
     private final PlayerInfoManager playerManager;
     private final Map<Player, Spectator> spectators = new HashMap<>();
 
-    private EssentialsHook essentials;
+    private Teleport teleport;
 
     public SpectateManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -57,7 +57,7 @@ public class SpectateManager implements Loadable, Listener {
 
     @Override
     public void handleLoad() {
-        this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
+        this.teleport = plugin.getTeleport();
     }
 
     @Override
@@ -106,7 +106,7 @@ public class SpectateManager implements Loadable, Listener {
 
         final Spectator spectator = new Spectator(player, target, arena);
         spectators.put(player, spectator);
-        player.teleport(target);
+        teleport.tryTeleport(player, target.getLocation());
         spectator.setTeleported(true);
         player.getInventory().setItem(8, ItemBuilder.of(Material.PAPER).name("&cStop Spectating").build());
         player.setAllowFlight(true);
@@ -136,21 +136,19 @@ public class SpectateManager implements Loadable, Listener {
         final PlayerInfo info = playerManager.removeAndGet(player);
 
         if (info != null) {
-            // TODO: 09/06/2018 implement Teleport
-            player.teleport(info.getLocation());
+            teleport.tryTeleport(player, info.getLocation(), failed -> {
+                failed.setHealth(0);
+                failed.sendMessage(StringUtil.color("&cTeleportation failed! You were killed to prevent staying in the arena."));
+            });
             info.restore(player);
         } else {
-            // teleport to lobby?
+            teleport.tryTeleport(player, playerManager.getLobby());
         }
 
         final Match match = spectator.getArena().getMatch();
 
         if (match != null) {
-            match.getPlayers().forEach(arenaPlayer -> {
-                if (arenaPlayer.isOnline()) {
-                    arenaPlayer.showPlayer(player);
-                }
-            });
+            match.getPlayers().stream().filter(Player::isOnline).forEach(matchPlayer -> matchPlayer.showPlayer(player));
         }
 
         if (!end) {
@@ -169,7 +167,7 @@ public class SpectateManager implements Loadable, Listener {
         }
 
         final Player player = event.getPlayer();
-        final ItemStack held = CompatUtil.isPre1_9() ? player.getItemInHand() : player.getInventory().getItemInMainHand();
+        final ItemStack held = player.getInventory().getItem(player.getInventory().getHeldItemSlot());
 
         if (held == null || held.getType() != Material.PAPER) {
             return;

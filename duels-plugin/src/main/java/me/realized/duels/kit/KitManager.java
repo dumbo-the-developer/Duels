@@ -55,7 +55,7 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
             if (data != null) {
                 for (final Map.Entry<String, KitData> entry : data.entrySet()) {
                     if (!StringUtil.isAlphanumeric(entry.getKey())) {
-                        Log.error(this, "Excluding kit '" + entry.getKey() + "' from load: Name is not alphanumeric.");
+                        Log.warn(this, "Excluding kit '" + entry.getKey() + "' from load: Name is not alphanumeric.");
                         continue;
                     }
 

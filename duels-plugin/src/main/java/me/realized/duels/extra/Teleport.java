@@ -46,7 +46,7 @@ public final class Teleport implements Loadable, Listener {
 
     public void tryTeleport(final Player player, final Location location, final Consumer<Player> failHandler) {
         if (location == null || location.getWorld() == null) {
-            Log.error("Could not teleport " + player.getName() + "! Location is null");
+            Log.warn(this, "Could not teleport " + player.getName() + "! Location is null");
 
             if (failHandler != null) {
                 failHandler.accept(player);
@@ -75,7 +75,7 @@ public final class Teleport implements Loadable, Listener {
         MetadataUtil.put(plugin, player, METADATA_KEY, location.clone());
 
         if (!player.teleport(location)) {
-            Log.error("Could not teleport " + player.getName() + "! Player is dead or is vehicle");
+            Log.warn(this, "Could not teleport " + player.getName() + "! Player is dead or is vehicle");
 
             if (failHandler != null) {
                 failHandler.accept(player);

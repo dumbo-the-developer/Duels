@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.request.RequestSendEvent;
+import me.realized.duels.config.Config;
 import me.realized.duels.setting.Setting;
 import me.realized.duels.util.Loadable;
 import org.bukkit.entity.Player;
@@ -12,19 +13,21 @@ import org.bukkit.entity.Player;
 public class RequestManager implements Loadable {
 
     private final DuelsPlugin plugin;
+    private final Config config;
     private final Map<UUID, Map<UUID, Request>> requests = new HashMap<>();
 
     public RequestManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
+        this.config = plugin.getConfiguration();
     }
 
     @Override
-    public void handleLoad() throws Exception {
+    public void handleLoad() {
 
     }
 
     @Override
-    public void handleUnload() throws Exception {
+    public void handleUnload() {
 
     }
 
@@ -65,7 +68,11 @@ public class RequestManager implements Loadable {
             return false;
         }
 
-        // add expiry check
+        if (System.currentTimeMillis() - request.getCreation() >= config.getExpiration() * 1000L) {
+            cached.remove(target.getUniqueId());
+            return false;
+        }
+
         return true;
     }
 
@@ -76,6 +83,17 @@ public class RequestManager implements Loadable {
             return null;
         }
 
-        return cached.remove(target.getUniqueId());
+        final Request request = cached.remove(target.getUniqueId());
+
+        if (request == null) {
+            return null;
+        }
+
+        if (System.currentTimeMillis() - request.getCreation() >= config.getExpiration() * 1000L) {
+            cached.remove(target.getUniqueId());
+            return null;
+        }
+
+        return request;
     }
 }

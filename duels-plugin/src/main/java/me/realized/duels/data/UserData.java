@@ -1,5 +1,6 @@
 package me.realized.duels.data;
 
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +33,7 @@ public class UserData implements User {
     private final List<MatchData> matches = new ArrayList<>();
 
     transient int defaultRating;
-    transient int maxDisplayMatches;
+    transient int matchesToDisplay;
 
     public UserData(final Player player) {
         this.uuid = player.getUniqueId();
@@ -77,11 +78,21 @@ public class UserData implements User {
     }
 
     public void addMatch(final MatchData matchData) {
-        if (matches.size() >= maxDisplayMatches) {
+        if (matches.size() >= matchesToDisplay) {
             matches.remove(0);
         }
 
         matches.add(matchData);
+    }
+
+    void refreshMatches() {
+        if (matches.size() < matchesToDisplay) {
+            return;
+        }
+
+        final List<MatchData> division = Lists.newArrayList(matches.subList(matches.size() - matchesToDisplay, matches.size()));
+        matches.clear();
+        matches.addAll(division);
     }
 
     @Override

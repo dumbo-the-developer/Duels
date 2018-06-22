@@ -1,10 +1,16 @@
 package me.realized.duels.config;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.util.EnumUtil;
 import me.realized.duels.util.config.AbstractConfiguration;
+import org.bukkit.Sound;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 
 public class Config extends AbstractConfiguration<DuelsPlugin> {
 
@@ -13,6 +19,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean checkForUpdates;
 
+    @Getter
+    private boolean requiresClearedInventory;
+    @Getter
+    private boolean preventCreativeMode;
     @Getter
     private boolean arenaSelectingEnabled;
     @Getter
@@ -26,13 +36,12 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean moneyBettingUsePermission;
     @Getter
+    private int expiration;
+
+    @Getter
     private boolean useOwnInventoryEnabled;
     @Getter
     private boolean useOwnInventoryKeepItems;
-    @Getter
-    private boolean requiresClearedInventory;
-    @Getter
-    private boolean preventCreativeMode;
     @Getter
     private int maxDuration;
     @Getter
@@ -52,6 +61,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean forceUnvanish;
     @Getter
+    private boolean cancelIfMoved;
+    @Getter
     private boolean teleportToLastLocation;
     @Getter
     private int teleportDelay;
@@ -70,6 +81,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private List<String> blacklistedCommands;
 
+    @Getter
+    private boolean ratingEnabled;
     @Getter
     private int kFactor;
     @Getter
@@ -95,25 +108,43 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean preventPvp;
 
+    @Getter
+    private boolean displayPastMatches;
+    @Getter
+    private int matchesToDisplay;
+
+    @Getter
+    private boolean soupEnabled;
+    @Getter
+    private String nameStartingWith;
+    @Getter
+    private double heartsToRegen;
+
+    @Getter
+    private boolean duelZoneEnabled;
+    @Getter
+    private List<String> duelZoneRegions;
+    private final Map<String, MessageSound> sounds = new HashMap<>();
+
     public Config(final DuelsPlugin plugin) {
-        super(plugin, "_config");
+        super(plugin, "config");
     }
 
     @Override
     protected void loadValues(final FileConfiguration configuration) {
         version = configuration.getInt("config-version");
         checkForUpdates = configuration.getBoolean("check-for-updates", true);
-        arenaSelectingEnabled = configuration.getBoolean("duel.arena-selecting.enabled", true);
-        arenaSelectingUsePermission = configuration.getBoolean("duel.arena-selecting.use-permission", false);
-        itemBettingEnabled = configuration.getBoolean("duel.item-betting.enabled", true);
-        itemBettingUsePermission = configuration.getBoolean("duel.item-betting.use-permission", false);
-        moneyBettingEnabled = configuration.getBoolean("duel.money-betting.enabled", true);
-        moneyBettingUsePermission = configuration.getBoolean("duel.money-betting.use-permission", false);
-
+        requiresClearedInventory = configuration.getBoolean("request.requires-cleared-inventory", true);
+        preventCreativeMode = configuration.getBoolean("request.prevent-creative-mode", false);
+        arenaSelectingEnabled = configuration.getBoolean("request.arena-selecting.enabled", true);
+        arenaSelectingUsePermission = configuration.getBoolean("request.arena-selecting.use-permission", false);
+        itemBettingEnabled = configuration.getBoolean("request.item-betting.enabled", true);
+        itemBettingUsePermission = configuration.getBoolean("request.item-betting.use-permission", false);
+        moneyBettingEnabled = configuration.getBoolean("request.money-betting.enabled", true);
+        moneyBettingUsePermission = configuration.getBoolean("request.money-betting.use-permission", false);
+        expiration = configuration.getInt("request.expiration", 30);
         useOwnInventoryEnabled = configuration.getBoolean("duel.use-own-inventory.enabled", false);
         useOwnInventoryKeepItems = configuration.getBoolean("duel.use-own-inventory.keep-items", false);
-        requiresClearedInventory = configuration.getBoolean("duel.requires-cleared-inventory", true);
-        preventCreativeMode = configuration.getBoolean("duel.prevent-creative-mode", true);
         maxDuration = configuration.getInt("duel.match.max-duration", -1);
         endCommandsEnabled = configuration.getBoolean("duel.match.end-commands.enabled", false);
         endCommands = configuration.getStringList("duel.match.end-commands.commands");
@@ -123,6 +154,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         preventMcMMO = configuration.getBoolean("duel.prevent-mcmmo-skills", true);
         forceAllowCombat = configuration.getBoolean("duel.force-allow-combat", true);
         forceUnvanish = configuration.getBoolean("duel.force-unvanish", true);
+        cancelIfMoved = configuration.getBoolean("duel.cancel-if-moved", false);
         teleportToLastLocation = configuration.getBoolean("duel.teleport-to-last-location", false);
         teleportDelay = configuration.getInt("duel.teleport-delay", 5);
         preventItemDrop = configuration.getBoolean("duel.prevent-item-drop", false);
@@ -132,6 +164,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         blockAllCommands = configuration.getBoolean("duel.block-all-commands", false);
         whitelistedCommands = configuration.getStringList("duel.whitelisted-commands");
         blacklistedCommands = configuration.getStringList("duel.blacklisted-commands");
+        ratingEnabled = configuration.getBoolean("rating.enabled", true);
         kFactor = configuration.getInt("rating.k-factor", 32);
         defaultRating = configuration.getInt("rating.default-rating", 1400);
         queueMatchesOnly = configuration.getBoolean("rating.queue-matches-only", true);
@@ -143,5 +176,50 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         preventMovement = configuration.getBoolean("countdown.prevent.movement", true);
         preventLaunchProjectile = configuration.getBoolean("countdown.prevent.launch-projectile", true);
         preventPvp = configuration.getBoolean("countdown.prevent.pvp", true);
+        displayPastMatches = configuration.getBoolean("stats.display-past-matches", true);
+        matchesToDisplay = configuration.getInt("stats.matches-to-display", 10);
+        soupEnabled = configuration.getBoolean("soup.enabled", true);
+        nameStartingWith = configuration.getString("soup.arena-name-starting-with", "soup arena");
+        heartsToRegen = configuration.getDouble("soup.hearts-to-regen", 3.5);
+        duelZoneEnabled = configuration.getBoolean("duelzone.enabled", false);
+        duelZoneRegions = configuration.getStringList("duelzone.regions");
+
+        final ConfigurationSection sounds = configuration.getConfigurationSection("sounds");
+
+        if (sounds != null) {
+            for (final String name : sounds.getKeys(false)) {
+                final ConfigurationSection sound = sounds.getConfigurationSection(name);
+                final Sound type = EnumUtil.getByName(sound.getString("type"), Sound.class);
+
+                if (type == null) {
+                    continue;
+                }
+
+                this.sounds.put(name, new MessageSound(type, sound.getDouble("pitch"), sound.getDouble("volume"), sound.getStringList("trigger-messages")));
+            }
+        }
+    }
+
+    public void playSound(final Player player, final String message) {
+        sounds.values().stream()
+            .filter(sound -> sound.getMessages().contains(message))
+            .forEach(sound -> player.playSound(player.getLocation(), sound.getType(), sound.getVolume(), sound.getPitch()));
+    }
+
+    public class MessageSound {
+
+        @Getter
+        private final Sound type;
+        @Getter
+        private final float pitch, volume;
+        @Getter
+        private final List<String> messages;
+
+        MessageSound(final Sound type, final double pitch, final double volume, final List<String> messages) {
+            this.type = type;
+            this.pitch = (float) pitch;
+            this.volume = (float) volume;
+            this.messages = messages;
+        }
     }
 }

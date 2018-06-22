@@ -2,6 +2,7 @@ package me.realized.duels.command.commands.duels;
 
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
+import me.realized.duels.command.commands.duels.subcommands.AddsignCommand;
 import me.realized.duels.command.commands.duels.subcommands.CreateCommand;
 import me.realized.duels.command.commands.duels.subcommands.DeleteCommand;
 import me.realized.duels.command.commands.duels.subcommands.DeletekitCommand;
@@ -25,6 +26,7 @@ public class DuelsCommand extends BaseCommand {
             new DeleteCommand(plugin),
             new SetCommand(plugin),
             new ToggleCommand(plugin),
+            new AddsignCommand(plugin),
             new ReloadCommand(plugin)
         );
     }

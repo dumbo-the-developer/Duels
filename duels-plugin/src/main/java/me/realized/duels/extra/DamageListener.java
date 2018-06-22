@@ -38,7 +38,7 @@ public class DamageListener implements Listener {
             return;
         }
 
-        if (!arenaManager.isInMatch(player) && arenaManager.isInMatch(damager)) {
+        if (!(arenaManager.isInMatch(player) && arenaManager.isInMatch(damager))) {
             return;
         }
 

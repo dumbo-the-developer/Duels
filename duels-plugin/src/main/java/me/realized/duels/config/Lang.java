@@ -15,13 +15,16 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 
 public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadable {
 
+    private final Config config;
     private final Map<String, String> messages = new HashMap<>();
 
     public Lang(final DuelsPlugin plugin) {
         super(plugin, "lang");
+        this.config = plugin.getConfiguration();
     }
 
     @Override
@@ -78,13 +81,17 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
     }
 
     public void sendMessage(final CommandSender receiver, final String key, final Object... replacers) {
-        final String message = getMessage(key, replacers);
+        String message = getRawMessage(key);
 
         if (message == null) {
             return;
         }
 
-        receiver.sendMessage(message);
+        if (receiver instanceof Player) {
+            config.playSound((Player) receiver, message);
+        }
+
+        receiver.sendMessage(StringUtil.color(replace(message, replacers)));
     }
 
     public void sendMessage(final String key, final CommandSender... receivers) {
@@ -94,10 +101,10 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
             return;
         }
 
-        Arrays.stream(receivers).forEach(receiver -> receiver.sendMessage(message));
+        Arrays.stream(receivers).forEach(receiver -> receiver.sendMessage(StringUtil.color(message)));
     }
 
-    public String getMessage(final String key, final Object... replacers) {
+    private String getRawMessage(final String key) {
         final String message = messages.get(key);
 
         if (message == null) {
@@ -105,12 +112,32 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
             return null;
         }
 
-        // Allows disabling any message by setting it to ''
+        // Allow disabling any message by setting it to ''
         if (message.isEmpty()) {
             return null;
         }
 
-        return StringUtil.color(replace(message, replacers));
+        return message;
+    }
+
+    public String getMessage(final String key) {
+        final String message = getRawMessage(key);
+
+        if (message == null) {
+            return null;
+        }
+
+        return StringUtil.color(message);
+    }
+
+    public String getMessage(final String key, final Object... replacers) {
+        final String message = getMessage(key);
+
+        if (message == null) {
+            return null;
+        }
+
+        return replace(message, replacers);
     }
 
     private String replace(String message, final Object... replacers) {

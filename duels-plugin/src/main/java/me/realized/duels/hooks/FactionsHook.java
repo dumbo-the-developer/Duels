@@ -4,29 +4,46 @@ import com.massivecraft.factions.entity.MPlayer;
 import com.massivecraft.factions.event.EventFactionsPowerChange;
 import com.massivecraft.factions.event.PowerLossEvent;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.arena.ArenaManager;
+import me.realized.duels.util.Log;
 import me.realized.duels.util.hook.PluginHook;
-import me.realized.duels.util.metadata.MetadataUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 public class FactionsHook extends PluginHook<DuelsPlugin> {
 
-    public static final String METADATA_KEY = "DuelDeath";
+    private final ArenaManager arenaManager;
 
     public FactionsHook(final DuelsPlugin plugin) {
         super(plugin, "Factions");
+        this.arenaManager = plugin.getArenaManager();
 
         Listener listener;
 
-        try {
-            Class.forName("com.massivecraft.factions.event.PowerLossEvent");
+        if (findClass("com.massivecraft.factions.event.PowerLossEvent")) {
             listener = new FactionsUUIDListener();
-        } catch (ClassNotFoundException ex) {
+        } else if (findClass("com.massivecraft.factions.event.EventFactionsPowerChange")) {
             listener = new Factions2Listener();
+        } else {
+            listener = null;
+        }
+
+        if (listener == null) {
+            Log.error("Could not detect this version of Factions. Please contact the developer if you believe this is an error.");
+            return;
         }
 
         plugin.getServer().getPluginManager().registerEvents(listener, plugin);
+    }
+
+    private boolean findClass(final String path) {
+        try {
+            Class.forName(path);
+            return true;
+        } catch (ClassNotFoundException ex) {
+            return false;
+        }
     }
 
     public class Factions2Listener implements Listener {
@@ -35,11 +52,12 @@ public class FactionsHook extends PluginHook<DuelsPlugin> {
         public void on(final EventFactionsPowerChange event) {
             final MPlayer mPlayer = event.getMPlayer();
             final Player player = mPlayer.getPlayer();
-            final Object value = MetadataUtil.removeAndGet(plugin, player, METADATA_KEY);
 
-            if (value != null) {
-                event.setCancelled(true);
+            if (!arenaManager.isInMatch(player)) {
+                return;
             }
+
+            event.setCancelled(true);
         }
     }
 
@@ -48,11 +66,12 @@ public class FactionsHook extends PluginHook<DuelsPlugin> {
         @EventHandler
         public void on(final PowerLossEvent event) {
             final Player player = event.getfPlayer().getPlayer();
-            final Object value = MetadataUtil.removeAndGet(plugin, player, METADATA_KEY);
 
-            if (value != null) {
-                event.setCancelled(true);
+            if (!arenaManager.isInMatch(player)) {
+                return;
             }
+
+            event.setCancelled(true);
         }
     }
 }

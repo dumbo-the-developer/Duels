@@ -18,8 +18,8 @@ public class EssentialsHook extends PluginHook<DuelsPlugin> {
             return;
         }
 
-        final Essentials essentials = (Essentials) getPlugin();
-        final User user = essentials.getUser(player);
+        final Essentials plugin = (Essentials) getPlugin();
+        final User user = plugin.getUser(player);
 
         if (user != null && user.isVanished()) {
             user.setVanished(false);
@@ -27,8 +27,8 @@ public class EssentialsHook extends PluginHook<DuelsPlugin> {
     }
 
     public void setBackLocation(final Player player, final Location location) {
-        final Essentials essentials = (Essentials) getPlugin();
-        final User user = essentials.getUser(player);
+        final Essentials plugin = (Essentials) getPlugin();
+        final User user = plugin.getUser(player);
 
         if (user != null) {
             user.setLastLocation(location);

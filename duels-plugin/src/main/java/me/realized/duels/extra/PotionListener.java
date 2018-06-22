@@ -11,9 +11,11 @@ import org.bukkit.inventory.ItemStack;
 
 public class PotionListener implements Listener {
 
+    private final DuelsPlugin plugin;
     private final ArenaManager arenaManager;
 
     public PotionListener(final DuelsPlugin plugin) {
+        this.plugin = plugin;
         this.arenaManager = plugin.getArenaManager();
 
         if (plugin.getConfiguration().isRemoveEmptyBottle()) {
@@ -35,6 +37,6 @@ public class PotionListener implements Listener {
             return;
         }
 
-        event.setItem(null);
+        plugin.doSync(() -> player.getInventory().setItem(player.getInventory().getHeldItemSlot(), null));
     }
 }

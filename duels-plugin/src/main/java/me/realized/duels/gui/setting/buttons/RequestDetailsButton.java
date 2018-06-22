@@ -10,8 +10,17 @@ import org.bukkit.entity.Player;
 
 public class RequestDetailsButton extends BaseButton {
 
-    private static final String[] LORE_TEMPLATE = {"&7Opponent: &f%s", "&7Kit: &9%s", "&7Arena: &9%s", "&7Bet Items: %s", "&7Bet: &6%s", " ",
-        "&7To change the bet", "&7amount, please type", "&a/duel %s [amount]"};
+    private static final String[] LORE_TEMPLATE = {
+        "&7Opponent: &f%s",
+        "&7Kit: &9%s",
+        "&7Arena: &9%s",
+        "&7Bet Items: %s",
+        "&7Bet: &6%s",
+        " ",
+        "&7To change the bet",
+        "&7amount, please type",
+        "&a/duel %s [amount]"
+    };
 
     public RequestDetailsButton(final DuelsPlugin plugin) {
         super(plugin, ItemBuilder.of(Material.SIGN).name("&eRequest Details").build());

@@ -14,5 +14,6 @@ public class HookManager extends AbstractHookManager<DuelsPlugin> {
         register("CombatTagPlus", CombatTagPlusHook.class);
         register("Factions", FactionsHook.class);
         register("mcMMO", McMMOHook.class);
+        register("WorldGuard", WorldGuardHook.class);
     }
 }

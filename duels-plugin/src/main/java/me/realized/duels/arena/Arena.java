@@ -16,6 +16,7 @@ import lombok.Setter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.arena.ArenaSetPositionEvent;
 import me.realized.duels.api.event.arena.ArenaStateChangeEvent;
+import me.realized.duels.duel.DuelManager.OpponentInfo;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.setting.Setting;
@@ -94,22 +95,22 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
         return !isDisabled() && !isUsed() && getPosition(1) != null && getPosition(2) != null;
     }
 
-    public void startMatch(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet) {
-        this.match = new Match(kit, items, bet);
+    public void startMatch(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet, final boolean fromQueue) {
+        this.match = new Match(kit, items, bet, fromQueue);
     }
 
     public void endMatch() {
         match = null;
     }
 
-    public void startCountdown() {
+    public void startCountdown(final String kit, final Map<UUID, OpponentInfo> info) {
         final List<String> messages = config.getCdMessages();
 
         if (messages.isEmpty()) {
             return;
         }
 
-        this.countdown = new Countdown(this, messages, config.getTitles());
+        this.countdown = new Countdown(plugin, this, kit, info, messages, config.getTitles());
         countdown.runTaskTimer(plugin, 0L, 20L);
     }
 

@@ -23,13 +23,16 @@ public class Match implements me.realized.duels.api.match.Match {
     private final Map<UUID, List<ItemStack>> items;
     @Getter
     private final int bet;
+    @Getter
+    private final boolean fromQueue;
     private final Map<Player, Boolean> players = new HashMap<>();
 
-    Match(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet) {
+    Match(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet, final boolean fromQueue) {
         this.start = System.currentTimeMillis();
         this.kit = kit;
         this.items = items;
         this.bet = bet;
+        this.fromQueue = fromQueue;
     }
 
     Map<Player, Boolean> getPlayerMap() {

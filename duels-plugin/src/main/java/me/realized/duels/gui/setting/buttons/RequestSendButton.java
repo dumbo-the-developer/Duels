@@ -41,6 +41,7 @@ public class RequestSendButton extends BaseButton {
         }
 
         player.closeInventory();
+        setting.getLocations()[0] = player.getLocation().clone();
 
         if (!requestManager.send(player, target, setting)) {
             return;

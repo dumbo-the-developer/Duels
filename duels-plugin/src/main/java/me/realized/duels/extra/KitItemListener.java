@@ -2,6 +2,8 @@ package me.realized.duels.extra;
 
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManager;
+import me.realized.duels.util.Log;
+import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.compat.Tags;
 import org.bukkit.Material;
 import org.bukkit.entity.Item;
@@ -15,8 +17,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-// TODO: 13/06/2018 sendMessage
 public class KitItemListener implements Listener {
+
+    private static final String WARNING = StringUtil.color("&4[Duels] Kit contents cannot be used when not in a duel.");
+    private static final String WARNING_CONSOLE = "%s has attempted to use a kit item while not in duel, but was prevented by KitItemListener.";
 
     private final ArenaManager arenaManager;
 
@@ -46,6 +50,8 @@ public class KitItemListener implements Listener {
         }
 
         event.setCurrentItem(null);
+        player.sendMessage(WARNING);
+        Log.warn(String.format(WARNING_CONSOLE, player.getName()));
     }
 
     @EventHandler
@@ -64,6 +70,8 @@ public class KitItemListener implements Listener {
 
         event.setCancelled(true);
         player.getInventory().remove(item);
+        player.sendMessage(WARNING);
+        Log.warn(String.format(WARNING_CONSOLE, player.getName()));
     }
 
     @EventHandler
@@ -82,6 +90,8 @@ public class KitItemListener implements Listener {
 
         event.setCancelled(true);
         item.remove();
+        player.sendMessage(WARNING);
+        Log.warn(String.format(WARNING_CONSOLE, player.getName()));
     }
 
     private boolean shouldCancel(final Player player) {

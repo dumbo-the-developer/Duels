@@ -20,7 +20,7 @@ public class VaultHook extends PluginHook<DuelsPlugin> {
         final RegisteredServiceProvider<Economy> provider = plugin.getServer().getServicesManager().getRegistration(Economy.class);
 
         if (provider == null) {
-            Log.error("Found no available economy plugin that supports Vault. Money betting will not be available.");
+            Log.warn("Found no available economy plugin that supports Vault. Money betting will not be available.");
             return;
         }
 

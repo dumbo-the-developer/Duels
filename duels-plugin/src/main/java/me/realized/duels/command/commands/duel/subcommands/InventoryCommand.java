@@ -1,37 +1,31 @@
-package me.realized.duels.command.commands;
+package me.realized.duels.command.commands.duel.subcommands;
 
 import java.util.UUID;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
-import me.realized.duels.extra.Permissions;
 import me.realized.duels.gui.inventory.InventoryGui;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.profile.ProfileUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class InventoryViewCommand extends BaseCommand {
+public class InventoryCommand extends BaseCommand {
 
-    public InventoryViewCommand(final DuelsPlugin plugin) {
-        super(plugin, "inventoryview", Permissions.DUEL, true);
+    public InventoryCommand(final DuelsPlugin plugin) {
+        super(plugin, "_", "_ [uuid]", "Displays player's inventories after match.", 2);
     }
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
-        if (args.length == 0) {
-            sender.sendMessage(StringUtil.color("&cUsage: /inventoryview [uuid]"));
-            return;
-        }
-
-        if (!ProfileUtil.isUUID(args[0])) {
+        if (!ProfileUtil.isUUID(args[1])) {
             sender.sendMessage(StringUtil.color("&cInvalid UUID!"));
             return;
         }
 
-        final InventoryGui gui = inventoryManager.get(UUID.fromString(args[0]));
+        final InventoryGui gui = inventoryManager.get(UUID.fromString(args[1]));
 
         if (gui == null) {
-            sender.sendMessage(StringUtil.color("&cNo inventory was found."));
+            sender.sendMessage(StringUtil.color("&cNo inventory found."));
             return;
         }
 

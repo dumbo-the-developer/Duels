@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -21,7 +22,8 @@ public class PlayerInfo {
     private final int hunger;
 
     @Getter
-    private final Location location;
+    @Setter
+    private Location location;
 
     public PlayerInfo(final Player player, final boolean inventory) {
         this.inventory = inventory ? Lists.newArrayList(player.getInventory().getContents().clone()) : Collections.emptyList();

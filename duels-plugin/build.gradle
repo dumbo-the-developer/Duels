@@ -17,7 +17,6 @@ processResources {
 }
 
 dependencies {
-    // todo: Add unavailable dependencies to local lib folder
     compile 'net.milkbowl.vault:VaultAPI:1.6'
     compile 'me.clip:placeholderapi:2.8.4'
     compile ('be.maximvdw:MVdWPlaceholderAPI:2.5.1-SNAPSHOT') { transitive = false }

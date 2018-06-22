@@ -14,8 +14,7 @@ public class PvPManagerHook extends PluginHook<DuelsPlugin> {
     }
 
     public void removeTag(final Player player) {
-        final PvPManager plugin = (PvPManager) getPlugin();
-        final PlayerHandler playerHandler = plugin.getPlayerHandler();
+        final PlayerHandler playerHandler = ((PvPManager) getPlugin()).getPlayerHandler();
         final PvPlayer pvPlayer = playerHandler.get(player);
 
         if (pvPlayer == null) {

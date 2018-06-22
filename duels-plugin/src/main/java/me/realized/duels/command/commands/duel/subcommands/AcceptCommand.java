@@ -2,6 +2,7 @@ package me.realized.duels.command.commands.duel.subcommands;
 
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
+import me.realized.duels.hooks.WorldGuardHook;
 import me.realized.duels.request.Request;
 import me.realized.duels.setting.Setting;
 import me.realized.duels.util.inventory.InventoryUtil;
@@ -12,8 +13,11 @@ import org.bukkit.entity.Player;
 
 public class AcceptCommand extends BaseCommand {
 
+    private final WorldGuardHook worldGuard;
+
     public AcceptCommand(final DuelsPlugin plugin) {
         super(plugin, "accept", "accept [player]", "Accepts a duel request.", 2);
+        this.worldGuard = hookManager.getHook(WorldGuardHook.class);
     }
 
     @Override
@@ -26,6 +30,11 @@ public class AcceptCommand extends BaseCommand {
         }
 
         if (config.isPreventCreativeMode() && player.getGameMode() == GameMode.CREATIVE) {
+            // TODO: 16/06/2018 send msg
+            return;
+        }
+
+        if (config.isDuelZoneEnabled() && worldGuard != null && !worldGuard.inDuelZone(player)) {
             // TODO: 16/06/2018 send msg
             return;
         }
@@ -66,9 +75,10 @@ public class AcceptCommand extends BaseCommand {
             "player", target.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
 
         if (setting.isItemBetting()) {
+            setting.getLocations()[1] = player.getLocation().clone();
             bettingManager.open(setting, target, player);
         } else {
-            duelManager.startMatch(player, target, setting, null);
+            duelManager.startMatch(player, target, setting, null, false);
         }
     }
 }

@@ -36,7 +36,7 @@ public final class Log {
     public static void error(final String s) {
         for (final LogSource source : sources) {
             if (source instanceof Plugin) {
-                Bukkit.getConsoleSender().sendMessage("[" + ((Plugin) source).getName() + "] " + ChatColor.RED + s);
+                Bukkit.getConsoleSender().sendMessage("[" + ((Plugin) source).getName() + "] " + ChatColor.DARK_RED + s);
             } else {
                 source.log(Level.SEVERE, s);
             }
@@ -45,6 +45,20 @@ public final class Log {
 
     public static void error(final Loadable loadable, final String s) {
         error(loadable.getClass().getSimpleName() + ": " + s);
+    }
+
+    public static void warn(final String s) {
+        for (final LogSource source : sources) {
+            if (source instanceof Plugin) {
+                Bukkit.getConsoleSender().sendMessage("[" + ((Plugin) source).getName() + "] " + ChatColor.RED + s);
+            } else {
+                source.log(Level.WARNING, s);
+            }
+        }
+    }
+
+    public static void warn(final Loadable loadable, final String s) {
+        warn(loadable.getClass().getSimpleName() + ": " + s);
     }
 
     public interface LogSource {

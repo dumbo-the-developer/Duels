@@ -45,7 +45,7 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
     private final Map<UUID, UserData> users = new ConcurrentHashMap<>();
 
     private volatile int defaultRating;
-    private volatile int maxDisplayMatches;
+    private volatile int matchesToDisplay;
 
     @Getter
     private volatile boolean loaded;
@@ -72,7 +72,11 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
     @Override
     public void handleLoad() {
         this.defaultRating = config.getDefaultRating();
-        this.maxDisplayMatches = 10;
+        this.matchesToDisplay = config.getMatchesToDisplay();
+
+        if (matchesToDisplay < 0) {
+            matchesToDisplay = 0;
+        }
 
         plugin.doAsync(() -> {
             final File[] files = folder.listFiles();
@@ -100,7 +104,8 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
                     try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
                         final UserData user = plugin.getGson().fromJson(reader, UserData.class);
                         user.defaultRating = defaultRating;
-                        user.maxDisplayMatches = maxDisplayMatches;
+                        user.matchesToDisplay = matchesToDisplay;
+                        user.refreshMatches();
                         // Player might have logged in while reading the file
                         users.putIfAbsent(uuid, user);
                     } catch (IOException ex) {
@@ -177,7 +182,7 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
         if (!file.exists()) {
             final UserData user = new UserData(player);
             user.defaultRating = defaultRating;
-            user.maxDisplayMatches = maxDisplayMatches;
+            user.matchesToDisplay = matchesToDisplay;
             plugin.doSync(() -> plugin.getServer().getPluginManager().callEvent(new UserCreateEvent(user)));
             return user;
         }
@@ -185,7 +190,8 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
         try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
             final UserData user = plugin.getGson().fromJson(reader, UserData.class);
             user.defaultRating = defaultRating;
-            user.maxDisplayMatches = maxDisplayMatches;
+            user.matchesToDisplay = matchesToDisplay;
+            user.refreshMatches();
 
             if (!player.getName().equals(user.getName())) {
                 user.setName(player.getName());

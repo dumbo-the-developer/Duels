@@ -12,7 +12,6 @@ import lombok.Getter;
 import me.realized.duels.api.Duels;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.betting.BettingManager;
-import me.realized.duels.command.commands.InventoryViewCommand;
 import me.realized.duels.command.commands.SpectateCommand;
 import me.realized.duels.command.commands.duel.DuelCommand;
 import me.realized.duels.command.commands.duels.DuelsCommand;
@@ -23,6 +22,7 @@ import me.realized.duels.duel.DuelManager;
 import me.realized.duels.extra.DamageListener;
 import me.realized.duels.extra.KitItemListener;
 import me.realized.duels.extra.PotionListener;
+import me.realized.duels.extra.SoupListener;
 import me.realized.duels.extra.Teleport;
 import me.realized.duels.extra.TeleportListener;
 import me.realized.duels.hooks.HookManager;
@@ -30,6 +30,7 @@ import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.KitManager;
 import me.realized.duels.logging.LogManager;
 import me.realized.duels.player.PlayerInfoManager;
+import me.realized.duels.queue.QueueManager;
 import me.realized.duels.request.RequestManager;
 import me.realized.duels.setting.SettingManager;
 import me.realized.duels.shaded.bstats.Metrics;
@@ -80,6 +81,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private DuelManager duelManager;
     @Getter
+    private QueueManager queueManager;
+    @Getter
     private RequestManager requestManager;
     @Getter
     private HookManager hookManager;
@@ -103,23 +106,25 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(bettingManager = new BettingManager(this));
         loadables.add(inventoryManager = new InventoryManager(this));
         loadables.add(duelManager = new DuelManager(this));
+        loadables.add(queueManager = new QueueManager(this));
         loadables.add(requestManager = new RequestManager(this));
         hookManager = new HookManager(this);
         loadables.add(teleport = new Teleport(this));
-        new KitItemListener(this);
-        new DamageListener(this);
-        new PotionListener(this);
-        new TeleportListener(this);
 
         if (!load()) {
             getPluginLoader().disablePlugin(this);
             return;
         }
 
+        new KitItemListener(this);
+        new DamageListener(this);
+        new PotionListener(this);
+        new TeleportListener(this);
+        new SoupListener(this);
+
         new DuelCommand(this).register();
         new DuelsCommand(this).register();
         new SpectateCommand(this).register();
-        new InventoryViewCommand(this).register();
 
         new Metrics(this);
 
@@ -160,7 +165,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             try {
                 loadable.handleLoad();
                 lastLoad = loadables.indexOf(loadable);
-                Log.info("Loaded " + loadable.getClass().getSimpleName() + ".");
             } catch (Exception ex) {
                 Log.error("There was an error while loading " + loadable.getClass().getSimpleName()
                     + "! If you believe this is an issue from the plugin, please contact the developer.");
@@ -184,7 +188,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                 }
 
                 loadable.handleUnload();
-                Log.info("Unloaded " + loadable.getClass().getSimpleName() + ".");
             } catch (Exception ex) {
                 Log.error("There was an error while unloading " + loadable.getClass().getSimpleName()
                     + "! If you believe this is an issue from the plugin, please contact the developer.");
@@ -232,17 +235,15 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     }
 
     public boolean reload(final Loadable loadable) {
-        final String name = loadable.getClass().getSimpleName();
         boolean unloaded = false;
         try {
             loadable.handleUnload();
             unloaded = true;
-            Log.info("UnLoaded " + name + ".");
             loadable.handleLoad();
-            Log.info("Loaded " + name + ".");
             return true;
         } catch (Exception ex) {
-            Log.error("There was an error while " + (unloaded ? "loading " : "unloading ") + name
+            Log.error("There was an error while " + (unloaded ? "loading " : "unloading ")
+                + loadable.getClass().getSimpleName()
                 + "! If you believe this is an issue from the plugin, please contact the developer.");
             Log.error("Cause of error: " + ex.getMessage());
             ex.printStackTrace();

@@ -81,17 +81,21 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
         }
 
         if (firstReady && secondReady) {
-            final Player first = Bukkit.getPlayer(this.first);
-            final Player second = Bukkit.getPlayer(this.second);
-            first.closeInventory();
-            second.closeInventory();
-            guiListener.removeGui(first, this);
-            guiListener.removeGui(second, this);
+            final Player other = Bukkit.getPlayer(first.equals(player.getUniqueId()) ? second : first);
+
+            if (other == null) {
+                return;
+            }
+
+            player.closeInventory();
+            other.closeInventory();
+            guiListener.removeGui(player, this);
+            guiListener.removeGui(other, this);
 
             final Map<UUID, List<ItemStack>> items = new HashMap<>();
-            items.put(first.getUniqueId(), getSection(first).collect());
-            items.put(second.getUniqueId(), getSection(second).collect());
-            duelManager.startMatch(first, second, setting, items);
+            items.put(player.getUniqueId(), getSection(player).collect());
+            items.put(other.getUniqueId(), getSection(other).collect());
+            duelManager.startMatch(player, other, setting, items, false);
         }
     }
 
@@ -202,20 +206,19 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
             return;
         }
 
-        final Player first = Bukkit.getPlayer(this.first);
-        final Player second = Bukkit.getPlayer(this.second);
+        getSection(player).collect().forEach(item -> player.getInventory().addItem(item));
+        guiListener.removeGui(player, this);
 
-        // TODO: 04/06/2018 Might cause dupe glitch!
-        if (first.equals(player)) {
-            plugin.doSync(second::closeInventory);
-        } else {
-            plugin.doSync(first::closeInventory);
+        final Player other = Bukkit.getPlayer(first.equals(player.getUniqueId()) ? second : first);
+
+        if (other != null) {
+            plugin.doSync(() -> {
+                if (inventory.getViewers().contains(other)) {
+                    other.closeInventory();
+                    guiListener.removeGui(other, this);
+                }
+            });
         }
-
-        guiListener.removeGui(first, this);
-        guiListener.removeGui(second, this);
-        getSection(first).collect().forEach(item -> first.getInventory().addItem(item));
-        getSection(second).collect().forEach(item -> second.getInventory().addItem(item));
     }
 
     private class Section {

@@ -53,7 +53,11 @@ public final class TextBuilder {
 
     public void send(final Collection<Player> players) {
         final BaseComponent[] message = list.toArray(new BaseComponent[list.size()]);
-        players.forEach(player -> player.spigot().sendMessage(message));
+        players.forEach(player -> {
+            if (player.isOnline()) {
+                player.spigot().sendMessage(message);
+            }
+        });
     }
 
     public void send(final Player... players) {
