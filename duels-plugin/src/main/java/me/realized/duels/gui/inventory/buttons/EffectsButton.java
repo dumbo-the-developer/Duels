@@ -14,14 +14,15 @@ import org.bukkit.inventory.ItemFlag;
 public class EffectsButton extends BaseButton {
 
     public EffectsButton(final DuelsPlugin plugin, final Player player) {
-        super(plugin, ItemBuilder.of(Material.POTION, 1, (short) 8237)
-            .name("&bPotion Effects")
+        super(plugin, ItemBuilder
+            .of(Material.POTION, 1, (short) 8237)
+            .name(plugin.getLang().getMessage("GUI.inventory-view.buttons.effects.name"))
             .lore(player.getActivePotionEffects().stream()
-                .map(effect -> StringUtil.color("&7"
-                    + StringUtils.capitalize(effect.getType().getName().replace("_", " ").toLowerCase())
-                    + " "
-                    + StringUtil.toRoman(effect.getAmplifier() + 1)
-                    + " (" + (effect.getDuration() / 20) + "s)")).collect(Collectors.toList())).build());
+                .map(effect -> plugin.getLang().getMessage("GUI.inventory-view.buttons.effects.lore-format",
+                        "type", StringUtils.capitalize(effect.getType().getName().replace("_", " ").toLowerCase()),
+                        "amplifier", StringUtil.toRoman(effect.getAmplifier() + 1),
+                        "duration", (effect.getDuration() / 20))).collect(Collectors.toList()))
+            .build());
         editMeta(meta -> {
             if (!CompatUtil.isPre1_8()) {
                 meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);

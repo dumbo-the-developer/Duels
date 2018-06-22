@@ -7,7 +7,6 @@ import me.realized.duels.gui.inventory.buttons.HeadButton;
 import me.realized.duels.gui.inventory.buttons.HealthButton;
 import me.realized.duels.gui.inventory.buttons.HungerButton;
 import me.realized.duels.gui.inventory.buttons.PotionCounterButton;
-import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.gui.SinglePageGui;
 import me.realized.duels.util.inventory.ItemBuilder;
 import me.realized.duels.util.inventory.Slots;
@@ -21,7 +20,7 @@ public class InventoryGui extends SinglePageGui<DuelsPlugin> {
     private final long creation;
 
     public InventoryGui(final DuelsPlugin plugin, final Player player) {
-        super(plugin, StringUtil.color("&e" + player.getName()), 6);
+        super(plugin, plugin.getLang().getMessage("GUI.inventory-view.title", "name", player.getName()), 6);
         this.creation = System.currentTimeMillis();
 
         final ItemStack spacing = ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 7).name(" ").build();

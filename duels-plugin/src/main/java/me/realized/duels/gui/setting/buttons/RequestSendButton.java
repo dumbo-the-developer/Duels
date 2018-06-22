@@ -2,7 +2,7 @@ package me.realized.duels.gui.setting.buttons;
 
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.gui.BaseButton;
-import me.realized.duels.setting.Setting;
+import me.realized.duels.setting.Settings;
 import me.realized.duels.util.TextBuilder;
 import me.realized.duels.util.inventory.ItemBuilder;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
@@ -13,44 +13,44 @@ import org.bukkit.entity.Player;
 public class RequestSendButton extends BaseButton {
 
     public RequestSendButton(final DuelsPlugin plugin) {
-        super(plugin, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 5).name("&a&lSEND REQUEST").build());
+        super(plugin, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 5).name(plugin.getLang().getMessage("GUI.settings.buttons.send.name")).build());
     }
 
     @Override
     public void onClick(final Player player) {
-        final Setting setting = settingManager.getSafely(player);
+        final Settings settings = settingManager.getSafely(player);
 
-        if (setting.getTarget() == null) {
-            setting.reset();
+        if (settings.getTarget() == null) {
+            settings.reset();
             player.closeInventory();
             return;
         }
 
-        final Player target = Bukkit.getPlayer(setting.getTarget());
+        final Player target = Bukkit.getPlayer(settings.getTarget());
 
         if (target == null) {
-            setting.reset();
+            settings.reset();
             player.closeInventory();
             lang.sendMessage(player, "ERROR.no-longer-online");
             return;
         }
 
-        if (!config.isUseOwnInventoryEnabled() && setting.getKit() == null) {
+        if (!config.isUseOwnInventoryEnabled() && settings.getKit() == null) {
             lang.sendMessage(player, "DUEL.no-selected-kit");
             return;
         }
 
         player.closeInventory();
-        setting.getLocations()[0] = player.getLocation().clone();
+        settings.getLocations()[0] = player.getLocation().clone();
 
-        if (!requestManager.send(player, target, setting)) {
+        if (!requestManager.send(player, target, settings)) {
             return;
         }
 
-        final String kit = setting.getKit() != null ? setting.getKit().getName() : "Not Selected";
-        final String arena = setting.getArena() != null ? setting.getArena().getName() : "Random";
-        final int betAmount = setting.getBet();
-        final String itemBetting = setting.isItemBetting() ? "&aenabled" : "&cdisabled";
+        final String kit = settings.getKit() != null ? settings.getKit().getName() : "Not Selected";
+        final String arena = settings.getArena() != null ? settings.getArena().getName() : "Random";
+        final int betAmount = settings.getBet();
+        final String itemBetting = settings.isItemBetting() ? "&aenabled" : "&cdisabled";
 
         lang.sendMessage(player, "COMMAND.duel.request.sent.sender",
             "player", target.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);

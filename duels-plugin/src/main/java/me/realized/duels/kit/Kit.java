@@ -10,7 +10,7 @@ import me.realized.duels.api.event.kit.KitEquipEvent;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.extra.Permissions;
 import me.realized.duels.gui.BaseButton;
-import me.realized.duels.setting.Setting;
+import me.realized.duels.setting.Settings;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Material;
@@ -106,9 +106,9 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
             return;
         }
 
-        final Setting setting = settingManager.getSafely(player);
-        setting.setKit(this);
-        setting.openGui(player);
+        final Settings settings = settingManager.getSafely(player);
+        settings.setKit(this);
+        settings.openGui(player);
         lang.sendMessage(player, "DUEL.on-select.kit", "kit", name);
     }
 }

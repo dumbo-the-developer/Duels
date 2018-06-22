@@ -1,111 +1,143 @@
 # DO NOT EDIT THIS VALUE!
 config-version: 1
 
-# If enabled, a notification and the download link will be printed on console whenever an update is available.
+# If set to 'true', a notification and a download link will be printed on the console whenever an update is available.
+# default: true
 check-for-updates: true
 
 request:
-  # Force players to have a cleared inventory to send or accept a duel request.
+  # If set to 'true', players will be forced to have a cleared inventory in order to send or accept a duel request.
+  # default: true
   requires-cleared-inventory: true
 
-  # Prevent players in creative mode from dueling.
+  # If set to 'true', players in creative mode will be prohibited from dueling.
+  # default: false
   prevent-creative-mode: false
 
-  # Allow players to choose an arena to duel in the Setting GUI.
   arena-selecting:
+    # If set to 'true', players will be able to choose an arena they wish to fight in through a GUI.
+    # default: true
     enabled: true
 
-    # If enabled, only players with the permission 'duels.use.arena-select' will be allowed to use the arena selector.
+    # If set to 'true', players without the permission 'duels.use.arena-select' will not be able to select an arena.
+    # default: false
     use-permission: false
 
   # Allow players to enable or disable item betting in the Setting GUI.
   item-betting:
+    # If set to 'true', players will be able to choose to enable or disable item betting in the Setting GUI.
+    # default: true
     enabled: true
 
-    # If enabled, only players with the permission 'duels.use.item-betting' will be allowed to enable item betting.
+    # If set to 'true', players without the permission 'duels.use.item-betting' will not be able to enable item betting.
+    # default: false
     use-permission: false
 
-  # Allow players to bet money by using the command /duels [player] [bet amount].
   money-betting:
+    # If set to 'true', players will be able to bet money on their duel by using the command '/duel [player] [bet amount]'.
+    # default: true
     enabled: true
 
-    # If enabled, only players with the permission 'duels.use.money-betting' will be allowed to bet money.
+    # If set to 'true', players without the permission 'duels.use.money-betting' will not be able to bet money on their duel.
+    # default: false
     use-permission: false
 
-  # Request expiration in seconds.
+  # Request expiration, in seconds.
+  # default: 30
   expiration: 30
 
 duel:
-  # Use player's own inventory in a duel.
-  # NOTE: If this option is enabled, Kit Selecting will be disabled in the Settings GUI.
   use-own-inventory:
+    # If set to 'true', player's own inventory will be used in a duel instead of kits.
+    # NOTE: If this option is enabled, Kit Selector will be inaccessible in the Setting GUI.
+    # default: false
     enabled: false
 
-    # Prevent players dropping their inventory items on death.
+    # If set to 'true', players will keep their inventory items on death.
+    # default: false
     keep-items: false
 
-  # Force players to have a cleared inventory to send or accept a duel request.
-  requires-cleared-inventory: true
-
-  # Prevent players in creative mode from dueling.
-  prevent-creative-mode: false
-
   match:
-    # The max duration of a match in minutes. -1 to set it to infinite!
+    # The max duration of a match, in minutes. Setting it to -1 will allow players to fight for as long as they like.
+    # default: -1
     max-duration: -1
 
-    # Commands to run at the end of the match. {WINNER} for the winner's name, and {LOSER} for the loser's name.
     end-commands:
+      # If set to 'true', the commands listed below will run at the end of a match.
+      # default: false
       enabled: false
-      commands:
-      - 'give {WINNER} diamond 1'
-      - 'give {LOSER} dirt 1'
 
-  # Prevent opening inventories while in duel.
+      # Available placeholders:
+      # %winner% - Name of the winner of the match
+      # %loser% - Name of the loser of the match
+      commands:
+      - 'give %winner% diamond 1'
+      - 'give %loser% dirt 1'
+
+  # If set to 'true', players in duel will not be able to open any kind of inventories except their own.
+  # default: true
   prevent-inventory-open: true
 
-  # If enabled, the empty bottle will be automatically removed after consuming a potion.
+  # If set to 'true', the empty bottle will be automatically removed when a potion is consumed.
+  # NOTE: Only active for players in a duel!
+  # default: true
   remove-empty-bottle: true
 
-  # If enabled, players will not be able to teleport to players in duel. This was implemented to patch an exploit regarding the /tpa command.
-  # BYPASS PERMISSION: duels.teleport.bypass
+  # If set to 'true', players will not be able to teleport to players in duel.
+  # NOTE: This was implemented to patch an exploit regarding the '/tpa' command. Bypass permission - duels.teleport.bypass
+  # default: true
   prevent-teleport-to-match-players: true
 
-  # Prevent mcMMO skills and abilities from being used in a duel.
+  # If set to 'true', usage of mcMMO skills and abilities will be prohibited while in a duel.
+  # default: true
   prevent-mcmmo-skills: true
 
-  # If enabled, players in the same faction will be able to attack each other while in a duel.
+  # If set to 'true', players in the same faction will be able to attack each other if they are in a duel.
+  # default: true
   force-allow-combat: true
 
-  # If enabled, players in vanish will be unvanished at the start of the duel. (Essentials Vanish)
+  # If set to 'true', players in vanish will be unvanished automatically at the start of the duel.
+  # NOTE: Only supports Essentials Vanish as of now!
+  # default: true
   force-unvanish: true
 
-  # Cancel match from starting if the
+  # If set to 'true', players will be required to stay in the position where they have sent or accepted the request in order for the duel to start.
+  # default: false
   cancel-if-moved: false
 
-  # If set to 'true', after the duel, players will be teleported to the location where they were at before the duel instead of duel lobby.
+  # If set to 'true', players will be teleported to the location where they were before the duel instead of duel lobby.
+  # default: false
   teleport-to-last-location: false
 
-  # The delay (seconds) to wait before teleporting the winner of the duel to their last location / duel lobby.
+  # Seconds to wait before teleporting the winner after the duel.
+  # default: 5
   teleport-delay: 5
 
-  # Prevent players from dropping their inventory items while in a duel.
+  # If set to 'true', players in duel will not be able to drop items.
+  # default: false
   prevent-item-drop: false
 
-  # Prevent players from picking up items on ground while in a duel.
+  # If set to 'true', players in duel will not be able to pickup items on the ground.
+  # default: true
   prevent-item-pickup: true
 
-  # Prevent players from teleporting out of the arena while in a duel.
-  # NOTE: Teleportation caused by an enderpearl is excluded from prevention.
   limit-teleportation:
+    # If set to 'true', teleportation while in duel will be limited to the distance specified below.
+    # NOTE: Teleportation caused by an enderpearl is excluded from prevention.
+    # default: true
     enabled: true
 
     # The max distance players can teleport while in a duel. '-1' to prevent all teleportation.
     # NOTE: If players are getting stuck, try increasing this value.
+    # default: 5.0
     distance-allowed: 5.0
 
   # If set to 'true', only commands listed in 'whitelisted-commands' will be usable while in a duel.
+  # default: false
   block-all-commands: false
+
+  # List of commands to allow while in a duel.
+  # NOTE: Only active if 'block-all-commands' is enabled!
   whitelisted-commands:
     - 'msg'
     - 'r'
@@ -121,7 +153,7 @@ duel:
     - 'tempban'
 
   # List of commands to block while in a duel.
-  # NOTE: 'block-all-commands' option must be disabled in order for this option to take effect.
+  # NOTE: Only active if 'block-all-commands' is disabled!
   blacklisted-commands:
   - 'heal'
   - 'eheal'
@@ -194,24 +226,30 @@ duel:
 
 
 rating:
+  # If set to 'true', player's rating will change after match based on their opponent.
+  # default: true
   enabled: true
 
   # "The K factor is a measure of how strong a match will impact the players’ ratings."
   # Source: https://metinmediamath.wordpress.com/2013/11/27/how-to-calculate-the-elo-rating-including-example/
+  # default: 32
   k-factor: 32
 
   # The default rating for all kits.
+  # default: 1400
   default-rating: 1400
 
-  # If enabled, only matches started through the queue system will modify the rating of the players.
+  # If set to 'true', only matches started through the queue sign system will modify the rating of the players.
+  # default: false
   queue-matches-only: false
 
 
 spectate:
-  # Require players to have a cleared inventory to start spectating.
+  # If set to 'true', players will be required to have a cleared inventory in order to start spectating.
+  # default: false
   requires-cleared-inventory: false
 
-  # Only the commands listed below will be usable while spectating.
+  # List of commands to allow while spectating.
   whitelisted-commands:
     - 'msg'
     - 'r'
@@ -228,8 +266,13 @@ spectate:
 
 
 countdown:
-  # If enabled, a countdown will occur for the length of the messages list.
+  # If set to 'true', a countdown will occur for the length of the messages list.
   enabled: true
+
+  # Available placeholders:
+  # %opponent% - Name of the opponent of the match
+  # %opponent_rating% - Rating of the opponent
+  # %kit% - Name of the kit used in this match. If players are using their own inventory, it will display 'none'
   messages:
     - '&7Starting in &f5 &7seconds!'
     - '&7Starting in &f4 &7seconds!'
@@ -238,8 +281,8 @@ countdown:
     - '&7Starting in &f1 &7second!'
     - '&7Now in a match against &f%opponent%&7(&a%opponent_rating%&7) with kit &3%kit%'
 
-  # This list must have the same size as above list.
-  # NOTE: Titles will only display in 1.8 or above!
+  # Titles to display along with the countdown. Must have the same size as the countdown list size.
+  # NOTE: Titles will only display on 1.8 or above!
   titles:
     - '&f&l5'
     - '&f&l4'
@@ -248,37 +291,63 @@ countdown:
     - '&c&l1'
     - '&a&lGO!'
 
-  # Determine which actions to prevent while countdown is ongoing.
   prevent:
+    # If set to 'true', movements will be cancelled while the countdown is ongoing.
+    # default: true
     movement: true
+
+    # If set to 'true', shooting projectiles (such as arrows/snowballs) will be blocked while the countdown is ongoing.
+    # default: true
     launch-projectile: true
+
+    # If set to 'true', attacking players will be prohibited while the countdown is ongoing.
+    # default: true
     pvp: true
 
 
 stats:
-  # If enabled, past matches of a player will be displayed when the command /duel stats is executed.
+  # If set to 'true', past matches of a player will be displayed when the command '/duel stats' is executed.
+  # default: true
   display-past-matches: true
 
   # Max amount of matches to display & store in the userdata file.
+  # default: 10
   matches-to-display: 10
 
 
+guis:
+  kit-selector:
+    rows: 2
+  arena-selector:
+    rows: 3
+
+
 soup:
-  # If enabled, arenas with their name starting with 'soup arena' will have soup consuming enabled.
+  # If set to 'true', arenas with their name starting with 'soup arena' will have soup consuming enabled.
+  # default: true
   enabled: true
+
   # This is the value an arena's name must start with in order to have soup consuming enabled.
+  # default: 'soup arena'
   arena-name-starting-with: 'soup arena'
-  # Amount of hearts to regenerate on soup[ consume.
+
+  # Amount of hearts to regenerate on soup consume.
+  # default: 3.5
   hearts-to-regen: 3.5
 
 
 duelzone:
-  # If enabled, players will be able to use duel related commands only in the regions listed below.
+  # If set to 'true', players will be able to use duel related commands only in the regions listed below.
+  # default: false
   enabled: false
+
   # List of regions to allow dueling.
   regions: [spawn, lobby]
 
 
+# List of sound types:
+# 1.7.x - 1.8.x: https://jd.bukkit.org/org/bukkit/Sound.html
+# 1.9.x - 1.12.2+: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html
 sounds:
   # Remove this sound if your server version is above 1.8!
   countdown-ongoing-sound-1-8:
@@ -316,16 +385,3 @@ sounds:
     volume: 1.0
     trigger-messages:
     - '&7Now in a match against &f%opponent%&7(&a%opponent_rating%&7) with kit &3%kit%'
-
-guis:
-  setting:
-    boi: ''
-  item-betting: ''
-  kit-selector: ''
-  arena-selector: ''
-
-gui:
-  kit-selector-rows: 3
-  arena-selector-rows: 2
-  available-arena-displayname: '&9{NAME}: &aAvailable'
-  in-use-arena-displayname: '&9{NAME}: &cIn Use'

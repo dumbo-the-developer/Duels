@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 public class CancelButton extends BaseButton {
 
     public CancelButton(final DuelsPlugin plugin) {
-        super(plugin, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 14).name("&c&lCANCEL").build());
+        super(plugin, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 14).name(plugin.getLang().getMessage("GUI.settings.buttons.cancel.name")).build());
     }
 
     @Override

@@ -12,7 +12,11 @@ public class HeadButton extends BaseButton {
     private final UUID owner;
 
     public HeadButton(final DuelsPlugin plugin, final Player owner) {
-        super(plugin, ItemBuilder.of(Material.SKULL_ITEM, 1, (short) 3).build());
+        super(plugin, ItemBuilder
+            .of(Material.SKULL_ITEM, 1, (short) 3)
+            .name(plugin.getLang().getMessage("GUI.item-betting.buttons.head.name", "name", owner.getName()))
+            .build()
+        );
         this.owner = owner.getUniqueId();
     }
 

@@ -9,6 +9,7 @@ STRINGS:
   HALF_LINE: '&9&m------------------&r'
   FAIL_PREFIX: '&cFailed to start the match:'
 
+
 ERROR:
   data-load-failure: '{PREFIX} &cCould not load your duel stats. Please contact an administrator.'
   no-permission: '{PREFIX} &cNope! You are lacking the following permission: ''%permission%'''
@@ -28,6 +29,7 @@ ERROR:
     target: '&c%player% is in spectator mode.'
   not-in-match: '&c%player% is not in a duel.'
   no-data-available: '&cThere were no data available.'
+
 
 COMMAND:
   duel:
@@ -144,6 +146,7 @@ DUEL:
     name-color: '&b'
   rating-change: '&7Rating Change: &a%winner% +%change% (%winner_rating%) &c%loser% -%change% (%loser_rating%)'
 
+
 SPECTATE:
   start: '{PREFIX} &7You are now spectating &f%player%&7.'
   arena-broadcast: '{PREFIX} &f%player% &7is now spectating the match!'
@@ -152,3 +155,82 @@ SPECTATE:
   prevent-command: '&cYou cannot use ''%command%'' while in spectator mode.'
   prevent-teleportation: '&cYou cannot teleport while in spectator mode.'
   prevent-attack: '&cYou cannot do this while in spectator mode.'
+
+
+GUI:
+  settings:
+    title: 'Request Settings'
+    buttons:
+      details:
+        name: '&9Request Details'
+        lore:
+        - '&7Opponent: &f%opponent%'
+        - '&7Kit: &3%kit%'
+        - '&7Arena: &e%arena%'
+        - '&7Bet Items: &r%item_betting%'
+        - '&7Bet: &6$%bet_amount%'
+        - ' '
+        - '&7To change the bet'
+        - '&7amount, please type'
+        - '&b/duel %opponent% [amount]'
+      kit-selector:
+        name: '&9Kit Selection'
+        lore:
+        - '&7Selected Kit: &3%kit%'
+        - ' '
+        - '&aClick to Change Kit!'
+      arena-selector:
+        name: '&9Arena Selection'
+        lore:
+        - '&7Selected Arena: &e%arena%'
+        - ' '
+        - '&aClick to Change Arena!'
+      item-betting:
+        name: '&9Allow Betting Items'
+        lore:
+        - '&7Item Betting: &r%item_betting%'
+        - ' '
+        - '&aClick to Toggle Item Betting!'
+      send:
+        name: '&a&lSEND REQUEST'
+      cancel:
+        name: '&c&lCANCEL'
+  kit-selector:
+    title: 'Kit Selection'
+  arena-selector:
+    title: 'Arena Selection'
+    buttons:
+      arena:
+        name: '&e%name%'
+        lore-available:
+        - '&aAvailable'
+        lore-unavailable:
+        - '&cUnavailable'
+  item-betting:
+    title: 'Winner Takes All!'
+    buttons:
+      head:
+        name: '&e%name%'
+      state:
+        name-ready: '&a&lREADY'
+        name-not-ready: '&7&lNOT READY'
+      details:
+        name: '&9Match Details'
+        lore:
+        - '&7Kit: &3%kit%'
+        - '&7Arena: &e%arena%'
+        - '&7Bet: &6$%bet_amount%'
+  inventory-view:
+    title: '&e%name%'
+    buttons:
+      head:
+        name: '&e%name%'
+      potion-counter:
+        name: '&d%potions% Health Potions'
+      effects:
+        name: '&bPotion Effects'
+        lore-format: '&7%type% %amplifier% (%duration%s)'
+      hunger:
+        name: '&6%hunger% bars'
+      health:
+        name: '&c%health% ♥'

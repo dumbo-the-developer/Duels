@@ -14,7 +14,11 @@ public class StateButton extends BaseButton {
     private final UUID owner;
 
     public StateButton(final DuelsPlugin plugin, final BettingGui gui, final Player owner) {
-        super(plugin, ItemBuilder.of(Material.INK_SACK, 1, (short) 8).name("&7&lNOT READY").build());
+        super(plugin, ItemBuilder
+            .of(Material.INK_SACK, 1, (short) 8)
+            .name(plugin.getLang().getMessage("GUI.item-betting.buttons.state.name-not-ready"))
+            .build()
+        );
         this.gui = gui;
         this.owner = owner.getUniqueId();
     }
@@ -23,7 +27,7 @@ public class StateButton extends BaseButton {
     public void onClick(final Player player) {
         if (!gui.isReady(player) && player.getUniqueId().equals(owner)) {
             getDisplayed().setDurability((short) 10);
-            setDisplayName("&a&lREADY");
+            setDisplayName(lang.getMessage("GUI.item-betting.buttons.state.name-ready"));
             gui.update(player, this);
             gui.setReady(player);
         }

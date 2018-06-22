@@ -13,7 +13,7 @@ import me.realized.duels.command.commands.duel.subcommands.VersionCommand;
 import me.realized.duels.extra.Permissions;
 import me.realized.duels.hooks.VaultHook;
 import me.realized.duels.hooks.WorldGuardHook;
-import me.realized.duels.setting.Setting;
+import me.realized.duels.setting.Settings;
 import me.realized.duels.util.NumberUtil;
 import me.realized.duels.util.inventory.InventoryUtil;
 import org.bukkit.Bukkit;
@@ -98,8 +98,8 @@ public class DuelCommand extends BaseCommand {
             return true;
         }
 
-        final Setting setting = settingManager.getSafely(player);
-        setting.setBet(0);
+        final Settings settings = settingManager.getSafely(player);
+        settings.setBet(0);
 
         if (config.isMoneyBettingEnabled() && args.length > 1) {
             if (config.isMoneyBettingUsePermission() && !player.hasPermission(Permissions.MONEY_BETTING)) {
@@ -119,13 +119,13 @@ public class DuelCommand extends BaseCommand {
                 return true;
             }
 
-            setting.setBet(amount);
+            settings.setBet(amount);
         }
 
-        setting.setTarget(target);
+        settings.setTarget(target);
 
         if (config.isUseOwnInventoryEnabled()) {
-            setting.openGui(player);
+            settings.openGui(player);
         } else {
             kitManager.getGui().open(player);
         }

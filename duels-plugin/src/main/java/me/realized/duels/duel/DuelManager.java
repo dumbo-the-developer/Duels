@@ -28,7 +28,7 @@ import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.player.PlayerInfo;
 import me.realized.duels.player.PlayerInfoManager;
-import me.realized.duels.setting.Setting;
+import me.realized.duels.setting.Settings;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.PlayerUtil;
 import me.realized.duels.util.RatingUtil;
@@ -251,8 +251,8 @@ public class DuelManager implements Loadable {
         }
     }
 
-    public void startMatch(final Player first, final Player second, final Setting setting, final Map<UUID, List<ItemStack>> items, final boolean fromQueue) {
-        final Kit kit = setting.getKit();
+    public void startMatch(final Player first, final Player second, final Settings settings, final Map<UUID, List<ItemStack>> items, final boolean fromQueue) {
+        final Kit kit = settings.getKit();
 
         if (!config.isUseOwnInventoryEnabled() && kit == null) {
             lang.sendMessage("DUEL.start-failure.no-kit-selected", first, second);
@@ -260,21 +260,21 @@ public class DuelManager implements Loadable {
             return;
         }
 
-        if (config.isCancelIfMoved() && (notInLoc(first, setting.getLocations()[0]) || notInLoc(second, setting.getLocations()[1]))) {
+        if (config.isCancelIfMoved() && (notInLoc(first, settings.getLocations()[0]) || notInLoc(second, settings.getLocations()[1]))) {
             lang.sendMessage("DUEL.start-failure.player-moved", first, second);
             refundItems(items, first, second);
             return;
         }
 
-        final Arena arena = setting.getArena() != null ? setting.getArena() : arenaManager.randomArena(kit);
+        final Arena arena = settings.getArena() != null ? settings.getArena() : arenaManager.randomArena(kit);
 
         if (arena == null || !arena.isAvailable() || (kit != null && kit.isArenaSpecific() && !kit.canUse(arena))) {
-            lang.sendMessage(setting.getArena() != null ? "DUEL.start-failure.arena-in-use" : "DUEL.start-failure.no-arena-available", first, second);
+            lang.sendMessage(settings.getArena() != null ? "DUEL.start-failure.arena-in-use" : "DUEL.start-failure.no-arena-available", first, second);
             refundItems(items, first, second);
             return;
         }
 
-        final int bet = setting.getBet();
+        final int bet = settings.getBet();
 
         if (bet > 0 && vault != null && vault.getEconomy() != null) {
             if (!vault.has(bet, first, second)) {
@@ -286,7 +286,7 @@ public class DuelManager implements Loadable {
             vault.remove(bet, first, second);
         }
 
-        arena.startMatch(kit, items, setting.getBet(), fromQueue);
+        arena.startMatch(kit, items, settings.getBet(), fromQueue);
         addPlayers(arena, kit, arena.getPositions(), first, second);
 
         if (config.isCdEnabled()) {
@@ -513,7 +513,7 @@ public class DuelManager implements Loadable {
 
                     if (config.isEndCommandsEnabled()) {
                         for (final String command : config.getEndCommands()) {
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("{WINNER}", winner.getName()).replace("{LOSER}", player.getName()));
+                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%winner%", winner.getName()).replace("%loser%", player.getName()));
                         }
                     }
 

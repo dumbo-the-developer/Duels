@@ -19,7 +19,7 @@ import me.realized.duels.api.event.arena.ArenaStateChangeEvent;
 import me.realized.duels.duel.DuelManager.OpponentInfo;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.kit.Kit;
-import me.realized.duels.setting.Setting;
+import me.realized.duels.setting.Settings;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -42,7 +42,7 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
     private Countdown countdown;
 
     public Arena(final DuelsPlugin plugin, final String name) {
-        super(plugin, ItemBuilder.of(Material.EMPTY_MAP).name("&e" + name).build());
+        super(plugin, ItemBuilder.of(Material.EMPTY_MAP).name(plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.name", "name", name)).build());
         this.name = name;
     }
 
@@ -62,6 +62,8 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
         }
 
         positions.put(pos, location);
+        setLore(lang.getMessage("GUI.arena-selector.buttons.arena.lore-" + (isAvailable() ? "available" : "unavailable")).split("\n"));
+        arenaManager.getGui().calculatePages();
     }
 
     @Override
@@ -79,6 +81,8 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
         }
 
         this.disabled = event.isDisabled();
+        setLore(lang.getMessage("GUI.arena-selector.buttons.arena.lore-" + (isAvailable() ? "available" : "unavailable")).split("\n"));
+        arenaManager.getGui().calculatePages();
     }
 
     @Override
@@ -97,10 +101,14 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
 
     public void startMatch(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet, final boolean fromQueue) {
         this.match = new Match(kit, items, bet, fromQueue);
+        setLore(lang.getMessage("GUI.arena-selector.buttons.arena.lore-unavailable").split("\n"));
+        arenaManager.getGui().calculatePages();
     }
 
     public void endMatch() {
         match = null;
+        setLore(lang.getMessage("GUI.arena-selector.buttons.arena.lore-available").split("\n"));
+        arenaManager.getGui().calculatePages();
     }
 
     public void startCountdown(final String kit, final Map<UUID, OpponentInfo> info) {
@@ -149,9 +157,13 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
 
     @Override
     public void onClick(final Player player) {
-        final Setting setting = settingManager.getSafely(player);
-        setting.setArena(this);
-        setting.openGui(player);
+        if (!isAvailable()) {
+            return;
+        }
+
+        final Settings settings = settingManager.getSafely(player);
+        settings.setArena(this);
+        settings.openGui(player);
         lang.sendMessage(player, "DUEL.on-select.arena", "arena", name);
     }
 

@@ -2,7 +2,7 @@ package me.realized.duels.betting;
 
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.gui.betting.BettingGui;
-import me.realized.duels.setting.Setting;
+import me.realized.duels.setting.Settings;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.gui.GuiListener;
 import org.bukkit.entity.Player;
@@ -24,8 +24,8 @@ public class BettingManager implements Loadable, Listener {
     @Override
     public void handleUnload() {}
 
-    public void open(final Setting setting, final Player first, final Player second) {
-        final BettingGui gui = new BettingGui(plugin, setting, first, second);
+    public void open(final Settings settings, final Player first, final Player second) {
+        final BettingGui gui = new BettingGui(plugin, settings, first, second);
         guiListener.addGui(first, gui).open(first);
         guiListener.addGui(second, gui).open(second);
     }

@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import lombok.Getter;
 import me.realized.duels.api.arena.Arena;
 import me.realized.duels.api.kit.Kit;
-import me.realized.duels.setting.Setting;
+import me.realized.duels.setting.Settings;
 import org.bukkit.entity.Player;
 
 public class Request implements me.realized.duels.api.request.Request {
@@ -15,36 +15,36 @@ public class Request implements me.realized.duels.api.request.Request {
     @Getter
     private final UUID target;
     @Getter
-    private final Setting setting;
+    private final Settings settings;
     @Getter
     private final long creation;
 
-    Request(final Player sender, final Player target, final Setting setting) {
+    Request(final Player sender, final Player target, final Settings setting) {
         this.sender = sender.getUniqueId();
         this.target = target.getUniqueId();
-        this.setting = setting.lightCopy();
+        this.settings = setting.lightCopy();
         this.creation = System.currentTimeMillis();
     }
 
     @Nullable
     @Override
     public Kit getKit() {
-        return setting.getKit();
+        return settings.getKit();
     }
 
     @Nullable
     @Override
     public Arena getArena() {
-        return setting.getArena();
+        return settings.getArena();
     }
 
     @Override
     public boolean canBetItems() {
-        return setting.isItemBetting();
+        return settings.isItemBetting();
     }
 
     @Override
     public int getBet() {
-        return setting.getBet();
+        return settings.getBet();
     }
 }

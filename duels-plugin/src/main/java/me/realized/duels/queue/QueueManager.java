@@ -22,7 +22,7 @@ import me.realized.duels.data.QueueSignData;
 import me.realized.duels.duel.DuelManager;
 import me.realized.duels.hooks.VaultHook;
 import me.realized.duels.kit.Kit;
-import me.realized.duels.setting.Setting;
+import me.realized.duels.setting.Settings;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.StringUtil;
@@ -88,7 +88,7 @@ public class QueueManager implements Loadable, Listener {
             if (queue.size() >= 2) {
                 final Player first = queue.poll();
                 final Player second = queue.poll();
-                final Setting setting = new Setting(plugin);
+                final Settings setting = new Settings(plugin);
                 setting.setKit(sign.getKit());
                 setting.setBet(sign.getBet());
                 duelManager.startMatch(first, second, setting, null, true);

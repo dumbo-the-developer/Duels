@@ -4,7 +4,7 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.hooks.WorldGuardHook;
 import me.realized.duels.request.Request;
-import me.realized.duels.setting.Setting;
+import me.realized.duels.setting.Settings;
 import me.realized.duels.util.inventory.InventoryUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -63,22 +63,22 @@ public class AcceptCommand extends BaseCommand {
             return;
         }
 
-        final Setting setting = request.getSetting();
-        final String kit = setting.getKit() != null ? setting.getKit().getName() : "Random";
-        final String arena = setting.getArena() != null ? setting.getArena().getName() : "Random";
-        final double betAmount = setting.getBet();
-        final String itemBetting = setting.isItemBetting() ? "&aenabled" : "&cdisabled";
+        final Settings settings = request.getSettings();
+        final String kit = settings.getKit() != null ? settings.getKit().getName() : "Random";
+        final String arena = settings.getArena() != null ? settings.getArena().getName() : "Random";
+        final double betAmount = settings.getBet();
+        final String itemBetting = settings.isItemBetting() ? "&aenabled" : "&cdisabled";
 
         lang.sendMessage(target, "COMMAND.duel.request.accepted.sender",
             "player", player.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
         lang.sendMessage(player, "COMMAND.duel.request.accepted.receiver",
             "player", target.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
 
-        if (setting.isItemBetting()) {
-            setting.getLocations()[1] = player.getLocation().clone();
-            bettingManager.open(setting, target, player);
+        if (settings.isItemBetting()) {
+            settings.getLocations()[1] = player.getLocation().clone();
+            bettingManager.open(settings, target, player);
         } else {
-            duelManager.startMatch(player, target, setting, null, false);
+            duelManager.startMatch(player, target, settings, null, false);
         }
     }
 }

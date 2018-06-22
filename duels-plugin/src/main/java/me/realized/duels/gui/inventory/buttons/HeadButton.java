@@ -9,6 +9,10 @@ import org.bukkit.entity.Player;
 public class HeadButton extends BaseButton {
 
     public HeadButton(final DuelsPlugin plugin, final Player owner) {
-        super(plugin, ItemBuilder.of(Material.SKULL_ITEM, 1, (short) 3).name("&e" + owner.getName()).head(owner).build());
+        super(plugin, ItemBuilder
+            .of(Material.SKULL_ITEM, 1, (short) 3)
+            .name(plugin.getLang().getMessage("GUI.inventory-view.buttons.head.name", "name", owner.getName())).head(owner)
+            .build()
+        );
     }
 }

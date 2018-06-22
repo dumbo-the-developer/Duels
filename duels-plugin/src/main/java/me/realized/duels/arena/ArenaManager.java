@@ -21,6 +21,7 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.arena.ArenaCreateEvent;
 import me.realized.duels.api.event.arena.ArenaRemoveEvent;
 import me.realized.duels.config.Config;
+import me.realized.duels.config.Lang;
 import me.realized.duels.data.ArenaData;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.util.Loadable;
@@ -40,37 +41,39 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
 
     private final DuelsPlugin plugin;
     private final Config config;
+    private final Lang lang;
     private final File file;
     @Getter
     private final List<Arena> arenas = new ArrayList<>();
+
     @Getter
-    private final MultiPageGui<DuelsPlugin> gui;
+    private MultiPageGui<DuelsPlugin> gui;
 
     public ArenaManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
+        this.lang = plugin.getLang();
         this.file = new File(plugin.getDataFolder(), "arenas.json");
-        // TODO: 03/06/2018 Replace to config message vv
-        gui = new MultiPageGui<>(plugin, "Arena Selection", 1, arenas);
-        plugin.getGuiListener().addGui(gui);
     }
 
     @Override
     public void handleLoad() throws IOException {
+        gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.arena-selector.title"), 1, arenas);
+        plugin.getGuiListener().addGui(gui);
+
         if (config.isCdEnabled()) {
             plugin.getServer().getPluginManager().registerEvents(this, plugin);
         }
 
         if (!file.exists()) {
             file.createNewFile();
-            return;
-        }
+        } else {
+            try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
+                final List<ArenaData> data = plugin.getGson().fromJson(reader, new TypeToken<List<ArenaData>>() {}.getType());
 
-        try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
-            final List<ArenaData> data = plugin.getGson().fromJson(reader, new TypeToken<List<ArenaData>>() {}.getType());
-
-            if (data != null) {
-                data.forEach(arenaData -> arenas.add(arenaData.toArena(plugin)));
+                if (data != null) {
+                    data.forEach(arenaData -> arenas.add(arenaData.toArena(plugin)));
+                }
             }
         }
 
@@ -80,6 +83,10 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
 
     @Override
     public void handleUnload() throws IOException {
+        if (gui != null) {
+            plugin.getGuiListener().removeGui(gui);
+        }
+
         if (arenas.isEmpty()) {
             return;
         }
@@ -119,6 +126,7 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
             if (arena.getName().equals(name)) {
                 final ArenaRemoveEvent event = new ArenaRemoveEvent(source, arena);
                 plugin.getServer().getPluginManager().callEvent(event);
+                gui.calculatePages();
                 return true;
             }
 
@@ -131,6 +139,7 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
         arenas.add(arena);
         final ArenaCreateEvent event = new ArenaCreateEvent(source, arena);
         plugin.getServer().getPluginManager().callEvent(event);
+        gui.calculatePages();
     }
 
     @Override

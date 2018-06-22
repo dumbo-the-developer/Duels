@@ -22,7 +22,10 @@ public class InventoryManager implements Loadable {
 
     @Override
     public void handleLoad() {
-        // Start auto expire task
+        plugin.doSyncRepeat(() -> {
+            final long now = System.currentTimeMillis();
+            inventories.entrySet().removeIf(entry -> now - entry.getValue().getCreation() >= 1000L * 60 * 5);
+        }, 20L, 20L * 5);
     }
 
     @Override
@@ -30,14 +33,14 @@ public class InventoryManager implements Loadable {
         inventories.clear();
     }
 
+    public InventoryGui get(final UUID uuid) {
+        return inventories.get(uuid);
+    }
+
     public void create(final Player player) {
         final InventoryGui gui = new InventoryGui(plugin, player);
         guiListener.addGui(gui);
         inventories.put(player.getUniqueId(), gui);
-    }
-
-    public InventoryGui get(final UUID uuid) {
-        return inventories.get(uuid);
     }
 
     public void remove(final Player player) {

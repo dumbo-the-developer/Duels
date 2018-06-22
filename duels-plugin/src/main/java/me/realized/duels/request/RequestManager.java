@@ -6,7 +6,7 @@ import java.util.UUID;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.request.RequestSendEvent;
 import me.realized.duels.config.Config;
-import me.realized.duels.setting.Setting;
+import me.realized.duels.setting.Settings;
 import me.realized.duels.util.Loadable;
 import org.bukkit.entity.Player;
 
@@ -42,7 +42,7 @@ public class RequestManager implements Loadable {
         return cached;
     }
 
-    public boolean send(final Player sender, final Player target, final Setting setting) {
+    public boolean send(final Player sender, final Player target, final Settings setting) {
         final Request request = new Request(sender, target, setting);
         final RequestSendEvent event = new RequestSendEvent(sender, target, request);
         plugin.getServer().getPluginManager().callEvent(event);

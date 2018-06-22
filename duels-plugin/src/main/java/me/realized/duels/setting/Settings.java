@@ -5,12 +5,12 @@ import lombok.Getter;
 import lombok.Setter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
-import me.realized.duels.gui.setting.SettingGui;
+import me.realized.duels.gui.setting.SettingsGui;
 import me.realized.duels.kit.Kit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-public class Setting {
+public class Settings {
 
     private final DuelsPlugin plugin;
 
@@ -28,16 +28,16 @@ public class Setting {
     @Getter
     @Setter
     private boolean itemBetting;
-    private final SettingGui gui;
+    private final SettingsGui gui;
     @Getter
     private Location[] locations = new Location[2];
 
-    public Setting(final DuelsPlugin plugin, final Player player) {
+    public Settings(final DuelsPlugin plugin, final Player player) {
         this.plugin = plugin;
-        this.gui = player != null ? plugin.getGuiListener().addGui(player, new SettingGui(plugin)) : null;
+        this.gui = player != null ? plugin.getGuiListener().addGui(player, new SettingsGui(plugin)) : null;
     }
 
-    public Setting(final DuelsPlugin plugin) {
+    public Settings(final DuelsPlugin plugin) {
         this(plugin, null);
     }
 
@@ -68,8 +68,8 @@ public class Setting {
     }
 
     // Don't copy the gui since it won't be required to start a match
-    public Setting lightCopy() {
-        final Setting copy = new Setting(plugin);
+    public Settings lightCopy() {
+        final Settings copy = new Settings(plugin);
         copy.target = target;
         copy.kit = kit;
         copy.arena = arena;

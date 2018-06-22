@@ -31,7 +31,6 @@ public final class Teleport implements Loadable, Listener {
 
     public Teleport(final DuelsPlugin plugin) {
         this.plugin = plugin;
-        plugin.doSyncAfter(() -> plugin.getServer().getPluginManager().registerEvents(this, plugin), 1L);
     }
 
     @Override
@@ -39,6 +38,7 @@ public final class Teleport implements Loadable, Listener {
         this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
         this.combatTagPlus = plugin.getHookManager().getHook(CombatTagPlusHook.class);
         this.pvpManager = plugin.getHookManager().getHook(PvPManagerHook.class);
+        plugin.doSyncAfter(() -> plugin.getServer().getPluginManager().registerEvents(this, plugin), 1L);
     }
 
     @Override

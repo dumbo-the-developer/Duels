@@ -3,7 +3,7 @@ package me.realized.duels.gui.setting.buttons;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.extra.Permissions;
 import me.realized.duels.gui.BaseButton;
-import me.realized.duels.setting.Setting;
+import me.realized.duels.setting.Settings;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -11,10 +11,8 @@ import org.bukkit.entity.Player;
 
 public class ItemBettingButton extends BaseButton {
 
-    private static final String LORE_TEMPLATE = "&7Bet Items: %s";
-
     public ItemBettingButton(final DuelsPlugin plugin) {
-        super(plugin, ItemBuilder.of(Material.DIAMOND).name("&eAllow Betting Items").build());
+        super(plugin, ItemBuilder.of(Material.DIAMOND).name(plugin.getLang().getMessage("GUI.settings.buttons.item-betting.name")).build());
     }
 
     @Override
@@ -29,8 +27,10 @@ public class ItemBettingButton extends BaseButton {
             return;
         }
 
-        final Setting setting = settingManager.getSafely(player);
-        setLore(String.format(LORE_TEMPLATE, setting.isItemBetting() ? "&aenabled" : "&cdisabled"));
+        final Settings settings = settingManager.getSafely(player);
+        final String lore = plugin.getLang().getMessage("GUI.settings.buttons.item-betting.lore",
+            "item_betting", settings.isItemBetting() ? "&aenabled" : "&cdisabled");
+        setLore(lore.split("\n"));
     }
 
     @Override
@@ -45,8 +45,8 @@ public class ItemBettingButton extends BaseButton {
             return;
         }
 
-        final Setting setting = settingManager.getSafely(player);
-        setting.setItemBetting(!setting.isItemBetting());
-        setting.updateGui(player);
+        final Settings settings = settingManager.getSafely(player);
+        settings.setItemBetting(!settings.isItemBetting());
+        settings.updateGui(player);
     }
 }

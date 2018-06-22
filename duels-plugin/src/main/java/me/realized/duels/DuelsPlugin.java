@@ -32,7 +32,7 @@ import me.realized.duels.logging.LogManager;
 import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.queue.QueueManager;
 import me.realized.duels.request.RequestManager;
-import me.realized.duels.setting.SettingManager;
+import me.realized.duels.setting.SettingsManager;
 import me.realized.duels.shaded.bstats.Metrics;
 import me.realized.duels.spectate.SpectateManager;
 import me.realized.duels.util.Loadable;
@@ -69,7 +69,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private KitManager kitManager;
     @Getter
-    private SettingManager settingManager;
+    private SettingsManager settingManager;
     @Getter
     private PlayerInfoManager playerManager;
     @Getter
@@ -100,7 +100,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(guiListener = new GuiListener<>(this));
         loadables.add(arenaManager = new ArenaManager(this));
         loadables.add(kitManager = new KitManager(this));
-        loadables.add(settingManager = new SettingManager(this));
+        loadables.add(settingManager = new SettingsManager(this));
         loadables.add(playerManager = new PlayerInfoManager(this));
         loadables.add(spectateManager = new SpectateManager(this));
         loadables.add(bettingManager = new BettingManager(this));

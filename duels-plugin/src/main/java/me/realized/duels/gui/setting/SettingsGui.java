@@ -13,10 +13,10 @@ import me.realized.duels.util.inventory.Slots;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-public class SettingGui extends SinglePageGui<DuelsPlugin> {
+public class SettingsGui extends SinglePageGui<DuelsPlugin> {
 
-    public SettingGui(final DuelsPlugin plugin) {
-        super(plugin, "Request Settings", 3);
+    public SettingsGui(final DuelsPlugin plugin) {
+        super(plugin, plugin.getLang().getMessage("GUI.settings.title"), 3);
 
         final ItemStack spacing = ItemBuilder.of(Material.STAINED_GLASS_PANE).name(" ").build();
         Slots.run(2, 7, slot -> inventory.setItem(slot, spacing));

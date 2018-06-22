@@ -7,12 +7,12 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.util.Loadable;
 import org.bukkit.entity.Player;
 
-public class SettingManager implements Loadable {
+public class SettingsManager implements Loadable {
 
     private final DuelsPlugin plugin;
-    private final Map<UUID, Setting> cache = new HashMap<>();
+    private final Map<UUID, Settings> cache = new HashMap<>();
 
-    public SettingManager(final DuelsPlugin plugin) {
+    public SettingsManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -24,11 +24,11 @@ public class SettingManager implements Loadable {
         cache.clear();
     }
 
-    public Setting getSafely(final Player player) {
-        return cache.computeIfAbsent(player.getUniqueId(), result -> new Setting(plugin, player));
+    public Settings getSafely(final Player player) {
+        return cache.computeIfAbsent(player.getUniqueId(), result -> new Settings(plugin, player));
     }
 
-    public Setting remove(final Player player) {
+    public Settings remove(final Player player) {
         return cache.remove(player.getUniqueId());
     }
 }

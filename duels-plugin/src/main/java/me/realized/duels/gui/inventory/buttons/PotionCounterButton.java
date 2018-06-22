@@ -10,7 +10,11 @@ import org.bukkit.inventory.ItemFlag;
 public class PotionCounterButton extends BaseButton {
 
     public PotionCounterButton(final DuelsPlugin plugin, final int count) {
-        super(plugin, ItemBuilder.of(Material.POTION, 1, (short) 16421).name("&d" + count + " Health Potions").build());
+        super(plugin, ItemBuilder
+            .of(Material.POTION, 1, (short) 16421)
+            .name(plugin.getLang().getMessage("GUI.inventory-view.buttons.potion-counter.name", "potions", count))
+            .build()
+        );
         editMeta(meta -> {
             if (!CompatUtil.isPre1_8()) {
                 meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);

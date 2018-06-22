@@ -3,9 +3,11 @@ package me.realized.duels.util.gui;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import me.realized.duels.util.inventory.InventoryBuilder;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -43,6 +45,7 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
     }
 
     public void calculatePages() {
+        final List<HumanEntity> viewers = pages.stream().flatMap(page -> page.inventory.getViewers().stream()).collect(Collectors.toList());
         pages.clear();
 
         final ItemStack prevPage = ItemBuilder.of(Material.PAPER).name("&aPrevious Page").build();
@@ -89,6 +92,8 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
             i++;
             slot++;
         }
+
+        viewers.forEach(viewer -> open((Player) viewer));
     }
 
     @Override

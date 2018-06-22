@@ -12,7 +12,7 @@ import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.KitManager;
 import me.realized.duels.queue.QueueManager;
 import me.realized.duels.request.RequestManager;
-import me.realized.duels.setting.SettingManager;
+import me.realized.duels.setting.SettingsManager;
 import me.realized.duels.spectate.SpectateManager;
 import me.realized.duels.util.command.AbstractCommand;
 import org.bukkit.command.CommandSender;
@@ -26,7 +26,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
     protected final ArenaManager arenaManager;
     protected final KitManager kitManager;
     protected final QueueManager queueManager;
-    protected final SettingManager settingManager;
+    protected final SettingsManager settingManager;
     protected final SpectateManager spectateManager;
     protected final BettingManager bettingManager;
     protected final InventoryManager inventoryManager;

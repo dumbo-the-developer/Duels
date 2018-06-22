@@ -11,7 +11,7 @@ import me.realized.duels.duel.DuelManager;
 import me.realized.duels.gui.betting.buttons.DetailsButton;
 import me.realized.duels.gui.betting.buttons.HeadButton;
 import me.realized.duels.gui.betting.buttons.StateButton;
-import me.realized.duels.setting.Setting;
+import me.realized.duels.setting.Settings;
 import me.realized.duels.util.gui.AbstractGui;
 import me.realized.duels.util.gui.Button;
 import me.realized.duels.util.gui.GuiListener;
@@ -36,17 +36,17 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
     };
     private final GuiListener<DuelsPlugin> guiListener;
     private final DuelManager duelManager;
-    private final Setting setting;
+    private final Settings settings;
     private final Inventory inventory;
     private final UUID first, second;
     private boolean firstReady, secondReady;
 
-    public BettingGui(final DuelsPlugin plugin, final Setting setting, final Player first, final Player second) {
+    public BettingGui(final DuelsPlugin plugin, final Settings settings, final Player first, final Player second) {
         super(plugin);
         this.guiListener = plugin.getGuiListener();
         this.duelManager = plugin.getDuelManager();
-        this.setting = setting;
-        this.inventory = InventoryBuilder.of("Winner Takes All!", 54).build();
+        this.settings = settings;
+        this.inventory = InventoryBuilder.of(plugin.getLang().getMessage("GUI.item-betting.title"), 54).build();
         this.first = first.getUniqueId();
         this.second = second.getUniqueId();
         Slots.run(13, 14, 5, slot -> inventory.setItem(slot, ItemBuilder.of(Material.IRON_FENCE).name(" ").build()));
@@ -55,7 +55,7 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
         Slots.run(6, 9, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 11).name(" ").build()));
         Slots.run(51, 54, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 11).name(" ").build()));
         set(inventory, 3, new StateButton(plugin, this, first));
-        set(inventory, 4, new DetailsButton(plugin, setting));
+        set(inventory, 4, new DetailsButton(plugin, settings));
         set(inventory, 5, new StateButton(plugin, this, second));
         set(inventory, 48, new HeadButton(plugin, first));
         set(inventory, 50, new HeadButton(plugin, second));
@@ -95,7 +95,7 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
             final Map<UUID, List<ItemStack>> items = new HashMap<>();
             items.put(player.getUniqueId(), getSection(player).collect());
             items.put(other.getUniqueId(), getSection(other).collect());
-            duelManager.startMatch(player, other, setting, items, false);
+            duelManager.startMatch(player, other, settings, items, false);
         }
     }
 
