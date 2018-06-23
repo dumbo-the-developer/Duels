@@ -15,17 +15,27 @@ public final class TextBuilder {
     private final List<BaseComponent> list = new ArrayList<>();
 
     private TextBuilder(final String base) {
-        if (base != null) {
-            list.addAll(Arrays.asList(TextComponent.fromLegacyText(base)));
+        if (base == null) {
+           return;
         }
+
+        list.addAll(Arrays.asList(TextComponent.fromLegacyText(base)));
     }
 
     public TextBuilder add(final String text) {
+        if (text == null) {
+            return this;
+        }
+
         list.addAll(Arrays.asList(TextComponent.fromLegacyText(text)));
         return this;
     }
 
     public TextBuilder add(final String text, final ClickEvent.Action action, final String value) {
+        if (text == null || value == null) {
+            return this;
+        }
+
         Arrays.stream(TextComponent.fromLegacyText(text)).forEach(component -> {
             component.setClickEvent(new ClickEvent(action, value));
             list.add(component);
@@ -34,6 +44,10 @@ public final class TextBuilder {
     }
 
     public TextBuilder add(final String text, final HoverEvent.Action action, final String value) {
+        if (text == null || value == null) {
+            return this;
+        }
+
         Arrays.stream(TextComponent.fromLegacyText(text)).forEach(component -> {
             component.setHoverEvent(new HoverEvent(action, TextComponent.fromLegacyText(value)));
             list.add(component);
@@ -42,11 +56,19 @@ public final class TextBuilder {
     }
 
     public TextBuilder setClickEvent(final ClickEvent.Action action, final String value) {
+        if (value == null) {
+            return this;
+        }
+
         list.forEach(component -> component.setClickEvent(new ClickEvent(action, value)));
         return this;
     }
 
     public TextBuilder setHoverEvent(final HoverEvent.Action action, final String value) {
+        if (value == null) {
+            return this;
+        }
+
         list.forEach(component -> component.setHoverEvent(new HoverEvent(action, TextComponent.fromLegacyText(value))));
         return this;
     }

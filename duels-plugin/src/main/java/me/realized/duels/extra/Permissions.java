@@ -16,6 +16,7 @@ public final class Permissions {
     public static final String ARENA_SELECTING = "duels.use.arena-select";
     public static final String ITEM_BETTING = "duels.use.item-betting";
     public static final String MONEY_BETTING = "duels.use.money-betting";
+    public static final String SETTING_ALL = "duels.use.*";
 
     private Permissions() {}
 }

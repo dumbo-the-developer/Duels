@@ -440,6 +440,7 @@ public class DuelManager implements Loadable {
     // Separating out the listener fixes weird error with 1.7 spigot
     private class DuelListener implements Listener {
 
+        // TODO: 22/06/2018 Handle spectators on end
         @EventHandler(priority = EventPriority.HIGHEST)
         public void on(final PlayerDeathEvent event) {
             final Player player = event.getEntity();

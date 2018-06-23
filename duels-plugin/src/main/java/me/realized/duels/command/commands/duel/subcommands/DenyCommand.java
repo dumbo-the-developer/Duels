@@ -18,16 +18,16 @@ public class DenyCommand extends BaseCommand {
         final Player target = Bukkit.getPlayerExact(args[1]);
 
         if (target == null || !player.canSee(target)) {
-            lang.sendMessage(sender, "ERROR.player-not-found", "name", args[1]);
+            lang.sendMessage(sender, "ERROR.player.not-found", "name", args[1]);
             return;
         }
 
         if (requestManager.remove(target, player) == null) {
-            lang.sendMessage(sender, "ERROR.no-request", "player", target.getName());
+            lang.sendMessage(sender, "ERROR.duel.no-request", "player", target.getName());
             return;
         }
 
-        lang.sendMessage(target, "COMMAND.duel.request.denied.sender", "player", player.getName());
         lang.sendMessage(player, "COMMAND.duel.request.denied.receiver", "player", target.getName());
+        lang.sendMessage(target, "COMMAND.duel.request.denied.sender", "player", player.getName());
     }
 }

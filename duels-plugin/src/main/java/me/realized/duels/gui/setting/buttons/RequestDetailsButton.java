@@ -22,7 +22,7 @@ public class RequestDetailsButton extends BaseButton {
         if (target == null) {
             settings.reset();
             player.closeInventory();
-            lang.sendMessage(player, "ERROR.no-longer-online");
+            lang.sendMessage(player, "ERROR.player.no-longer-online");
             return;
         }
 

@@ -1,5 +1,6 @@
 package me.realized.duels.data;
 
+import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -25,11 +26,12 @@ import me.realized.duels.api.event.user.UserCreateEvent;
 import me.realized.duels.api.user.User;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
+import me.realized.duels.kit.Kit;
 import me.realized.duels.util.DateUtil;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
+import me.realized.duels.util.UUIDUtil;
 import me.realized.duels.util.compat.Players;
-import me.realized.duels.util.profile.ProfileUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -50,11 +52,11 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
     @Getter
     private volatile boolean loaded;
     @Getter
-    private volatile List<SortedEntry<String, Integer>> topWins;
-    private volatile long winsLastUpdate;
+    private volatile TopEntry wins;
     @Getter
-    private volatile List<SortedEntry<String, Integer>> topLosses;
-    private volatile long lossesLastUpdate;
+    private volatile TopEntry losses;
+    @Getter
+    private final Map<Kit, TopEntry> topRatings = new ConcurrentHashMap<>();
 
     public UserManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -91,13 +93,9 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
 
                     final String name = fileName.substring(0, fileName.length() - 5);
 
-                    if (!ProfileUtil.isUUID(name)) {
-                        continue;
-                    }
+                    final UUID uuid = UUIDUtil.parseUUID(name);
 
-                    final UUID uuid = UUID.fromString(name);
-
-                    if (users.containsKey(uuid)) {
+                    if (uuid == null || users.containsKey(uuid)) {
                         continue;
                     }
 
@@ -117,17 +115,25 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
             loaded = true;
         });
 
-        plugin.doAsyncRepeat(() -> {
-            if (!loaded) {
-                return;
-            }
+        plugin.doSyncRepeat(() -> {
+            final Collection<Kit> kits = plugin.getKitManager().getKits();
 
-            List<SortedEntry<String, Integer>> result = sorted(User::getWins);
-            topWins = Collections.unmodifiableList(result.size() > 10 ? result.subList(0, 10) : result);
-            winsLastUpdate = System.currentTimeMillis();
-            result = sorted(User::getLosses);
-            topLosses = Collections.unmodifiableList(result.size() > 10 ? result.subList(0, 10) : result);
-            lossesLastUpdate = System.currentTimeMillis();
+            plugin.doAsync(() -> {
+                if (!loaded) {
+                    return;
+                }
+
+                List<SortedEntry<String, Integer>> result = sorted(User::getWins);
+                wins = new TopEntry("Wins", "wins", result);
+                result = sorted(User::getLosses);
+                losses = new TopEntry("Losses", "losses", result);
+                topRatings.keySet().removeIf(kit -> !kits.contains(kit));
+
+                for (final Kit kit : kits) {
+                    result = sorted(user -> user.getRating(kit));
+                    topRatings.put(kit, new TopEntry(kit.getName(), "rating", result));
+                }
+            });
         }, 20L * 5, 20L * 60);
     }
 
@@ -136,14 +142,6 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
         loaded = false;
         saveUsers(Players.getOnlinePlayers());
         users.clear();
-    }
-
-    public String getNextWinsUpdate() {
-        return DateUtil.format((winsLastUpdate + 1000L * 60L - System.currentTimeMillis()) / 1000L);
-    }
-
-    public String getNextLossesUpdate() {
-        return DateUtil.format((lossesLastUpdate + 1000L * 60L - System.currentTimeMillis()) / 1000L);
     }
 
     @Nullable
@@ -156,6 +154,16 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
     @Override
     public UserData get(@Nonnull final Player player) {
         return get(player.getUniqueId());
+    }
+
+    @Override
+    public List<SortedEntry<String, Integer>> getTopWins() {
+        return wins != null ? wins.data : null;
+    }
+
+    @Override
+    public List<SortedEntry<String, Integer>> getTopLosses() {
+        return losses != null ? losses.data : null;
     }
 
     @Override
@@ -240,7 +248,7 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
             final UserData data = tryLoad(player);
 
             if (data == null) {
-                lang.sendMessage(event.getPlayer(), "ERROR.data-load-failure");
+                lang.sendMessage(event.getPlayer(), "ERROR.data.load-failure");
                 return;
             }
 
@@ -254,6 +262,26 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
 
         if (user != null) {
             plugin.doAsync(() -> trySave(event.getPlayer(), user));
+        }
+    }
+
+    public class TopEntry {
+
+        private final long lastUpdate;
+        @Getter
+        private final String name, type;
+        @Getter
+        private final List<SortedEntry<String, Integer>> data;
+
+        TopEntry(final String name, final String type, final List<SortedEntry<String, Integer>> data) {
+            this.lastUpdate = System.currentTimeMillis();
+            this.name = name;
+            this.type = type;
+            this.data = Collections.unmodifiableList(Lists.newArrayList(data.size() > 10 ? data.subList(0, 10) : data));
+        }
+
+        public String getNextUpdate() {
+            return DateUtil.format((lastUpdate + 1000L * 60L - System.currentTimeMillis()) / 1000L);
         }
     }
 }

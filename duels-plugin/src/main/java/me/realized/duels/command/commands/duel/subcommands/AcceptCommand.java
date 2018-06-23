@@ -25,54 +25,53 @@ public class AcceptCommand extends BaseCommand {
         final Player player = (Player) sender;
 
         if (config.isRequiresClearedInventory() && InventoryUtil.hasItem(player)) {
-            lang.sendMessage(sender, "ERROR.inventory-not-empty");
+            lang.sendMessage(sender, "ERROR.player.inventory-not-empty");
             return;
         }
 
         if (config.isPreventCreativeMode() && player.getGameMode() == GameMode.CREATIVE) {
-            // TODO: 16/06/2018 send msg
+            lang.sendMessage(sender, "ERROR.player.in-creative-mode");
             return;
         }
 
         if (config.isDuelZoneEnabled() && worldGuard != null && !worldGuard.inDuelZone(player)) {
-            // TODO: 16/06/2018 send msg
+            lang.sendMessage(sender, "ERROR.player.not-in-duelzone", "regions", config.getDuelZoneRegions());
             return;
         }
 
         if (arenaManager.isInMatch(player)) {
-            lang.sendMessage(sender, "ERROR.already-in-match.sender");
+            lang.sendMessage(sender, "ERROR.duel.already-in-match.sender");
             return;
         }
 
         final Player target = Bukkit.getPlayerExact(args[1]);
 
         if (target == null || !player.canSee(target)) {
-            lang.sendMessage(sender, "ERROR.player-not-found", "name", args[1]);
+            lang.sendMessage(sender, "ERROR.player.not-found", "name", args[1]);
             return;
         }
 
         final Request request = requestManager.remove(target, player);
 
         if (request == null) {
-            lang.sendMessage(sender, "ERROR.no-request", "player", target.getName());
+            lang.sendMessage(sender, "ERROR.duel.no-request", "player", target.getName());
             return;
         }
 
         if (arenaManager.isInMatch(target)) {
-            lang.sendMessage(sender, "ERROR.already-in-match.target", "player", target.getName());
+            lang.sendMessage(sender, "ERROR.duel.already-in-match.target", "player", target.getName());
             return;
         }
 
         final Settings settings = request.getSettings();
-        final String kit = settings.getKit() != null ? settings.getKit().getName() : "Random";
+        final String kit = settings.getKit() != null ? settings.getKit().getName() : "Not Selected";
         final String arena = settings.getArena() != null ? settings.getArena().getName() : "Random";
-        final double betAmount = settings.getBet();
+        final double bet = settings.getBet();
         final String itemBetting = settings.isItemBetting() ? "&aenabled" : "&cdisabled";
-
-        lang.sendMessage(target, "COMMAND.duel.request.accepted.sender",
-            "player", player.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
         lang.sendMessage(player, "COMMAND.duel.request.accepted.receiver",
-            "player", target.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
+            "player", target.getName(), "kit", kit, "arena", arena, "bet_amount", bet, "item_betting", itemBetting);
+        lang.sendMessage(target, "COMMAND.duel.request.accepted.sender",
+            "player", player.getName(), "kit", kit, "arena", arena, "bet_amount", bet, "item_betting", itemBetting);
 
         if (settings.isItemBetting()) {
             settings.getLocations()[1] = player.getLocation().clone();

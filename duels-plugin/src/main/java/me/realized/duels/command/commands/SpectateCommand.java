@@ -29,14 +29,14 @@ public class SpectateCommand extends BaseCommand {
         }
 
         if (config.isSpecRequiresClearedInventory() && InventoryUtil.hasItem(player)) {
-            lang.sendMessage(sender, "ERROR.inventory-not-empty");
+            lang.sendMessage(sender, "ERROR.player.inventory-not-empty");
             return;
         }
 
         final Player target = Bukkit.getPlayerExact(args[0]);
 
         if (target == null) {
-            lang.sendMessage(sender, "ERROR.player-not-found", "name", args[0]);
+            lang.sendMessage(sender, "ERROR.player.not-found", "name", args[0]);
             return;
         }
 

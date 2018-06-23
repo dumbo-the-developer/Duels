@@ -4,7 +4,10 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.extra.Permissions;
 import me.realized.duels.util.StringUtil;
+import me.realized.duels.util.TextBuilder;
+import net.md_5.bungee.api.chat.ClickEvent.Action;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
 
 public class VersionCommand extends BaseCommand {
@@ -16,6 +19,9 @@ public class VersionCommand extends BaseCommand {
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final PluginDescriptionFile info = plugin.getDescription();
-        sender.sendMessage(StringUtil.color("&9" + info.getFullName() + " by " + info.getAuthors().get(0)));
+        TextBuilder
+            .of(StringUtil.color("&b" + info.getFullName() + " by " + info.getAuthors().get(0) + " &l[Click]"))
+            .setClickEvent(Action.OPEN_URL, info.getWebsite())
+            .send((Player) sender);
     }
 }

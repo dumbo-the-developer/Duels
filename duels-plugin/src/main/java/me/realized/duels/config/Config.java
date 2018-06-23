@@ -109,6 +109,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean preventPvp;
 
     @Getter
+    private boolean displayRatings;
+    @Getter
     private boolean displayPastMatches;
     @Getter
     private int matchesToDisplay;
@@ -176,6 +178,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         preventMovement = configuration.getBoolean("countdown.prevent.movement", true);
         preventLaunchProjectile = configuration.getBoolean("countdown.prevent.launch-projectile", true);
         preventPvp = configuration.getBoolean("countdown.prevent.pvp", true);
+        displayRatings = configuration.getBoolean("stats.display-ratings", true);
         displayPastMatches = configuration.getBoolean("stats.display-past-matches", true);
         matchesToDisplay = configuration.getInt("stats.matches-to-display", 10);
         soupEnabled = configuration.getBoolean("soup.enabled", true);

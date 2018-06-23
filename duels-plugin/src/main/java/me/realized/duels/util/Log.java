@@ -36,7 +36,7 @@ public final class Log {
     public static void error(final String s) {
         for (final LogSource source : sources) {
             if (source instanceof Plugin) {
-                Bukkit.getConsoleSender().sendMessage("[" + ((Plugin) source).getName() + "] " + ChatColor.DARK_RED + s);
+                Bukkit.getConsoleSender().sendMessage("[" + ((Plugin) source).getName() + "] " + ChatColor.RED + s);
             } else {
                 source.log(Level.SEVERE, s);
             }
@@ -50,7 +50,7 @@ public final class Log {
     public static void warn(final String s) {
         for (final LogSource source : sources) {
             if (source instanceof Plugin) {
-                Bukkit.getConsoleSender().sendMessage("[" + ((Plugin) source).getName() + "] " + ChatColor.RED + s);
+                Bukkit.getConsoleSender().sendMessage("[" + ((Plugin) source).getName() + "] " + ChatColor.GOLD + s);
             } else {
                 source.log(Level.WARNING, s);
             }

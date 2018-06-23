@@ -34,7 +34,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
     protected final RequestManager requestManager;
     protected final HookManager hookManager;
 
-    /**
+    /**w
      * Constructor for sub command
      */
     public BaseCommand(final DuelsPlugin plugin, final String name, final String usage, final String description, final String permission, final int length,

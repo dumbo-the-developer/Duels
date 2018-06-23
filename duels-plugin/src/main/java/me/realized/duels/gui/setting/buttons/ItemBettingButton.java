@@ -22,7 +22,7 @@ public class ItemBettingButton extends BaseButton {
             return;
         }
 
-        if (config.isItemBettingUsePermission() && !player.hasPermission(Permissions.ITEM_BETTING)) {
+        if (config.isItemBettingUsePermission() && !player.hasPermission(Permissions.ITEM_BETTING) && !player.hasPermission(Permissions.SETTING_ALL)) {
             setLore("&cYou do not have permission to use this option.");
             return;
         }
@@ -40,7 +40,7 @@ public class ItemBettingButton extends BaseButton {
             return;
         }
 
-        if (config.isItemBettingUsePermission() && !player.hasPermission(Permissions.ITEM_BETTING)) {
+        if (config.isItemBettingUsePermission() && !player.hasPermission(Permissions.ITEM_BETTING) && !player.hasPermission(Permissions.SETTING_ALL)) {
             lang.sendMessage(player, "ERROR.no-permission", "permission", Permissions.ITEM_BETTING);
             return;
         }

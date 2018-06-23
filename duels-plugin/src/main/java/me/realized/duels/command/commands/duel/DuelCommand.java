@@ -10,6 +10,7 @@ import me.realized.duels.command.commands.duel.subcommands.StatsCommand;
 import me.realized.duels.command.commands.duel.subcommands.ToggleCommand;
 import me.realized.duels.command.commands.duel.subcommands.TopCommand;
 import me.realized.duels.command.commands.duel.subcommands.VersionCommand;
+import me.realized.duels.data.UserData;
 import me.realized.duels.extra.Permissions;
 import me.realized.duels.hooks.VaultHook;
 import me.realized.duels.hooks.WorldGuardHook;
@@ -17,7 +18,6 @@ import me.realized.duels.setting.Settings;
 import me.realized.duels.util.NumberUtil;
 import me.realized.duels.util.inventory.InventoryUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -45,6 +45,13 @@ public class DuelCommand extends BaseCommand {
 
     @Override
     protected boolean executeFirst(final CommandSender sender, final String label, final String[] args) {
+        final Player player = (Player) sender;
+
+        if (userManager.get(player) == null) {
+            lang.sendMessage(sender, "ERROR.data.load-failure");
+            return true;
+        }
+
         if (args.length == 0) {
             lang.sendMessage(sender, "COMMAND.duel.usage");
             return true;
@@ -54,47 +61,57 @@ public class DuelCommand extends BaseCommand {
             return false;
         }
 
-        final Player player = (Player) sender;
-
         if (config.isRequiresClearedInventory() && InventoryUtil.hasItem(player)) {
-            lang.sendMessage(sender, "ERROR.inventory-not-empty");
+            lang.sendMessage(sender, "ERROR.player.inventory-not-empty");
             return true;
         }
 
         if (config.isPreventCreativeMode() && player.getGameMode() == GameMode.CREATIVE) {
-            // TODO: 16/06/2018 send msg
+            lang.sendMessage(sender, "ERROR.player.in-creative-mode");
             return true;
         }
 
         if (config.isDuelZoneEnabled() && worldGuard != null && !worldGuard.inDuelZone(player)) {
-            // TODO: 16/06/2018 send msg
+            lang.sendMessage(sender, "ERROR.player.not-in-duelzone", "regions", config.getDuelZoneRegions());
             return true;
         }
 
         if (arenaManager.isInMatch(player)) {
-            lang.sendMessage(sender, "ERROR.already-in-match.sender");
+            lang.sendMessage(sender, "ERROR.duel.already-in-match.sender");
             return true;
         }
 
         final Player target = Bukkit.getPlayerExact(args[0]);
 
         if (target == null || !player.canSee(target)) {
-            lang.sendMessage(sender, "ERROR.player-not-found", "name", args[0]);
+            lang.sendMessage(sender, "ERROR.player.not-found", "name", args[0]);
             return true;
         }
 
-//        if (player.equals(target)) {
-//            lang.sendMessage(sender, "ERROR.target-is-self");
-//            return true;
-//        }
+        if (player.equals(target)) {
+            lang.sendMessage(sender, "ERROR.player.is-self");
+            return true;
+        }
+
+        final UserData user = userManager.get(target);
+
+        if (user == null) {
+            lang.sendMessage(sender, "ERROR.data.not-found", "player", target.getName());
+            return true;
+        }
+
+        if (!sender.hasPermission(Permissions.ADMIN) && !user.canRequest()) {
+            lang.sendMessage(sender, "ERROR.duel.requests-disabled", "player", target.getName());
+            return true;
+        }
 
         if (requestManager.has(player, target)) {
-            lang.sendMessage(sender, "ERROR.already-has-request", "player", target.getName());
+            lang.sendMessage(sender, "ERROR.duel.already-has-request", "player", target.getName());
             return true;
         }
 
         if (arenaManager.isInMatch(target)) {
-            lang.sendMessage(sender, "ERROR.already-in-match.target", "player", target.getName());
+            lang.sendMessage(sender, "ERROR.duel.already-in-match.target", "player", target.getName());
             return true;
         }
 
@@ -102,7 +119,7 @@ public class DuelCommand extends BaseCommand {
         settings.setBet(0);
 
         if (config.isMoneyBettingEnabled() && args.length > 1) {
-            if (config.isMoneyBettingUsePermission() && !player.hasPermission(Permissions.MONEY_BETTING)) {
+            if (config.isMoneyBettingUsePermission() && !player.hasPermission(Permissions.MONEY_BETTING) && !player.hasPermission(Permissions.SETTING_ALL)) {
                 lang.sendMessage(player, "ERROR.no-permission", "permission", Permissions.MONEY_BETTING);
                 return true;
             }
@@ -110,12 +127,12 @@ public class DuelCommand extends BaseCommand {
             final int amount = NumberUtil.parseInt(args[1]).orElse(0);
 
             if (vault == null || vault.getEconomy() == null) {
-                sender.sendMessage(ChatColor.RED + "Betting is currently disabled.");
+                lang.sendMessage(sender, "ERROR.disabled-option", "option", "Betting");
                 return true;
             }
 
             if (!vault.getEconomy().has(player, amount)) {
-                sender.sendMessage(ChatColor.RED + "You do not have enough money to bet!");
+                lang.sendMessage(sender, "ERROR.not-enough-money");
                 return true;
             }
 

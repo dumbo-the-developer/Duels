@@ -11,25 +11,42 @@ STRINGS:
 
 
 ERROR:
-  data-load-failure: '{PREFIX} &cCould not load your duel stats. Please contact an administrator.'
   no-permission: '{PREFIX} &cNope! You are lacking the following permission: ''%permission%'''
-  player-not-found: '{PREFIX} &c%name% is not online.'
-  no-longer-online: '{PREFIX} &cThat player is no longer online.'
-  invalid-sub-command: '{PREFIX} &c''%argument%'' is not a valid sub command. Please type ''/%command%'' for help.'
-  target-is-self: '{PREFIX} &cYou cannot duel yourself.'
-  inventory-not-empty: '{PREFIX} &cYou must have a cleared inventory to use this command.'
-  prevent-teleportation: '{PREFIX} &cCannot teleport to a player in a duel.'
-  already-has-request: '&cYou already have a request sent to %player%.'
-  no-request: '&cYou do not have a request from %player%.'
-  already-in-match:
-    sender: '&cYou cannot do this while in a duel.'
-    target: '&c%player% is already in a duel.'
-  already-spectating:
-    sender: '&cYou cannot do this while in spectator mode.'
-    target: '&c%player% is in spectator mode.'
-  not-in-match: '&c%player% is not in a duel.'
-  no-data-available: '&cThere were no data available.'
+  data:
+    load-failure: '{PREFIX} &cCould not load your duel stats. Please try re-logging.'
+    not-loaded: '{PREFIX} &cUsers are still under load, please try again later.'
+    not-found: '{PREFIX} &c%player% has no duel stats available.'
+  top:
+    no-data-available: '{PREFIX} &cThere were no data available.'
+  player:
+    not-found: '{PREFIX} &c%name% is not online.'
+    no-longer-online: '{PREFIX} &cThat player is no longer online.'
+    is-self: '{PREFIX} &cYou cannot duel yourself.'
+    inventory-not-empty: '{PREFIX} &cYou must have a cleared inventory to use this command.'
+    in-creative-mode: '{PREFIX} &cYou cannot duel in creative mode.'
+    not-in-duelzone: '{PREFIX} &cYou can only duel in the following regions: %regions%'
+  duel:
+    requests-disabled: '{PREFIX} &c%player% is currently not accepting duel requests.'
+    already-has-request: '{PREFIX} &cYou already have a request sent to %player%.'
+    no-request: '{PREFIX} &cYou do not have a request from %player%.'
+    already-in-match:
+      sender: '{PREFIX} &cYou cannot do this while in a duel.'
+      target: '{PREFIX} &c%player% is already in a duel.'
+  spectate:
+    already-spectating:
+      sender: '&cYou cannot do this while in spectator mode.'
+      target: '&c%player% is in spectator mode.'
+    not-in-match: '&c%player% is not in a duel.'
+  inventory-view:
+    not-a-uuid: '{PREFIX} &c%input% is not a valid UUID.'
+    not-found: '{PREFIX} &cNo inventory exists with the UUID ''%uuid%''.'
 
+
+  invalid-sub-command: '{PREFIX} &c''%argument%'' is not a valid sub command. Please type ''/%command%'' for help.'
+  prevent-teleportation: '{PREFIX} &cCannot teleport to a player in a duel.'
+  kit-not-found: '{PREFIX} &c%name% is not an existing kit.'
+  disabled-option: '{PREFIX} &c%option% is currently disabled.'
+  not-enough-money: '{PREFIX} &cYou do not have enough money to bet!'
 
 COMMAND:
   duel:
@@ -78,20 +95,27 @@ COMMAND:
       - '&7Losses: &c%losses%'
       - '&7W/L Ratio: &b%wl_ratio%'
       - '&7Requests: &r%requests_enabled%'
-      - '&7Recent Matches &e-'
-      match-format: '&a%winner% &fvs &c%loser% &6[Hover Me!]'
-      hover-text:
-      - '&7Duration: &f%duration%'
-      - '&7Time: &f%time% ago'
-      - '&7Health: &d&l%health% ♥'
-      extra: '{LINE}'
+      # NOTE: Ratings will only display if 'display-ratings' is enabled in the configuration.
+      rating:
+        header: '&7Ratings &e-'
+        format: '&f%kit%&7: &b%rating%'
+        footer: ''
+      # NOTE: Past matches will only display if 'display-past-matches' is enabled in the configuration.
+      match:
+        header: '&7Recent Matches &e-'
+        format: '&a%winner% &fvs &c%loser% &6[Hover Me!]'
+        hover-text:
+        - '&7Duration: &f%duration%'
+        - '&7Time: &f%time% ago'
+        - '&7Health: &d&l%health% ♥'
+        footer: '{LINE}'
     toggle:
       enabled: '{PREFIX} &7Duel requests has been &aenabled&7.'
       disabled: '{PREFIX} &7Duel requests has been &cdisabled&7.'
     top:
       next-update: '{PREFIX} &7Next update: &f%remaining%'
       header: '{HALF_LINE} &7Top &f10 &7%type% {HALF_LINE}'
-      display-format: '&e%rank%. &f%name% &e- &f%score% &7%type%'
+      display-format: '&e%rank%. &f%name% &e- &f%score% &7%identifier%'
       footer: '{HALF_LINE} &7Top &f10 &7%type% {HALF_LINE}'
 
   duels:
@@ -134,9 +158,6 @@ DUEL:
     no-arena-available: '{FAIL_PREFIX} No arena is currently available. Please try again later.'
     arena-in-use: '{FAIL_PREFIX} That arena is already in use. Please select a different arena.'
     not-enough-money: '{FAIL_PREFIX} You or your opponent lacks $%bet%.'
-  on-select:
-    arena: '{PREFIX} &7Selected Arena: &f%arena%'
-    kit: '{PREFIX} &7Selected Kit: &f%kit%'
   on-end:
     tie: '{PREFIX} &7Tie Game!'
     plugin-disable: '{PREFIX} &cPlugin is disabling! Ending match automatically.'

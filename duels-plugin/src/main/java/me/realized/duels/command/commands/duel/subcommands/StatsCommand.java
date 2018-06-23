@@ -2,7 +2,6 @@ package me.realized.duels.command.commands.duel.subcommands;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.Map;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.data.MatchData;
@@ -34,7 +33,7 @@ public class StatsCommand extends BaseCommand {
             final Player target = Bukkit.getPlayerExact(args[1]);
 
             if (target == null || !player.canSee(target)) {
-                lang.sendMessage(sender, "ERROR.player-not-found", "name", args[1]);
+                lang.sendMessage(sender, "ERROR.player.not-found", "name", args[1]);
                 return;
             }
 
@@ -45,18 +44,12 @@ public class StatsCommand extends BaseCommand {
         displayStats(player, player);
     }
 
-    private void displayStats(final Player sender, final Player player) {
-        final UserData user = userManager.get(player);
+    private void displayStats(final Player sender, final Player target) {
+        final UserData user = userManager.get(target);
 
         if (user == null) {
-            // boi
+            lang.sendMessage(sender, "ERROR.data.not-found", "player", target.getName());
             return;
-        }
-
-        final Map<String, Integer> rating = user.getRating();
-
-        if (rating != null) {
-            rating.forEach((name, value) -> sender.sendMessage(name + ": " + value + " Rating"));
         }
 
         final String wins = String.valueOf(user.getWins());
@@ -66,20 +59,28 @@ public class StatsCommand extends BaseCommand {
         lang.sendMessage(sender, "COMMAND.duel.stats.displayed",
             "player", user.getName(), "wins", wins, "losses", losses, "wl_ratio", wlRatio, "requests_enabled", requests);
 
+        if (config.isDisplayRatings()) {
+            lang.sendMessage(sender, "COMMAND.duel.stats.rating.header");
+            kitManager.getKits().forEach(kit -> lang.sendMessage(sender, "COMMAND.duel.stats.rating.format", "kit", kit.getName(), "rating", user.getRating(kit)));
+            lang.sendMessage(sender, "COMMAND.duel.stats.rating.footer");
+        }
+
         if (config.isDisplayPastMatches()) {
+            lang.sendMessage(sender, "COMMAND.duel.stats.match.header");
+
             final Calendar calendar = new GregorianCalendar();
 
             for (final MatchData match : user.getMatches()) {
                 final String duration = DateUtil.formatMilliseconds(match.getDuration());
                 final String timeSince = DateUtil.formatMilliseconds(calendar.getTimeInMillis() - match.getTime());
                 TextBuilder
-                    .of(lang.getMessage("COMMAND.duel.stats.match-format", "winner", match.getWinner(), "loser", match.getLoser()))
+                    .of(lang.getMessage("COMMAND.duel.stats.match.format", "winner", match.getWinner(), "loser", match.getLoser()))
                     .setHoverEvent(Action.SHOW_TEXT,
-                        lang.getMessage("COMMAND.duel.stats.hover-text", "duration", duration, "time", timeSince, "health", match.getHealth()))
+                        lang.getMessage("COMMAND.duel.stats.match.hover-text", "duration", duration, "time", timeSince, "health", match.getHealth()))
                     .send(sender);
             }
-        }
 
-        lang.sendMessage(sender, "COMMAND.duel.stats.extra");
+            lang.sendMessage(sender, "COMMAND.duel.stats.match.footer");
+        }
     }
 }

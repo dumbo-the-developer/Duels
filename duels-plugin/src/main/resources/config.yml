@@ -306,13 +306,17 @@ countdown:
 
 
 stats:
+  # If set to 'true', ratings of a player will be displayed when the command '/duel stats' is executed.
+  # default: true
+  display-ratings: true
+
   # If set to 'true', past matches of a player will be displayed when the command '/duel stats' is executed.
   # default: true
   display-past-matches: true
 
   # Max amount of matches to display & store in the userdata file.
   # default: 10
-  matches-to-display: 10
+  matches-to-display: 5
 
 
 guis:

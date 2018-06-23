@@ -75,19 +75,19 @@ public class SpectateManager implements Loadable, Listener {
 
     public void startSpectating(final Player player, final Player target) {
         if (isSpectating(player)) {
-            lang.sendMessage(player, "ERROR.already-spectating.sender");
+            lang.sendMessage(player, "ERROR.spectate.already-spectating.sender");
             return;
         }
 
         if (arenaManager.isInMatch(player)) {
-            lang.sendMessage(player, "ERROR.already-in-match.sender");
+            lang.sendMessage(player, "ERROR.duel.already-in-match.sender");
             return;
         }
 
         final Arena arena = arenaManager.get(target);
 
         if (arena == null) {
-            lang.sendMessage(player, "ERROR.not-in-match", "player", target.getName());
+            lang.sendMessage(player, "ERROR.spectate.not-in-match", "player", target.getName());
             return;
         }
 

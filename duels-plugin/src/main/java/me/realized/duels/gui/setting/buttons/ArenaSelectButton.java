@@ -22,7 +22,7 @@ public class ArenaSelectButton extends BaseButton {
             return;
         }
 
-        if (config.isArenaSelectingUsePermission() && !player.hasPermission(Permissions.ARENA_SELECTING)) {
+        if (config.isArenaSelectingUsePermission() && !player.hasPermission(Permissions.ARENA_SELECTING) && !player.hasPermission(Permissions.SETTING_ALL)) {
             setLore("&cYou do not have permission to use this option.");
             return;
         }
@@ -40,7 +40,7 @@ public class ArenaSelectButton extends BaseButton {
             return;
         }
 
-        if (config.isArenaSelectingUsePermission() && !player.hasPermission(Permissions.ARENA_SELECTING)) {
+        if (config.isArenaSelectingUsePermission() && !player.hasPermission(Permissions.ARENA_SELECTING) && !player.hasPermission(Permissions.SETTING_ALL)) {
             lang.sendMessage(player, "ERROR.no-permission", "permission", Permissions.ARENA_SELECTING);
             return;
         }

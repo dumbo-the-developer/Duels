@@ -1,5 +1,6 @@
 package me.realized.duels.kit;
 
+import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,6 +10,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
@@ -96,6 +99,10 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
         }
 
         kits.clear();
+    }
+
+    public Collection<Kit> getKits() {
+        return Collections.unmodifiableCollection(Lists.newArrayList(kits.values()));
     }
 
     @Nullable

@@ -11,28 +11,33 @@ description: An ultimate solution to server owners wanting to create a duel syst
 
 commands:
    duels:
-     description: Administrative commands of Duels.
+     description: Administrative command of Duels.
      aliases: [ds]
    duel:
      description: Send, accept, or deny a duel request.
      aliases: [1v1]
    spectate:
-     description: Spectate a player in duel.
+     description: Spectate a duel.
      aliases: [spec]
 
 permissions:
   duels.*:
     children:
       duels.admin: true
-
+  duels.admin:
+    children:
+      duels.default: true
+      duels.stats.others: true
+      duels.kits.*: true
+      duels.teleport.bypass: true
+      duels.spectate: true
+      duels.spectate.anonymously: true
+      duels.use.*: true
   duels.default:
     children:
       duels.duel: true
       duels.stats: true
       duels.toggle: true
-
-  duels.admin:
-    children:
-      duels.default: true
-      duels.spectate: true
-      duels.spectate.anonymously: true
+      duels.top: true
+  duels.duel:
+    default: true

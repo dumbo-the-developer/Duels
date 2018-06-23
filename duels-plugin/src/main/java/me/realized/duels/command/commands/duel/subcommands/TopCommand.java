@@ -4,35 +4,59 @@ import java.util.List;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.user.UserManager.SortedEntry;
 import me.realized.duels.command.BaseCommand;
+import me.realized.duels.data.UserManager.TopEntry;
 import me.realized.duels.extra.Permissions;
+import me.realized.duels.kit.Kit;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
 
 public class TopCommand extends BaseCommand {
 
     public TopCommand(final DuelsPlugin plugin) {
-        super(plugin, "top", "top [wins|losses]", "Displays top duel wins & losses.", Permissions.TOP, 2, true);
+        super(plugin, "top", "top [wins|losses|kit]", "Displays top wins, losses, or rating for kit.", Permissions.TOP, 2, true);
     }
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
-        final boolean wins = args[1].equalsIgnoreCase("wins");
-        final List<SortedEntry<String, Integer>> top = wins ? userManager.getTopWins() : userManager.getTopLosses();
-
-        if (top == null || top.isEmpty()) {
-            lang.sendMessage(sender, "ERROR.no-data-available");
+        if (!userManager.isLoaded()) {
+            lang.sendMessage(sender, "ERROR.data.not-loaded");
             return;
         }
 
-        lang.sendMessage(sender, "COMMAND.duel.top.next-update",
-            "remaining", wins ? userManager.getNextWinsUpdate() : userManager.getNextLossesUpdate());
-        lang.sendMessage(sender, "COMMAND.duel.top.header", "type", wins ? "Wins" : "Losses");
+        final TopEntry topEntry;
+
+        if (args[1].equalsIgnoreCase("wins")) {
+            topEntry = userManager.getWins();
+        } else if (args[1].equalsIgnoreCase("losses")) {
+            topEntry = userManager.getLosses();
+        } else {
+            final String name = StringUtils.join(args, " ", 1, args.length);
+            final Kit kit = kitManager.get(name);
+
+            if (kit == null) {
+                lang.sendMessage(sender, "ERROR.kit-not-found", "name", name);
+                return;
+            }
+
+            topEntry = userManager.getTopRatings().get(kit);
+        }
+
+        final List<SortedEntry<String, Integer>> top;
+
+        if (topEntry == null || (top = topEntry.getData()).isEmpty()) {
+            lang.sendMessage(sender, "ERROR.top.no-data-available");
+            return;
+        }
+
+        lang.sendMessage(sender, "COMMAND.duel.top.next-update", "remaining", topEntry.getNextUpdate());
+        lang.sendMessage(sender, "COMMAND.duel.top.header", "type", topEntry.getName());
 
         for (int i = 0; i < top.size(); i++) {
             final SortedEntry<String, Integer> entry = top.get(i);
             lang.sendMessage(sender, "COMMAND.duel.top.display-format",
-                "rank", i + 1, "name", entry.getKey(), "score", entry.getValue(), "type", wins ? "Wins" : "Losses");
+                "rank", i + 1, "name", entry.getKey(), "score", entry.getValue(), "identifier", topEntry.getType());
         }
 
-        lang.sendMessage(sender, "COMMAND.duel.top.footer", "type", wins ? "Wins" : "Losses");
+        lang.sendMessage(sender, "COMMAND.duel.top.footer", "type", topEntry.getName());
     }
 }

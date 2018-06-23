@@ -164,7 +164,6 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
         final Settings settings = settingManager.getSafely(player);
         settings.setArena(this);
         settings.openGui(player);
-        lang.sendMessage(player, "DUEL.on-select.arena", "arena", name);
     }
 
     @Override

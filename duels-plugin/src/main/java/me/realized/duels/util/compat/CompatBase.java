@@ -2,7 +2,6 @@ package me.realized.duels.util.compat;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import me.realized.duels.util.ReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 

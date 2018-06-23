@@ -39,6 +39,7 @@ import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.Log.LogSource;
 import me.realized.duels.util.Reloadable;
+import me.realized.duels.util.ServerUtil;
 import me.realized.duels.util.gui.GuiListener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.inventivetalent.update.spiget.SpigetUpdate;
@@ -48,6 +49,7 @@ import org.inventivetalent.update.spiget.comparator.VersionComparator;
 public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     private static final int RESOURCE_ID = 20171;
+    private static final String SPIGOT_URL = "https://www.spigotmc.org/wiki/spigot-installation/";
 
     @Getter
     private final Gson gson = new GsonBuilder().excludeFieldsWithModifiers(Modifier.TRANSIENT).setPrettyPrinting().create();
@@ -94,6 +96,17 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         Log.addSource(this);
         loadables.add(logManager = new LogManager(this));
         Log.addSource(logManager);
+
+        if (!ServerUtil.isUsingSpigot()) {
+            Log.error("================= *** DUELS LOAD FAILURE *** =================");
+            Log.error("Duels requires a spigot server to run, but this server was not running on spigot!");
+            Log.error("To run your server on spigot, follow this guide: " + SPIGOT_URL);
+            Log.error("Spigot is compatible with CraftBukkit/Bukkit plugins.");
+            Log.error("================= *** DUELS LOAD FAILURE *** =================");
+            getPluginLoader().disablePlugin(this);
+            return;
+        }
+
         loadables.add(configuration = new Config(this));
         loadables.add(lang = new Lang(this));
         loadables.add(userManager = new UserManager(this));

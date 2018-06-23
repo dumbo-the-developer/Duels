@@ -4,8 +4,7 @@ import java.util.UUID;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.gui.inventory.InventoryGui;
-import me.realized.duels.util.StringUtil;
-import me.realized.duels.util.profile.ProfileUtil;
+import me.realized.duels.util.UUIDUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -17,15 +16,17 @@ public class InventoryCommand extends BaseCommand {
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
-        if (!ProfileUtil.isUUID(args[1])) {
-            sender.sendMessage(StringUtil.color("&cInvalid UUID!"));
+        final UUID target = UUIDUtil.parseUUID(args[1]);
+
+        if (target == null) {
+            lang.sendMessage(sender, "ERROR.inventory-view.not-a-uuid", "input", args[1]);
             return;
         }
 
         final InventoryGui gui = inventoryManager.get(UUID.fromString(args[1]));
 
         if (gui == null) {
-            sender.sendMessage(StringUtil.color("&cNo inventory found."));
+            lang.sendMessage(sender, "ERROR.inventory-view.not-found", "uuid", target);
             return;
         }
 

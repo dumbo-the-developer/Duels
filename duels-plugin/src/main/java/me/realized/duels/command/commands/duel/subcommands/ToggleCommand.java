@@ -18,7 +18,7 @@ public class ToggleCommand extends BaseCommand {
         final UserData user = userManager.get((Player) sender);
 
         if (user == null) {
-            lang.sendMessage(sender, "ERROR.data-load-failure");
+            lang.sendMessage(sender, "ERROR.data.load-failure");
             return;
         }
 
