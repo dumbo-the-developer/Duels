@@ -17,7 +17,7 @@ import org.bukkit.entity.Player;
 public class StatsCommand extends BaseCommand {
 
     public StatsCommand(final DuelsPlugin plugin) {
-        super(plugin, "stats", Permissions.STATS);
+        super(plugin, "stats", null, null, Permissions.STATS, 1, true);
     }
 
     @Override
@@ -56,17 +56,17 @@ public class StatsCommand extends BaseCommand {
         final String losses = String.valueOf(user.getLosses());
         final String wlRatio = String.valueOf(Math.round(((double) user.getWins() / (double) user.getLosses()) * 100.0) / 100.0);
         final String requests = String.valueOf(user.canRequest() ? "&aenabled" : "&cdisabled");
-        lang.sendMessage(sender, "COMMAND.duel.stats.displayed",
-            "player", user.getName(), "wins", wins, "losses", losses, "wl_ratio", wlRatio, "requests_enabled", requests);
+        final Object[] args = {"player", user.getName(), "wins", wins, "losses", losses, "wl_ratio", wlRatio, "requests_enabled", requests};
+        lang.sendMessage(sender, "COMMAND.duel.stats.displayed", args);
 
         if (config.isDisplayRatings()) {
-            lang.sendMessage(sender, "COMMAND.duel.stats.rating.header");
+            lang.sendMessage(sender, "COMMAND.duel.stats.rating.header", args);
             kitManager.getKits().forEach(kit -> lang.sendMessage(sender, "COMMAND.duel.stats.rating.format", "kit", kit.getName(), "rating", user.getRating(kit)));
-            lang.sendMessage(sender, "COMMAND.duel.stats.rating.footer");
+            lang.sendMessage(sender, "COMMAND.duel.stats.rating.footer", args);
         }
 
         if (config.isDisplayPastMatches()) {
-            lang.sendMessage(sender, "COMMAND.duel.stats.match.header");
+            lang.sendMessage(sender, "COMMAND.duel.stats.match.header", args);
 
             final Calendar calendar = new GregorianCalendar();
 
@@ -80,7 +80,7 @@ public class StatsCommand extends BaseCommand {
                     .send(sender);
             }
 
-            lang.sendMessage(sender, "COMMAND.duel.stats.match.footer");
+            lang.sendMessage(sender, "COMMAND.duel.stats.match.footer", args);
         }
     }
 }

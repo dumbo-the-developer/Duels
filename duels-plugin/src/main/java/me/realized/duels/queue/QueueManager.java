@@ -9,6 +9,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -125,12 +126,20 @@ public class QueueManager implements Loadable, Listener {
         queues.clear();
     }
 
+    public Collection<QueueSign> getSigns() {
+        return signs.values();
+    }
+
     public Queue<Player> get(final Player player) {
         return queues.entrySet().stream().filter(entry -> entry.getValue().contains(player)).findFirst().map(Entry::getValue).orElse(null);
     }
 
     public QueueSign get(final Sign sign) {
         return signs.get(sign);
+    }
+
+    public QueueSign remove(final Sign sign) {
+        return signs.remove(sign);
     }
 
     public Queue<Player> get(final QueueSign sign) {

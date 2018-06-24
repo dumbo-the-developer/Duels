@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 public class InventoryCommand extends BaseCommand {
 
     public InventoryCommand(final DuelsPlugin plugin) {
-        super(plugin, "_", "_ [uuid]", "Displays player's inventories after match.", 2);
+        super(plugin, "_", "_ [uuid]", "Displays player's inventories after match.", 2, true);
     }
 
     @Override

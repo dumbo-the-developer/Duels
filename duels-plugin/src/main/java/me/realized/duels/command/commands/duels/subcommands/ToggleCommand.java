@@ -9,24 +9,20 @@ import org.bukkit.command.CommandSender;
 public class ToggleCommand extends BaseCommand {
 
     public ToggleCommand(final DuelsPlugin plugin) {
-        super(plugin, "toggle", "toggle [name]", "Enables or disables an arena.", null, 2, false);
+        super(plugin, "toggle", "toggle [name]", "Enables or disables an arena.", 2, false);
     }
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
-        final Arena arena = arenaManager.get(StringUtils.join(args, " ", 1, args.length));
+        final String name = StringUtils.join(args, " ", 1, args.length);
+        final Arena arena = arenaManager.get(name);
 
         if (arena == null) {
-            // send message
-            return;
-        }
-
-        if (arena.isUsed()) {
-            // send message
+            lang.sendMessage(sender, "ERROR.arena.not-found", "name", name);
             return;
         }
 
         arena.setDisabled(sender, !arena.isDisabled());
-        sender.sendMessage("Arena '" + arena.getName() + "' is now " + (arena.isDisabled() ? "disabled" : "enabled") + "!");
+        lang.sendMessage(sender, "COMMAND.duels.toggle", "name", name, "state", arena.isDisabled() ? "&cdisabled" : "&aenabled");
     }
 }

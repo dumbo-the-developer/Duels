@@ -9,7 +9,7 @@ import org.bukkit.command.CommandSender;
 public class CreateCommand extends BaseCommand {
 
     public CreateCommand(final DuelsPlugin plugin) {
-        super(plugin, "create", "create [name]", "Creates an arena with given name.", null, 2, true);
+        super(plugin, "create", "create [name]", "Creates an arena with given name.", 2, true);
     }
 
     @Override
@@ -17,15 +17,15 @@ public class CreateCommand extends BaseCommand {
         final String name = StringUtils.join(args, " ", 1, args.length);
 
         if (!StringUtil.isAlphanumeric(name)) {
-            // send msg
+            lang.sendMessage(sender, "ERROR.name-not-alphanumeric");
             return;
         }
 
-        if (arenaManager.get(name) != null) {
-            // send msg
+        if (!arenaManager.create(sender, name)) {
+            lang.sendMessage(sender, "ERROR.arena.already-exists", "name", name);
             return;
         }
 
-        arenaManager.create(sender, name);
+        lang.sendMessage(sender, "COMMAND.duels.create", "name", name);
     }
 }

@@ -3,6 +3,7 @@ package me.realized.duels.queue;
 import java.util.Objects;
 import lombok.Getter;
 import me.realized.duels.kit.Kit;
+import me.realized.duels.util.StringUtil;
 import org.bukkit.block.Sign;
 
 public class QueueSign {
@@ -31,5 +32,10 @@ public class QueueSign {
     @Override
     public int hashCode() {
         return Objects.hash(kit, bet);
+    }
+
+    @Override
+    public String toString() {
+        return (kit != null ? kit.getName() : "none") + " - $" + bet + " - " + StringUtil.parse(sign.getLocation());
     }
 }

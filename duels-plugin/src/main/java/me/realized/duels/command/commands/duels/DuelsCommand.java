@@ -6,6 +6,9 @@ import me.realized.duels.command.commands.duels.subcommands.AddsignCommand;
 import me.realized.duels.command.commands.duels.subcommands.CreateCommand;
 import me.realized.duels.command.commands.duels.subcommands.DeleteCommand;
 import me.realized.duels.command.commands.duels.subcommands.DeletekitCommand;
+import me.realized.duels.command.commands.duels.subcommands.DeletesignCommand;
+import me.realized.duels.command.commands.duels.subcommands.InfoCommand;
+import me.realized.duels.command.commands.duels.subcommands.ListCommand;
 import me.realized.duels.command.commands.duels.subcommands.LoadkitCommand;
 import me.realized.duels.command.commands.duels.subcommands.ReloadCommand;
 import me.realized.duels.command.commands.duels.subcommands.SavekitCommand;
@@ -27,6 +30,9 @@ public class DuelsCommand extends BaseCommand {
             new SetCommand(plugin),
             new ToggleCommand(plugin),
             new AddsignCommand(plugin),
+            new DeletesignCommand(plugin),
+            new InfoCommand(plugin),
+            new ListCommand(plugin),
             new ReloadCommand(plugin)
         );
     }

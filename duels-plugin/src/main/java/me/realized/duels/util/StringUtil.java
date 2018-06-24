@@ -5,6 +5,7 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 
 public final class StringUtil {
 
@@ -50,6 +51,10 @@ public final class StringUtil {
         }
 
         return builder.toString();
+    }
+
+    public static String parse(final Location location) {
+        return "(" + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ() + ")";
     }
 
     public static String color(final String input) {

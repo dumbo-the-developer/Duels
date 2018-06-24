@@ -6,13 +6,15 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Reloadable;
+import org.apache.commons.lang.StringUtils;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 public class ReloadCommand extends BaseCommand {
 
     public ReloadCommand(final DuelsPlugin plugin) {
-        super(plugin, "reload", null, null, null, 1, false);
+        super(plugin, "reload", null, null, 1, false, "rl");
     }
 
     @Override
@@ -21,25 +23,25 @@ public class ReloadCommand extends BaseCommand {
             final Loadable target = plugin.find(args[1]);
 
             if (target == null || !(target instanceof Reloadable)) {
-                sender.sendMessage("Invalid module. Available: " + plugin.getReloadables());
+                sender.sendMessage(ChatColor.RED + "Invalid module. The following modules are available for a reload: " + StringUtils.join(plugin.getReloadables(), ", "));
                 return;
             }
 
             final String name = target.getClass().getSimpleName();
 
             if (plugin.reload(target)) {
-                sender.sendMessage("[" + plugin.getDescription().getFullName() + "] Successfully reloaded " + name + ".");
+                sender.sendMessage(ChatColor.GREEN + "[" + plugin.getDescription().getFullName() + "] Successfully reloaded " + name + ".");
             } else {
-                sender.sendMessage("An error occured while reloading " + name + "! Please check the console for more information.");
+                sender.sendMessage(ChatColor.RED + "An error occured while reloading " + name + "! Please check the console for more information.");
             }
 
             return;
         }
 
         if (plugin.reload()) {
-            sender.sendMessage("[" + plugin.getDescription().getFullName() + "] Reload complete.");
+            sender.sendMessage(ChatColor.GREEN + "[" + plugin.getDescription().getFullName() + "] Reload complete.");
         } else {
-            sender.sendMessage("An error occured while reloading the plugin! The plugin will be disabled, please check the console for more information.");
+            sender.sendMessage(ChatColor.RED + "An error occured while reloading the plugin! Please check the console for more information.");
         }
     }
 

@@ -16,7 +16,7 @@ public class AcceptCommand extends BaseCommand {
     private final WorldGuardHook worldGuard;
 
     public AcceptCommand(final DuelsPlugin plugin) {
-        super(plugin, "accept", "accept [player]", "Accepts a duel request.", 2);
+        super(plugin, "accept", "accept [player]", "Accepts a duel request.", 2, true);
         this.worldGuard = hookManager.getHook(WorldGuardHook.class);
     }
 

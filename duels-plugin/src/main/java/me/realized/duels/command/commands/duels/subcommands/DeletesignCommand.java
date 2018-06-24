@@ -3,19 +3,19 @@ package me.realized.duels.command.commands.duels.subcommands;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.kit.Kit;
+import me.realized.duels.queue.QueueSign;
 import me.realized.duels.util.BlockUtil;
-import me.realized.duels.util.NumberUtil;
 import me.realized.duels.util.StringUtil;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class AddsignCommand extends BaseCommand {
+public class DeletesignCommand extends BaseCommand {
 
-    public AddsignCommand(final DuelsPlugin plugin) {
-        super(plugin, "addsign", "addsign [kit] [bet]", "Creates a queue sign with kit and bet.", 3, true);
+    public DeletesignCommand(final DuelsPlugin plugin) {
+        super(plugin, "deletesign", null, null, 1, true, "delsign");
     }
 
     @Override
@@ -28,23 +28,19 @@ public class AddsignCommand extends BaseCommand {
             return;
         }
 
-        final String name = StringUtils.join(args, " ", 1, args.length - 1);
-        final Kit kit = kitManager.get(name);
+        final QueueSign queueSign = queueManager.remove(sign);
 
-        if (!config.isUseOwnInventoryEnabled() && kit == null) {
-            lang.sendMessage(sender, "ERROR.kit.not-found", "name", name);
+        if (queueSign == null) {
+            lang.sendMessage(sender, "ERROR.sign.not-found");
             return;
         }
 
-        final int bet = NumberUtil.parseInt(args[args.length - 1]).orElse(0);
-
-        if (!queueManager.create(sign, kit, bet)) {
-            lang.sendMessage(sender, "ERROR.sign.already-exists");
-            return;
-        }
+        sign.setType(Material.AIR);
+        sign.update(true);
 
         final Location location = sign.getLocation();
+        final Kit kit = queueSign.getKit();
         final String kitName = kit != null ? kit.getName() : "none";
-        lang.sendMessage(sender, "COMMAND.duels.addsign", "location", StringUtil.parse(location), "kit", kitName, "bet_amount", bet);
+        lang.sendMessage(sender, "COMMAND.duels.delsign", "location", StringUtil.parse(location), "kit", kitName, "bet_amount", queueSign.getBet());
     }
 }

@@ -6,7 +6,7 @@ config-version: 1
 STRINGS:
   PREFIX: '&9[Duels]'
   LINE: '&9&m------------------------------------&r'
-  HALF_LINE: '&9&m------------------&r'
+  HALF_LINE: '&9&m----------------&r'
   FAIL_PREFIX: '&cFailed to start the match:'
 
 
@@ -25,6 +25,14 @@ ERROR:
     inventory-not-empty: '{PREFIX} &cYou must have a cleared inventory to use this command.'
     in-creative-mode: '{PREFIX} &cYou cannot duel in creative mode.'
     not-in-duelzone: '{PREFIX} &cYou can only duel in the following regions: %regions%'
+  arena:
+    not-found: '{PREFIX} &cNo arena exists with the name ''%name%''.'
+    already-exists: '{PREFIX} &cAn arena named ''%name%'' already exists.'
+    delete-failure: '{PREFIX} &cCannot delete an arena that is currently in use. Please disable it first using the command ''/duels toggle %name%'''
+    invalid-position: '{PREFIX} &cPosition must be 1 or 2.'
+  kit:
+    not-found: '{PREFIX} &cNo kit exists with the name ''%name%''.'
+    already-exists: '{PREFIX} &cAn arena named ''%name%'' already exists.'
   duel:
     requests-disabled: '{PREFIX} &c%player% is currently not accepting duel requests.'
     already-has-request: '{PREFIX} &cYou already have a request sent to %player%.'
@@ -40,13 +48,17 @@ ERROR:
   inventory-view:
     not-a-uuid: '{PREFIX} &c%input% is not a valid UUID.'
     not-found: '{PREFIX} &cNo inventory exists with the UUID ''%uuid%''.'
+  sign:
+    not-a-sign: '{PREFIX} &cThe block you are looking at is not a sign!'
+    not-found: '{PREFIX} &cThat sign is not a queue sign!'
+    already-exists: '{PREFIX} &cThat sign is already a queue sign! To remove, use the command ''/duels delsign'''
 
 
   invalid-sub-command: '{PREFIX} &c''%argument%'' is not a valid sub command. Please type ''/%command%'' for help.'
   prevent-teleportation: '{PREFIX} &cCannot teleport to a player in a duel.'
-  kit-not-found: '{PREFIX} &c%name% is not an existing kit.'
   disabled-option: '{PREFIX} &c%option% is currently disabled.'
   not-enough-money: '{PREFIX} &cYou do not have enough money to bet!'
+  name-not-alphanumeric: '{PREFIX} &c''%input%'' is not alphanumeric.'
 
 COMMAND:
   duel:
@@ -110,8 +122,8 @@ COMMAND:
         - '&7Health: &d&l%health% ♥'
         footer: '{LINE}'
     toggle:
-      enabled: '{PREFIX} &7Duel requests has been &aenabled&7.'
-      disabled: '{PREFIX} &7Duel requests has been &cdisabled&7.'
+      enabled: '{PREFIX} &aYou are now receiving duel requests.'
+      disabled: '{PREFIX} &cYou are no longer accepting duel requests.'
     top:
       next-update: '{PREFIX} &7Next update: &f%remaining%'
       header: '{HALF_LINE} &7Top &f10 &7%type% {HALF_LINE}'
@@ -135,7 +147,35 @@ COMMAND:
     - '&f/duels setitem [name] &e- &7Replaces the displayed item to held item for selected kit.'
     - '&f/duels reset [player] &e- &7Completely reset a player''s stats.'
     - '&f/duels playsound [name] &e- &7Plays the selected sound if exists in config.'
-    - '&f/duels reload [module] &e- &7Reloads the plugin or the selected mdule.'
+    - '&f/duels reload [module] &e- &7Reloads the plugin or the selected module.'
+    - '{LINE}'
+    create: '{PREFIX} &7Arena &e%name% &7was successfully created. To set spawnpoints for this arena, use the command &f/duels set %name% 1'
+    delete: '{PREFIX} &7Arena &e%name% &7was successfully deleted.'
+    set: '{PREFIX} &7Set position &f%position% &7for arena &e%name% &7at &f%location%&7.'
+    toggle: '{PREFIX} &7Arena &e%name% &7is now &r%state%&7.'
+    savekit: '{PREFIX} &7Kit &3%name% &7was successfully saved.'
+    deletekit: '{PREFIX} &7Kit &3%name% &7was successfully deleted.'
+    loadkit: '{PREFIX} &7Kit &3%name% &7was loaded in your inventory.'
+    addsign: '{PREFIX} &7Created queue sign at &f%location% &7with kit &3%kit% &7and bet &6$%bet_amount%&7.'
+    delsign: '{PREFIX} &7Removed queue sign at &f%location% &7with kit &3%kit% &7and bet &6$%bet_amount%&7.'
+    info:
+    - '{HALF_LINE} &7Arena &e%name% {HALF_LINE}'
+    - '&7In Use: &r%in_use%'
+    - '&7Disabled: &r%disabled%'
+    - '&7Players: &f%players%'
+    - '&7Positions: &f%positions%'
+    - '{HALF_LINE} &7Arena: &e%name% {HALF_LINE}'
+    list:
+    - '{LINE}'
+    - '&4DARK RED&7: Disabled arena'
+    - '&9BLUE&7: Arena without spawn positions set'
+    - '&aGREEN&7: Available arena'
+    - '&cRED&7: Arena in use'
+    - '&7Arenas: &r%arenas%'
+    - '&7Kits: &f%kits%'
+    - '&7Sign Format: &b[kit name] - [bet] - [sign location]'
+    - '&7Signs: &f%signs%'
+    - '&7Duel lobby is located at &f%lobby%&7.'
     - '{LINE}'
 
   spectate:

@@ -10,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -44,7 +45,7 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
     private final Lang lang;
     private final File file;
     @Getter
-    private final List<Arena> arenas = new ArrayList<>();
+    private final Set<Arena> arenas = new HashSet<>();
 
     @Getter
     private MultiPageGui<DuelsPlugin> gui;
@@ -121,25 +122,28 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
         return arenas.stream().filter(arena -> arena.has(player)).findFirst().orElse(null);
     }
 
-    public boolean remove(final CommandSender source, final String name) {
-        return arenas.removeIf(arena -> {
-            if (arena.getName().equals(name)) {
-                final ArenaRemoveEvent event = new ArenaRemoveEvent(source, arena);
-                plugin.getServer().getPluginManager().callEvent(event);
-                gui.calculatePages();
-                return true;
-            }
-
+    public boolean create(final CommandSender source, final String name) {
+        if (get(name) != null) {
             return false;
-        });
-    }
+        }
 
-    public void create(final CommandSender source, final String name) {
         final Arena arena = new Arena(plugin, name);
         arenas.add(arena);
         final ArenaCreateEvent event = new ArenaCreateEvent(source, arena);
         plugin.getServer().getPluginManager().callEvent(event);
         gui.calculatePages();
+        return true;
+    }
+
+    public boolean remove(final CommandSender source, final Arena arena) {
+        if (arenas.remove(arena)) {
+            final ArenaRemoveEvent event = new ArenaRemoveEvent(source, arena);
+            plugin.getServer().getPluginManager().callEvent(event);
+            gui.calculatePages();
+            return true;
+        }
+
+        return false;
     }
 
     @Override

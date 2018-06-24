@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 public class SavekitCommand extends BaseCommand {
 
     public SavekitCommand(final DuelsPlugin plugin) {
-        super(plugin, "savekit", "savekit [name]", "Saves a kit with given name.", null, 2, true);
+        super(plugin, "savekit", "savekit [name]", "Saves a kit with given name.", 2, true);
     }
 
     @Override
@@ -18,15 +18,15 @@ public class SavekitCommand extends BaseCommand {
         final String name = StringUtils.join(args, " ", 1, args.length);
 
         if (!StringUtil.isAlphanumeric(name)) {
-            // send msg
+            lang.sendMessage(sender, "ERROR.name-not-alphanumeric");
             return;
         }
 
-        if (kitManager.get(name) != null) {
+        if (kitManager.create((Player) sender, name) == null) {
+            lang.sendMessage(sender, "ERROR.kit.already-exists", "name", name);
             return;
         }
 
-        kitManager.create((Player) sender, name);
-        sender.sendMessage("Saved kit " + name);
+        lang.sendMessage(sender, "COMMAND.duels.savekit", "name", name);
     }
 }

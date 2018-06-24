@@ -10,6 +10,7 @@ import me.realized.duels.duel.DuelManager;
 import me.realized.duels.hooks.HookManager;
 import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.KitManager;
+import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.queue.QueueManager;
 import me.realized.duels.request.RequestManager;
 import me.realized.duels.setting.SettingsManager;
@@ -27,6 +28,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
     protected final KitManager kitManager;
     protected final QueueManager queueManager;
     protected final SettingsManager settingManager;
+    protected final PlayerInfoManager playerManager;
     protected final SpectateManager spectateManager;
     protected final BettingManager bettingManager;
     protected final InventoryManager inventoryManager;
@@ -34,10 +36,10 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
     protected final RequestManager requestManager;
     protected final HookManager hookManager;
 
-    /**w
-     * Constructor for sub command
+    /**
+     * Constructor for a sub command
      */
-    public BaseCommand(final DuelsPlugin plugin, final String name, final String usage, final String description, final String permission, final int length,
+    protected BaseCommand(final DuelsPlugin plugin, final String name, final String usage, final String description, final String permission, final int length,
         final boolean playerOnly, final String... aliases) {
         super(plugin, name, usage, description, permission, length, playerOnly, aliases);
         this.plugin = plugin;
@@ -48,6 +50,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
         this.kitManager = plugin.getKitManager();
         this.queueManager = plugin.getQueueManager();
         this.settingManager = plugin.getSettingManager();
+        this.playerManager = plugin.getPlayerManager();
         this.spectateManager = plugin.getSpectateManager();
         this.bettingManager = plugin.getBettingManager();
         this.inventoryManager = plugin.getInventoryManager();
@@ -57,23 +60,17 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
     }
 
     /**
-     * Constructor for sub command with parent permission & playerOnly check
+     * Constructor for a sub command, inherits parent permission
      */
-    public BaseCommand(final DuelsPlugin plugin, final String name, final String usage, final String description, final int length, final String... aliases) {
-        this(plugin, name, usage, description, null, length, true, aliases);
+    protected BaseCommand(final DuelsPlugin plugin, final String name, final String usage, final String description, final int length, final boolean playerOnly,
+        final String... aliases) {
+        this(plugin, name, usage, description, null, length, playerOnly, aliases);
     }
 
     /**
-     * Constructor for sub command with no description & usage due to length = 1
+     * Constructor for a parent command
      */
-    public BaseCommand(final DuelsPlugin plugin, final String name, final String permission, final String... aliases) {
-        this(plugin, name, null, null, permission, 1, true, aliases);
-    }
-
-    /**
-     * Constructor for parent command
-     */
-    public BaseCommand(final DuelsPlugin plugin, final String name, final String permission, final boolean playerOnly) {
+    protected BaseCommand(final DuelsPlugin plugin, final String name, final String permission, final boolean playerOnly) {
         this(plugin, name, null, null, permission, -1, playerOnly);
     }
 

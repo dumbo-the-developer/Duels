@@ -37,7 +37,7 @@ public abstract class AbstractCommand<P extends JavaPlugin> implements TabComple
 
     private Map<String, AbstractCommand<P>> children;
 
-    public AbstractCommand(final P plugin, final String name, final String usage, final String description, final String permission, final int length,
+    protected AbstractCommand(final P plugin, final String name, final String usage, final String description, final String permission, final int length,
         final boolean playerOnly, final String... aliases) {
         this.plugin = plugin;
         this.name = name;

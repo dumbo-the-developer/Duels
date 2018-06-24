@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 public class ToggleCommand extends BaseCommand {
 
     public ToggleCommand(final DuelsPlugin plugin) {
-        super(plugin, "toggle", Permissions.TOGGLE);
+        super(plugin, "toggle", null, null, Permissions.TOGGLE, 1, true);
     }
 
     @Override

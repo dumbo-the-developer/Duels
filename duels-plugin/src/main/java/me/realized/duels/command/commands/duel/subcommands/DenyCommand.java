@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 public class DenyCommand extends BaseCommand {
 
     public DenyCommand(final DuelsPlugin plugin) {
-        super(plugin, "deny", "deny [player]", "Denies a duel request.", 2);
+        super(plugin, "deny", "deny [player]", "Denies a duel request.", 2, true);
     }
 
     @Override

@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 public class LoadkitCommand extends BaseCommand {
 
     public LoadkitCommand(final DuelsPlugin plugin) {
-        super(plugin, "loadkit", "loadkit [name]", "Loads the selected kit to your inventory.", null, 2, true);
+        super(plugin, "loadkit", "loadkit [name]", "Loads the selected kit to your inventory.", 2, true);
     }
 
     @Override
@@ -19,11 +19,11 @@ public class LoadkitCommand extends BaseCommand {
         final Kit kit = kitManager.get(name);
 
         if (kit == null) {
-            sender.sendMessage(name + " is not an existing kit.");
+            lang.sendMessage(sender, "ERROR.kit.not-found", "name", name);
             return;
         }
 
         kit.equip((Player) sender);
-        sender.sendMessage("Equipped " + name + "!");
+        lang.sendMessage(sender, "COMMAND.duels.loadkit", "name", name);
     }
 }

@@ -140,7 +140,11 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
         return replace(message, replacers);
     }
 
-    private String replace(String message, final Object... replacers) {
+    private String replace(String message, Object... replacers) {
+        if (replacers.length == 1 && replacers[0] instanceof Object[]) {
+            replacers = (Object[]) replacers[0];
+        }
+
         for (int i = 0; i < replacers.length; i += 2) {
             if (i + 1 >= replacers.length) {
                 break;

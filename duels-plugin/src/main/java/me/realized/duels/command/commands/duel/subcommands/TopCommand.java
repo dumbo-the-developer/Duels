@@ -34,7 +34,7 @@ public class TopCommand extends BaseCommand {
             final Kit kit = kitManager.get(name);
 
             if (kit == null) {
-                lang.sendMessage(sender, "ERROR.kit-not-found", "name", name);
+                lang.sendMessage(sender, "ERROR.kit.not-found", "name", name);
                 return;
             }
 
