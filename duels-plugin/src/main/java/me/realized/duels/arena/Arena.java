@@ -16,6 +16,8 @@ import lombok.Setter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.arena.ArenaSetPositionEvent;
 import me.realized.duels.api.event.arena.ArenaStateChangeEvent;
+import me.realized.duels.api.event.match.MatchEndEvent;
+import me.realized.duels.api.event.match.MatchEndEvent.Reason;
 import me.realized.duels.duel.DuelManager.OpponentInfo;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.kit.Kit;
@@ -54,6 +56,8 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
 
     @Override
     public void setPosition(@Nullable final Player source, final int pos, @Nonnull final Location location) {
+        Objects.requireNonNull(location, "location");
+
         if (pos <= 0 || pos > 2) {
             return;
         }
@@ -109,7 +113,11 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
         arenaManager.getGui().calculatePages();
     }
 
-    public void endMatch() {
+    public void endMatch(final UUID winner, final UUID loser, final Reason reason) {
+        spectateManager.stopSpectating(this);
+
+        final MatchEndEvent endEvent = new MatchEndEvent(match, winner, loser, reason);
+        plugin.getServer().getPluginManager().callEvent(endEvent);
         match = null;
         setLore(lang.getMessage("GUI.arena-selector.buttons.arena.lore-available").split("\n"));
         arenaManager.getGui().calculatePages();
@@ -132,6 +140,7 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
 
     @Override
     public boolean has(@Nonnull final Player player) {
+        Objects.requireNonNull(player, "player");
         return isUsed() && !match.getPlayerMap().getOrDefault(player, true);
     }
 

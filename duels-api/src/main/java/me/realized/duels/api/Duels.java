@@ -1,15 +1,20 @@
 package me.realized.duels.api;
 
+import javax.annotation.Nonnull;
 import me.realized.duels.api.arena.ArenaManager;
 import me.realized.duels.api.kit.KitManager;
 import me.realized.duels.api.user.UserManager;
+import org.bukkit.plugin.Plugin;
 
-public interface Duels {
+public interface Duels extends Plugin {
 
+    @Nonnull
     UserManager getUserManager();
 
+    @Nonnull
     ArenaManager getArenaManager();
 
+    @Nonnull
     KitManager getKitManager();
 
     /**

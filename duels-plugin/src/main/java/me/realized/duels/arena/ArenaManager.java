@@ -12,6 +12,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -113,12 +114,14 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
     @Nullable
     @Override
     public Arena get(@Nonnull final String name) {
+        Objects.requireNonNull(name, "name");
         return arenas.stream().filter(arena -> arena.getName().equals(name)).findFirst().orElse(null);
     }
 
     @Nullable
     @Override
     public Arena get(@Nonnull final Player player) {
+        Objects.requireNonNull(player, "player");
         return arenas.stream().filter(arena -> arena.has(player)).findFirst().orElse(null);
     }
 
@@ -148,6 +151,7 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
 
     @Override
     public boolean isInMatch(@Nonnull final Player player) {
+        Objects.requireNonNull(player, "player");
         return get(player) != null;
     }
 
@@ -197,7 +201,6 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
         }
 
         event.setCancelled(true);
-        // TODO: 06/06/2018 add message
     }
 
     @EventHandler(ignoreCancelled = true)

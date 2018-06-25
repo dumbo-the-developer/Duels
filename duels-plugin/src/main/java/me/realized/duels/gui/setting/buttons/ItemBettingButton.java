@@ -5,7 +5,6 @@ import me.realized.duels.extra.Permissions;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.inventory.ItemBuilder;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -18,25 +17,25 @@ public class ItemBettingButton extends BaseButton {
     @Override
     public void update(final Player player) {
         if (!config.isItemBettingEnabled()) {
-            setLore("&cThis option is currently unavailable.");
+            setLore(lang.getMessage("GUI.settings.buttons.item-betting.lore-disabled").split("\n"));
             return;
         }
 
         if (config.isItemBettingUsePermission() && !player.hasPermission(Permissions.ITEM_BETTING) && !player.hasPermission(Permissions.SETTING_ALL)) {
-            setLore("&cYou do not have permission to use this option.");
+            setLore(lang.getMessage("GUI.settings.buttons.item-betting.lore-no-permission").split("\n"));
             return;
         }
 
         final Settings settings = settingManager.getSafely(player);
-        final String lore = plugin.getLang().getMessage("GUI.settings.buttons.item-betting.lore",
-            "item_betting", settings.isItemBetting() ? "&aenabled" : "&cdisabled");
+        final String itemBetting = settings.isItemBetting() ? "&aenabled" : "&cdisabled";
+        final String lore = plugin.getLang().getMessage("GUI.settings.buttons.item-betting.lore", "item_betting", itemBetting);
         setLore(lore.split("\n"));
     }
 
     @Override
     public void onClick(final Player player) {
         if (!config.isItemBettingEnabled()) {
-            player.sendMessage(ChatColor.RED + "This option is currently unavailable.");
+            lang.sendMessage(player, "ERROR.setting.disabled-option", "option", "Item Betting");
             return;
         }
 

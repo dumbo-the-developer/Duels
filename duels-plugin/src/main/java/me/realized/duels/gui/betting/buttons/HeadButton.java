@@ -24,7 +24,7 @@ public class HeadButton extends BaseButton {
     public void update(final Player player) {
         if (player.getUniqueId().equals(owner)) {
             setOwner(player.getName());
-            setDisplayName("&e" + player.getName());
+            setDisplayName(lang.getMessage("GUI.item-betting.buttons.head.name", "name", player.getName()));
         }
     }
 }

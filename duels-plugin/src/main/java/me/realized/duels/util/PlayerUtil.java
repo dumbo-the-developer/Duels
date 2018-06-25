@@ -26,5 +26,4 @@ public final class PlayerUtil {
         player.getInventory().clear();
         player.updateInventory();
     }
-
 }

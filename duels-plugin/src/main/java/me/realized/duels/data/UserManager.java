@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -147,12 +148,14 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
     @Nullable
     @Override
     public UserData get(@Nonnull final UUID uuid) {
+        Objects.requireNonNull(uuid, "uuid");
         return users.get(uuid);
     }
 
     @Nullable
     @Override
     public UserData get(@Nonnull final Player player) {
+        Objects.requireNonNull(player, "player");
         return get(player.getUniqueId());
     }
 
@@ -168,6 +171,7 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
 
     @Override
     public <V extends Comparable<V>> List<SortedEntry<String, V>> sorted(@Nonnull final Function<User, V> function) {
+        Objects.requireNonNull(function, "function");
         return users.values().stream()
             .map(data -> new SortedEntry<>(data.getName(), function.apply(data)))
             .sorted(Comparator.reverseOrder())

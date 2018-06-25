@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -49,6 +50,8 @@ public class Match implements me.realized.duels.api.match.Match {
 
     @Override
     public List<ItemStack> getItems(@Nonnull final Player player) {
+        Objects.requireNonNull(player, "player");
+
         if (this.items == null) {
             return Collections.emptyList();
         }

@@ -19,6 +19,7 @@ import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.UserManager;
 import me.realized.duels.duel.DuelManager;
+import me.realized.duels.extension.ExtensionManager;
 import me.realized.duels.extra.DamageListener;
 import me.realized.duels.extra.KitItemListener;
 import me.realized.duels.extra.PotionListener;
@@ -41,6 +42,7 @@ import me.realized.duels.util.Log.LogSource;
 import me.realized.duels.util.Reloadable;
 import me.realized.duels.util.ServerUtil;
 import me.realized.duels.util.gui.GuiListener;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.inventivetalent.update.spiget.SpigetUpdate;
 import org.inventivetalent.update.spiget.UpdateCallback;
@@ -49,7 +51,7 @@ import org.inventivetalent.update.spiget.comparator.VersionComparator;
 public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     private static final int RESOURCE_ID = 20171;
-    private static final String SPIGOT_URL = "https://www.spigotmc.org/wiki/spigot-installation/";
+    private static final String SPIGOT_INSTALLATION_URL = "https://www.spigotmc.org/wiki/spigot-installation/";
 
     @Getter
     private final Gson gson = new GsonBuilder().excludeFieldsWithModifiers(Modifier.TRANSIENT).setPrettyPrinting().create();
@@ -90,6 +92,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private HookManager hookManager;
     @Getter
     private Teleport teleport;
+    @Getter
+    private ExtensionManager extensionManager;
 
     @Override
     public void onEnable() {
@@ -100,7 +104,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         if (!ServerUtil.isUsingSpigot()) {
             Log.error("================= *** DUELS LOAD FAILURE *** =================");
             Log.error("Duels requires a spigot server to run, but this server was not running on spigot!");
-            Log.error("To run your server on spigot, follow this guide: " + SPIGOT_URL);
+            Log.error("To run your server on spigot, follow this guide: " + SPIGOT_INSTALLATION_URL);
             Log.error("Spigot is compatible with CraftBukkit/Bukkit plugins.");
             Log.error("================= *** DUELS LOAD FAILURE *** =================");
             getPluginLoader().disablePlugin(this);
@@ -123,6 +127,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(requestManager = new RequestManager(this));
         hookManager = new HookManager(this);
         loadables.add(teleport = new Teleport(this));
+        loadables.add(extensionManager = new ExtensionManager(this));
 
         if (!load()) {
             getPluginLoader().disablePlugin(this);
@@ -168,6 +173,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     public void onDisable() {
         unload();
         Log.clearSources();
+        Bukkit.getScheduler().cancelTasks(this);
     }
 
     /**

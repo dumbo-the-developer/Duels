@@ -17,6 +17,7 @@ import me.realized.duels.util.Loadable;
 import me.realized.duels.util.PlayerUtil;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.compat.Collisions;
+import me.realized.duels.util.inventory.InventoryUtil;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -87,7 +88,7 @@ public class SpectateManager implements Loadable, Listener {
         final Arena arena = arenaManager.get(target);
 
         if (arena == null) {
-            lang.sendMessage(player, "ERROR.spectate.not-in-match", "player", target.getName());
+            lang.sendMessage(player, "ERROR.spectate.not-in-match", "name", target.getName());
             return;
         }
 
@@ -112,12 +113,12 @@ public class SpectateManager implements Loadable, Listener {
         player.setAllowFlight(true);
         player.setFlying(true);
         Collisions.setCollidable(player, false);
-
+        lang.sendMessage(player, "SPECTATE.start", "name", target.getName());
         if (player.hasPermission(Permissions.SPEC_ANON)) {
             return;
         }
 
-        arena.getMatch().getPlayers().forEach(matchPlayer -> lang.sendMessage(matchPlayer, "SPECTATE.arena-broadcast", true, "player", player.getName()));
+        arena.getMatch().getPlayers().forEach(matchPlayer -> lang.sendMessage(matchPlayer, "SPECTATE.arena-broadcast", true, "name", player.getName()));
     }
 
     public void stopSpectating(final Player player, final boolean end) {
@@ -127,7 +128,10 @@ public class SpectateManager implements Loadable, Listener {
             return;
         }
 
-        spectators.remove(player);
+        if (!end) {
+            spectators.remove(player);
+        }
+
         PlayerUtil.reset(player);
         player.setFlying(false);
         player.setAllowFlight(false);
@@ -152,8 +156,23 @@ public class SpectateManager implements Loadable, Listener {
         }
 
         if (!end) {
-            lang.sendMessage(player, "SPECTATE.stop", "player", spectator.getTargetName());
+            lang.sendMessage(player, "SPECTATE.stop", "name", spectator.getTargetName());
+        } else {
+            lang.sendMessage(player, "SPECTATE.end");
         }
+    }
+
+    public void stopSpectating(final Arena arena) {
+        spectators.entrySet().removeIf(entry -> {
+            final Spectator spectator = entry.getValue();
+
+            if (!spectator.getArena().equals(arena)) {
+                return false;
+            }
+
+            stopSpectating(entry.getKey(), true);
+            return true;
+        });
     }
 
     public Set<Player> getPlayers() {
@@ -167,7 +186,7 @@ public class SpectateManager implements Loadable, Listener {
         }
 
         final Player player = event.getPlayer();
-        final ItemStack held = player.getInventory().getItem(player.getInventory().getHeldItemSlot());
+        final ItemStack held = InventoryUtil.getItemInHand(player);
 
         if (held == null || held.getType() != Material.PAPER) {
             return;

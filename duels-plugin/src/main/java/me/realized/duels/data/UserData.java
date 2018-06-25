@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
@@ -61,6 +62,7 @@ public class UserData implements User {
 
     @Override
     public int getRating(@Nonnull final Kit kit) {
+        Objects.requireNonNull(kit, "kit");
         return this.rating != null ? this.rating.getOrDefault(kit.getName(), defaultRating) : defaultRating;
     }
 
@@ -74,6 +76,7 @@ public class UserData implements User {
 
     @Override
     public void resetRating(@Nonnull final Kit kit) {
+        Objects.requireNonNull(kit, "kit");
         setRating(kit.getName(), defaultRating);
     }
 

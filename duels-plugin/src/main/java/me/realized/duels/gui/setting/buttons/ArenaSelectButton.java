@@ -5,7 +5,6 @@ import me.realized.duels.extra.Permissions;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.inventory.ItemBuilder;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -18,25 +17,25 @@ public class ArenaSelectButton extends BaseButton {
     @Override
     public void update(final Player player) {
         if (!config.isArenaSelectingEnabled()) {
-            setLore("&cThis option is currently unavailable.");
+            setLore(lang.getMessage("GUI.settings.buttons.arena-selector.lore-disabled").split("\n"));
             return;
         }
 
         if (config.isArenaSelectingUsePermission() && !player.hasPermission(Permissions.ARENA_SELECTING) && !player.hasPermission(Permissions.SETTING_ALL)) {
-            setLore("&cYou do not have permission to use this option.");
+            setLore(lang.getMessage("GUI.settings.buttons.arena-selector.lore-no-permission").split("\n"));
             return;
         }
 
         final Settings settings = settingManager.getSafely(player);
-        final String lore = plugin.getLang().getMessage("GUI.settings.buttons.arena-selector.lore",
-            "arena", settings.getArena() != null ? settings.getArena().getName() : "Random");
+        final String arena = settings.getArena() != null ? settings.getArena().getName() : "Random";
+        final String lore = lang.getMessage("GUI.settings.buttons.arena-selector.lore", "arena", arena);
         setLore(lore.split("\n"));
     }
 
     @Override
     public void onClick(final Player player) {
         if (!config.isArenaSelectingEnabled()) {
-            player.sendMessage(ChatColor.RED + "This option is currently unavailable.");
+            lang.sendMessage(player, "ERROR.setting.disabled-option", "option", "Arena Selector");
             return;
         }
 

@@ -11,14 +11,42 @@ public class QueueSign {
     @Getter
     private final Sign sign;
     @Getter
+    private final String[] lines;
+    @Getter
     private final Kit kit;
     @Getter
     private final int bet;
 
-    public QueueSign(final Sign sign, final Kit kit, final int bet) {
+    public QueueSign(final Sign sign, final String format, final Kit kit, final int bet) {
         this.sign = sign;
         this.kit = kit;
         this.bet = bet;
+
+        final String[] data = {"", "", "", ""};
+
+        if (format != null) {
+            final String[] lines = format.split("\n");
+            System.arraycopy(data, 0, lines, 0, 4);
+        }
+
+        this.lines = data;
+        sign.setLine(0, replace(lines[0], 0));
+        sign.setLine(1, replace(lines[1], 0));
+        sign.setLine(2, replace(lines[2], 0));
+        sign.setLine(3, replace(lines[3], 0));
+        sign.update(true);
+    }
+
+    private String replace(final String line, final int count) {
+        return StringUtil.color(line.replace("%count%", String.valueOf(count)));
+    }
+
+    public void setCount(final int count) {
+        sign.setLine(0, replace(lines[0], count));
+        sign.setLine(1, replace(lines[1], count));
+        sign.setLine(2, replace(lines[2], count));
+        sign.setLine(3, replace(lines[3], count));
+        sign.update(true);
     }
 
     @Override

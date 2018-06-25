@@ -21,4 +21,8 @@ public final class InventoryUtil {
 
         return false;
     }
+
+    public static ItemStack getItemInHand(final Player player) {
+        return player.getInventory().getItem(player.getInventory().getHeldItemSlot());
+    }
 }

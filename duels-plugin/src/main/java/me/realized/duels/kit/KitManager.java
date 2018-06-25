@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.Getter;
@@ -108,12 +109,15 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
     @Nullable
     @Override
     public Kit get(@Nonnull final String name) {
+        Objects.requireNonNull(name, "name");
         return kits.get(name);
     }
 
     @Nullable
     @Override
     public Kit create(@Nonnull final Player creator, @Nonnull final String name) {
+        Objects.requireNonNull(name, "name");
+
         if (!StringUtil.isAlphanumeric(name) || kits.containsKey(name)) {
             return null;
         }
@@ -129,6 +133,8 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
     @Nullable
     @Override
     public Kit remove(@Nullable CommandSender source, @Nonnull final String name) {
+        Objects.requireNonNull(name, "name");
+
         final Kit kit = kits.remove(name);
 
         if (kit == null) {

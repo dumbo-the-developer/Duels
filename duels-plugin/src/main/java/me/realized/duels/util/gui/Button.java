@@ -3,6 +3,7 @@ package me.realized.duels.util.gui;
 import java.util.Arrays;
 import java.util.function.Consumer;
 import lombok.Getter;
+import lombok.Setter;
 import me.realized.duels.util.StringUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -15,7 +16,8 @@ public class Button<P extends JavaPlugin> {
 
     protected final P plugin;
     @Getter
-    private final ItemStack displayed;
+    @Setter
+    private ItemStack displayed;
 
     public Button(final P plugin, final ItemStack displayed) {
         this.plugin = plugin;

@@ -4,7 +4,6 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.inventory.ItemBuilder;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -17,20 +16,20 @@ public class KitSelectButton extends BaseButton {
     @Override
     public void update(final Player player) {
         if (config.isUseOwnInventoryEnabled()) {
-            setLore("&cThis option is currently", "&cunavailable. Your inventory", "&cwill be used instead", "&cin the duel.");
+            setLore(lang.getMessage("GUI.settings.buttons.kit-selector.lore-disabled").split("\n"));
             return;
         }
 
         final Settings settings = settingManager.getSafely(player);
-        final String lore = plugin.getLang().getMessage("GUI.settings.buttons.kit-selector.lore",
-                "kit", settings.getKit() != null ? settings.getKit().getName() : "Not Selected");
+        final String kit = settings.getKit() != null ? settings.getKit().getName() : "Not Selected";
+        final String lore = lang.getMessage("GUI.settings.buttons.kit-selector.lore", "kit", kit);
         setLore(lore.split("\n"));
     }
 
     @Override
     public void onClick(final Player player) {
         if (config.isUseOwnInventoryEnabled()) {
-            player.sendMessage(ChatColor.RED + "This option is currently unavailable. Your inventory will be used instead in the duel.");
+            lang.sendMessage(player, "ERROR.setting.disabled-option", "option", "Kit Selector");
             return;
         }
 

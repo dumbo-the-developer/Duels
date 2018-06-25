@@ -13,11 +13,15 @@ import me.realized.duels.command.commands.duels.subcommands.LoadkitCommand;
 import me.realized.duels.command.commands.duels.subcommands.ReloadCommand;
 import me.realized.duels.command.commands.duels.subcommands.SavekitCommand;
 import me.realized.duels.command.commands.duels.subcommands.SetCommand;
+import me.realized.duels.command.commands.duels.subcommands.SetitemCommand;
+import me.realized.duels.command.commands.duels.subcommands.SetlobbyCommand;
 import me.realized.duels.command.commands.duels.subcommands.ToggleCommand;
 import me.realized.duels.extra.Permissions;
 import org.bukkit.command.CommandSender;
 
 public class DuelsCommand extends BaseCommand {
+
+    // TODO: 24/06/2018 Implement User Edit commands & Kit option commands
 
     public DuelsCommand(final DuelsPlugin plugin) {
         super(plugin, "duels", Permissions.ADMIN, false);
@@ -25,12 +29,14 @@ public class DuelsCommand extends BaseCommand {
             new SavekitCommand(plugin),
             new DeletekitCommand(plugin),
             new LoadkitCommand(plugin),
+            new SetitemCommand(plugin),
             new CreateCommand(plugin),
             new DeleteCommand(plugin),
             new SetCommand(plugin),
             new ToggleCommand(plugin),
             new AddsignCommand(plugin),
             new DeletesignCommand(plugin),
+            new SetlobbyCommand(plugin),
             new InfoCommand(plugin),
             new ListCommand(plugin),
             new ReloadCommand(plugin)

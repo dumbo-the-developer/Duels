@@ -2,6 +2,7 @@ package me.realized.duels.kit;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
@@ -80,6 +81,7 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
 
     @Override
     public void equip(@Nonnull final Player player) {
+        Objects.requireNonNull(player, "player");
         final KitEquipEvent event = new KitEquipEvent(player, this);
         plugin.getServer().getPluginManager().callEvent(event);
 

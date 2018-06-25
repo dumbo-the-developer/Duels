@@ -88,10 +88,10 @@ public class DuelCommand extends BaseCommand {
             return true;
         }
 
-        if (player.equals(target)) {
-            lang.sendMessage(sender, "ERROR.player.is-self");
-            return true;
-        }
+//        if (player.equals(target)) {
+//            lang.sendMessage(sender, "ERROR.player.is-self");
+//            return true;
+//        }
 
         final UserData user = userManager.get(target);
 
@@ -126,8 +126,8 @@ public class DuelCommand extends BaseCommand {
 
             final int amount = NumberUtil.parseInt(args[1]).orElse(0);
 
-            if (vault == null || vault.getEconomy() == null) {
-                lang.sendMessage(sender, "ERROR.disabled-option", "option", "Betting");
+            if (vault == null || vault.getEconomy() == null ) {
+                lang.sendMessage(sender, "ERROR.setting.disabled-option", "option", "Betting");
                 return true;
             }
 

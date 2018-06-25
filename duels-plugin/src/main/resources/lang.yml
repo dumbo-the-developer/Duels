@@ -33,6 +33,7 @@ ERROR:
   kit:
     not-found: '{PREFIX} &cNo kit exists with the name ''%name%''.'
     already-exists: '{PREFIX} &cAn arena named ''%name%'' already exists.'
+    empty-hand: '{PREFIX} &cYou must be holding an item to use this command.'
   duel:
     requests-disabled: '{PREFIX} &c%player% is currently not accepting duel requests.'
     already-has-request: '{PREFIX} &cYou already have a request sent to %player%.'
@@ -42,9 +43,12 @@ ERROR:
       target: '{PREFIX} &c%player% is already in a duel.'
   spectate:
     already-spectating:
-      sender: '&cYou cannot do this while in spectator mode.'
-      target: '&c%player% is in spectator mode.'
-    not-in-match: '&c%player% is not in a duel.'
+      sender: '{PREFIX} &cYou cannot do this while in spectator mode.'
+      # todo unused
+      target: '{PREFIX} &c%name% is in spectator mode.'
+    not-in-match: '{PREFIX} &c%name% is not in a duel.'
+  setting:
+    disabled-option: '{PREFIX} &c%option% is currently disabled.'
   inventory-view:
     not-a-uuid: '{PREFIX} &c%input% is not a valid UUID.'
     not-found: '{PREFIX} &cNo inventory exists with the UUID ''%uuid%''.'
@@ -52,13 +56,16 @@ ERROR:
     not-a-sign: '{PREFIX} &cThe block you are looking at is not a sign!'
     not-found: '{PREFIX} &cThat sign is not a queue sign!'
     already-exists: '{PREFIX} &cThat sign is already a queue sign! To remove, use the command ''/duels delsign'''
+    cancel-break: '{PREFIX} &cYou cannot break a queue sign manually! Please use the command ''/duels delsign'''
+    already-in: '{PREFIX} &cYou are already in a queue!'
+    not-enough-money: '{PREFIX} &cYou need $%bet_amount% to join that queue.'
 
-
+  lobby-save-failure: '{PREFIX} &cCould not save lobby location. Please check the console for more information.'
   invalid-sub-command: '{PREFIX} &c''%argument%'' is not a valid sub command. Please type ''/%command%'' for help.'
   prevent-teleportation: '{PREFIX} &cCannot teleport to a player in a duel.'
-  disabled-option: '{PREFIX} &c%option% is currently disabled.'
   not-enough-money: '{PREFIX} &cYou do not have enough money to bet!'
   name-not-alphanumeric: '{PREFIX} &c''%input%'' is not alphanumeric.'
+
 
 COMMAND:
   duel:
@@ -129,7 +136,6 @@ COMMAND:
       header: '{HALF_LINE} &7Top &f10 &7%type% {HALF_LINE}'
       display-format: '&e%rank%. &f%name% &e- &f%score% &7%identifier%'
       footer: '{HALF_LINE} &7Top &f10 &7%type% {HALF_LINE}'
-
   duels:
     usage:
     - '{LINE}'
@@ -156,8 +162,10 @@ COMMAND:
     savekit: '{PREFIX} &7Kit &3%name% &7was successfully saved.'
     deletekit: '{PREFIX} &7Kit &3%name% &7was successfully deleted.'
     loadkit: '{PREFIX} &7Kit &3%name% &7was loaded in your inventory.'
+    setitem: '{PREFIX} &7Kit %3%name%&7''s displayed item was changed to your held item.'
     addsign: '{PREFIX} &7Created queue sign at &f%location% &7with kit &3%kit% &7and bet &6$%bet_amount%&7.'
     delsign: '{PREFIX} &7Removed queue sign at &f%location% &7with kit &3%kit% &7and bet &6$%bet_amount%&7.'
+    setlobby: '{PREFIX} &7Duel lobby set at your current location.'
     info:
     - '{HALF_LINE} &7Arena &e%name% {HALF_LINE}'
     - '&7In Use: &r%in_use%'
@@ -189,9 +197,9 @@ COMMAND:
 
 DUEL:
   prevent-item-drop: '&cYou cannot drop items while in a duel.'
-  prevent-item-pickup: '&cYou cannot pick up items while in a duel.'
   prevent-command: '&cYou cannot use ''%command%'' while in a duel.'
   prevent-teleportation: '&cYou cannot teleport while in a duel.'
+  prevent-inventory-open: '&cYou cannot open inventories while in a duel.'
   start-failure:
     no-kit-selected: '{FAIL_PREFIX} No kit was selected!'
     player-moved: '{FAIL_PREFIX} You or your opponent moved after sending/accepting the request!'
@@ -201,17 +209,28 @@ DUEL:
   on-end:
     tie: '{PREFIX} &7Tie Game!'
     plugin-disable: '{PREFIX} &cPlugin is disabling! Ending match automatically.'
-    opponent-defeat: '{PREFIX} &f%winner%&7(&d%health%♥&7) has defeated &f%loser% &7with kit &3%kit% &7on arena &e%arena%&7.'
+    opponent-defeat: '{PREFIX} &f%winner% &a(%winner_rating%) (+%change%) &7has defeated &f%loser% &c(%loser_rating%) (-%change%) &7on kit &3%kit% &7with &d%health%♥'
   inventories:
     message: '&7Inventories (click on the name to view): '
     name-color: '&b'
-  rating-change: '&7Rating Change: &a%winner% +%change% (%winner_rating%) &c%loser% -%change% (%loser_rating%)'
+
+
+SIGN:
+  add: '{PREFIX} &7You have been added to the queue for kit &3%kit% &7and bet &6$%bet_amount%&7.'
+  remove: '{PREFIX} &7You have been removed from the queue.'
+  found-opponent: '{PREFIX} &7Opponent found: &f%name%&7! Starting match with kit &3%kit% &7and a bet of &6$%bet_amount%&7...'
+  format:
+  - '&a[Click to Join]'
+  - '&3%kit%'
+  - '&6$%bet_amount%'
+  - '&f&l%count% IN QUEUE'
 
 
 SPECTATE:
-  start: '{PREFIX} &7You are now spectating &f%player%&7.'
-  arena-broadcast: '{PREFIX} &f%player% &7is now spectating the match!'
-  stop: '{PREFIX} &7You are no longer spectating &f%player%&7.'
+  start: '{PREFIX} &7You are now spectating &f%name%&7.'
+  arena-broadcast: '{PREFIX} &f%name% &7is now spectating the match!'
+  stop: '{PREFIX} &7You are no longer spectating &f%name%&7.'
+  end: '{PREFIX} &7The match you were spectating has ended.'
   prevent-item-drop: '&cYou cannot drop items while in spectator mode.'
   prevent-command: '&cYou cannot use ''%command%'' while in spectator mode.'
   prevent-teleportation: '&cYou cannot teleport while in spectator mode.'
@@ -240,18 +259,32 @@ GUI:
         - '&7Selected Kit: &3%kit%'
         - ' '
         - '&aClick to Change Kit!'
+        lore-disabled:
+        - '&cThis option is currently disabled.'
+        - '&cYour inventory will be used instead'
+        - '&cin the duel.'
       arena-selector:
         name: '&9Arena Selection'
         lore:
         - '&7Selected Arena: &e%arena%'
         - ' '
         - '&aClick to Change Arena!'
+        lore-disabled:
+        - '&cThis option is currently disabled.'
+        lore-no-permission:
+        - '&cYou do not have permission to'
+        - '&cuse this option.'
       item-betting:
         name: '&9Allow Betting Items'
         lore:
         - '&7Item Betting: &r%item_betting%'
         - ' '
         - '&aClick to Toggle Item Betting!'
+        lore-disabled:
+        - '&cThis option is currently disabled.'
+        lore-no-permission:
+        - '&cYou do not have permission to'
+        - '&cuse this option.'
       send:
         name: '&a&lSEND REQUEST'
       cancel:
