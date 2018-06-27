@@ -88,10 +88,10 @@ public class DuelCommand extends BaseCommand {
             return true;
         }
 
-//        if (player.equals(target)) {
-//            lang.sendMessage(sender, "ERROR.player.is-self");
-//            return true;
-//        }
+        if (player.equals(target)) {
+            lang.sendMessage(sender, "ERROR.player.is-self");
+            return true;
+        }
 
         final UserData user = userManager.get(target);
 

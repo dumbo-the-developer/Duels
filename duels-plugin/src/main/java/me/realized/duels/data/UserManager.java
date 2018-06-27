@@ -3,12 +3,9 @@ package me.realized.duels.data;
 import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
-import java.io.Writer;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -108,6 +105,8 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
 
                     try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
                         final UserData user = plugin.getGson().fromJson(reader, UserData.class);
+                        user.plugin = plugin;
+                        user.folder = folder;
                         user.defaultRating = defaultRating;
                         user.matchesToDisplay = matchesToDisplay;
                         user.refreshMatches();
@@ -220,7 +219,7 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
             final UserData user = users.remove(player.getUniqueId());
 
             if (user != null) {
-                trySave(player, user);
+                user.trySave();
             }
         }
     }
@@ -229,15 +228,15 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
         final File file = new File(folder, player.getUniqueId() + ".json");
 
         if (!file.exists()) {
-            final UserData user = new UserData(player);
-            user.defaultRating = defaultRating;
-            user.matchesToDisplay = matchesToDisplay;
+            final UserData user = new UserData(plugin, folder, defaultRating, matchesToDisplay, player);
             plugin.doSync(() -> plugin.getServer().getPluginManager().callEvent(new UserCreateEvent(user)));
             return user;
         }
 
         try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
             final UserData user = plugin.getGson().fromJson(reader, UserData.class);
+            user.plugin = plugin;
+            user.folder = folder;
             user.defaultRating = defaultRating;
             user.matchesToDisplay = matchesToDisplay;
             user.refreshMatches();
@@ -251,24 +250,6 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
             ex.printStackTrace();
             Log.error("An error occured while loading userdata of " + player.getName() + ": " + ex.getMessage());
             return null;
-        }
-    }
-
-    private void trySave(final Player player, final UserData data) {
-        final File file = new File(folder, player.getUniqueId() + ".json");
-
-        try {
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-
-            try (Writer writer = new OutputStreamWriter(new FileOutputStream(file))) {
-                plugin.getGson().toJson(data, writer);
-                writer.flush();
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            Log.error("An error occured while saving userdata of " + player.getName() + ": " + ex.getMessage());
         }
     }
 
@@ -304,7 +285,7 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
         final UserData user = users.remove(event.getPlayer().getUniqueId());
 
         if (user != null) {
-            plugin.doAsync(() -> trySave(event.getPlayer(), user));
+            plugin.doAsync(user::trySave);
         }
     }
 

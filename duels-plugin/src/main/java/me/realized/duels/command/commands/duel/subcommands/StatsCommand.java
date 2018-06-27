@@ -46,7 +46,7 @@ public class StatsCommand extends BaseCommand {
 
         final String wins = String.valueOf(user.getWins());
         final String losses = String.valueOf(user.getLosses());
-        final String wlRatio = String.valueOf(Math.round(((double) user.getWins() / (double) user.getLosses()) * 100.0) / 100.0);
+        final String wlRatio = String.valueOf(user.getLosses() > 0 ? Math.round(((double) user.getWins() / (double) user.getLosses()) * 100.0) / 100.0 : user.getWins());
         final String requests = String.valueOf(user.canRequest() ? "&aenabled" : "&cdisabled");
         final Object[] args = {"player", user.getName(), "wins", wins, "losses", losses, "wl_ratio", wlRatio, "requests_enabled", requests};
         lang.sendMessage(sender, "COMMAND.duel.stats.displayed", args);
