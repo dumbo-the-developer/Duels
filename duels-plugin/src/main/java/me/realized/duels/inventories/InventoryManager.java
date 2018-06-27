@@ -15,6 +15,8 @@ public class InventoryManager implements Loadable {
     private final GuiListener<DuelsPlugin> guiListener;
     private final Map<UUID, InventoryGui> inventories = new HashMap<>();
 
+    private int expireTask;
+
     public InventoryManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.guiListener = plugin.getGuiListener();
@@ -22,7 +24,7 @@ public class InventoryManager implements Loadable {
 
     @Override
     public void handleLoad() {
-        plugin.doSyncRepeat(() -> {
+        this.expireTask = plugin.doSyncRepeat(() -> {
             final long now = System.currentTimeMillis();
             inventories.entrySet().removeIf(entry -> now - entry.getValue().getCreation() >= 1000L * 60 * 5);
         }, 20L, 20L * 5);
@@ -30,6 +32,7 @@ public class InventoryManager implements Loadable {
 
     @Override
     public void handleUnload() {
+        plugin.cancelTask(expireTask);
         inventories.clear();
     }
 

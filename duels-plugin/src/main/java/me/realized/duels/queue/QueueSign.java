@@ -26,7 +26,7 @@ public class QueueSign {
 
         if (format != null) {
             final String[] lines = format.split("\n");
-            System.arraycopy(data, 0, lines, 0, 4);
+            System.arraycopy(lines, 0, data, 0, 4);
         }
 
         this.lines = data;

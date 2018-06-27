@@ -35,8 +35,6 @@ dependencies {
 
 shadowJar {
     archiveName = parent.name + '-' + project.version + '.jar'
-    // todo: remove later
-    exclude "me/realized/_duels/**"
 
     dependencies {
         include(dependency(':duels-api'))

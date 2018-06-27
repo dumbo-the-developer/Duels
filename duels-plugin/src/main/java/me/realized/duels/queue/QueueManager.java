@@ -34,6 +34,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class QueueManager implements Loadable, Listener {
 
@@ -46,6 +47,7 @@ public class QueueManager implements Loadable, Listener {
     private final Map<QueueSign, Queue<Player>> queues = new HashMap<>();
 
     private VaultHook vault;
+    private int queueTask;
 
     public QueueManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -82,7 +84,7 @@ public class QueueManager implements Loadable, Listener {
 
         Log.info(this, "Loaded " + signs.size() + " queue sign(s).");
 
-        plugin.doSyncRepeat(() -> queues.forEach((sign, queue) -> {
+        this.queueTask = plugin.doSyncRepeat(() -> queues.forEach((sign, queue) -> {
             if (queue.size() >= 2) {
                 final Player first = queue.poll();
                 final Player second = queue.poll();
@@ -91,8 +93,8 @@ public class QueueManager implements Loadable, Listener {
                 setting.setBet(sign.getBet());
 
                 final String kit = sign.getKit() != null ? sign.getKit().getName() : "none";
-                lang.sendMessage(first, "SIGN.found-opponent", "kit", kit, "bet_amount", sign.getBet());
-                lang.sendMessage(second, "SIGN.found-opponent", "kit", kit, "bet_amount", sign.getBet());
+                lang.sendMessage(first, "SIGN.found-opponent", "name", second.getName(), "kit", kit, "bet_amount", sign.getBet());
+                lang.sendMessage(second, "SIGN.found-opponent", "name", first.getName(), "kit", kit, "bet_amount", sign.getBet());
                 duelManager.startMatch(first, second, setting, null, true);
                 signs.values().stream().filter(queueSign -> queueSign.equals(sign)).forEach(queueSign -> queueSign.setCount(queue.size()));
             }
@@ -101,6 +103,8 @@ public class QueueManager implements Loadable, Listener {
 
     @Override
     public void handleUnload() throws Exception {
+        plugin.cancelTask(queueTask);
+
         if (signs.isEmpty()) {
             return;
         }
@@ -129,7 +133,17 @@ public class QueueManager implements Loadable, Listener {
     }
 
     public QueueSign remove(final Sign sign) {
-        return signs.remove(sign);
+        final QueueSign queueSign = signs.remove(sign);
+
+        if (queueSign != null && signs.values().stream().noneMatch(s -> s.equals(queueSign))) {
+            final Queue<Player> queue = queues.remove(queueSign);
+
+            if (queue != null) {
+                queue.forEach(player -> lang.sendMessage(player, "SIGN.remove"));
+            }
+        }
+
+        return queueSign;
     }
 
     public Queue<Player> get(final Player player) {
@@ -145,8 +159,12 @@ public class QueueManager implements Loadable, Listener {
             return false;
         }
 
+        final QueueSign created;
         final String kitName = kit != null ? kit.getName() : "none";
-        signs.put(sign, new QueueSign(sign, lang.getMessage("SIGN.format", "kit", kitName, "bet_amount", bet), kit, bet));
+        signs.put(sign, created = new QueueSign(sign, lang.getMessage("SIGN.format", "kit", kitName, "bet_amount", bet), kit, bet));
+
+        final Queue<Player> queue = get(created);
+        signs.values().stream().filter(queueSign -> queueSign.equals(created)).forEach(queueSign -> queueSign.setCount(queue.size()));
         return true;
     }
 
@@ -219,5 +237,16 @@ public class QueueManager implements Loadable, Listener {
 
         lang.sendMessage(player, "ERROR.sign.cancel-break");
         event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void on(final PlayerQuitEvent event) {
+        final Queue<Player> queue = get(event.getPlayer());
+
+        if (queue == null) {
+            return;
+        }
+
+        queue.remove(event.getPlayer());
     }
 }

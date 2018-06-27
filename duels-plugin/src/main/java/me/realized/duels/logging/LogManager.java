@@ -17,20 +17,20 @@ import me.realized.duels.util.Log.LogSource;
 // TODO: 22/06/2018 Log matches
 public class LogManager implements Loadable, LogSource {
 
-    private final File folder;
-
     @Getter
     private final Logger logger = Logger.getAnonymousLogger();
+    private final File folder;
+
     private FileHandler handler;
 
     public LogManager(final DuelsPlugin plugin) {
-        final File dataFolder = plugin.getDataFolder();
+        final File pluginFolder = plugin.getDataFolder();
 
-        if (!dataFolder.exists()) {
-            dataFolder.mkdir();
+        if (!pluginFolder.exists()) {
+            pluginFolder.mkdir();
         }
 
-        this.folder = new File(dataFolder, "logs");
+        this.folder = new File(pluginFolder, "logs");
 
         if (!folder.exists()) {
             folder.mkdir();
@@ -53,7 +53,7 @@ public class LogManager implements Loadable, LogSource {
         handler.setFormatter(new Formatter() {
             @Override
             public String format(final LogRecord record) {
-                return "[" + DateUtil.formatDatetime(record.getMillis()) + "] [" + record.getLevel().getLocalizedName() + "] " + record.getMessage() + '\n';
+                return "[" + DateUtil.formatDatetime(record.getMillis()) + "] [" + record.getLevel().getName() + "] " + record.getMessage() + '\n';
             }
         });
         logger.addHandler(handler);

@@ -14,7 +14,7 @@ public class SetlobbyCommand extends BaseCommand {
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         if (!playerManager.setLobby((Player) sender)) {
-            lang.sendMessage(sender, "ERROR.lobby-save-failure");
+            lang.sendMessage(sender, "ERROR.command.lobby-save-failure");
             return;
         }
 

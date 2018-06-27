@@ -209,6 +209,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
             .forEach(sound -> player.playSound(player.getLocation(), sound.getType(), sound.getVolume(), sound.getPitch()));
     }
 
+    public MessageSound getSound(final String name) {
+        return sounds.get(name);
+    }
+
     public class MessageSound {
 
         @Getter

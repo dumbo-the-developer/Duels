@@ -18,6 +18,7 @@ import me.realized.duels.spectate.SpectateManager;
 import me.realized.duels.util.command.AbstractCommand;
 import org.bukkit.command.CommandSender;
 
+// TODO: 27/06/2018 Rewrite usages for all subcommands & add it to usage in lang
 public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
 
     protected final DuelsPlugin plugin;
@@ -84,7 +85,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
                 lang.sendMessage(sender, "ERROR.no-permission", "permission", args[0]);
                 break;
             case SUB_COMMAND_INVALID:
-                lang.sendMessage(sender, "ERROR.invalid-sub-command", "command", args[0], "argument", args[1]);
+                lang.sendMessage(sender, "ERROR.command.invalid-sub-command", "command", args[0], "argument", args[1]);
                 break;
             case SUB_COMMAND_USAGE:
                 lang.sendMessage(sender, "COMMAND.sub-command-usage", "command", args[0], "usage", args[1], "description", args[2]);

@@ -18,7 +18,7 @@ public class SavekitCommand extends BaseCommand {
         final String name = StringUtils.join(args, " ", 1, args.length);
 
         if (!StringUtil.isAlphanumeric(name)) {
-            lang.sendMessage(sender, "ERROR.name-not-alphanumeric");
+            lang.sendMessage(sender, "ERROR.command.name-not-alphanumeric");
             return;
         }
 

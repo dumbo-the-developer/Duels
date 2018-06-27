@@ -24,10 +24,11 @@ import javax.annotation.Nullable;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.user.UserCreateEvent;
+import me.realized.duels.api.kit.Kit;
 import me.realized.duels.api.user.User;
+import me.realized.duels.api.util.Pair;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
-import me.realized.duels.kit.Kit;
 import me.realized.duels.util.DateUtil;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
@@ -41,11 +42,14 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class UserManager implements Loadable, Listener, me.realized.duels.api.user.UserManager {
 
+    private static final long UPDATE_INTERVAL = 1000 * 60;
+
     private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
     private final File folder;
     private final Map<UUID, UserData> users = new ConcurrentHashMap<>();
+    private final Map<String, UUID> names = new ConcurrentHashMap<>();
 
     private volatile int defaultRating;
     private volatile int matchesToDisplay;
@@ -58,6 +62,8 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
     private volatile TopEntry losses;
     @Getter
     private final Map<Kit, TopEntry> topRatings = new ConcurrentHashMap<>();
+
+    private int topTask;
 
     public UserManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -106,6 +112,7 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
                         user.matchesToDisplay = matchesToDisplay;
                         user.refreshMatches();
                         // Player might have logged in while reading the file
+                        names.putIfAbsent(user.getName().toLowerCase(), uuid);
                         users.putIfAbsent(uuid, user);
                     } catch (IOException ex) {
                         Log.error("Failed to load data of " + uuid + ": " + ex.getMessage());
@@ -116,33 +123,54 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
             loaded = true;
         });
 
-        plugin.doSyncRepeat(() -> {
-            final Collection<Kit> kits = plugin.getKitManager().getKits();
+        this.topTask = plugin.doSyncRepeat(() -> {
+            final Collection<? extends Kit> kits = plugin.getKitManager().getKits();
 
             plugin.doAsync(() -> {
                 if (!loaded) {
                     return;
                 }
 
-                List<SortedEntry<String, Integer>> result = sorted(User::getWins);
-                wins = new TopEntry("Wins", "wins", result);
-                result = sorted(User::getLosses);
-                losses = new TopEntry("Losses", "losses", result);
+                List<Pair<String, Integer>> result;
+
+                if (wins == null || System.currentTimeMillis() - wins.getCreation() >= UPDATE_INTERVAL) {
+                    result = sorted(User::getWins);
+                    wins = new TopEntry("Wins", "wins", subList(result, 10));
+                }
+
+                if (losses == null || System.currentTimeMillis() - losses.getCreation() >= UPDATE_INTERVAL) {
+                    result = sorted(User::getLosses);
+                    losses = new TopEntry("Losses", "losses", subList(result, 10));
+                }
+
                 topRatings.keySet().removeIf(kit -> !kits.contains(kit));
 
                 for (final Kit kit : kits) {
-                    result = sorted(user -> user.getRating(kit));
-                    topRatings.put(kit, new TopEntry(kit.getName(), "rating", result));
+                    final TopEntry entry = topRatings.get(kit);
+
+                    if (entry == null || System.currentTimeMillis() - entry.getCreation() >= UPDATE_INTERVAL) {
+                        result = sorted(user -> user.getRating(kit));
+                        topRatings.put(kit, new TopEntry(kit.getName(), "rating", subList(result, 10)));
+                    }
                 }
             });
-        }, 20L * 5, 20L * 60);
+        }, 20L * 5, 20L);
     }
 
     @Override
     public void handleUnload() {
+        plugin.cancelTask(topTask);
         loaded = false;
         saveUsers(Players.getOnlinePlayers());
         users.clear();
+    }
+
+    @Nullable
+    @Override
+    public UserData get(@Nonnull final String name) {
+        Objects.requireNonNull(name, "name");
+        final UUID uuid = names.get(name.toLowerCase());
+        return uuid != null ? get(uuid) : null;
     }
 
     @Nullable
@@ -160,20 +188,29 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
     }
 
     @Override
-    public List<SortedEntry<String, Integer>> getTopWins() {
-        return wins != null ? wins.data : null;
+    public TopEntry getTopWins() {
+        return wins;
     }
 
     @Override
-    public List<SortedEntry<String, Integer>> getTopLosses() {
-        return losses != null ? losses.data : null;
+    public TopEntry getTopLosses() {
+        return losses;
     }
 
+    @Nullable
     @Override
-    public <V extends Comparable<V>> List<SortedEntry<String, V>> sorted(@Nonnull final Function<User, V> function) {
-        Objects.requireNonNull(function, "function");
+    public TopEntry getTopRatings(@Nonnull final Kit kit) {
+        Objects.requireNonNull(kit, "kit");
+        return topRatings.get(kit);
+    }
+
+    private List<Pair<String, Integer>> subList(final List<Pair<String, Integer>> list, final int max) {
+        return Collections.unmodifiableList(Lists.newArrayList(list.size() > 10 ? list.subList(0, max) : list));
+    }
+
+    private <V extends Comparable<V>> List<Pair<String, V>> sorted(final Function<User, V> function) {
         return users.values().stream()
-            .map(data -> new SortedEntry<>(data.getName(), function.apply(data)))
+            .map(data -> new Pair<>(data.getName(), function.apply(data)))
             .sorted(Comparator.reverseOrder())
             .collect(Collectors.toList());
     }
@@ -243,6 +280,7 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
         if (user != null) {
             if (!player.getName().equals(user.getName())) {
                 user.setName(player.getName());
+                names.put(player.getName().toLowerCase(), player.getUniqueId());
             }
 
             return;
@@ -252,11 +290,12 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
             final UserData data = tryLoad(player);
 
             if (data == null) {
-                lang.sendMessage(event.getPlayer(), "ERROR.data.load-failure");
+                lang.sendMessage(player, "ERROR.data.load-failure");
                 return;
             }
 
-            users.put(event.getPlayer().getUniqueId(), data);
+            names.put(player.getName().toLowerCase(), player.getUniqueId());
+            users.put(player.getUniqueId(), data);
         });
     }
 
@@ -269,23 +308,7 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
         }
     }
 
-    public class TopEntry {
-
-        private final long lastUpdate;
-        @Getter
-        private final String name, type;
-        @Getter
-        private final List<SortedEntry<String, Integer>> data;
-
-        TopEntry(final String name, final String type, final List<SortedEntry<String, Integer>> data) {
-            this.lastUpdate = System.currentTimeMillis();
-            this.name = name;
-            this.type = type;
-            this.data = Collections.unmodifiableList(Lists.newArrayList(data.size() > 10 ? data.subList(0, 10) : data));
-        }
-
-        public String getNextUpdate() {
-            return DateUtil.format((lastUpdate + 1000L * 60L - System.currentTimeMillis()) / 1000L);
-        }
+    public String getNextUpdate(final long creation) {
+        return DateUtil.format((creation + UPDATE_INTERVAL - System.currentTimeMillis()) / 1000L);
     }
 }

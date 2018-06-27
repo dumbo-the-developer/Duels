@@ -59,14 +59,17 @@ ERROR:
     cancel-break: '{PREFIX} &cYou cannot break a queue sign manually! Please use the command ''/duels delsign'''
     already-in: '{PREFIX} &cYou are already in a queue!'
     not-enough-money: '{PREFIX} &cYou need $%bet_amount% to join that queue.'
-
-  lobby-save-failure: '{PREFIX} &cCould not save lobby location. Please check the console for more information.'
-  invalid-sub-command: '{PREFIX} &c''%argument%'' is not a valid sub command. Please type ''/%command%'' for help.'
+  sound:
+    not-found: '{PREFIX} &cNo sound exists with the name ''%name%''.'
+  command:
+    invalid-sub-command: '{PREFIX} &c''%argument%'' is not a valid sub command. Please type ''/%command%'' for help.'
+    invalid-option: '{PREFIX} &c''%option%'' is not a valid option.'
+    not-enough-money: '{PREFIX} &cYou do not have enough money to bet!'
+    lobby-save-failure: '{PREFIX} &cCould not save lobby location. Please check the console for more information.'
+    name-not-alphanumeric: '{PREFIX} &c''%input%'' is not alphanumeric.'
   prevent-teleportation: '{PREFIX} &cCannot teleport to a player in a duel.'
-  not-enough-money: '{PREFIX} &cYou do not have enough money to bet!'
-  name-not-alphanumeric: '{PREFIX} &c''%input%'' is not alphanumeric.'
 
-
+# todo remake usages & old msgs
 COMMAND:
   duel:
     usage:
@@ -162,10 +165,15 @@ COMMAND:
     savekit: '{PREFIX} &7Kit &3%name% &7was successfully saved.'
     deletekit: '{PREFIX} &7Kit &3%name% &7was successfully deleted.'
     loadkit: '{PREFIX} &7Kit &3%name% &7was loaded in your inventory.'
-    setitem: '{PREFIX} &7Kit %3%name%&7''s displayed item was changed to your held item.'
+    setitem: '{PREFIX} &7Kit &3%name%&7''s displayed item was changed to your held item.'
+    useoption: '{PREFIX} &7Option &f%option% &7of kit &3%kit% &7was set to &a%value%&7.'
     addsign: '{PREFIX} &7Created queue sign at &f%location% &7with kit &3%kit% &7and bet &6$%bet_amount%&7.'
     delsign: '{PREFIX} &7Removed queue sign at &f%location% &7with kit &3%kit% &7and bet &6$%bet_amount%&7.'
     setlobby: '{PREFIX} &7Duel lobby set at your current location.'
+    edit: '{PREFIX} &f%name%&7''s %type% was set to &f%amount%&7.'
+    setrating: '{PREFIX} &f%name%&7''s rating for kit &3%kit% &7was set to &a%rating%&7.'
+    resetrating: '{PREFIX} &7Reset &f%name%&7''s rating for kit &3%kit%&7.'
+    reset: '{PREFIX} &7Reset &f%name%&7''s stats.'
     info:
     - '{HALF_LINE} &7Arena &e%name% {HALF_LINE}'
     - '&7In Use: &r%in_use%'

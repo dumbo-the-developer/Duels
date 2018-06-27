@@ -42,7 +42,6 @@ import me.realized.duels.util.Log.LogSource;
 import me.realized.duels.util.Reloadable;
 import me.realized.duels.util.ServerUtil;
 import me.realized.duels.util.gui.GuiListener;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.inventivetalent.update.spiget.SpigetUpdate;
 import org.inventivetalent.update.spiget.UpdateCallback;
@@ -173,7 +172,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     public void onDisable() {
         unload();
         Log.clearSources();
-        Bukkit.getScheduler().cancelTasks(this);
     }
 
     /**

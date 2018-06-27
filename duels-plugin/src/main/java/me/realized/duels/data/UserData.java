@@ -74,6 +74,13 @@ public class UserData implements User {
         this.rating.put(name, rating);
     }
 
+    public void reset() {
+        setWins(0);
+        setLosses(0);
+        matches.clear();
+        rating.clear();
+    }
+
     @Override
     public void resetRating(@Nonnull final Kit kit) {
         Objects.requireNonNull(kit, "kit");

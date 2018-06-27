@@ -59,6 +59,18 @@ public interface User {
 
 
     /**
+     * @param requests true to allow sending duel requests to this user, otherwise false
+     */
+    void setRequests(final boolean requests);
+
+
+    /**
+     * @return List of recent matches for this user
+     */
+    List<? extends MatchInfo> getMatches();
+
+
+    /**
      * Method is thread-safe.
      *
      * @param kit Kit to check for rating
@@ -76,7 +88,7 @@ public interface User {
 
 
     /**
-     * @return List of recent matches for this user
+     * Resets user's wins, losses, recent matches, and rating for all kits.
      */
-    List<? extends MatchInfo> getMatches();
+    void reset();
 }

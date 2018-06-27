@@ -14,6 +14,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -126,5 +127,10 @@ public class GuiListener<P extends JavaPlugin> implements Loadable, Listener {
                 break;
             }
         }
+    }
+
+    @EventHandler
+    public void on(final PlayerQuitEvent event) {
+        privateGuis.removeAll(event.getPlayer().getUniqueId());
     }
 }

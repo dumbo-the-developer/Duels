@@ -10,7 +10,6 @@ import me.realized.duels.extra.Permissions;
 import me.realized.duels.util.DateUtil;
 import me.realized.duels.util.TextBuilder;
 import net.md_5.bungee.api.chat.HoverEvent.Action;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -30,25 +29,18 @@ public class StatsCommand extends BaseCommand {
                 return;
             }
 
-            final Player target = Bukkit.getPlayerExact(args[1]);
-
-            if (target == null || !player.canSee(target)) {
-                lang.sendMessage(sender, "ERROR.player.not-found", "name", args[1]);
-                return;
-            }
-
-            displayStats(player, target);
+            displayStats(player, args[1]);
             return;
         }
 
-        displayStats(player, player);
+        displayStats(player, player.getName());
     }
 
-    private void displayStats(final Player sender, final Player target) {
-        final UserData user = userManager.get(target);
+    private void displayStats(final Player sender, final String name) {
+        final UserData user = userManager.get(name);
 
         if (user == null) {
-            lang.sendMessage(sender, "ERROR.data.not-found", "player", target.getName());
+            lang.sendMessage(sender, "ERROR.data.not-found", "player", name);
             return;
         }
 

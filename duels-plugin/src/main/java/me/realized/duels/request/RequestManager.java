@@ -9,8 +9,11 @@ import me.realized.duels.config.Config;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.Loadable;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
 
-public class RequestManager implements Loadable {
+public class RequestManager implements Loadable, Listener {
 
     private final DuelsPlugin plugin;
     private final Config config;
@@ -19,17 +22,14 @@ public class RequestManager implements Loadable {
     public RequestManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @Override
-    public void handleLoad() {
-
-    }
+    public void handleLoad() {}
 
     @Override
-    public void handleUnload() {
-
-    }
+    public void handleUnload() {}
 
     private Map<UUID, Request> get(final Player player, final boolean create) {
         Map<UUID, Request> cached = requests.get(player.getUniqueId());
@@ -95,5 +95,10 @@ public class RequestManager implements Loadable {
         }
 
         return request;
+    }
+
+    @EventHandler
+    public void on(final PlayerQuitEvent event) {
+        requests.remove(event.getPlayer().getUniqueId());
     }
 }

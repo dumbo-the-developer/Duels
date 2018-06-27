@@ -132,7 +132,7 @@ public class DuelCommand extends BaseCommand {
             }
 
             if (!vault.getEconomy().has(player, amount)) {
-                lang.sendMessage(sender, "ERROR.not-enough-money");
+                lang.sendMessage(sender, "ERROR.command.not-enough-money");
                 return true;
             }
 
