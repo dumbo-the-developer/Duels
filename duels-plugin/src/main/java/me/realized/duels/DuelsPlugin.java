@@ -53,6 +53,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private static final String SPIGOT_INSTALLATION_URL = "https://www.spigotmc.org/wiki/spigot-installation/";
 
     @Getter
+    private static DuelsPlugin instance;
+
+    @Getter
     private final Gson gson = new GsonBuilder().excludeFieldsWithModifiers(Modifier.TRANSIENT).setPrettyPrinting().create();
     private final List<Loadable> loadables = new ArrayList<>();
     private int lastLoad;
@@ -96,6 +99,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     @Override
     public void onEnable() {
+        instance = this;
         Log.addSource(this);
         loadables.add(logManager = new LogManager(this));
         Log.addSource(logManager);
@@ -172,6 +176,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     public void onDisable() {
         unload();
         Log.clearSources();
+        instance = null;
     }
 
     /**
