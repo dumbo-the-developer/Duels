@@ -27,6 +27,7 @@ import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.player.PlayerInfo;
 import me.realized.duels.player.PlayerInfoManager;
+import me.realized.duels.queue.QueueManager;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.PlayerUtil;
@@ -70,6 +71,7 @@ public class DuelManager implements Loadable {
     private final PlayerInfoManager playerManager;
     private final InventoryManager inventoryManager;
 
+    private QueueManager queueManager;
     private Teleport teleport;
     private VaultHook vault;
     private EssentialsHook essentials;
@@ -89,6 +91,7 @@ public class DuelManager implements Loadable {
 
     @Override
     public void handleLoad() {
+        this.queueManager = plugin.getQueueManager();
         this.teleport = plugin.getTeleport();
         this.vault = plugin.getHookManager().getHook(VaultHook.class);
         this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
@@ -283,7 +286,7 @@ public class DuelManager implements Loadable {
         }
 
         arena.startMatch(kit, items, settings.getBet(), fromQueue);
-        addPlayers(arena, kit, arena.getPositions(), first, second);
+        addPlayers(fromQueue, arena, kit, arena.getPositions(), first, second);
 
         if (config.isCdEnabled()) {
             final Map<UUID, OpponentInfo> info = new HashMap<>();
@@ -321,10 +324,14 @@ public class DuelManager implements Loadable {
         return user != null ? user.getRating(kit) : config.getDefaultRating();
     }
 
-    private void addPlayers(final Arena arena, final Kit kit, final Map<Integer, Location> locations, final Player... players) {
+    private void addPlayers(final boolean fromQueue, final Arena arena, final Kit kit, final Map<Integer, Location> locations, final Player... players) {
         int position = 0;
 
         for (final Player player : players) {
+            if (!fromQueue) {
+                queueManager.remove(player);
+            }
+
             inventoryManager.remove(player);
 
             if (player.getAllowFlight()) {

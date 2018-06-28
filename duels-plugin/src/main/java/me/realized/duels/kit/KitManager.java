@@ -13,6 +13,7 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nonnull;
@@ -21,6 +22,7 @@ import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.kit.KitCreateEvent;
 import me.realized.duels.api.event.kit.KitRemoveEvent;
+import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.KitData;
 import me.realized.duels.util.Loadable;
@@ -33,23 +35,24 @@ import org.bukkit.entity.Player;
 public class KitManager implements Loadable, me.realized.duels.api.kit.KitManager {
 
     private final DuelsPlugin plugin;
+    private final Config config;
     private final Lang lang;
     private final File file;
-    private final Map<String, Kit> kits = new HashMap<>();
+    private final Map<String, Kit> kits = new LinkedHashMap<>();
 
     @Getter
     private MultiPageGui<DuelsPlugin> gui;
 
     public KitManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
+        this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
         this.file = new File(plugin.getDataFolder(), "kits.json");
     }
 
     @Override
     public void handleLoad() throws IOException {
-        // TODO: 28/06/2018 Define rows in config
-        gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.kit-selector.title"), 1, kits.values());
+        gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.kit-selector.title"), config.getKitSelectorRows(), kits.values());
         plugin.getGuiListener().addGui(gui);
 
         if (!file.exists()) {

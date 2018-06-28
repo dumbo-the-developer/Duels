@@ -14,7 +14,6 @@ import me.realized.duels.util.DateUtil;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log.LogSource;
 
-// TODO: 22/06/2018 Log matches
 public class LogManager implements Loadable, LogSource {
 
     @Getter

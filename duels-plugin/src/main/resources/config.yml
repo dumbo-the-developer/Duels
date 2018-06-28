@@ -23,7 +23,6 @@ request:
     # default: false
     use-permission: false
 
-  # Allow players to enable or disable item betting in the Setting GUI.
   item-betting:
     # If set to 'true', players will be able to choose to enable or disable item betting in the Setting GUI.
     # default: true
@@ -318,15 +317,23 @@ stats:
   # default: 10
   matches-to-display: 5
 
+
 top:
   # /duel top update interval, in minutes.
   # default: 5
   update-interval: 5
 
+
 guis:
   kit-selector:
+    # Amount of rows to display in one page of the kit selector GUI.
+    # NOTE: Must be in between 1 - 5!
+    # default: 2
     rows: 2
   arena-selector:
+    # Amount of rows to display in one page of the arena selector GUI.
+    # NOTE: Must be in between 1 - 5!
+    # default: 3
     rows: 3
 
 

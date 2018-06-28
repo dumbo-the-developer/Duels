@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
@@ -20,6 +21,8 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.QueueSignData;
+import me.realized.duels.data.UserData;
+import me.realized.duels.data.UserManager;
 import me.realized.duels.duel.DuelManager;
 import me.realized.duels.extra.Permissions;
 import me.realized.duels.hooks.VaultHook;
@@ -27,6 +30,7 @@ import me.realized.duels.kit.Kit;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
+import me.realized.duels.util.RatingUtil;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -36,16 +40,16 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-// TODO: 28/06/2018 Handle entering a duel while in a queue
 public class QueueManager implements Loadable, Listener {
 
     private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
+    private final UserManager userManager;
     private final DuelManager duelManager;
     private final File file;
     private final Map<Sign, QueueSign> signs = new HashMap<>();
-    private final Map<QueueSign, Queue<Player>> queues = new HashMap<>();
+    private final Map<QueueSign, LinkedList<Player>> queues = new HashMap<>();
 
     private VaultHook vault;
     private int queueTask;
@@ -54,6 +58,7 @@ public class QueueManager implements Loadable, Listener {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
+        this.userManager = plugin.getUserManager();
         this.duelManager = plugin.getDuelManager();
         this.file = new File(plugin.getDataFolder(), "signs.json");
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -86,20 +91,49 @@ public class QueueManager implements Loadable, Listener {
         Log.info(this, "Loaded " + signs.size() + " queue sign(s).");
 
         this.queueTask = plugin.doSyncRepeat(() -> queues.forEach((sign, queue) -> {
-            if (queue.size() >= 2) {
-                final Player first = queue.poll();
-                final Player second = queue.poll();
-                final Settings setting = new Settings(plugin);
-                setting.setKit(sign.getKit());
-                setting.setBet(sign.getBet());
+            final ListIterator<Player> iterator = queue.listIterator();
 
-                final String kit = sign.getKit() != null ? sign.getKit().getName() : "none";
-                lang.sendMessage(first, "SIGN.found-opponent", "name", second.getName(), "kit", kit, "bet_amount", sign.getBet());
-                lang.sendMessage(second, "SIGN.found-opponent", "name", first.getName(), "kit", kit, "bet_amount", sign.getBet());
-                duelManager.startMatch(first, second, setting, null, true);
-                signs.values().stream().filter(queueSign -> queueSign.equals(sign)).forEach(queueSign -> queueSign.setCount(queue.size()));
+            while (iterator.hasNext()) {
+                final Player current = iterator.next();
+
+                if (iterator.hasNext()) {
+                    final Player next = queue.get(iterator.nextIndex());
+
+                    if (!canFight(sign.getKit(), userManager.get(current), userManager.get(next))) {
+                        continue;
+                    }
+
+                    iterator.remove();
+                    iterator.next();
+                    iterator.remove();
+
+                    final Settings setting = new Settings(plugin);
+                    setting.setKit(sign.getKit());
+                    setting.setBet(sign.getBet());
+
+                    final String kit = sign.getKit() != null ? sign.getKit().getName() : "none";
+                    lang.sendMessage(current, "SIGN.found-opponent", "name", next.getName(), "kit", kit, "bet_amount", sign.getBet());
+                    lang.sendMessage(next, "SIGN.found-opponent", "name", current.getName(), "kit", kit, "bet_amount", sign.getBet());
+                    duelManager.startMatch(current, next, setting, null, true);
+                    signs.values().stream().filter(queueSign -> queueSign.equals(sign)).forEach(queueSign -> queueSign.setCount(queue.size()));
+                }
             }
         }), 20L, 40L);
+    }
+
+    private boolean canFight(final Kit kit, final UserData first, final UserData second) {
+        if (kit == null || !config.isRatingEnabled()) {
+            return true;
+        }
+
+        if (first != null && second != null) {
+            final int firstRating = first.getRating(kit);
+            final int secondRating = second.getRating(kit);
+            final int kFactor = config.getKFactor();
+            return RatingUtil.getChange(kFactor, firstRating, secondRating) != 0 && RatingUtil.getChange(kFactor, secondRating, firstRating) != 0;
+        }
+
+        return false;
     }
 
     @Override
@@ -145,6 +179,15 @@ public class QueueManager implements Loadable, Listener {
         }
 
         return queueSign;
+    }
+
+    public void remove(final Player player) {
+        queues.forEach((sign, queue) -> {
+            if (queue.remove(player)) {
+                lang.sendMessage(player, "SIGN.remove");
+                signs.values().stream().filter(queueSign -> queueSign.equals(sign)).forEach(queueSign -> queueSign.setCount(queue.size()));
+            }
+        });
     }
 
     public Queue<Player> get(final Player player) {

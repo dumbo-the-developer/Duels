@@ -16,11 +16,11 @@ import org.bukkit.entity.Player;
 
 public class Config extends AbstractConfiguration<DuelsPlugin> {
 
-    private final Map<String, MessageSound> sounds = new HashMap<>();
     @Getter
     private int version;
     @Getter
     private boolean checkForUpdates;
+
     @Getter
     private boolean requiresClearedInventory;
     @Getter
@@ -39,6 +39,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean moneyBettingUsePermission;
     @Getter
     private int expiration;
+
     @Getter
     private boolean useOwnInventoryEnabled;
     @Getter
@@ -81,6 +82,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private List<String> whitelistedCommands;
     @Getter
     private List<String> blacklistedCommands;
+
     @Getter
     private boolean ratingEnabled;
     @Getter
@@ -89,10 +91,12 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private int defaultRating;
     @Getter
     private boolean queueMatchesOnly;
+
     @Getter
     private boolean specRequiresClearedInventory;
     @Getter
     private List<String> specWhitelistedCommands;
+
     @Getter
     private boolean cdEnabled;
     @Getter
@@ -105,24 +109,35 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean preventLaunchProjectile;
     @Getter
     private boolean preventPvp;
+
     @Getter
     private boolean displayRatings;
     @Getter
     private boolean displayPastMatches;
     @Getter
     private int matchesToDisplay;
+
     @Getter
     private long topUpdateInterval;
+
+    @Getter
+    private int kitSelectorRows;
+    @Getter
+    private int arenaSelectorRows;
+
     @Getter
     private boolean soupEnabled;
     @Getter
     private String nameStartingWith;
     @Getter
     private double heartsToRegen;
+
     @Getter
     private boolean duelZoneEnabled;
     @Getter
     private List<String> duelZoneRegions;
+
+    private final Map<String, MessageSound> sounds = new HashMap<>();
 
     public Config(final DuelsPlugin plugin) {
         super(plugin, "config");
@@ -182,6 +197,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         displayPastMatches = configuration.getBoolean("stats.display-past-matches", true);
         matchesToDisplay = configuration.getInt("stats.matches-to-display", 10);
         topUpdateInterval = configuration.getInt("top.update-interval", 5) * 60L * 1000L;
+        kitSelectorRows = Math.min(Math.max(configuration.getInt("guis.kit-selector.rows", 2), 1), 5);
+        arenaSelectorRows = Math.min(Math.max(configuration.getInt("guis.arena-selector.rows", 3), 1), 5);
         soupEnabled = configuration.getBoolean("soup.enabled", true);
         nameStartingWith = configuration.getString("soup.arena-name-starting-with", "soup arena");
         heartsToRegen = configuration.getDouble("soup.hearts-to-regen", 3.5);

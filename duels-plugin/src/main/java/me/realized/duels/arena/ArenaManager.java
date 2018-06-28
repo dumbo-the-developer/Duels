@@ -61,7 +61,7 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
 
     @Override
     public void handleLoad() throws IOException {
-        gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.arena-selector.title"), 1, arenas);
+        gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.arena-selector.title"), config.getArenaSelectorRows(), arenas);
         plugin.getGuiListener().addGui(gui);
 
         if (config.isCdEnabled()) {
