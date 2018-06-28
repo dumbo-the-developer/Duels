@@ -15,16 +15,12 @@ ERROR:
   data:
     load-failure: '{PREFIX} &cCould not load your duel stats. Please try re-logging.'
     not-loaded: '{PREFIX} &cUsers are still under load, please try again later.'
-    not-found: '{PREFIX} &c%player% has no duel stats available.'
+    not-found: '{PREFIX} &c%name% has no duel stats available.'
   top:
     no-data-available: '{PREFIX} &cThere were no data available.'
   player:
     not-found: '{PREFIX} &c%name% is not online.'
     no-longer-online: '{PREFIX} &cThat player is no longer online.'
-    is-self: '{PREFIX} &cYou cannot duel yourself.'
-    inventory-not-empty: '{PREFIX} &cYou must have a cleared inventory to use this command.'
-    in-creative-mode: '{PREFIX} &cYou cannot duel in creative mode.'
-    not-in-duelzone: '{PREFIX} &cYou can only duel in the following regions: %regions%'
   arena:
     not-found: '{PREFIX} &cNo arena exists with the name ''%name%''.'
     already-exists: '{PREFIX} &cAn arena named ''%name%'' already exists.'
@@ -35,16 +31,20 @@ ERROR:
     already-exists: '{PREFIX} &cAn arena named ''%name%'' already exists.'
     empty-hand: '{PREFIX} &cYou must be holding an item to use this command.'
   duel:
-    requests-disabled: '{PREFIX} &c%player% is currently not accepting duel requests.'
-    already-has-request: '{PREFIX} &cYou already have a request sent to %player%.'
-    no-request: '{PREFIX} &cYou do not have a request from %player%.'
+    is-self: '{PREFIX} &cYou cannot duel yourself.'
+    inventory-not-empty: '{PREFIX} &cYou must have a cleared inventory to use this command.'
+    in-creative-mode: '{PREFIX} &cYou cannot duel in creative mode.'
+    not-in-duelzone: '{PREFIX} &cYou can only duel in the following regions: %regions%'
+    requests-disabled: '{PREFIX} &c%name% is currently not accepting duel requests.'
+    already-has-request: '{PREFIX} &cYou already have a request sent to %name%.'
+    no-request: '{PREFIX} &cYou do not have a request from %name%.'
     already-in-match:
       sender: '{PREFIX} &cYou cannot do this while in a duel.'
-      target: '{PREFIX} &c%player% is already in a duel.'
+      target: '{PREFIX} &c%name% is already in a duel.'
+    prevent-teleportation: '{PREFIX} &cCannot teleport to a player in a duel.'
   spectate:
     already-spectating:
       sender: '{PREFIX} &cYou cannot do this while in spectator mode.'
-      # todo unused
       target: '{PREFIX} &c%name% is in spectator mode.'
     not-in-match: '{PREFIX} &c%name% is not in a duel.'
   setting:
@@ -67,25 +67,23 @@ ERROR:
     not-enough-money: '{PREFIX} &cYou do not have enough money to bet!'
     lobby-save-failure: '{PREFIX} &cCould not save lobby location. Please check the console for more information.'
     name-not-alphanumeric: '{PREFIX} &c''%input%'' is not alphanumeric.'
-  prevent-teleportation: '{PREFIX} &cCannot teleport to a player in a duel.'
 
-# todo remake usages & old msgs
 COMMAND:
   duel:
     usage:
     - '{LINE}'
-    - '&f/duel [player] &e- &7Sends a duel request to selected player.'
-    - '&f/duel [player] [amount] &e- &7Sends a duel request with given bet.'
+    - '&f/duel [player] &e- &7Sends a duel request to player.'
+    - '&f/duel [player] <amount> &e- &7Sends a duel request with a bet.'
     - '&f/duel [accept | deny] [player] &e- &7Accepts or denies a duel request.'
-    - '&f/duel stats [player] &e- &7Displays your duel stats.'
+    - '&f/duel stats <name> &e- &7Displays your duel stats.'
     - '&f/duel toggle &e- &7Enable or disable receiving duel requests.'
-    - '&f/duel top [wins|losses] &e- &7Displays top duel wins & losses.'
+    - '&f/duel top [wins|losses|kit] &e- &7Displays top wins, losses, or rating for the kit.'
     - '{LINE}'
     request:
-      sent:
+      send:
         sender:
         - '{LINE}'
-        - '&7Duel request sent to &f%player%&7.'
+        - '&7Duel request sent to &f%name%&7.'
         - '&6- &7Kit: &3%kit%'
         - '&6- &7Arena: &e%arena%'
         - '&6- &7Bet: &6$%bet_amount%'
@@ -93,7 +91,7 @@ COMMAND:
         - '{LINE}'
         receiver:
         - '{LINE}'
-        - '&7Duel request received from &f%player%&7.'
+        - '&7Duel request received from &f%name%&7.'
         - '&6- &7Kit: &3%kit%'
         - '&6- &7Arena: &e%arena%'
         - '&6- &7Bet: &6$%bet_amount%'
@@ -103,16 +101,16 @@ COMMAND:
           accept: '&a&l[ACCEPT] '
           deny: '&c&l[DENY]'
           extra: '{LINE}'
-      accepted:
-        sender: '{PREFIX} &f%player% &7has accepted your duel request.'
-        receiver: '{PREFIX} &7Accepted the duel request from &f%player%&7.'
-      denied:
-        sender: '{PREFIX} &7Your duel request to &f%player% &7was denied.'
-        receiver: '{PREFIX} &7Denied the duel request from &f%player%&7.'
+      accept:
+        sender: '{PREFIX} &f%name% &7has accepted your duel request.'
+        receiver: '{PREFIX} &7Accepted the duel request from &f%name%&7.'
+      deny:
+        sender: '{PREFIX} &7Your duel request to &f%name% &7was denied.'
+        receiver: '{PREFIX} &7Denied the duel request from &f%name%&7.'
     stats:
       displayed:
       - '{LINE}'
-      - '&7Stats of &f%player% &e-'
+      - '&7Stats of &f%name% &e-'
       - '&7Wins: &a%wins%'
       - '&7Losses: &c%losses%'
       - '&7W/L Ratio: &b%wl_ratio%'
@@ -139,40 +137,70 @@ COMMAND:
       header: '{HALF_LINE} &7Top &f10 &7%type% {HALF_LINE}'
       display-format: '&e%rank%. &f%name% &e- &f%score% &7%identifier%'
       footer: '{HALF_LINE} &7Top &f10 &7%type% {HALF_LINE}'
+
   duels:
     usage:
     - '{LINE}'
-    - '&f/duels edit [player] [add|remove|set] [wins|losses] [quantity] &e- &7Edit player''s stats.'
-    - '&f/duels create [name] &e- &7Create an arena.'
-    - '&f/duels set [name] [1|2] &e- &7Set spawn position for arena.'
-    - '&f/duels delete [name] &e- &7Remove an arena.'
-    - '&f/duels list &e- &7Displays the lobby location and lists arenas and kits.'
-    - '&f/duels toggle [name] &e- &7Enable/Disable an arena.'
-    - '&f/duels info [name] &e- &7Show arena information.'
-    - '&f/duels savekit [name] &e- &7Save a new kit with your inventory contents.'
-    - '&f/duels deletekit [name] &e- &7Delete a kit with the given name.'
-    - '&f/duels loadkit [name] &e- &7Load a kit with the given name.'
-    - '&f/duels setlobby &e- &7Set duel lobby on your current location.'
-    - '&f/duels setitem [name] &e- &7Replaces the displayed item to held item for selected kit.'
-    - '&f/duels reset [player] &e- &7Completely reset a player''s stats.'
-    - '&f/duels playsound [name] &e- &7Plays the selected sound if exists in config.'
-    - '&f/duels reload [module] &e- &7Reloads the plugin or the selected module.'
+    - '&f/duels help &e- &7Displays this page.'
+    - '&f/duels help arena &e- &7Displays a list of arena commands.'
+    - '&f/duels help kit &e- &7Displays a list of kit commands.'
+    - '&f/duels help sign &e- &7Displays a list of sign commands.'
+    - '&f/duels help user &e- &7Displays a list of user edit commands.'
+    - '&f/duels help extra &e- &7Displays a list of extra commands.'
     - '{LINE}'
+    help:
+      arena:
+      - '{HALF_LINE} &fArena Commands {HALF_LINE}'
+      - '&f/duel create [name] &e- &7Creates an arena with given name.'
+      - '&f/duel set [name] [1|2] &e- &7Sets the teleport position of an arena.'
+      - '&f/duel delete [name] &e- &7Deletes an arena.'
+      - '&f/duel info [name] &e- &7Displays information about the selected arena.'
+      - '&f/duel toggle [name] &e- &7Enables or disables an arena.'
+      - '&f/duels list &e- &7Displays a list of arenas.'
+      - '{HALF_LINE} &fArena Commands {HALF_LINE}'
+      kit:
+      - '{HALF_LINE} &fKit Commands {HALF_LINE}'
+      - '&f/duel savekit [name] &e- &7Saves a kit with given name.'
+      - '&f/duel loadkit [name] &e- &7Loads the selected kit to your inventory.'
+      - '&f/duel deletekit [name] &e- &7Deletes a kit.'
+      - '&f/duel setitem [name] &e- &7Sets the displayed item for selected kit.'
+      - '&f/duel useoption [kit] [usepermission:arenaspecific] &e- &7Enable or disable options for kit.'
+      - '&f/duels list &e- &7Displays a list of kits.'
+      - '{HALF_LINE} &fKit Commands {HALF_LINE}'
+      sign:
+      - '{HALF_LINE} &fQueue Sign Commands {HALF_LINE}'
+      - '&f/duel addsign [kit] [bet] &e- &7Creates a queue sign with kit and bet.'
+      - '&f/duel delsign &e- &7Deletes the queue sign you are looking at.'
+      - '&f/duels list &e- &7Displays a list of queue signs.'
+      - '{HALF_LINE} &fQueue Sign Commands {HALF_LINE}'
+      user:
+      - '{HALF_LINE} &fUser Edit Commands {HALF_LINE}'
+      - '&f/duel setrating [name] [kit] [amount] &e- &7Sets player''s rating for kit.'
+      - '&f/duel edit [name] [wins|losses] [amount] &e- &7Sets player''s wins or losses to given amount.'
+      - '&f/duel resetrating [name] [kit:all] &e- &7Resets all or specified kit''s rating for player.'
+      - '&f/duel reset [name] &e- &7Resets player''s stats.'
+      - '{HALF_LINE} &fUser Edit Commands {HALF_LINE}'
+      extra:
+      - '{HALF_LINE} &fExtra Commands {HALF_LINE}'
+      - '&f/duel setlobby &e- &7Sets duel lobby location.'
+      - '&f/duel playsound [name] &e- &7Plays the selected sound if defined in config.'
+      - '&f/duel reload <module> &e- &7Reloads the plugin or the specified module.'
+      - '{HALF_LINE} &fExtra Commands {HALF_LINE}'
     create: '{PREFIX} &7Arena &e%name% &7was successfully created. To set spawnpoints for this arena, use the command &f/duels set %name% 1'
     delete: '{PREFIX} &7Arena &e%name% &7was successfully deleted.'
     set: '{PREFIX} &7Set position &f%position% &7for arena &e%name% &7at &f%location%&7.'
     toggle: '{PREFIX} &7Arena &e%name% &7is now &r%state%&7.'
-    savekit: '{PREFIX} &7Kit &3%name% &7was successfully saved.'
-    deletekit: '{PREFIX} &7Kit &3%name% &7was successfully deleted.'
-    loadkit: '{PREFIX} &7Kit &3%name% &7was loaded in your inventory.'
-    setitem: '{PREFIX} &7Kit &3%name%&7''s displayed item was changed to your held item.'
-    useoption: '{PREFIX} &7Option &f%option% &7of kit &3%kit% &7was set to &a%value%&7.'
-    addsign: '{PREFIX} &7Created queue sign at &f%location% &7with kit &3%kit% &7and bet &6$%bet_amount%&7.'
-    delsign: '{PREFIX} &7Removed queue sign at &f%location% &7with kit &3%kit% &7and bet &6$%bet_amount%&7.'
-    setlobby: '{PREFIX} &7Duel lobby set at your current location.'
+    save-kit: '{PREFIX} &7Kit &3%name% &7was successfully saved.'
+    delete-kit: '{PREFIX} &7Kit &3%name% &7was successfully deleted.'
+    load-kit: '{PREFIX} &7Kit &3%name% &7was loaded in your inventory.'
+    set-item: '{PREFIX} &7Kit &3%name%&7''s displayed item was changed to your held item.'
+    use-option: '{PREFIX} &7Option &f%option% &7of kit &3%kit% &7was set to &a%value%&7.'
+    add-sign: '{PREFIX} &7Created queue sign at &f%location% &7with kit &3%kit% &7and bet &6$%bet_amount%&7.'
+    del-sign: '{PREFIX} &7Removed queue sign at &f%location% &7with kit &3%kit% &7and bet &6$%bet_amount%&7.'
+    set-lobby: '{PREFIX} &7Duel lobby set at your current location.'
     edit: '{PREFIX} &f%name%&7''s %type% was set to &f%amount%&7.'
-    setrating: '{PREFIX} &f%name%&7''s rating for kit &3%kit% &7was set to &a%rating%&7.'
-    resetrating: '{PREFIX} &7Reset &f%name%&7''s rating for kit &3%kit%&7.'
+    set-rating: '{PREFIX} &f%name%&7''s rating for kit &3%kit% &7was set to &a%rating%&7.'
+    reset-rating: '{PREFIX} &7Reset &f%name%&7''s rating for kit &3%kit%&7.'
     reset: '{PREFIX} &7Reset &f%name%&7''s stats.'
     info:
     - '{HALF_LINE} &7Arena &e%name% {HALF_LINE}'
@@ -199,21 +227,24 @@ COMMAND:
     - '{LINE}'
     - '&f/spectate [player] &e- &7Spectates the target player.'
     - '{LINE}'
+    start-spectate: '{PREFIX} &7You are now spectating &f%name%&7.'
+    stop-spectate: '{PREFIX} &7You are no longer spectating &f%name%&7.'
 
   sub-command-usage: '{PREFIX} &f/%command% %usage% &e- &7%description%'
 
 
 DUEL:
-  prevent-item-drop: '&cYou cannot drop items while in a duel.'
-  prevent-command: '&cYou cannot use ''%command%'' while in a duel.'
-  prevent-teleportation: '&cYou cannot teleport while in a duel.'
-  prevent-inventory-open: '&cYou cannot open inventories while in a duel.'
+  prevent:
+    item-drop: '&cYou cannot drop items while in a duel.'
+    command: '&cYou cannot use ''%command%'' while in a duel.'
+    teleportation: '&cYou cannot teleport while in a duel.'
+    inventory-open: '&cYou cannot open inventories while in a duel.'
   start-failure:
     no-kit-selected: '{FAIL_PREFIX} No kit was selected!'
     player-moved: '{FAIL_PREFIX} You or your opponent moved after sending/accepting the request!'
     no-arena-available: '{FAIL_PREFIX} No arena is currently available. Please try again later.'
     arena-in-use: '{FAIL_PREFIX} That arena is already in use. Please select a different arena.'
-    not-enough-money: '{FAIL_PREFIX} You or your opponent lacks $%bet%.'
+    not-enough-money: '{FAIL_PREFIX} You or your opponent lacks $%bet_amount%.'
   on-end:
     tie: '{PREFIX} &7Tie Game!'
     plugin-disable: '{PREFIX} &cPlugin is disabling! Ending match automatically.'
@@ -235,15 +266,13 @@ SIGN:
 
 
 SPECTATE:
-  start: '{PREFIX} &7You are now spectating &f%name%&7.'
   arena-broadcast: '{PREFIX} &f%name% &7is now spectating the match!'
-  stop: '{PREFIX} &7You are no longer spectating &f%name%&7.'
-  end: '{PREFIX} &7The match you were spectating has ended.'
-  prevent-item-drop: '&cYou cannot drop items while in spectator mode.'
-  prevent-command: '&cYou cannot use ''%command%'' while in spectator mode.'
-  prevent-teleportation: '&cYou cannot teleport while in spectator mode.'
-  prevent-attack: '&cYou cannot do this while in spectator mode.'
-
+  match-end: '{PREFIX} &7The match you were spectating has ended.'
+  prevent:
+    item-drop: '&cYou cannot drop items while in spectator mode.'
+    command: '&cYou cannot use ''%command%'' while in spectator mode.'
+    teleportation: '&cYou cannot teleport while in spectator mode.'
+    pvp: '&cYou cannot do this while in spectator mode.'
 
 GUI:
   settings:
@@ -279,6 +308,8 @@ GUI:
         - '&aClick to Change Arena!'
         lore-disabled:
         - '&cThis option is currently disabled.'
+        - '&cA random arena will be picked'
+        - '&cfor the duel.'
         lore-no-permission:
         - '&cYou do not have permission to'
         - '&cuse this option.'

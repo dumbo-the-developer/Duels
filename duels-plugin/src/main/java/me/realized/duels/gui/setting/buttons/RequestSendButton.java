@@ -36,7 +36,7 @@ public class RequestSendButton extends BaseButton {
         }
 
         if (!config.isUseOwnInventoryEnabled() && settings.getKit() == null) {
-            lang.sendMessage(player, "DUEL.no-selected-kit");
+            player.closeInventory();
             return;
         }
 
@@ -52,12 +52,12 @@ public class RequestSendButton extends BaseButton {
         final int betAmount = settings.getBet();
         final String itemBetting = settings.isItemBetting() ? "&aenabled" : "&cdisabled";
 
-        lang.sendMessage(player, "COMMAND.duel.request.sent.sender",
-            "player", target.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
-        lang.sendMessage(target, "COMMAND.duel.request.sent.receiver",
-            "player", player.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
+        lang.sendMessage(player, "COMMAND.duel.request.send.sender",
+            "name", target.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
+        lang.sendMessage(target, "COMMAND.duel.request.send.receiver",
+            "name", player.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
 
-        final String path = "COMMAND.duel.request.sent.clickable-text.";
+        final String path = "COMMAND.duel.request.send.clickable-text.";
 
         TextBuilder
             .of(lang.getMessage(path + "info"))

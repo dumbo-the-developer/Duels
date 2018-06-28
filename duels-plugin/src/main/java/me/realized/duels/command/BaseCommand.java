@@ -1,5 +1,9 @@
 package me.realized.duels.command;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.betting.BettingManager;
@@ -15,10 +19,10 @@ import me.realized.duels.queue.QueueManager;
 import me.realized.duels.request.RequestManager;
 import me.realized.duels.setting.SettingsManager;
 import me.realized.duels.spectate.SpectateManager;
+import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.command.AbstractCommand;
 import org.bukkit.command.CommandSender;
 
-// TODO: 27/06/2018 Rewrite usages for all subcommands & add it to usage in lang
 public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
 
     protected final DuelsPlugin plugin;
@@ -91,5 +95,14 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
                 lang.sendMessage(sender, "COMMAND.sub-command-usage", "command", args[0], "usage", args[1], "description", args[2]);
                 break;
         }
+    }
+
+    protected <V> List<String> handleTabCompletion(final CommandSender sender, final String arg, final String type, final Collection<V> collection,
+        final Function<V, String> function) {
+        sender.sendMessage(StringUtil.color("&e&l(!) &r&eSpaces in " + type + " name has been replaced to a dash to support tab completion."));
+        return collection.stream()
+            .filter(value -> function.apply(value).toLowerCase().startsWith(arg))
+            .map(value -> function.apply(value).replace(" ", "-"))
+            .collect(Collectors.toList());
     }
 }

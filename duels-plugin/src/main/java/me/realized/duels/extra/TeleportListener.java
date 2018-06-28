@@ -47,7 +47,7 @@ public class TeleportListener implements Listener {
             }
 
             event.setCancelled(true);
-            lang.sendMessage(player, "ERROR.prevent-teleportation");
+            lang.sendMessage(player, "ERROR.duel.prevent-teleportation");
             return;
         }
     }

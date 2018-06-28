@@ -39,8 +39,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class UserManager implements Loadable, Listener, me.realized.duels.api.user.UserManager {
 
-    private static final long UPDATE_INTERVAL = 1000 * 60;
-
     private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
@@ -130,16 +128,14 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
                     return;
                 }
 
-                List<Pair<String, Integer>> result;
+                TopEntry top;
 
-                if (wins == null || System.currentTimeMillis() - wins.getCreation() >= UPDATE_INTERVAL) {
-                    result = sorted(User::getWins);
-                    wins = new TopEntry("Wins", "wins", subList(result, 10));
+                if ((top = get(config.getTopUpdateInterval(), wins, User::getWins, "Wins", "wins")) != null) {
+                    wins = top;
                 }
 
-                if (losses == null || System.currentTimeMillis() - losses.getCreation() >= UPDATE_INTERVAL) {
-                    result = sorted(User::getLosses);
-                    losses = new TopEntry("Losses", "losses", subList(result, 10));
+                if ((top = get(config.getTopUpdateInterval(), losses, User::getLosses, "Losses", "losses")) != null) {
+                    losses = top;
                 }
 
                 topRatings.keySet().removeIf(kit -> !kits.contains(kit));
@@ -147,9 +143,8 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
                 for (final Kit kit : kits) {
                     final TopEntry entry = topRatings.get(kit);
 
-                    if (entry == null || System.currentTimeMillis() - entry.getCreation() >= UPDATE_INTERVAL) {
-                        result = sorted(user -> user.getRating(kit));
-                        topRatings.put(kit, new TopEntry(kit.getName(), "rating", subList(result, 10)));
+                    if ((top = get(config.getTopUpdateInterval(), entry, user -> user.getRating(kit), kit.getName(), "rating")) != null) {
+                        topRatings.put(kit, top);
                     }
                 }
             });
@@ -203,8 +198,20 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
         return topRatings.get(kit);
     }
 
-    private List<Pair<String, Integer>> subList(final List<Pair<String, Integer>> list, final int max) {
-        return Collections.unmodifiableList(Lists.newArrayList(list.size() > 10 ? list.subList(0, max) : list));
+    public String getNextUpdate(final long creation) {
+        return DateUtil.format((creation + config.getTopUpdateInterval() - System.currentTimeMillis()) / 1000L);
+    }
+
+    private TopEntry get(final long interval, final TopEntry previous, final Function<User, Integer> function, final String name, final String type) {
+        if (previous == null || System.currentTimeMillis() - previous.getCreation() >= interval) {
+            return new TopEntry(name, type, subList(sorted(function)));
+        }
+
+        return null;
+    }
+
+    private List<Pair<String, Integer>> subList(final List<Pair<String, Integer>> list) {
+        return Collections.unmodifiableList(Lists.newArrayList(list.size() > 10 ? list.subList(0, 10) : list));
     }
 
     private <V extends Comparable<V>> List<Pair<String, V>> sorted(final Function<User, V> function) {
@@ -212,16 +219,6 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
             .map(data -> new Pair<>(data.getName(), function.apply(data)))
             .sorted(Comparator.reverseOrder())
             .collect(Collectors.toList());
-    }
-
-    private void saveUsers(final Collection<? extends Player> players) {
-        for (final Player player : players) {
-            final UserData user = users.remove(player.getUniqueId());
-
-            if (user != null) {
-                user.trySave();
-            }
-        }
     }
 
     private UserData tryLoad(final Player player) {
@@ -250,6 +247,16 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
             ex.printStackTrace();
             Log.error("An error occured while loading userdata of " + player.getName() + ": " + ex.getMessage());
             return null;
+        }
+    }
+
+    private void saveUsers(final Collection<? extends Player> players) {
+        for (final Player player : players) {
+            final UserData user = users.remove(player.getUniqueId());
+
+            if (user != null) {
+                user.trySave();
+            }
         }
     }
 
@@ -282,14 +289,16 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
 
     @EventHandler
     public void on(final PlayerQuitEvent event) {
-        final UserData user = users.remove(event.getPlayer().getUniqueId());
+        final UUID uuid = event.getPlayer().getUniqueId();
+        final UserData user = users.remove(uuid);
 
         if (user != null) {
-            plugin.doAsync(user::trySave);
-        }
-    }
+            plugin.doAsync(() -> {
+                user.trySave();
 
-    public String getNextUpdate(final long creation) {
-        return DateUtil.format((creation + UPDATE_INTERVAL - System.currentTimeMillis()) / 1000L);
+                // Put data back after saving to prevent concurrency issues
+                users.put(uuid, user);
+            });
+        }
     }
 }

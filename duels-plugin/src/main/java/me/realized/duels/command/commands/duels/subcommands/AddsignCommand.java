@@ -1,5 +1,7 @@
 package me.realized.duels.command.commands.duels.subcommands;
 
+import java.util.Arrays;
+import java.util.List;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.kit.Kit;
@@ -9,6 +11,7 @@ import me.realized.duels.util.StringUtil;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -28,7 +31,7 @@ public class AddsignCommand extends BaseCommand {
             return;
         }
 
-        final String name = StringUtils.join(args, " ", 1, args.length - 1);
+        final String name = StringUtils.join(args, " ", 1, args.length - 1).replace("-", " ");
         final Kit kit = kitManager.get(name);
 
         if (!config.isUseOwnInventoryEnabled() && kit == null) {
@@ -45,6 +48,19 @@ public class AddsignCommand extends BaseCommand {
 
         final Location location = sign.getLocation();
         final String kitName = kit != null ? kit.getName() : "none";
-        lang.sendMessage(sender, "COMMAND.duels.addsign", "location", StringUtil.parse(location), "kit", kitName, "bet_amount", bet);
+        lang.sendMessage(sender, "COMMAND.duels.add-sign", "location", StringUtil.parse(location), "kit", kitName, "bet_amount", bet);
+    }
+
+    @Override
+    public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
+        if (args.length == 2) {
+            return handleTabCompletion(sender, args[1], "kit", kitManager.getKits(), Kit::getName);
+        }
+
+        if (args.length > 2) {
+            return Arrays.asList("10", "50", "100", "500", "1000");
+        }
+
+        return null;
     }
 }

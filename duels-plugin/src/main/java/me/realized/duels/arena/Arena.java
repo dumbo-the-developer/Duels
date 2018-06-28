@@ -44,7 +44,12 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
     private Countdown countdown;
 
     public Arena(final DuelsPlugin plugin, final String name) {
-        super(plugin, ItemBuilder.of(Material.EMPTY_MAP).name(plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.name", "name", name)).build());
+        super(plugin, ItemBuilder
+            .of(Material.EMPTY_MAP)
+            .name(plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.name", "name", name))
+            .lore(plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.lore-unavailable").split("\n"))
+            .build()
+        );
         this.name = name;
     }
 

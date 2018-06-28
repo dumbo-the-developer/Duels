@@ -28,6 +28,7 @@ import me.realized.duels.data.ArenaData;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
+import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.gui.MultiPageGui;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
@@ -74,7 +75,14 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
                 final List<ArenaData> data = plugin.getGson().fromJson(reader, new TypeToken<List<ArenaData>>() {}.getType());
 
                 if (data != null) {
-                    data.forEach(arenaData -> arenas.add(arenaData.toArena(plugin)));
+                    for (final ArenaData arenaData : data) {
+                        if (!StringUtil.isAlphanumeric(arenaData.getName())) {
+                            Log.warn(this, "Excluding arena '" + arenaData.getName() + "' from load: Name is not alphanumeric.");
+                            continue;
+                        }
+
+                        arenas.add(arenaData.toArena(plugin));
+                    }
                 }
             }
         }

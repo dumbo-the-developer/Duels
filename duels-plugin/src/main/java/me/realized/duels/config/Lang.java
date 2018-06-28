@@ -29,10 +29,9 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
 
     @Override
     protected void loadValues(FileConfiguration configuration) throws IOException {
-        // TODO: 26/04/2018 Temp disabled to allow /reload, enable later
-//        if (configuration.getInt("config-version") < getLatestVersion()) {
-//            configuration = convert(null);
-//        }
+        if (configuration.getInt("config-version") < getLatestVersion()) {
+            configuration = convert(null);
+        }
 
         final Map<String, String> strings = new HashMap<>();
 

@@ -36,6 +36,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+// TODO: 28/06/2018 Handle entering a duel while in a queue
 public class QueueManager implements Loadable, Listener {
 
     private final DuelsPlugin plugin;

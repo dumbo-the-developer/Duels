@@ -1,8 +1,10 @@
 package me.realized.duels.config;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.util.EnumUtil;
@@ -116,6 +118,9 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private int matchesToDisplay;
 
     @Getter
+    private long topUpdateInterval;
+
+    @Getter
     private boolean soupEnabled;
     @Getter
     private String nameStartingWith;
@@ -133,7 +138,11 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     }
 
     @Override
-    protected void loadValues(final FileConfiguration configuration) {
+    protected void loadValues(FileConfiguration configuration) throws IOException {
+        if (configuration.getInt("config-version") < getLatestVersion()) {
+            configuration = convert(null);
+        }
+
         version = configuration.getInt("config-version");
         checkForUpdates = configuration.getBoolean("check-for-updates", true);
         requiresClearedInventory = configuration.getBoolean("request.requires-cleared-inventory", true);
@@ -181,6 +190,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         displayRatings = configuration.getBoolean("stats.display-ratings", true);
         displayPastMatches = configuration.getBoolean("stats.display-past-matches", true);
         matchesToDisplay = configuration.getInt("stats.matches-to-display", 10);
+        topUpdateInterval = configuration.getInt("top.update-interval", 5) * 60L * 1000L;
         soupEnabled = configuration.getBoolean("soup.enabled", true);
         nameStartingWith = configuration.getString("soup.arena-name-starting-with", "soup arena");
         heartsToRegen = configuration.getDouble("soup.hearts-to-regen", 3.5);
@@ -211,6 +221,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
 
     public MessageSound getSound(final String name) {
         return sounds.get(name);
+    }
+
+    public Set<String> getSounds() {
+        return sounds.keySet();
     }
 
     public class MessageSound {

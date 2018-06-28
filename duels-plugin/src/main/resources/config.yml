@@ -318,6 +318,10 @@ stats:
   # default: 10
   matches-to-display: 5
 
+top:
+  # /duel top update interval, in minutes.
+  # default: 5
+  update-interval: 5
 
 guis:
   kit-selector:

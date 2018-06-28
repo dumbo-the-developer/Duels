@@ -62,22 +62,27 @@ public class DuelCommand extends BaseCommand {
         }
 
         if (config.isRequiresClearedInventory() && InventoryUtil.hasItem(player)) {
-            lang.sendMessage(sender, "ERROR.player.inventory-not-empty");
+            lang.sendMessage(sender, "ERROR.duel.inventory-not-empty");
             return true;
         }
 
         if (config.isPreventCreativeMode() && player.getGameMode() == GameMode.CREATIVE) {
-            lang.sendMessage(sender, "ERROR.player.in-creative-mode");
+            lang.sendMessage(sender, "ERROR.duel.in-creative-mode");
             return true;
         }
 
         if (config.isDuelZoneEnabled() && worldGuard != null && !worldGuard.inDuelZone(player)) {
-            lang.sendMessage(sender, "ERROR.player.not-in-duelzone", "regions", config.getDuelZoneRegions());
+            lang.sendMessage(sender, "ERROR.duel.not-in-duelzone", "regions", config.getDuelZoneRegions());
             return true;
         }
 
         if (arenaManager.isInMatch(player)) {
             lang.sendMessage(sender, "ERROR.duel.already-in-match.sender");
+            return true;
+        }
+
+        if (spectateManager.isSpectating(player)) {
+            lang.sendMessage(sender, "ERROR.spectate.already-spectating.sender");
             return true;
         }
 
@@ -89,29 +94,34 @@ public class DuelCommand extends BaseCommand {
         }
 
         if (player.equals(target)) {
-            lang.sendMessage(sender, "ERROR.player.is-self");
+            lang.sendMessage(sender, "ERROR.duel.is-self");
             return true;
         }
 
         final UserData user = userManager.get(target);
 
         if (user == null) {
-            lang.sendMessage(sender, "ERROR.data.not-found", "player", target.getName());
+            lang.sendMessage(sender, "ERROR.data.not-found", "name", target.getName());
             return true;
         }
 
         if (!sender.hasPermission(Permissions.ADMIN) && !user.canRequest()) {
-            lang.sendMessage(sender, "ERROR.duel.requests-disabled", "player", target.getName());
+            lang.sendMessage(sender, "ERROR.duel.requests-disabled", "name", target.getName());
             return true;
         }
 
         if (requestManager.has(player, target)) {
-            lang.sendMessage(sender, "ERROR.duel.already-has-request", "player", target.getName());
+            lang.sendMessage(sender, "ERROR.duel.already-has-request", "name", target.getName());
             return true;
         }
 
         if (arenaManager.isInMatch(target)) {
-            lang.sendMessage(sender, "ERROR.duel.already-in-match.target", "player", target.getName());
+            lang.sendMessage(sender, "ERROR.duel.already-in-match.target", "name", target.getName());
+            return true;
+        }
+
+        if (spectateManager.isSpectating(target)) {
+            lang.sendMessage(sender, "ERROR.spectate.already-spectating.target", "name", target.getName());
             return true;
         }
 

@@ -25,22 +25,27 @@ public class AcceptCommand extends BaseCommand {
         final Player player = (Player) sender;
 
         if (config.isRequiresClearedInventory() && InventoryUtil.hasItem(player)) {
-            lang.sendMessage(sender, "ERROR.player.inventory-not-empty");
+            lang.sendMessage(sender, "ERROR.duel.inventory-not-empty");
             return;
         }
 
         if (config.isPreventCreativeMode() && player.getGameMode() == GameMode.CREATIVE) {
-            lang.sendMessage(sender, "ERROR.player.in-creative-mode");
+            lang.sendMessage(sender, "ERROR.duel.in-creative-mode");
             return;
         }
 
         if (config.isDuelZoneEnabled() && worldGuard != null && !worldGuard.inDuelZone(player)) {
-            lang.sendMessage(sender, "ERROR.player.not-in-duelzone", "regions", config.getDuelZoneRegions());
+            lang.sendMessage(sender, "ERROR.duel.not-in-duelzone", "regions", config.getDuelZoneRegions());
             return;
         }
 
         if (arenaManager.isInMatch(player)) {
             lang.sendMessage(sender, "ERROR.duel.already-in-match.sender");
+            return;
+        }
+
+        if (spectateManager.isSpectating(player)) {
+            lang.sendMessage(sender, "ERROR.spectate.already-spectating.sender");
             return;
         }
 
@@ -54,12 +59,17 @@ public class AcceptCommand extends BaseCommand {
         final Request request = requestManager.remove(target, player);
 
         if (request == null) {
-            lang.sendMessage(sender, "ERROR.duel.no-request", "player", target.getName());
+            lang.sendMessage(sender, "ERROR.duel.no-request", "name", target.getName());
             return;
         }
 
         if (arenaManager.isInMatch(target)) {
-            lang.sendMessage(sender, "ERROR.duel.already-in-match.target", "player", target.getName());
+            lang.sendMessage(sender, "ERROR.duel.already-in-match.target", "name", target.getName());
+            return;
+        }
+
+        if (spectateManager.isSpectating(target)) {
+            lang.sendMessage(sender, "ERROR.spectate.already-spectating.target", "name", target.getName());
             return;
         }
 
@@ -68,10 +78,10 @@ public class AcceptCommand extends BaseCommand {
         final String arena = settings.getArena() != null ? settings.getArena().getName() : "Random";
         final double bet = settings.getBet();
         final String itemBetting = settings.isItemBetting() ? "&aenabled" : "&cdisabled";
-        lang.sendMessage(player, "COMMAND.duel.request.accepted.receiver",
-            "player", target.getName(), "kit", kit, "arena", arena, "bet_amount", bet, "item_betting", itemBetting);
-        lang.sendMessage(target, "COMMAND.duel.request.accepted.sender",
-            "player", player.getName(), "kit", kit, "arena", arena, "bet_amount", bet, "item_betting", itemBetting);
+        lang.sendMessage(player, "COMMAND.duel.request.accept.receiver",
+            "name", target.getName(), "kit", kit, "arena", arena, "bet_amount", bet, "item_betting", itemBetting);
+        lang.sendMessage(target, "COMMAND.duel.request.accept.sender",
+            "name", player.getName(), "kit", kit, "arena", arena, "bet_amount", bet, "item_betting", itemBetting);
 
         if (settings.isItemBetting()) {
             settings.getLocations()[1] = player.getLocation().clone();

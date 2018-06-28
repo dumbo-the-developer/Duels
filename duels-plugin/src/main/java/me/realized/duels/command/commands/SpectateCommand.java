@@ -29,7 +29,7 @@ public class SpectateCommand extends BaseCommand {
         }
 
         if (config.isSpecRequiresClearedInventory() && InventoryUtil.hasItem(player)) {
-            lang.sendMessage(sender, "ERROR.player.inventory-not-empty");
+            lang.sendMessage(sender, "ERROR.duel.inventory-not-empty");
             return;
         }
 

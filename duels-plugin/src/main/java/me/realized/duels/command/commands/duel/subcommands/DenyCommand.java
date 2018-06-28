@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 public class DenyCommand extends BaseCommand {
 
     public DenyCommand(final DuelsPlugin plugin) {
-        super(plugin, "deny", "deny [player]", "Denies a duel request.", 2, true);
+        super(plugin, "deny", "deny [player]", "Declines a duel request.", 2, true);
     }
 
     @Override
@@ -23,11 +23,11 @@ public class DenyCommand extends BaseCommand {
         }
 
         if (requestManager.remove(target, player) == null) {
-            lang.sendMessage(sender, "ERROR.duel.no-request", "player", target.getName());
+            lang.sendMessage(sender, "ERROR.duel.no-request", "name", target.getName());
             return;
         }
 
-        lang.sendMessage(player, "COMMAND.duel.request.denied.receiver", "player", target.getName());
-        lang.sendMessage(target, "COMMAND.duel.request.denied.sender", "player", player.getName());
+        lang.sendMessage(player, "COMMAND.duel.request.deny.receiver", "name", target.getName());
+        lang.sendMessage(target, "COMMAND.duel.request.deny.sender", "name", player.getName());
     }
 }

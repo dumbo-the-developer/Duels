@@ -16,7 +16,7 @@ public class ResetCommand extends BaseCommand {
         final UserData user = userManager.get(args[1]);
 
         if (user == null) {
-            lang.sendMessage(sender, "ERROR.data.not-found", "player", args[1]);
+            lang.sendMessage(sender, "ERROR.data.not-found", "name", args[1]);
             return;
         }
 

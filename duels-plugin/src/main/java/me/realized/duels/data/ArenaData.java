@@ -2,12 +2,14 @@ package me.realized.duels.data;
 
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
 import org.bukkit.Location;
 
 public class ArenaData {
 
+    @Getter
     private final String name;
     private final boolean disabled;
     private final Map<Integer, LocationData> positions = new HashMap<>();

@@ -113,7 +113,7 @@ public class SpectateManager implements Loadable, Listener {
         player.setAllowFlight(true);
         player.setFlying(true);
         Collisions.setCollidable(player, false);
-        lang.sendMessage(player, "SPECTATE.start", "name", target.getName());
+        lang.sendMessage(player, "COMMAND.spectate.start-spectate", "name", target.getName());
         if (player.hasPermission(Permissions.SPEC_ANON)) {
             return;
         }
@@ -156,9 +156,9 @@ public class SpectateManager implements Loadable, Listener {
         }
 
         if (!end) {
-            lang.sendMessage(player, "SPECTATE.stop", "name", spectator.getTargetName());
+            lang.sendMessage(player, "COMMAND.spectate.stop-spectate", "name", spectator.getTargetName());
         } else {
-            lang.sendMessage(player, "SPECTATE.end");
+            lang.sendMessage(player, "SPECTATE.match-end");
         }
     }
 
@@ -217,7 +217,7 @@ public class SpectateManager implements Loadable, Listener {
         }
 
         event.setCancelled(true);
-        lang.sendMessage(player, "SPECTATE.prevent-command", "command", event.getMessage());
+        lang.sendMessage(player, "SPECTATE.prevent.command", "command", event.getMessage());
     }
 
 
@@ -231,7 +231,7 @@ public class SpectateManager implements Loadable, Listener {
         }
 
         event.setCancelled(true);
-        lang.sendMessage(player, "SPECTATE.prevent-teleportation");
+        lang.sendMessage(player, "SPECTATE.prevent.teleportation");
     }
 
 
@@ -244,7 +244,7 @@ public class SpectateManager implements Loadable, Listener {
         }
 
         event.setCancelled(true);
-        lang.sendMessage(player, "SPECTATE.prevent-item-drop");
+        lang.sendMessage(player, "SPECTATE.prevent.item-drop");
     }
 
 
@@ -295,7 +295,7 @@ public class SpectateManager implements Loadable, Listener {
         }
 
         event.setCancelled(true);
-        lang.sendMessage(player, "SPECTATE.prevent-attack");
+        lang.sendMessage(player, "SPECTATE.prevent.pvp");
     }
 
 

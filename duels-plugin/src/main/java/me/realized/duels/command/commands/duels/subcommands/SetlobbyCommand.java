@@ -18,6 +18,6 @@ public class SetlobbyCommand extends BaseCommand {
             return;
         }
 
-        lang.sendMessage(sender, "COMMAND.duels.setlobby");
+        lang.sendMessage(sender, "COMMAND.duels.set-lobby");
     }
 }

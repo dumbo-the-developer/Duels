@@ -273,7 +273,8 @@ public class DuelManager implements Loadable {
 
         if (bet > 0 && vault != null && vault.getEconomy() != null) {
             if (!vault.has(bet, first, second)) {
-                lang.sendMessage("DUEL.start-failure.not-enough-money", first, second);
+                lang.sendMessage(first, "DUEL.start-failure.not-enough-money", "bet_amount", bet);
+                lang.sendMessage(second, "DUEL.start-failure.not-enough-money", "bet_amount", bet);
                 refundItems(items, first, second);
                 return;
             }
@@ -568,7 +569,7 @@ public class DuelManager implements Loadable {
             }
 
             event.setCancelled(true);
-            lang.sendMessage(event.getPlayer(), "DUEL.prevent-item-drop");
+            lang.sendMessage(event.getPlayer(), "DUEL.prevent.item-drop");
         }
 
         @EventHandler(ignoreCancelled = true)
@@ -591,7 +592,7 @@ public class DuelManager implements Loadable {
             }
 
             event.setCancelled(true);
-            lang.sendMessage(event.getPlayer(), "DUEL.prevent-command", "command", event.getMessage());
+            lang.sendMessage(event.getPlayer(), "DUEL.prevent.command", "command", event.getMessage());
         }
 
         @EventHandler(ignoreCancelled = true)
@@ -610,7 +611,7 @@ public class DuelManager implements Loadable {
             }
 
             event.setCancelled(true);
-            lang.sendMessage(player, "DUEL.prevent-teleportation");
+            lang.sendMessage(player, "DUEL.prevent.teleportation");
         }
     }
 
@@ -627,6 +628,6 @@ public class DuelManager implements Loadable {
         }
 
         event.setCancelled(true);
-        lang.sendMessage(player, "DUEL.prevent-inventory-open");
+        lang.sendMessage(player, "DUEL.prevent.inventory-open");
     }
 }

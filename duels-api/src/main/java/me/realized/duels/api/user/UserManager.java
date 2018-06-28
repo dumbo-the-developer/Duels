@@ -13,6 +13,14 @@ public interface UserManager {
 
 
     /**
+     * @return true if all users have completed loading to the memory, otherwise false
+     */
+    boolean isLoaded();
+
+
+    /**
+     * If {@link #isLoaded()} returns false, this may return null even if userdata file exists.
+     *
      * @param name Name of the user to get
      * @return User with the given name if exists, otherwise null
      */
@@ -21,6 +29,8 @@ public interface UserManager {
 
 
     /**
+     * If {@link #isLoaded()} returns false, this may return null even if userdata file exists.
+     *
      * @param uuid UUID of the user to get
      * @return User with the given UUID if exists, otherwise null
      */

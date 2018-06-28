@@ -27,6 +27,6 @@ public class SavekitCommand extends BaseCommand {
             return;
         }
 
-        lang.sendMessage(sender, "COMMAND.duels.savekit", "name", name);
+        lang.sendMessage(sender, "COMMAND.duels.save-kit", "name", name);
     }
 }

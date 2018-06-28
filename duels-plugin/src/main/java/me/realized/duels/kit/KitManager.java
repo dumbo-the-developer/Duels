@@ -48,6 +48,7 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
 
     @Override
     public void handleLoad() throws IOException {
+        // TODO: 28/06/2018 Define rows in config
         gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.kit-selector.title"), 1, kits.values());
         plugin.getGuiListener().addGui(gui);
 

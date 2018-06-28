@@ -8,6 +8,7 @@ import me.realized.duels.command.commands.duels.subcommands.DeleteCommand;
 import me.realized.duels.command.commands.duels.subcommands.DeletekitCommand;
 import me.realized.duels.command.commands.duels.subcommands.DeletesignCommand;
 import me.realized.duels.command.commands.duels.subcommands.EditCommand;
+import me.realized.duels.command.commands.duels.subcommands.HelpCommand;
 import me.realized.duels.command.commands.duels.subcommands.InfoCommand;
 import me.realized.duels.command.commands.duels.subcommands.ListCommand;
 import me.realized.duels.command.commands.duels.subcommands.LoadkitCommand;
@@ -30,6 +31,7 @@ public class DuelsCommand extends BaseCommand {
     public DuelsCommand(final DuelsPlugin plugin) {
         super(plugin, "duels", Permissions.ADMIN, false);
         child(
+            new HelpCommand(plugin),
             new SavekitCommand(plugin),
             new DeletekitCommand(plugin),
             new LoadkitCommand(plugin),
