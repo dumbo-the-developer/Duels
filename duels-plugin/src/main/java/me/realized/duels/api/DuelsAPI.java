@@ -8,11 +8,9 @@ import me.realized.duels.data.UserData;
 import org.bukkit.entity.Player;
 
 /**
- *
  * A static API for Duels.
  *
  * @deprecated as of v3.0.0, use {@link Duels} instead.
- *
  */
 
 public class DuelsAPI {

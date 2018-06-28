@@ -23,6 +23,12 @@ public interface Arena {
      */
     boolean isDisabled();
 
+    /**
+     * Calls {@link #setDisabled(CommandSender, boolean)} with source being null.
+     *
+     * @see #setDisabled(CommandSender, boolean)
+     */
+    void setDisabled(final boolean disabled);
 
     /**
      * Calls {@link ArenaStateChangeEvent}.
@@ -31,15 +37,6 @@ public interface Arena {
      * @param disabled true to disable the arena, false to enable the arena
      */
     void setDisabled(@Nullable final CommandSender source, final boolean disabled);
-
-
-    /**
-     * Calls {@link #setDisabled(CommandSender, boolean)} with source being null.
-     *
-     * @see #setDisabled(CommandSender, boolean)
-     */
-    void setDisabled(final boolean disabled);
-
 
     /**
      * @return true if arena is in use. This also guarantees that {@link #getMatch()} will not be null.

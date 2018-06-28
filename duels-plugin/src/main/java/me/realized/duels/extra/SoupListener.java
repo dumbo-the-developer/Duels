@@ -35,7 +35,7 @@ public class SoupListener implements Listener {
         final ItemStack item = event.getItem();
 
         if (item == null || item.getType() != Material.MUSHROOM_SOUP) {
-           return;
+            return;
         }
 
         event.setUseItemInHand(Result.DENY);

@@ -16,10 +16,14 @@ public final class TextBuilder {
 
     private TextBuilder(final String base) {
         if (base == null) {
-           return;
+            return;
         }
 
         list.addAll(Arrays.asList(TextComponent.fromLegacyText(base)));
+    }
+
+    public static TextBuilder of(final String base) {
+        return new TextBuilder(base);
     }
 
     public TextBuilder add(final String text) {
@@ -84,9 +88,5 @@ public final class TextBuilder {
 
     public void send(final Player... players) {
         send(Arrays.asList(players));
-    }
-
-    public static TextBuilder of(final String base) {
-        return new TextBuilder(base);
     }
 }

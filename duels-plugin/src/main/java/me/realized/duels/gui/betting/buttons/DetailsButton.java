@@ -24,7 +24,7 @@ public class DetailsButton extends BaseButton {
     public void update(final Player player) {
         final String lore = lang.getMessage("GUI.item-betting.buttons.details.lore",
             "kit", settings.getKit() != null ? settings.getKit().getName() : "Not Selected",
-            "arena",settings.getArena() != null ? settings.getArena().getName() : "Random",
+            "arena", settings.getArena() != null ? settings.getArena().getName() : "Random",
             "bet_amount", settings.getBet()
         );
         setLore(lore.split("\n"));

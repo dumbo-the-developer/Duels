@@ -28,12 +28,12 @@ public class ArenaStateChangeEvent extends ArenaEvent implements Cancellable {
         this.disabled = disabled;
     }
 
-    @Override
-    public HandlerList getHandlers() {
+    public static HandlerList getHandlerList() {
         return handlers;
     }
 
-    public static HandlerList getHandlerList() {
+    @Override
+    public HandlerList getHandlers() {
         return handlers;
     }
 }

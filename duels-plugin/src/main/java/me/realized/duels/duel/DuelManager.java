@@ -420,6 +420,22 @@ public class DuelManager implements Loadable {
         event.setCancelled(true);
     }
 
+    @EventHandler(ignoreCancelled = true)
+    public void on(final InventoryOpenEvent event) {
+        if (!config.isPreventInventoryOpen()) {
+            return;
+        }
+
+        final Player player = (Player) event.getPlayer();
+
+        if (!arenaManager.isInMatch(player)) {
+            return;
+        }
+
+        event.setCancelled(true);
+        lang.sendMessage(player, "DUEL.prevent.inventory-open");
+    }
+
     public class OpponentInfo {
 
         @Getter
@@ -613,21 +629,5 @@ public class DuelManager implements Loadable {
             event.setCancelled(true);
             lang.sendMessage(player, "DUEL.prevent.teleportation");
         }
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void on(final InventoryOpenEvent event) {
-        if (!config.isPreventInventoryOpen()) {
-            return;
-        }
-
-        final Player player = (Player) event.getPlayer();
-
-        if (!arenaManager.isInMatch(player)) {
-            return;
-        }
-
-        event.setCancelled(true);
-        lang.sendMessage(player, "DUEL.prevent.inventory-open");
     }
 }

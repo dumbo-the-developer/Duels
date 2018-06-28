@@ -63,12 +63,14 @@ public class StatsCommand extends BaseCommand {
             final Calendar calendar = new GregorianCalendar();
 
             for (final MatchData match : user.getMatches()) {
+                final String kit = match.getKit() != null ? match.getKit() : "none";
                 final String duration = DateUtil.formatMilliseconds(match.getDuration());
                 final String timeSince = DateUtil.formatMilliseconds(calendar.getTimeInMillis() - match.getTime());
                 TextBuilder
                     .of(lang.getMessage("COMMAND.duel.stats.match.format", "winner", match.getWinner(), "loser", match.getLoser()))
                     .setHoverEvent(Action.SHOW_TEXT,
-                        lang.getMessage("COMMAND.duel.stats.match.hover-text", "duration", duration, "time", timeSince, "health", match.getHealth()))
+                        lang.getMessage("COMMAND.duel.stats.match.hover-text",
+                            "kit", kit, "duration", duration, "time", timeSince, "health", match.getHealth()))
                     .send(sender);
             }
 

@@ -29,7 +29,7 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
 
     @Override
     protected void loadValues(FileConfiguration configuration) throws IOException {
-        if (configuration.getInt("config-version") < getLatestVersion()) {
+        if (configuration.getInt("config-version", 0) < getLatestVersion()) {
             configuration = convert(null);
         }
 

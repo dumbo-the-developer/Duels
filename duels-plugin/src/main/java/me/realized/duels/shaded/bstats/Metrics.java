@@ -34,31 +34,28 @@ import org.json.simple.JSONObject;
  */
 public class Metrics {
 
+    // The version of this bStats class
+    public static final int B_STATS_VERSION = 1;
+    // The url to which the data is sent
+    private static final String URL = "https://bStats.org/submitData/bukkit";
+    // Should failed requests be logged?
+    private static boolean logFailedRequests;
+    // The uuid of the server
+    private static String serverUUID;
+
     static {
         // You can use the property to disable the check in your test environment
         if (System.getProperty("bstats.relocatecheck") == null || !System.getProperty("bstats.relocatecheck").equals("false")) {
             // Maven's Relocate is clever and changes strings, too. So we have to use this little "trick" ... :D
             final String defaultPackage = new String(
-                new byte[]{'o', 'r', 'g', '.', 'b', 's', 't', 'a', 't', 's', '.', 'b', 'u', 'k', 'k', 'i', 't'});
-            final String examplePackage = new String(new byte[]{'y', 'o', 'u', 'r', '.', 'p', 'a', 'c', 'k', 'a', 'g', 'e'});
+                new byte[] {'o', 'r', 'g', '.', 'b', 's', 't', 'a', 't', 's', '.', 'b', 'u', 'k', 'k', 'i', 't'});
+            final String examplePackage = new String(new byte[] {'y', 'o', 'u', 'r', '.', 'p', 'a', 'c', 'k', 'a', 'g', 'e'});
             // We want to make sure nobody just copy & pastes the example and use the wrong package names
             if (Metrics.class.getPackage().getName().equals(defaultPackage) || Metrics.class.getPackage().getName().equals(examplePackage)) {
                 throw new IllegalStateException("bStats Metrics class has not been relocated correctly!");
             }
         }
     }
-
-    // The version of this bStats class
-    public static final int B_STATS_VERSION = 1;
-
-    // The url to which the data is sent
-    private static final String URL = "https://bStats.org/submitData/bukkit";
-
-    // Should failed requests be logged?
-    private static boolean logFailedRequests;
-
-    // The uuid of the server
-    private static String serverUUID;
 
     // The plugin
     private final JavaPlugin plugin;
@@ -124,6 +121,61 @@ public class Metrics {
                 startSubmitting();
             }
         }
+    }
+
+    /**
+     * Sends the data to the bStats server.
+     *
+     * @param data The data to send.
+     * @throws Exception If the request failed.
+     */
+    private static void sendData(JSONObject data) throws Exception {
+        if (data == null) {
+            throw new IllegalArgumentException("Data cannot be null!");
+        }
+        if (Bukkit.isPrimaryThread()) {
+            throw new IllegalAccessException("This method must not be called from the main thread!");
+        }
+        HttpsURLConnection connection = (HttpsURLConnection) new URL(URL).openConnection();
+
+        // Compress the data to save bandwidth
+        byte[] compressedData = compress(data.toString());
+
+        // Add headers
+        connection.setRequestMethod("POST");
+        connection.addRequestProperty("Accept", "application/json");
+        connection.addRequestProperty("Connection", "close");
+        connection.addRequestProperty("Content-Encoding", "gzip"); // We gzip our request
+        connection.addRequestProperty("Content-Length", String.valueOf(compressedData.length));
+        connection.setRequestProperty("Content-Type", "application/json"); // We send our data in JSON format
+        connection.setRequestProperty("User-Agent", "MC-Server/" + B_STATS_VERSION);
+
+        // Send data
+        connection.setDoOutput(true);
+        DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
+        outputStream.write(compressedData);
+        outputStream.flush();
+        outputStream.close();
+
+        connection.getInputStream().close(); // We don't care about the response - Just send our data :)
+    }
+
+    /**
+     * Gzips the given String.
+     *
+     * @param str The string to gzip.
+     * @return The gzipped String.
+     * @throws IOException If the compression failed.
+     */
+    private static byte[] compress(final String str) throws IOException {
+        if (str == null) {
+            return null;
+        }
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        GZIPOutputStream gzip = new GZIPOutputStream(outputStream);
+        gzip.write(str.getBytes("UTF-8"));
+        gzip.close();
+        return outputStream.toByteArray();
     }
 
     /**
@@ -277,61 +329,6 @@ public class Metrics {
                 }
             }
         }).start();
-    }
-
-    /**
-     * Sends the data to the bStats server.
-     *
-     * @param data The data to send.
-     * @throws Exception If the request failed.
-     */
-    private static void sendData(JSONObject data) throws Exception {
-        if (data == null) {
-            throw new IllegalArgumentException("Data cannot be null!");
-        }
-        if (Bukkit.isPrimaryThread()) {
-            throw new IllegalAccessException("This method must not be called from the main thread!");
-        }
-        HttpsURLConnection connection = (HttpsURLConnection) new URL(URL).openConnection();
-
-        // Compress the data to save bandwidth
-        byte[] compressedData = compress(data.toString());
-
-        // Add headers
-        connection.setRequestMethod("POST");
-        connection.addRequestProperty("Accept", "application/json");
-        connection.addRequestProperty("Connection", "close");
-        connection.addRequestProperty("Content-Encoding", "gzip"); // We gzip our request
-        connection.addRequestProperty("Content-Length", String.valueOf(compressedData.length));
-        connection.setRequestProperty("Content-Type", "application/json"); // We send our data in JSON format
-        connection.setRequestProperty("User-Agent", "MC-Server/" + B_STATS_VERSION);
-
-        // Send data
-        connection.setDoOutput(true);
-        DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
-        outputStream.write(compressedData);
-        outputStream.flush();
-        outputStream.close();
-
-        connection.getInputStream().close(); // We don't care about the response - Just send our data :)
-    }
-
-    /**
-     * Gzips the given String.
-     *
-     * @param str The string to gzip.
-     * @return The gzipped String.
-     * @throws IOException If the compression failed.
-     */
-    private static byte[] compress(final String str) throws IOException {
-        if (str == null) {
-            return null;
-        }
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        GZIPOutputStream gzip = new GZIPOutputStream(outputStream);
-        gzip.write(str.getBytes("UTF-8"));
-        gzip.close();
-        return outputStream.toByteArray();
     }
 
     /**

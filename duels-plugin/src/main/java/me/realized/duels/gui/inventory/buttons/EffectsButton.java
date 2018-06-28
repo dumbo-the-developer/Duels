@@ -19,9 +19,9 @@ public class EffectsButton extends BaseButton {
             .name(plugin.getLang().getMessage("GUI.inventory-view.buttons.effects.name"))
             .lore(player.getActivePotionEffects().stream()
                 .map(effect -> plugin.getLang().getMessage("GUI.inventory-view.buttons.effects.lore-format",
-                        "type", StringUtils.capitalize(effect.getType().getName().replace("_", " ").toLowerCase()),
-                        "amplifier", StringUtil.toRoman(effect.getAmplifier() + 1),
-                        "duration", (effect.getDuration() / 20))).collect(Collectors.toList()))
+                    "type", StringUtils.capitalize(effect.getType().getName().replace("_", " ").toLowerCase()),
+                    "amplifier", StringUtil.toRoman(effect.getAmplifier() + 1),
+                    "duration", (effect.getDuration() / 20))).collect(Collectors.toList()))
             .build());
         editMeta(meta -> {
             if (!CompatUtil.isPre1_8()) {

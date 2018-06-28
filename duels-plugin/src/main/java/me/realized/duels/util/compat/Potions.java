@@ -186,7 +186,7 @@ public class Potions extends CompatBase {
                     potionType = extended ? "long_regeneration" : (strong ? "strong_regeneration" : "regeneration");
                     break;
                 case STRENGTH:
-                    potionType = extended ? "long_strength": (strong ? "strong_strength" : "strength");
+                    potionType = extended ? "long_strength" : (strong ? "strong_strength" : "strength");
                     break;
                 case WEAKNESS:
                     potionType = extended ? "long_weakness" : "weakness";

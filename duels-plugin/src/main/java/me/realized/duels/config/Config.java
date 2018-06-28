@@ -16,11 +16,11 @@ import org.bukkit.entity.Player;
 
 public class Config extends AbstractConfiguration<DuelsPlugin> {
 
+    private final Map<String, MessageSound> sounds = new HashMap<>();
     @Getter
     private int version;
     @Getter
     private boolean checkForUpdates;
-
     @Getter
     private boolean requiresClearedInventory;
     @Getter
@@ -39,7 +39,6 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean moneyBettingUsePermission;
     @Getter
     private int expiration;
-
     @Getter
     private boolean useOwnInventoryEnabled;
     @Getter
@@ -82,7 +81,6 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private List<String> whitelistedCommands;
     @Getter
     private List<String> blacklistedCommands;
-
     @Getter
     private boolean ratingEnabled;
     @Getter
@@ -91,12 +89,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private int defaultRating;
     @Getter
     private boolean queueMatchesOnly;
-
     @Getter
     private boolean specRequiresClearedInventory;
     @Getter
     private List<String> specWhitelistedCommands;
-
     @Getter
     private boolean cdEnabled;
     @Getter
@@ -109,29 +105,24 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean preventLaunchProjectile;
     @Getter
     private boolean preventPvp;
-
     @Getter
     private boolean displayRatings;
     @Getter
     private boolean displayPastMatches;
     @Getter
     private int matchesToDisplay;
-
     @Getter
     private long topUpdateInterval;
-
     @Getter
     private boolean soupEnabled;
     @Getter
     private String nameStartingWith;
     @Getter
     private double heartsToRegen;
-
     @Getter
     private boolean duelZoneEnabled;
     @Getter
     private List<String> duelZoneRegions;
-    private final Map<String, MessageSound> sounds = new HashMap<>();
 
     public Config(final DuelsPlugin plugin) {
         super(plugin, "config");
@@ -139,7 +130,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
 
     @Override
     protected void loadValues(FileConfiguration configuration) throws IOException {
-        if (configuration.getInt("config-version") < getLatestVersion()) {
+        if (configuration.getInt("config-version", 0) < getLatestVersion()) {
             configuration = convert(null);
         }
 

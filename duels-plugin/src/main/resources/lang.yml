@@ -125,9 +125,10 @@ COMMAND:
         header: '&7Recent Matches &e-'
         format: '&a%winner% &fvs &c%loser% &6[Hover Me!]'
         hover-text:
-        - '&7Duration: &f%duration%'
+        - '&7Kit: &3%kit%'
+        - '&7Duration: &a%duration%'
         - '&7Time: &f%time% ago'
-        - '&7Health: &d&l%health% ♥'
+        - '&7Health: &d%health%♥'
         footer: '{LINE}'
     toggle:
       enabled: '{PREFIX} &aYou are now receiving duel requests.'

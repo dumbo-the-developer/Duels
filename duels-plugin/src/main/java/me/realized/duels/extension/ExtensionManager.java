@@ -104,7 +104,7 @@ public class ExtensionManager implements Loadable {
         final URL url = file.toURI().toURL();
 
         try (
-            URLClassLoader classLoader = new URLClassLoader(new URL[]{url}, DuelsExtension.class.getClassLoader());
+            URLClassLoader classLoader = new URLClassLoader(new URL[] {url}, DuelsExtension.class.getClassLoader());
             JarInputStream stream = new JarInputStream(url.openStream())
         ) {
             Class<? extends DuelsExtension> foundClass = null;

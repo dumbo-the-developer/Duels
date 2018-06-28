@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 public class Settings {
 
     private final DuelsPlugin plugin;
-
+    private final SettingsGui gui;
     @Getter
     private UUID target;
     @Getter
@@ -28,7 +28,6 @@ public class Settings {
     @Getter
     @Setter
     private boolean itemBetting;
-    private final SettingsGui gui;
     @Getter
     private Location[] locations = new Location[2];
 

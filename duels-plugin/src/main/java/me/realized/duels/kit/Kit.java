@@ -24,13 +24,13 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
     @Getter
     private final String name;
     @Getter
+    private final Map<String, Map<Integer, ItemStack>> items = new HashMap<>();
+    @Getter
     @Setter
     private boolean usePermission;
     @Getter
     @Setter
     private boolean arenaSpecific;
-    @Getter
-    private final Map<String, Map<Integer, ItemStack>> items = new HashMap<>();
 
     public Kit(final DuelsPlugin plugin, final String name, final ItemStack displayed, final boolean usePermission, final boolean arenaSpecific) {
         super(plugin, displayed != null ? displayed : ItemBuilder

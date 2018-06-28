@@ -23,7 +23,8 @@ public class ReloadCommand extends BaseCommand {
             final Loadable target = plugin.find(args[1]);
 
             if (target == null || !(target instanceof Reloadable)) {
-                sender.sendMessage(ChatColor.RED + "Invalid module. The following modules are available for a reload: " + StringUtils.join(plugin.getReloadables(), ", "));
+                sender
+                    .sendMessage(ChatColor.RED + "Invalid module. The following modules are available for a reload: " + StringUtils.join(plugin.getReloadables(), ", "));
                 return;
             }
 

@@ -19,7 +19,7 @@ processResources {
 dependencies {
     compile 'net.milkbowl.vault:VaultAPI:1.6'
     compile 'me.clip:placeholderapi:2.8.4'
-    compile ('be.maximvdw:MVdWPlaceholderAPI:2.5.1-SNAPSHOT') { transitive = false }
+    compile('be.maximvdw:MVdWPlaceholderAPI:2.5.1-SNAPSHOT') { transitive = false }
     compile 'com.sk89q:worldguard:6.1.1-SNAPSHOT'
     compile name: 'EssentialsX'
     compile name: 'CombatTagPlus'

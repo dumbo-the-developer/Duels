@@ -45,19 +45,16 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
     private final File folder;
     private final Map<UUID, UserData> users = new ConcurrentHashMap<>();
     private final Map<String, UUID> names = new ConcurrentHashMap<>();
-
+    @Getter
+    private final Map<Kit, TopEntry> topRatings = new ConcurrentHashMap<>();
     private volatile int defaultRating;
     private volatile int matchesToDisplay;
-
     @Getter
     private volatile boolean loaded;
     @Getter
     private volatile TopEntry wins;
     @Getter
     private volatile TopEntry losses;
-    @Getter
-    private final Map<Kit, TopEntry> topRatings = new ConcurrentHashMap<>();
-
     private int topTask;
 
     public UserManager(final DuelsPlugin plugin) {
