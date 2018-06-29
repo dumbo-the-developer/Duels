@@ -23,14 +23,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class UserData implements User {
-
     @Getter
     private final UUID uuid;
-    private final List<MatchData> matches = new ArrayList<>();
-    transient DuelsPlugin plugin;
-    transient File folder;
-    transient int defaultRating;
-    transient int matchesToDisplay;
     @Getter
     @Setter
     private String name;
@@ -41,6 +35,12 @@ public class UserData implements User {
     private boolean requests = true;
     @Getter
     private ConcurrentHashMap<String, Integer> rating;
+    private final List<MatchData> matches = new ArrayList<>();
+
+    transient DuelsPlugin plugin;
+    transient File folder;
+    transient int defaultRating;
+    transient int matchesToDisplay;
 
     public UserData(final DuelsPlugin plugin, final File folder, final int defaultRating, final int matchesToDisplay, final Player player) {
         this.plugin = plugin;

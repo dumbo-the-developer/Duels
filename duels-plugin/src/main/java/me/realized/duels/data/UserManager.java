@@ -47,6 +47,7 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
     private final Map<String, UUID> names = new ConcurrentHashMap<>();
     @Getter
     private final Map<Kit, TopEntry> topRatings = new ConcurrentHashMap<>();
+
     private volatile int defaultRating;
     private volatile int matchesToDisplay;
     @Getter
