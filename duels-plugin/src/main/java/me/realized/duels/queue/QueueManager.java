@@ -11,12 +11,13 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
+import java.util.Set;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
@@ -91,33 +92,40 @@ public class QueueManager implements Loadable, Listener {
         Log.info(this, "Loaded " + signs.size() + " queue sign(s).");
 
         this.queueTask = plugin.doSyncRepeat(() -> queues.forEach((sign, queue) -> {
-            final ListIterator<Player> iterator = queue.listIterator();
+            final Set<Player> remove = new HashSet<>();
 
-            while (iterator.hasNext()) {
-                final Player current = iterator.next();
+            for (final Player current : queue) {
+                // player is already in a match
+                if (remove.contains(current)) {
+                    continue;
+                }
 
-                if (iterator.hasNext()) {
-                    final Player next = queue.get(iterator.nextIndex());
-
-                    if (!canFight(sign.getKit(), userManager.get(current), userManager.get(next))) {
+                for (final Player opponent : queue) {
+                    // opponent is already in a match
+                    if (current.equals(opponent) || remove.contains(opponent)) {
                         continue;
                     }
 
-                    iterator.remove();
-                    iterator.next();
-                    iterator.remove();
+                    if (!canFight(sign.getKit(), userManager.get(current), userManager.get(opponent))) {
+                        continue;
+                    }
+
+                    remove.add(current);
+                    remove.add(opponent);
 
                     final Settings setting = new Settings(plugin);
                     setting.setKit(sign.getKit());
                     setting.setBet(sign.getBet());
 
                     final String kit = sign.getKit() != null ? sign.getKit().getName() : "none";
-                    lang.sendMessage(current, "SIGN.found-opponent", "name", next.getName(), "kit", kit, "bet_amount", sign.getBet());
-                    lang.sendMessage(next, "SIGN.found-opponent", "name", current.getName(), "kit", kit, "bet_amount", sign.getBet());
-                    duelManager.startMatch(current, next, setting, null, true);
-                    signs.values().stream().filter(queueSign -> queueSign.equals(sign)).forEach(queueSign -> queueSign.setCount(queue.size()));
+                    lang.sendMessage(current, "SIGN.found-opponent", "name", opponent.getName(), "kit", kit, "bet_amount", sign.getBet());
+                    lang.sendMessage(opponent, "SIGN.found-opponent", "name", current.getName(), "kit", kit, "bet_amount", sign.getBet());
+                    duelManager.startMatch(current, opponent, setting, null, true);
                 }
             }
+
+            queue.removeAll(remove);
+            signs.values().stream().filter(queueSign -> queueSign.equals(sign)).forEach(queueSign -> queueSign.setCount(queue.size()));
         }), 20L, 40L);
     }
 

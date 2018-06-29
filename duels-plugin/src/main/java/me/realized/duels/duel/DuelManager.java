@@ -3,9 +3,11 @@ package me.realized.duels.duel;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
@@ -35,6 +37,7 @@ import me.realized.duels.util.RatingUtil;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.TextBuilder;
 import me.realized.duels.util.compat.Players;
+import me.realized.duels.util.compat.Titles;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
@@ -144,7 +147,7 @@ public class DuelManager implements Loadable {
                 if (ongoing) {
                     handleTiePlayer(player, arena, match, true);
                 } else if (!tie) {
-                    handleWinner(player, arena, match);
+                    handleWinner(player, getOther(player, match.getPlayers()), arena, match);
                 }
             }
 
@@ -164,10 +167,21 @@ public class DuelManager implements Loadable {
         });
     }
 
+    private Player getOther(final Player player, final Set<Player> players) {
+        final Set<Player> copy = new HashSet<>(players);
+        copy.remove(player);
+
+        if (copy.isEmpty()) {
+            return null;
+        }
+
+        return copy.iterator().next();
+    }
+
     private void handleTiePlayer(final Player player, final Arena arena, final Match match, boolean alive) {
         arena.remove(player);
 
-        if (vault != null) {
+        if (vault != null && match.getBet() > 0) {
             vault.add(match.getBet(), player);
         }
 
@@ -208,11 +222,19 @@ public class DuelManager implements Loadable {
         }
     }
 
-    private void handleWinner(final Player player, final Arena arena, final Match match) {
+    private void handleWinner(final Player player, final Player opponent, final Arena arena, final Match match) {
         arena.remove(player);
 
-        if (vault != null) {
-            vault.add(match.getBet() * 2, player);
+        if (vault != null && match.getBet() > 0) {
+            final int amount = match.getBet() * 2;
+            vault.add(amount, player);
+            lang.sendMessage(player, "DUEL.reward.money.message", "name", opponent != null ? opponent.getName() : "none", "money", amount);
+
+            final String title = lang.getMessage("DUEL.reward.money.title", "name", opponent != null ? opponent.getName() : "none", "money", amount);
+
+            if (title != null) {
+                Titles.send(player, title, null, 0, 20, 50);
+            }
         }
 
         if (mcMMO != null) {
@@ -239,7 +261,23 @@ public class DuelManager implements Loadable {
                 info.restore(player);
             }
 
-            items.stream().filter(Objects::nonNull).forEach(item -> player.getInventory().addItem(item));
+            boolean added = false;
+
+            for (final ItemStack item : items) {
+                if (item == null) {
+                    continue;
+                }
+
+                if (!added) {
+                    added = true;
+                }
+
+                player.getInventory().addItem(item);
+            }
+
+            if (added) {
+                lang.sendMessage(player, "DUEL.reward.items.message", "name", opponent != null ? opponent.getName() : "none");
+            }
         }
     }
 
@@ -427,22 +465,6 @@ public class DuelManager implements Loadable {
         event.setCancelled(true);
     }
 
-    @EventHandler(ignoreCancelled = true)
-    public void on(final InventoryOpenEvent event) {
-        if (!config.isPreventInventoryOpen()) {
-            return;
-        }
-
-        final Player player = (Player) event.getPlayer();
-
-        if (!arenaManager.isInMatch(player)) {
-            return;
-        }
-
-        event.setCancelled(true);
-        lang.sendMessage(player, "DUEL.prevent.inventory-open");
-    }
-
     public class OpponentInfo {
 
         @Getter
@@ -523,7 +545,7 @@ public class DuelManager implements Loadable {
                 handleInventories(match);
 
                 plugin.doSyncAfter(() -> {
-                    handleWinner(winner, arena, match);
+                    handleWinner(winner, player, arena, match);
 
                     if (config.isEndCommandsEnabled()) {
                         for (final String command : config.getEndCommands()) {
@@ -635,6 +657,22 @@ public class DuelManager implements Loadable {
 
             event.setCancelled(true);
             lang.sendMessage(player, "DUEL.prevent.teleportation");
+        }
+
+        @EventHandler(ignoreCancelled = true)
+        public void on(final InventoryOpenEvent event) {
+            if (!config.isPreventInventoryOpen()) {
+                return;
+            }
+
+            final Player player = (Player) event.getPlayer();
+
+            if (!arenaManager.isInMatch(player)) {
+                return;
+            }
+
+            event.setCancelled(true);
+            lang.sendMessage(player, "DUEL.prevent.inventory-open");
         }
     }
 }

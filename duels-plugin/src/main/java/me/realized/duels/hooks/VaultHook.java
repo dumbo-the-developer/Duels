@@ -42,13 +42,13 @@ public class VaultHook extends PluginHook<DuelsPlugin> {
     }
 
     public void add(final int amount, final Player... players) {
-        if (amount > 0 && economy != null) {
+        if (economy != null) {
             Arrays.stream(players).forEach(player -> economy.depositPlayer(player, amount));
         }
     }
 
     public void remove(final int amount, final Player... players) {
-        if (amount > 0 && economy != null) {
+        if (economy != null) {
             Arrays.stream(players).forEach(player -> economy.withdrawPlayer(player, amount));
         }
     }

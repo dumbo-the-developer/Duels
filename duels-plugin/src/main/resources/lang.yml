@@ -246,7 +246,7 @@ DUEL:
     player-moved: '{FAIL_PREFIX} You or your opponent moved after sending/accepting the request!'
     no-arena-available: '{FAIL_PREFIX} No arena is currently available. Please try again later.'
     arena-in-use: '{FAIL_PREFIX} That arena is already in use. Please select a different arena.'
-    not-enough-money: '{FAIL_PREFIX} You or your opponent lacks $%bet_amount%.'
+    not-enough-money: '{FAIL_PREFIX} You or your opponent does not have $%bet_amount%.'
   on-end:
     tie: '{PREFIX} &7Tie Game!'
     plugin-disable: '{PREFIX} &cPlugin is disabling! Ending match automatically.'
@@ -254,6 +254,12 @@ DUEL:
   inventories:
     message: '&7Inventories (click on the name to view): '
     name-color: '&b'
+  reward:
+    money:
+      message: '{PREFIX} &7You have received &6$%money% &7for winning against &f%name%&7!'
+      title: '&eYOU WON &6$%money%&e!'
+    items:
+      message: '{PREFIX} &7You have received &f%name%&7''s items for winning!'
 
 
 SIGN:
@@ -275,6 +281,7 @@ SPECTATE:
     command: '&cYou cannot use ''%command%'' while in spectator mode.'
     teleportation: '&cYou cannot teleport while in spectator mode.'
     pvp: '&cYou cannot do this while in spectator mode.'
+
 
 GUI:
   settings:
