@@ -44,6 +44,7 @@ public class ItemData {
     private List<String> contents;
     private Map<String, String> effects;
     private String color;
+    private boolean unbreakable;
 
     public ItemData(final ItemStack item) {
         this.material = item.getType().name();
@@ -157,6 +158,10 @@ public class ItemData {
                     color = DyeColor.getByColor(leatherArmorMeta.getColor()).name();
                 }
             }
+
+            if (!CompatUtil.isPre1_8() && meta.spigot().isUnbreakable()) {
+                unbreakable = meta.spigot().isUnbreakable();
+            }
         }
     }
 
@@ -248,6 +253,10 @@ public class ItemData {
             if (color != null) {
                 leatherArmorMeta.setColor(DyeColor.valueOf(color).getColor());
             }
+        }
+
+        if (!CompatUtil.isPre1_8() && unbreakable) {
+            meta.spigot().setUnbreakable(true);
         }
 
         item.setItemMeta(meta);
