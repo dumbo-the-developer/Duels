@@ -34,6 +34,7 @@ ERROR:
     is-self: '{PREFIX} &cYou cannot duel yourself.'
     inventory-not-empty: '{PREFIX} &cYou must have a cleared inventory to use this command.'
     in-creative-mode: '{PREFIX} &cYou cannot duel in creative mode.'
+    is-tagged: '{PREFIX} &cYou cannot duel while combat tagged.'
     not-in-duelzone: '{PREFIX} &cYou can only duel in the following regions: %regions%'
     requests-disabled: '{PREFIX} &c%name% is currently not accepting duel requests.'
     already-has-request: '{PREFIX} &cYou already have a request sent to %name%.'

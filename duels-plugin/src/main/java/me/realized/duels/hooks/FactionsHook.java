@@ -5,6 +5,7 @@ import com.massivecraft.factions.event.EventFactionsPowerChange;
 import com.massivecraft.factions.event.PowerLossEvent;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManager;
+import me.realized.duels.config.Config;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.hook.PluginHook;
 import org.bukkit.entity.Player;
@@ -13,10 +14,12 @@ import org.bukkit.event.Listener;
 
 public class FactionsHook extends PluginHook<DuelsPlugin> {
 
+    private final Config config;
     private final ArenaManager arenaManager;
 
     public FactionsHook(final DuelsPlugin plugin) {
         super(plugin, "Factions");
+        this.config = plugin.getConfiguration();
         this.arenaManager = plugin.getArenaManager();
 
         Listener listener;
@@ -50,6 +53,10 @@ public class FactionsHook extends PluginHook<DuelsPlugin> {
 
         @EventHandler
         public void on(final EventFactionsPowerChange event) {
+            if (!config.isFNoPowerLoss()) {
+                return;
+            }
+
             final MPlayer mPlayer = event.getMPlayer();
             final Player player = mPlayer.getPlayer();
 
@@ -65,6 +72,10 @@ public class FactionsHook extends PluginHook<DuelsPlugin> {
 
         @EventHandler
         public void on(final PowerLossEvent event) {
+            if (!config.isFuNoPowerLoss()) {
+                return;
+            }
+
             final Player player = event.getfPlayer().getPlayer();
 
             if (!arenaManager.isInMatch(player)) {

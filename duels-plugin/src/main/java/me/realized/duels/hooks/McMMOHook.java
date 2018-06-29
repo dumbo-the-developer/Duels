@@ -4,20 +4,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.config.Config;
 import me.realized.duels.util.hook.PluginHook;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 
 public class McMMOHook extends PluginHook<DuelsPlugin> {
 
+    private final Config config;
     private final Map<UUID, PermissionAttachment> attachments = new HashMap<>();
 
     public McMMOHook(final DuelsPlugin plugin) {
         super(plugin, "mcMMO");
+        this.config = plugin.getConfiguration();
     }
 
     public void disableSkills(final Player player) {
-        if (!plugin.getConfiguration().isPreventMcMMO()) {
+        if (!config.isDisableSkills()) {
             return;
         }
 
@@ -27,7 +30,7 @@ public class McMMOHook extends PluginHook<DuelsPlugin> {
     }
 
     public void enableSkills(final Player player) {
-        if (!plugin.getConfiguration().isPreventMcMMO()) {
+        if (!config.isDisableSkills()) {
             return;
         }
 

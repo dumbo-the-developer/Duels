@@ -17,8 +17,12 @@ public class WorldGuardHook extends PluginHook<DuelsPlugin> {
     }
 
     public boolean inDuelZone(Player player) {
+        if (!config.isDuelzoneEnabled()) {
+            return true;
+        }
+
         final WorldGuardPlugin plugin = (WorldGuardPlugin) getPlugin();
-        final List<String> allowedRegions = config.getDuelZoneRegions();
+        final List<String> allowedRegions = config.getDuelzoneRegions();
         return plugin.getRegionManager(player.getWorld())
             .getApplicableRegions(player.getLocation()).getRegions()
             .stream().anyMatch(region -> allowedRegions.contains(region.getId()));

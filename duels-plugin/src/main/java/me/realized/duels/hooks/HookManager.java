@@ -7,13 +7,13 @@ public class HookManager extends AbstractHookManager<DuelsPlugin> {
 
     public HookManager(final DuelsPlugin plugin) {
         super(plugin);
-        register("Vault", VaultHook.class);
-        register("Essentials", EssentialsHook.class);
-        register("MVdWPlaceholderAPI", MVdWPlaceholderHook.class);
-        register("PvPManager", PvPManagerHook.class);
         register("CombatTagPlus", CombatTagPlusHook.class);
+        register("Essentials", EssentialsHook.class);
         register("Factions", FactionsHook.class);
         register("mcMMO", McMMOHook.class);
+        register("MVdWPlaceholderAPI", MVdWPlaceholderHook.class);
+        register("PvPManager", PvPManagerHook.class);
+        register("Vault", VaultHook.class);
         register("WorldGuard", WorldGuardHook.class);
     }
 }

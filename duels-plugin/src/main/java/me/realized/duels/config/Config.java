@@ -22,6 +22,29 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean checkForUpdates;
 
     @Getter
+    private boolean ctpPreventDuel;
+    @Getter
+    private boolean ctpUntag;
+    @Getter
+    private boolean pmPreventDuel;
+    @Getter
+    private boolean pmUntag;
+    @Getter
+    private boolean autoUnvanish;
+    @Getter
+    private boolean setBackLocation;
+    @Getter
+    private boolean disableSkills;
+    @Getter
+    private boolean fuNoPowerLoss;
+    @Getter
+    private boolean fNoPowerLoss;
+    @Getter
+    private boolean duelzoneEnabled;
+    @Getter
+    private List<String> duelzoneRegions;
+
+    @Getter
     private boolean requiresClearedInventory;
     @Getter
     private boolean preventCreativeMode;
@@ -57,11 +80,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean preventTpToMatchPlayers;
     @Getter
-    private boolean preventMcMMO;
-    @Getter
     private boolean forceAllowCombat;
-    @Getter
-    private boolean forceUnvanish;
     @Getter
     private boolean cancelIfMoved;
     @Getter
@@ -132,11 +151,6 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private double heartsToRegen;
 
-    @Getter
-    private boolean duelZoneEnabled;
-    @Getter
-    private List<String> duelZoneRegions;
-
     private final Map<String, MessageSound> sounds = new HashMap<>();
 
     public Config(final DuelsPlugin plugin) {
@@ -151,6 +165,19 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
 
         version = configuration.getInt("config-version");
         checkForUpdates = configuration.getBoolean("check-for-updates", true);
+
+        ctpPreventDuel = configuration.getBoolean("supported-plugins.CombatTagPlus.prevent-duel-if-tagged", true);
+        ctpUntag = configuration.getBoolean("supported-plugins.CombatTagPlus.untag-on-duel-teleport", true);
+        pmPreventDuel = configuration.getBoolean("supported-plugins.PvPManager.prevent-duel-if-tagged", true);
+        pmUntag = configuration.getBoolean("supported-plugins.PvPManager.untag-on-duel-teleport", true);
+        autoUnvanish = configuration.getBoolean("supported-plugins.Essentials.auto-unvanish", true);
+        setBackLocation = configuration.getBoolean("supported-plugins.Essentials.set-back-location", true);
+        disableSkills = configuration.getBoolean("supported-plugins.mcMMO.disable-skills-in-duel", true);
+        fuNoPowerLoss = configuration.getBoolean("supported-plugins.FactionsUUID.no-power-loss-in-duel", true);
+        fNoPowerLoss = configuration.getBoolean("supported-plugins.Factions.no-power-loss-in-duel", true);
+        duelzoneEnabled = configuration.getBoolean("supported-plugins.WorldGuard.duelzone.enabled", false);
+        duelzoneRegions = configuration.getStringList("supported-plugins.WorldGuard.duelzone.regions");
+
         requiresClearedInventory = configuration.getBoolean("request.requires-cleared-inventory", true);
         preventCreativeMode = configuration.getBoolean("request.prevent-creative-mode", false);
         arenaSelectingEnabled = configuration.getBoolean("request.arena-selecting.enabled", true);
@@ -159,7 +186,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         itemBettingUsePermission = configuration.getBoolean("request.item-betting.use-permission", false);
         moneyBettingEnabled = configuration.getBoolean("request.money-betting.enabled", true);
         moneyBettingUsePermission = configuration.getBoolean("request.money-betting.use-permission", false);
-        expiration = configuration.getInt("request.expiration", 30);
+        expiration = Math.max(configuration.getInt("request.expiration", 30), 0);
+
         useOwnInventoryEnabled = configuration.getBoolean("duel.use-own-inventory.enabled", false);
         useOwnInventoryKeepItems = configuration.getBoolean("duel.use-own-inventory.keep-items", false);
         maxDuration = configuration.getInt("duel.match.max-duration", -1);
@@ -168,9 +196,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         preventInventoryOpen = configuration.getBoolean("duel.prevent-inventory-open", true);
         removeEmptyBottle = configuration.getBoolean("duel.remove-empty-bottle", true);
         preventTpToMatchPlayers = configuration.getBoolean("duel.prevent-teleport-to-match-players", true);
-        preventMcMMO = configuration.getBoolean("duel.prevent-mcmmo-skills", true);
         forceAllowCombat = configuration.getBoolean("duel.force-allow-combat", true);
-        forceUnvanish = configuration.getBoolean("duel.force-unvanish", true);
         cancelIfMoved = configuration.getBoolean("duel.cancel-if-moved", false);
         teleportToLastLocation = configuration.getBoolean("duel.teleport-to-last-location", false);
         teleportDelay = configuration.getInt("duel.teleport-delay", 5);
@@ -181,29 +207,34 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         blockAllCommands = configuration.getBoolean("duel.block-all-commands", false);
         whitelistedCommands = configuration.getStringList("duel.whitelisted-commands");
         blacklistedCommands = configuration.getStringList("duel.blacklisted-commands");
+
         ratingEnabled = configuration.getBoolean("rating.enabled", true);
-        kFactor = configuration.getInt("rating.k-factor", 32);
-        defaultRating = configuration.getInt("rating.default-rating", 1400);
+        kFactor = Math.max(configuration.getInt("rating.k-factor", 32), 1);
+        defaultRating = Math.max(configuration.getInt("rating.default-rating", 1400), 0);
         queueMatchesOnly = configuration.getBoolean("rating.queue-matches-only", true);
+
         specRequiresClearedInventory = configuration.getBoolean("spectate.requires-cleared-inventory", false);
         specWhitelistedCommands = configuration.getStringList("spectate.whitelisted-commands");
+
         cdEnabled = configuration.getBoolean("countdown.enabled", true);
         cdMessages = configuration.getStringList("countdown.messages");
         titles = configuration.getStringList("countdown.titles");
         preventMovement = configuration.getBoolean("countdown.prevent.movement", true);
         preventLaunchProjectile = configuration.getBoolean("countdown.prevent.launch-projectile", true);
         preventPvp = configuration.getBoolean("countdown.prevent.pvp", true);
+
         displayRatings = configuration.getBoolean("stats.display-ratings", true);
         displayPastMatches = configuration.getBoolean("stats.display-past-matches", true);
-        matchesToDisplay = configuration.getInt("stats.matches-to-display", 10);
-        topUpdateInterval = configuration.getInt("top.update-interval", 5) * 60L * 1000L;
+        matchesToDisplay = Math.max(configuration.getInt("stats.matches-to-display", 10), 0);
+
+        topUpdateInterval = Math.max(configuration.getInt("top.update-interval", 5), 1) * 60L * 1000L;
+
         kitSelectorRows = Math.min(Math.max(configuration.getInt("guis.kit-selector.rows", 2), 1), 5);
         arenaSelectorRows = Math.min(Math.max(configuration.getInt("guis.arena-selector.rows", 3), 1), 5);
+
         soupEnabled = configuration.getBoolean("soup.enabled", true);
         nameStartingWith = configuration.getString("soup.arena-name-starting-with", "soup arena");
-        heartsToRegen = configuration.getDouble("soup.hearts-to-regen", 3.5);
-        duelZoneEnabled = configuration.getBoolean("duelzone.enabled", false);
-        duelZoneRegions = configuration.getStringList("duelzone.regions");
+        heartsToRegen = Math.max(configuration.getDouble("soup.hearts-to-regen", 3.5), 0);
 
         final ConfigurationSection sounds = configuration.getConfigurationSection("sounds");
 

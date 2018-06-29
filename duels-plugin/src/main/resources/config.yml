@@ -5,6 +5,57 @@ config-version: 1
 # default: true
 check-for-updates: true
 
+
+# NOTE: The following options will only activate if the message '[Duels] Hooked into <plugin name>!' is displayed on console.
+# If the plugin in the following list is enabled on your server but Duels fails to hook into them,
+# please contact the developer with the errors displayed on console.
+supported-plugins:
+  CombatTagPlus:
+    # If set to 'true', players will not be able to duel while combat tagged.
+    # default: true
+    prevent-duel-if-tagged: true
+
+    # If set to 'true', players will be untagged at the end of the duel to prevent teleport being cancelled.
+    # default: true
+    untag-on-duel-teleport: true
+  PvPManager:
+    # If set to 'true', players will not be able to duel while combat tagged.
+    # default: true
+    prevent-duel-if-tagged: true
+
+    # If set to 'true', players will be untagged at the end of the duel to prevent teleport being cancelled.
+    # default: true
+    untag-on-duel-teleport: true
+  Essentials:
+    # If set to 'true', players in vanish will be automatically unvanished at the start of a duel.
+    # default: true
+    auto-unvanish: true
+
+    # If set to 'true', players will not be able to use '/back' to teleport back to the arena after dying in a duel.
+    # default: true
+    set-back-location: true
+  mcMMO:
+    # If set to 'true', usage of mcMMO skills and abilities will be prohibited while in a duel.
+    # default: true
+    disable-skills-in-duel: true
+  FactionsUUID:
+    # If set to 'true', players will experience no power loss when they die in a duel.
+    # default: true
+    no-power-loss-in-duel: true
+  Factions:
+    # If set to 'true', players will experience no power loss when they die in a duel.
+    # default: true
+    no-power-loss-in-duel: true
+  WorldGuard:
+    duelzone:
+      # If set to 'true', players will be able to use duel related commands only in the regions listed below.
+      # default: false
+      enabled: false
+
+      # List of regions to allow dueling.
+      regions: [spawn, lobby]
+
+
 request:
   # If set to 'true', players will be forced to have a cleared inventory in order to send or accept a duel request.
   # default: true
@@ -44,6 +95,7 @@ request:
   # Request expiration, in seconds.
   # default: 30
   expiration: 30
+
 
 duel:
   use-own-inventory:
@@ -87,18 +139,9 @@ duel:
   # default: true
   prevent-teleport-to-match-players: true
 
-  # If set to 'true', usage of mcMMO skills and abilities will be prohibited while in a duel.
-  # default: true
-  prevent-mcmmo-skills: true
-
-  # If set to 'true', players in the same faction will be able to attack each other if they are in a duel.
+  # If set to 'true', players in the same faction/team/gang/party will be able to attack each other if they are in a duel.
   # default: true
   force-allow-combat: true
-
-  # If set to 'true', players in vanish will be unvanished automatically at the start of the duel.
-  # NOTE: Only supports Essentials Vanish as of now!
-  # default: true
-  force-unvanish: true
 
   # If set to 'true', players will be required to stay in the position where they have sent or accepted the request in order for the duel to start.
   # default: false
@@ -349,15 +392,6 @@ soup:
   # Amount of hearts to regenerate on soup consume.
   # default: 3.5
   hearts-to-regen: 3.5
-
-
-duelzone:
-  # If set to 'true', players will be able to use duel related commands only in the regions listed below.
-  # default: false
-  enabled: false
-
-  # List of regions to allow dueling.
-  regions: [spawn, lobby]
 
 
 # List of sound types:

@@ -2,6 +2,8 @@ package me.realized.duels.command.commands.duel.subcommands;
 
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
+import me.realized.duels.hooks.CombatTagPlusHook;
+import me.realized.duels.hooks.PvPManagerHook;
 import me.realized.duels.hooks.WorldGuardHook;
 import me.realized.duels.request.Request;
 import me.realized.duels.setting.Settings;
@@ -13,10 +15,14 @@ import org.bukkit.entity.Player;
 
 public class AcceptCommand extends BaseCommand {
 
+    private final CombatTagPlusHook combatTagPlus;
+    private final PvPManagerHook pvpManager;
     private final WorldGuardHook worldGuard;
 
     public AcceptCommand(final DuelsPlugin plugin) {
         super(plugin, "accept", "accept [player]", "Accepts a duel request.", 2, true);
+        this.combatTagPlus = hookManager.getHook(CombatTagPlusHook.class);
+        this.pvpManager = hookManager.getHook(PvPManagerHook.class);
         this.worldGuard = hookManager.getHook(WorldGuardHook.class);
     }
 
@@ -34,8 +40,13 @@ public class AcceptCommand extends BaseCommand {
             return;
         }
 
-        if (config.isDuelZoneEnabled() && worldGuard != null && !worldGuard.inDuelZone(player)) {
-            lang.sendMessage(sender, "ERROR.duel.not-in-duelzone", "regions", config.getDuelZoneRegions());
+        if ((combatTagPlus != null && combatTagPlus.isTagged(player)) || (pvpManager != null && pvpManager.isTagged(player))) {
+            lang.sendMessage(sender, "ERROR.duel.is-tagged");
+            return;
+        }
+
+        if (worldGuard != null && !worldGuard.inDuelZone(player)) {
+            lang.sendMessage(sender, "ERROR.duel.not-in-duelzone", "regions", config.getDuelzoneRegions());
             return;
         }
 

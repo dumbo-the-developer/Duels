@@ -12,6 +12,8 @@ import me.realized.duels.command.commands.duel.subcommands.TopCommand;
 import me.realized.duels.command.commands.duel.subcommands.VersionCommand;
 import me.realized.duels.data.UserData;
 import me.realized.duels.extra.Permissions;
+import me.realized.duels.hooks.CombatTagPlusHook;
+import me.realized.duels.hooks.PvPManagerHook;
 import me.realized.duels.hooks.VaultHook;
 import me.realized.duels.hooks.WorldGuardHook;
 import me.realized.duels.setting.Settings;
@@ -25,6 +27,8 @@ import org.bukkit.entity.Player;
 
 public class DuelCommand extends BaseCommand {
 
+    private final CombatTagPlusHook combatTagPlus;
+    private final PvPManagerHook pvpManager;
     private final WorldGuardHook worldGuard;
     private final VaultHook vault;
 
@@ -39,6 +43,8 @@ public class DuelCommand extends BaseCommand {
             new InventoryCommand(plugin),
             new VersionCommand(plugin)
         );
+        this.combatTagPlus = hookManager.getHook(CombatTagPlusHook.class);
+        this.pvpManager = hookManager.getHook(PvPManagerHook.class);
         this.worldGuard = hookManager.getHook(WorldGuardHook.class);
         this.vault = hookManager.getHook(VaultHook.class);
     }
@@ -71,8 +77,13 @@ public class DuelCommand extends BaseCommand {
             return true;
         }
 
-        if (config.isDuelZoneEnabled() && worldGuard != null && !worldGuard.inDuelZone(player)) {
-            lang.sendMessage(sender, "ERROR.duel.not-in-duelzone", "regions", config.getDuelZoneRegions());
+        if ((combatTagPlus != null && combatTagPlus.isTagged(player)) || (pvpManager != null && pvpManager.isTagged(player))) {
+            lang.sendMessage(sender, "ERROR.duel.is-tagged");
+            return true;
+        }
+
+        if (worldGuard != null && !worldGuard.inDuelZone(player)) {
+            lang.sendMessage(sender, "ERROR.duel.not-in-duelzone", "regions", config.getDuelzoneRegions());
             return true;
         }
 
