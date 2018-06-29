@@ -5,11 +5,16 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import me.realized.duels.api.Duels;
+import me.realized.duels.api.command.SubCommand;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.betting.BettingManager;
 import me.realized.duels.command.commands.SpectateCommand;
@@ -41,7 +46,9 @@ import me.realized.duels.util.Log;
 import me.realized.duels.util.Log.LogSource;
 import me.realized.duels.util.Reloadable;
 import me.realized.duels.util.ServerUtil;
+import me.realized.duels.util.command.AbstractCommand;
 import me.realized.duels.util.gui.GuiListener;
+import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.inventivetalent.update.spiget.SpigetUpdate;
 import org.inventivetalent.update.spiget.UpdateCallback;
@@ -96,6 +103,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private Teleport teleport;
     @Getter
     private ExtensionManager extensionManager;
+    private final Map<String, AbstractCommand<DuelsPlugin>> commands = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -132,6 +140,12 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(teleport = new Teleport(this));
         loadables.add(extensionManager = new ExtensionManager(this));
 
+        registerCommands(
+            new DuelCommand(this),
+            new SpectateCommand(this),
+            new DuelsCommand(this)
+        );
+
         if (!load()) {
             getPluginLoader().disablePlugin(this);
             return;
@@ -142,10 +156,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         new PotionListener(this);
         new TeleportListener(this);
         new SoupListener(this);
-
-        new DuelCommand(this).register();
-        new DuelsCommand(this).register();
-        new SpectateCommand(this).register();
 
         new Metrics(this);
 
@@ -222,28 +232,32 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         return true;
     }
 
-    public void doSync(final Runnable runnable) {
-        getServer().getScheduler().runTask(this, runnable);
+    @SafeVarargs
+    private final void registerCommands(final AbstractCommand<DuelsPlugin>... commands) {
+        for (final AbstractCommand<DuelsPlugin> command : commands) {
+            this.commands.put(command.getName().toLowerCase(), command);
+            command.register();
+        }
     }
 
-    public void doSyncAfter(final Runnable runnable, final long delay) {
-        getServer().getScheduler().runTaskLater(this, runnable, delay);
-    }
+    @Override
+    public boolean registerSubCommand(@Nonnull final String command, @Nonnull final SubCommand subCommand) {
+        Objects.requireNonNull(command, "command");
+        Objects.requireNonNull(subCommand, "subCommand");
 
-    public int doSyncRepeat(final Runnable runnable, final long delay, final long period) {
-        return getServer().getScheduler().runTaskTimer(this, runnable, delay, period).getTaskId();
-    }
+        final AbstractCommand<DuelsPlugin> result = commands.get(command.toLowerCase());
 
-    public void doAsync(final Runnable runnable) {
-        getServer().getScheduler().runTaskAsynchronously(this, runnable);
-    }
+        if (result == null || result.isChild(subCommand.getName())) {
+            return false;
+        }
 
-    public void doAsyncRepeat(final Runnable runnable, final long delay, final long period) {
-        getServer().getScheduler().runTaskTimerAsynchronously(this, runnable, delay, period);
-    }
-
-    public void cancelTask(final int taskId) {
-        getServer().getScheduler().cancelTask(taskId);
+        result.child(new AbstractCommand<DuelsPlugin>(this, subCommand) {
+            @Override
+            protected void execute(final CommandSender sender, final String label, final String[] args) {
+                subCommand.execute(sender, label, args);
+            }
+        });
+        return true;
     }
 
     @Override
@@ -271,6 +285,31 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             ex.printStackTrace();
             return false;
         }
+    }
+
+
+    public void doSync(final Runnable runnable) {
+        getServer().getScheduler().runTask(this, runnable);
+    }
+
+    public void doSyncAfter(final Runnable runnable, final long delay) {
+        getServer().getScheduler().runTaskLater(this, runnable, delay);
+    }
+
+    public int doSyncRepeat(final Runnable runnable, final long delay, final long period) {
+        return getServer().getScheduler().runTaskTimer(this, runnable, delay, period).getTaskId();
+    }
+
+    public void doAsync(final Runnable runnable) {
+        getServer().getScheduler().runTaskAsynchronously(this, runnable);
+    }
+
+    public void doAsyncRepeat(final Runnable runnable, final long delay, final long period) {
+        getServer().getScheduler().runTaskTimerAsynchronously(this, runnable, delay, period);
+    }
+
+    public void cancelTask(final int taskId) {
+        getServer().getScheduler().cancelTask(taskId);
     }
 
     public Loadable find(final String name) {

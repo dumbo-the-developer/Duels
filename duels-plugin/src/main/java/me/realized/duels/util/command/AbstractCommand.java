@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.Getter;
+import me.realized.duels.api.command.SubCommand;
 import me.realized.duels.util.StringUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -53,8 +54,12 @@ public abstract class AbstractCommand<P extends JavaPlugin> implements TabComple
         this.aliases = Collections.unmodifiableList(names);
     }
 
+    protected AbstractCommand(final P plugin, final SubCommand sub) {
+        this(plugin, sub.getName(), sub.getUsage(), sub.getDescription(), sub.getPermission(), sub.getLength(), sub.isPlayerOnly(), sub.getAliases());
+    }
+
     @SafeVarargs
-    protected final void child(final AbstractCommand<P>... commands) {
+    public final void child(final AbstractCommand<P>... commands) {
         if (commands == null || commands.length == 0) {
             return;
         }
@@ -91,7 +96,7 @@ public abstract class AbstractCommand<P extends JavaPlugin> implements TabComple
         });
     }
 
-    protected boolean isChild(final String name) {
+    public boolean isChild(final String name) {
         return children != null && children.get(name.toLowerCase()) != null;
     }
 
