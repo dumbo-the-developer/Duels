@@ -57,6 +57,6 @@ public class DuelsCommand extends BaseCommand {
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
-        lang.sendMessage(sender, "COMMAND.duels.usage");
+        lang.sendMessage(sender, "COMMAND.duels.usage", "command", label);
     }
 }

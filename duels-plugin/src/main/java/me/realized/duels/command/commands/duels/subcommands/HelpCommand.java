@@ -20,11 +20,11 @@ public class HelpCommand extends BaseCommand {
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         if (args.length == getLength() || !categories.contains(args[1].toLowerCase())) {
-            lang.sendMessage(sender, "COMMAND.duels.usage");
+            lang.sendMessage(sender, "COMMAND.duels.usage", "command", label);
             return;
         }
 
-        lang.sendMessage(sender, "COMMAND.duels.help." + args[1].toLowerCase());
+        lang.sendMessage(sender, "COMMAND.duels.help." + args[1].toLowerCase(), "command", label);
     }
 
     @Override

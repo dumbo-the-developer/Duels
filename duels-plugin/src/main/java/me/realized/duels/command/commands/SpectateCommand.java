@@ -24,7 +24,7 @@ public class SpectateCommand extends BaseCommand {
         }
 
         if (args.length == 0) {
-            lang.sendMessage(sender, "COMMAND.spectate.usage");
+            lang.sendMessage(sender, "COMMAND.spectate.usage", "command", label);
             return;
         }
 

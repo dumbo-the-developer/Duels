@@ -59,7 +59,7 @@ public class DuelCommand extends BaseCommand {
         }
 
         if (args.length == 0) {
-            lang.sendMessage(sender, "COMMAND.duel.usage");
+            lang.sendMessage(sender, "COMMAND.duel.usage", "command", label);
             return true;
         }
 

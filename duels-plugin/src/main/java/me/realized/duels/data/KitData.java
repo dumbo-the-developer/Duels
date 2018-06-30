@@ -2,6 +2,7 @@ package me.realized.duels.data;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.kit.Kit;
 import org.bukkit.inventory.ItemStack;
@@ -22,7 +23,9 @@ public class KitData {
 
         for (final Map.Entry<String, Map<Integer, ItemStack>> entry : kit.getItems().entrySet()) {
             final Map<Integer, ItemData> data = new HashMap<>();
-            entry.getValue().forEach(((slot, item) -> data.put(slot, new ItemData(item))));
+            entry.getValue().entrySet().stream()
+                .filter(value -> Objects.nonNull(value.getValue()))
+                .forEach(value -> data.put(value.getKey(), new ItemData(value.getValue())));
             items.put(entry.getKey(), data);
         }
     }
