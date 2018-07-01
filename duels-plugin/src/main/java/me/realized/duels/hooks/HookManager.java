@@ -12,6 +12,7 @@ public class HookManager extends AbstractHookManager<DuelsPlugin> {
         register("Factions", FactionsHook.class);
         register("mcMMO", McMMOHook.class);
         register("MVdWPlaceholderAPI", MVdWPlaceholderHook.class);
+        register("PlaceholderAPI", PlaceholderHook.class);
         register("PvPManager", PvPManagerHook.class);
         register("Vault", VaultHook.class);
         register("WorldGuard", WorldGuardHook.class);

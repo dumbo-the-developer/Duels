@@ -36,7 +36,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 
-public class SpectateManager implements Loadable, Listener {
+public class SpectateManager implements Loadable {
 
     private final DuelsPlugin plugin;
     private final Config config;
@@ -53,7 +53,7 @@ public class SpectateManager implements Loadable, Listener {
         this.lang = plugin.getLang();
         this.arenaManager = plugin.getArenaManager();
         this.playerManager = plugin.getPlayerManager();
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        plugin.getServer().getPluginManager().registerEvents(new SpectateListener(), plugin);
     }
 
     @Override
@@ -179,132 +179,136 @@ public class SpectateManager implements Loadable, Listener {
         return spectators.keySet();
     }
 
-    @EventHandler
-    public void on(final PlayerInteractEvent event) {
-        if (!event.getAction().name().startsWith("RIGHT")) {
-            return;
+    private class SpectateListener implements Listener {
+
+
+        @EventHandler
+        public void on(final PlayerInteractEvent event) {
+            if (!event.getAction().name().startsWith("RIGHT")) {
+                return;
+            }
+
+            final Player player = event.getPlayer();
+            final ItemStack held = InventoryUtil.getItemInHand(player);
+
+            if (held == null || held.getType() != Material.PAPER) {
+                return;
+            }
+
+            stopSpectating(player, false);
         }
 
-        final Player player = event.getPlayer();
-        final ItemStack held = InventoryUtil.getItemInHand(player);
 
-        if (held == null || held.getType() != Material.PAPER) {
-            return;
+        @EventHandler
+        public void on(final PlayerQuitEvent event) {
+            stopSpectating(event.getPlayer(), false);
         }
 
-        stopSpectating(player, false);
-    }
 
+        @EventHandler(ignoreCancelled = true)
+        public void on(final PlayerCommandPreprocessEvent event) {
+            final Player player = event.getPlayer();
 
-    @EventHandler
-    public void on(final PlayerQuitEvent event) {
-        stopSpectating(event.getPlayer(), false);
-    }
+            if (!isSpectating(player)) {
+                return;
+            }
 
+            final String command = event.getMessage().substring(1).split(" ")[0].toLowerCase();
 
-    @EventHandler(ignoreCancelled = true)
-    public void on(final PlayerCommandPreprocessEvent event) {
-        final Player player = event.getPlayer();
+            if (command.equalsIgnoreCase("spectate") || command.equalsIgnoreCase("spec") || config.getSpecWhitelistedCommands().contains(command)) {
+                return;
+            }
 
-        if (!isSpectating(player)) {
-            return;
+            event.setCancelled(true);
+            lang.sendMessage(player, "SPECTATE.prevent.command", "command", event.getMessage());
         }
 
-        final String command = event.getMessage().substring(1).split(" ")[0].toLowerCase();
 
-        if (command.equalsIgnoreCase("spectate") || command.equalsIgnoreCase("spec") || config.getSpecWhitelistedCommands().contains(command)) {
-            return;
+        @EventHandler(ignoreCancelled = true)
+        public void on(final PlayerTeleportEvent event) {
+            final Player player = event.getPlayer();
+            final Spectator spectator = get(player);
+
+            if (spectator == null || !spectator.isTeleported()) {
+                return;
+            }
+
+            event.setCancelled(true);
+            lang.sendMessage(player, "SPECTATE.prevent.teleportation");
         }
 
-        event.setCancelled(true);
-        lang.sendMessage(player, "SPECTATE.prevent.command", "command", event.getMessage());
-    }
 
+        @EventHandler(ignoreCancelled = true)
+        public void on(final PlayerDropItemEvent event) {
+            final Player player = event.getPlayer();
 
-    @EventHandler(ignoreCancelled = true)
-    public void on(final PlayerTeleportEvent event) {
-        final Player player = event.getPlayer();
-        final Spectator spectator = get(player);
+            if (!isSpectating(player)) {
+                return;
+            }
 
-        if (spectator == null || !spectator.isTeleported()) {
-            return;
+            event.setCancelled(true);
+            lang.sendMessage(player, "SPECTATE.prevent.item-drop");
         }
 
-        event.setCancelled(true);
-        lang.sendMessage(player, "SPECTATE.prevent.teleportation");
-    }
 
+        @EventHandler(ignoreCancelled = true)
+        public void on(PlayerPickupItemEvent event) {
+            if (!isSpectating(event.getPlayer())) {
+                return;
+            }
 
-    @EventHandler(ignoreCancelled = true)
-    public void on(final PlayerDropItemEvent event) {
-        final Player player = event.getPlayer();
-
-        if (!isSpectating(player)) {
-            return;
+            event.setCancelled(true);
         }
 
-        event.setCancelled(true);
-        lang.sendMessage(player, "SPECTATE.prevent.item-drop");
-    }
 
+        @EventHandler(ignoreCancelled = true)
+        public void on(final InventoryClickEvent event) {
+            if (!isSpectating((Player) event.getWhoClicked())) {
+                return;
+            }
 
-    @EventHandler(ignoreCancelled = true)
-    public void on(PlayerPickupItemEvent event) {
-        if (!isSpectating(event.getPlayer())) {
-            return;
+            event.setCancelled(true);
         }
 
-        event.setCancelled(true);
-    }
 
+        @EventHandler
+        public void on(final InventoryDragEvent event) {
+            if (!isSpectating((Player) event.getWhoClicked())) {
+                return;
+            }
 
-    @EventHandler(ignoreCancelled = true)
-    public void on(final InventoryClickEvent event) {
-        if (!isSpectating((Player) event.getWhoClicked())) {
-            return;
+            event.setCancelled(true);
         }
 
-        event.setCancelled(true);
-    }
 
+        @EventHandler(ignoreCancelled = true)
+        public void on(final EntityDamageByEntityEvent event) {
+            final Player player;
 
-    @EventHandler
-    public void on(final InventoryDragEvent event) {
-        if (!isSpectating((Player) event.getWhoClicked())) {
-            return;
+            if (event.getDamager() instanceof Player) {
+                player = (Player) event.getDamager();
+            } else if (event.getDamager() instanceof Projectile && ((Projectile) event.getDamager()).getShooter() instanceof Player) {
+                player = (Player) ((Projectile) event.getDamager()).getShooter();
+            } else {
+                return;
+            }
+
+            if (!isSpectating(player)) {
+                return;
+            }
+
+            event.setCancelled(true);
+            lang.sendMessage(player, "SPECTATE.prevent.pvp");
         }
 
-        event.setCancelled(true);
-    }
 
+        @EventHandler(ignoreCancelled = true)
+        public void on(final EntityDamageEvent event) {
+            if (!(event.getEntity() instanceof Player) || !isSpectating((Player) event.getEntity())) {
+                return;
+            }
 
-    @EventHandler(ignoreCancelled = true)
-    public void on(final EntityDamageByEntityEvent event) {
-        final Player player;
-
-        if (event.getDamager() instanceof Player) {
-            player = (Player) event.getDamager();
-        } else if (event.getDamager() instanceof Projectile && ((Projectile) event.getDamager()).getShooter() instanceof Player) {
-            player = (Player) ((Projectile) event.getDamager()).getShooter();
-        } else {
-            return;
+            event.setCancelled(true);
         }
-
-        if (!isSpectating(player)) {
-            return;
-        }
-
-        event.setCancelled(true);
-        lang.sendMessage(player, "SPECTATE.prevent.pvp");
-    }
-
-
-    @EventHandler(ignoreCancelled = true)
-    public void on(final EntityDamageEvent event) {
-        if (!(event.getEntity() instanceof Player) || !isSpectating((Player) event.getEntity())) {
-            return;
-        }
-
-        event.setCancelled(true);
     }
 }

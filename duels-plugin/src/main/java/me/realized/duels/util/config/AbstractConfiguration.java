@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ public abstract class AbstractConfiguration<P extends JavaPlugin> implements Loa
     }
 
     @Override
-    public void handleLoad() throws IOException {
+    public void handleLoad() throws Exception {
         if (!file.exists()) {
             plugin.saveResource(name, true);
         }
@@ -59,16 +60,18 @@ public abstract class AbstractConfiguration<P extends JavaPlugin> implements Loa
     @Override
     public void handleUnload() {}
 
-    protected abstract void loadValues(final FileConfiguration configuration) throws IOException;
+    protected abstract void loadValues(final FileConfiguration configuration) throws Exception;
 
-    protected int getLatestVersion() {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(plugin.getClass().getResourceAsStream("/" + name)))) {
-            return YamlConfiguration.loadConfiguration(reader).getInt("config-version", -1);
-        } catch (IOException ex) {
-            ex.printStackTrace();
+    protected int getLatestVersion() throws Exception {
+        final InputStream stream = plugin.getClass().getResourceAsStream("/" + name);
+
+        if (stream == null) {
+            throw new IllegalStateException(plugin.getName() + "'s jar file was replaced, but a reload was called! Please restart your server instead when updating this plugin.");
         }
 
-        return -1;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+            return YamlConfiguration.loadConfiguration(reader).getInt("config-version", -1);
+        }
     }
 
     protected FileConfiguration convert(final Converter converter) throws IOException {

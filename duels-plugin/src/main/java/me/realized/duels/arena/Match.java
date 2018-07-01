@@ -18,6 +18,8 @@ import org.bukkit.inventory.ItemStack;
 public class Match implements me.realized.duels.api.match.Match {
 
     @Getter
+    private final Arena arena;
+    @Getter
     private final long start;
     @Getter
     private final Kit kit;
@@ -28,7 +30,8 @@ public class Match implements me.realized.duels.api.match.Match {
     private final boolean fromQueue;
     private final Map<Player, Boolean> players = new HashMap<>();
 
-    Match(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet, final boolean fromQueue) {
+    Match(final Arena arena, final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet, final boolean fromQueue) {
+        this.arena = arena;
         this.start = System.currentTimeMillis();
         this.kit = kit;
         this.items = items;

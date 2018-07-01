@@ -3,11 +3,20 @@ package me.realized.duels.api.match;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import me.realized.duels.api.arena.Arena;
 import me.realized.duels.api.kit.Kit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public interface Match {
+
+
+    /**
+     * @return Arena this match is taking place in.
+     */
+    @Nonnull
+    Arena getArena();
+
 
     /**
      * {@link System#currentTimeMillis()} subtracted by the result of this method will give the duration of the current match in milliseconds.

@@ -113,7 +113,7 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
     }
 
     public void startMatch(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet, final boolean fromQueue) {
-        this.match = new Match(kit, items, bet, fromQueue);
+        this.match = new Match(this, kit, items, bet, fromQueue);
         setLore(lang.getMessage("GUI.arena-selector.buttons.arena.lore-unavailable").split("\n"));
         arenaManager.getGui().calculatePages();
     }

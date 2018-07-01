@@ -23,6 +23,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class UserData implements User {
+
     @Getter
     private final UUID uuid;
     @Getter

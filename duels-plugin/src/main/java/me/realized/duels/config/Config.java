@@ -1,6 +1,5 @@
 package me.realized.duels.config;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -158,7 +157,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     }
 
     @Override
-    protected void loadValues(FileConfiguration configuration) throws IOException {
+    protected void loadValues(FileConfiguration configuration) throws Exception {
         if (configuration.getInt("config-version", 0) < getLatestVersion()) {
             configuration = convert(null);
         }

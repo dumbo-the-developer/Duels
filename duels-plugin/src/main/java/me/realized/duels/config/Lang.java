@@ -1,6 +1,5 @@
 package me.realized.duels.config;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +27,7 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
     }
 
     @Override
-    protected void loadValues(FileConfiguration configuration) throws IOException {
+    protected void loadValues(FileConfiguration configuration) throws Exception {
         if (configuration.getInt("config-version", 0) < getLatestVersion()) {
             configuration = convert(null);
         }
