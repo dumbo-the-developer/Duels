@@ -101,7 +101,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
         final Function<V, String> function) {
         sender.sendMessage(StringUtil.color("&e&l(!) &r&eSpaces in " + type + " name has been replaced to a dash to support tab completion."));
         return collection.stream()
-            .filter(value -> function.apply(value).toLowerCase().startsWith(arg))
+            .filter(value -> function.apply(value).toLowerCase().startsWith(arg.toLowerCase()))
             .map(value -> function.apply(value).replace(" ", "-"))
             .collect(Collectors.toList());
     }

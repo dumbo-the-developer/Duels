@@ -11,10 +11,13 @@ public abstract class DuelsExtension {
     @Getter
     private boolean enabled;
     @Getter
+    private File folder;
+    @Getter
     private File file;
 
-    final void init(final Duels api, final File file) {
+    final void init(final Duels api, final File folder, final File file) {
         this.api = api;
+        this.folder = folder;
         this.file = file;
     }
 

@@ -210,7 +210,7 @@ COMMAND:
     - '&7Disabled: &r%disabled%'
     - '&7Players: &f%players%'
     - '&7Positions: &f%positions%'
-    - '{HALF_LINE} &7Arena: &e%name% {HALF_LINE}'
+    - '{HALF_LINE} &7Arena &e%name% {HALF_LINE}'
     list:
     - '{LINE}'
     - '&4DARK RED&7: Disabled arena'
@@ -269,7 +269,7 @@ SIGN:
   format:
   - '&a[Click to Join]'
   - '&3%kit%'
-  - '&6$%bet_amount%'
+  - '&e$%bet_amount%'
   - '&f&l%count% IN QUEUE'
 
 

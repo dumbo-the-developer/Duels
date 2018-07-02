@@ -22,7 +22,7 @@ public class ExtensionManager implements Loadable {
 
     static {
         try {
-            INIT_EXTENSION = DuelsExtension.class.getDeclaredMethod("init", Duels.class, File.class);
+            INIT_EXTENSION = DuelsExtension.class.getDeclaredMethod("init", Duels.class, File.class, File.class);
             INIT_EXTENSION.setAccessible(true);
         } catch (NoSuchMethodException ignored) {}
     }
@@ -70,7 +70,7 @@ public class ExtensionManager implements Loadable {
                     continue;
                 }
 
-                INIT_EXTENSION.invoke(extension, plugin, file);
+                INIT_EXTENSION.invoke(extension, plugin, folder, file);
 
                 if (extensions.containsKey(extension.getName())) {
                     Log.error("Could not load extension " + extension.getName() + ": An extension with same name already exists");
