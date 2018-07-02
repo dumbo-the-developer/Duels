@@ -71,21 +71,20 @@ public class QueueManager implements Loadable, Listener {
 
         if (!file.exists()) {
             file.createNewFile();
-            return;
-        }
+        } else {
+            try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
+                final List<QueueSignData> data = plugin.getGson().fromJson(reader, new TypeToken<List<QueueSignData>>() {}.getType());
 
-        try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
-            final List<QueueSignData> data = plugin.getGson().fromJson(reader, new TypeToken<List<QueueSignData>>() {}.getType());
+                if (data != null) {
+                    data.forEach(queueSignData -> {
+                        final QueueSign queueSign = queueSignData.toQueueSign(plugin);
 
-            if (data != null) {
-                data.forEach(queueSignData -> {
-                    final QueueSign queueSign = queueSignData.toQueueSign(plugin);
-
-                    if (queueSign != null) {
-                        final Sign sign = queueSign.getSign();
-                        signs.put(sign, queueSign);
-                    }
-                });
+                        if (queueSign != null) {
+                            final Sign sign = queueSign.getSign();
+                            signs.put(sign, queueSign);
+                        }
+                    });
+                }
             }
         }
 

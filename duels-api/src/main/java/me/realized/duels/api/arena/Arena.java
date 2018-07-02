@@ -23,12 +23,14 @@ public interface Arena {
      */
     boolean isDisabled();
 
+
     /**
      * Calls {@link #setDisabled(CommandSender, boolean)} with source being null.
      *
      * @see #setDisabled(CommandSender, boolean)
      */
     void setDisabled(final boolean disabled);
+
 
     /**
      * Calls {@link ArenaStateChangeEvent}.
@@ -37,18 +39,6 @@ public interface Arena {
      * @param disabled true to disable the arena, false to enable the arena
      */
     void setDisabled(@Nullable final CommandSender source, final boolean disabled);
-
-    /**
-     * @return true if arena is in use. This also guarantees that {@link #getMatch()} will not be null.
-     */
-    boolean isUsed();
-
-
-    /**
-     * @param player Player to check if in arena
-     * @return true if player is in this arena, otherwise false
-     */
-    boolean has(@Nonnull final Player player);
 
 
     /**
@@ -78,8 +68,21 @@ public interface Arena {
 
 
     /**
+     * @return true if arena is in use. This also guarantees that {@link #getMatch()} will not be null.
+     */
+    boolean isUsed();
+
+
+    /**
      * @return Match instance if a duel is currently being played on this arena, otherwise null
      */
     @Nullable
     Match getMatch();
+
+
+    /**
+     * @param player Player to check if in arena
+     * @return true if player is in this arena, otherwise false
+     */
+    boolean has(@Nonnull final Player player);
 }

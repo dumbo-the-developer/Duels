@@ -29,7 +29,9 @@ public class RequestManager implements Loadable, Listener {
     public void handleLoad() {}
 
     @Override
-    public void handleUnload() {}
+    public void handleUnload() {
+        requests.clear();
+    }
 
     private Map<UUID, Request> get(final Player player, final boolean create) {
         Map<UUID, Request> cached = requests.get(player.getUniqueId());

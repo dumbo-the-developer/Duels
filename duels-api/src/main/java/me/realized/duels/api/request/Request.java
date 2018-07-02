@@ -35,10 +35,12 @@ public interface Request {
     @Nullable
     Arena getArena();
 
+
     /**
      * @return true if item betting is enabled for this request, otherwise false
      */
     boolean canBetItems();
+
 
     /**
      * @return The bet for this request or 0 if not specified

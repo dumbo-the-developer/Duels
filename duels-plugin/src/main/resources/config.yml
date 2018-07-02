@@ -309,6 +309,7 @@ spectate:
 
 countdown:
   # If set to 'true', a countdown will occur for the length of the messages list.
+  # default: true
   enabled: true
 
   # Available placeholders:
@@ -357,7 +358,7 @@ stats:
   display-past-matches: true
 
   # Max amount of matches to display & store in the userdata file.
-  # default: 10
+  # default: 5
   matches-to-display: 5
 
 
