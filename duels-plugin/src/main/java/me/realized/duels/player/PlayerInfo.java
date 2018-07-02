@@ -34,10 +34,13 @@ public class PlayerInfo {
         this.location = player.getLocation().clone();
     }
 
-    public void restore(final Player player) {
+    public void restore(final Player player, boolean respawn) {
         player.addPotionEffects(effects);
-        player.setHealth(health);
-        player.setFoodLevel(hunger);
+
+        if (!respawn) {
+            player.setHealth(health);
+            player.setFoodLevel(hunger);
+        }
 
         if (armor.length > 0) {
             player.getInventory().setArmorContents(armor);

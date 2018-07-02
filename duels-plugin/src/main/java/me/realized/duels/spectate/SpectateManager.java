@@ -144,7 +144,7 @@ public class SpectateManager implements Loadable {
                 failed.setHealth(0);
                 failed.sendMessage(StringUtil.color("&cTeleportation failed! You were killed to prevent staying in the arena."));
             });
-            info.restore(player);
+            info.restore(player, false);
         } else {
             teleport.tryTeleport(player, playerManager.getLobby());
         }

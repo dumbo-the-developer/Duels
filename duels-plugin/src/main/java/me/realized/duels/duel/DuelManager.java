@@ -162,7 +162,7 @@ public class DuelManager implements Loadable {
                 player.spigot().respawn();
                 teleport.tryTeleport(player, info.getLocation());
                 PlayerUtil.reset(player);
-                info.restore(player);
+                info.restore(player, true);
             }
         });
     }
@@ -203,7 +203,7 @@ public class DuelManager implements Loadable {
                     failed.setHealth(0);
                     failed.sendMessage(StringUtil.color("&cTeleportation failed! You were killed to prevent staying in the arena."));
                 });
-                info.restore(player);
+                info.restore(player, false);
             } else {
                 // If somehow PlayerInfo is not found...
                 teleport.tryTeleport(player, playerManager.getLobby());
@@ -258,7 +258,7 @@ public class DuelManager implements Loadable {
                     failed.setHealth(0);
                     failed.sendMessage(StringUtil.color("&cTeleportation failed! You were killed to prevent staying in the arena."));
                 });
-                info.restore(player);
+                info.restore(player, false);
             }
 
             boolean added = false;
@@ -571,7 +571,7 @@ public class DuelManager implements Loadable {
                     essentials.setBackLocation(player, event.getRespawnLocation());
                 }
 
-                plugin.doSyncAfter(() -> info.restore(player), 1L);
+                plugin.doSyncAfter(() -> info.restore(player, true), 1L);
             }
         }
 
