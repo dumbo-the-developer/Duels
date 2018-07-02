@@ -562,7 +562,6 @@ public class DuelManager implements Loadable {
         @EventHandler(priority = EventPriority.HIGHEST)
         public void on(final PlayerRespawnEvent event) {
             final Player player = event.getPlayer();
-
             final PlayerInfo info = playerManager.removeAndGet(player);
 
             if (info != null) {
@@ -572,13 +571,7 @@ public class DuelManager implements Loadable {
                     essentials.setBackLocation(player, event.getRespawnLocation());
                 }
 
-                plugin.doSyncAfter(() -> {
-                    if (!config.isUseOwnInventoryEnabled()) {
-                        PlayerUtil.reset(player);
-                    }
-
-                    info.restore(player);
-                }, 1L);
+                plugin.doSyncAfter(() -> info.restore(player), 1L);
             }
         }
 
