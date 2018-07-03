@@ -8,6 +8,7 @@ import java.util.Map;
 import me.realized.duels.util.compat.Attributes;
 import me.realized.duels.util.compat.CompatUtil;
 import me.realized.duels.util.compat.Potions;
+import me.realized.duels.util.compat.Potions.PotionType;
 import me.realized.duels.util.compat.SpawnEggs;
 import me.realized.duels.util.compat.Tags;
 import org.bukkit.DyeColor;
@@ -24,7 +25,6 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.potion.PotionType;
 
 public class ItemData {
 
@@ -187,7 +187,7 @@ public class ItemData {
                 item = new SpawnEggs(EntityType.valueOf(args.get(0))).toItemStack(amount);
             } else if (material.equals("TIPPED_ARROW")) {
                 final PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-                final PotionData data = new PotionData(PotionType.valueOf(args.get(0)), args.contains("extended"), args.contains("upgraded"));
+                final PotionData data = new PotionData(org.bukkit.potion.PotionType.valueOf(args.get(0)), args.contains("extended"), args.contains("upgraded"));
                 potionMeta.setBasePotionData(data);
                 item.setItemMeta(potionMeta);
             }

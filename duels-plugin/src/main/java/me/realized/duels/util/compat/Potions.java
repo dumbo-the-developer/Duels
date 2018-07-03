@@ -4,9 +4,18 @@ import java.util.Collection;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionType;
 
 public class Potions extends CompatBase {
+
+    public enum PotionType {
+
+        FIRE_RESISTANCE, INSTANT_DAMAGE, INSTANT_HEAL,
+        INVISIBILITY, JUMP, LUCK,
+        NIGHT_VISION, POISON, REGEN,
+        SLOWNESS, SPEED, STRENGTH,
+        WATER, WATER_BREATHING, WEAKNESS,
+        EMPTY, UNCRAFTABLE, MUNDANE, THICK, AWKWARD
+    }
 
     @Getter
     private final PotionType type;
@@ -112,6 +121,9 @@ public class Potions extends CompatBase {
                 case "awkward":
                     type = PotionType.AWKWARD;
                     break;
+                case "empty":
+                    type = PotionType.EMPTY;
+                    break;
                 default:
                     return null;
             }
@@ -137,6 +149,7 @@ public class Potions extends CompatBase {
             String potionType;
 
             switch (type) {
+                case EMPTY:
                 case UNCRAFTABLE:
                     potionType = "empty";
                     break;
