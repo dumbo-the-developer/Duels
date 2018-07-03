@@ -10,7 +10,7 @@ buildscript {
 
 allprojects {
     group 'me.realized'
-    version '3.0.0-SNAPSHOT'
+    version '3.0.1-SNAPSHOT'
 }
 
 subprojects {

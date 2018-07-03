@@ -283,7 +283,7 @@ public class DuelManager implements Loadable {
 
     private void addItems(final PlayerInfo info, final List<ItemStack> items) {
         if (info != null) {
-            info.getInventory().addAll(items);
+            info.getExtra().addAll(items);
         }
     }
 
