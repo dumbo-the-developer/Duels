@@ -355,7 +355,7 @@ public class DuelManager implements Loadable {
         }
 
         final Location source = player.getLocation();
-        return source.getBlockX() != location.getBlockX() || source.getBlockY() != location.getBlockY() || source.getBlockZ() != location.getBlockZ();
+        return !source.getWorld().equals(location.getWorld()) || source.getBlockX() != location.getBlockX() || source.getBlockY() != location.getBlockY() || source.getBlockZ() != location.getBlockZ();
     }
 
     private int getRating(final Kit kit, final UserData user) {

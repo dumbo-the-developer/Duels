@@ -27,6 +27,7 @@ import me.realized.duels.duel.DuelManager;
 import me.realized.duels.extension.ExtensionManager;
 import me.realized.duels.extra.DamageListener;
 import me.realized.duels.extra.KitItemListener;
+import me.realized.duels.extra.Permissions;
 import me.realized.duels.extra.PotionListener;
 import me.realized.duels.extra.SoupListener;
 import me.realized.duels.extra.Teleport;
@@ -46,7 +47,9 @@ import me.realized.duels.util.Log;
 import me.realized.duels.util.Log.LogSource;
 import me.realized.duels.util.Reloadable;
 import me.realized.duels.util.ServerUtil;
+import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.command.AbstractCommand;
+import me.realized.duels.util.compat.Players;
 import me.realized.duels.util.gui.GuiListener;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -58,6 +61,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     private static final int RESOURCE_ID = 20171;
     private static final String SPIGOT_INSTALLATION_URL = "https://www.spigotmc.org/wiki/spigot-installation/";
+    private static final String ADMIN_UPDATE_MESSAGE = "&9[Duels] &bThere is an update available for Duels. Download at &f%s";
 
     @Getter
     private static DuelsPlugin instance;
@@ -173,6 +177,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                 Log.info("Download " + getName() + " v" + newVersion + " here:");
                 Log.info(downloadUrl);
                 Log.info("===============================================");
+                doSync(() -> Players.getOnlinePlayers().stream()
+                    .filter(player -> player.isOp() || player.hasPermission(Permissions.ADMIN))
+                    .forEach(player -> StringUtil.color(String.format(ADMIN_UPDATE_MESSAGE, downloadUrl))));
             }
 
             @Override

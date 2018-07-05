@@ -23,6 +23,11 @@ public class PvPManagerHook extends PluginHook<DuelsPlugin> {
         }
 
         final PlayerHandler playerHandler = ((PvPManager) getPlugin()).getPlayerHandler();
+
+        if (playerHandler == null) {
+            return false;
+        }
+
         final PvPlayer pvPlayer = playerHandler.get(player);
         return pvPlayer != null && pvPlayer.isInCombat();
     }
@@ -33,6 +38,11 @@ public class PvPManagerHook extends PluginHook<DuelsPlugin> {
         }
 
         final PlayerHandler playerHandler = ((PvPManager) getPlugin()).getPlayerHandler();
+
+        if (playerHandler == null) {
+            return;
+        }
+
         final PvPlayer pvPlayer = playerHandler.get(player);
 
         if (pvPlayer == null) {

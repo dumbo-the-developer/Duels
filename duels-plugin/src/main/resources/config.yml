@@ -58,8 +58,8 @@ supported-plugins:
 
 request:
   # If set to 'true', players will be forced to have a cleared inventory in order to send or accept a duel request.
-  # default: true
-  requires-cleared-inventory: true
+  # default: false
+  requires-cleared-inventory: false
 
   # If set to 'true', players in creative mode will be prohibited from dueling.
   # default: false
