@@ -179,7 +179,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                 Log.info("===============================================");
                 doSync(() -> Players.getOnlinePlayers().stream()
                     .filter(player -> player.isOp() || player.hasPermission(Permissions.ADMIN))
-                    .forEach(player -> StringUtil.color(String.format(ADMIN_UPDATE_MESSAGE, downloadUrl))));
+                    .forEach(player -> player.sendMessage(StringUtil.color(String.format(ADMIN_UPDATE_MESSAGE, downloadUrl)))));
             }
 
             @Override
