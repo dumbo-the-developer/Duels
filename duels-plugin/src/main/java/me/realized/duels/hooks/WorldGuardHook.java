@@ -1,7 +1,8 @@
 package me.realized.duels.hooks;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import java.util.List;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import java.util.Collection;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.config.Config;
 import me.realized.duels.util.hook.PluginHook;
@@ -16,15 +17,24 @@ public class WorldGuardHook extends PluginHook<DuelsPlugin> {
         this.config = plugin.getConfiguration();
     }
 
-    public boolean inDuelZone(Player player) {
+    public String findDuelZone(final Player player) {
         if (!config.isDuelzoneEnabled()) {
-            return true;
+            return null;
         }
 
         final WorldGuardPlugin plugin = (WorldGuardPlugin) getPlugin();
-        final List<String> allowedRegions = config.getDuelzoneRegions();
-        return plugin.getRegionManager(player.getWorld())
-            .getApplicableRegions(player.getLocation()).getRegions()
-            .stream().anyMatch(region -> allowedRegions.contains(region.getId()));
+        final Collection<String> allowedRegions = config.getDuelzones();
+
+        if (allowedRegions.isEmpty()) {
+            return null;
+        }
+
+        for (final ProtectedRegion region : plugin.getRegionManager(player.getWorld()).getApplicableRegions(player.getLocation())) {
+            if (allowedRegions.contains(region.getId())) {
+                return region.getId();
+            }
+        }
+
+        return null;
     }
 }

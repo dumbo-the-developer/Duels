@@ -45,8 +45,10 @@ public class AcceptCommand extends BaseCommand {
             return;
         }
 
-        if (worldGuard != null && !worldGuard.inDuelZone(player)) {
-            lang.sendMessage(sender, "ERROR.duel.not-in-duelzone", "regions", config.getDuelzoneRegions());
+        String duelzone = null;
+
+        if (worldGuard != null && config.isDuelzoneEnabled() && (duelzone = worldGuard.findDuelZone(player)) == null) {
+            lang.sendMessage(sender, "ERROR.duel.not-in-duelzone", "regions", config.getDuelzones());
             return;
         }
 
@@ -95,7 +97,8 @@ public class AcceptCommand extends BaseCommand {
             "name", player.getName(), "kit", kit, "arena", arena, "bet_amount", bet, "item_betting", itemBetting);
 
         if (settings.isItemBetting()) {
-            settings.getLocations()[1] = player.getLocation().clone();
+            settings.setDuelzone(player, duelzone);
+            settings.setBaseLoc(player);
             bettingManager.open(settings, target, player);
         } else {
             duelManager.startMatch(player, target, settings, null, false);

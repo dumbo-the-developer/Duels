@@ -48,7 +48,7 @@ supported-plugins:
     no-power-loss-in-duel: true
   WorldGuard:
     duelzone:
-      # If set to 'true', players will be able to use duel related commands only in the regions listed below.
+      # If set to 'true', players will be able to use duel only in the regions listed below.
       # default: false
       enabled: false
 

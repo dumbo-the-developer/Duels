@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 1
+config-version: 2
 
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
@@ -244,6 +244,7 @@ DUEL:
   start-failure:
     no-kit-selected: '{FAIL_PREFIX} No kit was selected!'
     player-moved: '{FAIL_PREFIX} You or your opponent moved after sending/accepting the request!'
+    not-in-duelzone: '{FAIL_PREFIX} You or your opponent moved out of the duelzone sending/accepting the request!'
     no-arena-available: '{FAIL_PREFIX} No arena is currently available. Please try again later.'
     arena-in-use: '{FAIL_PREFIX} That arena is already in use. Please select a different arena.'
     not-enough-money: '{FAIL_PREFIX} You or your opponent does not have $%bet_amount%.'

@@ -82,8 +82,10 @@ public class DuelCommand extends BaseCommand {
             return true;
         }
 
-        if (worldGuard != null && !worldGuard.inDuelZone(player)) {
-            lang.sendMessage(sender, "ERROR.duel.not-in-duelzone", "regions", config.getDuelzoneRegions());
+        String duelzone = null;
+
+        if (worldGuard != null && config.isDuelzoneEnabled() && (duelzone = worldGuard.findDuelZone(player)) == null) {
+            lang.sendMessage(sender, "ERROR.duel.not-in-duelzone", "regions", config.getDuelzones());
             return true;
         }
 
@@ -161,6 +163,8 @@ public class DuelCommand extends BaseCommand {
         }
 
         settings.setTarget(target);
+        settings.setDuelzone(player, duelzone);
+        settings.setBaseLoc(player);
 
         if (config.isUseOwnInventoryEnabled()) {
             settings.openGui(player);

@@ -1,5 +1,7 @@
 package me.realized.duels.setting;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +16,7 @@ public class Settings {
 
     private final DuelsPlugin plugin;
     private final SettingsGui gui;
+
     @Getter
     private UUID target;
     @Getter
@@ -29,7 +32,7 @@ public class Settings {
     @Setter
     private boolean itemBetting;
     @Getter
-    private Location[] locations = new Location[2];
+    private Map<UUID, LocationInfo> locations = new HashMap<>();
 
     public Settings(final DuelsPlugin plugin, final Player player) {
         this.plugin = plugin;
@@ -66,6 +69,34 @@ public class Settings {
         gui.open(player);
     }
 
+    public void setBaseLoc(final Player player) {
+        locations.computeIfAbsent(player.getUniqueId(), result -> new LocationInfo()).location = player.getLocation().clone();
+    }
+
+    public Location getBaseLoc(final Player player) {
+        final LocationInfo info = locations.get(player.getUniqueId());
+
+        if (info == null) {
+            return null;
+        }
+
+        return info.location;
+    }
+
+    public void setDuelzone(final Player player, final String duelzone) {
+        locations.computeIfAbsent(player.getUniqueId(), result -> new LocationInfo()).duelzone = duelzone;
+    }
+
+    public String getDuelzone(final Player player) {
+        final LocationInfo info = locations.get(player.getUniqueId());
+
+        if (info == null) {
+            return null;
+        }
+
+        return info.duelzone;
+    }
+
     // Don't copy the gui since it won't be required to start a match
     public Settings lightCopy() {
         final Settings copy = new Settings(plugin);
@@ -76,5 +107,12 @@ public class Settings {
         copy.itemBetting = itemBetting;
         copy.locations = locations;
         return copy;
+    }
+
+    private class LocationInfo {
+
+        private Location location;
+        private String duelzone;
+
     }
 }

@@ -100,12 +100,8 @@ public class QueueManager implements Loadable, Listener {
                 }
 
                 for (final Player opponent : queue) {
-                    // opponent is already in a match
-                    if (current.equals(opponent) || remove.contains(opponent)) {
-                        continue;
-                    }
-
-                    if (!canFight(sign.getKit(), userManager.get(current), userManager.get(opponent))) {
+                    // opponent is already in a match or the rating difference is too high
+                    if (current.equals(opponent) || remove.contains(opponent) || !canFight(sign.getKit(), userManager.get(current), userManager.get(opponent))) {
                         continue;
                     }
 
@@ -120,6 +116,7 @@ public class QueueManager implements Loadable, Listener {
                     lang.sendMessage(current, "SIGN.found-opponent", "name", opponent.getName(), "kit", kit, "bet_amount", sign.getBet());
                     lang.sendMessage(opponent, "SIGN.found-opponent", "name", current.getName(), "kit", kit, "bet_amount", sign.getBet());
                     duelManager.startMatch(current, opponent, setting, null, true);
+                    break;
                 }
             }
 

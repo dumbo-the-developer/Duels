@@ -41,7 +41,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean duelzoneEnabled;
     @Getter
-    private List<String> duelzoneRegions;
+    private List<String> duelzones;
 
     @Getter
     private boolean requiresClearedInventory;
@@ -175,7 +175,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         fuNoPowerLoss = configuration.getBoolean("supported-plugins.FactionsUUID.no-power-loss-in-duel", true);
         fNoPowerLoss = configuration.getBoolean("supported-plugins.Factions.no-power-loss-in-duel", true);
         duelzoneEnabled = configuration.getBoolean("supported-plugins.WorldGuard.duelzone.enabled", false);
-        duelzoneRegions = configuration.getStringList("supported-plugins.WorldGuard.duelzone.regions");
+        duelzones = configuration.getStringList("supported-plugins.WorldGuard.duelzone.regions");
 
         requiresClearedInventory = configuration.getBoolean("request.requires-cleared-inventory", true);
         preventCreativeMode = configuration.getBoolean("request.prevent-creative-mode", false);

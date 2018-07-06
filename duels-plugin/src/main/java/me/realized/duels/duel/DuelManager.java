@@ -25,6 +25,7 @@ import me.realized.duels.extra.Teleport;
 import me.realized.duels.hooks.EssentialsHook;
 import me.realized.duels.hooks.McMMOHook;
 import me.realized.duels.hooks.VaultHook;
+import me.realized.duels.hooks.WorldGuardHook;
 import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.player.PlayerInfo;
@@ -79,6 +80,7 @@ public class DuelManager implements Loadable {
     private VaultHook vault;
     private EssentialsHook essentials;
     private McMMOHook mcMMO;
+    private WorldGuardHook worldGuard;
     private int durationCheckTask;
 
     public DuelManager(final DuelsPlugin plugin) {
@@ -99,6 +101,7 @@ public class DuelManager implements Loadable {
         this.vault = plugin.getHookManager().getHook(VaultHook.class);
         this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
         this.mcMMO = plugin.getHookManager().getHook(McMMOHook.class);
+        this.worldGuard = plugin.getHookManager().getHook(WorldGuardHook.class);
 
         if (config.getMaxDuration() > 0) {
             this.durationCheckTask = plugin.doSyncRepeat(() -> {
@@ -296,7 +299,13 @@ public class DuelManager implements Loadable {
             return;
         }
 
-        if (config.isCancelIfMoved() && (notInLoc(first, settings.getLocations()[0]) || notInLoc(second, settings.getLocations()[1]))) {
+        if (config.isCancelIfMoved() && (notInLoc(first, settings.getBaseLoc(first)) || notInLoc(second, settings.getBaseLoc(second)))) {
+            lang.sendMessage("DUEL.start-failure.player-moved", first, second);
+            refundItems(items, first, second);
+            return;
+        }
+
+        if (config.isDuelzoneEnabled() && worldGuard != null && (notInDz(first, settings.getDuelzone(first)) || notInDz(second, settings.getDuelzone(second)))) {
             lang.sendMessage("DUEL.start-failure.player-moved", first, second);
             refundItems(items, first, second);
             return;
@@ -356,6 +365,10 @@ public class DuelManager implements Loadable {
 
         final Location source = player.getLocation();
         return !source.getWorld().equals(location.getWorld()) || source.getBlockX() != location.getBlockX() || source.getBlockY() != location.getBlockY() || source.getBlockZ() != location.getBlockZ();
+    }
+
+    private boolean notInDz(final Player player, final String duelzone) {
+        return duelzone != null && !duelzone.equals(worldGuard.findDuelZone(player));
     }
 
     private int getRating(final Kit kit, final UserData user) {
