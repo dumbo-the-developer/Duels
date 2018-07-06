@@ -72,6 +72,7 @@ public final class Teleport implements Loadable, Listener {
             chunk.load();
         }
 
+        location.getWorld().refreshChunk(chunk.getX(), chunk.getZ());
         MetadataUtil.put(plugin, player, METADATA_KEY, location.clone());
 
         if (!player.teleport(location)) {
