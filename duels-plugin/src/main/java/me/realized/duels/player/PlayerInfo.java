@@ -25,6 +25,10 @@ public class PlayerInfo {
     @Setter
     private Location location;
 
+    @Getter
+    @Setter
+    private boolean giveOnLogin;
+
     public PlayerInfo(final Player player, final boolean inventory) {
         this.inventory = inventory ? player.getInventory().getContents().clone() : new ItemStack[0];
         this.armor = inventory ? player.getInventory().getArmorContents().clone() : new ItemStack[0];

@@ -16,9 +16,11 @@ import me.realized.duels.hooks.CombatTagPlusHook;
 import me.realized.duels.hooks.PvPManagerHook;
 import me.realized.duels.hooks.VaultHook;
 import me.realized.duels.hooks.WorldGuardHook;
+import me.realized.duels.kit.Kit;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.NumberUtil;
 import me.realized.duels.util.inventory.InventoryUtil;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.command.Command;
@@ -141,32 +143,76 @@ public class DuelCommand extends BaseCommand {
         final Settings settings = settingManager.getSafely(player);
         settings.setBet(0);
 
-        if (config.isMoneyBettingEnabled() && args.length > 1) {
-            if (config.isMoneyBettingUsePermission() && !player.hasPermission(Permissions.MONEY_BETTING) && !player.hasPermission(Permissions.SETTING_ALL)) {
-                lang.sendMessage(player, "ERROR.no-permission", "permission", Permissions.MONEY_BETTING);
-                return true;
-            }
+        boolean sendRequest = false;
 
+        if (args.length > 1) {
             final int amount = NumberUtil.parseInt(args[1]).orElse(0);
 
-            if (vault == null || vault.getEconomy() == null) {
-                lang.sendMessage(sender, "ERROR.setting.disabled-option", "option", "Betting");
-                return true;
+            if (amount > 0 && config.isMoneyBettingEnabled()) {
+                if (config.isMoneyBettingUsePermission() && !player.hasPermission(Permissions.MONEY_BETTING) && !player.hasPermission(Permissions.SETTING_ALL)) {
+                    lang.sendMessage(player, "ERROR.no-permission", "permission", Permissions.MONEY_BETTING);
+                    return true;
+                }
+
+                if (vault == null || vault.getEconomy() == null) {
+                    lang.sendMessage(sender, "ERROR.setting.disabled-option", "option", "Betting");
+                    return true;
+                }
+
+                if (!vault.getEconomy().has(player, amount)) {
+                    lang.sendMessage(sender, "ERROR.command.not-enough-money");
+                    return true;
+                }
+
+                settings.setBet(amount);
             }
 
-            if (!vault.getEconomy().has(player, amount)) {
-                lang.sendMessage(sender, "ERROR.command.not-enough-money");
-                return true;
-            }
+            if (args.length > 2) {
+                if (args[2].equalsIgnoreCase("true")) {
+                    if (!config.isItemBettingEnabled()) {
+                        lang.sendMessage(player, "ERROR.setting.disabled-option", "option", "Item Betting");
+                        return true;
+                    }
 
-            settings.setBet(amount);
+                    if (config.isItemBettingUsePermission() && !player.hasPermission(Permissions.ITEM_BETTING) && !player.hasPermission(Permissions.SETTING_ALL)) {
+                        lang.sendMessage(player, "ERROR.no-permission", "permission", Permissions.ITEM_BETTING);
+                        return true;
+                    }
+
+                    settings.setItemBetting(true);
+                }
+
+                if (config.isUseOwnInventoryEnabled()) {
+                    sendRequest = true;
+                } else if (args.length > 3) {
+                    final String name = StringUtils.join(args, " ", 3, args.length);
+                    final Kit kit = kitManager.get(name);
+
+                    if (kit == null) {
+                        lang.sendMessage(sender, "ERROR.kit.not-found", "name", name);
+                        return true;
+                    }
+
+                    final String permission = String.format(Permissions.KIT, name.replace(" ", "-").toLowerCase());
+
+                    if (kit.isUsePermission() && !player.hasPermission(Permissions.KIT_ALL) && !player.hasPermission(permission)) {
+                        lang.sendMessage(player, "ERROR.no-permission", "permission", permission);
+                        return true;
+                    }
+
+                    settings.setKit(kit);
+                    sendRequest = true;
+                }
+            }
         }
 
         settings.setTarget(target);
         settings.setDuelzone(player, duelzone);
         settings.setBaseLoc(player);
 
-        if (config.isUseOwnInventoryEnabled()) {
+        if (sendRequest) {
+            requestManager.send(player, target, settings);
+        } else if (config.isUseOwnInventoryEnabled()) {
             settings.openGui(player);
         } else {
             kitManager.getGui().open(player);

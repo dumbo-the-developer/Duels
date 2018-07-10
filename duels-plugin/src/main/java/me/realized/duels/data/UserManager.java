@@ -26,9 +26,12 @@ import me.realized.duels.api.user.User;
 import me.realized.duels.api.util.Pair;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
+import me.realized.duels.extra.Permissions;
+import me.realized.duels.player.PlayerInfo;
 import me.realized.duels.util.DateUtil;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
+import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.UUIDUtil;
 import me.realized.duels.util.compat.Players;
 import org.bukkit.entity.Player;
@@ -38,6 +41,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class UserManager implements Loadable, Listener, me.realized.duels.api.user.UserManager {
+
+    private static final String ADMIN_UPDATE_MESSAGE = "&9[Duels] &bThere is an update available for Duels. Download at &7%s";
 
     private final DuelsPlugin plugin;
     private final Config config;
@@ -262,6 +267,18 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
     @EventHandler
     public void on(final PlayerJoinEvent event) {
         final Player player = event.getPlayer();
+
+        if (config.isCheckForUpdates() && plugin.isUpdateAvailable() && (player.isOp() || player.hasPermission(Permissions.ADMIN))) {
+            player.sendMessage(StringUtil.color(String.format(ADMIN_UPDATE_MESSAGE, plugin.getDownloadLink())));
+        }
+
+        final PlayerInfo info;
+
+        if (!player.isDead() && (info = plugin.getPlayerManager().get(player)) != null && info.isGiveOnLogin()) {
+            plugin.getPlayerManager().remove(player);
+            info.restore(player);
+        }
+
         final UserData user = users.get(player.getUniqueId());
 
         if (user != null) {

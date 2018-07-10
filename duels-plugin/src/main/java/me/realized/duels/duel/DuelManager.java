@@ -584,7 +584,15 @@ public class DuelManager implements Loadable {
                     essentials.setBackLocation(player, event.getRespawnLocation());
                 }
 
-                plugin.doSyncAfter(() -> info.restore(player), 1L);
+                plugin.doSyncAfter(() -> {
+                    if (!player.isOnline()) {
+                        info.setGiveOnLogin(true);
+                        playerManager.put(player, info);
+                        return;
+                    }
+
+                    info.restore(player);
+                }, 1L);
             }
         }
 

@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 2
+config-version: 3
 
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
@@ -363,6 +363,11 @@ GUI:
         - '&7Kit: &3%kit%'
         - '&7Arena: &e%arena%'
         - '&7Bet: &6$%bet_amount%'
+      cancel:
+        name: '&c&lCLICK TO CANCEL'
+        lore:
+        - '&7Click or close inventory'
+        - '&7to cancel the match.'
   inventory-view:
     title: '&e%name%'
     buttons:

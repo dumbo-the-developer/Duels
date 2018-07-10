@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.duel.DuelManager;
+import me.realized.duels.gui.betting.buttons.CancelButton;
 import me.realized.duels.gui.betting.buttons.DetailsButton;
 import me.realized.duels.gui.betting.buttons.HeadButton;
 import me.realized.duels.gui.betting.buttons.StateButton;
@@ -27,6 +28,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class BettingGui extends AbstractGui<DuelsPlugin> {
 
@@ -39,7 +41,7 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
     private final Settings settings;
     private final Inventory inventory;
     private final UUID first, second;
-    private boolean firstReady, secondReady;
+    private boolean firstReady, secondReady, waitDone, cancelWait;
 
     public BettingGui(final DuelsPlugin plugin, final Settings settings, final Player first, final Player second) {
         super(plugin);
@@ -49,7 +51,7 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
         this.inventory = InventoryBuilder.of(plugin.getLang().getMessage("GUI.item-betting.title"), 54).build();
         this.first = first.getUniqueId();
         this.second = second.getUniqueId();
-        Slots.run(13, 14, 5, slot -> inventory.setItem(slot, ItemBuilder.of(Material.IRON_FENCE).name(" ").build()));
+        set(inventory, 13, 14, 5, new CancelButton(plugin));
         Slots.run(0, 3, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 1).name(" ").build()));
         Slots.run(45, 48, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 1).name(" ").build()));
         Slots.run(6, 9, slot -> inventory.setItem(slot, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 11).name(" ").build()));
@@ -81,21 +83,22 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
         }
 
         if (firstReady && secondReady) {
-            final Player other = Bukkit.getPlayer(first.equals(player.getUniqueId()) ? second : first);
-
-            if (other == null) {
-                return;
-            }
-
-            player.closeInventory();
-            other.closeInventory();
-            guiListener.removeGui(player, this);
-            guiListener.removeGui(other, this);
-
-            final Map<UUID, List<ItemStack>> items = new HashMap<>();
-            items.put(player.getUniqueId(), getSection(player).collect());
-            items.put(other.getUniqueId(), getSection(other).collect());
-            duelManager.startMatch(player, other, settings, items, false);
+            new WaitTask().runTaskTimer(plugin, 10L, 20L);
+//            final Player other = Bukkit.getPlayer(first.equals(player.getUniqueId()) ? second : first);
+//
+//            if (other == null) {
+//                return;
+//            }
+//
+//            player.closeInventory();
+//            other.closeInventory();
+//            guiListener.removeGui(player, this);
+//            guiListener.removeGui(other, this);
+//
+//            final Map<UUID, List<ItemStack>> items = new HashMap<>();
+//            items.put(player.getUniqueId(), getSection(player).collect());
+//            items.put(other.getUniqueId(), getSection(other).collect());
+//            duelManager.startMatch(player, other, settings, items, false);
         }
     }
 
@@ -134,7 +137,9 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
             return;
         }
 
-        if (firstReady && secondReady) {
+        final Button<DuelsPlugin> button = get(inventory, event.getSlot());
+
+        if (firstReady && secondReady && !(button != null && button instanceof CancelButton)) {
             event.setCancelled(true);
             return;
         }
@@ -161,8 +166,6 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
         }
 
         event.setCancelled(true);
-
-        final Button<DuelsPlugin> button = get(inventory, event.getSlot());
 
         if (button == null) {
             return;
@@ -202,10 +205,11 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
 
     @Override
     public void on(final Player player, final Inventory inventory, final InventoryCloseEvent event) {
-        if (firstReady && secondReady) {
+        if (waitDone) {
             return;
         }
 
+        cancelWait = true;
         getSection(player).collect().forEach(item -> player.getInventory().addItem(item));
         guiListener.removeGui(player, this);
 
@@ -215,7 +219,6 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
             plugin.doSync(() -> {
                 if (inventory.getViewers().contains(other)) {
                     other.closeInventory();
-                    guiListener.removeGui(other, this);
                 }
             });
         }
@@ -253,6 +256,50 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
                 }
             });
             return result;
+        }
+    }
+
+    private class WaitTask extends BukkitRunnable {
+
+        private static final int SLOT_START = 13;
+
+        private int counter;
+
+        @Override
+        public void run() {
+            if (cancelWait) {
+                cancel();
+                return;
+            }
+
+            if (counter < 5) {
+                final int slot = SLOT_START + 9 * counter;
+                final ItemStack item = inventory.getItem(slot);
+                item.setDurability((short) 5);
+                inventory.setItem(slot, item);
+                counter++;
+                return;
+            }
+
+            cancel();
+            waitDone = true;
+
+            final Player first = Bukkit.getPlayer(BettingGui.this.first);
+            final Player second = Bukkit.getPlayer(BettingGui.this.second);
+
+            if (first == null || second == null) {
+                return;
+            }
+
+            first.closeInventory();
+            second.closeInventory();
+            guiListener.removeGui(first, BettingGui.this);
+            guiListener.removeGui(second, BettingGui.this);
+
+            final Map<UUID, List<ItemStack>> items = new HashMap<>();
+            items.put(first.getUniqueId(), getSection(first).collect());
+            items.put(second.getUniqueId(), getSection(second).collect());
+            duelManager.startMatch(first, second, settings, items, false);
         }
     }
 }

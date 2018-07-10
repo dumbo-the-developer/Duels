@@ -15,6 +15,12 @@ public class PvPManagerHook extends PluginHook<DuelsPlugin> {
     public PvPManagerHook(final DuelsPlugin plugin) {
         super(plugin, "PvPManager");
         this.config = plugin.getConfiguration();
+
+        try {
+            ((PvPManager) getPlugin()).getClass().getMethod("getPlayerHandler");
+        } catch (NoSuchMethodException ex) {
+            throw new RuntimeException("This version of PvPManager is not supported. Please try upgrading to the latest version.");
+        }
     }
 
     public boolean isTagged(final Player player) {

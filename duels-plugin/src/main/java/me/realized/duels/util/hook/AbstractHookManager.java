@@ -1,7 +1,5 @@
 package me.realized.duels.util.hook;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.Bukkit;
@@ -17,27 +15,27 @@ public abstract class AbstractHookManager<P extends JavaPlugin> {
         this.plugin = plugin;
     }
 
-    protected boolean register(final String name, final Class<? extends PluginHook<P>> clazz) {
+    protected void register(final String name, final Class<? extends PluginHook<P>> clazz) {
         final Plugin target = Bukkit.getPluginManager().getPlugin(name);
 
         if (target == null || !target.isEnabled()) {
-            return false;
+            return;
         }
 
         try {
-            final Constructor<? extends PluginHook<P>> constructor = clazz.getConstructor(plugin.getClass());
-            final boolean result;
-
-            if (result = constructor != null && hooks.putIfAbsent(clazz, constructor.newInstance(plugin)) == null) {
-                plugin.getLogger().info("Successfully hooked into '" + name + "'!");
+            if (hooks.putIfAbsent(clazz, clazz.getConstructor(plugin.getClass()).newInstance(plugin)) != null) {
+                plugin.getLogger().warning("Failed to hook into " + name + ": There was already a hook registered with same name");
+                return;
             }
 
-            return result;
-        } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException ex) {
-            plugin.getLogger().warning("Failed to hook into " + name + ": " + ex.getMessage());
-        }
+            plugin.getLogger().info("Successfully hooked into '" + name + "'!");
+        } catch (Throwable throwable) {
+            if (throwable.getCause() != null) {
+                throwable = throwable.getCause();
+            }
 
-        return false;
+            plugin.getLogger().warning("Failed to hook into " + name + ": " + throwable.getMessage());
+        }
     }
 
     public <T extends PluginHook<P>> T getHook(Class<T> clazz) {
