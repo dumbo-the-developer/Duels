@@ -58,7 +58,10 @@ supported-plugins:
     # If set to 'true', player's pet will despawn when entering a duel.
     # default: false
     despawn-pet-in-duel: false
-
+  BountyHunters:
+    # If set to 'true', player will not lose bounty even if they die in a duel.
+    # default: true
+    prevent-bounty-loss-in-duel: true
 
 request:
   # If set to 'true', players will be forced to have a cleared inventory in order to send or accept a duel request.

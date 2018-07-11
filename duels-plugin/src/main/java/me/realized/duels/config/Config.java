@@ -44,6 +44,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private List<String> duelzones;
     @Getter
     private boolean myPetDespawn;
+    @Getter
+    private boolean preventBountyLoss;
 
     @Getter
     private boolean requiresClearedInventory;
@@ -183,6 +185,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         duelzoneEnabled = configuration.getBoolean("supported-plugins.WorldGuard.duelzone.enabled", false);
         duelzones = configuration.getStringList("supported-plugins.WorldGuard.duelzone.regions");
         myPetDespawn = configuration.getBoolean("supported-plugins.MyPet.despawn-pet-in-duel", false);
+        preventBountyLoss = configuration.getBoolean("supported-plugins.BountyHunters.prevent-bounty-loss-in-duel", true);
 
         requiresClearedInventory = configuration.getBoolean("request.requires-cleared-inventory", true);
         preventCreativeMode = configuration.getBoolean("request.prevent-creative-mode", false);
