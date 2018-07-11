@@ -58,9 +58,6 @@ public final class StringUtil {
     }
 
     public static String reverseColor(final String s) {
-        System.out.println(s);
-        System.out.println(ChatColor.COLOR_CHAR);
-        System.out.println(s.replace(ChatColor.COLOR_CHAR, '&'));
         return s.replace(ChatColor.COLOR_CHAR, '&');
     }
 
