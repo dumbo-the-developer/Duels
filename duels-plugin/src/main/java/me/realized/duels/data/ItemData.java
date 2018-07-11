@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.compat.Attributes;
 import me.realized.duels.util.compat.CompatUtil;
 import me.realized.duels.util.compat.Potions;
@@ -100,11 +101,11 @@ public class ItemData {
             final ItemMeta meta = item.getItemMeta();
 
             if (meta.hasDisplayName()) {
-                displayName = meta.getDisplayName();
+                displayName = StringUtil.reverseColor(meta.getDisplayName());
             }
 
             if (meta.hasLore()) {
-                lore = meta.getLore();
+                lore = StringUtil.reverseColor(meta.getLore());
             }
 
             if (!CompatUtil.isPre1_8() && !meta.getItemFlags().isEmpty()) {
@@ -143,11 +144,11 @@ public class ItemData {
                 }
 
                 if (bookMeta.hasTitle()) {
-                    title = bookMeta.getTitle();
+                    title = StringUtil.reverseColor(bookMeta.getTitle());
                 }
 
                 if (bookMeta.hasPages()) {
-                    contents = bookMeta.getPages();
+                    contents = StringUtil.reverseColor(bookMeta.getPages());
                 }
             }
 
@@ -202,11 +203,11 @@ public class ItemData {
         final ItemMeta meta = item.getItemMeta();
 
         if (displayName != null) {
-            meta.setDisplayName(displayName);
+            meta.setDisplayName(StringUtil.color(displayName));
         }
 
         if (lore != null && !lore.isEmpty()) {
-            meta.setLore(lore);
+            meta.setLore(StringUtil.color(lore));
         }
 
         if (!CompatUtil.isPre1_8() && flags != null && !flags.isEmpty()) {
@@ -239,11 +240,11 @@ public class ItemData {
             }
 
             if (title != null) {
-                bookMeta.setTitle(title);
+                bookMeta.setTitle(StringUtil.color(title));
             }
 
             if (contents != null && !contents.isEmpty()) {
-                bookMeta.setPages(contents);
+                bookMeta.setPages(StringUtil.color(contents));
             }
         }
 

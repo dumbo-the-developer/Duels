@@ -57,6 +57,18 @@ public final class StringUtil {
         return "(" + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ() + ")";
     }
 
+    public static String reverseColor(final String s) {
+        System.out.println(s);
+        System.out.println(ChatColor.COLOR_CHAR);
+        System.out.println(s.replace(ChatColor.COLOR_CHAR, '&'));
+        return s.replace(ChatColor.COLOR_CHAR, '&');
+    }
+
+    public static List<String> reverseColor(final List<String> input) {
+        input.replaceAll(s -> s = reverseColor(s));
+        return input;
+    }
+
     public static String color(final String input) {
         return ChatColor.translateAlternateColorCodes('&', input);
     }
