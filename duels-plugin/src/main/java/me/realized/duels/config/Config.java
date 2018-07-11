@@ -42,6 +42,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean duelzoneEnabled;
     @Getter
     private List<String> duelzones;
+    @Getter
+    private boolean myPetDespawn;
 
     @Getter
     private boolean requiresClearedInventory;
@@ -68,6 +70,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean useOwnInventoryKeepItems;
     @Getter
     private int maxDuration;
+    @Getter
+    private boolean startCommandsEnabled;
+    @Getter
+    private List<String> startCommands;
     @Getter
     private boolean endCommandsEnabled;
     @Getter
@@ -176,6 +182,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         fNoPowerLoss = configuration.getBoolean("supported-plugins.Factions.no-power-loss-in-duel", true);
         duelzoneEnabled = configuration.getBoolean("supported-plugins.WorldGuard.duelzone.enabled", false);
         duelzones = configuration.getStringList("supported-plugins.WorldGuard.duelzone.regions");
+        myPetDespawn = configuration.getBoolean("supported-plugins.MyPet.despawn-pet-in-duel", false);
 
         requiresClearedInventory = configuration.getBoolean("request.requires-cleared-inventory", true);
         preventCreativeMode = configuration.getBoolean("request.prevent-creative-mode", false);
@@ -190,6 +197,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         useOwnInventoryEnabled = configuration.getBoolean("duel.use-own-inventory.enabled", false);
         useOwnInventoryKeepItems = configuration.getBoolean("duel.use-own-inventory.keep-items", false);
         maxDuration = configuration.getInt("duel.match.max-duration", -1);
+        startCommandsEnabled = configuration.getBoolean("duel.match.start-commands.enabled", false);
+        startCommands = configuration.getStringList("duel.match.start-commands.commands");
         endCommandsEnabled = configuration.getBoolean("duel.match.end-commands.enabled", false);
         endCommands = configuration.getStringList("duel.match.end-commands.commands");
         preventInventoryOpen = configuration.getBoolean("duel.prevent-inventory-open", true);

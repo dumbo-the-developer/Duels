@@ -24,6 +24,7 @@ import me.realized.duels.data.UserManager;
 import me.realized.duels.extra.Teleport;
 import me.realized.duels.hooks.EssentialsHook;
 import me.realized.duels.hooks.McMMOHook;
+import me.realized.duels.hooks.MyPetHook;
 import me.realized.duels.hooks.VaultHook;
 import me.realized.duels.hooks.WorldGuardHook;
 import me.realized.duels.inventories.InventoryManager;
@@ -81,6 +82,7 @@ public class DuelManager implements Loadable {
     private EssentialsHook essentials;
     private McMMOHook mcMMO;
     private WorldGuardHook worldGuard;
+    private MyPetHook myPet;
     private int durationCheckTask;
 
     public DuelManager(final DuelsPlugin plugin) {
@@ -102,6 +104,7 @@ public class DuelManager implements Loadable {
         this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
         this.mcMMO = plugin.getHookManager().getHook(McMMOHook.class);
         this.worldGuard = plugin.getHookManager().getHook(WorldGuardHook.class);
+        this.myPet = plugin.getHookManager().getHook(MyPetHook.class);
 
         if (config.getMaxDuration() > 0) {
             this.durationCheckTask = plugin.doSyncRepeat(() -> {
@@ -372,7 +375,7 @@ public class DuelManager implements Loadable {
     }
 
     private int getRating(final Kit kit, final UserData user) {
-        return user != null ? user.getRating(kit) : config.getDefaultRating();
+        return kit != null && user != null ? user.getRating(kit) : config.getDefaultRating();
     }
 
     private void addPlayers(final boolean fromQueue, final Arena arena, final Kit kit, final Map<Integer, Location> locations, final Player... players) {
@@ -399,6 +402,16 @@ public class DuelManager implements Loadable {
                 if (kit != null) {
                     kit.equip(player);
                 }
+            }
+
+            if (config.isStartCommandsEnabled()) {
+                for (final String command : config.getStartCommands()) {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", player.getName()));
+                }
+            }
+
+            if (myPet != null) {
+                myPet.removePet(player);
             }
 
             teleport.tryTeleport(player, locations.get(++position));

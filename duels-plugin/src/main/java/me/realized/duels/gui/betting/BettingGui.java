@@ -139,7 +139,7 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
 
         final Button<DuelsPlugin> button = get(inventory, event.getSlot());
 
-        if (firstReady && secondReady && !(button != null && button instanceof CancelButton)) {
+        if (firstReady && secondReady && !(button instanceof CancelButton)) {
             event.setCancelled(true);
             return;
         }

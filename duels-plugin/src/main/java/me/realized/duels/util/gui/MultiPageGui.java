@@ -121,12 +121,6 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
             return;
         }
 
-        final ItemStack item = event.getCurrentItem();
-
-        if (item == null || item.getType() == Material.AIR) {
-            return;
-        }
-
         event.setCancelled(true);
 
         if (!clicked.equals(top)) {

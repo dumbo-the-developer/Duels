@@ -11,6 +11,7 @@ import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.extra.Permissions;
 import me.realized.duels.extra.Teleport;
+import me.realized.duels.hooks.MyPetHook;
 import me.realized.duels.player.PlayerInfo;
 import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.util.Loadable;
@@ -46,6 +47,7 @@ public class SpectateManager implements Loadable {
     private final Map<Player, Spectator> spectators = new HashMap<>();
 
     private Teleport teleport;
+    private MyPetHook myPet;
 
     public SpectateManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -59,6 +61,7 @@ public class SpectateManager implements Loadable {
     @Override
     public void handleLoad() {
         this.teleport = plugin.getTeleport();
+        this.myPet = plugin.getHookManager().getHook(MyPetHook.class);
     }
 
     @Override
@@ -105,6 +108,10 @@ public class SpectateManager implements Loadable {
             });
         }
 
+        if (myPet != null) {
+            myPet.removePet(player);
+        }
+
         final Spectator spectator = new Spectator(player, target, arena);
         spectators.put(player, spectator);
         teleport.tryTeleport(player, target.getLocation());
@@ -114,6 +121,7 @@ public class SpectateManager implements Loadable {
         player.setFlying(true);
         Collisions.setCollidable(player, false);
         lang.sendMessage(player, "COMMAND.spectate.start-spectate", "name", target.getName());
+
         if (player.hasPermission(Permissions.SPEC_ANON)) {
             return;
         }

@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 1
+config-version: 2
 
 # If set to 'true', a notification and a download link will be printed on the console whenever an update is available.
 # default: true
@@ -54,6 +54,10 @@ supported-plugins:
 
       # List of regions to allow dueling.
       regions: [spawn, lobby]
+  MyPet:
+    # If set to 'true', player's pet will despawn when entering a duel.
+    # default: false
+    despawn-pet-in-duel: false
 
 
 request:
@@ -112,6 +116,16 @@ duel:
     # The max duration of a match, in minutes. Setting it to -1 will allow players to fight for as long as they like.
     # default: -1
     max-duration: -1
+
+    start-commands:
+      # If set to 'true', the commands listed below will run FOR EACH player at the start of a match.
+      # default: false
+      enabled: false
+
+      # Available placeholders:
+      # %player% - Name of the player entering the match
+      commands:
+      - 'broadcast %player% is entering a duel!'
 
     end-commands:
       # If set to 'true', the commands listed below will run at the end of a match.

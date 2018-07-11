@@ -2,11 +2,9 @@ package me.realized.duels.util.gui;
 
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.inventory.InventoryBuilder;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class SinglePageGui<P extends JavaPlugin> extends AbstractGui<P> {
@@ -49,12 +47,6 @@ public class SinglePageGui<P extends JavaPlugin> extends AbstractGui<P> {
         final Inventory clicked = event.getClickedInventory();
 
         if (clicked == null) {
-            return;
-        }
-
-        final ItemStack item = event.getCurrentItem();
-
-        if (item == null || item.getType() == Material.AIR) {
             return;
         }
 
