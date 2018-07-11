@@ -171,7 +171,8 @@ COMMAND:
       - '{HALF_LINE} &fKit Commands {HALF_LINE}'
       sign:
       - '{HALF_LINE} &fQueue Sign Commands {HALF_LINE}'
-      - '&f/%command% addsign [kit] [bet] &e- &7Creates a queue sign with kit and bet.'
+      - '&f/%command% addsign [bet] &e- &7Creates a queue sign with bet.'
+      - '&f/%command% addsign [bet] [kit] &e- &7Creates a queue sign with bet and kit.'
       - '&f/%command% delsign &e- &7Deletes the queue sign you are looking at.'
       - '&f/%command% list &e- &7Displays a list of queue signs.'
       - '{HALF_LINE} &fQueue Sign Commands {HALF_LINE}'

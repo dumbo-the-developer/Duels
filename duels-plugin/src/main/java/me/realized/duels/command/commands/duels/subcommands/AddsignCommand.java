@@ -18,7 +18,7 @@ import org.bukkit.entity.Player;
 public class AddsignCommand extends BaseCommand {
 
     public AddsignCommand(final DuelsPlugin plugin) {
-        super(plugin, "addsign", "addsign [kit] [bet]", "Creates a queue sign with kit and bet.", 3, true);
+        super(plugin, "addsign", "addsign [bet] [kit]", "Creates a queue sign with bet and kit.", 2, true);
     }
 
     @Override
@@ -31,15 +31,21 @@ public class AddsignCommand extends BaseCommand {
             return;
         }
 
-        final String name = StringUtils.join(args, " ", 1, args.length - 1).replace("-", " ");
-        final Kit kit = kitManager.get(name);
+        final int bet = NumberUtil.parseInt(args[1]).orElse(0);
+        String name = "";
+        Kit kit = null;
 
-        if (!config.isUseOwnInventoryEnabled() && kit == null) {
+        if (args.length > 2) {
+            name = StringUtils.join(args, " ", 2, args.length).replace("-", " ");
+            kit = kitManager.get(name);
+        }
+
+        if (config.isUseOwnInventoryEnabled()) {
+            kit = null;
+        } else if (kit == null) {
             lang.sendMessage(sender, "ERROR.kit.not-found", "name", name);
             return;
         }
-
-        final int bet = NumberUtil.parseInt(args[args.length - 1]).orElse(0);
 
         if (!queueManager.create(sign, kit, bet)) {
             lang.sendMessage(sender, "ERROR.sign.already-exists");
@@ -54,11 +60,11 @@ public class AddsignCommand extends BaseCommand {
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         if (args.length == 2) {
-            return handleTabCompletion(sender, args[1], "kit", kitManager.getKits(), Kit::getName);
+            return Arrays.asList("10", "50", "100", "500", "1000");
         }
 
         if (args.length > 2) {
-            return Arrays.asList("10", "50", "100", "500", "1000");
+            return handleTabCompletion(sender, args[1], "kit", kitManager.getKits(), Kit::getName);
         }
 
         return null;
