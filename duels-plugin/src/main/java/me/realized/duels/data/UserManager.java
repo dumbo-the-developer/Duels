@@ -268,7 +268,7 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
     public void on(final PlayerJoinEvent event) {
         final Player player = event.getPlayer();
 
-        if (config.isCheckForUpdates() && plugin.isUpdateAvailable() && (player.isOp() || player.hasPermission(Permissions.ADMIN))) {
+        if (plugin.isUpdateAvailable() && (player.isOp() || player.hasPermission(Permissions.ADMIN))) {
             player.sendMessage(StringUtil.color(String.format(ADMIN_UPDATE_MESSAGE, plugin.getDownloadLink())));
         }
 

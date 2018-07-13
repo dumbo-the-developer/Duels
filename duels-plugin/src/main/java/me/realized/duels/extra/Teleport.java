@@ -82,6 +82,8 @@ public final class Teleport implements Loadable, Listener {
                 failHandler.accept(player);
             }
         }
+
+        location.getWorld().refreshChunk(chunk.getX(), chunk.getZ());
     }
 
     public void tryTeleport(final Player player, final Location location) {
