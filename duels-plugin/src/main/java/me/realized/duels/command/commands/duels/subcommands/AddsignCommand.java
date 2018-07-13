@@ -64,7 +64,7 @@ public class AddsignCommand extends BaseCommand {
         }
 
         if (args.length > 2) {
-            return handleTabCompletion(sender, args[1], "kit", kitManager.getKits(), Kit::getName);
+            return handleTabCompletion(sender, args[2], "kit", kitManager.getKits(), Kit::getName);
         }
 
         return null;
