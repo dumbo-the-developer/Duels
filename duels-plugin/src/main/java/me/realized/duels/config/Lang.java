@@ -1,6 +1,6 @@
 package me.realized.duels.config;
 
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,14 +92,14 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
         receiver.sendMessage(StringUtil.color(replace(message, replacers)));
     }
 
-    public void sendMessage(final String key, final CommandSender... receivers) {
-        final String message = getMessage(key);
+    public void sendMessage(final Collection<Player> players, final String key, final Object... replacers) {
+        final String message = getMessage(key, replacers);
 
         if (message == null) {
             return;
         }
 
-        Arrays.stream(receivers).forEach(receiver -> receiver.sendMessage(StringUtil.color(message)));
+        players.forEach(player -> player.sendMessage(message));
     }
 
     private String getRawMessage(final String key) {

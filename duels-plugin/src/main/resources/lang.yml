@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 3
+config-version: 4
 
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
@@ -98,10 +98,18 @@ COMMAND:
         - '&6- &7Bet: &6$%bet_amount%'
         - '&6- &7Item Betting: &r%item_betting%'
         clickable-text:
-          info: '&7Click to '
-          accept: '&a&l[ACCEPT] '
-          deny: '&c&l[DENY]'
-          extra: '{LINE}'
+          info:
+            text: '&7Click to '
+            hover-text: ''
+          accept:
+            text: '&a&l[ACCEPT] '
+            hover-text: '&7Click to &aaccept &7this request.'
+          deny:
+            text: '&c&l[DENY]'
+            hover-text: '&7Click to &cdeny &7this request.'
+          extra:
+            text: '{LINE}'
+            hover-text: ''
       accept:
         sender: '{PREFIX} &f%name% &7has accepted your duel request.'
         receiver: '{PREFIX} &7Accepted the duel request from &f%name%&7.'
@@ -246,6 +254,7 @@ DUEL:
     no-kit-selected: '{FAIL_PREFIX} No kit was selected!'
     player-moved: '{FAIL_PREFIX} You or your opponent moved after sending/accepting the request!'
     not-in-duelzone: '{FAIL_PREFIX} You or your opponent moved out of the duelzone sending/accepting the request!'
+    in-creative-mode: '{FAIL_PREFIX} You or your opponent is in creative mode!'
     no-arena-available: '{FAIL_PREFIX} No arena is currently available. Please try again later.'
     arena-in-use: '{FAIL_PREFIX} That arena is already in use. Please select a different arena.'
     not-enough-money: '{FAIL_PREFIX} You or your opponent does not have $%bet_amount%.'

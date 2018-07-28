@@ -3,15 +3,15 @@ package me.realized.duels.gui.setting.buttons;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.setting.Settings;
+import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 public class RequestSendButton extends BaseButton {
 
     public RequestSendButton(final DuelsPlugin plugin) {
-        super(plugin, ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 5).name(plugin.getLang().getMessage("GUI.settings.buttons.send.name")).build());
+        super(plugin, ItemBuilder.of(Items.GREEN_PANE.clone()).name(plugin.getLang().getMessage("GUI.settings.buttons.send.name")).build());
     }
 
     @Override

@@ -2,6 +2,7 @@ package me.realized.duels.arena;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,9 +23,9 @@ import me.realized.duels.duel.DuelManager.OpponentInfo;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.setting.Settings;
+import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -45,7 +46,7 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
 
     public Arena(final DuelsPlugin plugin, final String name) {
         super(plugin, ItemBuilder
-            .of(Material.EMPTY_MAP)
+            .of(Items.EMPTY_MAP)
             .name(plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.name", "name", name))
             .lore(plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.lore-unavailable").split("\n"))
             .build()
@@ -162,15 +163,21 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
     }
 
     public int size() {
-        return isUsed() ? (int) match.getPlayerMap().entrySet().stream().filter(entry -> !entry.getValue()).count() : 0;
+        return isUsed() ? match.getAllPlayers().size() : 0;
     }
 
     public Player first() {
-        return isUsed() ? match.getPlayerMap().entrySet().stream().filter(entry -> !entry.getValue()).findFirst().map(Entry::getKey).orElse(null) : null;
+        return isUsed() ? match.getAlivePlayers().iterator().next() : null;
     }
 
     public Set<Player> getPlayers() {
-        return isUsed() ? match.getPlayers() : Collections.emptySet();
+        return isUsed() ? match.getAllPlayers() : Collections.emptySet();
+    }
+
+    public void broadcast(final String message) {
+        final Set<Player> receivers = new HashSet<>(getPlayers());
+        receivers.addAll(spectateManager.getSpectators(this));
+        receivers.forEach(player -> player.sendMessage(message));
     }
 
     @Override

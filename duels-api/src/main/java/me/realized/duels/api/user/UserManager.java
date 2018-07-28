@@ -1,12 +1,12 @@
 package me.realized.duels.api.user;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.Getter;
 import me.realized.duels.api.kit.Kit;
-import me.realized.duels.api.util.Pair;
 import org.bukkit.entity.Player;
 
 public interface UserManager {
@@ -80,15 +80,75 @@ public interface UserManager {
         @Getter
         private final long creation;
         @Getter
-        private final String name, type;
+        private final String type, identifier;
         @Getter
-        private final List<Pair<String, Integer>> data;
+        private final List<TopData> data;
 
-        public TopEntry(final String name, final String type, final List<Pair<String, Integer>> data) {
+        public TopEntry(final String type, final String identifier, final List<TopData> data) {
             this.creation = System.currentTimeMillis();
-            this.name = name;
             this.type = type;
+            this.identifier = identifier;
             this.data = data;
+        }
+
+        @Override
+        public boolean equals(final Object other) {
+            if (this == other) {
+                return true;
+            }
+
+            if (other == null || getClass() != other.getClass()) {
+                return false;
+            }
+
+            final TopEntry topEntry = (TopEntry) other;
+            return Objects.equals(type, topEntry.type) && Objects.equals(identifier, topEntry.identifier) && Objects.equals(data, topEntry.data);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(type, identifier, data);
+        }
+    }
+
+    class TopData implements Comparable<TopData> {
+
+        @Getter
+        private final UUID uuid;
+        @Getter
+        private final String name;
+        @Getter
+        private final int value;
+
+        public TopData(final UUID uuid, final String name, final int value) {
+            this.uuid = uuid;
+            this.name = name;
+            this.value = value;
+        }
+
+        @Override
+        public int compareTo(@Nonnull final TopData data) {
+            Objects.requireNonNull(data, "data");
+            return Integer.compare(value, data.value);
+        }
+
+        @Override
+        public boolean equals(final Object other) {
+            if (this == other) {
+                return true;
+            }
+
+            if (other == null || getClass() != other.getClass()) {
+                return false;
+            }
+
+            final TopData topData = (TopData) other;
+            return value == topData.value && Objects.equals(uuid, topData.uuid) && Objects.equals(name, topData.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(uuid, name, value);
         }
     }
 }

@@ -71,10 +71,19 @@ public class LogManager implements Loadable, LogSource {
 
     @Override
     public void log(final Level level, final String s) {
+        log(level, s, null);
+    }
+
+    @Override
+    public void log(final Level level, final String s, final Throwable thrown) {
         if (handler == null) {
             return;
         }
 
-        getLogger().log(level, s);
+        if (thrown != null) {
+            getLogger().log(level, s, thrown);
+        } else {
+            getLogger().log(level, s);
+        }
     }
 }

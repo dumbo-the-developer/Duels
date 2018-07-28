@@ -27,7 +27,7 @@ public class InventoryManager implements Loadable {
         this.expireTask = plugin.doSyncRepeat(() -> {
             final long now = System.currentTimeMillis();
             inventories.entrySet().removeIf(entry -> now - entry.getValue().getCreation() >= 1000L * 60 * 5);
-        }, 20L, 20L * 5);
+        }, 20L, 20L * 5).getTaskId();
     }
 
     @Override

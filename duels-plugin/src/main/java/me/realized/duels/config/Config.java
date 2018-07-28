@@ -46,6 +46,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean myPetDespawn;
     @Getter
     private boolean preventBountyLoss;
+    @Getter
+    private boolean preventAddDeath;
 
     @Getter
     private boolean requiresClearedInventory;
@@ -94,6 +96,12 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean teleportToLastLocation;
     @Getter
     private int teleportDelay;
+    @Getter
+    private boolean spawnFirework;
+    @Getter
+    private boolean arenaOnlyEndMessage;
+    @Getter
+    private boolean displayInventories;
     @Getter
     private boolean preventItemDrop;
     @Getter
@@ -145,6 +153,18 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
 
     @Getter
     private long topUpdateInterval;
+    @Getter
+    private String topWinsType;
+    @Getter
+    private String topWinsIdentifier;
+    @Getter
+    private String topLossesType;
+    @Getter
+    private String topLossesIdentifier;
+    @Getter
+    private String topKitType;
+    @Getter
+    private String topKitIdentifier;
 
     @Getter
     private int kitSelectorRows;
@@ -186,7 +206,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         duelzones = configuration.getStringList("supported-plugins.WorldGuard.duelzone.regions");
         myPetDespawn = configuration.getBoolean("supported-plugins.MyPet.despawn-pet-in-duel", false);
         preventBountyLoss = configuration.getBoolean("supported-plugins.BountyHunters.prevent-bounty-loss-in-duel", true);
-
+        preventAddDeath = configuration.getBoolean("supported-plugins.SimpleClans.prevent-add-death-in-duel", true);
         requiresClearedInventory = configuration.getBoolean("request.requires-cleared-inventory", true);
         preventCreativeMode = configuration.getBoolean("request.prevent-creative-mode", false);
         arenaSelectingEnabled = configuration.getBoolean("request.arena-selecting.enabled", true);
@@ -211,6 +231,9 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         cancelIfMoved = configuration.getBoolean("duel.cancel-if-moved", false);
         teleportToLastLocation = configuration.getBoolean("duel.teleport-to-last-location", false);
         teleportDelay = configuration.getInt("duel.teleport-delay", 5);
+        spawnFirework = configuration.getBoolean("duel.spawn-firework", true);
+        arenaOnlyEndMessage = configuration.getBoolean("duel.arena-only-end-message", false);
+        displayInventories = configuration.getBoolean("duel.display-inventories", true);
         preventItemDrop = configuration.getBoolean("duel.prevent-item-drop", false);
         preventItemPickup = configuration.getBoolean("duel.prevent-item-pickup", true);
         limitTeleportEnabled = configuration.getBoolean("duel.limit-teleportation.enabled", true);
@@ -239,6 +262,12 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         matchesToDisplay = Math.max(configuration.getInt("stats.matches-to-display", 10), 0);
 
         topUpdateInterval = Math.max(configuration.getInt("top.update-interval", 5), 1) * 60L * 1000L;
+        topWinsType = configuration.getString("top.displayed-replacers.wins.type", "Wins");
+        topWinsIdentifier = configuration.getString("top.displayed-replacers.wins.identifier", "wins");
+        topLossesType = configuration.getString("top.displayed-replacers.losses.type", "Losses");
+        topLossesIdentifier = configuration.getString("top.displayed-replacers.losses.identifier", "losses");
+        topKitType = configuration.getString("top.displayed-replacers.kit.type", "%kit%");
+        topKitIdentifier = configuration.getString("top.displayed-replacers.kit.identifier", "rating");
 
         kitSelectorRows = Math.min(Math.max(configuration.getInt("guis.kit-selector.rows", 2), 1), 5);
         arenaSelectorRows = Math.min(Math.max(configuration.getInt("guis.arena-selector.rows", 3), 1), 5);

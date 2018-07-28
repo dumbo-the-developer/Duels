@@ -7,8 +7,8 @@ import me.realized.duels.gui.inventory.buttons.HeadButton;
 import me.realized.duels.gui.inventory.buttons.HealthButton;
 import me.realized.duels.gui.inventory.buttons.HungerButton;
 import me.realized.duels.gui.inventory.buttons.PotionCounterButton;
+import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.gui.SinglePageGui;
-import me.realized.duels.util.inventory.ItemBuilder;
 import me.realized.duels.util.inventory.Slots;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -23,7 +23,7 @@ public class InventoryGui extends SinglePageGui<DuelsPlugin> {
         super(plugin, plugin.getLang().getMessage("GUI.inventory-view.title", "name", player.getName()), 6);
         this.creation = System.currentTimeMillis();
 
-        final ItemStack spacing = ItemBuilder.of(Material.STAINED_GLASS_PANE, 1, (short) 7).name(" ").build();
+        final ItemStack spacing = Items.GRAY_PANE.clone();
         Slots.run(0, 9, slot -> inventory.setItem(slot, spacing));
         set(4, new HeadButton(plugin, player));
 

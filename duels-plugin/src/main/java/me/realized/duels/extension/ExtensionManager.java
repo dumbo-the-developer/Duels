@@ -1,20 +1,15 @@
 package me.realized.duels.extension;
 
 import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.jar.JarEntry;
-import java.util.jar.JarInputStream;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.Duels;
 import me.realized.duels.api.extension.DuelsExtension;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
+import me.realized.duels.util.VersionUtil;
 
 public class ExtensionManager implements Loadable {
 
@@ -22,12 +17,13 @@ public class ExtensionManager implements Loadable {
 
     static {
         try {
-            INIT_EXTENSION = DuelsExtension.class.getDeclaredMethod("init", Duels.class, File.class, File.class);
+            INIT_EXTENSION = DuelsExtension.class.getDeclaredMethod("init", Duels.class, String.class, File.class, File.class);
             INIT_EXTENSION.setAccessible(true);
         } catch (NoSuchMethodException ignored) {}
     }
 
     private final Map<String, DuelsExtension> extensions = new HashMap<>();
+    private final Map<DuelsExtension, ExtensionInfo> info = new HashMap<>();
 
     private final DuelsPlugin plugin;
     private final File folder;
@@ -43,12 +39,7 @@ public class ExtensionManager implements Loadable {
 
     @Override
     public void handleLoad() {
-        final FilenameFilter filter = (dir, name) -> {
-            int i = name.lastIndexOf('.');
-            return i > 0 && name.substring(i).equals(".jar");
-        };
-
-        File[] jars = folder.listFiles(filter);
+        final File[] jars = folder.listFiles((dir, name) -> name.endsWith(".jar"));
 
         if (jars == null) {
             return;
@@ -56,33 +47,38 @@ public class ExtensionManager implements Loadable {
 
         for (final File file : jars) {
             try {
-                final Class<? extends DuelsExtension> clazz = find(file);
-
-                if (clazz == null) {
-                    Log.error("Could not load extension " + file.getName() + ": No class extending DuelsExtension found");
-                    continue;
-                }
-
-                final DuelsExtension extension = clazz.newInstance();
+                final ExtensionClassLoader classLoader = new ExtensionClassLoader(file, DuelsExtension.class.getClassLoader());
+                final DuelsExtension extension = classLoader.getExtension();
 
                 if (extension == null) {
-                    Log.error("Could not load extension " + file.getName() + ": Failed to instantiate " + clazz.getName());
+                    Log.error(this, "Could not load extension " + file.getName() + ": Failed to initiate main class");
                     continue;
                 }
 
-                INIT_EXTENSION.invoke(extension, plugin, folder, file);
-
-                if (extensions.containsKey(extension.getName())) {
-                    Log.error("Could not load extension " + extension.getName() + ": An extension with same name already exists");
+                if (extension.getRequiredVersion() != null && VersionUtil.isLower(plugin.getVersion(), extension.getRequiredVersion())) {
+                    Log.error(this, "Could not load extension " + file.getName() + ": This extension requires Duels v" + extension.getRequiredVersion() + " or higher!");
                     continue;
                 }
 
+                final ExtensionInfo info = classLoader.getInfo();
+
+                if (extensions.containsKey(info.getName())) {
+                    Log.error(this, "Could not load extension " + file.getName() + ": An extension with the name '" + info.getName() + "' already exists");
+                    continue;
+                }
+
+                if (!info.getDepends().isEmpty() && info.getDepends().stream().anyMatch(depend -> !plugin.getServer().getPluginManager().isPluginEnabled(depend))) {
+                    Log.error(this, "Could not load extension " + file.getName() + ": This extension require the following plugins to enable - " + info.getDepends());
+                    continue;
+                }
+
+                INIT_EXTENSION.invoke(extension, plugin, info.getName(), folder, file);
                 extension.setEnabled(true);
                 Log.info(this, "Extension '" + extension.getName() + "' is now enabled.");
                 extensions.put(extension.getName(), extension);
+                this.info.put(extension, info);
             } catch (Exception ex) {
-                Log.error("Could not enable extension " + file.getName() + ": " + ex.getMessage());
-                ex.printStackTrace();
+                Log.error(this, "Could not enable extension " + file.getName() + "!", ex);
             }
         }
     }
@@ -92,44 +88,27 @@ public class ExtensionManager implements Loadable {
         extensions.values().forEach(extension -> {
             try {
                 extension.setEnabled(false);
+
+                final ClassLoader classLoader = extension.getClass().getClassLoader();
+
+                if (classLoader instanceof ExtensionClassLoader) {
+                    ((ExtensionClassLoader) classLoader).close();
+                }
+
                 Log.info(this, "Extension '" + extension.getName() + "' is now disabled.");
             } catch (Exception ex) {
-                Log.error("Could not disable extension " + extension.getName() + ": " + ex.getMessage());
+                Log.error(this, "Could not disable extension " + extension.getName() + "!", ex);
             }
         });
         extensions.clear();
+        info.clear();
     }
 
-    private Class<? extends DuelsExtension> find(final File file) throws IOException, ClassNotFoundException {
-        final URL url = file.toURI().toURL();
+    public DuelsExtension getExtension(final String name) {
+        return extensions.get(name);
+    }
 
-        try (
-            URLClassLoader classLoader = new URLClassLoader(new URL[] {url}, DuelsExtension.class.getClassLoader());
-            JarInputStream stream = new JarInputStream(url.openStream())
-        ) {
-            Class<? extends DuelsExtension> foundClass = null;
-
-            while (true) {
-                final JarEntry entry = stream.getNextJarEntry();
-
-                if (entry == null) {
-                    break;
-                }
-
-                String name = entry.getName();
-
-                if (name != null && !name.isEmpty() && name.endsWith(".class")) {
-                    name = name.replace("/", ".");
-                    final String className = name.substring(0, name.lastIndexOf(".class"));
-                    final Class<?> clazz = classLoader.loadClass(className);
-
-                    if (DuelsExtension.class.isAssignableFrom(clazz)) {
-                        foundClass = clazz.asSubclass(DuelsExtension.class);
-                    }
-                }
-            }
-
-            return foundClass;
-        }
+    public ExtensionInfo getInfo(final DuelsExtension extension) {
+        return info.get(extension);
     }
 }

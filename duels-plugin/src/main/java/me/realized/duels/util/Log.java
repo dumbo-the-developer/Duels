@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.plugin.Plugin;
 
 public final class Log {
+
+    private static final String PLUGIN_WARN = "[%s] &c%s";
+    private static final String PLUGIN_ERROR = "[%s] &4&l%s";
 
     private static final List<LogSource> sources = new ArrayList<>();
 
@@ -33,24 +35,10 @@ public final class Log {
         }
     }
 
-    public static void error(final String s) {
-        for (final LogSource source : sources) {
-            if (source instanceof Plugin) {
-                Bukkit.getConsoleSender().sendMessage("[" + ((Plugin) source).getName() + "] " + ChatColor.RED + s);
-            } else {
-                source.log(Level.SEVERE, s);
-            }
-        }
-    }
-
-    public static void error(final Loadable loadable, final String s) {
-        error(loadable.getClass().getSimpleName() + ": " + s);
-    }
-
     public static void warn(final String s) {
         for (final LogSource source : sources) {
             if (source instanceof Plugin) {
-                Bukkit.getConsoleSender().sendMessage("[" + ((Plugin) source).getName() + "] " + ChatColor.GOLD + s);
+                Bukkit.getConsoleSender().sendMessage(StringUtil.color(String.format(PLUGIN_WARN, ((Plugin) source).getName(), s)));
             } else {
                 source.log(Level.WARNING, s);
             }
@@ -61,8 +49,34 @@ public final class Log {
         warn(loadable.getClass().getSimpleName() + ": " + s);
     }
 
+    public static void error(final String s, final Throwable thrown) {
+        for (final LogSource source : sources) {
+            if (source instanceof Plugin) {
+                Bukkit.getConsoleSender().sendMessage(StringUtil.color(String.format(PLUGIN_ERROR, ((Plugin) source).getName(), s)));
+            } else if (thrown != null) {
+                source.log(Level.SEVERE, s, thrown);
+            } else {
+                source.log(Level.SEVERE, s);
+            }
+        }
+    }
+
+    public static void error(final String s) {
+        error(s, null);
+    }
+
+    public static void error(final Loadable loadable, final String s, final Throwable thrown) {
+        error(loadable.getClass().getSimpleName() + ": " + s, thrown);
+    }
+
+    public static void error(final Loadable loadable, final String s) {
+        error(loadable, s, null);
+    }
+
     public interface LogSource {
 
         void log(final Level level, final String s);
+
+        void log(final Level level, final String s, final Throwable thrown);
     }
 }

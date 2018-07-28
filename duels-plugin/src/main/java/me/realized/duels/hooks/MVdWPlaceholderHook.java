@@ -20,6 +20,7 @@ public class MVdWPlaceholderHook extends PluginHook<DuelsPlugin> {
         final Placeholders placeholders = new Placeholders();
         PlaceholderAPI.registerPlaceholder(plugin, "duels_wins", placeholders);
         PlaceholderAPI.registerPlaceholder(plugin, "duels_losses", placeholders);
+        PlaceholderAPI.registerPlaceholder(plugin, "duels_can_request", placeholders);
     }
 
     public class Placeholders implements PlaceholderReplacer {
@@ -38,7 +39,16 @@ public class MVdWPlaceholderHook extends PluginHook<DuelsPlugin> {
                 return null;
             }
 
-            return String.valueOf(event.getPlaceholder().equals("duels_wins") ? user.getWins() : user.getLosses());
+            switch (event.getPlaceholder()) {
+                case "duels_wins":
+                    return String.valueOf(user.getWins());
+                case "duels_losses":
+                    return String.valueOf(user.getWins());
+                case "duels_can_request":
+                    return String.valueOf(user.canRequest());
+            }
+
+            return null;
         }
     }
 }

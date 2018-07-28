@@ -22,7 +22,7 @@ public final class Players extends CompatBase {
             try {
                 final Object result = GET_ONLINE_PLAYERS.invoke(null);
 
-                if (result != null && result instanceof Player[]) {
+                if (result instanceof Player[]) {
                     return Arrays.asList((Player[]) result);
                 }
             } catch (Exception ignored) {}

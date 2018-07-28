@@ -16,7 +16,7 @@ public class SpawnEggs extends CompatBase {
 
     @SuppressWarnings("deprecation")
     public static SpawnEggs fromItemStack(final ItemStack item) {
-        if (item == null || item.getType() != Material.MONSTER_EGG) {
+        if (item == null || !item.getType().name().equals("MONSTER_EGG")) {
             return null;
         }
 
@@ -43,7 +43,7 @@ public class SpawnEggs extends CompatBase {
     @SuppressWarnings("deprecation")
     public ItemStack toItemStack(final int amount) {
         try {
-            final ItemStack item = new ItemStack(Material.MONSTER_EGG, amount);
+            final ItemStack item = new ItemStack(Material.getMaterial("MONSTER_EGG"), amount);
             Object nmsItem = AS_NMS_COPY.invoke(null, item);
             Object tag = GET_TAG.invoke(nmsItem);
 

@@ -44,10 +44,10 @@ public class DuelsAPI {
 
 
     /**
-     * @deprecated As of v3.0.0, get the version from {@link Duels#getDescription()} instead.
+     * @deprecated As of v3.0.0, get the version from {@link Duels#getVersion()} instead.
      */
     @Deprecated
     public static String getVersion() {
-        return DuelsPlugin.getInstance().getDescription().getVersion();
+        return DuelsPlugin.getInstance().getVersion();
     }
 }

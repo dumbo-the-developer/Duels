@@ -14,7 +14,8 @@ public class Potions extends CompatBase {
         NIGHT_VISION, POISON, REGEN,
         SLOWNESS, SPEED, STRENGTH,
         WATER, WATER_BREATHING, WEAKNESS,
-        EMPTY, UNCRAFTABLE, MUNDANE, THICK, AWKWARD
+        EMPTY, UNCRAFTABLE, MUNDANE, THICK, AWKWARD,
+        TURTLE_MASTER, SLOW_FALLING
     }
 
     @Getter
@@ -124,6 +125,15 @@ public class Potions extends CompatBase {
                 case "empty":
                     type = PotionType.EMPTY;
                     break;
+                case "turtle_master":
+                case "long_turtle_master":
+                case "strong_turtle_master":
+                    type = PotionType.TURTLE_MASTER;
+                    break;
+                case "slow_falling":
+                case "long_slow_falling":
+                    type = PotionType.SLOW_FALLING;
+                    break;
                 default:
                     return null;
             }
@@ -206,6 +216,12 @@ public class Potions extends CompatBase {
                     break;
                 case LUCK:
                     potionType = "luck";
+                    break;
+                case TURTLE_MASTER:
+                    potionType = extended ? "long_turtle_master" : (strong ? "strong_turtle_master" : "turtle_master");
+                    break;
+                case SLOW_FALLING:
+                    potionType = extended ? "long_slow_falling" : "slow_falling";
                     break;
                 default:
                     return null;

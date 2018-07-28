@@ -2,12 +2,14 @@ package me.realized.duels.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.compat.Attributes;
 import me.realized.duels.util.compat.CompatUtil;
+import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.compat.Potions;
 import me.realized.duels.util.compat.Potions.PotionType;
 import me.realized.duels.util.compat.SpawnEggs;
@@ -71,21 +73,23 @@ public class ItemData {
                         + (potion.isSplash() ? "splash-" : "")
                         + (potion.isStrong() ? "strong-" : "");
                 }
-            } else if (material.equals("MONSTER_EGG")) {
+            } else if (CompatUtil.isPre_1_13() && material.equals("MONSTER_EGG")) {
                 final SpawnEggs spawnEgg = SpawnEggs.fromItemStack(item);
 
                 if (spawnEgg != null) {
                     this.itemData = spawnEgg.getType().name() + "-";
                 }
-            } else if (material.equals("TIPPED_ARROW")) {
-                final PotionMeta meta = (PotionMeta) item.getItemMeta();
-                final PotionData potionData = meta.getBasePotionData();
+            }
+        }
 
-                if (potionData.getType().getEffectType() != null) {
-                    this.itemData = potionData.getType().name() + "-"
-                        + (potionData.isExtended() ? "extended-" : "")
-                        + (potionData.isUpgraded() ? "upgraded-" : "");
-                }
+        if (material.equals("TIPPED_ARROW")) {
+            final PotionMeta meta = (PotionMeta) item.getItemMeta();
+            final PotionData potionData = meta.getBasePotionData();
+
+            if (potionData.getType().getEffectType() != null) {
+                this.itemData = potionData.getType().name() + "-"
+                    + (potionData.isExtended() ? "extended-" : "")
+                    + (potionData.isUpgraded() ? "upgraded-" : "");
             }
         }
 
@@ -116,7 +120,7 @@ public class ItemData {
                 }
             }
 
-            if (item.getType() == Material.SKULL_ITEM && item.getDurability() == 3) {
+            if (Items.equals(Items.HEAD, item)) {
                 final SkullMeta skullMeta = (SkullMeta) meta;
 
                 if (skullMeta.hasOwner()) {
@@ -179,19 +183,21 @@ public class ItemData {
             item = new Attributes(item).addModifiers(attributeModifiers);
         }
 
-        if (!CompatUtil.isPre1_9() && itemData != null) {
-            final List<String> args = Arrays.asList(itemData.split("-"));
+        final List<String> args = itemData != null ? Arrays.asList(itemData.split("-")) : Collections.emptyList();
 
+        if (!CompatUtil.isPre1_9() && itemData != null) {
             if (material.contains("POTION")) {
                 item = new Potions(PotionType.valueOf(args.get(0)), args).toItemStack(amount);
-            } else if (material.equals("MONSTER_EGG")) {
+            } else if (CompatUtil.isPre_1_13() && material.equals("MONSTER_EGG")) {
                 item = new SpawnEggs(EntityType.valueOf(args.get(0))).toItemStack(amount);
-            } else if (material.equals("TIPPED_ARROW")) {
-                final PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-                final PotionData data = new PotionData(org.bukkit.potion.PotionType.valueOf(args.get(0)), args.contains("extended"), args.contains("upgraded"));
-                potionMeta.setBasePotionData(data);
-                item.setItemMeta(potionMeta);
             }
+        }
+
+        if (material.equals("TIPPED_ARROW")) {
+            final PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
+            final PotionData data = new PotionData(org.bukkit.potion.PotionType.valueOf(args.get(0)), args.contains("extended"), args.contains("upgraded"));
+            potionMeta.setBasePotionData(data);
+            item.setItemMeta(potionMeta);
         }
 
         if (enchantments != null && !enchantments.isEmpty()) {
@@ -216,7 +222,7 @@ public class ItemData {
             }
         }
 
-        if (item.getType() == Material.SKULL_ITEM && item.getDurability() == 3 && owner != null) {
+        if (owner != null && Items.equals(Items.HEAD, item)) {
             final SkullMeta skullMeta = (SkullMeta) meta;
             skullMeta.setOwner(owner);
         }

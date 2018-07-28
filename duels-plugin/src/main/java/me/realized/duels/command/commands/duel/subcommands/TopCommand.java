@@ -2,8 +2,8 @@ package me.realized.duels.command.commands.duel.subcommands;
 
 import java.util.List;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.api.user.UserManager.TopData;
 import me.realized.duels.api.user.UserManager.TopEntry;
-import me.realized.duels.api.util.Pair;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.extra.Permissions;
 import me.realized.duels.kit.Kit;
@@ -41,7 +41,7 @@ public class TopCommand extends BaseCommand {
             topEntry = userManager.getTopRatings().get(kit);
         }
 
-        final List<Pair<String, Integer>> top;
+        final List<TopData> top;
 
         if (topEntry == null || (top = topEntry.getData()).isEmpty()) {
             lang.sendMessage(sender, "ERROR.top.no-data-available");
@@ -49,14 +49,14 @@ public class TopCommand extends BaseCommand {
         }
 
         lang.sendMessage(sender, "COMMAND.duel.top.next-update", "remaining", userManager.getNextUpdate(topEntry.getCreation()));
-        lang.sendMessage(sender, "COMMAND.duel.top.header", "type", topEntry.getName());
+        lang.sendMessage(sender, "COMMAND.duel.top.header", "type", topEntry.getType());
 
         for (int i = 0; i < top.size(); i++) {
-            final Pair<String, Integer> entry = top.get(i);
+            final TopData data = top.get(i);
             lang.sendMessage(sender, "COMMAND.duel.top.display-format",
-                "rank", i + 1, "name", entry.getKey(), "score", entry.getValue(), "identifier", topEntry.getType());
+                "rank", i + 1, "name", data.getName(), "score", data.getValue(), "identifier", topEntry.getIdentifier());
         }
 
-        lang.sendMessage(sender, "COMMAND.duel.top.footer", "type", topEntry.getName());
+        lang.sendMessage(sender, "COMMAND.duel.top.footer", "type", topEntry.getType());
     }
 }

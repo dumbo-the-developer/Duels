@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import lombok.Getter;
 import lombok.Setter;
 import me.realized.duels.util.StringUtil;
-import org.bukkit.Material;
+import me.realized.duels.util.compat.Items;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -40,7 +40,7 @@ public class Button<P extends JavaPlugin> {
 
     protected void setOwner(final String name) {
         editMeta(meta -> {
-            if (displayed.getType() == Material.SKULL_ITEM && displayed.getDurability() == 3) {
+            if (Items.equals(Items.HEAD, displayed)) {
                 ((SkullMeta) meta).setOwner(name);
             }
         });

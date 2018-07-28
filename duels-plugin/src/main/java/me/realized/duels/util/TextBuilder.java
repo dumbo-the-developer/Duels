@@ -14,16 +14,36 @@ public final class TextBuilder {
 
     private final List<BaseComponent> list = new ArrayList<>();
 
-    private TextBuilder(final String base) {
+    private TextBuilder(final String base,
+        final ClickEvent.Action clickAction, final String clickValue,
+        final HoverEvent.Action hoverAction, final String hoverValue
+    ) {
         if (base == null) {
             return;
         }
 
-        list.addAll(Arrays.asList(TextComponent.fromLegacyText(base)));
+        Arrays.stream(TextComponent.fromLegacyText(base)).forEach(component -> {
+            if (clickValue != null) {
+                component.setClickEvent(new ClickEvent(clickAction, clickValue));
+            }
+
+            if (hoverValue != null) {
+                component.setHoverEvent(new HoverEvent(hoverAction, TextComponent.fromLegacyText(hoverValue)));
+            }
+
+            list.add(component);
+        });
+    }
+
+    public static TextBuilder of(final String base,
+        final ClickEvent.Action clickAction, final String clickValue,
+        final HoverEvent.Action hoverAction, final String hoverValue
+    ) {
+        return new TextBuilder(base, clickAction, clickValue, hoverAction, hoverValue);
     }
 
     public static TextBuilder of(final String base) {
-        return new TextBuilder(base);
+        return of(base, null, null, null, null);
     }
 
     public TextBuilder add(final String text) {
@@ -54,6 +74,28 @@ public final class TextBuilder {
 
         Arrays.stream(TextComponent.fromLegacyText(text)).forEach(component -> {
             component.setHoverEvent(new HoverEvent(action, TextComponent.fromLegacyText(value)));
+            list.add(component);
+        });
+        return this;
+    }
+
+    public TextBuilder add(final String text,
+        final ClickEvent.Action clickAction, final String clickValue,
+        final HoverEvent.Action hoverAction, final String hoverValue
+    ) {
+        if (text == null) {
+            return this;
+        }
+
+        Arrays.stream(TextComponent.fromLegacyText(text)).forEach(component -> {
+            if (clickValue != null) {
+                component.setClickEvent(new ClickEvent(clickAction, clickValue));
+            }
+
+            if (hoverValue != null) {
+                component.setHoverEvent(new HoverEvent(hoverAction, TextComponent.fromLegacyText(hoverValue)));
+            }
+
             list.add(component);
         });
         return this;

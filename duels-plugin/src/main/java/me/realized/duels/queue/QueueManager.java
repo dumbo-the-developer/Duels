@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 import me.realized.duels.DuelsPlugin;
@@ -26,12 +27,19 @@ import me.realized.duels.data.UserData;
 import me.realized.duels.data.UserManager;
 import me.realized.duels.duel.DuelManager;
 import me.realized.duels.extra.Permissions;
+import me.realized.duels.hooks.CombatTagPlusHook;
+import me.realized.duels.hooks.PvPManagerHook;
 import me.realized.duels.hooks.VaultHook;
+import me.realized.duels.hooks.WorldGuardHook;
 import me.realized.duels.kit.Kit;
+import me.realized.duels.setting.CachedInfo;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.RatingUtil;
+import me.realized.duels.util.inventory.InventoryUtil;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -50,8 +58,11 @@ public class QueueManager implements Loadable, Listener {
     private final DuelManager duelManager;
     private final File file;
     private final Map<Sign, QueueSign> signs = new HashMap<>();
-    private final Map<QueueSign, LinkedList<Player>> queues = new HashMap<>();
+    private final Map<QueueSign, LinkedList<QueueEntry>> queues = new HashMap<>();
 
+    private CombatTagPlusHook combatTagPlus;
+    private PvPManagerHook pvpManager;
+    private WorldGuardHook worldGuard;
     private VaultHook vault;
     private int queueTask;
 
@@ -67,6 +78,9 @@ public class QueueManager implements Loadable, Listener {
 
     @Override
     public void handleLoad() throws Exception {
+        this.combatTagPlus = plugin.getHookManager().getHook(CombatTagPlusHook.class);
+        this.pvpManager = plugin.getHookManager().getHook(PvPManagerHook.class);
+        this.worldGuard = plugin.getHookManager().getHook(WorldGuardHook.class);
         this.vault = plugin.getHookManager().getHook(VaultHook.class);
 
         if (!file.exists()) {
@@ -91,17 +105,21 @@ public class QueueManager implements Loadable, Listener {
         Log.info(this, "Loaded " + signs.size() + " queue sign(s).");
 
         this.queueTask = plugin.doSyncRepeat(() -> queues.forEach((sign, queue) -> {
-            final Set<Player> remove = new HashSet<>();
+            final Set<QueueEntry> remove = new HashSet<>();
 
-            for (final Player current : queue) {
+            for (final QueueEntry current : queue) {
                 // player is already in a match
                 if (remove.contains(current)) {
                     continue;
                 }
 
-                for (final Player opponent : queue) {
+                final Player player = current.player;
+
+                for (final QueueEntry opponent : queue) {
+                    final Player other = opponent.player;
+
                     // opponent is already in a match or the rating difference is too high
-                    if (current.equals(opponent) || remove.contains(opponent) || !canFight(sign.getKit(), userManager.get(current), userManager.get(opponent))) {
+                    if (current.equals(opponent) || remove.contains(opponent) || !canFight(sign.getKit(), userManager.get(player), userManager.get(other))) {
                         continue;
                     }
 
@@ -111,18 +129,20 @@ public class QueueManager implements Loadable, Listener {
                     final Settings setting = new Settings(plugin);
                     setting.setKit(sign.getKit());
                     setting.setBet(sign.getBet());
+                    setting.getCache().put(player.getUniqueId(), current.info);
+                    setting.getCache().put(other.getUniqueId(), opponent.info);
 
                     final String kit = sign.getKit() != null ? sign.getKit().getName() : "none";
-                    lang.sendMessage(current, "SIGN.found-opponent", "name", opponent.getName(), "kit", kit, "bet_amount", sign.getBet());
-                    lang.sendMessage(opponent, "SIGN.found-opponent", "name", current.getName(), "kit", kit, "bet_amount", sign.getBet());
-                    duelManager.startMatch(current, opponent, setting, null, true);
+                    lang.sendMessage(player, "SIGN.found-opponent", "name", other.getName(), "kit", kit, "bet_amount", sign.getBet());
+                    lang.sendMessage(other, "SIGN.found-opponent", "name", player.getName(), "kit", kit, "bet_amount", sign.getBet());
+                    duelManager.startMatch(player, other, setting, null, true);
                     break;
                 }
             }
 
             queue.removeAll(remove);
             signs.values().stream().filter(queueSign -> queueSign.equals(sign)).forEach(queueSign -> queueSign.setCount(queue.size()));
-        }), 20L, 40L);
+        }), 20L, 40L).getTaskId();
     }
 
     private boolean canFight(final Kit kit, final UserData first, final UserData second) {
@@ -175,10 +195,10 @@ public class QueueManager implements Loadable, Listener {
         final QueueSign queueSign = signs.remove(sign);
 
         if (queueSign != null && signs.values().stream().noneMatch(s -> s.equals(queueSign))) {
-            final Queue<Player> queue = queues.remove(queueSign);
+            final Queue<QueueEntry> queue = queues.remove(queueSign);
 
             if (queue != null) {
-                queue.forEach(player -> lang.sendMessage(player, "SIGN.remove"));
+                queue.forEach(entry -> lang.sendMessage(entry.player, "SIGN.remove"));
             }
         }
 
@@ -186,19 +206,24 @@ public class QueueManager implements Loadable, Listener {
     }
 
     public void remove(final Player player) {
-        queues.forEach((sign, queue) -> {
-            if (queue.remove(player)) {
+        for (final Map.Entry<QueueSign, LinkedList<QueueEntry>> entry : queues.entrySet()) {
+            final LinkedList<QueueEntry> queue = entry.getValue();
+
+            if (queue.removeIf(queueEntry -> queueEntry.player.equals(player))) {
                 lang.sendMessage(player, "SIGN.remove");
-                signs.values().stream().filter(queueSign -> queueSign.equals(sign)).forEach(queueSign -> queueSign.setCount(queue.size()));
+                signs.values().stream().filter(queueSign -> queueSign.equals(entry.getKey())).forEach(queueSign -> queueSign.setCount(queue.size()));
+                break;
             }
-        });
+        }
     }
 
-    public Queue<Player> get(final Player player) {
-        return queues.entrySet().stream().filter(entry -> entry.getValue().contains(player)).findFirst().map(Entry::getValue).orElse(null);
+    public Queue<QueueEntry> get(final Player player) {
+        return queues.entrySet()
+            .stream().filter(entry -> entry.getValue().stream().anyMatch(queueEntry -> queueEntry.player.equals(player)))
+            .findFirst().map(Entry::getValue).orElse(null);
     }
 
-    public Queue<Player> get(final QueueSign sign) {
+    public Queue<QueueEntry> get(final QueueSign sign) {
         return queues.computeIfAbsent(sign, result -> new LinkedList<>());
     }
 
@@ -211,7 +236,7 @@ public class QueueManager implements Loadable, Listener {
         final String kitName = kit != null ? kit.getName() : "none";
         signs.put(sign, created = new QueueSign(sign, lang.getMessage("SIGN.format", "kit", kitName, "bet_amount", bet), kit, bet));
 
-        final Queue<Player> queue = get(created);
+        final Queue<QueueEntry> queue = get(created);
         signs.values().stream().filter(queueSign -> queueSign.equals(created)).forEach(queueSign -> queueSign.setCount(queue.size()));
         return true;
     }
@@ -235,12 +260,12 @@ public class QueueManager implements Loadable, Listener {
             return;
         }
 
-        final Queue<Player> queue = get(sign);
-        final Queue<Player> found = get(player);
+        final Queue<QueueEntry> queue = get(sign);
+        final Queue<QueueEntry> found = get(player);
 
         if (found != null) {
             if (found.equals(queue)) {
-                queue.remove(player);
+                queue.removeIf(entry -> entry.player.equals(player));
                 lang.sendMessage(player, "SIGN.remove");
                 signs.values().stream().filter(queueSign -> queueSign.equals(sign)).forEach(queueSign -> queueSign.setCount(queue.size()));
                 return;
@@ -250,12 +275,36 @@ public class QueueManager implements Loadable, Listener {
             return;
         }
 
+        if (config.isRequiresClearedInventory() && InventoryUtil.hasItem(player)) {
+            lang.sendMessage(player, "ERROR.duel.inventory-not-empty");
+            return;
+        }
+
+        GameMode gameMode = null;
+
+        if (config.isPreventCreativeMode() && (gameMode = player.getGameMode()) == GameMode.CREATIVE) {
+            lang.sendMessage(player, "ERROR.duel.in-creative-mode");
+            return;
+        }
+
+        if ((combatTagPlus != null && combatTagPlus.isTagged(player)) || (pvpManager != null && pvpManager.isTagged(player))) {
+            lang.sendMessage(player, "ERROR.duel.is-tagged");
+            return;
+        }
+
+        String duelzone = null;
+
+        if (worldGuard != null && config.isDuelzoneEnabled() && (duelzone = worldGuard.findDuelZone(player)) == null) {
+            lang.sendMessage(player, "ERROR.duel.not-in-duelzone", "regions", config.getDuelzones());
+            return;
+        }
+
         if (sign.getBet() > 0 && vault != null && !vault.has(sign.getBet(), player)) {
             lang.sendMessage(player, "ERROR.sign.not-enough-money", "bet_amount", sign.getBet());
             return;
         }
 
-        queue.add(player);
+        queue.add(new QueueEntry(player, player.getLocation().clone(), duelzone, gameMode));
 
         final String kit = sign.getKit() != null ? sign.getKit().getName() : "none";
         lang.sendMessage(player, "SIGN.add", "kit", kit, "bet_amount", sign.getBet());
@@ -289,12 +338,37 @@ public class QueueManager implements Loadable, Listener {
 
     @EventHandler
     public void on(final PlayerQuitEvent event) {
-        final Queue<Player> queue = get(event.getPlayer());
+        final Player player = event.getPlayer();
+        final Queue<QueueEntry> queue = get(player);
 
         if (queue == null) {
             return;
         }
 
-        queue.remove(event.getPlayer());
+        queue.removeIf(entry -> entry.player.equals(player));
+    }
+
+    private class QueueEntry {
+
+        private final Player player;
+        private final CachedInfo info;
+
+        QueueEntry(final Player player, final Location location, final String duelzone, final GameMode gameMode) {
+            this.player = player;
+            this.info = new CachedInfo(location, duelzone, gameMode);
+        }
+
+        @Override
+        public boolean equals(final Object other) {
+            if (this == other) { return true; }
+            if (other == null || getClass() != other.getClass()) { return false; }
+            final QueueEntry that = (QueueEntry) other;
+            return Objects.equals(player, that.player);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(player);
+        }
     }
 }

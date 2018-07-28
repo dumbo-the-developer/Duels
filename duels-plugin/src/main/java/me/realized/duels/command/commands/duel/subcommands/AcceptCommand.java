@@ -35,7 +35,9 @@ public class AcceptCommand extends BaseCommand {
             return;
         }
 
-        if (config.isPreventCreativeMode() && player.getGameMode() == GameMode.CREATIVE) {
+        GameMode gameMode = null;
+
+        if (config.isPreventCreativeMode() && (gameMode = player.getGameMode()) == GameMode.CREATIVE) {
             lang.sendMessage(sender, "ERROR.duel.in-creative-mode");
             return;
         }
@@ -97,8 +99,9 @@ public class AcceptCommand extends BaseCommand {
             "name", player.getName(), "kit", kit, "arena", arena, "bet_amount", bet, "item_betting", itemBetting);
 
         if (settings.isItemBetting()) {
-            settings.setDuelzone(player, duelzone);
             settings.setBaseLoc(player);
+            settings.setDuelzone(player, duelzone);
+            settings.setGameMode(player, gameMode);
             bettingManager.open(settings, target, player);
         } else {
             duelManager.startMatch(player, target, settings, null, false);

@@ -7,6 +7,7 @@ import me.realized.duels.hooks.EssentialsHook;
 import me.realized.duels.hooks.PvPManagerHook;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
+import me.realized.duels.util.compat.Players;
 import me.realized.duels.util.metadata.MetadataUtil;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -21,7 +22,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
  */
 public final class Teleport implements Loadable, Listener {
 
-    private static final String METADATA_KEY = Teleport.class.getSimpleName();
+    public static final String METADATA_KEY = Teleport.class.getSimpleName();
 
     private final DuelsPlugin plugin;
 
@@ -72,7 +73,6 @@ public final class Teleport implements Loadable, Listener {
             chunk.load();
         }
 
-        location.getWorld().refreshChunk(chunk.getX(), chunk.getZ());
         MetadataUtil.put(plugin, player, METADATA_KEY, location.clone());
 
         if (!player.teleport(location)) {
@@ -83,7 +83,12 @@ public final class Teleport implements Loadable, Listener {
             }
         }
 
-        location.getWorld().refreshChunk(chunk.getX(), chunk.getZ());
+        Players.getOnlinePlayers().forEach(online -> {
+            if (player.canSee(online) && online.canSee(player)) {
+                player.showPlayer(online);
+                online.showPlayer(player);
+            }
+        });
     }
 
     public void tryTeleport(final Player player, final Location location) {

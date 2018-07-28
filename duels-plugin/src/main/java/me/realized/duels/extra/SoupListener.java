@@ -4,6 +4,7 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.config.Config;
+import me.realized.duels.util.compat.Items;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
@@ -34,7 +35,7 @@ public class SoupListener implements Listener {
 
         final ItemStack item = event.getItem();
 
-        if (item == null || item.getType() != Material.MUSHROOM_SOUP) {
+        if (item == null || item.getType() != Items.MUSHROOM_SOUP) {
             return;
         }
 

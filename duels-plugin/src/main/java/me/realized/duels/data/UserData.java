@@ -170,8 +170,7 @@ public class UserData implements User {
                 writer.flush();
             }
         } catch (IOException ex) {
-            ex.printStackTrace();
-            Log.error("An error occured while saving userdata of " + name + ": " + ex.getMessage());
+            Log.error("An error occured while saving userdata of " + name + "!", ex);
         }
     }
 

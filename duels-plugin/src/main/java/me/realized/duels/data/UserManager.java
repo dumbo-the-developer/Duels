@@ -23,7 +23,6 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.user.UserCreateEvent;
 import me.realized.duels.api.kit.Kit;
 import me.realized.duels.api.user.User;
-import me.realized.duels.api.util.Pair;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.extra.Permissions;
@@ -115,7 +114,7 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
                         names.putIfAbsent(user.getName().toLowerCase(), uuid);
                         users.putIfAbsent(uuid, user);
                     } catch (IOException ex) {
-                        Log.error("Failed to load data of " + uuid + ": " + ex.getMessage());
+                        Log.error(this, "Failed to load data of " + uuid + "!", ex);
                     }
                 }
             }
@@ -133,11 +132,11 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
 
                 TopEntry top;
 
-                if ((top = get(config.getTopUpdateInterval(), wins, User::getWins, "Wins", "wins")) != null) {
+                if ((top = get(config.getTopUpdateInterval(), wins, User::getWins, config.getTopWinsType(), config.getTopWinsIdentifier())) != null) {
                     wins = top;
                 }
 
-                if ((top = get(config.getTopUpdateInterval(), losses, User::getLosses, "Losses", "losses")) != null) {
+                if ((top = get(config.getTopUpdateInterval(), losses, User::getLosses, config.getTopLossesType(), config.getTopLossesIdentifier())) != null) {
                     losses = top;
                 }
 
@@ -146,12 +145,13 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
                 for (final Kit kit : kits) {
                     final TopEntry entry = topRatings.get(kit);
 
-                    if ((top = get(config.getTopUpdateInterval(), entry, user -> user.getRating(kit), kit.getName(), "rating")) != null) {
+                    if ((top = get(config.getTopUpdateInterval(), entry, user -> user.getRating(kit),
+                        config.getTopKitType().replace("%kit%", kit.getName()), config.getTopKitIdentifier())) != null) {
                         topRatings.put(kit, top);
                     }
                 }
             });
-        }, 20L * 5, 20L);
+        }, 20L * 5, 20L).getTaskId();
     }
 
     @Override
@@ -185,11 +185,13 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
         return get(player.getUniqueId());
     }
 
+    @Nullable
     @Override
     public TopEntry getTopWins() {
         return wins;
     }
 
+    @Nullable
     @Override
     public TopEntry getTopLosses() {
         return losses;
@@ -206,21 +208,21 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
         return DateUtil.format((creation + config.getTopUpdateInterval() - System.currentTimeMillis()) / 1000L);
     }
 
-    private TopEntry get(final long interval, final TopEntry previous, final Function<User, Integer> function, final String name, final String type) {
+    private TopEntry get(final long interval, final TopEntry previous, final Function<User, Integer> function, final String type, final String identifier) {
         if (previous == null || System.currentTimeMillis() - previous.getCreation() >= interval) {
-            return new TopEntry(name, type, subList(sorted(function)));
+            return new TopEntry(type, identifier, subList(sorted(function)));
         }
 
         return null;
     }
 
-    private List<Pair<String, Integer>> subList(final List<Pair<String, Integer>> list) {
+    private List<TopData> subList(final List<TopData> list) {
         return Collections.unmodifiableList(Lists.newArrayList(list.size() > 10 ? list.subList(0, 10) : list));
     }
 
-    private <V extends Comparable<V>> List<Pair<String, V>> sorted(final Function<User, V> function) {
+    private List<TopData> sorted(final Function<User, Integer> function) {
         return users.values().stream()
-            .map(data -> new Pair<>(data.getName(), function.apply(data)))
+            .map(data -> new TopData(data.getUuid(), data.getName(), function.apply(data)))
             .sorted(Comparator.reverseOrder())
             .collect(Collectors.toList());
     }
@@ -248,8 +250,7 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
 
             return user;
         } catch (IOException ex) {
-            ex.printStackTrace();
-            Log.error("An error occured while loading userdata of " + player.getName() + ": " + ex.getMessage());
+            Log.error(this, "An error occured while loading userdata of " + player.getName() + "!", ex);
             return null;
         }
     }

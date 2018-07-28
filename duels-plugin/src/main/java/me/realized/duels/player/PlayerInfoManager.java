@@ -43,7 +43,7 @@ public class PlayerInfoManager implements Loadable {
             try (InputStreamReader reader = new InputStreamReader(new FileInputStream(file))) {
                 this.lobby = plugin.getGson().fromJson(reader, LocationData.class).toLocation();
             } catch (IOException ex) {
-                Log.error(this, "Could not load lobby location: " + ex.getMessage());
+                Log.error(this, "Could not load lobby location!", ex);
             }
         }
 
@@ -74,7 +74,7 @@ public class PlayerInfoManager implements Loadable {
             this.lobby = lobby;
             return true;
         } catch (IOException ex) {
-            Log.error(this, "Could not save lobby location: " + ex.getMessage());
+            Log.error(this, "Could not save lobby location!", ex);
             return false;
         }
     }

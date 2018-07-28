@@ -10,7 +10,8 @@ import me.realized.duels.config.Lang;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.TextBuilder;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent.Action;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -72,11 +73,15 @@ public class RequestManager implements Loadable, Listener {
         final String path = "COMMAND.duel.request.send.clickable-text.";
 
         TextBuilder
-            .of(lang.getMessage(path + "info"))
-            .add(lang.getMessage(path + "accept"), Action.RUN_COMMAND, "/duel accept " + sender.getName())
-            .add(lang.getMessage(path + "deny"), Action.RUN_COMMAND, "/duel deny " + sender.getName())
+            .of(lang.getMessage(path + "info.text"), null, null, Action.SHOW_TEXT, lang.getMessage(path + "info.hover-text"))
+            .add(lang.getMessage(path + "accept.text"),
+                ClickEvent.Action.RUN_COMMAND, "/duel accept " + sender.getName(),
+                Action.SHOW_TEXT, lang.getMessage(path + "accept.hover-text"))
+            .add(lang.getMessage(path + "deny.text"),
+                ClickEvent.Action.RUN_COMMAND, "/duel deny " + sender.getName(),
+                Action.SHOW_TEXT, lang.getMessage(path + "deny.hover-text"))
             .send(target);
-        TextBuilder.of(lang.getMessage(path + "extra")).send(target);
+        TextBuilder.of(lang.getMessage(path + "extra.text"), null, null, Action.SHOW_TEXT, lang.getMessage(path + "extra.hover-text")).send(target);
     }
 
     public boolean has(final Player sender, final Player target) {

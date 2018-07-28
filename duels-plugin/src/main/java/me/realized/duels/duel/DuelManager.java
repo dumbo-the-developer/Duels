@@ -25,6 +25,7 @@ import me.realized.duels.extra.Teleport;
 import me.realized.duels.hooks.EssentialsHook;
 import me.realized.duels.hooks.McMMOHook;
 import me.realized.duels.hooks.MyPetHook;
+import me.realized.duels.hooks.SimpleClansHook;
 import me.realized.duels.hooks.VaultHook;
 import me.realized.duels.hooks.WorldGuardHook;
 import me.realized.duels.inventories.InventoryManager;
@@ -45,6 +46,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
@@ -83,6 +85,7 @@ public class DuelManager implements Loadable {
     private McMMOHook mcMMO;
     private WorldGuardHook worldGuard;
     private MyPetHook myPet;
+    private SimpleClansHook simpleClans;
     private int durationCheckTask;
 
     public DuelManager(final DuelsPlugin plugin) {
@@ -105,6 +108,7 @@ public class DuelManager implements Loadable {
         this.mcMMO = plugin.getHookManager().getHook(McMMOHook.class);
         this.worldGuard = plugin.getHookManager().getHook(WorldGuardHook.class);
         this.myPet = plugin.getHookManager().getHook(MyPetHook.class);
+        this.simpleClans = plugin.getHookManager().getHook(SimpleClansHook.class);
 
         if (config.getMaxDuration() > 0) {
             this.durationCheckTask = plugin.doSyncRepeat(() -> {
@@ -117,14 +121,14 @@ public class DuelManager implements Loadable {
                         continue;
                     }
 
-                    for (final Player player : match.getPlayers()) {
+                    for (final Player player : match.getAllPlayers()) {
                         handleTiePlayer(player, arena, match, true);
                         lang.sendMessage(player, "DUEL.on-end.tie");
                     }
 
                     arena.endMatch(null, null, Reason.MAX_TIME_REACHED);
                 }
-            }, 0L, 20L);
+            }, 0L, 20L).getTaskId();
         }
     }
 
@@ -143,7 +147,7 @@ public class DuelManager implements Loadable {
             final boolean ongoing = size > 1;
             final boolean tie = size == 0;
 
-            for (final Player player : match.getPlayers()) {
+            for (final Player player : match.getAllPlayers()) {
                 // This case wouldn't be called if ongoing = true
                 if (match.isDead(player)) {
                     continue;
@@ -153,7 +157,7 @@ public class DuelManager implements Loadable {
                 if (ongoing) {
                     handleTiePlayer(player, arena, match, true);
                 } else if (!tie) {
-                    handleWinner(player, getOther(player, match.getPlayers()), arena, match);
+                    handleWinner(player, getOther(player, match.getAllPlayers()), arena, match);
                 }
             }
 
@@ -297,19 +301,25 @@ public class DuelManager implements Loadable {
         final Kit kit = settings.getKit();
 
         if (!config.isUseOwnInventoryEnabled() && kit == null) {
-            lang.sendMessage("DUEL.start-failure.no-kit-selected", first, second);
+            lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure.no-kit-selected");
             refundItems(items, first, second);
             return;
         }
 
         if (config.isCancelIfMoved() && (notInLoc(first, settings.getBaseLoc(first)) || notInLoc(second, settings.getBaseLoc(second)))) {
-            lang.sendMessage("DUEL.start-failure.player-moved", first, second);
+            lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure.player-moved");
             refundItems(items, first, second);
             return;
         }
 
         if (config.isDuelzoneEnabled() && worldGuard != null && (notInDz(first, settings.getDuelzone(first)) || notInDz(second, settings.getDuelzone(second)))) {
-            lang.sendMessage("DUEL.start-failure.player-moved", first, second);
+            lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure.player-moved");
+            refundItems(items, first, second);
+            return;
+        }
+
+        if (config.isPreventCreativeMode() && (notNoCreative(first, settings.getGameMode(first)) || notNoCreative(second, settings.getGameMode(second)))) {
+            lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure.in-creative-mode");
             refundItems(items, first, second);
             return;
         }
@@ -317,7 +327,7 @@ public class DuelManager implements Loadable {
         final Arena arena = settings.getArena() != null ? settings.getArena() : arenaManager.randomArena(kit);
 
         if (arena == null || !arena.isAvailable() || (kit != null && kit.isArenaSpecific() && !kit.canUse(arena))) {
-            lang.sendMessage("DUEL.start-failure." + (settings.getArena() != null ? "arena-in-use" : "no-arena-available"), first, second);
+            lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure." + (settings.getArena() != null ? "arena-in-use" : "no-arena-available"));
             refundItems(items, first, second);
             return;
         }
@@ -326,8 +336,7 @@ public class DuelManager implements Loadable {
 
         if (bet > 0 && vault != null && vault.getEconomy() != null) {
             if (!vault.has(bet, first, second)) {
-                lang.sendMessage(first, "DUEL.start-failure.not-enough-money", "bet_amount", bet);
-                lang.sendMessage(second, "DUEL.start-failure.not-enough-money", "bet_amount", bet);
+                lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure.not-enough-money", "bet_amount", bet);
                 refundItems(items, first, second);
                 return;
             }
@@ -372,6 +381,10 @@ public class DuelManager implements Loadable {
 
     private boolean notInDz(final Player player, final String duelzone) {
         return duelzone != null && !duelzone.equals(worldGuard.findDuelZone(player));
+    }
+
+    private boolean notNoCreative(final Player player, final GameMode gameMode) {
+        return gameMode != null && player.getGameMode() != gameMode;
     }
 
     private int getRating(final Kit kit, final UserData user) {
@@ -429,12 +442,16 @@ public class DuelManager implements Loadable {
     }
 
     private void handleInventories(final Match match) {
+        if (!config.isDisplayInventories()) {
+            return;
+        }
+
         String color = lang.getMessage("DUEL.inventories.name-color");
         color = color != null ? color : "";
         boolean start = true;
         final TextBuilder builder = TextBuilder.of(lang.getMessage("DUEL.inventories.message"));
 
-        for (final Player matchPlayer : match.getPlayers()) {
+        for (final Player matchPlayer : match.getAllPlayers()) {
             if (!start) {
                 builder.add(StringUtil.color(color + ", "));
             } else {
@@ -444,7 +461,7 @@ public class DuelManager implements Loadable {
             builder.add(StringUtil.color(color + matchPlayer.getName()), Action.RUN_COMMAND, "/duel _ " + matchPlayer.getUniqueId());
         }
 
-        builder.send(match.getPlayers());
+        builder.send(match.getAllPlayers());
     }
 
     private void handleEndUsers(final Match match, final UserData winner, final UserData loser, final MatchData matchData, final Object... args) {
@@ -468,7 +485,17 @@ public class DuelManager implements Loadable {
                 append[5] = change;
             }
 
-            Bukkit.broadcastMessage(lang.getMessage("DUEL.on-end.opponent-defeat", ArrayUtils.addAll(args, append)));
+            final String message = lang.getMessage("DUEL.on-end.opponent-defeat", ArrayUtils.addAll(args, append));
+
+            if (message == null) {
+                return;
+            }
+
+            if (config.isArenaOnlyEndMessage()) {
+                match.getArena().broadcast(message);
+            } else {
+                Players.getOnlinePlayers().forEach(player -> player.sendMessage(message));
+            }
         }
     }
 
@@ -520,10 +547,16 @@ public class DuelManager implements Loadable {
                 mcMMO.enableSkills(player);
             }
 
-            inventoryManager.create(player);
-            event.setKeepInventory(config.isUseOwnInventoryEnabled() && config.isUseOwnInventoryKeepItems());
+            if (simpleClans != null) {
+                simpleClans.removeDeath(player);
+            }
 
-            if (!config.isUseOwnInventoryEnabled()) {
+            inventoryManager.create(player);
+
+            final boolean keepItems = config.isUseOwnInventoryEnabled() && config.isUseOwnInventoryKeepItems();
+            event.setKeepInventory(keepItems);
+
+            if (!config.isUseOwnInventoryEnabled() || keepItems) {
                 event.setKeepLevel(true);
                 event.setDroppedExp(0);
                 event.getDrops().clear();
@@ -544,7 +577,7 @@ public class DuelManager implements Loadable {
                 }
 
                 if (arena.size() == 0) {
-                    match.getPlayers().forEach(matchPlayer -> {
+                    match.getAllPlayers().forEach(matchPlayer -> {
                         handleTiePlayer(matchPlayer, arena, match, false);
                         lang.sendMessage(matchPlayer, "DUEL.on-end.tie");
                     });
@@ -556,10 +589,12 @@ public class DuelManager implements Loadable {
                 final Player winner = arena.first();
                 inventoryManager.create(winner);
 
-                final Firework firework = (Firework) winner.getWorld().spawnEntity(winner.getEyeLocation(), EntityType.FIREWORK);
-                final FireworkMeta meta = firework.getFireworkMeta();
-                meta.addEffect(FireworkEffect.builder().withColor(Color.RED).with(FireworkEffect.Type.BALL_LARGE).withTrail().build());
-                firework.setFireworkMeta(meta);
+                if (config.isSpawnFirework()) {
+                    final Firework firework = (Firework) winner.getWorld().spawnEntity(winner.getEyeLocation(), EntityType.FIREWORK);
+                    final FireworkMeta meta = firework.getFireworkMeta();
+                    meta.addEffect(FireworkEffect.builder().withColor(Color.RED).with(FireworkEffect.Type.BALL_LARGE).withTrail().build());
+                    firework.setFireworkMeta(meta);
+                }
 
                 final double health = Math.ceil(winner.getHealth()) * 0.5;
                 final String kit = match.getKit() != null ? match.getKit().getName() : "none";

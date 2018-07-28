@@ -4,6 +4,8 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.util.hook.PluginHook;
 import net.Indyuce.bh.api.BountyClaimEvent;
+import net.Indyuce.bh.api.BountyCreateEvent;
+import net.Indyuce.bh.resource.BountyCause;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -23,6 +25,15 @@ public class BountyHuntersHook extends PluginHook<DuelsPlugin> implements Listen
     @EventHandler(ignoreCancelled = true)
     public void on(final BountyClaimEvent event) {
         if (!arenaManager.isInMatch(event.getClaimer())) {
+            return;
+        }
+
+        event.setCancelled(true);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void on(final BountyCreateEvent event) {
+        if (event.getCause() != BountyCause.AUTO_BOUNTY || !arenaManager.isInMatch(event.getBounty().getTarget().getPlayer())) {
             return;
         }
 

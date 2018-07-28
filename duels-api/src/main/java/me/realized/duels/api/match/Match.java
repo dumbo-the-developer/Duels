@@ -1,6 +1,7 @@
 package me.realized.duels.api.match;
 
 import java.util.List;
+import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.realized.duels.api.arena.Arena;
@@ -44,5 +45,12 @@ public interface Match {
      * @return The bet amount for this match or 0 if no bet was specified
      */
     int getBet();
+
+
+    /**
+     * @return UnmodifiableSet of alive players in this match
+     * @since 3.1.0
+     */
+    Set<Player> getPlayers();
 
 }

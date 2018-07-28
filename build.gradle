@@ -10,7 +10,7 @@ buildscript {
 
 allprojects {
     group 'me.realized'
-    version '3.0.5-SNAPSHOT'
+    version '3.1.0'
 }
 
 subprojects {
@@ -66,6 +66,6 @@ subprojects {
     dependencies {
         compile 'org.projectlombok:lombok:1.16.20'
         compile 'com.google.code.findbugs:jsr305:3.0.2'
-        compile 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
+        compile 'org.spigotmc:spigot-api:1.13-R0.1-SNAPSHOT'
     }
 }

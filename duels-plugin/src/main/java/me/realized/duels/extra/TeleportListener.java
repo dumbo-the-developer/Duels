@@ -32,8 +32,8 @@ public class TeleportListener implements Listener {
     public void on(final PlayerTeleportEvent event) {
         final Player player = event.getPlayer();
 
-        if (player.isOp() || player.hasPermission(Permissions.ADMIN) || player.hasPermission(Permissions.TP_BYPASS)
-            || arenaManager.isInMatch(player) || spectateManager.isSpectating(player)) {
+        if (player.isOp() || player.isDead() || player.hasPermission(Permissions.ADMIN) || player.hasPermission(Permissions.TP_BYPASS) ||
+            player.hasMetadata(Teleport.METADATA_KEY) || arenaManager.isInMatch(player) || spectateManager.isSpectating(player)) {
             return;
         }
 

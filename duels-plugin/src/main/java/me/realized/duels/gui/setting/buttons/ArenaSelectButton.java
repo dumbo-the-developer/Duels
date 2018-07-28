@@ -4,14 +4,14 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.extra.Permissions;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.setting.Settings;
+import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.inventory.ItemBuilder;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 public class ArenaSelectButton extends BaseButton {
 
     public ArenaSelectButton(final DuelsPlugin plugin) {
-        super(plugin, ItemBuilder.of(Material.EMPTY_MAP).name(plugin.getLang().getMessage("GUI.settings.buttons.arena-selector.name")).build());
+        super(plugin, ItemBuilder.of(Items.EMPTY_MAP).name(plugin.getLang().getMessage("GUI.settings.buttons.arena-selector.name")).build());
     }
 
     @Override

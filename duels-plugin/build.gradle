@@ -29,6 +29,7 @@ dependencies {
     compile name: 'Factions'
     compile name: 'MyPet-2.3.4'
     compile name: 'BountyHunters'
+    compile name: 'SimpleClans'
 
     compile project(':duels-api')
     compile 'com.google.code.gson:gson:2.8.2'

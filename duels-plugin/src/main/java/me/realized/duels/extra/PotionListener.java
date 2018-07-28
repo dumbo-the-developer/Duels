@@ -2,7 +2,6 @@ package me.realized.duels.extra;
 
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManager;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -33,7 +32,7 @@ public class PotionListener implements Listener {
 
         final ItemStack item = event.getItem();
 
-        if (item.getType() != Material.POTION) {
+        if (item.getType().name().endsWith("POTION")) {
             return;
         }
 

@@ -131,7 +131,9 @@ public abstract class AbstractConfiguration<P extends JavaPlugin> implements Loa
 
             // Transfer values from the old configuration
             for (Map.Entry<String, Object> entry : oldValues.entrySet()) {
-                if (configuration.get(entry.getKey()) != null) {
+                final Object value = configuration.get(entry.getKey());
+
+                if (value != null && !(value instanceof MemorySection)) {
                     configuration.set(entry.getKey(), entry.getValue());
                 }
             }

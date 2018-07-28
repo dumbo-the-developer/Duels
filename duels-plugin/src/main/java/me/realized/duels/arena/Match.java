@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -43,12 +44,20 @@ public class Match implements me.realized.duels.api.match.Match {
         return players;
     }
 
-    public Set<Player> getPlayers() {
+    Set<Player> getAlivePlayers() {
+        return players.entrySet().stream().filter(entry -> !entry.getValue()).map(Entry::getKey).collect(Collectors.toSet());
+    }
+
+    public Set<Player> getAllPlayers() {
         return players.keySet();
     }
 
     public boolean isDead(final Player player) {
         return players.getOrDefault(player, true);
+    }
+
+    public List<ItemStack> getItems() {
+        return items != null ? items.values().stream().flatMap(Collection::stream).collect(Collectors.toList()) : Collections.emptyList();
     }
 
     @Override
@@ -63,7 +72,8 @@ public class Match implements me.realized.duels.api.match.Match {
         return items != null ? items : Collections.emptyList();
     }
 
-    public List<ItemStack> getItems() {
-        return items != null ? items.values().stream().flatMap(Collection::stream).collect(Collectors.toList()) : Collections.emptyList();
+    @Override
+    public Set<Player> getPlayers() {
+        return Collections.unmodifiableSet(getAlivePlayers());
     }
 }

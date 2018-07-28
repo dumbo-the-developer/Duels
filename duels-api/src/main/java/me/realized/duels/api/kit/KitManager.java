@@ -1,5 +1,6 @@
 package me.realized.duels.api.kit;
 
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.realized.duels.api.event.kit.KitCreateEvent;
@@ -46,4 +47,11 @@ public interface KitManager {
      */
     @Nullable
     Kit remove(@Nonnull final String name);
+
+
+    /**
+     * @return List of kits that are currently loaded
+     * @since 3.1.0
+     */
+    List<? extends Kit> getKits();
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.inventory.InventoryBuilder;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
@@ -58,7 +59,7 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
                 InventoryBuilder
                     .of(title, 18)
                     .set(4, ItemBuilder.of(Material.REDSTONE_BLOCK).name("&cThis page is empty.").build())
-                    .fillRange(9, 18, ItemBuilder.of(Material.STAINED_GLASS_PANE).name(" ").build()).build())
+                    .fillRange(9, 18, Items.WHITE_PANE.clone()).build())
             );
             return;
         }
@@ -73,7 +74,7 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
                 final Page prev = page;
                 page = new Page(
                     InventoryBuilder.of(title + " (" + pageNum + "/" + pages + ")", size)
-                        .fillRange(prevPageSlot, nextPageSlot + 1, ItemBuilder.of(Material.STAINED_GLASS_PANE).name(" ").build()).build()
+                        .fillRange(prevPageSlot, nextPageSlot + 1, Items.WHITE_PANE.clone()).build()
                 );
 
                 if (prev != null) {

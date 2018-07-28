@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.Getter;
+import lombok.NonNull;
 import me.realized.duels.api.Duels;
 import me.realized.duels.api.command.SubCommand;
 import me.realized.duels.arena.ArenaManager;
@@ -50,6 +51,7 @@ import me.realized.duels.util.command.AbstractCommand;
 import me.realized.duels.util.gui.GuiListener;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 import org.inventivetalent.update.spiget.SpigetUpdate;
 import org.inventivetalent.update.spiget.UpdateCallback;
 import org.inventivetalent.update.spiget.comparator.VersionComparator;
@@ -206,9 +208,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                 lastLoad = loadables.indexOf(loadable);
             } catch (Exception ex) {
                 Log.error("There was an error while loading " + loadable.getClass().getSimpleName()
-                    + "! If you believe this is an issue from the plugin, please contact the developer.");
-                Log.error("Cause of error: " + ex.getMessage());
-                ex.printStackTrace();
+                    + "! If you believe this is an issue from the plugin, please contact the developer.", ex);
                 return false;
             }
         }
@@ -229,9 +229,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                 loadable.handleUnload();
             } catch (Exception ex) {
                 Log.error("There was an error while unloading " + loadable.getClass().getSimpleName()
-                    + "! If you believe this is an issue from the plugin, please contact the developer.");
-                Log.error("Cause of error: " + ex.getMessage());
-                ex.printStackTrace();
+                    + "! If you believe this is an issue from the plugin, please contact the developer.", ex);
                 return false;
             }
         }
@@ -254,7 +252,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
         final AbstractCommand<DuelsPlugin> result = commands.get(command.toLowerCase());
 
-        if (result == null || result.isChild(subCommand.getName())) {
+        if (result == null || result.isChild(subCommand.getName().toLowerCase())) {
             return false;
         }
 
@@ -277,6 +275,11 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         return true;
     }
 
+    @Override
+    public String getVersion() {
+        return getDescription().getVersion();
+    }
+
     public boolean reload(final Loadable loadable) {
         boolean unloaded = false;
         try {
@@ -287,32 +290,70 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         } catch (Exception ex) {
             Log.error("There was an error while " + (unloaded ? "loading " : "unloading ")
                 + loadable.getClass().getSimpleName()
-                + "! If you believe this is an issue from the plugin, please contact the developer.");
-            Log.error("Cause of error: " + ex.getMessage());
-            ex.printStackTrace();
+                + "! If you believe this is an issue from the plugin, please contact the developer.", ex);
             return false;
         }
     }
 
-
-    public void doSync(final Runnable runnable) {
-        getServer().getScheduler().runTask(this, runnable);
+    @Override
+    public BukkitTask doSync(@NonNull final Runnable task) {
+        Objects.requireNonNull(task, "task");
+        return getServer().getScheduler().runTask(this, task);
     }
 
-    public void doSyncAfter(final Runnable runnable, final long delay) {
-        getServer().getScheduler().runTaskLater(this, runnable, delay);
+    @Override
+    public BukkitTask doSyncAfter(@NonNull final Runnable task, final long delay) {
+        Objects.requireNonNull(task, "task");
+        return getServer().getScheduler().runTaskLater(this, task, delay);
     }
 
-    public int doSyncRepeat(final Runnable runnable, final long delay, final long period) {
-        return getServer().getScheduler().runTaskTimer(this, runnable, delay, period).getTaskId();
+    @Override
+    public BukkitTask doSyncRepeat(@NonNull final Runnable task, final long delay, final long period) {
+        Objects.requireNonNull(task, "task");
+        return getServer().getScheduler().runTaskTimer(this, task, delay, period);
     }
 
-    public void doAsync(final Runnable runnable) {
-        getServer().getScheduler().runTaskAsynchronously(this, runnable);
+    @Override
+    public BukkitTask doAsync(@NonNull final Runnable task) {
+        Objects.requireNonNull(task, "task");
+        return getServer().getScheduler().runTaskAsynchronously(this, task);
     }
 
-    public void doAsyncRepeat(final Runnable runnable, final long delay, final long period) {
-        getServer().getScheduler().runTaskTimerAsynchronously(this, runnable, delay, period);
+    @Override
+    public BukkitTask doAsyncAfter(@NonNull final Runnable task, final long delay) {
+        Objects.requireNonNull(task, "task");
+        return getServer().getScheduler().runTaskLaterAsynchronously(this, task, delay);
+    }
+
+    @Override
+    public BukkitTask doAsyncRepeat(@NonNull final Runnable task, final long delay, final long period) {
+        Objects.requireNonNull(task, "task");
+        return getServer().getScheduler().runTaskTimerAsynchronously(this, task, delay, period);
+    }
+
+    @Override
+    public void info(@NonNull final String message) {
+        Objects.requireNonNull(message, "message");
+        Log.info(message);
+    }
+
+    @Override
+    public void warn(@NonNull final String message) {
+        Objects.requireNonNull(message, "message");
+        Log.warn(message);
+    }
+
+    @Override
+    public void error(@NonNull final String message) {
+        Objects.requireNonNull(message, "message");
+        Log.error(message);
+    }
+
+    @Override
+    public void error(@NonNull final String message, @NonNull final Throwable thrown) {
+        Objects.requireNonNull(message, "message");
+        Objects.requireNonNull(thrown, "thrown");
+        Log.error(message, thrown);
     }
 
     public void cancelTask(final int taskId) {
@@ -333,5 +374,10 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Override
     public void log(final Level level, final String s) {
         getLogger().log(level, s);
+    }
+
+    @Override
+    public void log(final Level level, final String s, final Throwable thrown) {
+        getLogger().log(level, s, thrown);
     }
 }

@@ -3,6 +3,7 @@ package me.realized.duels.util.inventory;
 import java.util.Arrays;
 import java.util.List;
 import me.realized.duels.util.StringUtil;
+import me.realized.duels.util.compat.Items;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -17,6 +18,14 @@ public final class ItemBuilder {
         this.result = new ItemStack(type, amount, durability);
     }
 
+    private ItemBuilder(final String type, final int amount, final short durability) {
+        this(Material.matchMaterial(type), amount, durability);
+    }
+
+    private ItemBuilder(final ItemStack item) {
+        this.result = item;
+    }
+
     public static ItemBuilder of(final Material type) {
         return of(type, 1);
     }
@@ -27,6 +36,14 @@ public final class ItemBuilder {
 
     public static ItemBuilder of(final Material type, final int amount, final short durability) {
         return new ItemBuilder(type, amount, durability);
+    }
+
+    public static ItemBuilder of(final String type, final int amount, final short durability) {
+        return new ItemBuilder(type, amount, durability);
+    }
+
+    public static ItemBuilder of(final ItemStack item) {
+        return new ItemBuilder(item);
     }
 
     public ItemBuilder name(final String name) {
@@ -48,7 +65,7 @@ public final class ItemBuilder {
     }
 
     public ItemBuilder head(final Player player) {
-        if (result.getType() == Material.SKULL_ITEM && result.getDurability() == 3) {
+        if (Items.equals(Items.HEAD, result)) {
             final SkullMeta meta = (SkullMeta) result.getItemMeta();
             meta.setOwner(player.getName());
             result.setItemMeta(meta);

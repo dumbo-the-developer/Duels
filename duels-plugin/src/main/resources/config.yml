@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 2
+config-version: 3
 
 # If set to 'true', a notification and a download link will be printed on the console whenever an update is available.
 # default: true
@@ -62,6 +62,11 @@ supported-plugins:
     # If set to 'true', player will not lose bounty even if they die in a duel.
     # default: true
     prevent-bounty-loss-in-duel: true
+  SimpleClans:
+    # If set to 'true', player will not be added a death when they die in a duel.
+    # default: true
+    prevent-add-death-in-duel: true
+
 
 request:
   # If set to 'true', players will be forced to have a cleared inventory in order to send or accept a duel request.
@@ -171,6 +176,18 @@ duel:
   # Seconds to wait before teleporting the winner after the duel.
   # default: 5
   teleport-delay: 5
+
+  # If set to 'true', a firework will spawn at the winner's location when a duel ends.
+  # default: true
+  spawn-firework: true
+
+  # If set to 'true', the duel end message will be sent only to the players in duel & spectators of the duel.
+  # default: false
+  arena-only-end-message: false
+
+  # If set to 'true', players will be sent a clickable message that displays the inventories at the end of a duel.
+  # default: true
+  display-inventories: true
 
   # If set to 'true', players in duel will not be able to drop items.
   # default: false
@@ -383,6 +400,18 @@ top:
   # /duel top update interval, in minutes.
   # default: 5
   update-interval: 5
+
+  # Type and identifier of the data displayed in /duel top [wins|losses|kit].
+  displayed-replacers:
+    wins:
+      type: 'Wins'
+      identifier: 'wins'
+    losses:
+      type: 'Losses'
+      identifier: 'losses'
+    kit:
+      type: '%kit%'
+      identifier: 'rating'
 
 
 guis:

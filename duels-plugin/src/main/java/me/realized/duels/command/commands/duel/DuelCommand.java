@@ -74,7 +74,9 @@ public class DuelCommand extends BaseCommand {
             return true;
         }
 
-        if (config.isPreventCreativeMode() && player.getGameMode() == GameMode.CREATIVE) {
+        GameMode gameMode = null;
+
+        if (config.isPreventCreativeMode() && (gameMode = player.getGameMode()) == GameMode.CREATIVE) {
             lang.sendMessage(sender, "ERROR.duel.in-creative-mode");
             return true;
         }
@@ -207,8 +209,9 @@ public class DuelCommand extends BaseCommand {
         }
 
         settings.setTarget(target);
-        settings.setDuelzone(player, duelzone);
         settings.setBaseLoc(player);
+        settings.setDuelzone(player, duelzone);
+        settings.setGameMode(player, gameMode);
 
         if (sendRequest) {
             requestManager.send(player, target, settings);

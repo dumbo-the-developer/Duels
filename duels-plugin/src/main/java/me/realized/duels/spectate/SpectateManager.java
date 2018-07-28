@@ -2,7 +2,9 @@ package me.realized.duels.spectate;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.arena.ArenaManager;
@@ -101,7 +103,7 @@ public class SpectateManager implements Loadable {
         final Match match = arena.getMatch();
 
         if (match != null) {
-            match.getPlayers().forEach(arenaPlayer -> {
+            match.getAllPlayers().forEach(arenaPlayer -> {
                 if (arenaPlayer.isOnline() && arenaPlayer.canSee(player)) {
                     arenaPlayer.hidePlayer(player);
                 }
@@ -126,7 +128,7 @@ public class SpectateManager implements Loadable {
             return;
         }
 
-        arena.getMatch().getPlayers().forEach(matchPlayer -> lang.sendMessage(matchPlayer, "SPECTATE.arena-broadcast", true, "name", player.getName()));
+        arena.getMatch().getAllPlayers().forEach(matchPlayer -> lang.sendMessage(matchPlayer, "SPECTATE.arena-broadcast", "name", player.getName()));
     }
 
     public void stopSpectating(final Player player, final boolean end) {
@@ -160,7 +162,7 @@ public class SpectateManager implements Loadable {
         final Match match = spectator.getArena().getMatch();
 
         if (match != null) {
-            match.getPlayers().stream().filter(Player::isOnline).forEach(matchPlayer -> matchPlayer.showPlayer(player));
+            match.getAllPlayers().stream().filter(Player::isOnline).forEach(matchPlayer -> matchPlayer.showPlayer(player));
         }
 
         if (!end) {
@@ -185,6 +187,10 @@ public class SpectateManager implements Loadable {
 
     public Set<Player> getPlayers() {
         return spectators.keySet();
+    }
+
+    public Set<Player> getSpectators(final Arena arena) {
+        return spectators.entrySet().stream().filter(entry -> entry.getValue().getArena().equals(arena)).map(Entry::getKey).collect(Collectors.toSet());
     }
 
     private class SpectateListener implements Listener {
