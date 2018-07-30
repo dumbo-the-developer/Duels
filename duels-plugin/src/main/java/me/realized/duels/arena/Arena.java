@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -163,7 +162,7 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
     }
 
     public int size() {
-        return isUsed() ? match.getAllPlayers().size() : 0;
+        return isUsed() ? match.getAlivePlayers().size() : 0;
     }
 
     public Player first() {

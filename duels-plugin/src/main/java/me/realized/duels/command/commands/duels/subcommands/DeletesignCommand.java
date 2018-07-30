@@ -28,7 +28,7 @@ public class DeletesignCommand extends BaseCommand {
             return;
         }
 
-        final QueueSign queueSign = queueManager.remove(sign);
+        final QueueSign queueSign = queueManager.remove(sign.getLocation());
 
         if (queueSign == null) {
             lang.sendMessage(sender, "ERROR.sign.not-found");

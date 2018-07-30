@@ -73,7 +73,7 @@ public class ItemData {
                         + (potion.isSplash() ? "splash-" : "")
                         + (potion.isStrong() ? "strong-" : "");
                 }
-            } else if (CompatUtil.isPre_1_13() && material.equals("MONSTER_EGG")) {
+            } else if (CompatUtil.isPre1_13() && material.equals("MONSTER_EGG")) {
                 final SpawnEggs spawnEgg = SpawnEggs.fromItemStack(item);
 
                 if (spawnEgg != null) {
@@ -188,7 +188,7 @@ public class ItemData {
         if (!CompatUtil.isPre1_9() && itemData != null) {
             if (material.contains("POTION")) {
                 item = new Potions(PotionType.valueOf(args.get(0)), args).toItemStack(amount);
-            } else if (CompatUtil.isPre_1_13() && material.equals("MONSTER_EGG")) {
+            } else if (CompatUtil.isPre1_13() && material.equals("MONSTER_EGG")) {
                 item = new SpawnEggs(EntityType.valueOf(args.get(0))).toItemStack(amount);
             }
         }

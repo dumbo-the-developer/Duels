@@ -40,7 +40,7 @@ import me.realized.duels.util.RatingUtil;
 import me.realized.duels.util.inventory.InventoryUtil;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.block.BlockState;
+import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -57,7 +57,7 @@ public class QueueManager implements Loadable, Listener {
     private final UserManager userManager;
     private final DuelManager duelManager;
     private final File file;
-    private final Map<Sign, QueueSign> signs = new HashMap<>();
+    private final Map<Location, QueueSign> signs = new HashMap<>();
     private final Map<QueueSign, LinkedList<QueueEntry>> queues = new HashMap<>();
 
     private CombatTagPlusHook combatTagPlus;
@@ -94,8 +94,7 @@ public class QueueManager implements Loadable, Listener {
                         final QueueSign queueSign = queueSignData.toQueueSign(plugin);
 
                         if (queueSign != null) {
-                            final Sign sign = queueSign.getSign();
-                            signs.put(sign, queueSign);
+                            signs.put(queueSign.getLocation(), queueSign);
                         }
                     });
                 }
@@ -187,12 +186,12 @@ public class QueueManager implements Loadable, Listener {
         queues.clear();
     }
 
-    public QueueSign get(final Sign sign) {
-        return signs.get(sign);
+    public QueueSign get(final Location location) {
+        return signs.get(location);
     }
 
-    public QueueSign remove(final Sign sign) {
-        final QueueSign queueSign = signs.remove(sign);
+    public QueueSign remove(final Location location) {
+        final QueueSign queueSign = signs.remove(location);
 
         if (queueSign != null && signs.values().stream().noneMatch(s -> s.equals(queueSign))) {
             final Queue<QueueEntry> queue = queues.remove(queueSign);
@@ -227,14 +226,14 @@ public class QueueManager implements Loadable, Listener {
         return queues.computeIfAbsent(sign, result -> new LinkedList<>());
     }
 
-    public boolean create(final Sign sign, final Kit kit, final int bet) {
-        if (get(sign) != null) {
+    public boolean create(final Location location, final Kit kit, final int bet) {
+        if (get(location) != null) {
             return false;
         }
 
         final QueueSign created;
         final String kitName = kit != null ? kit.getName() : "none";
-        signs.put(sign, created = new QueueSign(sign, lang.getMessage("SIGN.format", "kit", kitName, "bet_amount", bet), kit, bet));
+        signs.put(location, created = new QueueSign(location, lang.getMessage("SIGN.format", "kit", kitName, "bet_amount", bet), kit, bet));
 
         final Queue<QueueEntry> queue = get(created);
         signs.values().stream().filter(queueSign -> queueSign.equals(created)).forEach(queueSign -> queueSign.setCount(queue.size()));
@@ -247,14 +246,14 @@ public class QueueManager implements Loadable, Listener {
 
     @EventHandler
     public void on(final PlayerInteractEvent event) {
-        final BlockState state;
+        final Block block;
 
-        if (!event.hasBlock() || !((state = event.getClickedBlock().getState()) instanceof Sign)) {
+        if (!event.hasBlock() || !((block = event.getClickedBlock()).getState() instanceof Sign)) {
             return;
         }
 
         final Player player = event.getPlayer();
-        final QueueSign sign = get((Sign) state);
+        final QueueSign sign = get(block.getLocation());
 
         if (sign == null) {
             return;
@@ -313,15 +312,9 @@ public class QueueManager implements Loadable, Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void on(final BlockBreakEvent event) {
-        final BlockState state = event.getBlock().getState();
+        final Block block = event.getBlock();
 
-        if (!(state instanceof Sign)) {
-            return;
-        }
-
-        final Sign sign = (Sign) state;
-
-        if (get(sign) == null) {
+        if (!(block.getState() instanceof Sign) || get(block.getLocation()) == null) {
             return;
         }
 

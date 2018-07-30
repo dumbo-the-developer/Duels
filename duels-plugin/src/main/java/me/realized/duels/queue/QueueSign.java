@@ -4,12 +4,14 @@ import java.util.Objects;
 import lombok.Getter;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.util.StringUtil;
+import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 
 public class QueueSign {
 
     @Getter
-    private final Sign sign;
+    private final Location location;
     @Getter
     private final String[] lines;
     @Getter
@@ -17,8 +19,8 @@ public class QueueSign {
     @Getter
     private final int bet;
 
-    public QueueSign(final Sign sign, final String format, final Kit kit, final int bet) {
-        this.sign = sign;
+    public QueueSign(final Location location, final String format, final Kit kit, final int bet) {
+        this.location = location;
         this.kit = kit;
         this.bet = bet;
 
@@ -30,6 +32,15 @@ public class QueueSign {
         }
 
         this.lines = data;
+
+        final Block block = location.getBlock();
+
+        if (!(block.getState() instanceof Sign)) {
+            return;
+        }
+
+        final Sign sign = (Sign) block.getState();
+
         sign.setLine(0, replace(lines[0], 0));
         sign.setLine(1, replace(lines[1], 0));
         sign.setLine(2, replace(lines[2], 0));
@@ -42,6 +53,13 @@ public class QueueSign {
     }
 
     public void setCount(final int count) {
+        final Block block = location.getBlock();
+
+        if (!(block.getState() instanceof Sign)) {
+            return;
+        }
+
+        final Sign sign = (Sign) block.getState();
         sign.setLine(0, replace(lines[0], count));
         sign.setLine(1, replace(lines[1], count));
         sign.setLine(2, replace(lines[2], count));
@@ -64,6 +82,6 @@ public class QueueSign {
 
     @Override
     public String toString() {
-        return (kit != null ? kit.getName() : "none") + " - $" + bet + " - " + StringUtil.parse(sign.getLocation());
+        return (kit != null ? kit.getName() : "none") + " - $" + bet + " - " + StringUtil.parse(location);
     }
 }

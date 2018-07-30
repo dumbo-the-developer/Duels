@@ -71,7 +71,7 @@ class CompatBase {
         PLAYER_CONNECTION = ReflectionUtil.getField(NMS_PLAYER, "playerConnection");
         SEND_PACKET = ReflectionUtil.getMethod(ReflectionUtil.getNMSClass("PlayerConnection"), "sendPacket", ReflectionUtil.getNMSClass("Packet"));
 
-        COLLIDES_WITH_ENTITIES = CompatUtil.isPre_1_10() ? ReflectionUtil.getField(NMS_PLAYER, "collidesWithEntities") : null;
+        COLLIDES_WITH_ENTITIES = CompatUtil.isPre1_10() ? ReflectionUtil.getField(NMS_PLAYER, "collidesWithEntities") : null;
 
         GET_ONLINE_PLAYERS = ReflectionUtil.getMethod(Bukkit.class, "getOnlinePlayers");
 

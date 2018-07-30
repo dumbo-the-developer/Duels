@@ -32,7 +32,7 @@ public class PotionListener implements Listener {
 
         final ItemStack item = event.getItem();
 
-        if (item.getType().name().endsWith("POTION")) {
+        if (!item.getType().name().endsWith("POTION")) {
             return;
         }
 

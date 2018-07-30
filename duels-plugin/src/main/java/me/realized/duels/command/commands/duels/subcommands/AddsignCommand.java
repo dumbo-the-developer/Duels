@@ -47,7 +47,7 @@ public class AddsignCommand extends BaseCommand {
             return;
         }
 
-        if (!queueManager.create(sign, kit, bet)) {
+        if (!queueManager.create(sign.getLocation(), kit, bet)) {
             lang.sendMessage(sender, "ERROR.sign.already-exists");
             return;
         }

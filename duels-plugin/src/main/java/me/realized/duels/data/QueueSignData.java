@@ -13,7 +13,7 @@ public class QueueSignData {
     private final int bet;
 
     public QueueSignData(final QueueSign queue) {
-        this.location = new LocationData(queue.getSign().getLocation());
+        this.location = new LocationData(queue.getLocation());
         this.kit = queue.getKit() != null ? queue.getKit().getName() : null;
         this.bet = queue.getBet();
     }
@@ -31,7 +31,7 @@ public class QueueSignData {
             return null;
         }
 
-        return new QueueSign((Sign) block.getState(), plugin.getLang().getMessage("SIGN.format",
+        return new QueueSign(location, plugin.getLang().getMessage("SIGN.format",
             "kit", kit != null ? kit : "none", "bet_amount", bet), kit != null ? plugin.getKitManager().get(kit) : null, bet);
     }
 }
