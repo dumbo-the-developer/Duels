@@ -35,8 +35,8 @@ class CompatBase {
     static final Method GET_ONLINE_PLAYERS;
 
     static final Class<?> TITLE_PACKET;
-    static final Class<?> TITLE_ACTIONS;
     static final Class<?> CHAT_COMPONENT;
+    static Class<?> TITLE_ACTIONS;
     static final Class<?> CHAT_SERIALIZER;
 
     static {
@@ -77,9 +77,12 @@ class CompatBase {
 
         boolean pre1_8 = CompatUtil.isPre1_8();
         TITLE_PACKET = !pre1_8 ? ReflectionUtil.getNMSClass("PacketPlayOutTitle") : null;
-        TITLE_ACTIONS = !pre1_8 ? ReflectionUtil.getNMSClass("PacketPlayOutTitle$EnumTitleAction") : null;
         CHAT_COMPONENT = !pre1_8 ? ReflectionUtil.getNMSClass("IChatBaseComponent") : null;
+        TITLE_ACTIONS = !pre1_8 ? ReflectionUtil.getNMSClass("PacketPlayOutTitle$EnumTitleAction") : null;
         CHAT_SERIALIZER = !pre1_8 ? ReflectionUtil.getNMSClass("ChatComponentText") : null;
 
+        if (!pre1_8 && TITLE_ACTIONS == null) {
+            TITLE_ACTIONS = ReflectionUtil.getNMSClass("EnumTitleAction");
+        }
     }
 }

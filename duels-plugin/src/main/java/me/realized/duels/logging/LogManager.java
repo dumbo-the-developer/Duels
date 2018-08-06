@@ -2,6 +2,8 @@ package me.realized.duels.logging;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Date;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
@@ -52,7 +54,17 @@ public class LogManager implements Loadable, LogSource {
         handler.setFormatter(new Formatter() {
             @Override
             public String format(final LogRecord record) {
-                return "[" + DateUtil.formatDatetime(record.getMillis()) + "] [" + record.getLevel().getName() + "] " + record.getMessage() + '\n';
+                String thrown = "";
+
+                if (record.getThrown() != null) {
+                    final StringWriter stringWriter = new StringWriter();
+                    final PrintWriter printWriter = new PrintWriter(stringWriter);
+                    record.getThrown().printStackTrace(printWriter);
+                    printWriter.close();
+                    thrown = stringWriter.toString();
+                }
+
+                return "[" + DateUtil.formatDatetime(record.getMillis()) + "] [" + record.getLevel().getName() + "] " + record.getMessage() + '\n' + thrown;
             }
         });
         logger.addHandler(handler);

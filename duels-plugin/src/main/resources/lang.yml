@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 4
+config-version: 5
 
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
@@ -245,11 +245,6 @@ COMMAND:
 
 
 DUEL:
-  prevent:
-    item-drop: '&cYou cannot drop items while in a duel.'
-    command: '&cYou cannot use ''%command%'' while in a duel.'
-    teleportation: '&cYou cannot teleport while in a duel.'
-    inventory-open: '&cYou cannot open inventories while in a duel.'
   start-failure:
     no-kit-selected: '{FAIL_PREFIX} No kit was selected!'
     player-moved: '{FAIL_PREFIX} You or your opponent moved after sending/accepting the request!'
@@ -258,6 +253,12 @@ DUEL:
     no-arena-available: '{FAIL_PREFIX} No arena is currently available. Please try again later.'
     arena-in-use: '{FAIL_PREFIX} That arena is already in use. Please select a different arena.'
     not-enough-money: '{FAIL_PREFIX} You or your opponent does not have $%bet_amount%.'
+  prevent:
+    item-drop: '&cYou cannot drop items while in a duel.'
+    command: '&cYou cannot use ''%command%'' while in a duel.'
+    teleportation: '&cYou cannot teleport while in a duel.'
+    inventory-open: '&cYou cannot open inventories while in a duel.'
+  projectile-hit-message: '{PREFIX} &f%name% &7is now at &d%health%♥&7!'
   on-end:
     tie: '{PREFIX} &7Tie Game!'
     plugin-disable: '{PREFIX} &cPlugin is disabling! Ending match automatically.'

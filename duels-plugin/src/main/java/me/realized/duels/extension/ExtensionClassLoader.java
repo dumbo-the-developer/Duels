@@ -18,7 +18,7 @@ import lombok.Getter;
 import me.realized.duels.api.extension.DuelsExtension;
 import sun.misc.CompoundEnumeration;
 
-class ExtensionClassLoader extends URLClassLoader {
+public class ExtensionClassLoader extends URLClassLoader {
 
     private final JarFile jar;
     private final Manifest manifest;

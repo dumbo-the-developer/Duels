@@ -16,7 +16,7 @@ public class PotionCounterButton extends BaseButton {
             .build()
         );
         editMeta(meta -> {
-            if (!CompatUtil.isPre1_8()) {
+            if (CompatUtil.hasItemFlag()) {
                 meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
             }
         });

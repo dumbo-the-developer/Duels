@@ -2,6 +2,7 @@ package me.realized.duels.util.compat;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import me.realized.duels.util.Log;
 import org.bukkit.Bukkit;
 
 public final class ReflectionUtil {
@@ -14,11 +15,19 @@ public final class ReflectionUtil {
 
     private ReflectionUtil() {}
 
+    public static Class<?> getClassUnsafe(final String name) {
+        try {
+            return Class.forName(name);
+        } catch (ClassNotFoundException ex) {
+            return null;
+        }
+    }
+
     public static Class<?> getNMSClass(final String name) {
         try {
             return Class.forName("net.minecraft.server." + VERSION + "." + name);
         } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
+            Log.error(ex.getMessage(), ex);
             return null;
         }
     }
@@ -27,7 +36,7 @@ public final class ReflectionUtil {
         try {
             return Class.forName("org.bukkit.craftbukkit." + VERSION + "." + path);
         } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
+            Log.error(ex.getMessage(), ex);
             return null;
         }
     }
@@ -36,7 +45,7 @@ public final class ReflectionUtil {
         try {
             return clazz.getMethod(name, parameters);
         } catch (NoSuchMethodException ex) {
-            ex.printStackTrace();
+            Log.error(ex.getMessage(), ex);
             return null;
         }
     }
@@ -45,7 +54,7 @@ public final class ReflectionUtil {
         try {
             return clazz.getField(name);
         } catch (NoSuchFieldException ex) {
-            ex.printStackTrace();
+            Log.error(ex.getMessage(), ex);
             return null;
         }
     }

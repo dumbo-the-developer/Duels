@@ -24,7 +24,7 @@ public class EffectsButton extends BaseButton {
                     "duration", (effect.getDuration() / 20))).collect(Collectors.toList()))
             .build());
         editMeta(meta -> {
-            if (!CompatUtil.isPre1_8()) {
+            if (CompatUtil.hasItemFlag()) {
                 meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
             }
         });

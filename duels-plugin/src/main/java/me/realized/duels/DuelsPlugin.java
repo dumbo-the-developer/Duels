@@ -13,7 +13,6 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.Getter;
-import lombok.NonNull;
 import me.realized.duels.api.Duels;
 import me.realized.duels.api.command.SubCommand;
 import me.realized.duels.arena.ArenaManager;
@@ -25,10 +24,12 @@ import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.UserManager;
 import me.realized.duels.duel.DuelManager;
+import me.realized.duels.extension.ExtensionClassLoader;
 import me.realized.duels.extension.ExtensionManager;
 import me.realized.duels.extra.DamageListener;
 import me.realized.duels.extra.KitItemListener;
 import me.realized.duels.extra.PotionListener;
+import me.realized.duels.extra.ProjectileHitListener;
 import me.realized.duels.extra.SoupListener;
 import me.realized.duels.extra.Teleport;
 import me.realized.duels.extra.TeleportListener;
@@ -50,6 +51,8 @@ import me.realized.duels.util.ServerUtil;
 import me.realized.duels.util.command.AbstractCommand;
 import me.realized.duels.util.gui.GuiListener;
 import org.bukkit.command.CommandSender;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.inventivetalent.update.spiget.SpigetUpdate;
@@ -106,6 +109,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private ExtensionManager extensionManager;
     private final Map<String, AbstractCommand<DuelsPlugin>> commands = new HashMap<>();
+    private final List<Listener> registeredListeners = new ArrayList<>();
 
     @Getter
     private volatile boolean updateAvailable;
@@ -147,12 +151,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(teleport = new Teleport(this));
         loadables.add(extensionManager = new ExtensionManager(this));
 
-        registerCommands(
-            new DuelCommand(this),
-            new SpectateCommand(this),
-            new DuelsCommand(this)
-        );
-
         if (!load()) {
             getPluginLoader().disablePlugin(this);
             return;
@@ -163,6 +161,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         new PotionListener(this);
         new TeleportListener(this);
         new SoupListener(this);
+        new ProjectileHitListener(this);
 
         new Metrics(this);
 
@@ -202,6 +201,12 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
      * @return true if load was successful, otherwise false
      */
     private boolean load() {
+        registerCommands(
+            new DuelCommand(this),
+            new SpectateCommand(this),
+            new DuelsCommand(this)
+        );
+
         for (final Loadable loadable : loadables) {
             try {
                 loadable.handleLoad();
@@ -220,6 +225,15 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
      * @return true if unload was successful, otherwise false
      */
     private boolean unload() {
+        registeredListeners.forEach(HandlerList::unregisterAll);
+        registeredListeners.clear();
+        // Unregister all extension listeners that isn't using the method Duels#registerListener
+        HandlerList.getRegisteredListeners(this)
+            .stream()
+            .filter(listener -> listener.getListener().getClass().getClassLoader().getClass().isAssignableFrom(ExtensionClassLoader.class))
+            .forEach(listener -> HandlerList.unregisterAll(listener.getListener()));
+        commands.clear();
+
         for (final Loadable loadable : Lists.reverse(loadables)) {
             try {
                 if (loadables.indexOf(loadable) > lastLoad) {
@@ -266,6 +280,13 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     }
 
     @Override
+    public void registerListener(@Nonnull final Listener listener) {
+        Objects.requireNonNull(listener, "listener");
+        registeredListeners.add(listener);
+        getServer().getPluginManager().registerEvents(listener, this);
+    }
+
+    @Override
     public boolean reload() {
         if (!(unload() && load())) {
             getPluginLoader().disablePlugin(this);
@@ -296,61 +317,61 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     }
 
     @Override
-    public BukkitTask doSync(@NonNull final Runnable task) {
+    public BukkitTask doSync(@Nonnull final Runnable task) {
         Objects.requireNonNull(task, "task");
         return getServer().getScheduler().runTask(this, task);
     }
 
     @Override
-    public BukkitTask doSyncAfter(@NonNull final Runnable task, final long delay) {
+    public BukkitTask doSyncAfter(@Nonnull final Runnable task, final long delay) {
         Objects.requireNonNull(task, "task");
         return getServer().getScheduler().runTaskLater(this, task, delay);
     }
 
     @Override
-    public BukkitTask doSyncRepeat(@NonNull final Runnable task, final long delay, final long period) {
+    public BukkitTask doSyncRepeat(@Nonnull final Runnable task, final long delay, final long period) {
         Objects.requireNonNull(task, "task");
         return getServer().getScheduler().runTaskTimer(this, task, delay, period);
     }
 
     @Override
-    public BukkitTask doAsync(@NonNull final Runnable task) {
+    public BukkitTask doAsync(@Nonnull final Runnable task) {
         Objects.requireNonNull(task, "task");
         return getServer().getScheduler().runTaskAsynchronously(this, task);
     }
 
     @Override
-    public BukkitTask doAsyncAfter(@NonNull final Runnable task, final long delay) {
+    public BukkitTask doAsyncAfter(@Nonnull final Runnable task, final long delay) {
         Objects.requireNonNull(task, "task");
         return getServer().getScheduler().runTaskLaterAsynchronously(this, task, delay);
     }
 
     @Override
-    public BukkitTask doAsyncRepeat(@NonNull final Runnable task, final long delay, final long period) {
+    public BukkitTask doAsyncRepeat(@Nonnull final Runnable task, final long delay, final long period) {
         Objects.requireNonNull(task, "task");
         return getServer().getScheduler().runTaskTimerAsynchronously(this, task, delay, period);
     }
 
     @Override
-    public void info(@NonNull final String message) {
+    public void info(@Nonnull final String message) {
         Objects.requireNonNull(message, "message");
         Log.info(message);
     }
 
     @Override
-    public void warn(@NonNull final String message) {
+    public void warn(@Nonnull final String message) {
         Objects.requireNonNull(message, "message");
         Log.warn(message);
     }
 
     @Override
-    public void error(@NonNull final String message) {
+    public void error(@Nonnull final String message) {
         Objects.requireNonNull(message, "message");
         Log.error(message);
     }
 
     @Override
-    public void error(@NonNull final String message, @NonNull final Throwable thrown) {
+    public void error(@Nonnull final String message, @Nonnull final Throwable thrown) {
         Objects.requireNonNull(message, "message");
         Objects.requireNonNull(thrown, "thrown");
         Log.error(message, thrown);

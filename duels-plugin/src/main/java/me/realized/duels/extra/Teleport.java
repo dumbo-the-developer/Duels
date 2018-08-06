@@ -22,7 +22,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
  */
 public final class Teleport implements Loadable, Listener {
 
-    public static final String METADATA_KEY = Teleport.class.getSimpleName();
+    static final String METADATA_KEY = Teleport.class.getSimpleName();
 
     private final DuelsPlugin plugin;
 

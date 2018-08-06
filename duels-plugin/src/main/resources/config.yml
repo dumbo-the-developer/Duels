@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 3
+config-version: 4
 
 # If set to 'true', a notification and a download link will be printed on the console whenever an update is available.
 # default: true
@@ -146,6 +146,13 @@ duel:
       commands:
       - 'give %winner% diamond 1'
       - 'give %loser% dirt 1'
+
+  projectile-hit-message:
+    # If set to 'true', a message from lang.yml will be sent to the shooter of the projectile.
+    enabled: true
+
+    # Projectile types to display the message.
+    types: [ARROW, TIPPED_ARROW, SPECTRAL_ARROW, TRIDENT]
 
   # If set to 'true', players in duel will not be able to open any kind of inventories except their own.
   # default: true

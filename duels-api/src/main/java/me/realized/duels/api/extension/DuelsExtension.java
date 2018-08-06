@@ -8,10 +8,9 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Objects;
-import java.util.logging.Level;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.Getter;
-import lombok.NonNull;
 import me.realized.duels.api.Duels;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -43,7 +42,7 @@ public abstract class DuelsExtension {
         this.configFile = new File(dataFolder, "config.yml");
     }
 
-    @NonNull
+    @Nonnull
     public final String getName() {
         return name;
     }
@@ -62,7 +61,7 @@ public abstract class DuelsExtension {
         this.enabled = enabled;
     }
 
-    public void saveResource(@NonNull String resourcePath) {
+    public void saveResource(@Nonnull String resourcePath) {
         Objects.requireNonNull(resourcePath, "resourcePath");
         resourcePath = resourcePath.replace('\\', '/');
 
@@ -97,7 +96,7 @@ public abstract class DuelsExtension {
     }
 
     @Nullable
-    public InputStream getResource(@NonNull final String filename) {
+    public InputStream getResource(@Nonnull final String filename) {
         Objects.requireNonNull(filename, "filename");
 
         try {

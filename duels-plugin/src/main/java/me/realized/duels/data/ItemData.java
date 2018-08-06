@@ -112,7 +112,7 @@ public class ItemData {
                 lore = StringUtil.reverseColor(meta.getLore());
             }
 
-            if (!CompatUtil.isPre1_8() && !meta.getItemFlags().isEmpty()) {
+            if (CompatUtil.hasItemFlag() && !meta.getItemFlags().isEmpty()) {
                 this.flags = new ArrayList<>();
 
                 for (final ItemFlag flag : meta.getItemFlags()) {
@@ -216,7 +216,7 @@ public class ItemData {
             meta.setLore(StringUtil.color(lore));
         }
 
-        if (!CompatUtil.isPre1_8() && flags != null && !flags.isEmpty()) {
+        if (CompatUtil.hasItemFlag() && flags != null && !flags.isEmpty()) {
             for (final String flag : flags) {
                 meta.addItemFlags(ItemFlag.valueOf(flag));
             }

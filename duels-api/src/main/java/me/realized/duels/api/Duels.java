@@ -1,11 +1,11 @@
 package me.realized.duels.api;
 
 import javax.annotation.Nonnull;
-import lombok.NonNull;
 import me.realized.duels.api.arena.ArenaManager;
 import me.realized.duels.api.command.SubCommand;
 import me.realized.duels.api.kit.KitManager;
 import me.realized.duels.api.user.UserManager;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -32,6 +32,13 @@ public interface Duels extends Plugin {
 
 
     /**
+     * @param listener Listener to register
+     * @since 3.1.2
+     */
+    void registerListener(@Nonnull final Listener listener);
+
+
+    /**
      * Reloads the plugin.
      *
      * @return true if reload was successful, otherwise false
@@ -46,7 +53,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed
      * @since 3.1.0
      */
-    BukkitTask doSync(@NonNull final Runnable task);
+    BukkitTask doSync(@Nonnull final Runnable task);
 
 
     /**
@@ -57,7 +64,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed
      * @since 3.1.0
      */
-    BukkitTask doSyncAfter(@NonNull final Runnable task, long delay);
+    BukkitTask doSyncAfter(@Nonnull final Runnable task, long delay);
 
 
     /**
@@ -69,7 +76,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed
      * @since 3.1.0
      */
-    BukkitTask doSyncRepeat(@NonNull final Runnable task, long delay, long interval);
+    BukkitTask doSyncRepeat(@Nonnull final Runnable task, long delay, long interval);
 
 
     /**
@@ -79,7 +86,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed
      * @since 3.1.0
      */
-    BukkitTask doAsync(@NonNull final Runnable task);
+    BukkitTask doAsync(@Nonnull final Runnable task);
 
 
     /**
@@ -90,7 +97,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed
      * @since 3.1.0
      */
-    BukkitTask doAsyncAfter(@NonNull final Runnable task, long delay);
+    BukkitTask doAsyncAfter(@Nonnull final Runnable task, long delay);
 
 
     /**
@@ -102,31 +109,35 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed
      * @since 3.1.0
      */
-    BukkitTask doAsyncRepeat(@NonNull final Runnable task, long delay, long interval);
+    BukkitTask doAsyncRepeat(@Nonnull final Runnable task, long delay, long interval);
 
 
     /**
      * @param message message to log
+     * @since 3.1.0
      */
-    void info(@NonNull final String message);
+    void info(@Nonnull final String message);
 
 
     /**
      * @param message message to log
+     * @since 3.1.0
      */
-    void warn(@NonNull final String message);
+    void warn(@Nonnull final String message);
 
 
     /**
      * @param message message to log
+     * @since 3.1.0
      */
-    void error(@NonNull final String message);
+    void error(@Nonnull final String message);
 
 
     /**
      * @param message message to log
+     * @since 3.1.0
      */
-    void error(@NonNull final String message, @NonNull Throwable thrown);
+    void error(@Nonnull final String message, @Nonnull Throwable thrown);
 
 
     /**
