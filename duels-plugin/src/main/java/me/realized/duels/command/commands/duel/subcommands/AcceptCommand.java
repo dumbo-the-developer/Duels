@@ -88,6 +88,11 @@ public class AcceptCommand extends BaseCommand {
             return;
         }
 
+        if ((combatTagPlus != null && combatTagPlus.isTagged(target)) || (pvpManager != null && pvpManager.isTagged(target))) {
+            lang.sendMessage(sender, "ERROR.duel.is-tagged");
+            return;
+        }
+
         final Settings settings = request.getSettings();
         final String kit = settings.getKit() != null ? settings.getKit().getName() : "Not Selected";
         final String arena = settings.getArena() != null ? settings.getArena().getName() : "Random";
