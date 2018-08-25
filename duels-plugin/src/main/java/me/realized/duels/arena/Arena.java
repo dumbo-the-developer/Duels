@@ -42,6 +42,9 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
     @Getter(value = AccessLevel.PACKAGE)
     @Setter(value = AccessLevel.PACKAGE)
     private Countdown countdown;
+    @Getter
+    @Setter(value = AccessLevel.PACKAGE)
+    private boolean removed;
 
     public Arena(final DuelsPlugin plugin, final String name) {
         super(plugin, ItemBuilder
@@ -60,47 +63,49 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
     }
 
     @Override
-    public void setPosition(@Nullable final Player source, final int pos, @Nonnull final Location location) {
+    public boolean setPosition(@Nullable final Player source, final int pos, @Nonnull final Location location) {
         Objects.requireNonNull(location, "location");
 
         if (pos <= 0 || pos > 2) {
-            return;
+            return false;
         }
 
         final ArenaSetPositionEvent event = new ArenaSetPositionEvent(source, this, pos, location);
         plugin.getServer().getPluginManager().callEvent(event);
 
         if (event.isCancelled()) {
-            return;
+            return false;
         }
 
         positions.put(pos, location);
         setLore(lang.getMessage("GUI.arena-selector.buttons.arena.lore-" + (isAvailable() ? "available" : "unavailable")).split("\n"));
         arenaManager.getGui().calculatePages();
+        return true;
     }
 
     @Override
-    public void setPosition(final int pos, @Nonnull final Location location) {
-        setPosition(null, pos, location);
+    public boolean setPosition(final int pos, @Nonnull final Location location) {
+        return setPosition(null, pos, location);
     }
 
     @Override
-    public void setDisabled(@Nullable final CommandSender source, final boolean disabled) {
+    public boolean setDisabled(@Nullable final CommandSender source, final boolean disabled) {
         final ArenaStateChangeEvent event = new ArenaStateChangeEvent(source, this, disabled);
         plugin.getServer().getPluginManager().callEvent(event);
 
         if (event.isCancelled()) {
-            return;
+            return false;
         }
 
         this.disabled = event.isDisabled();
         setLore(lang.getMessage("GUI.arena-selector.buttons.arena.lore-" + (isAvailable() ? "available" : "unavailable")).split("\n"));
         arenaManager.getGui().calculatePages();
+        return true;
     }
 
     @Override
-    public void setDisabled(final boolean disabled) {
-        setDisabled(null, disabled);
+    public boolean setDisabled(final boolean disabled) {
+        return setDisabled(null, disabled);
     }
 
     @Override
@@ -112,10 +117,11 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
         return !isDisabled() && !isUsed() && getPosition(1) != null && getPosition(2) != null;
     }
 
-    public void startMatch(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet, final boolean fromQueue) {
+    public Match startMatch(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet, final boolean fromQueue) {
         this.match = new Match(this, kit, items, bet, fromQueue);
         setLore(lang.getMessage("GUI.arena-selector.buttons.arena.lore-unavailable").split("\n"));
         arenaManager.getGui().calculatePages();
+        return match;
     }
 
     public void endMatch(final UUID winner, final UUID loser, final Reason reason) {

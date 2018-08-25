@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 5
+config-version: 6
 
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
@@ -28,7 +28,7 @@ ERROR:
     invalid-position: '{PREFIX} &cPosition must be 1 or 2.'
   kit:
     not-found: '{PREFIX} &cNo kit exists with the name ''%name%''.'
-    already-exists: '{PREFIX} &cAn arena named ''%name%'' already exists.'
+    already-exists: '{PREFIX} &cA kit named ''%name%'' already exists.'
     empty-hand: '{PREFIX} &cYou must be holding an item to use this command.'
   duel:
     is-self: '{PREFIX} &cYou cannot duel yourself.'
@@ -53,13 +53,18 @@ ERROR:
   inventory-view:
     not-a-uuid: '{PREFIX} &c%input% is not a valid UUID.'
     not-found: '{PREFIX} &cNo inventory exists with the UUID ''%uuid%''.'
+  queue:
+    not-found: '{PREFIX} &cNo queue exists with kit %kit% and bet $%bet_amount%.'
+    already-exists: '{PREFIX} &cA queue with kit ''%kit%'' and bet $%bet_amount% already exists.'
+    already-in: '{PREFIX} &cYou are already in a queue!'
+    not-in-queue: '{PREFIX} &cYou are not in a queue.'
+    not-enough-money: '{PREFIX} &cYou need $%bet_amount% to join that queue.'
+    no-queues-available: '{PREFIX} &cNo queues are available.'
   sign:
     not-a-sign: '{PREFIX} &cThe block you are looking at is not a sign!'
     not-found: '{PREFIX} &cThat sign is not a queue sign!'
     already-exists: '{PREFIX} &cThat sign is already a queue sign! To remove, use the command ''/duels delsign'''
     cancel-break: '{PREFIX} &cYou cannot break a queue sign manually! Please use the command ''/duels delsign'''
-    already-in: '{PREFIX} &cYou are already in a queue!'
-    not-enough-money: '{PREFIX} &cYou need $%bet_amount% to join that queue.'
   sound:
     not-found: '{PREFIX} &cNo sound exists with the name ''%name%''.'
   command:
@@ -69,6 +74,7 @@ ERROR:
     lobby-save-failure: '{PREFIX} &cCould not save lobby location. Please check the console for more information.'
     name-not-alphanumeric: '{PREFIX} &c''%input%'' is not alphanumeric.'
 
+
 COMMAND:
   duel:
     usage:
@@ -76,6 +82,8 @@ COMMAND:
     - '&f/%command% [player] &e- &7Sends a duel request to player.'
     - '&f/%command% [player] <amount> &e- &7Sends a duel request with a bet.'
     - '&f/%command% [accept | deny] [player] &e- &7Accepts or denies a duel request.'
+    - '&f/%command% queue &e- &7Opens the queues GUI.'
+    - '&f/%command% queue [kit] <amount> &e- &7Enters the queue with given kit and bet.'
     - '&f/%command% stats <name> &e- &7Displays your duel stats.'
     - '&f/%command% toggle &e- &7Enable or disable receiving duel requests.'
     - '&f/%command% top [wins|losses|kit] &e- &7Displays top wins, losses, or rating for the kit.'
@@ -154,6 +162,7 @@ COMMAND:
     - '&f/%command% help &e- &7Displays this page.'
     - '&f/%command% help arena &e- &7Displays a list of arena commands.'
     - '&f/%command% help kit &e- &7Displays a list of kit commands.'
+    - '&f/%command% help queue &e- &7Displays a list of queue commands.'
     - '&f/%command% help sign &e- &7Displays a list of sign commands.'
     - '&f/%command% help user &e- &7Displays a list of user edit commands.'
     - '&f/%command% help extra &e- &7Displays a list of extra commands.'
@@ -177,6 +186,13 @@ COMMAND:
       - '&f/%command% useoption [kit] [usepermission:arenaspecific] &e- &7Enable or disable options for kit.'
       - '&f/%command% list &e- &7Displays a list of kits.'
       - '{HALF_LINE} &fKit Commands {HALF_LINE}'
+      queue:
+      - '{HALF_LINE} &fQueue Sign Commands {HALF_LINE}'
+      - '&f/%command% createqueue [bet] &e- &7Creates a queue with bet.'
+      - '&f/%command% createqueue [bet] [kit] &e- &7Creates a queue with bet and kit.'
+      - '&f/%command% deletequeue &e- &7Deletes the queue with bet and kit.'
+      - '&f/%command% list &e- &7Displays a list of available queues.'
+      - '{HALF_LINE} &fQueue Sign Commands {HALF_LINE}'
       sign:
       - '{HALF_LINE} &fQueue Sign Commands {HALF_LINE}'
       - '&f/%command% addsign [bet] &e- &7Creates a queue sign with bet.'
@@ -198,16 +214,18 @@ COMMAND:
       - '&f/%command% reload <module> &e- &7Reloads the plugin or the specified module.'
       - '{HALF_LINE} &fExtra Commands {HALF_LINE}'
     create: '{PREFIX} &7Arena &e%name% &7was successfully created. To set spawnpoints for this arena, use the command &f/duels set %name% 1'
-    delete: '{PREFIX} &7Arena &e%name% &7was successfully deleted.'
+    delete: '{PREFIX} &7Arena &e%name% &7was successfully removed.'
     set: '{PREFIX} &7Set position &f%position% &7for arena &e%name% &7at &f%location%&7.'
     toggle: '{PREFIX} &7Arena &e%name% &7is now &r%state%&7.'
     save-kit: '{PREFIX} &7Kit &3%name% &7was successfully saved.'
-    delete-kit: '{PREFIX} &7Kit &3%name% &7was successfully deleted.'
+    delete-kit: '{PREFIX} &7Kit &3%name% &7was successfully removed.'
     load-kit: '{PREFIX} &7Kit &3%name% &7was loaded in your inventory.'
     set-item: '{PREFIX} &7Kit &3%name%&7''s displayed item was changed to your held item.'
     use-option: '{PREFIX} &7Option &f%option% &7of kit &3%kit% &7was set to &a%value%&7.'
+    create-queue: '{PREFIX} &7Created a queue with kit &3%kit% &7and bet &6$%bet_amount%&7.'
+    delete-queue: '{PREFIX} &7Deleted a queue with kit &3%kit% &7and bet &6$%bet_amount%&7.'
     add-sign: '{PREFIX} &7Created queue sign at &f%location% &7with kit &3%kit% &7and bet &6$%bet_amount%&7.'
-    del-sign: '{PREFIX} &7Removed queue sign at &f%location% &7with kit &3%kit% &7and bet &6$%bet_amount%&7.'
+    del-sign: '{PREFIX} &7Deleted queue sign at &f%location% &7with kit &3%kit% &7and bet &6$%bet_amount%&7.'
     set-lobby: '{PREFIX} &7Duel lobby set at your current location.'
     edit: '{PREFIX} &f%name%&7''s %type% was set to &f%amount%&7.'
     set-rating: '{PREFIX} &f%name%&7''s rating for kit &3%kit% &7was set to &a%rating%&7.'
@@ -228,8 +246,8 @@ COMMAND:
     - '&cRED&7: Arena in use'
     - '&7Arenas: &r%arenas%'
     - '&7Kits: &f%kits%'
-    - '&7Sign Format: &b[kit name] - [bet] - [sign location]'
-    - '&7Signs: &f%signs%'
+    - '&7Queues: &b%queues%'
+    - '&7Queue Signs: &f%queue_signs%'
     - '&7Duel lobby is located at &f%lobby%&7.'
     - '{LINE}'
 
@@ -247,6 +265,7 @@ COMMAND:
 DUEL:
   start-failure:
     no-kit-selected: '{FAIL_PREFIX} No kit was selected!'
+    is-tagged: '{FAIL_PREFIX} You or your opponent is in combat!'
     player-moved: '{FAIL_PREFIX} You or your opponent moved after sending/accepting the request!'
     not-in-duelzone: '{FAIL_PREFIX} You or your opponent moved out of the duelzone sending/accepting the request!'
     in-creative-mode: '{FAIL_PREFIX} You or your opponent is in creative mode!'
@@ -274,10 +293,13 @@ DUEL:
       message: '{PREFIX} &7You have received &f%name%&7''s items for winning!'
 
 
-SIGN:
-  add: '{PREFIX} &7You have been added to the queue for kit &3%kit% &7and bet &6$%bet_amount%&7.'
+QUEUE:
+  add: '{PREFIX} &7You have been added to the queue for kit &3%kit% &7and bet &6$%bet_amount%&7. Click the sign or type the command again to leave the queue.'
   remove: '{PREFIX} &7You have been removed from the queue.'
   found-opponent: '{PREFIX} &7Opponent found: &f%name%&7! Starting match with kit &3%kit% &7and a bet of &6$%bet_amount%&7...'
+
+
+SIGN:
   format:
   - '&a[Click to Join]'
   - '&3%kit%'
@@ -360,6 +382,16 @@ GUI:
         - '&aAvailable'
         lore-unavailable:
         - '&cUnavailable'
+  queues:
+    title: 'Available Queues'
+    buttons:
+      queue:
+        name: '&3%kit%'
+        lore:
+        - '&7Bet: &6$%bet_amount%'
+        - '&7In Queue: &f%players%'
+        - ' '
+        - '&a&lClick to Queue!'
   item-betting:
     title: 'Winner Takes All!'
     buttons:

@@ -5,34 +5,40 @@ import java.util.Objects;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import lombok.Getter;
 import me.realized.duels.api.kit.Kit;
 import org.bukkit.entity.Player;
 
+/**
+ * Represents the UserManager singleton used by Duels.
+ */
 public interface UserManager {
 
 
     /**
-     * @return true if all users have completed loading to the memory, otherwise false
+     * Whether or not had all users completed loading to the memory.
+     *
+     * @return True if all users have completed loading to the memory. False otherwise.
      */
     boolean isLoaded();
 
 
     /**
-     * If {@link #isLoaded()} returns false, this may return null even if userdata file exists.
+     * Gets a {@link User} with the given name.
+     * Note: If {@link #isLoaded()} returns false, this may return null even if userdata file exists.
      *
-     * @param name Name of the user to get
-     * @return User with the given name if exists, otherwise null
+     * @param name Name of the user to get.
+     * @return {@link User} with the given name or null if not exists.
      */
     @Nullable
     User get(@Nonnull final String name);
 
 
     /**
-     * If {@link #isLoaded()} returns false, this may return null even if userdata file exists.
+     * Gets a {@link User} with the given {@link UUID}.
+     * Note: If {@link #isLoaded()} returns false, this may return null even if userdata file exists.
      *
-     * @param uuid UUID of the user to get
-     * @return User with the given UUID if exists, otherwise null
+     * @param uuid {@link UUID} of the user to get.
+     * @return {@link User} with the given {@link UUID} or null if not exists.
      */
     @Nullable
     User get(@Nonnull final UUID uuid);
@@ -48,47 +54,62 @@ public interface UserManager {
 
 
     /**
-     * Method is thread-safe.
+     * Gets the top wins. thread-safe!
      *
-     * @return TopEntry containing name and wins of the top 10 Wins or null if the leaderboard has not loaded yet
+     * @return {@link TopEntry} containing name and wins of the top 10 Wins or null if the leaderboard has not loaded yet.
      */
     @Nullable
     TopEntry getTopWins();
 
 
     /**
-     * Method is thread-safe.
+     * Gets the top losses. thread-safe!
      *
-     * @return TopEntry containing name and losses of the top 10 Losses or null if the leaderboard has not loaded yet
+     * @return {@link TopEntry} containing name and losses of the top 10 Losses or null if the leaderboard has not loaded yet.
      */
     @Nullable
     TopEntry getTopLosses();
 
 
     /**
-     * Method is thread-safe.
+     * Gets the top rating for the given {@link Kit}. thread-safe!
      *
-     * @param kit Kit to get TopEntry
-     * @return TopEntry containing name and rating of the top 10 Rating for kit or null if the leaderboard has not loaded yet
+     * @param kit {@link Kit} to get {@link TopEntry}.
+     * @return {@link TopEntry} containing name and rating of the top 10 Rating for kit or null if the leaderboard has not loaded yet.
      */
     @Nullable
     TopEntry getTopRatings(@Nonnull final Kit kit);
 
-
     class TopEntry {
 
-        @Getter
         private final long creation;
-        @Getter
         private final String type, identifier;
-        @Getter
         private final List<TopData> data;
 
-        public TopEntry(final String type, final String identifier, final List<TopData> data) {
+        public TopEntry(@Nonnull final String type, @Nonnull final String identifier, @Nonnull final List<TopData> data) {
+            Objects.requireNonNull(type, "type");
+            Objects.requireNonNull(identifier, "identifier");
+            Objects.requireNonNull(data, "data");
             this.creation = System.currentTimeMillis();
             this.type = type;
             this.identifier = identifier;
             this.data = data;
+        }
+
+        public long getCreation() {
+            return creation;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public String getIdentifier() {
+            return identifier;
+        }
+
+        public List<TopData> getData() {
+            return data;
         }
 
         @Override
@@ -113,17 +134,28 @@ public interface UserManager {
 
     class TopData implements Comparable<TopData> {
 
-        @Getter
         private final UUID uuid;
-        @Getter
         private final String name;
-        @Getter
         private final int value;
 
-        public TopData(final UUID uuid, final String name, final int value) {
+        public TopData(@Nonnull final UUID uuid, @Nonnull final String name, final int value) {
+            Objects.requireNonNull(uuid, "uuid");
+            Objects.requireNonNull(name, "name");
             this.uuid = uuid;
             this.name = name;
             this.value = value;
+        }
+
+        public UUID getUuid() {
+            return uuid;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getValue() {
+            return value;
         }
 
         @Override

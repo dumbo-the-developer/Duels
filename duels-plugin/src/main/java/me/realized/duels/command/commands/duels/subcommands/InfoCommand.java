@@ -19,7 +19,7 @@ public class InfoCommand extends BaseCommand {
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
-        final String name = StringUtils.join(args, " ", 1, args.length);
+        final String name = StringUtils.join(args, " ", 1, args.length).replace("-", " ");
         final Arena arena = arenaManager.get(name);
 
         if (arena == null) {

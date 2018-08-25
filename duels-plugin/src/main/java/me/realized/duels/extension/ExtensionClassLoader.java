@@ -27,32 +27,20 @@ public class ExtensionClassLoader extends URLClassLoader {
 
     @Getter
     private DuelsExtension extension;
-    @Getter
-    private ExtensionInfo info;
 
-    ExtensionClassLoader(final File file, final ClassLoader parent) throws Exception {
+    ExtensionClassLoader(final File file, final ExtensionInfo info, final ClassLoader parent) throws Exception {
         super(new URL[] {file.toURI().toURL()}, parent);
         this.jar = new JarFile(file);
         this.manifest = jar.getManifest();
         this.url = file.toURI().toURL();
 
-        final JarEntry entry = jar.getJarEntry("extension.yml");
+        Class<?> mainClass = Class.forName(info.getMain(), true, this);
 
-        if (entry == null) {
-            throw new RuntimeException("No extension.yml found");
+        if (!DuelsExtension.class.isAssignableFrom(mainClass)) {
+            throw new RuntimeException(mainClass.getName() + " does not extend DuelsExtension");
         }
 
-        try (InputStream stream = jar.getInputStream(entry)) {
-            final ExtensionInfo info = new ExtensionInfo(stream);
-            Class<?> mainClass = Class.forName(info.getMain(), true, this);
-
-            if (!DuelsExtension.class.isAssignableFrom(mainClass)) {
-                throw new RuntimeException(mainClass.getName() + " does not extend DuelsExtension");
-            }
-
-            this.extension = mainClass.asSubclass(DuelsExtension.class).newInstance();
-            this.info = info;
-        }
+        this.extension = mainClass.asSubclass(DuelsExtension.class).newInstance();
     }
 
     protected Class<?> findClass(final String name) throws ClassNotFoundException {

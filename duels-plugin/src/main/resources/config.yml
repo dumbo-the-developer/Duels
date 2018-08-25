@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 4
+config-version: 5
 
 # If set to 'true', a notification and a download link will be printed on the console whenever an update is available.
 # default: true
@@ -19,6 +19,14 @@ supported-plugins:
     # default: true
     untag-on-duel-teleport: true
   PvPManager:
+    # If set to 'true', players will not be able to duel while combat tagged.
+    # default: true
+    prevent-duel-if-tagged: true
+
+    # If set to 'true', players will be untagged at the end of the duel to prevent teleport being cancelled.
+    # default: true
+    untag-on-duel-teleport: true
+  CombatLogX:
     # If set to 'true', players will not be able to duel while combat tagged.
     # default: true
     prevent-duel-if-tagged: true
@@ -424,14 +432,43 @@ top:
 guis:
   kit-selector:
     # Amount of rows to display in one page of the kit selector GUI.
-    # NOTE: Must be in between 1 - 5!
+    # NOTE: Must be between 1 - 5!
     # default: 2
     rows: 2
+
+    # Item used to fill empty spaces in the kit selector GUI.
+    space-filler-item:
+      type: STAINED_GLASS_PANE
+      data: 0
   arena-selector:
     # Amount of rows to display in one page of the arena selector GUI.
-    # NOTE: Must be in between 1 - 5!
+    # NOTE: Must be between 1 - 5!
     # default: 3
     rows: 3
+
+    # Item used to fill empty spaces in the arena selector GUI.
+    space-filler-item:
+      type: STAINED_GLASS_PANE
+      data: 0
+  settings:
+    # Item used to fill empty spaces in the settings GUI.
+    space-filler-item:
+      type: STAINED_GLASS_PANE
+      data: 0
+  queues:
+    # Amount of rows to display in one page of the queues GUI.
+    # NOTE: Must be between 1 - 5!
+    # default: 2
+    rows: 2
+
+    # Item used to fill empty spaces in the queues GUI.
+    space-filler-item:
+      type: STAINED_GLASS_PANE
+      data: 0
+
+    # If set to 'true', the type of the queue's displayed item will be its kit's displayed item type.
+    # default: true
+    inherit-kit-item-type: true
 
 
 soup:

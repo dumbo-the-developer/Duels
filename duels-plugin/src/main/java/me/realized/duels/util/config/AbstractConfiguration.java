@@ -14,9 +14,11 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import me.realized.duels.util.Loadable;
@@ -131,10 +133,11 @@ public abstract class AbstractConfiguration<P extends JavaPlugin> implements Loa
 
             // Transfer values from the old configuration
             for (Map.Entry<String, Object> entry : oldValues.entrySet()) {
-                final Object value = configuration.get(entry.getKey());
+                final String key = entry.getKey();
+                final Object value = configuration.get(key);
 
-                if (value != null && !(value instanceof MemorySection)) {
-                    configuration.set(entry.getKey(), entry.getValue());
+                if ((value != null && !(value instanceof MemorySection)) || transferredSections().stream().anyMatch(section -> key.startsWith(section + "."))) {
+                    configuration.set(key, entry.getValue());
                 }
             }
 
@@ -188,5 +191,9 @@ public abstract class AbstractConfiguration<P extends JavaPlugin> implements Loa
         }
 
         return configuration;
+    }
+
+    protected Set<String> transferredSections() {
+        return Collections.emptySet();
     }
 }

@@ -1,8 +1,10 @@
 package me.realized.duels.extension;
 
-import java.io.InputStream;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -10,20 +12,29 @@ import org.bukkit.configuration.file.YamlConfiguration;
 public class ExtensionInfo {
 
     @Getter
-    private final String name, version, main, description, website;
+    private final String name, version, main, apiVersion, description, website;
     @Getter
     private final List<String> depends, authors;
 
-    ExtensionInfo(final InputStream stream) throws Exception {
-        try (InputStreamReader reader = new InputStreamReader(stream)) {
-            final FileConfiguration config = YamlConfiguration.loadConfiguration(reader);
-            this.name = getOrThrow(config, "name");
-            this.version = getOrThrow(config, "version");
-            this.main = getOrThrow(config, "main");
-            this.description = config.getString("description", "not specified");
-            this.website = config.getString("description", "not specified");
-            this.depends = config.getStringList("depends");
-            this.authors = config.getStringList("authors");
+    ExtensionInfo(final File file) throws Exception {
+        try (JarFile jar = new JarFile(file)) {
+            final JarEntry entry = jar.getJarEntry("extension.yml");
+
+            if (entry == null) {
+                throw new RuntimeException("No extension.yml found");
+            }
+
+            try (InputStreamReader reader = new InputStreamReader(jar.getInputStream(entry))) {
+                final FileConfiguration config = YamlConfiguration.loadConfiguration(reader);
+                this.name = getOrThrow(config, "name");
+                this.version = getOrThrow(config, "version");
+                this.main = getOrThrow(config, "main");
+                this.apiVersion = config.getString("api-version");
+                this.description = config.getString("description", "not specified");
+                this.website = config.getString("description", "not specified");
+                this.depends = config.getStringList("depends");
+                this.authors = config.getStringList("authors");
+            }
         }
     }
 

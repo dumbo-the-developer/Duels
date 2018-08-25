@@ -10,7 +10,6 @@ import java.net.URLConnection;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import lombok.Getter;
 import me.realized.duels.api.Duels;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -20,14 +19,9 @@ public abstract class DuelsExtension {
     protected Duels api;
 
     private String name;
-    @Getter
     private File folder;
-    @Getter
     private File file;
-    @Getter
     private File dataFolder;
-
-    @Getter
     private boolean enabled;
 
     private File configFile;
@@ -43,8 +37,32 @@ public abstract class DuelsExtension {
     }
 
     @Nonnull
+    public Duels getApi() {
+        return api;
+    }
+
+    @Nonnull
     public final String getName() {
         return name;
+    }
+
+    @Nonnull
+    public File getFolder() {
+        return folder;
+    }
+
+    @Nonnull
+    public File getFile() {
+        return file;
+    }
+
+    @Nonnull
+    public File getDataFolder() {
+        return dataFolder;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
     }
 
     public final void setEnabled(final boolean enabled) {
@@ -143,6 +161,12 @@ public abstract class DuelsExtension {
 
     public void onDisable() {}
 
+    /**
+     * @return The version of Duels that this extension requires in order to enable.
+     *
+     * @deprecated As of v3.2.0. Specify 'api-version' in extension.yml instead.
+     */
+    @Deprecated
     @Nullable
     public String getRequiredVersion() {
         return null;

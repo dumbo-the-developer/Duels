@@ -23,13 +23,20 @@ public final class ReflectionUtil {
         }
     }
 
-    public static Class<?> getNMSClass(final String name) {
+    public static Class<?> getNMSClass(final String name, final boolean logError) {
         try {
             return Class.forName("net.minecraft.server." + VERSION + "." + name);
         } catch (ClassNotFoundException ex) {
-            Log.error(ex.getMessage(), ex);
+            if (logError) {
+                Log.error(ex.getMessage(), ex);
+            }
+
             return null;
         }
+    }
+
+    public static Class<?> getNMSClass(final String name) {
+        return getNMSClass(name, true);
     }
 
     public static Class<?> getCBClass(final String path) {

@@ -70,6 +70,10 @@ public abstract class AbstractCommand<P extends JavaPlugin> implements TabComple
 
         for (final AbstractCommand<P> child : commands) {
             for (final String alias : child.getAliases()) {
+                if (children.containsKey(alias)) {
+                    continue;
+                }
+
                 children.put(alias.toLowerCase(), child);
             }
         }

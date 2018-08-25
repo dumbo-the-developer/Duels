@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 
 /**
  * A static API for Duels.
+ * (This is an old API for Duels v2 and below.)
  *
  * @deprecated as of v3.0.0, use {@link Duels} instead.
  */

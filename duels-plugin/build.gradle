@@ -17,6 +17,7 @@ processResources {
 }
 
 dependencies {
+    compile 'org.projectlombok:lombok:1.16.20'
     compile 'net.milkbowl.vault:VaultAPI:1.6'
     compile 'me.clip:placeholderapi:2.8.4'
     compile('be.maximvdw:MVdWPlaceholderAPI:2.5.1-SNAPSHOT') { transitive = false }
@@ -30,6 +31,7 @@ dependencies {
     compile name: 'MyPet-2.3.4'
     compile name: 'BountyHunters'
     compile name: 'SimpleClans'
+    compile name: 'CombatLogX'
 
     compile project(':duels-api')
     compile 'com.google.code.gson:gson:2.8.2'

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.Setter;
 import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.inventory.InventoryBuilder;
 import me.realized.duels.util.inventory.ItemBuilder;
@@ -21,6 +23,10 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
     private final int size, prevPageSlot, nextPageSlot;
     private final Collection<? extends Button<P>> buttons;
     private final List<Page> pages = new ArrayList<>();
+
+    @Getter
+    @Setter
+    private ItemStack spaceFiller;
 
     public MultiPageGui(final P plugin, final String title, final int rows, final Collection<? extends Button<P>> buttons) {
         super(plugin);
@@ -59,7 +65,7 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
                 InventoryBuilder
                     .of(title, 18)
                     .set(4, ItemBuilder.of(Material.REDSTONE_BLOCK).name("&cThis page is empty.").build())
-                    .fillRange(9, 18, Items.WHITE_PANE.clone()).build())
+                    .fillRange(9, 18, spaceFiller != null ? spaceFiller : Items.WHITE_PANE.clone()).build())
             );
             return;
         }
@@ -74,7 +80,7 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
                 final Page prev = page;
                 page = new Page(
                     InventoryBuilder.of(title + " (" + pageNum + "/" + pages + ")", size)
-                        .fillRange(prevPageSlot, nextPageSlot + 1, Items.WHITE_PANE.clone()).build()
+                        .fillRange(prevPageSlot, nextPageSlot + 1, spaceFiller != null ? spaceFiller : Items.WHITE_PANE.clone()).build()
                 );
 
                 if (prev != null) {

@@ -2,9 +2,10 @@ package me.realized.duels.extra;
 
 import java.util.function.Consumer;
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.hooks.CombatTagPlusHook;
-import me.realized.duels.hooks.EssentialsHook;
-import me.realized.duels.hooks.PvPManagerHook;
+import me.realized.duels.hook.hooks.CombatLogXHook;
+import me.realized.duels.hook.hooks.CombatTagPlusHook;
+import me.realized.duels.hook.hooks.EssentialsHook;
+import me.realized.duels.hook.hooks.PvPManagerHook;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.compat.Players;
@@ -29,6 +30,7 @@ public final class Teleport implements Loadable, Listener {
     private EssentialsHook essentials;
     private CombatTagPlusHook combatTagPlus;
     private PvPManagerHook pvpManager;
+    private CombatLogXHook combatLogX;
 
     public Teleport(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -39,6 +41,7 @@ public final class Teleport implements Loadable, Listener {
         this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
         this.combatTagPlus = plugin.getHookManager().getHook(CombatTagPlusHook.class);
         this.pvpManager = plugin.getHookManager().getHook(PvPManagerHook.class);
+        this.combatLogX = plugin.getHookManager().getHook(CombatLogXHook.class);
         plugin.doSyncAfter(() -> plugin.getServer().getPluginManager().registerEvents(this, plugin), 1L);
     }
 
@@ -65,6 +68,10 @@ public final class Teleport implements Loadable, Listener {
 
         if (pvpManager != null) {
             pvpManager.removeTag(player);
+        }
+
+        if (combatLogX != null) {
+            combatLogX.removeTag(player);
         }
 
         final Chunk chunk = location.getChunk();
@@ -95,7 +102,7 @@ public final class Teleport implements Loadable, Listener {
         tryTeleport(player, location, null);
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void on(final PlayerTeleportEvent event) {
         final Player player = event.getPlayer();
 

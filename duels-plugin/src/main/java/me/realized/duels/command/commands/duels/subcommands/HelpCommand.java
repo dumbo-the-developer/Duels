@@ -11,7 +11,7 @@ import org.bukkit.command.CommandSender;
 
 public class HelpCommand extends BaseCommand {
 
-    private final Set<String> categories = Sets.newHashSet("arena", "kit", "sign", "user", "extra");
+    private final Set<String> categories = Sets.newHashSet("arena", "kit", "queue", "sign", "user", "extra");
 
     public HelpCommand(final DuelsPlugin plugin) {
         super(plugin, "help", null, null, 1, false, "h");

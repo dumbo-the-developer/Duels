@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nonnull;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import me.realized.duels.DuelsPlugin;
@@ -31,6 +32,9 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
     @Getter
     @Setter
     private boolean arenaSpecific;
+    @Getter
+    @Setter(value = AccessLevel.PACKAGE)
+    private boolean removed;
 
     public Kit(final DuelsPlugin plugin, final String name, final ItemStack displayed, final boolean usePermission, final boolean arenaSpecific) {
         super(plugin, displayed != null ? displayed : ItemBuilder
@@ -75,18 +79,23 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
         items.put("ARMOR", armorContents);
     }
 
+    @Nonnull
+    public ItemStack getDisplayed() {
+        return super.getDisplayed();
+    }
+
     public boolean canUse(final Arena arena) {
         return arena.getName().startsWith(getName() + "_");
     }
 
     @Override
-    public void equip(@Nonnull final Player player) {
+    public boolean equip(@Nonnull final Player player) {
         Objects.requireNonNull(player, "player");
         final KitEquipEvent event = new KitEquipEvent(player, this);
         plugin.getServer().getPluginManager().callEvent(event);
 
         if (event.isCancelled()) {
-            return;
+            return false;
         }
 
         for (final Map.Entry<Integer, ItemStack> entry : items.get("INVENTORY").entrySet()) {
@@ -97,6 +106,7 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
         ArrayUtils.reverse(armor);
         player.getInventory().setArmorContents(armor);
         player.updateInventory();
+        return true;
     }
 
     @Override

@@ -7,7 +7,8 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.kit.Kit;
-import me.realized.duels.queue.QueueSign;
+import me.realized.duels.queue.Queue;
+import me.realized.duels.queue.sign.QueueSign;
 import me.realized.duels.util.StringUtil;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
@@ -23,11 +24,13 @@ public class ListCommand extends BaseCommand {
         final List<String> arenas = new ArrayList<>();
         arenaManager.getArenas().forEach(arena -> arenas.add("&" + getColor(arena) + arena.getName()));
         final String kits = StringUtils.join(kitManager.getKits().stream().map(Kit::getName).collect(Collectors.toList()), ", ");
-        final String signs = StringUtils.join(queueManager.getSigns().stream().map(QueueSign::toString).collect(Collectors.toList()), ", ");
+        final String queues = StringUtils.join(queueManager.getQueues().stream().map(Queue::toString).collect(Collectors.toList()), ", ");
+        final String signs = StringUtils.join(queueSignManager.getSigns().stream().map(QueueSign::toString).collect(Collectors.toList()), ", ");
         lang.sendMessage(sender, "COMMAND.duels.list",
             "arenas", !arenas.isEmpty() ? StringUtils.join(arenas, "&r, &r") : "none",
             "kits", !kits.isEmpty() ? kits : "none",
-            "signs", !signs.isEmpty() ? signs : "none",
+            "queues", !queues.isEmpty() ? queues : "none",
+            "queue_signs", !signs.isEmpty() ? signs : "none",
             "lobby", StringUtil.parse(playerManager.getLobby()));
     }
 

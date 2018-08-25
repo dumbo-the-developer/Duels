@@ -6,16 +6,18 @@ import me.realized.duels.command.BaseCommand;
 import me.realized.duels.command.commands.duel.subcommands.AcceptCommand;
 import me.realized.duels.command.commands.duel.subcommands.DenyCommand;
 import me.realized.duels.command.commands.duel.subcommands.InventoryCommand;
+import me.realized.duels.command.commands.duel.subcommands.QueueCommand;
 import me.realized.duels.command.commands.duel.subcommands.StatsCommand;
 import me.realized.duels.command.commands.duel.subcommands.ToggleCommand;
 import me.realized.duels.command.commands.duel.subcommands.TopCommand;
 import me.realized.duels.command.commands.duel.subcommands.VersionCommand;
 import me.realized.duels.data.UserData;
 import me.realized.duels.extra.Permissions;
-import me.realized.duels.hooks.CombatTagPlusHook;
-import me.realized.duels.hooks.PvPManagerHook;
-import me.realized.duels.hooks.VaultHook;
-import me.realized.duels.hooks.WorldGuardHook;
+import me.realized.duels.hook.hooks.CombatLogXHook;
+import me.realized.duels.hook.hooks.CombatTagPlusHook;
+import me.realized.duels.hook.hooks.PvPManagerHook;
+import me.realized.duels.hook.hooks.VaultHook;
+import me.realized.duels.hook.hooks.WorldGuardHook;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.NumberUtil;
@@ -31,6 +33,7 @@ public class DuelCommand extends BaseCommand {
 
     private final CombatTagPlusHook combatTagPlus;
     private final PvPManagerHook pvpManager;
+    private final CombatLogXHook combatLogX;
     private final WorldGuardHook worldGuard;
     private final VaultHook vault;
 
@@ -39,6 +42,7 @@ public class DuelCommand extends BaseCommand {
         child(
             new AcceptCommand(plugin),
             new DenyCommand(plugin),
+            new QueueCommand(plugin),
             new StatsCommand(plugin),
             new ToggleCommand(plugin),
             new TopCommand(plugin),
@@ -47,6 +51,7 @@ public class DuelCommand extends BaseCommand {
         );
         this.combatTagPlus = hookManager.getHook(CombatTagPlusHook.class);
         this.pvpManager = hookManager.getHook(PvPManagerHook.class);
+        this.combatLogX = plugin.getHookManager().getHook(CombatLogXHook.class);
         this.worldGuard = hookManager.getHook(WorldGuardHook.class);
         this.vault = hookManager.getHook(VaultHook.class);
     }
@@ -81,7 +86,9 @@ public class DuelCommand extends BaseCommand {
             return true;
         }
 
-        if ((combatTagPlus != null && combatTagPlus.isTagged(player)) || (pvpManager != null && pvpManager.isTagged(player))) {
+        if ((combatTagPlus != null && combatTagPlus.isTagged(player))
+            || (pvpManager != null && pvpManager.isTagged(player))
+            || (combatLogX != null && combatLogX.isTagged(player))) {
             lang.sendMessage(sender, "ERROR.duel.is-tagged");
             return true;
         }

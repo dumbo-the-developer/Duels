@@ -5,6 +5,7 @@ import java.util.List;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.kit.Kit;
+import me.realized.duels.queue.Queue;
 import me.realized.duels.util.BlockUtil;
 import me.realized.duels.util.NumberUtil;
 import me.realized.duels.util.StringUtil;
@@ -47,20 +48,27 @@ public class AddsignCommand extends BaseCommand {
             return;
         }
 
-        if (!queueManager.create(sign.getLocation(), kit, bet)) {
+        final String kitName = kit != null ? kit.getName() : "none";
+        final Queue queue = queueManager.get(kit, bet);
+
+        if (queue == null) {
+            lang.sendMessage(sender, "ERROR.queue.not-found", "bet_amount", bet, "kit", kitName);
+            return;
+        }
+
+        if (!queueSignManager.create(player, sign.getLocation(), queue)) {
             lang.sendMessage(sender, "ERROR.sign.already-exists");
             return;
         }
 
         final Location location = sign.getLocation();
-        final String kitName = kit != null ? kit.getName() : "none";
         lang.sendMessage(sender, "COMMAND.duels.add-sign", "location", StringUtil.parse(location), "kit", kitName, "bet_amount", bet);
     }
 
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         if (args.length == 2) {
-            return Arrays.asList("10", "50", "100", "500", "1000");
+            return Arrays.asList("0", "10", "50", "100", "500", "1000");
         }
 
         if (args.length > 2) {

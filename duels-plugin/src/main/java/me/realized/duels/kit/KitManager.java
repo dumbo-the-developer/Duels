@@ -1,5 +1,6 @@
 package me.realized.duels.kit;
 
+import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,7 +10,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -28,6 +28,7 @@ import me.realized.duels.data.KitData;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.StringUtil;
+import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.gui.MultiPageGui;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -53,6 +54,7 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
     @Override
     public void handleLoad() throws IOException {
         gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.kit-selector.title"), config.getKitSelectorRows(), kits.values());
+        gui.setSpaceFiller(Items.from(config.getKitSelectorFillerType(), config.getKitSelectorFillerData()));
         plugin.getGuiListener().addGui(gui);
 
         if (!file.exists()) {
@@ -84,10 +86,6 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
             plugin.getGuiListener().removeGui(gui);
         }
 
-        if (kits.isEmpty()) {
-            return;
-        }
-
         final Map<String, KitData> data = new HashMap<>();
 
         for (final Map.Entry<String, Kit> entry : kits.entrySet()) {
@@ -106,11 +104,6 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
         kits.clear();
     }
 
-    @Override
-    public List<Kit> getKits() {
-        return Collections.unmodifiableList(new ArrayList<>(kits.values()));
-    }
-
     @Nullable
     @Override
     public Kit get(@Nonnull final String name) {
@@ -121,6 +114,7 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
     @Nullable
     @Override
     public Kit create(@Nonnull final Player creator, @Nonnull final String name) {
+        Objects.requireNonNull(creator, "creator");
         Objects.requireNonNull(name, "name");
 
         if (!StringUtil.isAlphanumeric(name) || kits.containsKey(name)) {
@@ -146,6 +140,8 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
             return null;
         }
 
+        kit.setRemoved(true);
+
         final KitRemoveEvent event = new KitRemoveEvent(source, kit);
         plugin.getServer().getPluginManager().callEvent(event);
         gui.calculatePages();
@@ -156,5 +152,11 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
     @Override
     public Kit remove(@Nonnull final String name) {
         return remove(null, name);
+    }
+
+    @Nonnull
+    @Override
+    public List<Kit> getKits() {
+        return Collections.unmodifiableList(Lists.newArrayList(kits.values()));
     }
 }

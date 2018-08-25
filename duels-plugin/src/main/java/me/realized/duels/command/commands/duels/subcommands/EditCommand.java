@@ -55,7 +55,7 @@ public class EditCommand extends BaseCommand {
         }
 
         if (args.length > 3) {
-            return Arrays.asList("10", "50", "100", "500", "1000");
+            return Arrays.asList("0", "10", "50", "100", "500", "1000");
         }
 
         return null;

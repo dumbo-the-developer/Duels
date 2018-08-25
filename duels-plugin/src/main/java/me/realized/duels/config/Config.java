@@ -29,6 +29,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean pmUntag;
     @Getter
+    private boolean clxPreventDuel;
+    @Getter
+    private boolean clxUntag;
+    @Getter
     private boolean autoUnvanish;
     @Getter
     private boolean setBackLocation;
@@ -173,7 +177,27 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private int kitSelectorRows;
     @Getter
+    private String kitSelectorFillerType;
+    @Getter
+    private short kitSelectorFillerData;
+    @Getter
     private int arenaSelectorRows;
+    @Getter
+    private String arenaSelectorFillerType;
+    @Getter
+    private short arenaSelectorFillerData;
+    @Getter
+    private String settingsFillerType;
+    @Getter
+    private short settingsFillerData;
+    @Getter
+    private int queuesRows;
+    @Getter
+    private String queuesFillerType;
+    @Getter
+    private short queuesFillerData;
+    @Getter
+    private boolean inheritKitItemType;
 
     @Getter
     private boolean soupEnabled;
@@ -201,6 +225,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         ctpUntag = configuration.getBoolean("supported-plugins.CombatTagPlus.untag-on-duel-teleport", true);
         pmPreventDuel = configuration.getBoolean("supported-plugins.PvPManager.prevent-duel-if-tagged", true);
         pmUntag = configuration.getBoolean("supported-plugins.PvPManager.untag-on-duel-teleport", true);
+        clxPreventDuel = configuration.getBoolean("supported-plugins.CombatLogX.prevent-duel-if-tagged", true);
+        clxUntag = configuration.getBoolean("supported-plugins.CombatLogX.untag-on-duel-teleport", true);
         autoUnvanish = configuration.getBoolean("supported-plugins.Essentials.auto-unvanish", true);
         setBackLocation = configuration.getBoolean("supported-plugins.Essentials.set-back-location", true);
         disableSkills = configuration.getBoolean("supported-plugins.mcMMO.disable-skills-in-duel", true);
@@ -276,7 +302,17 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         topKitIdentifier = configuration.getString("top.displayed-replacers.kit.identifier", "rating");
 
         kitSelectorRows = Math.min(Math.max(configuration.getInt("guis.kit-selector.rows", 2), 1), 5);
+        kitSelectorFillerType = configuration.getString("guis.kit-selector.space-filler-item.type", "STAINED_GLASS_PANE");
+        kitSelectorFillerData = (short) configuration.getInt("guis.kit-selector.space-filler-item.data", 0);
         arenaSelectorRows = Math.min(Math.max(configuration.getInt("guis.arena-selector.rows", 3), 1), 5);
+        arenaSelectorFillerType = configuration.getString("guis.arena-selector.space-filler-item.type", "STAINED_GLASS_PANE");
+        arenaSelectorFillerData = (short) configuration.getInt("guis.arena-selector.space-filler-item.data", 0);
+        settingsFillerType = configuration.getString("guis.settings.space-filler-item.type", "STAINED_GLASS_PANE");
+        settingsFillerData = (short) configuration.getInt("guis.settings.space-filler-item.data", 0);
+        queuesRows = Math.min(Math.max(configuration.getInt("guis.queues.rows", 3), 1), 5);
+        queuesFillerType = configuration.getString("guis.queues.space-filler-item.type", "STAINED_GLASS_PANE");
+        queuesFillerData = (short) configuration.getInt("guis.queues.space-filler-item.data", 0);
+        inheritKitItemType = configuration.getBoolean("guis.queues.inherit-kit-item-type", true);
 
         soupEnabled = configuration.getBoolean("soup.enabled", true);
         nameStartingWith = configuration.getString("soup.arena-name-starting-with", "soup arena");

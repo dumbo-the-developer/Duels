@@ -84,6 +84,7 @@ public class UserData implements User {
         }
     }
 
+    @Nonnull
     @Override
     public List<MatchData> getMatches() {
         return Collections.unmodifiableList(matches);

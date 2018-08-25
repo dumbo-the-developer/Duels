@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
-import me.realized.duels.gui.setting.SettingsGui;
+import me.realized.duels.gui.settings.SettingsGui;
 import me.realized.duels.kit.Kit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;

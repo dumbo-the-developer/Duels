@@ -4,8 +4,10 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.command.commands.duels.subcommands.AddsignCommand;
 import me.realized.duels.command.commands.duels.subcommands.CreateCommand;
+import me.realized.duels.command.commands.duels.subcommands.CreatequeueCommand;
 import me.realized.duels.command.commands.duels.subcommands.DeleteCommand;
 import me.realized.duels.command.commands.duels.subcommands.DeletekitCommand;
+import me.realized.duels.command.commands.duels.subcommands.DeletequeueCommand;
 import me.realized.duels.command.commands.duels.subcommands.DeletesignCommand;
 import me.realized.duels.command.commands.duels.subcommands.EditCommand;
 import me.realized.duels.command.commands.duels.subcommands.HelpCommand;
@@ -41,6 +43,8 @@ public class DuelsCommand extends BaseCommand {
             new DeleteCommand(plugin),
             new SetCommand(plugin),
             new ToggleCommand(plugin),
+            new CreatequeueCommand(plugin),
+            new DeletequeueCommand(plugin),
             new AddsignCommand(plugin),
             new DeletesignCommand(plugin),
             new SetlobbyCommand(plugin),

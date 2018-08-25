@@ -60,6 +60,7 @@ public class Match implements me.realized.duels.api.match.Match {
         return items != null ? items.values().stream().flatMap(Collection::stream).collect(Collectors.toList()) : Collections.emptyList();
     }
 
+    @Nonnull
     @Override
     public List<ItemStack> getItems(@Nonnull final Player player) {
         Objects.requireNonNull(player, "player");
@@ -72,6 +73,7 @@ public class Match implements me.realized.duels.api.match.Match {
         return items != null ? items : Collections.emptyList();
     }
 
+    @Nonnull
     @Override
     public Set<Player> getPlayers() {
         return Collections.unmodifiableSet(getAlivePlayers());

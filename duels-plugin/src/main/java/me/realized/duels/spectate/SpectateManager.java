@@ -13,7 +13,7 @@ import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.extra.Permissions;
 import me.realized.duels.extra.Teleport;
-import me.realized.duels.hooks.MyPetHook;
+import me.realized.duels.hook.hooks.MyPetHook;
 import me.realized.duels.player.PlayerInfo;
 import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.util.Loadable;
@@ -68,7 +68,7 @@ public class SpectateManager implements Loadable {
 
     @Override
     public void handleUnload() {
-
+        spectators.clear();
     }
 
     public Spectator get(final Player player) {
@@ -116,7 +116,7 @@ public class SpectateManager implements Loadable {
 
         final Spectator spectator = new Spectator(player, target, arena);
         spectators.put(player, spectator);
-        teleport.tryTeleport(player, target.getLocation());
+        teleport.tryTeleport(player, target.getLocation().clone().add(0, 2, 0));
         spectator.setTeleported(true);
         player.getInventory().setItem(8, ItemBuilder.of(Material.PAPER).name("&cStop Spectating").build());
         player.setAllowFlight(true);

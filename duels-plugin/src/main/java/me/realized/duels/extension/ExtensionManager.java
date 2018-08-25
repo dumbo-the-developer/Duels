@@ -47,20 +47,7 @@ public class ExtensionManager implements Loadable {
 
         for (final File file : jars) {
             try {
-                final ExtensionClassLoader classLoader = new ExtensionClassLoader(file, DuelsExtension.class.getClassLoader());
-                final DuelsExtension extension = classLoader.getExtension();
-
-                if (extension == null) {
-                    Log.error(this, "Could not load extension " + file.getName() + ": Failed to initiate main class");
-                    continue;
-                }
-
-                if (extension.getRequiredVersion() != null && VersionUtil.isLower(plugin.getVersion(), extension.getRequiredVersion())) {
-                    Log.error(this, "Could not load extension " + file.getName() + ": This extension requires Duels v" + extension.getRequiredVersion() + " or higher!");
-                    continue;
-                }
-
-                final ExtensionInfo info = classLoader.getInfo();
+                final ExtensionInfo info = new ExtensionInfo(file);
 
                 if (extensions.containsKey(info.getName())) {
                     Log.error(this, "Could not load extension " + file.getName() + ": An extension with the name '" + info.getName() + "' already exists");
@@ -72,13 +59,33 @@ public class ExtensionManager implements Loadable {
                     continue;
                 }
 
+                if (info.getApiVersion() != null && VersionUtil.isLower(plugin.getVersion(), info.getApiVersion())) {
+                    Log.error(this, "Could not load extension " + file.getName() + ": This extension requires Duels v" + info.getApiVersion() + " or higher!");
+                    continue;
+                }
+
+                final ExtensionClassLoader classLoader = new ExtensionClassLoader(file, info, DuelsExtension.class.getClassLoader());
+                final DuelsExtension extension = classLoader.getExtension();
+
+                if (extension == null) {
+                    Log.error(this, "Could not load extension " + file.getName() + ": Failed to initiate main class");
+                    continue;
+                }
+
+                final String requiredVersion = extension.getRequiredVersion();
+
+                if (requiredVersion != null && VersionUtil.isLower(plugin.getVersion(), requiredVersion)) {
+                    Log.error(this, "Could not load extension " + file.getName() + ": This extension requires Duels v" + requiredVersion + " or higher!");
+                    continue;
+                }
+
                 INIT_EXTENSION.invoke(extension, plugin, info.getName(), folder, file);
                 extension.setEnabled(true);
                 Log.info(this, "Extension '" + extension.getName() + "' is now enabled.");
                 extensions.put(extension.getName(), extension);
                 this.info.put(extension, info);
-            } catch (Exception ex) {
-                Log.error(this, "Could not enable extension " + file.getName() + "!", ex);
+            } catch (Throwable thrown) {
+                Log.error(this, "Could not enable extension " + file.getName() + "!", thrown);
             }
         }
     }

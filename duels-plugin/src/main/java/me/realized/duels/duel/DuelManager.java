@@ -22,12 +22,15 @@ import me.realized.duels.data.MatchData;
 import me.realized.duels.data.UserData;
 import me.realized.duels.data.UserManager;
 import me.realized.duels.extra.Teleport;
-import me.realized.duels.hooks.EssentialsHook;
-import me.realized.duels.hooks.McMMOHook;
-import me.realized.duels.hooks.MyPetHook;
-import me.realized.duels.hooks.SimpleClansHook;
-import me.realized.duels.hooks.VaultHook;
-import me.realized.duels.hooks.WorldGuardHook;
+import me.realized.duels.hook.hooks.CombatLogXHook;
+import me.realized.duels.hook.hooks.CombatTagPlusHook;
+import me.realized.duels.hook.hooks.EssentialsHook;
+import me.realized.duels.hook.hooks.McMMOHook;
+import me.realized.duels.hook.hooks.MyPetHook;
+import me.realized.duels.hook.hooks.PvPManagerHook;
+import me.realized.duels.hook.hooks.SimpleClansHook;
+import me.realized.duels.hook.hooks.VaultHook;
+import me.realized.duels.hook.hooks.WorldGuardHook;
 import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.player.PlayerInfo;
@@ -80,6 +83,9 @@ public class DuelManager implements Loadable {
 
     private QueueManager queueManager;
     private Teleport teleport;
+    private CombatTagPlusHook combatTagPlus;
+    private PvPManagerHook pvpManager;
+    private CombatLogXHook combatLogX;
     private VaultHook vault;
     private EssentialsHook essentials;
     private McMMOHook mcMMO;
@@ -103,6 +109,9 @@ public class DuelManager implements Loadable {
     public void handleLoad() {
         this.queueManager = plugin.getQueueManager();
         this.teleport = plugin.getTeleport();
+        this.combatTagPlus = plugin.getHookManager().getHook(CombatTagPlusHook.class);
+        this.pvpManager = plugin.getHookManager().getHook(PvPManagerHook.class);
+        this.combatLogX = plugin.getHookManager().getHook(CombatLogXHook.class);
         this.vault = plugin.getHookManager().getHook(VaultHook.class);
         this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
         this.mcMMO = plugin.getHookManager().getHook(McMMOHook.class);
@@ -306,6 +315,12 @@ public class DuelManager implements Loadable {
             return;
         }
 
+        if (isTagged(first) || isTagged(second)) {
+            lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure.is-tagged");
+            refundItems(items, first, second);
+            return;
+        }
+
         if (config.isCancelIfMoved() && (notInLoc(first, settings.getBaseLoc(first)) || notInLoc(second, settings.getBaseLoc(second)))) {
             lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure.player-moved");
             refundItems(items, first, second);
@@ -313,7 +328,7 @@ public class DuelManager implements Loadable {
         }
 
         if (config.isDuelzoneEnabled() && worldGuard != null && (notInDz(first, settings.getDuelzone(first)) || notInDz(second, settings.getDuelzone(second)))) {
-            lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure.player-moved");
+            lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure.not-in-duelzone");
             refundItems(items, first, second);
             return;
         }
@@ -344,7 +359,7 @@ public class DuelManager implements Loadable {
             vault.remove(bet, first, second);
         }
 
-        arena.startMatch(kit, items, settings.getBet(), fromQueue);
+        final Match match = arena.startMatch(kit, items, settings.getBet(), fromQueue);
         addPlayers(fromQueue, arena, kit, arena.getPositions(), first, second);
 
         if (config.isCdEnabled()) {
@@ -354,7 +369,7 @@ public class DuelManager implements Loadable {
             arena.startCountdown(kit != null ? kit.getName() : "none", info);
         }
 
-        final MatchStartEvent event = new MatchStartEvent(arena.getMatch(), first, second);
+        final MatchStartEvent event = new MatchStartEvent(match, first, second);
         plugin.getServer().getPluginManager().callEvent(event);
     }
 
@@ -368,6 +383,12 @@ public class DuelManager implements Loadable {
                 }
             });
         }
+    }
+
+    private boolean isTagged(final Player player) {
+        return (combatTagPlus != null && combatTagPlus.isTagged(player))
+            || (pvpManager != null && pvpManager.isTagged(player))
+            || (combatLogX != null && combatLogX.isTagged(player));
     }
 
     private boolean notInLoc(final Player player, final Location location) {
@@ -534,6 +555,21 @@ public class DuelManager implements Loadable {
     // Separating out the listener fixes weird error with 1.7 spigot
     private class DuelListener implements Listener {
 
+        @EventHandler(priority = EventPriority.LOWEST)
+        public void onLowest(final PlayerDeathEvent event) {
+            if (!arenaManager.isInMatch(event.getEntity())) {
+                return;
+            }
+
+            if (!(!config.isUseOwnInventoryEnabled() || config.isUseOwnInventoryKeepItems())) {
+                return;
+            }
+
+            event.setKeepLevel(true);
+            event.setDroppedExp(0);
+            event.getDrops().clear();
+        }
+
         @EventHandler(priority = EventPriority.HIGHEST)
         public void on(final PlayerDeathEvent event) {
             final Player player = event.getEntity();
@@ -551,17 +587,8 @@ public class DuelManager implements Loadable {
                 simpleClans.removeDeath(player);
             }
 
+            event.setKeepInventory(config.isUseOwnInventoryEnabled() && config.isUseOwnInventoryKeepItems());
             inventoryManager.create(player);
-
-            final boolean keepItems = config.isUseOwnInventoryEnabled() && config.isUseOwnInventoryKeepItems();
-            event.setKeepInventory(keepItems);
-
-            if (!config.isUseOwnInventoryEnabled() || keepItems) {
-                event.setKeepLevel(true);
-                event.setDroppedExp(0);
-                event.getDrops().clear();
-            }
-
             arena.remove(player);
 
             // Call end task only on the first death
@@ -610,7 +637,11 @@ public class DuelManager implements Loadable {
 
                     if (config.isEndCommandsEnabled()) {
                         for (final String command : config.getEndCommands()) {
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%winner%", winner.getName()).replace("%loser%", player.getName()));
+                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command
+                                .replace("%winner%", winner.getName()).replace("%loser%", player.getName())
+                                .replace("%kit%", kit).replace("%arena%", arena.getName())
+                                .replace("%bet_amount%", String.valueOf(match.getBet()))
+                            );
                         }
                     }
 

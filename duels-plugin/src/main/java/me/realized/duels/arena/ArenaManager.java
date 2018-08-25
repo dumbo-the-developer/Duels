@@ -29,6 +29,7 @@ import me.realized.duels.kit.Kit;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.StringUtil;
+import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.gui.MultiPageGui;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
@@ -62,6 +63,7 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
     @Override
     public void handleLoad() throws IOException {
         gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.arena-selector.title"), config.getArenaSelectorRows(), arenas);
+        gui.setSpaceFiller(Items.from(config.getArenaSelectorFillerType(), config.getArenaSelectorFillerData()));
         plugin.getGuiListener().addGui(gui);
 
         if (config.isCdEnabled()) {
@@ -95,10 +97,6 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
     public void handleUnload() throws IOException {
         if (gui != null) {
             plugin.getGuiListener().removeGui(gui);
-        }
-
-        if (arenas.isEmpty()) {
-            return;
         }
 
         final List<ArenaData> data = new ArrayList<>();
@@ -148,6 +146,8 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
 
     public boolean remove(final CommandSender source, final Arena arena) {
         if (arenas.remove(arena)) {
+            arena.setRemoved(true);
+
             final ArenaRemoveEvent event = new ArenaRemoveEvent(source, arena);
             plugin.getServer().getPluginManager().callEvent(event);
             gui.calculatePages();
@@ -198,7 +198,7 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
     public void on(final ProjectileLaunchEvent event) {
         final ProjectileSource shooter = event.getEntity().getShooter();
 
-        if (shooter == null || !(shooter instanceof Player)) {
+        if (!(shooter instanceof Player)) {
             return;
         }
 

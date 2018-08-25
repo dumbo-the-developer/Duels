@@ -78,11 +78,12 @@ class CompatBase {
         boolean pre1_8 = CompatUtil.isPre1_8();
         TITLE_PACKET = !pre1_8 ? ReflectionUtil.getNMSClass("PacketPlayOutTitle") : null;
         CHAT_COMPONENT = !pre1_8 ? ReflectionUtil.getNMSClass("IChatBaseComponent") : null;
-        TITLE_ACTIONS = !pre1_8 ? ReflectionUtil.getNMSClass("PacketPlayOutTitle$EnumTitleAction") : null;
-        CHAT_SERIALIZER = !pre1_8 ? ReflectionUtil.getNMSClass("ChatComponentText") : null;
+        TITLE_ACTIONS = !pre1_8 ? ReflectionUtil.getNMSClass("PacketPlayOutTitle$EnumTitleAction", false) : null;
 
         if (!pre1_8 && TITLE_ACTIONS == null) {
             TITLE_ACTIONS = ReflectionUtil.getNMSClass("EnumTitleAction");
         }
+
+        CHAT_SERIALIZER = !pre1_8 ? ReflectionUtil.getNMSClass("ChatComponentText") : null;
     }
 }

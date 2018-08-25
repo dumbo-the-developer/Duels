@@ -5,90 +5,105 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import me.realized.duels.api.kit.Kit;
 
+/**
+ * Represents a User loaded on the server.
+ */
 public interface User {
 
     /**
-     * @return UUID of this user
+     * The {@link UUID} of this user. thread-safe!
+     *
+     * @return {@link UUID} of this user.
      */
     @Nonnull
     UUID getUuid();
 
 
     /**
-     * This value is updated on login.
-     * Method is thread-safe.
+     * The Name of this user. thread-safe!
      *
-     * @return Name of this user
+     * @return Name of this user.
      */
     @Nonnull
     String getName();
 
 
     /**
-     * Method is thread-safe.
+     * Total wins of this user. thread-safe!
      *
-     * @return total wins of this user
+     * @return total wins of this user.
      */
     int getWins();
 
 
     /**
      * Sets new total wins for this user
+     *
+     * @param wins New total wins.
      */
     void setWins(final int wins);
 
 
     /**
-     * Method is thread-safe.
+     * Total losses of this user. thread-safe!
      *
-     * @return total losses of this user
+     * @return total losses of this user.
      */
     int getLosses();
 
 
     /**
-     * Sets new total wins for this user
+     * Sets new total wins for this user.
+     *
+     * @param losses New total losses.
      */
     void setLosses(final int losses);
 
 
     /**
-     * @return true if this user has requests enabled, otherwise false
+     * Whether or not this user is receiving duel requests.
+     *
+     * @return True if this user has requests enabled. False otherwise.
      */
     boolean canRequest();
 
 
     /**
-     * @param requests true to allow sending duel requests to this user, otherwise false
+     * Enables or disables duel requests for this user.
+     *
+     * @param requests True to allow sending duel requests to this user. False otherwise.
      */
     void setRequests(final boolean requests);
 
 
     /**
-     * @return List of recent matches for this user
+     * UnmodifiableList of recent matches for this user.
+     *
+     * @return Never-null UnmodifiableList of recent matches for this user.
      */
+    @Nonnull
     List<? extends MatchInfo> getMatches();
 
 
     /**
-     * Method is thread-safe.
+     * Gets the rating of the given {@link Kit}. thread-safe!
      *
-     * @param kit Kit to check for rating
-     * @return Rating for this kit or the default rating specified in the configuration
+     * @param kit {@link Kit} to check for rating.
+     * @return Rating for this {@link Kit} or the default rating specified in the configuration.
      */
     int getRating(@Nonnull final Kit kit);
 
 
     /**
-     * Method is thread-safe.
+     * Resets the rating to default for the given {@link Kit}. thread-safe!
      *
-     * @param kit Kit to reset the rating to default.
+     * @param kit {@link Kit} to reset the rating to default.
      */
     void resetRating(@Nonnull final Kit kit);
 
 
     /**
-     * Resets user's wins, losses, recent matches, and rating for all kits.
+     * Resets user's wins, losses, recent matches, and all rating.
      */
     void reset();
 }

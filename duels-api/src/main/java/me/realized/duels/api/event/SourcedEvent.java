@@ -1,19 +1,36 @@
 package me.realized.duels.api.event;
 
 import javax.annotation.Nullable;
-import lombok.Getter;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
 
+/**
+ * Represents an event that may have a source.
+ */
 public abstract class SourcedEvent extends Event {
 
-    @Getter
     private final CommandSender source;
 
     protected SourcedEvent(@Nullable final CommandSender source) {
         this.source = source;
     }
 
+    /**
+     * Source of this event. May be null!
+     *
+     * @return {@link CommandSender} that is the source of this event or null.
+     */
+    @Nullable
+    public CommandSender getSource() {
+        return source;
+    }
+
+
+    /**
+     * Whether or not this event has a source specified.
+     *
+     * @return True if there was a source specified. False otherwise.
+     */
     public boolean hasSource() {
         return getSource() != null;
     }

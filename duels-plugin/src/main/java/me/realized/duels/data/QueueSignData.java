@@ -1,7 +1,9 @@
 package me.realized.duels.data;
 
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.queue.QueueSign;
+import me.realized.duels.kit.Kit;
+import me.realized.duels.queue.Queue;
+import me.realized.duels.queue.sign.QueueSign;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -12,8 +14,10 @@ public class QueueSignData {
     private final String kit;
     private final int bet;
 
-    public QueueSignData(final QueueSign queue) {
-        this.location = new LocationData(queue.getLocation());
+    public QueueSignData(final QueueSign sign) {
+        this.location = new LocationData(sign.getLocation());
+
+        final Queue queue = sign.getQueue();
         this.kit = queue.getKit() != null ? queue.getKit().getName() : null;
         this.bet = queue.getBet();
     }
@@ -31,7 +35,14 @@ public class QueueSignData {
             return null;
         }
 
-        return new QueueSign(location, plugin.getLang().getMessage("SIGN.format",
-            "kit", kit != null ? kit : "none", "bet_amount", bet), kit != null ? plugin.getKitManager().get(kit) : null, bet);
+        final Kit kit = this.kit != null ? plugin.getKitManager().get(this.kit) : null;
+        Queue queue = plugin.getQueueManager().get(kit, bet);
+
+        if (queue == null) {
+            plugin.getQueueManager().create(kit, bet);
+            queue = plugin.getQueueManager().get(kit, bet);
+        }
+
+        return new QueueSign(location, plugin.getLang().getMessage("SIGN.format", "kit", this.kit != null ? this.kit : "none", "bet_amount", bet), queue);
     }
 }

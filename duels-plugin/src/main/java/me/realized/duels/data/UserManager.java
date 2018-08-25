@@ -238,6 +238,11 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
 
         try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
             final UserData user = plugin.getGson().fromJson(reader, UserData.class);
+
+            if (user == null) {
+                return null;
+            }
+
             user.plugin = plugin;
             user.folder = folder;
             user.defaultRating = defaultRating;

@@ -3,7 +3,8 @@ package me.realized.duels.command.commands.duels.subcommands;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.kit.Kit;
-import me.realized.duels.queue.QueueSign;
+import me.realized.duels.queue.Queue;
+import me.realized.duels.queue.sign.QueueSign;
 import me.realized.duels.util.BlockUtil;
 import me.realized.duels.util.StringUtil;
 import org.bukkit.Location;
@@ -28,7 +29,7 @@ public class DeletesignCommand extends BaseCommand {
             return;
         }
 
-        final QueueSign queueSign = queueManager.remove(sign.getLocation());
+        final QueueSign queueSign = queueSignManager.remove(player, sign.getLocation());
 
         if (queueSign == null) {
             lang.sendMessage(sender, "ERROR.sign.not-found");
@@ -39,8 +40,9 @@ public class DeletesignCommand extends BaseCommand {
         sign.update(true);
 
         final Location location = sign.getLocation();
-        final Kit kit = queueSign.getKit();
+        final Queue queue = queueSign.getQueue();
+        final Kit kit = queue.getKit();
         final String kitName = kit != null ? kit.getName() : "none";
-        lang.sendMessage(sender, "COMMAND.duels.del-sign", "location", StringUtil.parse(location), "kit", kitName, "bet_amount", queueSign.getBet());
+        lang.sendMessage(sender, "COMMAND.duels.del-sign", "location", StringUtil.parse(location), "kit", kitName, "bet_amount", queue.getBet());
     }
 }

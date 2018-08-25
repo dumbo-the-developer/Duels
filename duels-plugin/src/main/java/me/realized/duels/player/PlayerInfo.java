@@ -18,6 +18,7 @@ public class PlayerInfo {
     private final Collection<PotionEffect> effects;
     private final double health;
     private final int hunger;
+
     @Getter
     private final List<ItemStack> extra = new ArrayList<>();
 

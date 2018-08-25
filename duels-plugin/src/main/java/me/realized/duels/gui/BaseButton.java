@@ -5,6 +5,7 @@ import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.kit.KitManager;
+import me.realized.duels.queue.QueueManager;
 import me.realized.duels.request.RequestManager;
 import me.realized.duels.setting.SettingsManager;
 import me.realized.duels.spectate.SpectateManager;
@@ -18,6 +19,7 @@ public abstract class BaseButton extends Button<DuelsPlugin> {
     protected final ArenaManager arenaManager;
     protected final KitManager kitManager;
     protected final SettingsManager settingManager;
+    protected final QueueManager queueManager;
     protected final SpectateManager spectateManager;
     protected final RequestManager requestManager;
 
@@ -28,6 +30,7 @@ public abstract class BaseButton extends Button<DuelsPlugin> {
         this.arenaManager = plugin.getArenaManager();
         this.kitManager = plugin.getKitManager();
         this.settingManager = plugin.getSettingManager();
+        this.queueManager = plugin.getQueueManager();
         this.spectateManager = plugin.getSpectateManager();
         this.requestManager = plugin.getRequestManager();
     }

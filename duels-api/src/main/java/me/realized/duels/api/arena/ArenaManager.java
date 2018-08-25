@@ -4,27 +4,36 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
 
+/**
+ * Represents the ArenaManager singleton used by Duels.
+ */
 public interface ArenaManager {
 
     /**
-     * @param name Name to search through the list of arenas
-     * @return Arena instance if an arena with the given name exists, otherwise null
+     * Attempts to find an {@link Arena} instance associated with the given name.
+     *
+     * @param name Name to search through the loaded arenas. Should not be null!
+     * @return {@link Arena} instance that has a name matching with the given name or null if not exists.
      */
     @Nullable
     Arena get(@Nonnull final String name);
 
 
     /**
-     * @param player Player to search through the list of arenas
-     * @return Arena instance if an arena containing the player exists, otherwise null
+     * Attempts to find an {@link Arena} instance that contains the player.
+     *
+     * @param player Player to search through the loaded arenas. Should not be null!
+     * @return {@link Arena} instance that contains the player or null if not exists.
      */
     @Nullable
     Arena get(@Nonnull final Player player);
 
 
     /**
-     * @param player Player to check if in match
-     * @return true if in match, otherwise false. If true, {@link #get(Player)} is guaranteed to return an Arena instance.
+     * Whether or not the given player is in a match. If returned true, {@link #get(Player)} is guaranteed to return a {@link Arena} instance.
+     *
+     * @param player Player to check if in match. Should not be null!
+     * @return True if player was in a match. False otherwise.
      */
     boolean isInMatch(@Nonnull final Player player);
 }
