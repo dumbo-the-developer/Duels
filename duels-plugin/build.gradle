@@ -18,10 +18,10 @@ processResources {
 
 dependencies {
     compile 'org.projectlombok:lombok:1.16.20'
-    compile 'net.milkbowl.vault:VaultAPI:1.6'
     compile 'me.clip:placeholderapi:2.8.4'
     compile('be.maximvdw:MVdWPlaceholderAPI:2.5.1-SNAPSHOT') { transitive = false }
     compile 'com.sk89q:worldguard:6.1.1-SNAPSHOT'
+    compile name: 'Vault-1.6.7'
     compile name: 'EssentialsX'
     compile name: 'CombatTagPlus'
     compile name: 'PvPManager'

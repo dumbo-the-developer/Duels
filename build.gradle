@@ -34,11 +34,6 @@ subprojects {
         }
 
         maven {
-            name 'vault-repo'
-            url 'http://nexus.hc.to/content/repositories/pub_releases'
-        }
-
-        maven {
             name 'mvdw-repo'
             url 'http://repo.mvdw-software.be/content/groups/public/'
         }
