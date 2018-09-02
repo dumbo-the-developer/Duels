@@ -56,6 +56,15 @@ public abstract class AbstractGui<P extends JavaPlugin> {
         Slots.run(from, to, slot -> set(inventory, slot, button));
     }
 
+    public void remove(final Inventory inventory) {
+        buttons.remove(inventory);
+    }
+
+    public Button<P> remove(final Inventory inventory, final int slot) {
+        final Map<Integer, Button<P>> buttons;
+        return (buttons = this.buttons.get(inventory)) != null ? buttons.remove(slot) : null;
+    }
+
     public void update(final Player player, final Inventory inventory, final Button<P> button) {
         final Map<Integer, Button<P>> cached = buttons.get(inventory);
 

@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -29,7 +30,7 @@ public class KitItemListener implements Listener {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void on(final InventoryClickEvent event) {
         final Player player = (Player) event.getWhoClicked();
 
@@ -39,7 +40,7 @@ public class KitItemListener implements Listener {
 
         final Inventory clicked = event.getClickedInventory();
 
-        if (clicked == null || !(clicked instanceof PlayerInventory)) {
+        if (!(clicked instanceof PlayerInventory)) {
             return;
         }
 

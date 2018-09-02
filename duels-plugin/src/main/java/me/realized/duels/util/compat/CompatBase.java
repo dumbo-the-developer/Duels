@@ -39,6 +39,9 @@ class CompatBase {
     static Class<?> TITLE_ACTIONS;
     static final Class<?> CHAT_SERIALIZER;
 
+    static final Field CB_INVENTORY;
+    static final Field CB_INVENTORY_TITLE;
+
     static {
         final Class<?> CB_ITEMSTACK = ReflectionUtil.getCBClass("inventory.CraftItemStack");
         final Class<?> NMS_ITEMSTACK = ReflectionUtil.getNMSClass("ItemStack");
@@ -85,5 +88,8 @@ class CompatBase {
         }
 
         CHAT_SERIALIZER = !pre1_8 ? ReflectionUtil.getNMSClass("ChatComponentText") : null;
+
+        CB_INVENTORY = ReflectionUtil.getDeclaredField(ReflectionUtil.getCBClass("inventory.CraftInventory"), "inventory");
+        CB_INVENTORY_TITLE = ReflectionUtil.getDeclaredField(ReflectionUtil.getCBClass("inventory.CraftInventoryCustom$MinecraftInventory"), "title");
     }
 }

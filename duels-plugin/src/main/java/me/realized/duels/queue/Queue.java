@@ -67,9 +67,8 @@ public class Queue extends BaseButton implements DQueue {
         return false;
     }
 
-    void removeAll(final Set<QueueEntry> players) {
-        this.players.removeAll(players);
-        update();
+    boolean removeAll(final Set<QueueEntry> players) {
+        return this.players.removeAll(players);
     }
 
     private void update() {

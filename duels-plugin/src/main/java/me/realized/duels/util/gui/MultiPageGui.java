@@ -1,14 +1,14 @@
 package me.realized.duels.util.gui;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-import lombok.Getter;
+import java.util.function.Consumer;
 import lombok.Setter;
+import me.realized.duels.util.compat.Inventories;
 import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.inventory.InventoryBuilder;
 import me.realized.duels.util.inventory.ItemBuilder;
+import me.realized.duels.util.inventory.Slots;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -19,12 +19,18 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
 
+    private final ItemStack PREV_BUTTON = ItemBuilder.of(Material.PAPER).name("&aPrevious Page").build();
+    private final ItemStack NEXT_BUTTON = ItemBuilder.of(Material.PAPER).name("&aNext Page").build();
+    private final ItemStack EMPTY_INDICATOR = ItemBuilder.of(Material.REDSTONE_BLOCK).name("&cThis page is empty.").build();
+
     private final String title;
     private final int size, prevPageSlot, nextPageSlot;
-    private final Collection<? extends Button<P>> buttons;
-    private final List<Page> pages = new ArrayList<>();
 
-    @Getter
+    // Note: Referenced Collection!
+    private final Collection<? extends Button<P>> buttons;
+
+    private PageNode first;
+
     @Setter
     private ItemStack spaceFiller;
 
@@ -51,73 +57,95 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
         this.buttons = buttons;
     }
 
+    /**
+     * Recalculates the pages for this {@link MultiPageGui}.
+     */
     public void calculatePages() {
-        final List<HumanEntity> viewers = pages.stream().flatMap(page -> page.inventory.getViewers().stream()).collect(Collectors.toList());
-        pages.clear();
-
-        final ItemStack prevPage = ItemBuilder.of(Material.PAPER).name("&aPrevious Page").build();
-        final ItemStack nextPage = ItemBuilder.of(Material.PAPER).name("&aNext Page").build();
+        // The max size an inventory can contain.
         final int maxSize = size - 9;
-        final int pages = buttons.size() / maxSize + (buttons.size() % maxSize > 0 ? 1 : 0);
+        // Total pages calculated based on the size of the buttons collection at this point of call.
+        final int totalPages = buttons.size() / maxSize + (buttons.size() % maxSize > 0 ? 1 : 0);
 
-        if (pages == 0) {
-            this.pages.add(new Page(
-                InventoryBuilder
-                    .of(title, 18)
-                    .set(4, ItemBuilder.of(Material.REDSTONE_BLOCK).name("&cThis page is empty.").build())
-                    .fillRange(9, 18, spaceFiller != null ? spaceFiller : Items.WHITE_PANE.clone()).build())
-            );
+        // If first time calculating, init first PageNode
+        if (first == null) {
+            first = createPage(1, totalPages);
+        }
+
+        // Case: The updated buttons collection is empty.
+        if (totalPages == 0) {
+            first.setEmpty();
             return;
         }
 
         int i = 0;
         int pageNum = 1;
         int slot = 0;
-        Page page = null;
+        PageNode last = null;
 
         for (final Button<P> button : buttons) {
             if (i % maxSize == 0) {
-                final Page prev = page;
-                page = new Page(
-                    InventoryBuilder.of(title + " (" + pageNum + "/" + pages + ")", size)
-                        .fillRange(prevPageSlot, nextPageSlot + 1, spaceFiller != null ? spaceFiller : Items.WHITE_PANE.clone()).build()
-                );
+                final PageNode prev = last;
 
-                if (prev != null) {
-                    page.inventory.setItem(prevPageSlot, prevPage);
-                    page.previous = prev;
-                    prev.inventory.setItem(nextPageSlot, nextPage);
-                    prev.next = page;
+                if (last == null) {
+                    last = first;
+                } else {
+                    if (last.next == null) {
+                        last.next = createPage(pageNum, totalPages);
+                    }
+
+                    last = last.next;
                 }
 
-                this.pages.add(page);
+                last.setTitle(title + " (" + pageNum + "/" + totalPages + ")");
+                last.clear();
+
+                if (prev != null) {
+                    last.previous = prev;
+                    last.inventory.setItem(prevPageSlot, PREV_BUTTON);
+                    prev.next = last;
+                    prev.inventory.setItem(nextPageSlot, NEXT_BUTTON);
+                }
+
                 slot = 0;
                 pageNum++;
             }
 
-            set(page.inventory, slot, button);
+            set(last.inventory, slot, button);
             i++;
             slot++;
         }
 
-        viewers.forEach(viewer -> open((Player) viewer));
+        if (last != null) {
+            last.resetNext();
+        }
+    }
+
+    private PageNode createPage(final int page, final int total) {
+        return new PageNode(InventoryBuilder
+            .of(title + " (" + page + "/" + total + ")", size)
+            .fillRange(prevPageSlot, nextPageSlot + 1, getSpaceFiller())
+            .build());
+    }
+
+    private ItemStack getSpaceFiller() {
+        return spaceFiller != null ? spaceFiller : Items.WHITE_PANE.clone();
     }
 
     @Override
     public void open(final Player... players) {
         for (final Player player : players) {
-            player.openInventory(pages.get(0).inventory);
+            player.openInventory(first.inventory);
         }
     }
 
     @Override
     public boolean isPart(final Inventory inventory) {
-        return pages.stream().anyMatch(page -> page.inventory.equals(inventory));
+        return first.isPart(inventory);
     }
 
     @Override
     public boolean hasViewers() {
-        return pages.stream().anyMatch(page -> !page.inventory.getViewers().isEmpty());
+        return first.hasViewers();
     }
 
     @Override
@@ -134,18 +162,18 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
             return;
         }
 
-        final Page page = pages.stream().filter(element -> element.inventory.equals(clicked)).findFirst().orElse(null);
+        final PageNode node = first.find(clicked);
 
-        if (page == null) {
+        if (node == null) {
             return;
         }
 
         final int slot = event.getSlot();
 
-        if (slot == nextPageSlot && page.next != null) {
-            player.openInventory(page.next.inventory);
-        } else if (slot == prevPageSlot && page.previous != null) {
-            player.openInventory(page.previous.inventory);
+        if (slot == nextPageSlot && node.next != null) {
+            player.openInventory(node.next.inventory);
+        } else if (slot == prevPageSlot && node.previous != null) {
+            player.openInventory(node.previous.inventory);
         } else {
             final Button<P> button = get(clicked, slot);
 
@@ -157,13 +185,98 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
         }
     }
 
-    private class Page {
+    private class PageNode {
 
         private final Inventory inventory;
-        private Page previous, next;
+        private PageNode previous, next;
 
-        private Page(final Inventory inventory) {
+        PageNode(final Inventory inventory) {
             this.inventory = inventory;
+        }
+
+        void setEmpty() {
+            setTitle(title);
+
+            final ItemStack item = inventory.getItem(4);
+
+            if (item != null && item.isSimilar(EMPTY_INDICATOR)) {
+                return;
+            }
+
+            clear();
+            resetBottom();
+            inventory.setItem(4, EMPTY_INDICATOR);
+            remove(inventory);
+            resetNext();
+        }
+
+        void resetNext() {
+            if (next == null) {
+                return;
+            }
+
+            inventory.setItem(nextPageSlot, getSpaceFiller());
+            forEach(node -> {
+                if (node.equals(this)) {
+                    return;
+                }
+
+                remove(node.inventory);
+                Lists.newArrayList(node.inventory.getViewers()).forEach(HumanEntity::closeInventory);
+            });
+            next = null;
+        }
+
+        void setTitle(final String title) {
+            if (inventory.getTitle().equals(title)) {
+                return;
+            }
+
+            Inventories.setTitle(inventory, title);
+        }
+
+        void clear() {
+            remove(inventory);
+
+            for (int slot = 0; slot < inventory.getSize() - 9; slot++) {
+                inventory.setItem(slot, null);
+            }
+        }
+
+        void resetBottom() {
+            Slots.run(prevPageSlot, nextPageSlot + 1, slot -> inventory.setItem(slot, getSpaceFiller()));
+        }
+
+        void forEach(final Consumer<PageNode> consumer) {
+            consumer.accept(this);
+
+            if (next != null) {
+                next.forEach(consumer);
+            }
+        }
+
+        PageNode find(final Inventory inventory) {
+            if (this.inventory.equals(inventory)) {
+                return this;
+            }
+
+            if (next != null) {
+                return next.find(inventory);
+            }
+
+            return null;
+        }
+
+        boolean isPart(final Inventory inventory) {
+            return find(inventory) != null;
+        }
+
+        boolean hasViewers() {
+            if (!inventory.getViewers().isEmpty()) {
+                return true;
+            }
+
+            return next != null && !next.hasViewers();
         }
     }
 }

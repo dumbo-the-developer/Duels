@@ -65,4 +65,15 @@ public final class ReflectionUtil {
             return null;
         }
     }
+
+    public static Field getDeclaredField(final Class<?> clazz, final String name) {
+        try {
+            final Field field = clazz.getDeclaredField(name);
+            field.setAccessible(true);
+            return field;
+        } catch (NoSuchFieldException ex) {
+            Log.error(ex.getMessage(), ex);
+            return null;
+        }
+    }
 }

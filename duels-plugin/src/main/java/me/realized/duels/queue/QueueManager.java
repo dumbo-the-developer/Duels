@@ -155,7 +155,13 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
                     }
                 }
 
-                queue.removeAll(remove);
+                if (queue.removeAll(remove) && !update) {
+                    update = true;
+                }
+            }
+
+            if (update) {
+                gui.calculatePages();
             }
         }, 20L, 40L).getTaskId();
     }
