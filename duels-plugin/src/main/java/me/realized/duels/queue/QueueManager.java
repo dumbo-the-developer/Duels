@@ -4,6 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -53,6 +54,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class QueueManager implements Loadable, DQueueManager, Listener {
 
+    private static final long AUTO_SAVE_INTERVAL = 20L * 60 * 5;
+
     private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
@@ -71,6 +74,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
     @Getter
     private MultiPageGui<DuelsPlugin> gui;
+    private int autoSaveTask;
 
     public QueueManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -116,6 +120,13 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         Log.info(this, "Loaded " + queues.size() + " queue(s).");
         gui.calculatePages();
 
+        this.autoSaveTask = plugin.doSyncRepeat(() -> {
+            try {
+                saveQueues();
+            } catch (IOException ex) {
+                Log.error(this, ex.getMessage(), ex);
+            }
+        }, AUTO_SAVE_INTERVAL, AUTO_SAVE_INTERVAL).getTaskId();
         this.queueTask = plugin.doSyncRepeat(() -> {
             boolean update = false;
 
@@ -183,8 +194,18 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
     @Override
     public void handleUnload() throws Exception {
+        plugin.cancelTask(autoSaveTask);
         plugin.cancelTask(queueTask);
 
+        if (gui != null) {
+            plugin.getGuiListener().removeGui(gui);
+        }
+
+        saveQueues();
+        queues.clear();
+    }
+
+    private void saveQueues() throws IOException {
         final List<QueueData> data = new ArrayList<>();
 
         for (final Queue queue : queues) {
@@ -196,11 +217,9 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         }
 
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(file))) {
-            writer.write(plugin.getGson().toJson(data));
+            plugin.getGson().toJson(data, writer);
             writer.flush();
         }
-
-        queues.clear();
     }
 
     @Nullable

@@ -7,15 +7,22 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
 /**
- * Called when a {@link Player} sends a {@link Request} to a {@link Player}.
+ * Called when a {@link Player} accepts a {@link Request} from a {@link Player}.
+ *
+ * @since 3.2.1
  */
-public class RequestSendEvent extends RequestEvent implements Cancellable {
+public class RequestAcceptEvent extends RequestEvent implements Cancellable {
 
     private static final HandlerList handlers = new HandlerList();
 
     private boolean cancelled;
 
-    public RequestSendEvent(@Nonnull final Player source, @Nonnull final Player target, @Nonnull final Request request) {
+    /**
+     * @param source {@link Player} who is accepting this {@link Request}.
+     * @param target {@link Player} who sent this {@link Request}.
+     * @param request {@link Request} that is being handled.
+     */
+    public RequestAcceptEvent(@Nonnull final Player source, @Nonnull final Player target, @Nonnull final Request request) {
         super(source, target, request);
     }
 
@@ -31,6 +38,7 @@ public class RequestSendEvent extends RequestEvent implements Cancellable {
 
     /**
      * Whether or not to cancel this event.
+     * When cancelled, the request will not be removed and remain as unhandled.
      *
      * @param cancelled True to cancel this event.
      */

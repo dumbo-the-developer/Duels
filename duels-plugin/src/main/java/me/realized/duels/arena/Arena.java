@@ -34,7 +34,7 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
     @Getter
     private final String name;
     @Getter
-    private Map<Integer, Location> positions = new HashMap<>();
+    private final Map<Integer, Location> positions = new HashMap<>();
     @Getter
     private boolean disabled;
     @Getter

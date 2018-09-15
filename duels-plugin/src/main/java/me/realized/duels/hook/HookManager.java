@@ -6,6 +6,7 @@ import me.realized.duels.hook.hooks.CombatLogXHook;
 import me.realized.duels.hook.hooks.CombatTagPlusHook;
 import me.realized.duels.hook.hooks.EssentialsHook;
 import me.realized.duels.hook.hooks.FactionsHook;
+import me.realized.duels.hook.hooks.LeaderHeadsHook;
 import me.realized.duels.hook.hooks.MVdWPlaceholderHook;
 import me.realized.duels.hook.hooks.McMMOHook;
 import me.realized.duels.hook.hooks.MyPetHook;
@@ -25,6 +26,7 @@ public class HookManager extends AbstractHookManager<DuelsPlugin> {
         register("CombatTagPlus", CombatTagPlusHook.class);
         register("Essentials", EssentialsHook.class);
         register("Factions", FactionsHook.class);
+        register("LeaderHeads", LeaderHeadsHook.class);
         register("mcMMO", McMMOHook.class);
         register("MVdWPlaceholderAPI", MVdWPlaceholderHook.class);
         register("MyPet", MyPetHook.class);

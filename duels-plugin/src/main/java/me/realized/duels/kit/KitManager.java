@@ -35,6 +35,8 @@ import org.bukkit.entity.Player;
 
 public class KitManager implements Loadable, me.realized.duels.api.kit.KitManager {
 
+    private static final long AUTO_SAVE_INTERVAL = 20L * 60 * 5;
+
     private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
@@ -43,6 +45,7 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
 
     @Getter
     private MultiPageGui<DuelsPlugin> gui;
+    private int autoSaveTask;
 
     public KitManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -78,14 +81,29 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
 
         Log.info(this, "Loaded " + kits.size() + " kit(s).");
         gui.calculatePages();
+
+        this.autoSaveTask = plugin.doSyncRepeat(() -> {
+            try {
+                saveKits();
+            } catch (IOException ex) {
+                Log.error(this, ex.getMessage(), ex);
+            }
+        }, AUTO_SAVE_INTERVAL, AUTO_SAVE_INTERVAL).getTaskId();
     }
 
     @Override
     public void handleUnload() throws IOException {
+        plugin.cancelTask(autoSaveTask);
+
         if (gui != null) {
             plugin.getGuiListener().removeGui(gui);
         }
 
+        saveKits();
+        kits.clear();
+    }
+
+    private void saveKits() throws IOException {
         final Map<String, KitData> data = new HashMap<>();
 
         for (final Map.Entry<String, Kit> entry : kits.entrySet()) {
@@ -97,11 +115,9 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
         }
 
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(file))) {
-            writer.write(plugin.getGson().toJson(data));
+            plugin.getGson().toJson(data, writer);
             writer.flush();
         }
-
-        kits.clear();
     }
 
     @Nullable

@@ -48,9 +48,9 @@ public class PlayerInfoManager implements Loadable {
         }
 
         if (lobby == null || lobby.getWorld() == null) {
-            final World defaultWorld = Bukkit.getWorlds().iterator().next();
-            this.lobby = defaultWorld.getSpawnLocation();
-            Log.info(this, "Lobby location was not set, using " + defaultWorld.getName()
+            final World world = Bukkit.getWorlds().get(0);
+            this.lobby = world.getSpawnLocation();
+            Log.info(this, "Lobby location was not set, using " + world.getName()
                 + "'s spawn location as default. Use the command /duels setlobby in-game to set the lobby location.");
         }
     }

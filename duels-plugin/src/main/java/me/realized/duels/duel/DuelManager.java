@@ -631,7 +631,6 @@ public class DuelManager implements Loadable {
                 handleEndUsers(match, userDataManager.get(winner), userDataManager.get(player), matchData,
                     "winner", winner.getName(), "loser", player.getName(), "health", health, "kit", kit, "arena", arena.getName());
                 handleInventories(match);
-
                 plugin.doSyncAfter(() -> {
                     handleWinner(winner, player, arena, match);
 

@@ -43,6 +43,8 @@ import org.bukkit.projectiles.ProjectileSource;
 
 public class ArenaManager implements Loadable, me.realized.duels.api.arena.ArenaManager, Listener {
 
+    private static final long AUTO_SAVE_INTERVAL = 20L * 60 * 5;
+
     private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
@@ -52,6 +54,7 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
 
     @Getter
     private MultiPageGui<DuelsPlugin> gui;
+    private int autoSaveTask;
 
     public ArenaManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -91,14 +94,29 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
 
         Log.info(this, "Loaded " + arenas.size() + " arena(s).");
         gui.calculatePages();
+
+        this.autoSaveTask = plugin.doSyncRepeat(() -> {
+            try {
+                saveArenas();
+            } catch (IOException ex) {
+                Log.error(this, ex.getMessage(), ex);
+            }
+        }, AUTO_SAVE_INTERVAL, AUTO_SAVE_INTERVAL).getTaskId();
     }
 
     @Override
     public void handleUnload() throws IOException {
+        plugin.cancelTask(autoSaveTask);
+
         if (gui != null) {
             plugin.getGuiListener().removeGui(gui);
         }
 
+        saveArenas();
+        arenas.clear();
+    }
+
+    private void saveArenas() throws IOException {
         final List<ArenaData> data = new ArrayList<>();
 
         for (final Arena arena : arenas) {
@@ -110,11 +128,9 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
         }
 
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(file))) {
-            writer.write(plugin.getGson().toJson(data));
+            plugin.getGson().toJson(data, writer);
             writer.flush();
         }
-
-        arenas.clear();
     }
 
     @Nullable

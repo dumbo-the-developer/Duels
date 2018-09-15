@@ -218,6 +218,11 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                 loadable.handleLoad();
                 lastLoad = loadables.indexOf(loadable);
             } catch (Exception ex) {
+                // Handles the case of exceptions from LogManager not being logged in file
+                if (loadable instanceof LogSource) {
+                    ex.printStackTrace();
+                }
+
                 Log.error("There was an error while loading " + loadable.getClass().getSimpleName()
                     + "! If you believe this is an issue from the plugin, please contact the developer.", ex);
                 return false;

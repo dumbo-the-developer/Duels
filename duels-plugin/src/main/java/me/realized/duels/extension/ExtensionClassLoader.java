@@ -24,9 +24,8 @@ public class ExtensionClassLoader extends URLClassLoader {
     private final Manifest manifest;
     private final URL url;
     private final Map<String, Class<?>> classes = new ConcurrentHashMap<>();
-
     @Getter
-    private DuelsExtension extension;
+    private final DuelsExtension extension;
 
     ExtensionClassLoader(final File file, final ExtensionInfo info, final ClassLoader parent) throws Exception {
         super(new URL[] {file.toURI().toURL()}, parent);
@@ -34,7 +33,7 @@ public class ExtensionClassLoader extends URLClassLoader {
         this.manifest = jar.getManifest();
         this.url = file.toURI().toURL();
 
-        Class<?> mainClass = Class.forName(info.getMain(), true, this);
+        final Class<?> mainClass = Class.forName(info.getMain(), true, this);
 
         if (!DuelsExtension.class.isAssignableFrom(mainClass)) {
             throw new RuntimeException(mainClass.getName() + " does not extend DuelsExtension");
@@ -102,7 +101,7 @@ public class ExtensionClassLoader extends URLClassLoader {
     @Override
     public Enumeration<URL> getResources(final String name) throws IOException {
         @SuppressWarnings("unchecked")
-        Enumeration<URL>[] tmp = (Enumeration<URL>[]) new Enumeration<?>[2];
+        final Enumeration<URL>[] tmp = (Enumeration<URL>[]) new Enumeration<?>[2];
         tmp[1] = findResources(name);
         return new CompoundEnumeration<>(tmp);
     }

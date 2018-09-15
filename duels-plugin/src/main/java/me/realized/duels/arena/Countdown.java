@@ -49,7 +49,12 @@ class Countdown extends BukkitRunnable {
             final OpponentInfo info = this.info.get(player.getUniqueId());
 
             if (info != null) {
-                player.sendMessage(message.replace("%opponent%", info.getName()).replace("%opponent_rating%", String.valueOf(info.getRating())).replace("%kit%", kit));
+                player.sendMessage(message
+                    .replace("%opponent%", info.getName())
+                    .replace("%opponent_rating%", String.valueOf(info.getRating()))
+                    .replace("%kit%", kit)
+                    .replace("%arena%", arena.getName())
+                );
             } else {
                 player.sendMessage(message);
             }

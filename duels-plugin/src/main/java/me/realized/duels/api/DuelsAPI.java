@@ -9,9 +9,9 @@ import org.bukkit.entity.Player;
 
 /**
  * A static API for Duels.
- * (This is an old API for Duels v2 and below.)
+ * (This is an old, deprecated API for Duels v2 and below.)
  *
- * @deprecated as of v3.0.0, use {@link Duels} instead.
+ * @deprecated As of v3.0.0, use {@link Duels} instead.
  */
 
 public class DuelsAPI {
@@ -21,7 +21,7 @@ public class DuelsAPI {
      * @deprecated As of v3.0.0, use {@link UserManager#get(UUID)} instead.
      */
     @Deprecated
-    public static UserData getUser(UUID uuid, boolean force) {
+    public static UserData getUser(final UUID uuid, boolean force) {
         return DuelsPlugin.getInstance().getUserManager().get(uuid);
     }
 
@@ -30,7 +30,7 @@ public class DuelsAPI {
      * @deprecated As of v3.0.0, use {@link UserManager#get(Player)} instead.
      */
     @Deprecated
-    public static UserData getUser(Player player, boolean force) {
+    public static UserData getUser(final Player player, boolean force) {
         return DuelsPlugin.getInstance().getUserManager().get(player);
     }
 
@@ -39,7 +39,7 @@ public class DuelsAPI {
      * @deprecated As of v3.0.0, use {@link ArenaManager#isInMatch(Player)} instead.
      */
     @Deprecated
-    public static boolean isInMatch(Player player) {
+    public static boolean isInMatch(final Player player) {
         return DuelsPlugin.getInstance().getArenaManager().isInMatch(player);
     }
 

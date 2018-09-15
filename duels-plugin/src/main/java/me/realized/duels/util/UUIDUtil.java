@@ -16,8 +16,4 @@ public final class UUIDUtil {
 
         return UUID.fromString(s);
     }
-
-    public static boolean isUUID(final String s) {
-        return UUID_PATTERN.matcher(s).matches();
-    }
 }

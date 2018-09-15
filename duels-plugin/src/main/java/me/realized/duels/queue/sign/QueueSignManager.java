@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -39,6 +40,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public class QueueSignManager implements Loadable, me.realized.duels.api.queue.sign.QueueSignManager, Listener {
 
+    private static final long AUTO_SAVE_INTERVAL = 20L * 60 * 5;
+
     private final DuelsPlugin plugin;
     private final Lang lang;
     private final QueueManager queueManager;
@@ -46,6 +49,7 @@ public class QueueSignManager implements Loadable, me.realized.duels.api.queue.s
 
     private final Map<Location, QueueSign> signs = new HashMap<>();
 
+    private int autoSaveTask;
     private int updateTask;
 
     public QueueSignManager(final DuelsPlugin plugin) {
@@ -78,6 +82,13 @@ public class QueueSignManager implements Loadable, me.realized.duels.api.queue.s
 
         Log.info(this, "Loaded " + signs.size() + " queue sign(s).");
 
+        this.autoSaveTask = plugin.doSyncRepeat(() -> {
+            try {
+                saveQueueSigns();
+            } catch (IOException ex) {
+                Log.error(this, ex.getMessage(), ex);
+            }
+        }, AUTO_SAVE_INTERVAL, AUTO_SAVE_INTERVAL).getTaskId();
         this.updateTask = plugin.doSyncRepeat(() -> signs.entrySet().removeIf(entry -> {
             entry.getValue().updateCount();
             return entry.getValue().getQueue().isRemoved();
@@ -86,8 +97,13 @@ public class QueueSignManager implements Loadable, me.realized.duels.api.queue.s
 
     @Override
     public void handleUnload() throws Exception {
+        plugin.cancelTask(autoSaveTask);
         plugin.cancelTask(updateTask);
+        saveQueueSigns();
+        signs.clear();
+    }
 
+    private void saveQueueSigns() throws IOException {
         final List<QueueSignData> data = new ArrayList<>();
 
         for (final QueueSign sign : signs.values()) {
@@ -103,11 +119,9 @@ public class QueueSignManager implements Loadable, me.realized.duels.api.queue.s
         }
 
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(file))) {
-            writer.write(plugin.getGson().toJson(data));
+            plugin.getGson().toJson(data, writer);
             writer.flush();
         }
-
-        signs.clear();
     }
 
     @Nullable

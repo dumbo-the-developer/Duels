@@ -56,11 +56,13 @@ public class Queue extends BaseButton implements DQueue {
     void addPlayer(final QueueEntry entry) {
         players.add(entry);
         update();
+        queueManager.getGui().calculatePages();
     }
 
     boolean removePlayer(final Player player) {
         if (players.removeIf(entry -> entry.getPlayer().equals(player))) {
             update();
+            queueManager.getGui().calculatePages();
             return true;
         }
 
@@ -68,7 +70,12 @@ public class Queue extends BaseButton implements DQueue {
     }
 
     boolean removeAll(final Set<QueueEntry> players) {
-        return this.players.removeAll(players);
+        if (this.players.removeAll(players)) {
+            update();
+            return true;
+        }
+
+        return false;
     }
 
     private void update() {
@@ -76,7 +83,6 @@ public class Queue extends BaseButton implements DQueue {
             "kit", kit != null ? kit.getName() : "none", "bet_amount", bet, "players", players.size()));
         setLore(lang.getMessage("GUI.queues.buttons.queue.lore",
             "kit", kit != null ? kit.getName() : "none", "bet_amount", bet, "players", players.size()).split("\n"));
-        queueManager.getGui().calculatePages();
     }
 
     @Override

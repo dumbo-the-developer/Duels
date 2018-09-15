@@ -1,6 +1,7 @@
 package me.realized.duels.command.commands.duel.subcommands;
 
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.api.event.request.RequestAcceptEvent;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.hook.hooks.CombatLogXHook;
 import me.realized.duels.hook.hooks.CombatTagPlusHook;
@@ -76,12 +77,21 @@ public class AcceptCommand extends BaseCommand {
             return;
         }
 
-        final Request request = requestManager.remove(target, player);
+        final Request request = requestManager.get(target, player);
 
         if (request == null) {
             lang.sendMessage(sender, "ERROR.duel.no-request", "name", target.getName());
             return;
         }
+
+        final RequestAcceptEvent event = new RequestAcceptEvent(player, target, request);
+        plugin.getServer().getPluginManager().callEvent(event);
+
+        if (event.isCancelled()) {
+            return;
+        }
+
+        requestManager.remove(target, player);
 
         if (arenaManager.isInMatch(target)) {
             lang.sendMessage(sender, "ERROR.duel.already-in-match.target", "name", target.getName());

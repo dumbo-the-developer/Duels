@@ -20,6 +20,11 @@ public class UserCreateEvent extends Event {
         this.user = user;
     }
 
+    /**
+     * The {@link User} that was created.
+     *
+     * @return Never-null {@link User} that was created.
+     */
     @Nonnull
     public User getUser() {
         return user;

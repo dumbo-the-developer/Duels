@@ -84,25 +84,29 @@ public class RequestManager implements Loadable, Listener {
         TextBuilder.of(lang.getMessage(path + "extra.text"), null, null, Action.SHOW_TEXT, lang.getMessage(path + "extra.hover-text")).send(target);
     }
 
-    public boolean has(final Player sender, final Player target) {
+    public Request get(final Player sender, final Player target) {
         final Map<UUID, Request> cached = get(sender, false);
 
         if (cached == null) {
-            return false;
+            return null;
         }
 
         final Request request = cached.get(target.getUniqueId());
 
         if (request == null) {
-            return false;
+            return null;
         }
 
         if (System.currentTimeMillis() - request.getCreation() >= config.getExpiration() * 1000L) {
             cached.remove(target.getUniqueId());
-            return false;
+            return null;
         }
 
-        return true;
+        return request;
+    }
+
+    public boolean has(final Player sender, final Player target) {
+        return get(sender, target) != null;
     }
 
     public Request remove(final Player sender, final Player target) {

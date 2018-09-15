@@ -52,6 +52,14 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean preventBountyLoss;
     @Getter
     private boolean preventAddDeath;
+    @Getter
+    private String lhWinsCmd;
+    @Getter
+    private String lhWinsTitle;
+    @Getter
+    private String lhLossesCmd;
+    @Getter
+    private String lhLossesTitle;
 
     @Getter
     private boolean requiresClearedInventory;
@@ -237,6 +245,11 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         myPetDespawn = configuration.getBoolean("supported-plugins.MyPet.despawn-pet-in-duel", false);
         preventBountyLoss = configuration.getBoolean("supported-plugins.BountyHunters.prevent-bounty-loss-in-duel", true);
         preventAddDeath = configuration.getBoolean("supported-plugins.SimpleClans.prevent-add-death-in-duel", true);
+        lhWinsCmd = configuration.getString("supported-plugins.LeaderHeads.wins.menu.command", "openwins");
+        lhWinsTitle = configuration.getString("supported-plugins.LeaderHeads.wins.menu.title", "Duel Wins");
+        lhLossesCmd = configuration.getString("supported-plugins.LeaderHeads.losses.menu.command", "openlosses");
+        lhLossesTitle = configuration.getString("supported-plugins.LeaderHeads.losses.menu.title", "Duel Losses");
+
         requiresClearedInventory = configuration.getBoolean("request.requires-cleared-inventory", true);
         preventCreativeMode = configuration.getBoolean("request.prevent-creative-mode", false);
         arenaSelectingEnabled = configuration.getBoolean("request.arena-selecting.enabled", true);

@@ -27,8 +27,14 @@ public class Spectator {
 
     @Override
     public boolean equals(final Object other) {
-        if (this == other) { return true; }
-        if (other == null || getClass() != other.getClass()) { return false; }
+        if (this == other) {
+            return true;
+        }
+
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+
         final Spectator spectator = (Spectator) other;
         return Objects.equals(owner, spectator.owner);
     }
