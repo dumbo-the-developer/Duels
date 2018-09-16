@@ -41,6 +41,7 @@ class CompatBase {
 
     static final Field CB_INVENTORY;
     static final Field CB_INVENTORY_TITLE;
+    static final Method CHAT_SERIALIZER_A;
 
     static {
         final Class<?> CB_ITEMSTACK = ReflectionUtil.getCBClass("inventory.CraftItemStack");
@@ -74,7 +75,7 @@ class CompatBase {
         PLAYER_CONNECTION = ReflectionUtil.getField(NMS_PLAYER, "playerConnection");
         SEND_PACKET = ReflectionUtil.getMethod(ReflectionUtil.getNMSClass("PlayerConnection"), "sendPacket", ReflectionUtil.getNMSClass("Packet"));
 
-        COLLIDES_WITH_ENTITIES = CompatUtil.isPre1_10() ? ReflectionUtil.getField(NMS_PLAYER, "collidesWithEntities") : null;
+        COLLIDES_WITH_ENTITIES = !CompatUtil.hasSetCollidable() ? ReflectionUtil.getField(NMS_PLAYER, "collidesWithEntities") : null;
 
         GET_ONLINE_PLAYERS = ReflectionUtil.getMethod(Bukkit.class, "getOnlinePlayers");
 
@@ -91,5 +92,7 @@ class CompatBase {
 
         CB_INVENTORY = ReflectionUtil.getDeclaredField(ReflectionUtil.getCBClass("inventory.CraftInventory"), "inventory");
         CB_INVENTORY_TITLE = ReflectionUtil.getDeclaredField(ReflectionUtil.getCBClass("inventory.CraftInventoryCustom$MinecraftInventory"), "title");
+        CHAT_SERIALIZER_A =
+            !CompatUtil.isPre1_13() ? ReflectionUtil.getMethod(ReflectionUtil.getNMSClass("IChatBaseComponent$ChatSerializer"), "a", String.class) : null;
     }
 }

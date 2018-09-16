@@ -33,7 +33,7 @@ class Countdown extends BukkitRunnable {
     public void run() {
         final Match match = arena.getMatch();
 
-        if (match == null) {
+        if (match == null || messages.isEmpty()) {
             cancel();
             arena.setCountdown(null);
             return;
@@ -63,10 +63,5 @@ class Countdown extends BukkitRunnable {
                 Titles.send(player, title, null, 0, 20, 50);
             }
         });
-
-        if (messages.isEmpty()) {
-            cancel();
-            arena.setCountdown(null);
-        }
     }
 }

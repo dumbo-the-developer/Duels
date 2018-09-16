@@ -13,7 +13,9 @@ public final class Titles extends CompatBase {
             return;
         }
 
-        if (CompatUtil.isPre1_9()) {
+        if (CompatUtil.hasSendTitle()) {
+            player.sendTitle(StringUtil.color(title), subtitle != null ? StringUtil.color(subtitle) : null, fadeIn, stay, fadeOut);
+        } else {
             try {
                 final Object connection = PLAYER_CONNECTION.get(GET_HANDLE.invoke(player));
                 final Object[] actions = TITLE_ACTIONS.getEnumConstants();
@@ -31,8 +33,6 @@ public final class Titles extends CompatBase {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-        } else {
-            player.sendTitle(StringUtil.color(title), subtitle != null ? StringUtil.color(subtitle) : null, fadeIn, stay, fadeOut);
         }
     }
 }

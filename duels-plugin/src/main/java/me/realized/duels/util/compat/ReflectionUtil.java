@@ -23,6 +23,14 @@ public final class ReflectionUtil {
         }
     }
 
+    public static Method getMethodUnsafe(final Class<?> clazz, final String name, final Class<?>... parameters) {
+        try {
+            return clazz.getMethod(name, parameters);
+        } catch (NoSuchMethodException ex) {
+            return null;
+        }
+    }
+
     public static Class<?> getNMSClass(final String name, final boolean logError) {
         try {
             return Class.forName("net.minecraft.server." + VERSION + "." + name);
