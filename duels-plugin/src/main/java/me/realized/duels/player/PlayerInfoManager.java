@@ -55,6 +55,7 @@ public class PlayerInfoManager implements Loadable {
         }
     }
 
+    // PlayerInfo should remain even on reloads
     @Override
     public void handleUnload() {}
 

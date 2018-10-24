@@ -52,7 +52,7 @@ public class ItemData {
     public ItemData(final ItemStack item) {
         this.material = item.getType().name();
         this.amount = item.getAmount() == 0 ? 1 : item.getAmount();
-        this.data = item.getDurability();
+        this.data = Items.getDurability(item);
 
         final Attributes attributes = new Attributes(item);
         final List<AttributeData> modifiers = attributes.getModifiers();

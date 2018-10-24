@@ -9,7 +9,7 @@ import me.realized.duels.api.Duels;
 import me.realized.duels.api.extension.DuelsExtension;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
-import me.realized.duels.util.VersionUtil;
+import me.realized.duels.util.NumberUtil;
 
 public class ExtensionManager implements Loadable {
 
@@ -59,7 +59,7 @@ public class ExtensionManager implements Loadable {
                     continue;
                 }
 
-                if (info.getApiVersion() != null && VersionUtil.isLower(plugin.getVersion(), info.getApiVersion())) {
+                if (info.getApiVersion() != null && isLower(plugin.getVersion(), info.getApiVersion())) {
                     Log.error(this, "Could not load extension " + file.getName() + ": This extension requires Duels v" + info.getApiVersion() + " or higher!");
                     continue;
                 }
@@ -74,7 +74,7 @@ public class ExtensionManager implements Loadable {
 
                 final String requiredVersion = extension.getRequiredVersion();
 
-                if (requiredVersion != null && VersionUtil.isLower(plugin.getVersion(), requiredVersion)) {
+                if (requiredVersion != null && isLower(plugin.getVersion(), requiredVersion)) {
                     Log.error(this, "Could not load extension " + file.getName() + ": This extension requires Duels v" + requiredVersion + " or higher!");
                     continue;
                 }
@@ -95,7 +95,6 @@ public class ExtensionManager implements Loadable {
         extensions.values().forEach(extension -> {
             try {
                 extension.setEnabled(false);
-
                 final ClassLoader classLoader = extension.getClass().getClassLoader();
 
                 if (classLoader instanceof ExtensionClassLoader) {
@@ -109,6 +108,12 @@ public class ExtensionManager implements Loadable {
         });
         extensions.clear();
         info.clear();
+    }
+
+    private boolean isLower(String version, String otherVersion) {
+        version = version.replace("-SNAPSHOT", "").replace(".", "");
+        otherVersion = otherVersion.replace("-SNAPSHOT", "").replace(".", "");
+        return NumberUtil.parseInt(version).orElse(0) < NumberUtil.parseInt(otherVersion).orElse(0);
     }
 
     public DuelsExtension getExtension(final String name) {

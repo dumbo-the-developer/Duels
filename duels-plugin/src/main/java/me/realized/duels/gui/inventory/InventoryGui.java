@@ -32,7 +32,7 @@ public class InventoryGui extends SinglePageGui<DuelsPlugin> {
 
         for (final ItemStack item : player.getInventory().getContents()) {
             if (item != null && item.getType() != Material.AIR) {
-                if (item.getType() == Material.POTION && item.getDurability() == 16421) {
+                if (item.getType() == Material.POTION && Items.getDurability(item) == 16421) {
                     potions++;
                 }
 

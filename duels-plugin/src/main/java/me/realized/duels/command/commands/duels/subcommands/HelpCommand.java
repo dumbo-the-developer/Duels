@@ -1,8 +1,7 @@
 package me.realized.duels.command.commands.duels.subcommands;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Lists;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
@@ -11,7 +10,7 @@ import org.bukkit.command.CommandSender;
 
 public class HelpCommand extends BaseCommand {
 
-    private final Set<String> categories = Sets.newHashSet("arena", "kit", "queue", "sign", "user", "extra");
+    private final List<String> categories = Lists.newArrayList("arena", "kit", "queue", "sign", "user", "extra");
 
     public HelpCommand(final DuelsPlugin plugin) {
         super(plugin, "help", null, null, 1, false, "h");

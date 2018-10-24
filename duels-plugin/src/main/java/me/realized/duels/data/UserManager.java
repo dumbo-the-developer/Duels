@@ -161,6 +161,7 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
         saveUsers(Players.getOnlinePlayers());
         users.clear();
         names.clear();
+        topRatings.clear();
     }
 
     @Nullable

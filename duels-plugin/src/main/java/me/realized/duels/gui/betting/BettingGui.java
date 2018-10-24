@@ -275,7 +275,7 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
             if (counter < 5) {
                 final int slot = SLOT_START + 9 * counter;
                 final ItemStack item = inventory.getItem(slot);
-                item.setDurability((short) 5);
+                Items.setDurability(item, (short) 5);
                 inventory.setItem(slot, item);
                 counter++;
                 return;

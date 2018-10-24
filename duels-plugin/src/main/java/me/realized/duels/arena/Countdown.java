@@ -20,6 +20,8 @@ class Countdown extends BukkitRunnable {
     private final List<String> messages;
     private final List<String> titles;
 
+    private boolean ended;
+
     Countdown(final DuelsPlugin plugin, final Arena arena, final String kit, final Map<UUID, OpponentInfo> info, final List<String> messages, final List<String> titles) {
         this.config = plugin.getConfiguration();
         this.arena = arena;
@@ -31,11 +33,7 @@ class Countdown extends BukkitRunnable {
 
     @Override
     public void run() {
-        final Match match = arena.getMatch();
-
-        if (match == null || messages.isEmpty()) {
-            cancel();
-            arena.setCountdown(null);
+        if (ended) {
             return;
         }
 
@@ -63,5 +61,11 @@ class Countdown extends BukkitRunnable {
                 Titles.send(player, title, null, 0, 20, 50);
             }
         });
+
+        if (arena.getMatch() == null || messages.isEmpty()) {
+            arena.setCountdown(null);
+            cancel();
+            ended = true;
+        }
     }
 }

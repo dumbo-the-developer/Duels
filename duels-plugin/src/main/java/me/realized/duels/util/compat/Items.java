@@ -3,6 +3,8 @@ package me.realized.duels.util.compat;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public final class Items {
 
@@ -37,7 +39,7 @@ public final class Items {
     }
 
     public static boolean equals(final ItemStack item, final ItemStack other) {
-        return item.getType() == other.getType() && item.getDurability() == other.getDurability();
+        return item.getType() == other.getType() && getDurability(item) == getDurability(other);
     }
 
     public static ItemStack from(final String type, final short data) {
@@ -46,6 +48,31 @@ public final class Items {
         }
 
         return ItemBuilder.of(type, 1, data).name(" ").build();
+    }
+
+    public static short getDurability(final ItemStack item) {
+        if (CompatUtil.isPre1_13()) {
+            return item.getDurability();
+        }
+
+        final ItemMeta meta;
+        return ((meta = item.getItemMeta()) == null) ? 0 : (short) ((Damageable) meta).getDamage();
+    }
+
+    public static void setDurability(final ItemStack item, final short durability) {
+        if (CompatUtil.isPre1_13()) {
+            item.setDurability(durability);
+            return;
+        }
+
+        final ItemMeta meta = item.getItemMeta();
+
+        if (meta == null) {
+            return;
+        }
+
+        ((Damageable) meta).setDamage(durability);
+        item.setItemMeta(meta);
     }
 
     private Items() {}

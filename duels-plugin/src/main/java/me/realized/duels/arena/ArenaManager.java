@@ -10,7 +10,6 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -49,9 +48,9 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
     private final Config config;
     private final Lang lang;
     private final File file;
-    @Getter
-    private final Set<Arena> arenas = new HashSet<>();
 
+    @Getter
+    private final List<Arena> arenas = new ArrayList<>();
     @Getter
     private MultiPageGui<DuelsPlugin> gui;
     private int autoSaveTask;
@@ -154,6 +153,7 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
 
         final Arena arena = new Arena(plugin, name);
         arenas.add(arena);
+
         final ArenaCreateEvent event = new ArenaCreateEvent(source, arena);
         plugin.getServer().getPluginManager().callEvent(event);
         gui.calculatePages();

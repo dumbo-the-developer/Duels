@@ -3,6 +3,7 @@ package me.realized.duels;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +49,6 @@ import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.Log.LogSource;
 import me.realized.duels.util.Reloadable;
-import me.realized.duels.util.ServerUtil;
 import me.realized.duels.util.command.AbstractCommand;
 import me.realized.duels.util.gui.GuiListener;
 import org.bukkit.command.CommandSender;
@@ -114,7 +114,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     private final Map<String, AbstractCommand<DuelsPlugin>> commands = new HashMap<>();
     private final List<Listener> registeredListeners = new ArrayList<>();
-    private final List<BukkitTask> registeredTasks = new ArrayList<>();
 
     @Getter
     private volatile boolean updateAvailable;
@@ -125,10 +124,24 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     public void onEnable() {
         instance = this;
         Log.addSource(this);
-        loadables.add(logManager = new LogManager(this));
-        Log.addSource(logManager);
 
-        if (!ServerUtil.isUsingSpigot()) {
+        try {
+            logManager = new LogManager(this);
+        } catch (IOException ex) {
+            Log.error("Could not load LogManager. Please contact the developer.");
+
+            // Manually print the stacktrace since Log#error only prints errors to non-plugin log sources.
+            ex.printStackTrace();
+            getPluginLoader().disablePlugin(this);
+            return;
+        }
+
+        Log.addSource(logManager);
+        logManager.debug("onEnable start -> " + System.currentTimeMillis() + "\n");
+
+        try {
+            Class.forName("org.spigotmc.SpigotConfig");
+        } catch (ClassNotFoundException ex) {
             Log.error("================= *** DUELS LOAD FAILURE *** =================");
             Log.error("Duels requires a spigot server to run, but this server was not running on spigot!");
             Log.error("To run your server on spigot, follow this guide: " + SPIGOT_INSTALLATION_URL);
@@ -198,9 +211,16 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     @Override
     public void onDisable() {
+        final long start = System.currentTimeMillis();
+        long last = start;
+        logManager.debug("onDisable start -> " + start + "\n");
         unload();
+        logManager.debug("unload done (took " + Math.abs(last - (last = System.currentTimeMillis())) + "ms)");
         Log.clearSources();
+        logManager.debug("Log#clearSources done (took " + Math.abs(last - System.currentTimeMillis()) + "ms)");
+        logManager.handleDisable();
         instance = null;
+        log(Level.INFO, "Disable process took " + (System.currentTimeMillis() - start) + "ms.");
     }
 
     /**
@@ -214,8 +234,13 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         );
 
         for (final Loadable loadable : loadables) {
+            final String name = loadable.getClass().getSimpleName();
+
             try {
+                final long now = System.currentTimeMillis();
+                logManager.debug("Starting load of " + name + " at " + now);
                 loadable.handleLoad();
+                logManager.debug(name + " has been loaded. (took " + (System.currentTimeMillis() - now) + "ms)");
                 lastLoad = loadables.indexOf(loadable);
             } catch (Exception ex) {
                 // Handles the case of exceptions from LogManager not being logged in file
@@ -223,8 +248,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                     ex.printStackTrace();
                 }
 
-                Log.error("There was an error while loading " + loadable.getClass().getSimpleName()
-                    + "! If you believe this is an issue from the plugin, please contact the developer.", ex);
+                Log.error("There was an error while loading " + name + "! If you believe this is an issue from the plugin, please contact the developer.", ex);
                 return false;
             }
         }
@@ -236,7 +260,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
      * @return true if unload was successful, otherwise false
      */
     private boolean unload() {
-        registeredTasks.forEach(this::cancelTask);
         registeredListeners.forEach(HandlerList::unregisterAll);
         registeredListeners.clear();
         // Unregister all extension listeners that isn't using the method Duels#registerListener
@@ -247,15 +270,19 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         commands.clear();
 
         for (final Loadable loadable : Lists.reverse(loadables)) {
+            final String name = loadable.getClass().getSimpleName();
+
             try {
                 if (loadables.indexOf(loadable) > lastLoad) {
                     continue;
                 }
 
+                final long now = System.currentTimeMillis();
+                logManager.debug("Starting unload of " + name + " at " + now);
                 loadable.handleUnload();
+                logManager.debug(name + " has been unloaded. (took " + (System.currentTimeMillis() - now) + "ms)");
             } catch (Exception ex) {
-                Log.error("There was an error while unloading " + loadable.getClass().getSimpleName()
-                    + "! If you believe this is an issue from the plugin, please contact the developer.", ex);
+                Log.error("There was an error while unloading " + name + "! If you believe this is an issue from the plugin, please contact the developer.", ex);
                 return false;
             }
         }
@@ -269,11 +296,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             this.commands.put(command.getName().toLowerCase(), command);
             command.register();
         }
-    }
-
-    private BukkitTask registerTask(final BukkitTask task) {
-        registeredTasks.add(task);
-        return task;
     }
 
     @Override
@@ -336,37 +358,37 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Override
     public BukkitTask doSync(@Nonnull final Runnable task) {
         Objects.requireNonNull(task, "task");
-        return registerTask(getServer().getScheduler().runTask(this, task));
+        return getServer().getScheduler().runTask(this, task);
     }
 
     @Override
     public BukkitTask doSyncAfter(@Nonnull final Runnable task, final long delay) {
         Objects.requireNonNull(task, "task");
-        return registerTask(getServer().getScheduler().runTaskLater(this, task, delay));
+        return getServer().getScheduler().runTaskLater(this, task, delay);
     }
 
     @Override
     public BukkitTask doSyncRepeat(@Nonnull final Runnable task, final long delay, final long period) {
         Objects.requireNonNull(task, "task");
-        return registerTask(getServer().getScheduler().runTaskTimer(this, task, delay, period));
+        return getServer().getScheduler().runTaskTimer(this, task, delay, period);
     }
 
     @Override
     public BukkitTask doAsync(@Nonnull final Runnable task) {
         Objects.requireNonNull(task, "task");
-        return registerTask(getServer().getScheduler().runTaskAsynchronously(this, task));
+        return getServer().getScheduler().runTaskAsynchronously(this, task);
     }
 
     @Override
     public BukkitTask doAsyncAfter(@Nonnull final Runnable task, final long delay) {
         Objects.requireNonNull(task, "task");
-        return registerTask(getServer().getScheduler().runTaskLaterAsynchronously(this, task, delay));
+        return getServer().getScheduler().runTaskLaterAsynchronously(this, task, delay);
     }
 
     @Override
     public BukkitTask doAsyncRepeat(@Nonnull final Runnable task, final long delay, final long period) {
         Objects.requireNonNull(task, "task");
-        return registerTask(getServer().getScheduler().runTaskTimerAsynchronously(this, task, delay, period));
+        return getServer().getScheduler().runTaskTimerAsynchronously(this, task, delay, period);
     }
 
     @Override

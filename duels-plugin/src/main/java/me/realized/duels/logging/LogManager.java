@@ -13,25 +13,22 @@ import java.util.logging.Logger;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.util.DateUtil;
-import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log.LogSource;
 
-public class LogManager implements Loadable, LogSource {
+public class LogManager implements LogSource {
 
     @Getter
     private final Logger logger = Logger.getAnonymousLogger();
-    private final File folder;
+    private final FileHandler handler;
 
-    private FileHandler handler;
-
-    public LogManager(final DuelsPlugin plugin) {
+    public LogManager(final DuelsPlugin plugin) throws IOException {
         final File pluginFolder = plugin.getDataFolder();
 
         if (!pluginFolder.exists()) {
             pluginFolder.mkdir();
         }
 
-        this.folder = new File(pluginFolder, "logs");
+        final File folder = new File(pluginFolder, "logs");
 
         if (!folder.exists()) {
             folder.mkdir();
@@ -39,10 +36,7 @@ public class LogManager implements Loadable, LogSource {
 
         logger.setLevel(Level.ALL);
         logger.setUseParentHandlers(false);
-    }
 
-    @Override
-    public void handleLoad() throws IOException {
         final File file = new File(folder, DateUtil.formatDate(new Date()) + ".log");
 
         if (!file.exists()) {
@@ -70,15 +64,13 @@ public class LogManager implements Loadable, LogSource {
         logger.addHandler(handler);
     }
 
-    @Override
-    public void handleUnload() {
-        if (handler == null) {
-            return;
-        }
-
+    public void handleDisable() {
         handler.close();
         logger.removeHandler(handler);
-        handler = null;
+    }
+
+    public void debug(final String s) {
+        log(Level.INFO, "[DEBUG] " + s);
     }
 
     @Override

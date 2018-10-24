@@ -141,7 +141,7 @@ public class UserData implements User {
     }
 
     public void addMatch(final MatchData matchData) {
-        if (matches.size() >= matchesToDisplay) {
+        if (!matches.isEmpty() && matches.size() >= matchesToDisplay) {
             matches.remove(0);
         }
 

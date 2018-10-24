@@ -122,4 +122,22 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
         settings.setKit(this);
         settings.openGui(player);
     }
+
+    @Override
+    public boolean equals(final Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+
+        final Kit kit = (Kit) other;
+        return Objects.equals(name, kit.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
 }
