@@ -43,7 +43,7 @@ public class MVdWPlaceholderHook extends PluginHook<DuelsPlugin> {
                 case "duels_wins":
                     return String.valueOf(user.getWins());
                 case "duels_losses":
-                    return String.valueOf(user.getWins());
+                    return String.valueOf(user.getLosses());
                 case "duels_can_request":
                     return String.valueOf(user.canRequest());
             }

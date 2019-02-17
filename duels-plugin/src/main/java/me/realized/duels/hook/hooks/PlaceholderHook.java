@@ -55,7 +55,7 @@ public class PlaceholderHook extends PluginHook<DuelsPlugin> {
                 case "wins":
                     return String.valueOf(user.getWins());
                 case "losses":
-                    return String.valueOf(user.getWins());
+                    return String.valueOf(user.getLosses());
                 case "can_request":
                     return String.valueOf(user.canRequest());
             }
