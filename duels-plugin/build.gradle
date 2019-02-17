@@ -36,7 +36,7 @@ dependencies {
 
     compile project(':duels-api')
     compile 'com.google.code.gson:gson:2.8.2'
-    compile 'org.inventivetalent.spiget-update:bukkit:1.4.+'
+    compile 'org.inventivetalent.spiget-update:bukkit:1.4.2-SNAPSHOT'
 }
 
 shadowJar {
