@@ -38,7 +38,7 @@ Maven:
 #### Dependency
 Gradle:
 ```groovy
-compile group: 'com.github.Realizedd.Duels', name: 'duels-api', version : '3.2.1'
+compile group: 'com.github.Realizedd.Duels', name: 'duels-api', version: '3.2.1'
 ```  
 
 Maven:
