@@ -1,32 +1,35 @@
 package me.realized.duels.spectate;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.Permissions;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.arena.Match;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
-import me.realized.duels.extra.Permissions;
-import me.realized.duels.extra.Teleport;
 import me.realized.duels.hook.hooks.MyPetHook;
 import me.realized.duels.player.PlayerInfo;
 import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.PlayerUtil;
 import me.realized.duels.util.StringUtil;
+import me.realized.duels.util.Teleport;
 import me.realized.duels.util.compat.Collisions;
+import me.realized.duels.util.compat.Players;
 import me.realized.duels.util.inventory.InventoryUtil;
 import me.realized.duels.util.inventory.ItemBuilder;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -46,7 +49,7 @@ public class SpectateManager implements Loadable {
     private final Lang lang;
     private final ArenaManager arenaManager;
     private final PlayerInfoManager playerManager;
-    private final Map<Player, Spectator> spectators = new HashMap<>();
+    private final Map<UUID, Spectator> spectators = new HashMap<>();
 
     private Teleport teleport;
     private MyPetHook myPet;
@@ -72,7 +75,7 @@ public class SpectateManager implements Loadable {
     }
 
     public Spectator get(final Player player) {
-        return spectators.get(player);
+        return spectators.get(player.getUniqueId());
     }
 
     public boolean isSpectating(final Player player) {
@@ -82,6 +85,11 @@ public class SpectateManager implements Loadable {
     public void startSpectating(final Player player, final Player target) {
         if (isSpectating(player)) {
             lang.sendMessage(player, "ERROR.spectate.already-spectating.sender");
+            return;
+        }
+
+        if (plugin.getQueueManager().isInQueue(player)) {
+            lang.sendMessage(player, "ERROR.duel.already-in-queue");
             return;
         }
 
@@ -115,10 +123,10 @@ public class SpectateManager implements Loadable {
         }
 
         final Spectator spectator = new Spectator(player, target, arena);
-        spectators.put(player, spectator);
+        spectators.put(player.getUniqueId(), spectator);
         teleport.tryTeleport(player, target.getLocation().clone().add(0, 2, 0));
         spectator.setTeleported(true);
-        player.getInventory().setItem(8, ItemBuilder.of(Material.PAPER).name("&cStop Spectating").build());
+        player.getInventory().setItem(8, ItemBuilder.of(Material.PAPER).name(lang.getMessage("SPECTATE.stop-item.name")).build());
         player.setAllowFlight(true);
         player.setFlying(true);
         Collisions.setCollidable(player, false);
@@ -131,15 +139,9 @@ public class SpectateManager implements Loadable {
         arena.getMatch().getAllPlayers().forEach(matchPlayer -> lang.sendMessage(matchPlayer, "SPECTATE.arena-broadcast", "name", player.getName()));
     }
 
-    public void stopSpectating(final Player player, final boolean end) {
-        final Spectator spectator = get(player);
-
-        if (spectator == null) {
-            return;
-        }
-
+    public void stopSpectating(final Player player, final Spectator spectator, final boolean end) {
         if (!end) {
-            spectators.remove(player);
+            spectators.remove(player.getUniqueId());
         }
 
         PlayerUtil.reset(player);
@@ -172,6 +174,10 @@ public class SpectateManager implements Loadable {
         }
     }
 
+    public void stopSpectating(final Player player, final boolean end) {
+        stopSpectating(player, get(player), end);
+    }
+
     public void stopSpectating(final Arena arena) {
         spectators.entrySet().removeIf(entry -> {
             final Spectator spectator = entry.getValue();
@@ -180,44 +186,59 @@ public class SpectateManager implements Loadable {
                 return false;
             }
 
-            stopSpectating(entry.getKey(), true);
+            stopSpectating(Bukkit.getPlayer(entry.getKey()), spectator, true);
             return true;
         });
     }
 
-    public Set<Player> getPlayers() {
-        return spectators.keySet();
+    public Collection<Player> getPlayers() {
+        return Players.getOnlinePlayers().stream().filter(this::isSpectating).collect(Collectors.toList());
     }
 
-    public Set<Player> getSpectators(final Arena arena) {
-        return spectators.entrySet().stream().filter(entry -> entry.getValue().getArena().equals(arena)).map(Entry::getKey).collect(Collectors.toSet());
+    public Collection<Player> getSpectators(final Arena arena) {
+        return spectators.entrySet()
+            .stream().filter(entry -> entry.getValue().getArena().equals(arena)).map(spectator -> Bukkit.getPlayer(spectator.getKey())).collect(Collectors.toSet());
     }
 
     private class SpectateListener implements Listener {
 
-
         @EventHandler
         public void on(final PlayerInteractEvent event) {
-            if (!event.getAction().name().startsWith("RIGHT")) {
+            final Player player = event.getPlayer();
+            final Spectator spectator = get(player);
+
+            if (spectator == null) {
                 return;
             }
 
-            final Player player = event.getPlayer();
+            if (config.isSpecPreventBlockInteract()) {
+                event.setCancelled(true);
+            }
+
+            if (event.getAction() == Action.PHYSICAL) {
+                return;
+            }
+
             final ItemStack held = InventoryUtil.getItemInHand(player);
 
             if (held == null || held.getType() != Material.PAPER) {
                 return;
             }
 
-            stopSpectating(player, false);
+            stopSpectating(player, spectator, false);
         }
-
 
         @EventHandler
         public void on(final PlayerQuitEvent event) {
-            stopSpectating(event.getPlayer(), false);
-        }
+            final Player player = event.getPlayer();
+            final Spectator spectator = get(player);
 
+            if (spectator == null) {
+                return;
+            }
+
+            stopSpectating(player, spectator, false);
+        }
 
         @EventHandler(ignoreCancelled = true)
         public void on(final PlayerCommandPreprocessEvent event) {
@@ -237,7 +258,6 @@ public class SpectateManager implements Loadable {
             lang.sendMessage(player, "SPECTATE.prevent.command", "command", event.getMessage());
         }
 
-
         @EventHandler(ignoreCancelled = true)
         public void on(final PlayerTeleportEvent event) {
             final Player player = event.getPlayer();
@@ -251,7 +271,6 @@ public class SpectateManager implements Loadable {
             lang.sendMessage(player, "SPECTATE.prevent.teleportation");
         }
 
-
         @EventHandler(ignoreCancelled = true)
         public void on(final PlayerDropItemEvent event) {
             final Player player = event.getPlayer();
@@ -264,7 +283,6 @@ public class SpectateManager implements Loadable {
             lang.sendMessage(player, "SPECTATE.prevent.item-drop");
         }
 
-
         @EventHandler(ignoreCancelled = true)
         public void on(PlayerPickupItemEvent event) {
             if (!isSpectating(event.getPlayer())) {
@@ -273,7 +291,6 @@ public class SpectateManager implements Loadable {
 
             event.setCancelled(true);
         }
-
 
         @EventHandler(ignoreCancelled = true)
         public void on(final InventoryClickEvent event) {
@@ -284,7 +301,6 @@ public class SpectateManager implements Loadable {
             event.setCancelled(true);
         }
 
-
         @EventHandler
         public void on(final InventoryDragEvent event) {
             if (!isSpectating((Player) event.getWhoClicked())) {
@@ -293,7 +309,6 @@ public class SpectateManager implements Loadable {
 
             event.setCancelled(true);
         }
-
 
         @EventHandler(ignoreCancelled = true)
         public void on(final EntityDamageByEntityEvent event) {
@@ -314,7 +329,6 @@ public class SpectateManager implements Loadable {
             event.setCancelled(true);
             lang.sendMessage(player, "SPECTATE.prevent.pvp");
         }
-
 
         @EventHandler(ignoreCancelled = true)
         public void on(final EntityDamageEvent event) {

@@ -25,13 +25,13 @@ public class ToggleCommand extends BaseCommand {
         }
 
         arena.setDisabled(sender, !arena.isDisabled());
-        lang.sendMessage(sender, "COMMAND.duels.toggle", "name", name, "state", arena.isDisabled() ? "&cdisabled" : "&aenabled");
+        lang.sendMessage(sender, "COMMAND.duels.toggle", "name", name, "state", arena.isDisabled() ? lang.getMessage("GENERAL.disabled") : lang.getMessage("GENERAL.enabled"));
     }
 
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         if (args.length == 2) {
-            return handleTabCompletion(sender, args[1], "arena", arenaManager.getArenas(), Arena::getName);
+            return handleTabCompletion(args[1], arenaManager.getNames());
         }
 
         return null;

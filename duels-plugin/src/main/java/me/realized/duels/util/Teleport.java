@@ -1,4 +1,4 @@
-package me.realized.duels.extra;
+package me.realized.duels.util;
 
 import java.util.function.Consumer;
 import me.realized.duels.DuelsPlugin;
@@ -6,8 +6,6 @@ import me.realized.duels.hook.hooks.CombatLogXHook;
 import me.realized.duels.hook.hooks.CombatTagPlusHook;
 import me.realized.duels.hook.hooks.EssentialsHook;
 import me.realized.duels.hook.hooks.PvPManagerHook;
-import me.realized.duels.util.Loadable;
-import me.realized.duels.util.Log;
 import me.realized.duels.util.compat.Players;
 import me.realized.duels.util.metadata.MetadataUtil;
 import org.bukkit.Chunk;
@@ -23,7 +21,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
  */
 public final class Teleport implements Loadable, Listener {
 
-    static final String METADATA_KEY = Teleport.class.getSimpleName();
+    public static final String METADATA_KEY = Teleport.class.getSimpleName();
 
     private final DuelsPlugin plugin;
 

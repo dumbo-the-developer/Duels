@@ -4,9 +4,9 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.config.Config;
 import me.realized.duels.util.hook.PluginHook;
-import net.Indyuce.bountyhunters.api.BountyCause;
 import net.Indyuce.bountyhunters.api.event.BountyClaimEvent;
 import net.Indyuce.bountyhunters.api.event.BountyCreateEvent;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -23,7 +23,6 @@ public class BountyHuntersHook extends PluginHook<DuelsPlugin> implements Listen
         try {
             Class.forName("net.Indyuce.bountyhunters.api.event.BountyClaimEvent");
             Class.forName("net.Indyuce.bountyhunters.api.event.BountyCreateEvent");
-            Class.forName("net.Indyuce.bountyhunters.api.BountyCause");
         } catch (ClassNotFoundException ex) {
             throw new RuntimeException("This version of " + getName() + " is not supported. Please try upgrading to the latest version.");
         }
@@ -42,7 +41,9 @@ public class BountyHuntersHook extends PluginHook<DuelsPlugin> implements Listen
 
     @EventHandler(ignoreCancelled = true)
     public void on(final BountyCreateEvent event) {
-        if (!config.isPreventBountyLoss() || event.getCause() != BountyCause.AUTO_BOUNTY || !arenaManager.isInMatch(event.getBounty().getTarget().getPlayer())) {
+        final Player target = event.getBounty().getTarget().getPlayer();
+
+        if (!config.isPreventBountyLoss() || target == null || !arenaManager.isInMatch(target)) {
             return;
         }
 

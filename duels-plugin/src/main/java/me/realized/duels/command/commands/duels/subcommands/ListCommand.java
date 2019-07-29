@@ -27,10 +27,10 @@ public class ListCommand extends BaseCommand {
         final String queues = StringUtils.join(queueManager.getQueues().stream().map(Queue::toString).collect(Collectors.toList()), ", ");
         final String signs = StringUtils.join(queueSignManager.getSigns().stream().map(QueueSign::toString).collect(Collectors.toList()), ", ");
         lang.sendMessage(sender, "COMMAND.duels.list",
-            "arenas", !arenas.isEmpty() ? StringUtils.join(arenas, "&r, &r") : "none",
-            "kits", !kits.isEmpty() ? kits : "none",
-            "queues", !queues.isEmpty() ? queues : "none",
-            "queue_signs", !signs.isEmpty() ? signs : "none",
+            "arenas", !arenas.isEmpty() ? StringUtils.join(arenas, "&r, &r") : lang.getMessage("GENERAL.none"),
+            "kits", !kits.isEmpty() ? kits : lang.getMessage("GENERAL.none"),
+            "queues", !queues.isEmpty() ? queues : lang.getMessage("GENERAL.none"),
+            "queue_signs", !signs.isEmpty() ? signs : lang.getMessage("GENERAL.none"),
             "lobby", StringUtil.parse(playerManager.getLobby()));
     }
 

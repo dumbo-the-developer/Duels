@@ -27,19 +27,19 @@ public class InfoCommand extends BaseCommand {
             return;
         }
 
-        final String inUse = arena.isUsed() ? "&atrue" : "&cfalse";
-        final String disabled = arena.isDisabled() ? "&atrue" : "&cfalse";
+        final String inUse = arena.isUsed() ? lang.getMessage("GENERAL.true") : lang.getMessage("GENERAL.false");
+        final String disabled = arena.isDisabled() ? lang.getMessage("GENERAL.true") : lang.getMessage("GENERAL.false");
         final String players = StringUtils.join(arena.getPlayers().stream().map(Player::getName).collect(Collectors.toList()), ", ");
         final String positions = StringUtils.join(arena.getPositions().values().stream().map(StringUtil::parse).collect(Collectors.toList()), ", ");
         lang.sendMessage(sender, "COMMAND.duels.info",
             "name", name, "in_use", inUse, "disabled", disabled, "players",
-            !players.isEmpty() ? players : "none", "positions", !positions.isEmpty() ? positions : "none");
+            !players.isEmpty() ? players : lang.getMessage("GENERAL.none"), "positions", !positions.isEmpty() ? positions : "none");
     }
 
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         if (args.length == 2) {
-            return handleTabCompletion(sender, args[1], "arena", arenaManager.getArenas(), Arena::getName);
+            return handleTabCompletion(args[1], arenaManager.getNames());
         }
 
         return null;

@@ -1,4 +1,4 @@
-package me.realized.duels.extra;
+package me.realized.duels;
 
 public final class Permissions {
 

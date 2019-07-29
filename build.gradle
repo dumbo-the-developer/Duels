@@ -10,7 +10,7 @@ buildscript {
 
 allprojects {
     group 'me.realized'
-    version '3.2.3'
+    version '3.3.0'
 }
 
 subprojects {
@@ -25,17 +25,17 @@ subprojects {
 
         maven {
             name 'spigot-repo'
-            url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots'
+            url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
         }
 
         maven {
             name 'bungeecord-repo'
-            url 'https://oss.sonatype.org/content/repositories/snapshots'
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
         }
 
         maven {
             name 'mvdw-repo'
-            url 'http://repo.mvdw-software.be/content/groups/public/'
+            url 'http://repo.mvdw-software.com/content/groups/public/'
         }
 
         maven {

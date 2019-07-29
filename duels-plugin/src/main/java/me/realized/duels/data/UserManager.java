@@ -20,12 +20,12 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.Permissions;
 import me.realized.duels.api.event.user.UserCreateEvent;
 import me.realized.duels.api.kit.Kit;
 import me.realized.duels.api.user.User;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
-import me.realized.duels.extra.Permissions;
 import me.realized.duels.player.PlayerInfo;
 import me.realized.duels.util.DateUtil;
 import me.realized.duels.util.Loadable;
@@ -41,7 +41,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class UserManager implements Loadable, Listener, me.realized.duels.api.user.UserManager {
 
-    private static final String ADMIN_UPDATE_MESSAGE = "&9[Duels] &bThere is an update available for Duels. Download at &7%s";
+    private static final String ADMIN_UPDATE_MESSAGE = "&9[Duels] &bDuels &fv%s &7is now available for download! Download at: &c%s";
 
     private final DuelsPlugin plugin;
     private final Config config;
@@ -49,6 +49,7 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
     private final File folder;
     private final Map<UUID, UserData> users = new ConcurrentHashMap<>();
     private final Map<String, UUID> names = new ConcurrentHashMap<>();
+
     @Getter
     private final Map<Kit, TopEntry> topRatings = new ConcurrentHashMap<>();
 
@@ -60,6 +61,8 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
     private volatile TopEntry wins;
     @Getter
     private volatile TopEntry losses;
+    @Getter
+    private volatile TopEntry noKit;
     private int topTask;
 
     public UserManager(final DuelsPlugin plugin) {
@@ -105,6 +108,12 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
 
                     try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
                         final UserData user = plugin.getGson().fromJson(reader, UserData.class);
+
+                        if (user == null) {
+                            Log.warn(this, "Could not load userdata from file: " + fileName);
+                            continue;
+                        }
+
                         user.plugin = plugin;
                         user.folder = folder;
                         user.defaultRating = defaultRating;
@@ -140,13 +149,17 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
                     losses = top;
                 }
 
+                if ((top = get(config.getTopUpdateInterval(), noKit, User::getRating, config.getTopNoKitType(), config.getTopNoKitIdentifier())) != null) {
+                    noKit = top;
+                }
+
                 topRatings.keySet().removeIf(kit -> !kits.contains(kit));
 
                 for (final Kit kit : kits) {
                     final TopEntry entry = topRatings.get(kit);
 
-                    if ((top = get(config.getTopUpdateInterval(), entry, user -> user.getRating(kit),
-                        config.getTopKitType().replace("%kit%", kit.getName()), config.getTopKitIdentifier())) != null) {
+                    if ((top = get(config.getTopUpdateInterval(), entry, user -> user.getRating(kit), config.getTopKitType().replace("%kit%", kit.getName()),
+                        config.getTopKitIdentifier())) != null) {
                         topRatings.put(kit, top);
                     }
                 }
@@ -196,6 +209,12 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
     @Override
     public TopEntry getTopLosses() {
         return losses;
+    }
+
+    @Nullable
+    @Override
+    public TopEntry getTopRatings() {
+        return noKit;
     }
 
     @Nullable
@@ -276,7 +295,7 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
         final Player player = event.getPlayer();
 
         if (plugin.isUpdateAvailable() && (player.isOp() || player.hasPermission(Permissions.ADMIN))) {
-            player.sendMessage(StringUtil.color(String.format(ADMIN_UPDATE_MESSAGE, plugin.getDownloadLink())));
+            player.sendMessage(StringUtil.color(String.format(ADMIN_UPDATE_MESSAGE, plugin.getNewVersion(), plugin.getDescription().getWebsite())));
         }
 
         final PlayerInfo info;

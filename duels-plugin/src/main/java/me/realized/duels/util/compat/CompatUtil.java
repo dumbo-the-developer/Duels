@@ -32,12 +32,16 @@ public final class CompatUtil {
         return SET_COLLIDABLE;
     }
 
-    public static boolean isPre1_13() {
-        return SUB_VERSION < 13;
+    public static boolean is1_13() {
+        return SUB_VERSION == 13;
     }
 
-    public static boolean isPre1_10() {
-        return SUB_VERSION < 10;
+    public static boolean isPre1_14() {
+        return SUB_VERSION < 14;
+    }
+
+    public static boolean isPre1_13() {
+        return SUB_VERSION < 13;
     }
 
     public static boolean isPre1_9() {

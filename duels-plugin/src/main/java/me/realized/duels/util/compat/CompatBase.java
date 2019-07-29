@@ -57,7 +57,7 @@ class CompatBase {
         SET = ReflectionUtil.getMethod(TAG_COMPOUND, "set", String.class, TAG_BASE);
         GET_LIST = ReflectionUtil.getMethod(TAG_COMPOUND, "getList", String.class, int.class);
         GET = ReflectionUtil.getMethod(TAG_LIST, "get", int.class);
-        ADD = ReflectionUtil.getMethod(TAG_LIST, "add", TAG_BASE);
+        ADD = CompatUtil.isPre1_14() ? ReflectionUtil.getMethod(TAG_LIST, "add", TAG_BASE) : ReflectionUtil.getMethod(TAG_LIST, "add", Integer.TYPE, TAG_BASE);
         SIZE = ReflectionUtil.getMethod(TAG_LIST, "size");
         GET_STRING = ReflectionUtil.getMethod(TAG_COMPOUND, "getString", String.class);
         SET_STRING = ReflectionUtil.getMethod(TAG_COMPOUND, "setString", String.class, String.class);

@@ -42,7 +42,7 @@ public class DeletesignCommand extends BaseCommand {
         final Location location = sign.getLocation();
         final Queue queue = queueSign.getQueue();
         final Kit kit = queue.getKit();
-        final String kitName = kit != null ? kit.getName() : "none";
+        final String kitName = kit != null ? kit.getName() : lang.getMessage("GENERAL.none");
         lang.sendMessage(sender, "COMMAND.duels.del-sign", "location", StringUtil.parse(location), "kit", kitName, "bet_amount", queue.getBet());
     }
 }

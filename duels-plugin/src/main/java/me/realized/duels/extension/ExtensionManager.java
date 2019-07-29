@@ -90,6 +90,12 @@ public class ExtensionManager implements Loadable {
         }
     }
 
+    private boolean isLower(String version, String otherVersion) {
+        version = version.replace("-SNAPSHOT", "").replace(".", "");
+        otherVersion = otherVersion.replace("-SNAPSHOT", "").replace(".", "");
+        return NumberUtil.parseInt(version).orElse(0) < NumberUtil.parseInt(otherVersion).orElse(0);
+    }
+
     @Override
     public void handleUnload() {
         extensions.values().forEach(extension -> {
@@ -108,12 +114,6 @@ public class ExtensionManager implements Loadable {
         });
         extensions.clear();
         info.clear();
-    }
-
-    private boolean isLower(String version, String otherVersion) {
-        version = version.replace("-SNAPSHOT", "").replace(".", "");
-        otherVersion = otherVersion.replace("-SNAPSHOT", "").replace(".", "");
-        return NumberUtil.parseInt(version).orElse(0) < NumberUtil.parseInt(otherVersion).orElse(0);
     }
 
     public DuelsExtension getExtension(final String name) {

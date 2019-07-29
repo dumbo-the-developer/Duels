@@ -20,7 +20,6 @@ dependencies {
     compile 'org.projectlombok:lombok:1.16.20'
     compile 'me.clip:placeholderapi:2.8.4'
     compile('be.maximvdw:MVdWPlaceholderAPI:2.5.1-SNAPSHOT') { transitive = false }
-    compile 'com.sk89q:worldguard:6.1.1-SNAPSHOT'
     compile name: 'Vault-1.6.7'
     compile name: 'EssentialsX'
     compile name: 'CombatTagPlus'
@@ -29,11 +28,14 @@ dependencies {
     compile name: 'MassiveCore'
     compile name: 'Factions'
     compile name: 'MyPet-2.3.4'
-    compile name: 'BountyHunters'
+    compile name: 'BountyHunters-2.2.6'
     compile name: 'SimpleClans'
-    compile name: 'CombatLogX'
+    compile name: 'CombatLogX-9.8.4.0'
     compile name: 'LeaderHeadsAPI'
 
+    compile project(':duels-worldguard')
+    compile project(':duels-worldguard-v6')
+    compile project(':duels-worldguard-v7')
     compile project(':duels-api')
     compile 'com.google.code.gson:gson:2.8.2'
     compile 'org.inventivetalent.spiget-update:bukkit:1.4.2-SNAPSHOT'
@@ -43,6 +45,9 @@ shadowJar {
     archiveName = parent.name + '-' + project.version + '.jar'
 
     dependencies {
+        include(dependency(':duels-worldguard'))
+        include(dependency(':duels-worldguard-v6'))
+        include(dependency(':duels-worldguard-v7'))
         include(dependency(':duels-api'))
         include(dependency('com.google.code.gson:.*'))
         include(dependency('org.inventivetalent.spiget-update:.*'))

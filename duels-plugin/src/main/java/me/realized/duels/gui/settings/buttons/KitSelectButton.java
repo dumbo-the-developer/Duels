@@ -21,7 +21,7 @@ public class KitSelectButton extends BaseButton {
         }
 
         final Settings settings = settingManager.getSafely(player);
-        final String kit = settings.getKit() != null ? settings.getKit().getName() : "Not Selected";
+        final String kit = settings.getKit() != null ? settings.getKit().getName() : lang.getMessage("GENERAL.not-selected");
         final String lore = lang.getMessage("GUI.settings.buttons.kit-selector.lore", "kit", kit);
         setLore(lore.split("\n"));
     }
@@ -29,7 +29,7 @@ public class KitSelectButton extends BaseButton {
     @Override
     public void onClick(final Player player) {
         if (config.isUseOwnInventoryEnabled()) {
-            lang.sendMessage(player, "ERROR.setting.disabled-option", "option", "Kit Selector");
+            lang.sendMessage(player, "ERROR.setting.disabled-option", "option", lang.getMessage("GENERAL.kit-selector"));
             return;
         }
 

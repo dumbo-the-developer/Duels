@@ -86,7 +86,7 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
     }
 
     public void sendMessage(final CommandSender receiver, final String key, final Object... replacers) {
-        String message = getRawMessage(key);
+        final String message = getRawMessage(key);
 
         if (message == null) {
             return;
@@ -113,7 +113,7 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
         final String message = messages.get(key);
 
         if (message == null) {
-            Log.error(this, "Failed to send message: provided key '" + key + "' has no assigned value");
+            Log.error(this, "Failed to load message: provided key '" + key + "' has no assigned value");
             return null;
         }
 

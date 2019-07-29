@@ -43,6 +43,7 @@ public class QueueSignData {
             queue = plugin.getQueueManager().get(kit, bet);
         }
 
-        return new QueueSign(location, plugin.getLang().getMessage("SIGN.format", "kit", this.kit != null ? this.kit : "none", "bet_amount", bet), queue);
+        return new QueueSign(location,
+            plugin.getLang().getMessage("SIGN.format", "kit", this.kit != null ? this.kit : plugin.getLang().getMessage("none"), "bet_amount", bet), queue);
     }
 }

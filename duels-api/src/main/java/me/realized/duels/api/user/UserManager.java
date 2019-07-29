@@ -72,6 +72,16 @@ public interface UserManager {
 
 
     /**
+     * Gets the top rating for no kit. thread-safe!
+     *
+     * @return {@link TopEntry} containing name and rating of the top 10 Rating for no kit or null if the leaderboard has not loaded yet.
+     * @since 3.3.0
+     */
+    @Nullable
+    TopEntry getTopRatings();
+
+
+    /**
      * Gets the top rating for the given {@link Kit}. thread-safe!
      *
      * @param kit {@link Kit} to get {@link TopEntry}.
@@ -79,6 +89,7 @@ public interface UserManager {
      */
     @Nullable
     TopEntry getTopRatings(@Nonnull final Kit kit);
+
 
     class TopEntry {
 

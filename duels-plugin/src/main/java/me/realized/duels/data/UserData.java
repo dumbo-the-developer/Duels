@@ -9,7 +9,6 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
@@ -91,15 +90,23 @@ public class UserData implements User {
     }
 
     @Override
+    public int getRating() {
+        return getRatingUnsafe(null);
+    }
+
+    @Override
     public int getRating(@Nonnull final Kit kit) {
-        Objects.requireNonNull(kit, "kit");
-        return this.rating != null ? this.rating.getOrDefault(kit.getName(), defaultRating) : defaultRating;
+        return getRatingUnsafe(kit);
+    }
+
+    @Override
+    public void resetRating() {
+        setRating(null, defaultRating);
     }
 
     @Override
     public void resetRating(@Nonnull final Kit kit) {
-        Objects.requireNonNull(kit, "kit");
-        setRating(kit.getName(), defaultRating);
+        setRating(kit, defaultRating);
     }
 
     @Override
@@ -108,6 +115,22 @@ public class UserData implements User {
         losses = 0;
         matches.clear();
         rating.clear();
+
+        if (!isOnline()) {
+            trySave();
+        }
+    }
+
+    private int getRatingUnsafe(final Kit kit) {
+        return this.rating != null ? this.rating.getOrDefault(kit == null ? "-" : kit.getName(), defaultRating) : defaultRating;
+    }
+
+    public void setRating(final Kit kit, final int rating) {
+        if (this.rating == null) {
+            this.rating = new ConcurrentHashMap<>();
+        }
+
+        this.rating.put(kit == null ? "-" : kit.getName(), rating);
 
         if (!isOnline()) {
             trySave();
@@ -126,18 +149,6 @@ public class UserData implements User {
     public void addLoss() {
         final int losses = this.losses;
         this.losses = losses + 1;
-    }
-
-    public void setRating(final String name, final int rating) {
-        if (this.rating == null) {
-            this.rating = new ConcurrentHashMap<>();
-        }
-
-        this.rating.put(name, rating);
-
-        if (!isOnline()) {
-            trySave();
-        }
     }
 
     public void addMatch(final MatchData matchData) {

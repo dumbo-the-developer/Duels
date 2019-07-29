@@ -30,6 +30,8 @@ import me.realized.duels.util.Log;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.gui.MultiPageGui;
+import me.realized.duels.util.inventory.ItemBuilder;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -58,6 +60,9 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
     public void handleLoad() throws IOException {
         gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.kit-selector.title"), config.getKitSelectorRows(), kits.values());
         gui.setSpaceFiller(Items.from(config.getKitSelectorFillerType(), config.getKitSelectorFillerData()));
+        gui.setPrevButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.arena-selector.buttons.previous-page.name")).build());
+        gui.setNextButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.arena-selector.buttons.next-page.name")).build());
+        gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.arena-selector.buttons.empty.name")).build());
         plugin.getGuiListener().addGui(gui);
 
         if (!file.exists()) {
@@ -127,22 +132,27 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
         return kits.get(name);
     }
 
-    @Nullable
-    @Override
-    public Kit create(@Nonnull final Player creator, @Nonnull final String name) {
+    public Kit create(@Nonnull final Player creator, @Nonnull final String name, final boolean override) {
         Objects.requireNonNull(creator, "creator");
         Objects.requireNonNull(name, "name");
 
-        if (!StringUtil.isAlphanumeric(name) || kits.containsKey(name)) {
+        if (!StringUtil.isAlphanumeric(name) || (!override && kits.containsKey(name))) {
             return null;
         }
 
         final Kit kit = new Kit(plugin, name, creator.getInventory());
         kits.put(name, kit);
+
         final KitCreateEvent event = new KitCreateEvent(creator, kit);
         plugin.getServer().getPluginManager().callEvent(event);
         gui.calculatePages();
         return kit;
+    }
+
+    @Nullable
+    @Override
+    public Kit create(@Nonnull final Player creator, @Nonnull final String name) {
+        return create(creator, name, false);
     }
 
     @Nullable
@@ -174,5 +184,12 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
     @Override
     public List<Kit> getKits() {
         return Collections.unmodifiableList(Lists.newArrayList(kits.values()));
+    }
+
+    public List<String> getNames() {
+        final List<String> names = Lists.newArrayList();
+        names.add("-"); // Special case: Change the nokit rating
+        names.addAll(kits.keySet());
+        return names;
     }
 }

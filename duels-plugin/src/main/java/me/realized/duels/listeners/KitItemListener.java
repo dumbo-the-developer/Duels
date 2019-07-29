@@ -1,6 +1,7 @@
-package me.realized.duels.extra;
+package me.realized.duels.listeners;
 
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.Permissions;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.StringUtil;
@@ -27,7 +28,10 @@ public class KitItemListener implements Listener {
 
     public KitItemListener(final DuelsPlugin plugin) {
         this.arenaManager = plugin.getArenaManager();
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+
+        if (plugin.getConfiguration().isProtectKitItems()) {
+            plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

@@ -21,7 +21,6 @@ import me.realized.duels.config.Lang;
 import me.realized.duels.data.MatchData;
 import me.realized.duels.data.UserData;
 import me.realized.duels.data.UserManager;
-import me.realized.duels.extra.Teleport;
 import me.realized.duels.hook.hooks.CombatLogXHook;
 import me.realized.duels.hook.hooks.CombatTagPlusHook;
 import me.realized.duels.hook.hooks.EssentialsHook;
@@ -30,7 +29,7 @@ import me.realized.duels.hook.hooks.MyPetHook;
 import me.realized.duels.hook.hooks.PvPManagerHook;
 import me.realized.duels.hook.hooks.SimpleClansHook;
 import me.realized.duels.hook.hooks.VaultHook;
-import me.realized.duels.hook.hooks.WorldGuardHook;
+import me.realized.duels.hook.hooks.worldguard.WorldGuardHook;
 import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.player.PlayerInfo;
@@ -41,11 +40,11 @@ import me.realized.duels.util.Loadable;
 import me.realized.duels.util.PlayerUtil;
 import me.realized.duels.util.RatingUtil;
 import me.realized.duels.util.StringUtil;
+import me.realized.duels.util.Teleport;
 import me.realized.duels.util.TextBuilder;
 import me.realized.duels.util.compat.Players;
 import me.realized.duels.util.compat.Titles;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
-import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
@@ -63,6 +62,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -247,9 +247,9 @@ public class DuelManager implements Loadable {
         if (vault != null && match.getBet() > 0) {
             final int amount = match.getBet() * 2;
             vault.add(amount, player);
-            lang.sendMessage(player, "DUEL.reward.money.message", "name", opponent != null ? opponent.getName() : "none", "money", amount);
+            lang.sendMessage(player, "DUEL.reward.money.message", "name", opponent != null ? opponent.getName() : lang.getMessage("GENERAL.none"), "money", amount);
 
-            final String title = lang.getMessage("DUEL.reward.money.title", "name", opponent != null ? opponent.getName() : "none", "money", amount);
+            final String title = lang.getMessage("DUEL.reward.money.title", "name", opponent != null ? opponent.getName() : lang.getMessage("GENERAL.none"), "money", amount);
 
             if (title != null) {
                 Titles.send(player, title, null, 0, 20, 50);
@@ -295,7 +295,7 @@ public class DuelManager implements Loadable {
             }
 
             if (added) {
-                lang.sendMessage(player, "DUEL.reward.items.message", "name", opponent != null ? opponent.getName() : "none");
+                lang.sendMessage(player, "DUEL.reward.items.message", "name", opponent != null ? opponent.getName() : lang.getMessage("GENERAL.none"));
             }
         }
     }
@@ -311,6 +311,12 @@ public class DuelManager implements Loadable {
 
         if (!config.isUseOwnInventoryEnabled() && kit == null) {
             lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure.no-kit-selected");
+            refundItems(items, first, second);
+            return;
+        }
+
+        if (isBlacklistedWorld(first) || isBlacklistedWorld(second)) {
+            lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure.in-blacklisted-world");
             refundItems(items, first, second);
             return;
         }
@@ -366,7 +372,7 @@ public class DuelManager implements Loadable {
             final Map<UUID, OpponentInfo> info = new HashMap<>();
             info.put(first.getUniqueId(), new OpponentInfo(second.getName(), getRating(kit, userDataManager.get(second))));
             info.put(second.getUniqueId(), new OpponentInfo(first.getName(), getRating(kit, userDataManager.get(first))));
-            arena.startCountdown(kit != null ? kit.getName() : "none", info);
+            arena.startCountdown(kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), info);
         }
 
         final MatchStartEvent event = new MatchStartEvent(match, first, second);
@@ -383,6 +389,10 @@ public class DuelManager implements Loadable {
                 }
             });
         }
+    }
+
+    private boolean isBlacklistedWorld(final Player player) {
+        return config.getBlacklistedWorlds().contains(player.getWorld().getName());
     }
 
     private boolean isTagged(final Player player) {
@@ -409,7 +419,7 @@ public class DuelManager implements Loadable {
     }
 
     private int getRating(final Kit kit, final UserData user) {
-        return kit != null && user != null ? user.getRating(kit) : config.getDefaultRating();
+        return user != null ? user.getRating(kit) : config.getDefaultRating();
     }
 
     private void addPlayers(final boolean fromQueue, final Arena arena, final Kit kit, final Map<Integer, Location> locations, final Player... players) {
@@ -485,7 +495,7 @@ public class DuelManager implements Loadable {
         builder.send(match.getAllPlayers());
     }
 
-    private void handleEndUsers(final Match match, final UserData winner, final UserData loser, final MatchData matchData, final Object... args) {
+    private void handleEndUsers(final Match match, final UserData winner, final UserData loser, final MatchData matchData) {
         if (winner != null && loser != null) {
             winner.addWin();
             loser.addLoss();
@@ -493,20 +503,26 @@ public class DuelManager implements Loadable {
             loser.addMatch(matchData);
 
             final Kit kit = match.getKit();
-            final Object[] append = {"winner_rating", config.getDefaultRating(), "loser_rating", config.getDefaultRating(), "change", 0};
+            int winnerRating = kit == null ? winner.getRating() : winner.getRating(kit);
+            int loserRating = kit == null ? loser.getRating() : loser.getRating(kit);
+            int change = 0;
 
-            if (config.isRatingEnabled() && kit != null && !(!match.isFromQueue() && config.isQueueMatchesOnly())) {
-                int winnerRating = winner.getRating(kit);
-                int loserRating = loser.getRating(kit);
-                final int change = RatingUtil.getChange(config.getKFactor(), winnerRating, loserRating);
-                winner.setRating(kit.getName(), winnerRating = winnerRating + change);
-                loser.setRating(kit.getName(), loserRating = loserRating - change);
-                append[1] = winnerRating;
-                append[3] = loserRating;
-                append[5] = change;
+            if (config.isRatingEnabled() && !(!match.isFromQueue() && config.isQueueMatchesOnly())) {
+                change = RatingUtil.getChange(config.getKFactor(), winnerRating, loserRating);
+                winner.setRating(kit, winnerRating = winnerRating + change);
+                loser.setRating(kit, loserRating = loserRating - change);
             }
 
-            final String message = lang.getMessage("DUEL.on-end.opponent-defeat", ArrayUtils.addAll(args, append));
+            final String message = lang.getMessage("DUEL.on-end.opponent-defeat",
+                "winner", winner.getName(),
+                "loser", loser.getName(),
+                "health", matchData.getHealth(),
+                "kit", matchData.getKit(),
+                "arena", match.getArena().getName(),
+                "winner_rating", winnerRating,
+                "loser_rating", loserRating,
+                "change", change
+            );
 
             if (message == null) {
                 return;
@@ -624,12 +640,11 @@ public class DuelManager implements Loadable {
                 }
 
                 final double health = Math.ceil(winner.getHealth()) * 0.5;
-                final String kit = match.getKit() != null ? match.getKit().getName() : "none";
+                final String kitName = match.getKit() != null ? match.getKit().getName() : lang.getMessage("GENERAL.none");
                 final long duration = System.currentTimeMillis() - match.getStart();
                 final long time = new GregorianCalendar().getTimeInMillis();
-                final MatchData matchData = new MatchData(winner.getName(), player.getName(), kit, time, duration, health);
-                handleEndUsers(match, userDataManager.get(winner), userDataManager.get(player), matchData,
-                    "winner", winner.getName(), "loser", player.getName(), "health", health, "kit", kit, "arena", arena.getName());
+                final MatchData matchData = new MatchData(winner.getName(), player.getName(), kitName, time, duration, health);
+                handleEndUsers(match, userDataManager.get(winner), userDataManager.get(player), matchData);
                 handleInventories(match);
                 plugin.doSyncAfter(() -> {
                     handleWinner(winner, player, arena, match);
@@ -638,7 +653,7 @@ public class DuelManager implements Loadable {
                         for (final String command : config.getEndCommands()) {
                             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command
                                 .replace("%winner%", winner.getName()).replace("%loser%", player.getName())
-                                .replace("%kit%", kit).replace("%arena%", arena.getName())
+                                .replace("%kit%", kitName).replace("%arena%", arena.getName())
                                 .replace("%bet_amount%", String.valueOf(match.getBet()))
                             );
                         }
@@ -648,7 +663,6 @@ public class DuelManager implements Loadable {
                 }, config.getTeleportDelay() * 20L);
             }, 1L);
         }
-
 
         @EventHandler(priority = EventPriority.HIGHEST)
         public void on(final PlayerRespawnEvent event) {
@@ -674,18 +688,15 @@ public class DuelManager implements Loadable {
             }
         }
 
-
         @EventHandler(ignoreCancelled = true)
         public void on(final EntityDamageEvent event) {
             cancelDamage(event);
         }
 
-
         @EventHandler(ignoreCancelled = true)
         public void on(final EntityDamageByEntityEvent event) {
             cancelDamage(event);
         }
-
 
         @EventHandler
         public void on(final PlayerQuitEvent event) {
@@ -697,7 +708,6 @@ public class DuelManager implements Loadable {
 
             player.setHealth(0);
         }
-
 
         @EventHandler(ignoreCancelled = true)
         public void on(final PlayerDropItemEvent event) {
@@ -717,7 +727,6 @@ public class DuelManager implements Loadable {
 
             event.setCancelled(true);
         }
-
 
         @EventHandler(ignoreCancelled = true)
         public void on(final PlayerCommandPreprocessEvent event) {
@@ -765,6 +774,15 @@ public class DuelManager implements Loadable {
 
             event.setCancelled(true);
             lang.sendMessage(player, "DUEL.prevent.inventory-open");
+        }
+
+        @EventHandler(ignoreCancelled = true)
+        public void on(final PlayerItemDamageEvent event) {
+            if (!config.isUseOwnInventoryEnabled() || !arenaManager.isInMatch(event.getPlayer())) {
+                return;
+            }
+
+            event.setCancelled(true);
         }
     }
 }

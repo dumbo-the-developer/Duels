@@ -13,28 +13,25 @@ import org.bukkit.command.CommandSender;
 public class CreatequeueCommand extends BaseCommand {
 
     public CreatequeueCommand(final DuelsPlugin plugin) {
-        super(plugin, "createqueue", "createqueue [bet] <kit>", "Creates a queue with given kit and bet.", 2, false, "createq");
+        super(plugin, "createqueue", "createqueue [bet] [-:kit]", "Creates a queue with given bet and kit.", 3, false, "createq");
     }
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final int bet = NumberUtil.parseInt(args[1]).orElse(0);
-        String name = "";
         Kit kit = null;
 
-        if (args.length > 2) {
-            name = StringUtils.join(args, " ", 2, args.length).replace("-", " ");
+        if (!args[2].equals("-")) {
+            String name = StringUtils.join(args, " ", 2, args.length).replace("-", " ");
             kit = kitManager.get(name);
+
+            if (kit == null) {
+                lang.sendMessage(sender, "ERROR.kit.not-found", "name", name);
+                return;
+            }
         }
 
-        if (config.isUseOwnInventoryEnabled()) {
-            kit = null;
-        } else if (kit == null) {
-            lang.sendMessage(sender, "ERROR.kit.not-found", "name", name);
-            return;
-        }
-
-        final String kitName = kit != null ? kit.getName() : "none";
+        final String kitName = kit != null ? kit.getName() : lang.getMessage("GENERAL.none");
 
         if (queueManager.create(sender, kit, bet) == null) {
             lang.sendMessage(sender, "ERROR.queue.already-exists", "kit", kitName, "bet_amount", bet);
@@ -51,7 +48,7 @@ public class CreatequeueCommand extends BaseCommand {
         }
 
         if (args.length > 2) {
-            return handleTabCompletion(sender, args[2], "kit", kitManager.getKits(), Kit::getName);
+            return handleTabCompletion(args[2], kitManager.getNames());
         }
 
         return null;

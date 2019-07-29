@@ -14,7 +14,7 @@ import me.realized.duels.hook.hooks.PlaceholderHook;
 import me.realized.duels.hook.hooks.PvPManagerHook;
 import me.realized.duels.hook.hooks.SimpleClansHook;
 import me.realized.duels.hook.hooks.VaultHook;
-import me.realized.duels.hook.hooks.WorldGuardHook;
+import me.realized.duels.hook.hooks.worldguard.WorldGuardHook;
 import me.realized.duels.util.hook.AbstractHookManager;
 
 public class HookManager extends AbstractHookManager<DuelsPlugin> {

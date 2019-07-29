@@ -7,9 +7,7 @@ import lombok.Setter;
 import me.realized.duels.util.compat.Inventories;
 import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.inventory.InventoryBuilder;
-import me.realized.duels.util.inventory.ItemBuilder;
 import me.realized.duels.util.inventory.Slots;
-import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -18,10 +16,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
-
-    private final ItemStack PREV_BUTTON = ItemBuilder.of(Material.PAPER).name("&aPrevious Page").build();
-    private final ItemStack NEXT_BUTTON = ItemBuilder.of(Material.PAPER).name("&aNext Page").build();
-    private final ItemStack EMPTY_INDICATOR = ItemBuilder.of(Material.REDSTONE_BLOCK).name("&cThis page is empty.").build();
 
     private final String title;
     private final int size, prevPageSlot, nextPageSlot;
@@ -33,6 +27,13 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
 
     @Setter
     private ItemStack spaceFiller;
+    @Setter
+    private ItemStack prevButton;
+    @Setter
+    private ItemStack nextButton;
+    @Setter
+    private ItemStack emptyIndicator;
+
 
     public MultiPageGui(final P plugin, final String title, final int rows, final Collection<? extends Button<P>> buttons) {
         super(plugin);
@@ -101,9 +102,9 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
 
                 if (prev != null) {
                     last.previous = prev;
-                    last.inventory.setItem(prevPageSlot, PREV_BUTTON);
+                    last.inventory.setItem(prevPageSlot, prevButton);
                     prev.next = last;
-                    prev.inventory.setItem(nextPageSlot, NEXT_BUTTON);
+                    prev.inventory.setItem(nextPageSlot, nextButton);
                 }
 
                 slot = 0;
@@ -199,13 +200,13 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
 
             final ItemStack item = inventory.getItem(4);
 
-            if (item != null && item.isSimilar(EMPTY_INDICATOR)) {
+            if (item != null && item.isSimilar(emptyIndicator)) {
                 return;
             }
 
             clear();
             resetBottom();
-            inventory.setItem(4, EMPTY_INDICATOR);
+            inventory.setItem(4, emptyIndicator);
             remove(inventory);
             resetNext();
         }
@@ -228,10 +229,6 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
         }
 
         void setTitle(final String title) {
-            if (inventory.getTitle().equals(title)) {
-                return;
-            }
-
             Inventories.setTitle(inventory, title);
         }
 

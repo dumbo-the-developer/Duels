@@ -1,7 +1,7 @@
 package me.realized.duels.gui.settings.buttons;
 
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.extra.Permissions;
+import me.realized.duels.Permissions;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.inventory.ItemBuilder;
@@ -27,7 +27,7 @@ public class ItemBettingButton extends BaseButton {
         }
 
         final Settings settings = settingManager.getSafely(player);
-        final String itemBetting = settings.isItemBetting() ? "&aenabled" : "&cdisabled";
+        final String itemBetting = settings.isItemBetting() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled");
         final String lore = plugin.getLang().getMessage("GUI.settings.buttons.item-betting.lore", "item_betting", itemBetting);
         setLore(lore.split("\n"));
     }
@@ -35,7 +35,7 @@ public class ItemBettingButton extends BaseButton {
     @Override
     public void onClick(final Player player) {
         if (!config.isItemBettingEnabled()) {
-            lang.sendMessage(player, "ERROR.setting.disabled-option", "option", "Item Betting");
+            lang.sendMessage(player, "ERROR.setting.disabled-option", "option", lang.getMessage("GENERAL.item-betting"));
             return;
         }
 

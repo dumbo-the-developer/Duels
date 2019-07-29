@@ -8,13 +8,12 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.Permissions;
 import me.realized.duels.api.event.kit.KitEquipEvent;
 import me.realized.duels.arena.Arena;
-import me.realized.duels.extra.Permissions;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.inventory.ItemBuilder;
-import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -102,8 +101,8 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
             player.getInventory().setItem(entry.getKey(), entry.getValue().clone());
         }
 
-        final ItemStack[] armor = items.get("ARMOR").values().toArray(new ItemStack[4]);
-        ArrayUtils.reverse(armor);
+        final ItemStack[] armor = new ItemStack[4];
+        items.get("ARMOR").forEach((slot, item) -> armor[4 - slot] = item.clone());
         player.getInventory().setArmorContents(armor);
         player.updateInventory();
         return true;

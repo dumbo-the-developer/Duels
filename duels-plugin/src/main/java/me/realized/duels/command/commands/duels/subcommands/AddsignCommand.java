@@ -19,7 +19,7 @@ import org.bukkit.entity.Player;
 public class AddsignCommand extends BaseCommand {
 
     public AddsignCommand(final DuelsPlugin plugin) {
-        super(plugin, "addsign", "addsign [bet] [kit]", "Creates a queue sign with bet and kit.", 2, true);
+        super(plugin, "addsign", "addsign [bet] [kit:-]", "Creates a queue sign with given bet and kit.", 3, true);
     }
 
     @Override
@@ -33,22 +33,19 @@ public class AddsignCommand extends BaseCommand {
         }
 
         final int bet = NumberUtil.parseInt(args[1]).orElse(0);
-        String name = "";
         Kit kit = null;
 
-        if (args.length > 2) {
-            name = StringUtils.join(args, " ", 2, args.length).replace("-", " ");
+        if (!args[2].equals("-")) {
+            String name = StringUtils.join(args, " ", 2, args.length).replace("-", " ");
             kit = kitManager.get(name);
+
+            if (kit == null) {
+                lang.sendMessage(sender, "ERROR.kit.not-found", "name", name);
+                return;
+            }
         }
 
-        if (config.isUseOwnInventoryEnabled()) {
-            kit = null;
-        } else if (kit == null) {
-            lang.sendMessage(sender, "ERROR.kit.not-found", "name", name);
-            return;
-        }
-
-        final String kitName = kit != null ? kit.getName() : "none";
+        final String kitName = kit != null ? kit.getName() : lang.getMessage("GENERAL.none");
         final Queue queue = queueManager.get(kit, bet);
 
         if (queue == null) {
@@ -72,7 +69,7 @@ public class AddsignCommand extends BaseCommand {
         }
 
         if (args.length > 2) {
-            return handleTabCompletion(sender, args[2], "kit", kitManager.getKits(), Kit::getName);
+            return handleTabCompletion(args[2], kitManager.getNames());
         }
 
         return null;

@@ -36,7 +36,7 @@ import me.realized.duels.duel.DuelManager;
 import me.realized.duels.hook.hooks.CombatTagPlusHook;
 import me.realized.duels.hook.hooks.PvPManagerHook;
 import me.realized.duels.hook.hooks.VaultHook;
-import me.realized.duels.hook.hooks.WorldGuardHook;
+import me.realized.duels.hook.hooks.worldguard.WorldGuardHook;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.spectate.SpectateManager;
 import me.realized.duels.util.Loadable;
@@ -45,7 +45,9 @@ import me.realized.duels.util.RatingUtil;
 import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.gui.MultiPageGui;
 import me.realized.duels.util.inventory.InventoryUtil;
+import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -97,6 +99,9 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
         this.gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.queues.title"), config.getQueuesRows(), queues);
         gui.setSpaceFiller(Items.from(config.getQueuesFillerType(), config.getQueuesFillerData()));
+        gui.setPrevButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.previous-page.name")).build());
+        gui.setNextButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.next-page.name")).build());
+        gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.empty.name")).build());
         plugin.getGuiListener().addGui(gui);
 
         if (!file.exists()) {
@@ -158,7 +163,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
                         setting.getCache().put(player.getUniqueId(), current.getInfo());
                         setting.getCache().put(other.getUniqueId(), opponent.getInfo());
 
-                        final String kit = queue.getKit() != null ? queue.getKit().getName() : "none";
+                        final String kit = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("none");
                         lang.sendMessage(player, "QUEUE.found-opponent", "name", other.getName(), "kit", kit, "bet_amount", queue.getBet());
                         lang.sendMessage(other, "QUEUE.found-opponent", "name", player.getName(), "kit", kit, "bet_amount", queue.getBet());
                         duelManager.startMatch(player, other, setting, null, true);
@@ -371,7 +376,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
         queue.addPlayer(new QueueEntry(player, player.getLocation().clone(), duelzone, gameMode));
 
-        final String kit = queue.getKit() != null ? queue.getKit().getName() : "none";
+        final String kit = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("none");
         lang.sendMessage(player, "QUEUE.add", "kit", kit, "bet_amount", queue.getBet());
         return true;
     }

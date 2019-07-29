@@ -1,4 +1,4 @@
-package me.realized.duels.extra;
+package me.realized.duels.listeners;
 
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManager;

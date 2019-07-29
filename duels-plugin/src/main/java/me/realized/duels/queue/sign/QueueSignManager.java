@@ -19,11 +19,11 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.Permissions;
 import me.realized.duels.api.event.queue.sign.QueueSignCreateEvent;
 import me.realized.duels.api.event.queue.sign.QueueSignRemoveEvent;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.QueueSignData;
-import me.realized.duels.extra.Permissions;
 import me.realized.duels.queue.Queue;
 import me.realized.duels.queue.QueueManager;
 import me.realized.duels.util.Loadable;
@@ -141,7 +141,7 @@ public class QueueSignManager implements Loadable, me.realized.duels.api.queue.s
         }
 
         final QueueSign created;
-        final String kitName = queue.getKit() != null ? queue.getKit().getName() : "none";
+        final String kitName = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("GENERAL.none");
         signs.put(location, created = new QueueSign(location, lang.getMessage("SIGN.format", "kit", kitName, "bet_amount", queue.getBet()), queue));
         signs.values().stream().filter(sign -> sign.equals(created)).forEach(QueueSign::updateCount);
 

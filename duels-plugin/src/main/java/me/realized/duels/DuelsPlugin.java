@@ -27,16 +27,16 @@ import me.realized.duels.data.UserManager;
 import me.realized.duels.duel.DuelManager;
 import me.realized.duels.extension.ExtensionClassLoader;
 import me.realized.duels.extension.ExtensionManager;
-import me.realized.duels.extra.DamageListener;
-import me.realized.duels.extra.KitItemListener;
-import me.realized.duels.extra.PotionListener;
-import me.realized.duels.extra.ProjectileHitListener;
-import me.realized.duels.extra.SoupListener;
-import me.realized.duels.extra.Teleport;
-import me.realized.duels.extra.TeleportListener;
 import me.realized.duels.hook.HookManager;
 import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.KitManager;
+import me.realized.duels.listeners.DamageListener;
+import me.realized.duels.listeners.KitItemListener;
+import me.realized.duels.listeners.PotionListener;
+import me.realized.duels.listeners.ProjectileHitListener;
+import me.realized.duels.listeners.SoupListener;
+import me.realized.duels.listeners.SumoListener;
+import me.realized.duels.listeners.TeleportListener;
 import me.realized.duels.logging.LogManager;
 import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.queue.QueueManager;
@@ -49,6 +49,7 @@ import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.Log.LogSource;
 import me.realized.duels.util.Reloadable;
+import me.realized.duels.util.Teleport;
 import me.realized.duels.util.command.AbstractCommand;
 import me.realized.duels.util.gui.GuiListener;
 import org.bukkit.command.CommandSender;
@@ -118,7 +119,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private volatile boolean updateAvailable;
     @Getter
-    private volatile String downloadLink;
+    private volatile String newVersion;
 
     @Override
     public void onEnable() {
@@ -180,6 +181,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         new PotionListener(this);
         new TeleportListener(this);
         new SoupListener(this);
+        new SumoListener(this);
         new ProjectileHitListener(this);
 
         new Metrics(this);
@@ -194,11 +196,11 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             @Override
             public void updateAvailable(final String newVersion, final String downloadUrl, final boolean hasDirectDownload) {
                 updateAvailable = true;
-                downloadLink = downloadUrl;
+                DuelsPlugin.this.newVersion = newVersion;
                 Log.info("===============================================");
                 Log.info("An update for " + getName() + " is available!");
                 Log.info("Download " + getName() + " v" + newVersion + " here:");
-                Log.info(downloadUrl);
+                Log.info(getDescription().getWebsite());
                 Log.info("===============================================");
             }
 

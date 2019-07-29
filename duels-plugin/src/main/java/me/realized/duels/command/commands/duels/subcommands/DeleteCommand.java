@@ -36,7 +36,7 @@ public class DeleteCommand extends BaseCommand {
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         if (args.length == 2) {
-            return handleTabCompletion(sender, args[1], "arena", arenaManager.getArenas(), Arena::getName);
+            return handleTabCompletion(args[1], arenaManager.getNames());
         }
 
         return null;

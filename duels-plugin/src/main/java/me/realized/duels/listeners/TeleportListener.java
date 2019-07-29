@@ -1,10 +1,12 @@
-package me.realized.duels.extra;
+package me.realized.duels.listeners;
 
 import java.util.Set;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.Permissions;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.config.Lang;
 import me.realized.duels.spectate.SpectateManager;
+import me.realized.duels.util.Teleport;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

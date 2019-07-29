@@ -2,6 +2,7 @@ package me.realized.duels.command.commands.duel;
 
 import java.util.List;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.Permissions;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.command.commands.duel.subcommands.AcceptCommand;
 import me.realized.duels.command.commands.duel.subcommands.DenyCommand;
@@ -12,12 +13,11 @@ import me.realized.duels.command.commands.duel.subcommands.ToggleCommand;
 import me.realized.duels.command.commands.duel.subcommands.TopCommand;
 import me.realized.duels.command.commands.duel.subcommands.VersionCommand;
 import me.realized.duels.data.UserData;
-import me.realized.duels.extra.Permissions;
 import me.realized.duels.hook.hooks.CombatLogXHook;
 import me.realized.duels.hook.hooks.CombatTagPlusHook;
 import me.realized.duels.hook.hooks.PvPManagerHook;
 import me.realized.duels.hook.hooks.VaultHook;
-import me.realized.duels.hook.hooks.WorldGuardHook;
+import me.realized.duels.hook.hooks.worldguard.WorldGuardHook;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.NumberUtil;
@@ -83,6 +83,11 @@ public class DuelCommand extends BaseCommand {
 
         if (config.isPreventCreativeMode() && (gameMode = player.getGameMode()) == GameMode.CREATIVE) {
             lang.sendMessage(sender, "ERROR.duel.in-creative-mode");
+            return true;
+        }
+
+        if (config.getBlacklistedWorlds().contains(player.getWorld().getName())) {
+            lang.sendMessage(sender, "ERROR.duel.in-blacklisted-world");
             return true;
         }
 
@@ -164,7 +169,7 @@ public class DuelCommand extends BaseCommand {
                 }
 
                 if (vault == null || vault.getEconomy() == null) {
-                    lang.sendMessage(sender, "ERROR.setting.disabled-option", "option", "Betting");
+                    lang.sendMessage(sender, "ERROR.setting.disabled-option", "option", lang.getMessage("GENERAL.betting"));
                     return true;
                 }
 
@@ -179,7 +184,7 @@ public class DuelCommand extends BaseCommand {
             if (args.length > 2) {
                 if (args[2].equalsIgnoreCase("true")) {
                     if (!config.isItemBettingEnabled()) {
-                        lang.sendMessage(player, "ERROR.setting.disabled-option", "option", "Item Betting");
+                        lang.sendMessage(player, "ERROR.setting.disabled-option", "option", lang.getMessage("GENERAL.item-betting"));
                         return true;
                     }
 

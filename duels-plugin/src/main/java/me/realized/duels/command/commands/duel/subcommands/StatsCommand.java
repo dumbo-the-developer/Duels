@@ -3,10 +3,10 @@ package me.realized.duels.command.commands.duel.subcommands;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.Permissions;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.data.MatchData;
 import me.realized.duels.data.UserData;
-import me.realized.duels.extra.Permissions;
 import me.realized.duels.util.DateUtil;
 import me.realized.duels.util.TextBuilder;
 import net.md_5.bungee.api.chat.HoverEvent.Action;
@@ -47,13 +47,23 @@ public class StatsCommand extends BaseCommand {
         final String wins = String.valueOf(user.getWins());
         final String losses = String.valueOf(user.getLosses());
         final String wlRatio = String.valueOf(user.getLosses() > 0 ? Math.round(((double) user.getWins() / (double) user.getLosses()) * 100.0) / 100.0 : user.getWins());
-        final String requests = String.valueOf(user.canRequest() ? "&aenabled" : "&cdisabled");
+        final String requests = String.valueOf(user.canRequest() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled"));
         final Object[] args = {"name", user.getName(), "wins", wins, "losses", losses, "wl_ratio", wlRatio, "requests_enabled", requests};
         lang.sendMessage(sender, "COMMAND.duel.stats.displayed", args);
 
-        if (config.isDisplayRatings()) {
+        if (config.isDisplayKitRatings() || config.isDisplayNoKitRating()) {
             lang.sendMessage(sender, "COMMAND.duel.stats.rating.header", args);
-            kitManager.getKits().forEach(kit -> lang.sendMessage(sender, "COMMAND.duel.stats.rating.format", "kit", kit.getName(), "rating", user.getRating(kit)));
+
+            if (config.isDisplayNoKitRating()) {
+                lang.sendMessage(sender, "COMMAND.duel.stats.rating.format",
+                    "type", config.getTopNoKitType(), "kit", config.getTopNoKitType(), "rating", user.getRating());
+            }
+
+            if (config.isDisplayKitRatings()) {
+                kitManager.getKits().forEach(kit -> lang.sendMessage(sender, "COMMAND.duel.stats.rating.format",
+                    "type", kit.getName(), "kit", kit.getName(), "rating", user.getRating(kit)));
+            }
+
             lang.sendMessage(sender, "COMMAND.duel.stats.rating.footer", args);
         }
 
@@ -63,7 +73,7 @@ public class StatsCommand extends BaseCommand {
             final Calendar calendar = new GregorianCalendar();
 
             for (final MatchData match : user.getMatches()) {
-                final String kit = match.getKit() != null ? match.getKit() : "none";
+                final String kit = match.getKit() != null ? match.getKit() : lang.getMessage("GENERAL.none");
                 final String duration = DateUtil.formatMilliseconds(match.getDuration());
                 final String timeSince = DateUtil.formatMilliseconds(calendar.getTimeInMillis() - match.getTime());
                 TextBuilder

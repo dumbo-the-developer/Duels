@@ -30,7 +30,9 @@ import me.realized.duels.util.Log;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.gui.MultiPageGui;
+import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -66,6 +68,9 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
     public void handleLoad() throws IOException {
         gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.arena-selector.title"), config.getArenaSelectorRows(), arenas);
         gui.setSpaceFiller(Items.from(config.getArenaSelectorFillerType(), config.getArenaSelectorFillerData()));
+        gui.setPrevButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.previous-page.name")).build());
+        gui.setNextButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.next-page.name")).build());
+        gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.empty.name")).build());
         plugin.getGuiListener().addGui(gui);
 
         if (config.isCdEnabled()) {
@@ -195,9 +200,13 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
         return available.get(ThreadLocalRandom.current().nextInt(available.size()));
     }
 
+    public List<String> getNames() {
+        return arenas.stream().map(Arena::getName).collect(Collectors.toList());
+    }
+
     @EventHandler(ignoreCancelled = true)
     public void on(final EntityDamageEvent event) {
-        if (!(event.getEntity() instanceof Player)) {
+        if (!config.isPreventPvp() || !(event.getEntity() instanceof Player)) {
             return;
         }
 
@@ -212,6 +221,10 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
 
     @EventHandler(ignoreCancelled = true)
     public void on(final ProjectileLaunchEvent event) {
+        if (!config.isPreventLaunchProjectile()) {
+            return;
+        }
+
         final ProjectileSource shooter = event.getEntity().getShooter();
 
         if (!(shooter instanceof Player)) {
@@ -229,6 +242,10 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
 
     @EventHandler(ignoreCancelled = true)
     public void on(final PlayerMoveEvent event) {
+        if (!config.isPreventMovement()) {
+            return;
+        }
+
         final Location from = event.getFrom();
         final Location to = event.getTo();
 

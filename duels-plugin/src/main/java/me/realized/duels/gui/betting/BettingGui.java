@@ -13,6 +13,7 @@ import me.realized.duels.gui.betting.buttons.DetailsButton;
 import me.realized.duels.gui.betting.buttons.HeadButton;
 import me.realized.duels.gui.betting.buttons.StateButton;
 import me.realized.duels.setting.Settings;
+import me.realized.duels.util.compat.CompatUtil;
 import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.gui.AbstractGui;
 import me.realized.duels.util.gui.Button;
@@ -84,21 +85,6 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
 
         if (firstReady && secondReady) {
             new WaitTask().runTaskTimer(plugin, 10L, 20L);
-//            final Player other = Bukkit.getPlayer(first.equals(player.getUniqueId()) ? second : first);
-//
-//            if (other == null) {
-//                return;
-//            }
-//
-//            player.closeInventory();
-//            other.closeInventory();
-//            guiListener.removeGui(player, this);
-//            guiListener.removeGui(other, this);
-//
-//            final Map<UUID, List<ItemStack>> items = new HashMap<>();
-//            items.put(player.getUniqueId(), getSection(player).collect());
-//            items.put(other.getUniqueId(), getSection(other).collect());
-//            duelManager.startMatch(player, other, settings, items, false);
         }
     }
 
@@ -274,8 +260,16 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
 
             if (counter < 5) {
                 final int slot = SLOT_START + 9 * counter;
-                final ItemStack item = inventory.getItem(slot);
-                Items.setDurability(item, (short) 5);
+                ItemStack item = inventory.getItem(slot);
+
+                if (CompatUtil.isPre1_13()) {
+                    item.setDurability((short) 5);
+                } else {
+                    final ItemStack greenPane = Items.GREEN_PANE.clone();
+                    greenPane.setItemMeta(item.getItemMeta());
+                    item = greenPane;
+                }
+
                 inventory.setItem(slot, item);
                 counter++;
                 return;

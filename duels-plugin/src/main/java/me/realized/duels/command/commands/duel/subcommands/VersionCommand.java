@@ -1,8 +1,8 @@
 package me.realized.duels.command.commands.duel.subcommands;
 
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.Permissions;
 import me.realized.duels.command.BaseCommand;
-import me.realized.duels.extra.Permissions;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.TextBuilder;
 import net.md_5.bungee.api.chat.ClickEvent.Action;

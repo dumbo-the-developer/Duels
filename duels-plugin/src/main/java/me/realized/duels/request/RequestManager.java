@@ -60,10 +60,10 @@ public class RequestManager implements Loadable, Listener {
         }
 
         get(sender, true).put(target.getUniqueId(), request);
-        final String kit = settings.getKit() != null ? settings.getKit().getName() : "Not Selected";
-        final String arena = settings.getArena() != null ? settings.getArena().getName() : "Random";
+        final String kit = settings.getKit() != null ? settings.getKit().getName() : lang.getMessage("GENERAL.not-selected");
+        final String arena = settings.getArena() != null ? settings.getArena().getName() : lang.getMessage("GENERAL.random");
         final int betAmount = settings.getBet();
-        final String itemBetting = settings.isItemBetting() ? "&aenabled" : "&cdisabled";
+        final String itemBetting = settings.isItemBetting() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled");
 
         lang.sendMessage(sender, "COMMAND.duel.request.send.sender",
             "name", target.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);

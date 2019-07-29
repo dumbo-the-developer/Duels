@@ -1,9 +1,9 @@
 package me.realized.duels.command.commands.duel.subcommands;
 
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.Permissions;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.data.UserData;
-import me.realized.duels.extra.Permissions;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 

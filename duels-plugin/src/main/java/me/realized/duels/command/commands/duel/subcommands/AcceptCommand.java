@@ -6,7 +6,7 @@ import me.realized.duels.command.BaseCommand;
 import me.realized.duels.hook.hooks.CombatLogXHook;
 import me.realized.duels.hook.hooks.CombatTagPlusHook;
 import me.realized.duels.hook.hooks.PvPManagerHook;
-import me.realized.duels.hook.hooks.WorldGuardHook;
+import me.realized.duels.hook.hooks.worldguard.WorldGuardHook;
 import me.realized.duels.request.Request;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.inventory.InventoryUtil;
@@ -104,10 +104,10 @@ public class AcceptCommand extends BaseCommand {
         }
 
         final Settings settings = request.getSettings();
-        final String kit = settings.getKit() != null ? settings.getKit().getName() : "Not Selected";
-        final String arena = settings.getArena() != null ? settings.getArena().getName() : "Random";
+        final String kit = settings.getKit() != null ? settings.getKit().getName() : lang.getMessage("GENERAL.not-selected");
+        final String arena = settings.getArena() != null ? settings.getArena().getName() : lang.getMessage("GENERAL.random");
         final double bet = settings.getBet();
-        final String itemBetting = settings.isItemBetting() ? "&aenabled" : "&cdisabled";
+        final String itemBetting = settings.isItemBetting() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled");
         lang.sendMessage(player, "COMMAND.duel.request.accept.receiver",
             "name", target.getName(), "kit", kit, "arena", arena, "bet_amount", bet, "item_betting", itemBetting);
         lang.sendMessage(target, "COMMAND.duel.request.accept.sender",

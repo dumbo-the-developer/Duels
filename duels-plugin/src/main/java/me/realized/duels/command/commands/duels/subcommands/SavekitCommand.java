@@ -1,5 +1,6 @@
 package me.realized.duels.command.commands.duels.subcommands;
 
+import java.util.Arrays;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.util.StringUtil;
@@ -15,14 +16,15 @@ public class SavekitCommand extends BaseCommand {
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
-        final String name = StringUtils.join(args, " ", 1, args.length);
+        final String[] argsNoOptions = Arrays.stream(args).filter(s -> !s.startsWith("-")).toArray(String[]::new);
+        final String name = StringUtils.join(argsNoOptions, " ", 1, argsNoOptions.length);
 
         if (!StringUtil.isAlphanumeric(name)) {
-            lang.sendMessage(sender, "ERROR.command.name-not-alphanumeric");
+            lang.sendMessage(sender, "ERROR.command.name-not-alphanumeric", "name", name);
             return;
         }
 
-        if (kitManager.create((Player) sender, name) == null) {
+        if (kitManager.create((Player) sender, name, Arrays.asList(args).contains("-o")) == null) {
             lang.sendMessage(sender, "ERROR.kit.already-exists", "name", name);
             return;
         }

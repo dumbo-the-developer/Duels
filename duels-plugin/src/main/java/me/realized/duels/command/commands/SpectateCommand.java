@@ -1,8 +1,8 @@
 package me.realized.duels.command.commands;
 
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.Permissions;
 import me.realized.duels.command.BaseCommand;
-import me.realized.duels.extra.Permissions;
 import me.realized.duels.util.inventory.InventoryUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;

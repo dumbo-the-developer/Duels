@@ -1,5 +1,6 @@
 package me.realized.duels.util;
 
+import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.function.Function;
@@ -9,8 +10,8 @@ import org.bukkit.Location;
 
 public final class StringUtil {
 
-    private static final Pattern ALPHANUMERIC = Pattern.compile("^[a-zA-Z0-9_]*$");
-    private final static TreeMap<Integer, String> ROMAN_NUMERALS = new TreeMap<>();
+    private static final Pattern ALPHANUMERIC = Pattern.compile("^[a-zA-Z0-9_]+$");
+    private static final TreeMap<Integer, String> ROMAN_NUMERALS = new TreeMap<>();
 
     static {
         ROMAN_NUMERALS.put(1000, "M");
@@ -32,13 +33,17 @@ public final class StringUtil {
 
     // Source: https://stackoverflow.com/questions/12967896/converting-integers-to-roman-numerals-java
     public static String toRoman(final int number) {
-        int l = ROMAN_NUMERALS.floorKey(number);
+        if (number <= 0) {
+            return String.valueOf(number);
+        }
 
-        if (number == l) {
+        int key = ROMAN_NUMERALS.floorKey(number);
+
+        if (number == key) {
             return ROMAN_NUMERALS.get(number);
         }
 
-        return ROMAN_NUMERALS.get(l) + toRoman(number - l);
+        return ROMAN_NUMERALS.get(key) + toRoman(number - key);
     }
 
     public static String fromList(final List<?> list) {
@@ -61,7 +66,9 @@ public final class StringUtil {
         return s.replace(ChatColor.COLOR_CHAR, '&');
     }
 
-    public static List<String> reverseColor(final List<String> input) {
+    public static List<String> reverseColor(List<String> input) {
+        // In case input is an unmodifiable list
+        input = Lists.newArrayList(input);
         input.replaceAll(s -> s = reverseColor(s));
         return input;
     }
@@ -79,7 +86,7 @@ public final class StringUtil {
         return input;
     }
 
-    public static boolean isAlphanumeric(String input) {
+    public static boolean isAlphanumeric(final String input) {
         return ALPHANUMERIC.matcher(input.replace(" ", "")).matches();
     }
 }

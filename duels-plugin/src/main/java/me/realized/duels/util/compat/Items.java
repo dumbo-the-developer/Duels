@@ -22,6 +22,7 @@ public final class Items {
     public static final ItemStack ON;
     public static final Material MUSHROOM_SOUP;
     public static final Material EMPTY_MAP;
+    public static final Material SIGN;
 
     static {
         ORANGE_PANE = (CompatUtil.isPre1_13() ? ItemBuilder.of(PANE, 1, (short) 1) : ItemBuilder.of(Material.ORANGE_STAINED_GLASS_PANE)).name(" ").build();
@@ -36,6 +37,7 @@ public final class Items {
         ON = (CompatUtil.isPre1_13() ? ItemBuilder.of("INK_SACK", 1, (short) 10) : ItemBuilder.of(Material.LIME_DYE)).build();
         MUSHROOM_SOUP = CompatUtil.isPre1_13() ? Material.matchMaterial("MUSHROOM_SOUP") : Material.MUSHROOM_STEW;
         EMPTY_MAP = CompatUtil.isPre1_13() ? Material.matchMaterial("EMPTY_MAP") : Material.MAP;
+        SIGN = CompatUtil.isPre1_14() ? Material.SIGN : Material.matchMaterial("OAK_SIGN");
     }
 
     public static boolean equals(final ItemStack item, final ItemStack other) {
@@ -57,22 +59,6 @@ public final class Items {
 
         final ItemMeta meta;
         return ((meta = item.getItemMeta()) == null) ? 0 : (short) ((Damageable) meta).getDamage();
-    }
-
-    public static void setDurability(final ItemStack item, final short durability) {
-        if (CompatUtil.isPre1_13()) {
-            item.setDurability(durability);
-            return;
-        }
-
-        final ItemMeta meta = item.getItemMeta();
-
-        if (meta == null) {
-            return;
-        }
-
-        ((Damageable) meta).setDamage(durability);
-        item.setItemMeta(meta);
     }
 
     private Items() {}

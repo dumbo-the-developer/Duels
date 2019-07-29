@@ -46,7 +46,11 @@ public class Attributes extends CompatBase {
                     continue;
                 }
 
-                ADD.invoke(list, tag);
+                if (CompatUtil.isPre1_14()) {
+                    ADD.invoke(list, tag);
+                } else {
+                    ADD.invoke(list, 0, tag);
+                }
             }
 
             final Object nmsItem = AS_NMS_COPY.invoke(null, item);

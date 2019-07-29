@@ -12,7 +12,7 @@ import org.bukkit.command.CommandSender;
 public class ResetratingCommand extends BaseCommand {
 
     public ResetratingCommand(final DuelsPlugin plugin) {
-        super(plugin, "resetrating", "resetrating [name] [kit:all]", "Resets all or specified kit's rating.", 3, false, "resetr");
+        super(plugin, "resetrating", "resetrating [name] [-:kit:all]", "Resets specified kit's rating or all.", 3, false, "resetr");
     }
 
     @Override
@@ -25,8 +25,12 @@ public class ResetratingCommand extends BaseCommand {
         }
 
         if (args[2].equalsIgnoreCase("all")) {
+            user.resetRating();
             kitManager.getKits().forEach(user::resetRating);
             lang.sendMessage(sender, "COMMAND.duels.reset-rating", "name", user.getName(), "kit", "all");
+        } else if (args[2].equals("-")) {
+            user.resetRating();
+            lang.sendMessage(sender, "COMMAND.duels.reset-rating", "name", user.getName(), "kit", "none");
         } else {
             final String name = StringUtils.join(args, " ", 2, args.length).replace("-", " ");
             final Kit kit = kitManager.get(name);
@@ -44,7 +48,7 @@ public class ResetratingCommand extends BaseCommand {
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         if (args.length == 3) {
-            return handleTabCompletion(sender, args[2], "kit", kitManager.getKits(), Kit::getName);
+            return handleTabCompletion(args[2], kitManager.getNames());
         }
 
         return null;

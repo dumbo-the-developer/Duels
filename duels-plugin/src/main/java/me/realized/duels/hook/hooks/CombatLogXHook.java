@@ -1,6 +1,7 @@
 package me.realized.duels.hook.hooks;
 
-import com.SirBlobman.combatlogx.Combat;
+import com.SirBlobman.combatlogx.event.PlayerUntagEvent.UntagReason;
+import com.SirBlobman.combatlogx.utility.CombatUtil;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.config.Config;
 import me.realized.duels.util.hook.PluginHook;
@@ -15,16 +16,17 @@ public class CombatLogXHook extends PluginHook<DuelsPlugin> {
         this.config = plugin.getConfiguration();
 
         try {
-            final Class<?> clazz = Class.forName("com.SirBlobman.combatlogx.Combat");
+            final Class<?> clazz = Class.forName("com.SirBlobman.combatlogx.utility.CombatUtil");
             clazz.getMethod("isInCombat", Player.class);
-            clazz.getMethod("remove", Player.class);
+            final Class<?> reasonClazz = Class.forName("com.SirBlobman.combatlogx.event.PlayerUntagEvent$UntagReason");
+            clazz.getMethod("untag", Player.class, reasonClazz);
         } catch (NoSuchMethodException | ClassNotFoundException ex) {
             throw new RuntimeException("This version of " + getName() + " is not supported. Please try upgrading to the latest version.");
         }
     }
 
     public boolean isTagged(final Player player) {
-        return config.isClxPreventDuel() && Combat.isInCombat(player);
+        return config.isClxPreventDuel() && CombatUtil.isInCombat(player);
     }
 
     public void removeTag(final Player player) {
@@ -32,6 +34,6 @@ public class CombatLogXHook extends PluginHook<DuelsPlugin> {
             return;
         }
 
-        Combat.remove(player);
+        CombatUtil.untag(player, UntagReason.EXPIRE_ENEMY_DEATH);
     }
 }

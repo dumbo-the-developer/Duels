@@ -7,6 +7,7 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManager;
 import me.realized.duels.config.Config;
 import me.realized.duels.util.Log;
+import me.realized.duels.util.compat.ReflectionUtil;
 import me.realized.duels.util.hook.PluginHook;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -24,9 +25,9 @@ public class FactionsHook extends PluginHook<DuelsPlugin> {
 
         Listener listener;
 
-        if (findClass("com.massivecraft.factions.event.PowerLossEvent")) {
+        if (ReflectionUtil.getClassUnsafe("com.massivecraft.factions.event.PowerLossEvent") != null) {
             listener = new FactionsUUIDListener();
-        } else if (findClass("com.massivecraft.factions.event.EventFactionsPowerChange")) {
+        } else if (ReflectionUtil.getClassUnsafe(("com.massivecraft.factions.event.EventFactionsPowerChange")) != null) {
             listener = new Factions2Listener();
         } else {
             listener = null;
@@ -38,15 +39,6 @@ public class FactionsHook extends PluginHook<DuelsPlugin> {
         }
 
         plugin.getServer().getPluginManager().registerEvents(listener, plugin);
-    }
-
-    private boolean findClass(final String path) {
-        try {
-            Class.forName(path);
-            return true;
-        } catch (ClassNotFoundException ex) {
-            return false;
-        }
     }
 
     public class Factions2Listener implements Listener {

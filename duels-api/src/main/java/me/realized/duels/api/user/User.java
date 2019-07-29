@@ -86,12 +86,29 @@ public interface User {
 
 
     /**
+     * Gets the no kit rating. thread-safe!
+     *
+     * @return no kit rating.
+     * @since 3.3.0
+     */
+    int getRating();
+
+
+    /**
      * Gets the rating of the given {@link Kit}. thread-safe!
      *
      * @param kit {@link Kit} to check for rating.
-     * @return Rating for this {@link Kit} or the default rating specified in the configuration.
+     * @return Rating for this {@link Kit}.
      */
     int getRating(@Nonnull final Kit kit);
+
+
+    /**
+     * Resets the rating to default for the no kit rating. thread-safe!
+     *
+     * @since 3.3.0
+     */
+    void resetRating();
 
 
     /**

@@ -1,7 +1,7 @@
 package me.realized.duels.gui.settings.buttons;
 
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.extra.Permissions;
+import me.realized.duels.Permissions;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.compat.Items;
@@ -27,7 +27,7 @@ public class ArenaSelectButton extends BaseButton {
         }
 
         final Settings settings = settingManager.getSafely(player);
-        final String arena = settings.getArena() != null ? settings.getArena().getName() : "Random";
+        final String arena = settings.getArena() != null ? settings.getArena().getName() : lang.getMessage("GENERAL.random");
         final String lore = lang.getMessage("GUI.settings.buttons.arena-selector.lore", "arena", arena);
         setLore(lore.split("\n"));
     }
@@ -35,7 +35,7 @@ public class ArenaSelectButton extends BaseButton {
     @Override
     public void onClick(final Player player) {
         if (!config.isArenaSelectingEnabled()) {
-            lang.sendMessage(player, "ERROR.setting.disabled-option", "option", "Arena Selector");
+            lang.sendMessage(player, "ERROR.setting.disabled-option", "option", lang.getMessage("GENERAL.arena-selector"));
             return;
         }
 

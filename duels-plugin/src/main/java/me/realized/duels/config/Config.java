@@ -101,6 +101,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean preventInventoryOpen;
     @Getter
+    private boolean protectKitItems;
+    @Getter
     private boolean removeEmptyBottle;
     @Getter
     private boolean preventTpToMatchPlayers;
@@ -108,6 +110,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean forceAllowCombat;
     @Getter
     private boolean cancelIfMoved;
+    @Getter
+    private List<String> blacklistedWorlds;
     @Getter
     private boolean teleportToLastLocation;
     @Getter
@@ -145,6 +149,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean specRequiresClearedInventory;
     @Getter
+    private boolean specPreventBlockInteract;
+    @Getter
     private List<String> specWhitelistedCommands;
 
     @Getter
@@ -161,7 +167,9 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean preventPvp;
 
     @Getter
-    private boolean displayRatings;
+    private boolean displayKitRatings;
+    @Getter
+    private boolean displayNoKitRating;
     @Getter
     private boolean displayPastMatches;
     @Getter
@@ -181,6 +189,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private String topKitType;
     @Getter
     private String topKitIdentifier;
+    @Getter
+    private String topNoKitType;
+    @Getter
+    private String topNoKitIdentifier;
 
     @Getter
     private int kitSelectorRows;
@@ -210,9 +222,14 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean soupEnabled;
     @Getter
-    private String nameStartingWith;
+    private String soupNameStartingWith;
     @Getter
-    private double heartsToRegen;
+    private double soupHeartsToRegen;
+
+    @Getter
+    private boolean sumoEnabled;
+    @Getter
+    private String sumoNameStartingWith;
 
     private final Map<String, MessageSound> sounds = new HashMap<>();
 
@@ -270,10 +287,12 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         projectileHitMessageEnabled = configuration.getBoolean("duel.projectile-hit-message.enabled", true);
         projectileHitMessageTypes = configuration.getStringList("duel.projectile-hit-message.types");
         preventInventoryOpen = configuration.getBoolean("duel.prevent-inventory-open", true);
+        protectKitItems = configuration.getBoolean("duel.protect-kit-items", true);
         removeEmptyBottle = configuration.getBoolean("duel.remove-empty-bottle", true);
         preventTpToMatchPlayers = configuration.getBoolean("duel.prevent-teleport-to-match-players", true);
         forceAllowCombat = configuration.getBoolean("duel.force-allow-combat", true);
         cancelIfMoved = configuration.getBoolean("duel.cancel-if-moved", false);
+        blacklistedWorlds = configuration.getStringList("duel.blacklisted-worlds");
         teleportToLastLocation = configuration.getBoolean("duel.teleport-to-last-location", false);
         teleportDelay = configuration.getInt("duel.teleport-delay", 5);
         spawnFirework = configuration.getBoolean("duel.spawn-firework", true);
@@ -293,6 +312,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         queueMatchesOnly = configuration.getBoolean("rating.queue-matches-only", true);
 
         specRequiresClearedInventory = configuration.getBoolean("spectate.requires-cleared-inventory", false);
+        specPreventBlockInteract = configuration.getBoolean("spectate.prevent.block-interact", true);
         specWhitelistedCommands = configuration.getStringList("spectate.whitelisted-commands");
 
         cdEnabled = configuration.getBoolean("countdown.enabled", true);
@@ -302,7 +322,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         preventLaunchProjectile = configuration.getBoolean("countdown.prevent.launch-projectile", true);
         preventPvp = configuration.getBoolean("countdown.prevent.pvp", true);
 
-        displayRatings = configuration.getBoolean("stats.display-ratings", true);
+        displayKitRatings = configuration.getBoolean("stats.display-kit-ratings", true);
+        displayNoKitRating = configuration.getBoolean("stats.display-nokit-rating", false);
         displayPastMatches = configuration.getBoolean("stats.display-past-matches", true);
         matchesToDisplay = Math.max(configuration.getInt("stats.matches-to-display", 10), 0);
 
@@ -313,6 +334,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         topLossesIdentifier = configuration.getString("top.displayed-replacers.losses.identifier", "losses");
         topKitType = configuration.getString("top.displayed-replacers.kit.type", "%kit%");
         topKitIdentifier = configuration.getString("top.displayed-replacers.kit.identifier", "rating");
+        topNoKitType = configuration.getString("top.displayed-replacers.no-kit.type", "No Kit");
+        topNoKitIdentifier = configuration.getString("top.displayed-replacers.no-kit.identifier", "rating");
 
         kitSelectorRows = Math.min(Math.max(configuration.getInt("guis.kit-selector.rows", 2), 1), 5);
         kitSelectorFillerType = configuration.getString("guis.kit-selector.space-filler-item.type", "STAINED_GLASS_PANE");
@@ -328,8 +351,11 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         inheritKitItemType = configuration.getBoolean("guis.queues.inherit-kit-item-type", true);
 
         soupEnabled = configuration.getBoolean("soup.enabled", true);
-        nameStartingWith = configuration.getString("soup.arena-name-starting-with", "soup arena");
-        heartsToRegen = Math.max(configuration.getDouble("soup.hearts-to-regen", 3.5), 0);
+        soupNameStartingWith = configuration.getString("soup.arena-name-starting-with", "soup arena");
+        soupHeartsToRegen = Math.max(configuration.getDouble("soup.hearts-to-regen", 3.5), 0);
+
+        sumoEnabled = configuration.getBoolean("sumo.enabled", true);
+        sumoNameStartingWith = configuration.getString("sumo.arena-name-starting-with", "sumo arena");
 
         final ConfigurationSection sounds = configuration.getConfigurationSection("sounds");
 

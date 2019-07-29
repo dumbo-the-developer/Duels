@@ -3,8 +3,8 @@ package me.realized.duels.command.commands.duel.subcommands;
 import java.util.Arrays;
 import java.util.List;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.Permissions;
 import me.realized.duels.command.BaseCommand;
-import me.realized.duels.extra.Permissions;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.queue.Queue;
 import me.realized.duels.util.NumberUtil;
@@ -16,7 +16,7 @@ import org.bukkit.entity.Player;
 public class QueueCommand extends BaseCommand {
 
     public QueueCommand(final DuelsPlugin plugin) {
-        super(plugin, "queue", "queue [kit] <bet>", "Joins a queue with given kit and bet.", Permissions.QUEUE, 1, true);
+        super(plugin, "queue", "queue [-:kit] [bet]", "Joins a queue with given kit and bet.", Permissions.QUEUE, 1, true);
     }
 
     @Override
@@ -28,39 +28,24 @@ public class QueueCommand extends BaseCommand {
             return;
         }
 
-        final Queue queue;
-        String name = "";
-        int bet;
+        Kit kit = null;
 
-        if (config.isUseOwnInventoryEnabled()) {
-            queue = queueManager.get(null, bet = NumberUtil.parseInt(args[args.length - 1]).orElse(0));
-        } else {
-            bet = 0;
-            int max = args.length;
-
-            if (args.length > getLength()) {
-                bet = NumberUtil.parseInt(args[args.length - 1]).orElse(-1);
-                max = args.length - 1;
-
-                if (bet == -1) {
-                    bet = 0;
-                    max = args.length;
-                }
-            }
-
-            name = StringUtils.join(args, " ", 1, max).replace("-", " ");
-            final Kit kit = kitManager.get(name);
+        if (!args[1].equals("-")) {
+            String name = StringUtils.join(args, " ", 1, args.length - (args.length > 2 ? 1 : 0)).replace("-", " ");
+            kit = kitManager.get(name);
 
             if (kit == null) {
                 lang.sendMessage(sender, "ERROR.kit.not-found", "name", name);
                 return;
             }
-
-            queue = queueManager.get(kit, bet);
         }
 
+        final String kitName = kit != null ? kit.getName() : lang.getMessage("none");
+        final int bet = args.length > 2 ? NumberUtil.parseInt(args[args.length - 1]).orElse(0) : 0;
+        final Queue queue = queueManager.get(kit, bet);
+
         if (queue == null) {
-            lang.sendMessage(sender, "ERROR.queue.not-found", "bet_amount", bet, "kit", name.isEmpty() ? "none" : name);
+            lang.sendMessage(sender, "ERROR.queue.not-found", "bet_amount", bet, "kit", kitName);
             return;
         }
 
@@ -70,7 +55,7 @@ public class QueueCommand extends BaseCommand {
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         if (args.length == 2) {
-            return handleTabCompletion(sender, args[1], "kit", kitManager.getKits(), Kit::getName);
+            return handleTabCompletion(args[1], kitManager.getNames());
         }
 
         if (args.length > 2) {

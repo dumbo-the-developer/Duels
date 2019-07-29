@@ -1,4 +1,4 @@
-package me.realized.duels.extra;
+package me.realized.duels.listeners;
 
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
@@ -33,6 +33,13 @@ public class SoupListener implements Listener {
             return;
         }
 
+        final Player player = event.getPlayer();
+        final Arena arena = arenaManager.get(player);
+
+        if (arena == null || !arena.getName().startsWith(config.getSoupNameStartingWith())) {
+            return;
+        }
+
         final ItemStack item = event.getItem();
 
         if (item == null || item.getType() != Items.MUSHROOM_SOUP) {
@@ -41,21 +48,13 @@ public class SoupListener implements Listener {
 
         event.setUseItemInHand(Result.DENY);
 
-        final Player player = event.getPlayer();
-
         if (player.getHealth() == player.getMaxHealth()) {
-            return;
-        }
-
-        final Arena arena = arenaManager.get(player);
-
-        if (arena == null || !arena.getName().startsWith(config.getNameStartingWith())) {
             return;
         }
 
         player.getInventory().setItem(player.getInventory().getHeldItemSlot(), new ItemStack(Material.BOWL));
 
-        final double regen = config.getHeartsToRegen() * 2.0;
+        final double regen = config.getSoupHeartsToRegen() * 2.0;
         final double oldHealth = player.getHealth();
         player.setHealth(oldHealth + regen > player.getMaxHealth() ? player.getMaxHealth() : oldHealth + regen);
     }

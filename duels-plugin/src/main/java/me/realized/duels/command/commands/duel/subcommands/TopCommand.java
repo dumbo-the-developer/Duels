@@ -2,10 +2,10 @@ package me.realized.duels.command.commands.duel.subcommands;
 
 import java.util.List;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.Permissions;
 import me.realized.duels.api.user.UserManager.TopData;
 import me.realized.duels.api.user.UserManager.TopEntry;
 import me.realized.duels.command.BaseCommand;
-import me.realized.duels.extra.Permissions;
 import me.realized.duels.kit.Kit;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
@@ -13,7 +13,7 @@ import org.bukkit.command.CommandSender;
 public class TopCommand extends BaseCommand {
 
     public TopCommand(final DuelsPlugin plugin) {
-        super(plugin, "top", "top [wins|losses|kit]", "Displays top wins, losses, or rating for kit.", Permissions.TOP, 2, true);
+        super(plugin, "top", "top [-:kit:wins:losses]", "Displays top wins, losses, or rating for kit.", Permissions.TOP, 2, true);
     }
 
     @Override
@@ -25,7 +25,9 @@ public class TopCommand extends BaseCommand {
 
         final TopEntry topEntry;
 
-        if (args[1].equalsIgnoreCase("wins")) {
+        if (args[1].equals("-")) {
+            topEntry = userManager.getTopRatings();
+        } else if (args[1].equalsIgnoreCase("wins")) {
             topEntry = userManager.getWins();
         } else if (args[1].equalsIgnoreCase("losses")) {
             topEntry = userManager.getLosses();
@@ -38,7 +40,7 @@ public class TopCommand extends BaseCommand {
                 return;
             }
 
-            topEntry = userManager.getTopRatings().get(kit);
+            topEntry = userManager.getTopRatings(kit);
         }
 
         final List<TopData> top;

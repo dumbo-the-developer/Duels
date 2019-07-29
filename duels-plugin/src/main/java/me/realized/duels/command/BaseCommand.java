@@ -2,7 +2,6 @@ package me.realized.duels.command;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManager;
@@ -20,7 +19,6 @@ import me.realized.duels.queue.sign.QueueSignManager;
 import me.realized.duels.request.RequestManager;
 import me.realized.duels.setting.SettingsManager;
 import me.realized.duels.spectate.SpectateManager;
-import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.command.AbstractCommand;
 import org.bukkit.command.CommandSender;
 
@@ -100,12 +98,10 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
         }
     }
 
-    protected <V> List<String> handleTabCompletion(final CommandSender sender, final String arg, final String type, final Collection<V> collection,
-        final Function<V, String> function) {
-        sender.sendMessage(StringUtil.color("&e&l(!) &r&eSpaces in " + type + " name has been replaced to a dash to support tab completion."));
+    protected List<String> handleTabCompletion(final String argument, final Collection<String> collection) {
         return collection.stream()
-            .filter(value -> function.apply(value).toLowerCase().startsWith(arg.toLowerCase()))
-            .map(value -> function.apply(value).replace(" ", "-"))
+            .filter(value ->value.toLowerCase().startsWith(argument.toLowerCase()))
+            .map(value -> value.replace(" ", "-"))
             .collect(Collectors.toList());
     }
 }
