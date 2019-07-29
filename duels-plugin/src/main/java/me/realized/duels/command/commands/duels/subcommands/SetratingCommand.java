@@ -38,7 +38,7 @@ public class SetratingCommand extends BaseCommand {
             }
         }
 
-        final String kitName = kit != null ? kit.getName() : "none";
+        final String kitName = kit != null ? kit.getName() : lang.getMessage("GENERAL.none");
         final int rating = Math.max(NumberUtil.parseInt(args[args.length - 1]).orElse(config.getDefaultRating()), 0);
         user.setRating(kit, rating);
         lang.sendMessage(sender, "COMMAND.duels.set-rating", "name", user.getName(), "kit", kitName, "rating", rating);

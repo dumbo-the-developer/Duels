@@ -30,7 +30,7 @@ public class ResetratingCommand extends BaseCommand {
             lang.sendMessage(sender, "COMMAND.duels.reset-rating", "name", user.getName(), "kit", "all");
         } else if (args[2].equals("-")) {
             user.resetRating();
-            lang.sendMessage(sender, "COMMAND.duels.reset-rating", "name", user.getName(), "kit", "none");
+            lang.sendMessage(sender, "COMMAND.duels.reset-rating", "name", user.getName(), "kit", lang.getMessage("GENERAL.none"));
         } else {
             final String name = StringUtils.join(args, " ", 2, args.length).replace("-", " ");
             final Kit kit = kitManager.get(name);
