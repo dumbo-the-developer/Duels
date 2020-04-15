@@ -31,9 +31,9 @@ import org.bukkit.potion.PotionEffectType;
 
 public class ItemData {
 
-    private final String material;
-    private final int amount;
-    private final short data;
+    private String material;
+    private int amount;
+    private short data;
 
     private String itemData;
     private List<AttributeData> attributeModifiers;
@@ -48,6 +48,9 @@ public class ItemData {
     private Map<String, String> effects;
     private String color;
     private boolean unbreakable;
+
+    // for Gson
+    private ItemData() {}
 
     public ItemData(final ItemStack item) {
         this.material = item.getType().name();
@@ -164,8 +167,8 @@ public class ItemData {
                 }
             }
 
-            if (!CompatUtil.isPre1_8() && meta.spigot().isUnbreakable()) {
-                unbreakable = meta.spigot().isUnbreakable();
+            if (!CompatUtil.isPre1_8() && (CompatUtil.isPre1_12() ? meta.spigot().isUnbreakable() : meta.isUnbreakable())) {
+                unbreakable = true;
             }
         }
     }
@@ -263,7 +266,11 @@ public class ItemData {
         }
 
         if (!CompatUtil.isPre1_8() && unbreakable) {
-            meta.spigot().setUnbreakable(true);
+            if (CompatUtil.isPre1_12()) {
+                meta.spigot().setUnbreakable(true);
+            } else {
+                meta.setUnbreakable(true);
+            }
         }
 
         item.setItemMeta(meta);

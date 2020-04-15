@@ -13,7 +13,7 @@ import org.bukkit.command.CommandSender;
 public class DeletequeueCommand extends BaseCommand {
 
     public DeletequeueCommand(final DuelsPlugin plugin) {
-        super(plugin, "deletequeue", "deletequeue [bet] [-:kit]", "Deletes a queue.", 2, false, "delqueue", "delq");
+        super(plugin, "deletequeue", "deletequeue [bet] [-:kit]", "Deletes a queue.", 3, false, "delqueue", "delq");
     }
 
     @Override
@@ -48,7 +48,7 @@ public class DeletequeueCommand extends BaseCommand {
         }
 
         if (args.length > 2) {
-            return handleTabCompletion(args[2], kitManager.getNames());
+            return handleTabCompletion(args[2], kitManager.getNames(true));
         }
 
         return null;

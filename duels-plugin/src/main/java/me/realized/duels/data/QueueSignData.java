@@ -10,9 +10,12 @@ import org.bukkit.block.Sign;
 
 public class QueueSignData {
 
-    private final LocationData location;
-    private final String kit;
-    private final int bet;
+    private LocationData location;
+    private String kit;
+    private int bet;
+
+    // for Gson
+    private QueueSignData() {}
 
     public QueueSignData(final QueueSign sign) {
         this.location = new LocationData(sign.getLocation());
@@ -43,7 +46,6 @@ public class QueueSignData {
             queue = plugin.getQueueManager().get(kit, bet);
         }
 
-        return new QueueSign(location,
-            plugin.getLang().getMessage("SIGN.format", "kit", this.kit != null ? this.kit : plugin.getLang().getMessage("none"), "bet_amount", bet), queue);
+        return new QueueSign(location, plugin.getLang().getMessage("SIGN.format", "kit", this.kit != null ? this.kit : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet), queue);
     }
 }

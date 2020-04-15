@@ -4,6 +4,7 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.Permissions;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.command.commands.duels.subcommands.AddsignCommand;
+import me.realized.duels.command.commands.duels.subcommands.BindCommand;
 import me.realized.duels.command.commands.duels.subcommands.CreateCommand;
 import me.realized.duels.command.commands.duels.subcommands.CreatequeueCommand;
 import me.realized.duels.command.commands.duels.subcommands.DeleteCommand;
@@ -16,6 +17,7 @@ import me.realized.duels.command.commands.duels.subcommands.InfoCommand;
 import me.realized.duels.command.commands.duels.subcommands.ListCommand;
 import me.realized.duels.command.commands.duels.subcommands.LoadkitCommand;
 import me.realized.duels.command.commands.duels.subcommands.LobbyCommand;
+import me.realized.duels.command.commands.duels.subcommands.OptionsCommand;
 import me.realized.duels.command.commands.duels.subcommands.PlaysoundCommand;
 import me.realized.duels.command.commands.duels.subcommands.ReloadCommand;
 import me.realized.duels.command.commands.duels.subcommands.ResetCommand;
@@ -27,7 +29,6 @@ import me.realized.duels.command.commands.duels.subcommands.SetlobbyCommand;
 import me.realized.duels.command.commands.duels.subcommands.SetratingCommand;
 import me.realized.duels.command.commands.duels.subcommands.TeleportCommand;
 import me.realized.duels.command.commands.duels.subcommands.ToggleCommand;
-import me.realized.duels.command.commands.duels.subcommands.UseoptionCommand;
 import org.bukkit.command.CommandSender;
 
 public class DuelsCommand extends BaseCommand {
@@ -40,7 +41,8 @@ public class DuelsCommand extends BaseCommand {
             new DeletekitCommand(plugin),
             new LoadkitCommand(plugin),
             new SetitemCommand(plugin),
-            new UseoptionCommand(plugin),
+            new OptionsCommand(plugin),
+            new BindCommand(plugin),
             new CreateCommand(plugin),
             new DeleteCommand(plugin),
             new SetCommand(plugin),

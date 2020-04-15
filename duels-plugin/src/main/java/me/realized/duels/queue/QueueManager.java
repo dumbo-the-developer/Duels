@@ -163,10 +163,10 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
                         setting.getCache().put(player.getUniqueId(), current.getInfo());
                         setting.getCache().put(other.getUniqueId(), opponent.getInfo());
 
-                        final String kit = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("none");
+                        final String kit = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("GENERAL.none");
                         lang.sendMessage(player, "QUEUE.found-opponent", "name", other.getName(), "kit", kit, "bet_amount", queue.getBet());
                         lang.sendMessage(other, "QUEUE.found-opponent", "name", player.getName(), "kit", kit, "bet_amount", queue.getBet());
-                        duelManager.startMatch(player, other, setting, null, true);
+                        duelManager.startMatch(player, other, setting, null, queue);
                         break;
                     }
                 }
@@ -376,7 +376,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
         queue.addPlayer(new QueueEntry(player, player.getLocation().clone(), duelzone, gameMode));
 
-        final String kit = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("none");
+        final String kit = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("GENERAL.none");
         lang.sendMessage(player, "QUEUE.add", "kit", kit, "bet_amount", queue.getBet());
         return true;
     }

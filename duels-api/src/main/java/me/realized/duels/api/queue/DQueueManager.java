@@ -83,14 +83,6 @@ public interface DQueueManager {
 
 
     /**
-     * An UnmodifiableList of {@link DQueue}s that are currently loaded.
-     *
-     * @return Never-null UnmodifiableList of {@link DQueue}s that are currently loaded.
-     */
-    List<? extends DQueue> getQueues();
-
-
-    /**
      * Whether or not the {@link Player} is in a queue.
      *
      * @param player {@link Player} to check if in queue.
@@ -118,4 +110,12 @@ public interface DQueueManager {
      * @return The {@link DQueue} that {@link Player} was in or null if {@link Player} was not in a queue.
      */
     DQueue removeFromQueue(@Nonnull final Player player);
+
+
+    /**
+     * An UnmodifiableList of {@link DQueue}s that are currently loaded.
+     *
+     * @return Never-null UnmodifiableList of {@link DQueue}s that are currently loaded.
+     */
+    List<? extends DQueue> getQueues();
 }

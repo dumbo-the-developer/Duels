@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 7
+config-version: 8
 
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
@@ -67,6 +67,7 @@ ERROR:
     not-in-match: '{PREFIX} &c%name% is not in a duel.'
   setting:
     disabled-option: '{PREFIX} &c%option% is currently disabled.'
+    arena-not-applicable: '{PREFIX} &cYou cannot use kit %kit% on this arena.'
   inventory-view:
     not-a-uuid: '{PREFIX} &c%input% is not a valid UUID.'
     not-found: '{PREFIX} &cNo inventory exists with the UUID ''%uuid%''.'
@@ -86,7 +87,8 @@ ERROR:
     not-found: '{PREFIX} &cNo sound exists with the name ''%name%''.'
   command:
     invalid-sub-command: '{PREFIX} &c''%argument%'' is not a valid sub command. Please type ''/%command%'' for help.'
-    invalid-option: '{PREFIX} &c''%option%'' is not a valid option.'
+    invalid-option: '{PREFIX} &c''%option%'' is not a valid option. Available options are: %available_options%'
+    invalid-action: '{PREFIX} &c''%action%'' is not a valid action. Available actions are: %available_actions%'
     not-enough-money: '{PREFIX} &cYou do not have enough money to bet!'
     lobby-save-failure: '{PREFIX} &cCould not save lobby location. Please check the console for more information.'
     name-not-alphanumeric: '{PREFIX} &c''%name%'' is not alphanumeric.'
@@ -99,8 +101,6 @@ COMMAND:
     - '&f/%command% [player] &e- &7Sends a duel request to player.'
     - '&f/%command% [player] <amount> &e- &7Sends a duel request with a bet.'
     - '&f/%command% [accept | deny] [player] &e- &7Accepts or denies a duel request.'
-    - '&f/%command% queue &e- &7Opens the queues GUI.'
-    - '&f/%command% queue [-|kit] <amount> &e- &7Enters the queue with given kit and bet.'
     - '&f/%command% stats <name> &e- &7Displays your duel stats.'
     - '&f/%command% toggle &e- &7Enable or disable receiving duel requests.'
     - '&f/%command% top [-|wins|losses|kit] &e- &7Displays top wins, losses, or rating for the kit.'
@@ -162,7 +162,7 @@ COMMAND:
         - '&7Kit: &3%kit%'
         - '&7Duration: &a%duration%'
         - '&7Time: &f%time% ago'
-        - '&7Health: &d%health%♥'
+        - '&7Health: &d%health%❤'
         footer: '{LINE}'
     toggle:
       enabled: '{PREFIX} &aYou are now receiving duel requests.'
@@ -190,10 +190,10 @@ COMMAND:
       - '&f/%command% create [name] &e- &7Creates an arena with given name.'
       - '&f/%command% set [name] [1|2] &e- &7Sets the teleport position of an arena.'
       - '&f/%command% delete [name] &e- &7Deletes an arena.'
-      - '&f/%command% info [name] &e- &7Displays information about the selected arena.'
+      - '&f/%command% info [name] &e- &7Displays a list of information about the selected arena.'
       - '&f/%command% toggle [name] &e- &7Enables or disables an arena.'
-      - '&f/%command% tp [name] &e- &7Teleports to an arena.'
-      - '&f/%command% list &e- &7Displays a list of arenas.'
+      - '&f/%command% tp [name] <1|2> &e- &7Teleports to an arena.'
+      - '&f/%command% list &e- &7Displays the list of all arenas.'
       - '{HALF_LINE} &fArena Commands {HALF_LINE}'
       kit:
       - '{HALF_LINE} &fKit Commands {HALF_LINE}'
@@ -201,8 +201,9 @@ COMMAND:
       - '&f/%command% loadkit [name] &e- &7Loads the selected kit to your inventory.'
       - '&f/%command% deletekit [name] &e- &7Deletes a kit.'
       - '&f/%command% setitem [name] &e- &7Sets the displayed item for selected kit.'
-      - '&f/%command% useoption [kit] [usepermission:arenaspecific] &e- &7Enable or disable options for kit.'
-      - '&f/%command% list &e- &7Displays a list of kits.'
+      - '&f/%command% options [kit] &e- &7Opens the options gui for selected kit.'
+      - '&f/%command% bind [kit] &e- &7Opens the arena bind gui for selected kit.'
+      - '&f/%command% list &e- &7Displays the list of all kits.'
       - '{HALF_LINE} &fKit Commands {HALF_LINE}'
       queue:
       - '{HALF_LINE} &fQueue Sign Commands {HALF_LINE}'
@@ -219,7 +220,7 @@ COMMAND:
       user:
       - '{HALF_LINE} &fUser Edit Commands {HALF_LINE}'
       - '&f/%command% setrating [name] [-|kit] [amount] &e- &7Sets player''s rating for kit.'
-      - '&f/%command% edit [name] [wins|losses] [amount] &e- &7Sets player''s wins or losses to given amount.'
+      - '&f/%command% edit [name] [add|remove|set] [wins|losses] [amount] &e- &7Edits player''s stats.'
       - '&f/%command% resetrating [name] [-|kit|all] &e- &7Resets all or specified kit''s rating for player.'
       - '&f/%command% reset [name] &e- &7Resets player''s stats.'
       - '{HALF_LINE} &fUser Edit Commands {HALF_LINE}'
@@ -234,19 +235,18 @@ COMMAND:
     delete: '{PREFIX} &7Arena &e%name% &7was successfully removed.'
     set: '{PREFIX} &7Set position &f%position% &7for arena &e%name% &7at &f%location%&7.'
     toggle: '{PREFIX} &7Arena &e%name% &7is now &r%state%&7.'
-    teleport: '{PREFIX} &7You have been teleported to arena &e%name%&7.'
+    teleport: '{PREFIX} &7You have been teleported to arena &e%name%&7''s position &f%position%&7.'
     save-kit: '{PREFIX} &7Kit &3%name% &7was successfully saved.'
     delete-kit: '{PREFIX} &7Kit &3%name% &7was successfully removed.'
     load-kit: '{PREFIX} &7Kit &3%name% &7was loaded in your inventory.'
     set-item: '{PREFIX} &7Kit &3%name%&7''s displayed item was changed to your held item.'
-    use-option: '{PREFIX} &7Option &f%option% &7of kit &3%kit% &7was set to &a%value%&7.'
     create-queue: '{PREFIX} &7Created a queue with kit &3%kit% &7and bet &6$%bet_amount%&7.'
     delete-queue: '{PREFIX} &7Deleted a queue with kit &3%kit% &7and bet &6$%bet_amount%&7.'
     add-sign: '{PREFIX} &7Created queue sign at &f%location% &7with kit &3%kit% &7and bet &6$%bet_amount%&7.'
     del-sign: '{PREFIX} &7Deleted queue sign at &f%location% &7with kit &3%kit% &7and bet &6$%bet_amount%&7.'
     set-lobby: '{PREFIX} &7Duel lobby set at your current location.'
     lobby: '{PREFIX} &7You have been teleported to lobby!'
-    edit: '{PREFIX} &f%name%&7''s %type% was set to &f%amount%&7.'
+    edit: '{PREFIX} &7Following action has been executed for &f%name%&7: &f%action% %amount% %type%'
     set-rating: '{PREFIX} &f%name%&7''s rating for kit &3%kit% &7was set to &a%rating%&7.'
     reset-rating: '{PREFIX} &7Reset &f%name%&7''s rating for kit &3%kit%&7.'
     reset: '{PREFIX} &7Reset &f%name%&7''s stats.'
@@ -254,8 +254,9 @@ COMMAND:
     - '{HALF_LINE} &7Arena &e%name% {HALF_LINE}'
     - '&7In Use: &r%in_use%'
     - '&7Disabled: &r%disabled%'
-    - '&7Players: &f%players%'
+    - '&7Bound Kits: &3%kits%'
     - '&7Positions: &f%positions%'
+    - '&7Players: &f%players%'
     - '{HALF_LINE} &7Arena &e%name% {HALF_LINE}'
     list:
     - '{LINE}'
@@ -289,19 +290,20 @@ DUEL:
     player-moved: '{FAIL_PREFIX} You or your opponent moved after sending/accepting the request!'
     not-in-duelzone: '{FAIL_PREFIX} You or your opponent moved out of the duelzone sending/accepting the request!'
     in-creative-mode: '{FAIL_PREFIX} You or your opponent is in creative mode!'
-    no-arena-available: '{FAIL_PREFIX} No arena is currently available. Please try again later.'
+    no-arena-available: '{FAIL_PREFIX} No arenas are currently available. Please try again later.'
     arena-in-use: '{FAIL_PREFIX} That arena is already in use. Please select a different arena.'
+    arena-not-applicable: '{FAIL_PREFIX} You cannot use kit %kit% on this arena.'
     not-enough-money: '{FAIL_PREFIX} You or your opponent does not have $%bet_amount%.'
   prevent:
     item-drop: '&cYou cannot drop items while in a duel.'
     command: '&cYou cannot use ''%command%'' while in a duel.'
     teleportation: '&cYou cannot teleport while in a duel.'
     inventory-open: '&cYou cannot open inventories while in a duel.'
-  projectile-hit-message: '{PREFIX} &f%name% &7is now at &d%health%♥&7!'
+  projectile-hit-message: '{PREFIX} &f%name% &7is now at &d%health%❤&7!'
   on-end:
     tie: '{PREFIX} &7Tie Game!'
     plugin-disable: '{PREFIX} &cPlugin is disabling! Ending match automatically.'
-    opponent-defeat: '{PREFIX} &f%winner% &a(%winner_rating%) (+%change%) &7has defeated &f%loser% &c(%loser_rating%) (-%change%) &7on kit &3%kit% &7with &d%health%♥'
+    opponent-defeat: '{PREFIX} &f%winner% &a(%winner_rating%) (+%change%) &7has defeated &f%loser% &c(%loser_rating%) (-%change%) &7on kit &3%kit% &7with &d%health%❤'
   inventories:
     message: '&7Inventories (click on the name to view): '
     name-color: '&b'
@@ -314,7 +316,7 @@ DUEL:
 
 
 QUEUE:
-  add: '{PREFIX} &7You have been added to the queue for kit &3%kit% &7and bet &6$%bet_amount%&7. Click the sign or type the command again to leave the queue.'
+  add: '{PREFIX} &7You have been added to the queue for kit &3%kit% &7and bet &6$%bet_amount%&7. Click the sign again or type &f/duel leave &7to leave the queue.'
   remove: '{PREFIX} &7You have been removed from the queue.'
   found-opponent: '{PREFIX} &7Opponent found: &f%name%&7! Starting match with kit &3%kit% &7and a bet of &6$%bet_amount%&7...'
 
@@ -322,9 +324,9 @@ QUEUE:
 SIGN:
   format:
   - '&a[Click to Join]'
-  - '&3%kit%'
-  - '&e$%bet_amount%'
-  - '&f&l%count% IN QUEUE'
+  - '&3%kit%&f:&e$%bet_amount%'
+  - '&f&l%in_queue% IN QUEUE'
+  - '&f&l%in_match% IN MATCH'
 
 
 SPECTATE:
@@ -361,20 +363,12 @@ GUI:
         - '&7Selected Kit: &3%kit%'
         - ' '
         - '&aClick to Change Kit!'
-        lore-disabled:
-        - '&cThis option is currently disabled.'
-        - '&cYour inventory will be used instead'
-        - '&cin the duel.'
       arena-selector:
         name: '&9Arena Selection'
         lore:
         - '&7Selected Arena: &e%arena%'
         - ' '
         - '&aClick to Change Arena!'
-        lore-disabled:
-        - '&cThis option is currently disabled.'
-        - '&cA random arena will be picked'
-        - '&cfor the duel.'
         lore-no-permission:
         - '&cYou do not have permission to'
         - '&cuse this option.'
@@ -384,8 +378,6 @@ GUI:
         - '&7Item Betting: &r%item_betting%'
         - ' '
         - '&aClick to Toggle Item Betting!'
-        lore-disabled:
-        - '&cThis option is currently disabled.'
         lore-no-permission:
         - '&cYou do not have permission to'
         - '&cuse this option.'
@@ -424,7 +416,8 @@ GUI:
         name: '&3%kit%'
         lore:
         - '&7Bet: &6$%bet_amount%'
-        - '&7In Queue: &f%players%'
+        - '&7In Queue: &f%in_queue%'
+        - '&7In Match: &f%in_match%'
         - ' '
         - '&a&lClick to Queue!'
       previous-page:
@@ -465,4 +458,31 @@ GUI:
       hunger:
         name: '&6%hunger% bars'
       health:
-        name: '&c%health% ♥'
+        name: '&c%health% ❤'
+  options:
+    title: 'Kit: %kit%'
+    buttons:
+      option:
+        name: '&b%name%'
+        lore:
+          - ' '
+          - '&7Status: &r%state%'
+          - ' '
+          - '&r&lCLICK TO TOGGLE'
+  bind:
+    title: 'Kit: %kit%'
+    buttons:
+      arena:
+        name: '&e%arena%'
+        lore-bound:
+          - '&7Bound Kits: &3%kits%'
+          - ' '
+          - '&a&lBOUND'
+          - ' '
+          - '&r&lCLICK TO TOGGLE'
+        lore-not-bound:
+          - '&7Bound Kits: &3%kits%'
+          - ' '
+          - '&c&lNOT BOUND'
+          - ' '
+          - '&r&lCLICK TO TOGGLE'

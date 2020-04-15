@@ -34,14 +34,17 @@ import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.Kit;
 import me.realized.duels.player.PlayerInfo;
 import me.realized.duels.player.PlayerInfoManager;
+import me.realized.duels.queue.Queue;
 import me.realized.duels.queue.QueueManager;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.Loadable;
+import me.realized.duels.util.Log;
 import me.realized.duels.util.PlayerUtil;
 import me.realized.duels.util.RatingUtil;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.Teleport;
 import me.realized.duels.util.TextBuilder;
+import me.realized.duels.util.compat.CompatUtil;
 import me.realized.duels.util.compat.Players;
 import me.realized.duels.util.compat.Titles;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
@@ -102,7 +105,7 @@ public class DuelManager implements Loadable {
         this.arenaManager = plugin.getArenaManager();
         this.playerManager = plugin.getPlayerManager();
         this.inventoryManager = plugin.getInventoryManager();
-        plugin.getServer().getPluginManager().registerEvents(new DuelListener(), plugin);
+        plugin.doSyncAfter(() -> plugin.getServer().getPluginManager().registerEvents(new DuelListener(), plugin), 1L);
     }
 
     @Override
@@ -306,7 +309,7 @@ public class DuelManager implements Loadable {
         }
     }
 
-    public void startMatch(final Player first, final Player second, final Settings settings, final Map<UUID, List<ItemStack>> items, final boolean fromQueue) {
+    public void startMatch(final Player first, final Player second, final Settings settings, final Map<UUID, List<ItemStack>> items, final Queue source) {
         final Kit kit = settings.getKit();
 
         if (!config.isUseOwnInventoryEnabled() && kit == null) {
@@ -347,8 +350,14 @@ public class DuelManager implements Loadable {
 
         final Arena arena = settings.getArena() != null ? settings.getArena() : arenaManager.randomArena(kit);
 
-        if (arena == null || !arena.isAvailable() || (kit != null && kit.isArenaSpecific() && !kit.canUse(arena))) {
+        if (arena == null || !arena.isAvailable()) {
             lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure." + (settings.getArena() != null ? "arena-in-use" : "no-arena-available"));
+            refundItems(items, first, second);
+            return;
+        }
+
+        if (kit != null && !arenaManager.isSelectable(kit, arena)) {
+            lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure.arena-not-applicable");
             refundItems(items, first, second);
             return;
         }
@@ -365,8 +374,8 @@ public class DuelManager implements Loadable {
             vault.remove(bet, first, second);
         }
 
-        final Match match = arena.startMatch(kit, items, settings.getBet(), fromQueue);
-        addPlayers(fromQueue, arena, kit, arena.getPositions(), first, second);
+        final Match match = arena.startMatch(kit, items, settings.getBet(), source);
+        addPlayers(source, arena, kit, arena.getPositions(), first, second);
 
         if (config.isCdEnabled()) {
             final Map<UUID, OpponentInfo> info = new HashMap<>();
@@ -422,11 +431,11 @@ public class DuelManager implements Loadable {
         return user != null ? user.getRating(kit) : config.getDefaultRating();
     }
 
-    private void addPlayers(final boolean fromQueue, final Arena arena, final Kit kit, final Map<Integer, Location> locations, final Player... players) {
+    private void addPlayers(final Queue source, final Arena arena, final Kit kit, final Map<Integer, Location> locations, final Player... players) {
         int position = 0;
 
         for (final Player player : players) {
-            if (!fromQueue) {
+            if (source == null) {
                 queueManager.remove(player);
             }
 
@@ -449,8 +458,12 @@ public class DuelManager implements Loadable {
             }
 
             if (config.isStartCommandsEnabled()) {
-                for (final String command : config.getStartCommands()) {
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", player.getName()));
+                try {
+                    for (final String command : config.getStartCommands()) {
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", player.getName()));
+                    }
+                } catch (Exception ex) {
+                    Log.warn(DuelManager.this, "Error while running match start commands: " + ex.getMessage());
                 }
             }
 
@@ -650,12 +663,16 @@ public class DuelManager implements Loadable {
                     handleWinner(winner, player, arena, match);
 
                     if (config.isEndCommandsEnabled()) {
-                        for (final String command : config.getEndCommands()) {
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command
-                                .replace("%winner%", winner.getName()).replace("%loser%", player.getName())
-                                .replace("%kit%", kitName).replace("%arena%", arena.getName())
-                                .replace("%bet_amount%", String.valueOf(match.getBet()))
-                            );
+                        try {
+                            for (final String command : config.getEndCommands()) {
+                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command
+                                    .replace("%winner%", winner.getName()).replace("%loser%", player.getName())
+                                    .replace("%kit%", kitName).replace("%arena%", arena.getName())
+                                    .replace("%bet_amount%", String.valueOf(match.getBet()))
+                                );
+                            }
+                        } catch (Exception ex) {
+                            Log.warn(DuelManager.this, "Error while running match end commands: " + ex.getMessage());
                         }
                     }
 
@@ -722,6 +739,10 @@ public class DuelManager implements Loadable {
         @EventHandler(ignoreCancelled = true)
         public void on(final PlayerPickupItemEvent event) {
             if (!config.isPreventItemPickup() || !arenaManager.isInMatch(event.getPlayer())) {
+                return;
+            }
+
+            if (!CompatUtil.isPre1_13() && event.getItem().getType() == EntityType.TRIDENT) {
                 return;
             }
 

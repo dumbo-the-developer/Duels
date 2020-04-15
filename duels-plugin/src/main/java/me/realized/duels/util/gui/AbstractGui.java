@@ -3,6 +3,7 @@ package me.realized.duels.util.gui;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import lombok.Getter;
 import me.realized.duels.util.inventory.Slots;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -14,21 +15,20 @@ import org.bukkit.plugin.java.JavaPlugin;
 public abstract class AbstractGui<P extends JavaPlugin> {
 
     protected final P plugin;
+
+    @Getter
+    private final long creation;
+
     private final Map<Inventory, Map<Integer, Button<P>>> buttons = new HashMap<>();
 
     public AbstractGui(final P plugin) {
         this.plugin = plugin;
+        this.creation = System.currentTimeMillis();
     }
 
     public abstract void open(final Player... players);
 
     public abstract boolean isPart(final Inventory inventory);
-
-    public abstract boolean hasViewers();
-
-    public boolean removeIfEmpty() {
-        return false;
-    }
 
     public abstract void on(final Player player, final Inventory top, final InventoryClickEvent event);
 
@@ -73,13 +73,7 @@ public abstract class AbstractGui<P extends JavaPlugin> {
         }
 
         button.update(player);
-
-        for (final Map.Entry<Integer, Button<P>> entry : cached.entrySet()) {
-            if (entry.getValue().equals(button)) {
-                inventory.setItem(entry.getKey(), button.getDisplayed());
-                return;
-            }
-        }
+        cached.entrySet().stream().filter(entry -> entry.getValue().equals(button)).findFirst().ifPresent(entry -> inventory.setItem(entry.getKey(), button.getDisplayed()));
     }
 
     public void update(final Player player) {
@@ -87,5 +81,9 @@ public abstract class AbstractGui<P extends JavaPlugin> {
             button.update(player);
             inventory.setItem(slot, button.getDisplayed());
         }));
+    }
+
+    public void clear() {
+        buttons.keySet().forEach(Inventory::clear);
     }
 }

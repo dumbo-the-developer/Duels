@@ -48,7 +48,7 @@ public class CreatequeueCommand extends BaseCommand {
         }
 
         if (args.length > 2) {
-            return handleTabCompletion(args[2], kitManager.getNames());
+            return handleTabCompletion(args[2], kitManager.getNames(true));
         }
 
         return null;

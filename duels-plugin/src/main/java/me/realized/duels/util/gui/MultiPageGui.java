@@ -3,6 +3,7 @@ package me.realized.duels.util.gui;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.function.Consumer;
+import lombok.Getter;
 import lombok.Setter;
 import me.realized.duels.util.compat.Inventories;
 import me.realized.duels.util.compat.Items;
@@ -21,6 +22,7 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
     private final int size, prevPageSlot, nextPageSlot;
 
     // Note: Referenced Collection!
+    @Getter
     private final Collection<? extends Button<P>> buttons;
 
     private PageNode first;
@@ -33,7 +35,6 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
     private ItemStack nextButton;
     @Setter
     private ItemStack emptyIndicator;
-
 
     public MultiPageGui(final P plugin, final String title, final int rows, final Collection<? extends Button<P>> buttons) {
         super(plugin);
@@ -142,11 +143,6 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
     @Override
     public boolean isPart(final Inventory inventory) {
         return first.isPart(inventory);
-    }
-
-    @Override
-    public boolean hasViewers() {
-        return first.hasViewers();
     }
 
     @Override
@@ -268,12 +264,12 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
             return find(inventory) != null;
         }
 
-        boolean hasViewers() {
-            if (!inventory.getViewers().isEmpty()) {
-                return true;
-            }
-
-            return next != null && !next.hasViewers();
-        }
+//        boolean hasViewers() {
+//            if (!inventory.getViewers().isEmpty()) {
+//                return true;
+//            }
+//
+//            return next != null && !next.hasViewers();
+//        }
     }
 }

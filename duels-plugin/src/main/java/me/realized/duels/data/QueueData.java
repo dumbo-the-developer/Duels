@@ -5,8 +5,11 @@ import me.realized.duels.queue.Queue;
 
 public class QueueData {
 
-    private final String kit;
-    private final int bet;
+    private String kit;
+    private int bet;
+
+    // for Gson
+    private QueueData() {}
 
     public QueueData(final Queue queue) {
         this.kit = queue.getKit() != null ? queue.getKit().getName() : null;

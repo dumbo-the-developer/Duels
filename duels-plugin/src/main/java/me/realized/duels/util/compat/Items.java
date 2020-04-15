@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionType;
 
 public final class Items {
 
@@ -22,7 +23,10 @@ public final class Items {
     public static final ItemStack ON;
     public static final Material MUSHROOM_SOUP;
     public static final Material EMPTY_MAP;
+    public static final Material BARRIER;
     public static final Material SIGN;
+    public static final ItemStack HEAL_SPLASH_POTION;
+    public static final ItemStack WATER_BREATHING_POTION;
 
     static {
         ORANGE_PANE = (CompatUtil.isPre1_13() ? ItemBuilder.of(PANE, 1, (short) 1) : ItemBuilder.of(Material.ORANGE_STAINED_GLASS_PANE)).name(" ").build();
@@ -37,7 +41,12 @@ public final class Items {
         ON = (CompatUtil.isPre1_13() ? ItemBuilder.of("INK_SACK", 1, (short) 10) : ItemBuilder.of(Material.LIME_DYE)).build();
         MUSHROOM_SOUP = CompatUtil.isPre1_13() ? Material.matchMaterial("MUSHROOM_SOUP") : Material.MUSHROOM_STEW;
         EMPTY_MAP = CompatUtil.isPre1_13() ? Material.matchMaterial("EMPTY_MAP") : Material.MAP;
+        BARRIER = CompatUtil.isPre1_8() ? Material.matchMaterial("REDSTONE_BLOCK") : Material.BARRIER;
         SIGN = CompatUtil.isPre1_14() ? Material.SIGN : Material.matchMaterial("OAK_SIGN");
+        HEAL_SPLASH_POTION = (CompatUtil.isPre1_9() ? ItemBuilder.of(Material.POTION, 1, (short) 16421) : ItemBuilder.of(Material.SPLASH_POTION).potion(
+            PotionType.INSTANT_HEAL, false, true)).build();
+        WATER_BREATHING_POTION = (CompatUtil.isPre1_9() ? ItemBuilder.of(Material.POTION, 1, (short) 8237) : ItemBuilder.of(Material.POTION).potion(
+            PotionType.WATER_BREATHING, false, false)).build();
     }
 
     public static boolean equals(final ItemStack item, final ItemStack other) {

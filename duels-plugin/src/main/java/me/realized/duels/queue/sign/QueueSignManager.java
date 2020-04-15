@@ -90,7 +90,7 @@ public class QueueSignManager implements Loadable, me.realized.duels.api.queue.s
             }
         }, AUTO_SAVE_INTERVAL, AUTO_SAVE_INTERVAL).getTaskId();
         this.updateTask = plugin.doSyncRepeat(() -> signs.entrySet().removeIf(entry -> {
-            entry.getValue().updateCount();
+            entry.getValue().update();
             return entry.getValue().getQueue().isRemoved();
         }), 20L, 20L).getTaskId();
     }
@@ -143,7 +143,7 @@ public class QueueSignManager implements Loadable, me.realized.duels.api.queue.s
         final QueueSign created;
         final String kitName = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("GENERAL.none");
         signs.put(location, created = new QueueSign(location, lang.getMessage("SIGN.format", "kit", kitName, "bet_amount", queue.getBet()), queue));
-        signs.values().stream().filter(sign -> sign.equals(created)).forEach(QueueSign::updateCount);
+        signs.values().stream().filter(sign -> sign.equals(created)).forEach(QueueSign::update);
 
         final QueueSignCreateEvent event = new QueueSignCreateEvent(creator, created);
         plugin.getServer().getPluginManager().callEvent(event);
@@ -189,7 +189,7 @@ public class QueueSignManager implements Loadable, me.realized.duels.api.queue.s
             return;
         }
 
-        signs.values().stream().filter(queueSign -> queueSign.equals(sign)).forEach(QueueSign::updateCount);
+        signs.values().stream().filter(queueSign -> queueSign.equals(sign)).forEach(QueueSign::update);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

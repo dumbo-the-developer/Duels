@@ -7,7 +7,6 @@ import me.realized.duels.command.BaseCommand;
 import me.realized.duels.command.commands.duel.subcommands.AcceptCommand;
 import me.realized.duels.command.commands.duel.subcommands.DenyCommand;
 import me.realized.duels.command.commands.duel.subcommands.InventoryCommand;
-import me.realized.duels.command.commands.duel.subcommands.QueueCommand;
 import me.realized.duels.command.commands.duel.subcommands.StatsCommand;
 import me.realized.duels.command.commands.duel.subcommands.ToggleCommand;
 import me.realized.duels.command.commands.duel.subcommands.TopCommand;
@@ -38,11 +37,10 @@ public class DuelCommand extends BaseCommand {
     private final VaultHook vault;
 
     public DuelCommand(final DuelsPlugin plugin) {
-        super(plugin, "duel", "duels.duel", true);
+        super(plugin, "duel", Permissions.DUEL, true);
         child(
             new AcceptCommand(plugin),
             new DenyCommand(plugin),
-            new QueueCommand(plugin),
             new StatsCommand(plugin),
             new ToggleCommand(plugin),
             new TopCommand(plugin),
@@ -51,7 +49,7 @@ public class DuelCommand extends BaseCommand {
         );
         this.combatTagPlus = hookManager.getHook(CombatTagPlusHook.class);
         this.pvpManager = hookManager.getHook(PvPManagerHook.class);
-        this.combatLogX = plugin.getHookManager().getHook(CombatLogXHook.class);
+        this.combatLogX = hookManager.getHook(CombatLogXHook.class);
         this.worldGuard = hookManager.getHook(WorldGuardHook.class);
         this.vault = hookManager.getHook(VaultHook.class);
     }

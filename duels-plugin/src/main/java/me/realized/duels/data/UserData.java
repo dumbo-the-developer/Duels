@@ -24,7 +24,7 @@ import org.bukkit.entity.Player;
 public class UserData implements User {
 
     @Getter
-    private final UUID uuid;
+    private UUID uuid;
     @Getter
     @Setter
     private String name;
@@ -33,14 +33,17 @@ public class UserData implements User {
     @Getter
     private volatile int losses;
     private boolean requests = true;
-    @Getter
+
     private ConcurrentHashMap<String, Integer> rating;
-    private final List<MatchData> matches = new ArrayList<>();
+    private List<MatchData> matches = new ArrayList<>();
 
     transient DuelsPlugin plugin;
     transient File folder;
     transient int defaultRating;
     transient int matchesToDisplay;
+
+    // for Gson
+    private UserData() {}
 
     public UserData(final DuelsPlugin plugin, final File folder, final int defaultRating, final int matchesToDisplay, final Player player) {
         this.plugin = plugin;

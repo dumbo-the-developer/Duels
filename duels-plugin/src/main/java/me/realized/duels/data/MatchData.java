@@ -6,17 +6,20 @@ import me.realized.duels.api.user.MatchInfo;
 public class MatchData implements MatchInfo {
 
     @Getter
-    private final String winner;
+    private String winner;
     @Getter
-    private final String loser;
+    private String loser;
     @Getter
-    private final String kit;
+    private String kit;
     @Getter
-    private final long time;
+    private long time;
     @Getter
-    private final long duration;
+    private long duration;
     @Getter
-    private final double health;
+    private double health;
+
+    // for Gson
+    private MatchData() {}
 
     public MatchData(final String winner, final String loser, final String kit, final long time, final long duration, final double health) {
         this.winner = winner;

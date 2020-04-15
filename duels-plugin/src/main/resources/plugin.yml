@@ -11,15 +11,18 @@ website: https://www.spigotmc.org/resources/duels.20171/
 description: An ultimate solution to server owners wanting to create a duel system.
 
 commands:
-   duels:
-     description: Administrative command of Duels.
-     aliases: [ds]
    duel:
      description: Send, accept, or deny a duel request.
      aliases: [1v1]
+   queue:
+    description: Join or leave a queue.
+    aliases: [q]
    spectate:
      description: Spectate a duel.
      aliases: [spec]
+   duels:
+     description: Administrative command of Duels.
+     aliases: [ds]
 
 permissions:
   duels.*:

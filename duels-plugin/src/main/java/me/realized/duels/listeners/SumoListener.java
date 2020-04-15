@@ -3,7 +3,8 @@ package me.realized.duels.listeners;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.arena.ArenaManager;
-import me.realized.duels.config.Config;
+import me.realized.duels.arena.Match;
+import me.realized.duels.kit.Kit.Characteristic;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,16 +14,20 @@ import org.bukkit.event.player.PlayerMoveEvent;
 
 public class SumoListener implements Listener {
 
-    private final Config config;
     private final ArenaManager arenaManager;
 
     public SumoListener(final DuelsPlugin plugin) {
-        this.config = plugin.getConfiguration();
         this.arenaManager = plugin.getArenaManager();
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    }
 
-        if (config.isSumoEnabled()) {
-            plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    private boolean isSumoEnabled(final Arena arena) {
+        if (arena == null) {
+            return false;
         }
+
+        final Match match = arena.getMatch();
+        return match != null && match.getKit() != null && match.getKit().hasCharacteristic(Characteristic.SUMO);
     }
 
     @EventHandler
@@ -34,7 +39,7 @@ public class SumoListener implements Listener {
         final Player player = (Player) event.getEntity();
         final Arena arena = arenaManager.get(player);
 
-        if (arena == null || !arena.getName().startsWith(config.getSumoNameStartingWith())) {
+        if (!isSumoEnabled(arena)) {
             return;
         }
 
@@ -46,7 +51,7 @@ public class SumoListener implements Listener {
         final Player player = event.getPlayer();
         final Arena arena = arenaManager.get(player);
 
-        if (player.isDead() || arena == null || !arena.getName().startsWith(config.getSumoNameStartingWith())) {
+        if (player.isDead() || !isSumoEnabled(arena)) {
             return;
         }
 

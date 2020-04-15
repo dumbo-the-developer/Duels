@@ -21,6 +21,7 @@ import me.realized.duels.betting.BettingManager;
 import me.realized.duels.command.commands.SpectateCommand;
 import me.realized.duels.command.commands.duel.DuelCommand;
 import me.realized.duels.command.commands.duels.DuelsCommand;
+import me.realized.duels.command.commands.queue.QueueCommand;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.UserManager;
@@ -85,9 +86,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private GuiListener<DuelsPlugin> guiListener;
     @Getter
-    private ArenaManager arenaManager;
-    @Getter
     private KitManager kitManager;
+    @Getter
+    private ArenaManager arenaManager;
     @Getter
     private SettingsManager settingManager;
     @Getter
@@ -115,6 +116,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     private final Map<String, AbstractCommand<DuelsPlugin>> commands = new HashMap<>();
     private final List<Listener> registeredListeners = new ArrayList<>();
+    @Getter
+    private boolean disabling;
 
     @Getter
     private volatile boolean updateAvailable;
@@ -156,8 +159,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(lang = new Lang(this));
         loadables.add(userManager = new UserManager(this));
         loadables.add(guiListener = new GuiListener<>(this));
-        loadables.add(arenaManager = new ArenaManager(this));
         loadables.add(kitManager = new KitManager(this));
+        loadables.add(arenaManager = new ArenaManager(this));
         loadables.add(settingManager = new SettingsManager(this));
         loadables.add(playerManager = new PlayerInfoManager(this));
         loadables.add(spectateManager = new SpectateManager(this));
@@ -213,6 +216,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     @Override
     public void onDisable() {
+        disabling = true;
         final long start = System.currentTimeMillis();
         long last = start;
         logManager.debug("onDisable start -> " + start + "\n");
@@ -222,6 +226,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         logManager.debug("Log#clearSources done (took " + Math.abs(last - System.currentTimeMillis()) + "ms)");
         logManager.handleDisable();
         instance = null;
+        disabling = false;
         log(Level.INFO, "Disable process took " + (System.currentTimeMillis() - start) + "ms.");
     }
 
@@ -231,6 +236,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private boolean load() {
         registerCommands(
             new DuelCommand(this),
+            new QueueCommand(this),
             new SpectateCommand(this),
             new DuelsCommand(this)
         );

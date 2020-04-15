@@ -16,11 +16,6 @@ public class ArenaSelectButton extends BaseButton {
 
     @Override
     public void update(final Player player) {
-        if (!config.isArenaSelectingEnabled()) {
-            setLore(lang.getMessage("GUI.settings.buttons.arena-selector.lore-disabled").split("\n"));
-            return;
-        }
-
         if (config.isArenaSelectingUsePermission() && !player.hasPermission(Permissions.ARENA_SELECTING) && !player.hasPermission(Permissions.SETTING_ALL)) {
             setLore(lang.getMessage("GUI.settings.buttons.arena-selector.lore-no-permission").split("\n"));
             return;
@@ -34,11 +29,6 @@ public class ArenaSelectButton extends BaseButton {
 
     @Override
     public void onClick(final Player player) {
-        if (!config.isArenaSelectingEnabled()) {
-            lang.sendMessage(player, "ERROR.setting.disabled-option", "option", lang.getMessage("GENERAL.arena-selector"));
-            return;
-        }
-
         if (config.isArenaSelectingUsePermission() && !player.hasPermission(Permissions.ARENA_SELECTING) && !player.hasPermission(Permissions.SETTING_ALL)) {
             lang.sendMessage(player, "ERROR.no-permission", "permission", Permissions.ARENA_SELECTING);
             return;

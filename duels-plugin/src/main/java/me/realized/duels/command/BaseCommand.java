@@ -28,8 +28,8 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
     protected final Config config;
     protected final Lang lang;
     protected final UserManager userManager;
-    protected final ArenaManager arenaManager;
     protected final KitManager kitManager;
+    protected final ArenaManager arenaManager;
     protected final QueueManager queueManager;
     protected final QueueSignManager queueSignManager;
     protected final SettingsManager settingManager;
@@ -51,8 +51,8 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
         this.userManager = plugin.getUserManager();
-        this.arenaManager = plugin.getArenaManager();
         this.kitManager = plugin.getKitManager();
+        this.arenaManager = plugin.getArenaManager();
         this.queueManager = plugin.getQueueManager();
         this.queueSignManager = plugin.getQueueSignManager();
         this.settingManager = plugin.getSettingManager();

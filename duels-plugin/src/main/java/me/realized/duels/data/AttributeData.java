@@ -6,16 +6,19 @@ import lombok.Setter;
 public class AttributeData {
 
     @Getter
-    private final String name;
+    private String name;
     @Getter
-    private final String attrName;
+    private String attrName;
     @Getter
-    private final int operation;
+    private int operation;
     @Getter
-    private final double amount;
+    private double amount;
     @Getter
     @Setter
     private String slot;
+
+    // for Gson
+    private AttributeData() {}
 
     public AttributeData(String name, String attrName, int operation, double amount) {
         this.name = name;

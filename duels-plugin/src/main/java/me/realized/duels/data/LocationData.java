@@ -6,12 +6,15 @@ import org.bukkit.World;
 
 public class LocationData {
 
-    private final String world;
-    private final double x;
-    private final double y;
-    private final double z;
+    private String world;
+    private double x;
+    private double y;
+    private double z;
     private float pitch;
     private float yaw;
+
+    // for Gson
+    private LocationData() {}
 
     public LocationData(final World world, final double x, final double y, final double z) {
         this.x = x;

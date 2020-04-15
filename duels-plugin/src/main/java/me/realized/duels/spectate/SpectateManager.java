@@ -20,6 +20,7 @@ import me.realized.duels.util.PlayerUtil;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.Teleport;
 import me.realized.duels.util.compat.Collisions;
+import me.realized.duels.util.compat.CompatUtil;
 import me.realized.duels.util.compat.Players;
 import me.realized.duels.util.inventory.InventoryUtil;
 import me.realized.duels.util.inventory.ItemBuilder;
@@ -41,6 +42,8 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class SpectateManager implements Loadable {
 
@@ -130,6 +133,15 @@ public class SpectateManager implements Loadable {
         player.setAllowFlight(true);
         player.setFlying(true);
         Collisions.setCollidable(player, false);
+
+        if (config.isSpecAddInvisibilityEffect()) {
+            // particles parameter does not exist in 1.7
+            final PotionEffect effect = CompatUtil.isPre1_8() ?
+                new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false) :
+                new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false);
+            player.addPotionEffect(effect);
+        }
+
         lang.sendMessage(player, "COMMAND.spectate.start-spectate", "name", target.getName());
 
         if (player.hasPermission(Permissions.SPEC_ANON)) {

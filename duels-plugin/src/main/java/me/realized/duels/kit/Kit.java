@@ -1,8 +1,10 @@
 package me.realized.duels.kit;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import javax.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,7 +12,6 @@ import lombok.Setter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.Permissions;
 import me.realized.duels.api.event.kit.KitEquipEvent;
-import me.realized.duels.arena.Arena;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.inventory.ItemBuilder;
@@ -32,10 +33,13 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
     @Setter
     private boolean arenaSpecific;
     @Getter
+    private Set<Characteristic> characteristics;
+    @Getter
     @Setter(value = AccessLevel.PACKAGE)
     private boolean removed;
 
-    public Kit(final DuelsPlugin plugin, final String name, final ItemStack displayed, final boolean usePermission, final boolean arenaSpecific) {
+    public Kit(final DuelsPlugin plugin, final String name, final ItemStack displayed, final boolean usePermission, final boolean arenaSpecific,
+        final Set<Characteristic> characteristics) {
         super(plugin, displayed != null ? displayed : ItemBuilder
             .of(Material.DIAMOND_SWORD)
             .name("&7&l" + name)
@@ -44,10 +48,11 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
         this.name = name;
         this.usePermission = usePermission;
         this.arenaSpecific = arenaSpecific;
+        this.characteristics = characteristics;
     }
 
     public Kit(final DuelsPlugin plugin, final String name, final PlayerInventory inventory) {
-        this(plugin, name, null, false, false);
+        this(plugin, name, null, false, false, new HashSet<>());
 
         final Map<Integer, ItemStack> contents = new HashMap<>();
 
@@ -83,8 +88,16 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
         return super.getDisplayed();
     }
 
-    public boolean canUse(final Arena arena) {
-        return arena.getName().startsWith(getName() + "_");
+    public boolean hasCharacteristic(final Characteristic characteristic) {
+        return characteristics.contains(characteristic);
+    }
+
+    public void toggleCharacteristic(final Characteristic characteristic) {
+        if (hasCharacteristic(characteristic)) {
+            characteristics.remove(characteristic);
+        } else {
+            characteristics.add(characteristic);
+        }
     }
 
     @Override
@@ -138,5 +151,11 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
     @Override
     public int hashCode() {
         return Objects.hash(name);
+    }
+
+    public enum Characteristic {
+
+        SOUP,
+        SUMO;
     }
 }

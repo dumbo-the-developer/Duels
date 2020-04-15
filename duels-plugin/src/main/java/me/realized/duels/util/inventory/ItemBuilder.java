@@ -8,7 +8,10 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.potion.PotionData;
+import org.bukkit.potion.PotionType;
 
 public final class ItemBuilder {
 
@@ -68,6 +71,16 @@ public final class ItemBuilder {
         if (Items.equals(Items.HEAD, result)) {
             final SkullMeta meta = (SkullMeta) result.getItemMeta();
             meta.setOwner(player.getName());
+            result.setItemMeta(meta);
+        }
+
+        return this;
+    }
+
+    public ItemBuilder potion(final PotionType type, final boolean extended, final boolean upgraded) {
+        if (result.getType().name().endsWith("POTION")) {
+            PotionMeta meta = (PotionMeta) result.getItemMeta();
+            meta.setBasePotionData(new PotionData(type, extended, upgraded));
             result.setItemMeta(meta);
         }
 

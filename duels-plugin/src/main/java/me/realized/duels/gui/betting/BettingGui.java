@@ -106,16 +106,6 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
     }
 
     @Override
-    public boolean hasViewers() {
-        return !inventory.getViewers().isEmpty();
-    }
-
-    @Override
-    public boolean removeIfEmpty() {
-        return true;
-    }
-
-    @Override
     public void on(final Player player, final Inventory top, final InventoryClickEvent event) {
         final Inventory clicked = event.getClickedInventory();
 
@@ -210,6 +200,19 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
         }
     }
 
+    @Override
+    public void clear() {
+        final Player first = Bukkit.getPlayer(BettingGui.this.first);
+        final Player second = Bukkit.getPlayer(BettingGui.this.second);
+
+        if (first != null && second != null) {
+            getSection(first).collect().forEach(item -> first.getInventory().addItem(item));
+            getSection(second).collect().forEach(item -> second.getInventory().addItem(item));
+        }
+
+        super.clear();
+    }
+
     private class Section {
 
         private final int start, end, height;
@@ -239,6 +242,7 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
 
                 if (item != null && item.getType() != Material.AIR) {
                     result.add(item);
+                    inventory.setItem(slot, null);
                 }
             });
             return result;
@@ -287,13 +291,14 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
 
             first.closeInventory();
             second.closeInventory();
-            guiListener.removeGui(first, BettingGui.this);
-            guiListener.removeGui(second, BettingGui.this);
 
             final Map<UUID, List<ItemStack>> items = new HashMap<>();
             items.put(first.getUniqueId(), getSection(first).collect());
             items.put(second.getUniqueId(), getSection(second).collect());
-            duelManager.startMatch(first, second, settings, items, false);
+
+            guiListener.removeGui(first, BettingGui.this);
+            guiListener.removeGui(second, BettingGui.this);
+            duelManager.startMatch(first, second, settings, items, null);
         }
     }
 }

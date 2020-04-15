@@ -85,30 +85,6 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
         messages.clear();
     }
 
-    public void sendMessage(final CommandSender receiver, final String key, final Object... replacers) {
-        final String message = getRawMessage(key);
-
-        if (message == null) {
-            return;
-        }
-
-        if (receiver instanceof Player) {
-            config.playSound((Player) receiver, message);
-        }
-
-        receiver.sendMessage(StringUtil.color(replace(message, replacers)));
-    }
-
-    public void sendMessage(final Collection<Player> players, final String key, final Object... replacers) {
-        final String message = getMessage(key, replacers);
-
-        if (message == null) {
-            return;
-        }
-
-        players.forEach(player -> player.sendMessage(message));
-    }
-
     private String getRawMessage(final String key) {
         final String message = messages.get(key);
 
@@ -159,5 +135,29 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
         }
 
         return message;
+    }
+
+    public void sendMessage(final CommandSender receiver, final String key, final Object... replacers) {
+        final String message = getRawMessage(key);
+
+        if (message == null) {
+            return;
+        }
+
+        if (receiver instanceof Player) {
+            config.playSound((Player) receiver, message);
+        }
+
+        receiver.sendMessage(StringUtil.color(replace(message, replacers)));
+    }
+
+    public void sendMessage(final Collection<Player> players, final String key, final Object... replacers) {
+        final String message = getMessage(key, replacers);
+
+        if (message == null) {
+            return;
+        }
+
+        players.forEach(player -> player.sendMessage(message));
     }
 }

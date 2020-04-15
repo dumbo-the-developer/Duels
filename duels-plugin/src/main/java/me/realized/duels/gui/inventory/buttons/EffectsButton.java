@@ -5,9 +5,9 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.compat.CompatUtil;
+import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 
@@ -15,7 +15,7 @@ public class EffectsButton extends BaseButton {
 
     public EffectsButton(final DuelsPlugin plugin, final Player player) {
         super(plugin, ItemBuilder
-            .of(Material.POTION, 1, (short) 8237)
+            .of(Items.WATER_BREATHING_POTION.clone())
             .name(plugin.getLang().getMessage("GUI.inventory-view.buttons.effects.name"))
             .lore(player.getActivePotionEffects().stream()
                 .map(effect -> plugin.getLang().getMessage("GUI.inventory-view.buttons.effects.lore-format",

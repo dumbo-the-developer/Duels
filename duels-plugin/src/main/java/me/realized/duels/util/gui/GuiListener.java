@@ -1,6 +1,7 @@
 package me.realized.duels.util.gui;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,7 +14,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -32,7 +32,9 @@ public class GuiListener<P extends JavaPlugin> implements Loadable, Listener {
 
     @Override
     public void handleUnload() {
+        privateGuis.values().forEach(AbstractGui::clear);
         privateGuis.clear();
+        publicGuis.forEach(AbstractGui::clear);
         publicGuis.clear();
     }
 
@@ -40,16 +42,34 @@ public class GuiListener<P extends JavaPlugin> implements Loadable, Listener {
         publicGuis.add(gui);
     }
 
-    public <T extends AbstractGui<P>> T addGui(final Player player, final T gui) {
+    /**
+     * @param removeSameType Prevents memory leaks in case of gui open failing for guis that remove themselves on inventory close.
+     */
+    public <T extends AbstractGui<P>> T addGui(final Player player, final T gui, final boolean removeSameType) {
+        if (removeSameType) {
+            final Collection<AbstractGui<P>> guis = privateGuis.asMap().get(player.getUniqueId());
+
+            if (guis != null) {
+                guis.removeIf(cached -> gui.getClass().isInstance(cached));
+            }
+        }
+
         privateGuis.put(player.getUniqueId(), gui);
         return gui;
     }
 
+    public <T extends AbstractGui<P>> T addGui(final Player player, final T gui) {
+        return addGui(player, gui, false);
+    }
+
     public void removeGui(final AbstractGui<P> gui) {
+        gui.clear();
         publicGuis.remove(gui);
     }
 
     public void removeGui(final Player player, final AbstractGui<P> gui) {
+        gui.clear();
+
         final Collection<AbstractGui<P>> guis = privateGuis.asMap().get(player.getUniqueId());
 
         if (guis != null) {
@@ -58,7 +78,7 @@ public class GuiListener<P extends JavaPlugin> implements Loadable, Listener {
     }
 
     private List<AbstractGui<P>> get(final Player player) {
-        final List<AbstractGui<P>> guis = new ArrayList<>(publicGuis);
+        final List<AbstractGui<P>> guis = Lists.newArrayList(publicGuis);
 
         if (privateGuis.containsKey(player.getUniqueId())) {
             guis.addAll(privateGuis.get(player.getUniqueId()));
@@ -71,10 +91,6 @@ public class GuiListener<P extends JavaPlugin> implements Loadable, Listener {
     public void on(final InventoryClickEvent event) {
         final Player player = (Player) event.getWhoClicked();
         final Inventory top = player.getOpenInventory().getTopInventory();
-
-        if (top == null) {
-            return;
-        }
 
         for (final AbstractGui<P> gui : get(player)) {
             if (gui.isPart(top)) {
@@ -105,25 +121,6 @@ public class GuiListener<P extends JavaPlugin> implements Loadable, Listener {
         for (final AbstractGui<P> gui : get(player)) {
             if (gui.isPart(inventory)) {
                 gui.on(player, event.getInventory(), event);
-                break;
-            }
-        }
-    }
-
-    @EventHandler
-    public void on(final InventoryOpenEvent event) {
-        final Player player = (Player) event.getPlayer();
-        final Inventory inventory = event.getInventory();
-
-        for (final AbstractGui<P> gui : get(player)) {
-            if (gui.isPart(inventory)) {
-                final Collection<AbstractGui<P>> guis = privateGuis.asMap().get(event.getPlayer().getUniqueId());
-
-                if (guis == null) {
-                    return;
-                }
-
-                guis.removeIf(privateGui -> privateGui.removeIfEmpty() && !privateGui.equals(gui) && !privateGui.hasViewers());
                 break;
             }
         }

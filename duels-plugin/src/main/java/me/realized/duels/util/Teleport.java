@@ -88,12 +88,18 @@ public final class Teleport implements Loadable, Listener {
             }
         }
 
-        Players.getOnlinePlayers().forEach(online -> {
+        if (plugin.isDisabling()) {
+            return;
+        }
+
+        plugin.doSyncAfter(() -> Players.getOnlinePlayers().forEach(online -> {
             if (player.canSee(online) && online.canSee(player)) {
+                player.hidePlayer(online);
+                online.hidePlayer(player);
                 player.showPlayer(online);
                 online.showPlayer(player);
             }
-        });
+        }), 1L);
     }
 
     public void tryTeleport(final Player player, final Location location) {

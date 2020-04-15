@@ -11,7 +11,6 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,16 +59,16 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
     public void handleLoad() throws IOException {
         gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.kit-selector.title"), config.getKitSelectorRows(), kits.values());
         gui.setSpaceFiller(Items.from(config.getKitSelectorFillerType(), config.getKitSelectorFillerData()));
-        gui.setPrevButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.arena-selector.buttons.previous-page.name")).build());
-        gui.setNextButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.arena-selector.buttons.next-page.name")).build());
-        gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.arena-selector.buttons.empty.name")).build());
+        gui.setPrevButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.previous-page.name")).build());
+        gui.setNextButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.next-page.name")).build());
+        gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.empty.name")).build());
         plugin.getGuiListener().addGui(gui);
 
         if (!file.exists()) {
             file.createNewFile();
         } else {
             try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
-                final Map<String, KitData> data = plugin.getGson().fromJson(reader, new TypeToken<Map<String, KitData>>() {}.getType());
+                final Map<String, KitData> data = plugin.getGson().fromJson(reader, new TypeToken<LinkedHashMap<String, KitData>>() {}.getType());
 
                 if (data != null) {
                     for (final Map.Entry<String, KitData> entry : data.entrySet()) {
@@ -109,7 +108,7 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
     }
 
     private void saveKits() throws IOException {
-        final Map<String, KitData> data = new HashMap<>();
+        final Map<String, KitData> data = new LinkedHashMap<>();
 
         for (final Map.Entry<String, Kit> entry : kits.entrySet()) {
             data.put(entry.getKey(), new KitData(entry.getValue()));
@@ -167,6 +166,7 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
         }
 
         kit.setRemoved(true);
+        plugin.getArenaManager().clearBinds(kit);
 
         final KitRemoveEvent event = new KitRemoveEvent(source, kit);
         plugin.getServer().getPluginManager().callEvent(event);
@@ -186,10 +186,14 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
         return Collections.unmodifiableList(Lists.newArrayList(kits.values()));
     }
 
-    public List<String> getNames() {
+    public List<String> getNames(final boolean nokit) {
         final List<String> names = Lists.newArrayList();
-        names.add("-"); // Special case: Change the nokit rating
         names.addAll(kits.keySet());
+
+        if (nokit) {
+            names.add("-"); // Special case: Change the nokit rating
+        }
+
         return names;
     }
 }

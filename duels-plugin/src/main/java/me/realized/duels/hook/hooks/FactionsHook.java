@@ -23,14 +23,12 @@ public class FactionsHook extends PluginHook<DuelsPlugin> {
         this.config = plugin.getConfiguration();
         this.arenaManager = plugin.getArenaManager();
 
-        Listener listener;
+        Listener listener = null;
 
         if (ReflectionUtil.getClassUnsafe("com.massivecraft.factions.event.PowerLossEvent") != null) {
             listener = new FactionsUUIDListener();
         } else if (ReflectionUtil.getClassUnsafe(("com.massivecraft.factions.event.EventFactionsPowerChange")) != null) {
             listener = new Factions2Listener();
-        } else {
-            listener = null;
         }
 
         if (listener == null) {

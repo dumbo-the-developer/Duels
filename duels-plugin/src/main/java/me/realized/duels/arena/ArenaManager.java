@@ -1,5 +1,6 @@
 package me.realized.duels.arena;
 
+import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,6 +11,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -21,10 +23,12 @@ import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.arena.ArenaCreateEvent;
 import me.realized.duels.api.event.arena.ArenaRemoveEvent;
+import me.realized.duels.api.event.kit.KitRemoveEvent;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.ArenaData;
 import me.realized.duels.kit.Kit;
+import me.realized.duels.queue.Queue;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.StringUtil;
@@ -51,7 +55,6 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
     private final Lang lang;
     private final File file;
 
-    @Getter
     private final List<Arena> arenas = new ArrayList<>();
     @Getter
     private MultiPageGui<DuelsPlugin> gui;
@@ -184,24 +187,48 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
         return get(player) != null;
     }
 
+    @Nonnull
+    @Override
+    public List<Arena> getArenas() {
+        return Collections.unmodifiableList(arenas);
+    }
+
     public Set<Player> getPlayers() {
         return arenas.stream().flatMap(arena -> arena.getPlayers().stream()).collect(Collectors.toSet());
     }
 
-    public Arena randomArena(final Kit kit) {
-        final List<Arena> available = arenas.stream()
-            .filter(arena -> (kit == null || !kit.isArenaSpecific() || kit.canUse(arena)) && arena.isAvailable())
-            .collect(Collectors.toList());
+    public long getPlayersInMatch(final Queue queue) {
+        return arenas.stream().filter(arena -> arena.isUsed() && arena.getMatch().isFromQueue() && arena.getMatch().getSource().equals(queue)).count() * 2;
+    }
 
-        if (available.isEmpty()) {
-            return null;
+    public boolean isSelectable(final Kit kit, final Arena arena) {
+        if (!arena.isAvailable()) {
+            return false;
         }
 
-        return available.get(ThreadLocalRandom.current().nextInt(available.size()));
+        if (kit == null) {
+            return true;
+        }
+
+        if (arena.isBoundless()) {
+            return !kit.isArenaSpecific();
+        }
+
+        return arena.isBound(kit);
+    }
+
+    public Arena randomArena(final Kit kit) {
+        final List<Arena> available = arenas.stream().filter(arena -> isSelectable(kit, arena)).collect(Collectors.toList());
+        return !available.isEmpty() ? available.get(ThreadLocalRandom.current().nextInt(available.size())) : null;
     }
 
     public List<String> getNames() {
         return arenas.stream().map(Arena::getName).collect(Collectors.toList());
+    }
+
+    // remove bind on kit removal
+    public void clearBinds(final Kit kit) {
+        arenas.stream().filter(arena -> arena.isBound(kit)).forEach(arena -> arena.bind(kit));
     }
 
     @EventHandler(ignoreCancelled = true)

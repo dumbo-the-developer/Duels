@@ -21,6 +21,7 @@ import me.realized.duels.api.event.match.MatchEndEvent.Reason;
 import me.realized.duels.duel.DuelManager.OpponentInfo;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.kit.Kit;
+import me.realized.duels.queue.Queue;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.inventory.ItemBuilder;
@@ -34,9 +35,11 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
     @Getter
     private final String name;
     @Getter
-    private final Map<Integer, Location> positions = new HashMap<>();
-    @Getter
     private boolean disabled;
+    @Getter
+    private final Set<Kit> kits = new HashSet<>();
+    @Getter
+    private final Map<Integer, Location> positions = new HashMap<>();
     @Getter
     private Match match;
     @Getter(value = AccessLevel.PACKAGE)
@@ -108,6 +111,22 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
         return setDisabled(null, disabled);
     }
 
+    public boolean isBoundless() {
+        return kits.isEmpty();
+    }
+
+    public boolean isBound(final Kit kit) {
+        return kits.contains(kit);
+    }
+
+    public void bind(final Kit kit) {
+        if (isBound(kit)) {
+            kits.remove(kit);
+        } else {
+            kits.add(kit);
+        }
+    }
+
     @Override
     public boolean isUsed() {
         return match != null;
@@ -117,8 +136,8 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
         return !isDisabled() && !isUsed() && getPosition(1) != null && getPosition(2) != null;
     }
 
-    public Match startMatch(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet, final boolean fromQueue) {
-        this.match = new Match(this, kit, items, bet, fromQueue);
+    public Match startMatch(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet, final Queue source) {
+        this.match = new Match(this, kit, items, bet, source);
         setLore(lang.getMessage("GUI.arena-selector.buttons.arena.lore-unavailable").split("\n"));
         arenaManager.getGui().calculatePages();
         return match;
@@ -129,7 +148,15 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
 
         final MatchEndEvent endEvent = new MatchEndEvent(match, winner, loser, reason);
         plugin.getServer().getPluginManager().callEvent(endEvent);
+
+        final Queue source = match.getSource();
         match = null;
+
+        if (source != null) {
+            source.update();
+            queueManager.getGui().calculatePages();
+        }
+
         setLore(lang.getMessage("GUI.arena-selector.buttons.arena.lore-available").split("\n"));
         arenaManager.getGui().calculatePages();
     }
@@ -192,6 +219,13 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
         }
 
         final Settings settings = settingManager.getSafely(player);
+        final Kit kit = settings.getKit();
+
+        if (kit != null && !arenaManager.isSelectable(kit, this)) {
+            lang.sendMessage(player, "ERROR.setting.arena-not-applicable", "kit", kit.getName());
+            return;
+        }
+
         settings.setArena(this);
         settings.openGui(player);
     }

@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.Getter;
 import me.realized.duels.kit.Kit;
+import me.realized.duels.queue.Queue;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -28,16 +29,16 @@ public class Match implements me.realized.duels.api.match.Match {
     @Getter
     private final int bet;
     @Getter
-    private final boolean fromQueue;
+    private final Queue source;
     private final Map<Player, Boolean> players = new HashMap<>();
 
-    Match(final Arena arena, final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet, final boolean fromQueue) {
+    Match(final Arena arena, final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet, final Queue source) {
         this.arena = arena;
         this.start = System.currentTimeMillis();
         this.kit = kit;
         this.items = items;
         this.bet = bet;
-        this.fromQueue = fromQueue;
+        this.source = source;
     }
 
     Map<Player, Boolean> getPlayerMap() {
@@ -54,6 +55,10 @@ public class Match implements me.realized.duels.api.match.Match {
 
     public boolean isDead(final Player player) {
         return players.getOrDefault(player, true);
+    }
+
+    public boolean isFromQueue() {
+        return source != null;
     }
 
     public List<ItemStack> getItems() {

@@ -28,7 +28,7 @@ public class DeletekitCommand extends BaseCommand {
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         if (args.length == 2) {
-            return handleTabCompletion(args[1], kitManager.getNames());
+            return handleTabCompletion(args[1], kitManager.getNames(false));
         }
 
         return null;

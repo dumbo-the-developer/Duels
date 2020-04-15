@@ -19,10 +19,12 @@ public class QueueSign implements me.realized.duels.api.queue.sign.QueueSign {
     private final String[] lines;
     @Getter
     private final Queue queue;
-    private int lastCount;
     @Getter
     @Setter(value = AccessLevel.PACKAGE)
     private boolean removed;
+
+    private int lastInQueue;
+    private long lastInMatch;
 
     public QueueSign(final Location location, final String format, final Queue queue) {
         this.location = location;
@@ -45,18 +47,18 @@ public class QueueSign implements me.realized.duels.api.queue.sign.QueueSign {
 
         final Sign sign = (Sign) block.getState();
 
-        sign.setLine(0, replace(lines[0], 0));
-        sign.setLine(1, replace(lines[1], 0));
-        sign.setLine(2, replace(lines[2], 0));
-        sign.setLine(3, replace(lines[3], 0));
+        sign.setLine(0, replace(lines[0], 0, 0));
+        sign.setLine(1, replace(lines[1], 0, 0));
+        sign.setLine(2, replace(lines[2], 0, 0));
+        sign.setLine(3, replace(lines[3], 0, 0));
         sign.update(true);
     }
 
-    private String replace(final String line, final int count) {
-        return StringUtil.color(line.replace("%count%", String.valueOf(count)));
+    private String replace(final String line, final int inQueue, final long inMatch) {
+        return StringUtil.color(line.replace("%in_queue%", String.valueOf(inQueue)).replace("%in_match%", String.valueOf(inMatch)));
     }
 
-    public void updateCount() {
+    public void update() {
         final Block block = location.getBlock();
 
         if (!(block.getState() instanceof Sign)) {
@@ -71,17 +73,20 @@ public class QueueSign implements me.realized.duels.api.queue.sign.QueueSign {
             return;
         }
 
-        final int count = queue.getPlayers().size();
+        final int inQueue = queue.getPlayers().size();
+        final long inMatch = queue.getPlayersInMatch();
 
-        if (lastCount == count) {
+        if (lastInQueue == inQueue && lastInMatch == inMatch) {
             return;
         }
 
-        this.lastCount = count;
-        sign.setLine(0, replace(lines[0], count));
-        sign.setLine(1, replace(lines[1], count));
-        sign.setLine(2, replace(lines[2], count));
-        sign.setLine(3, replace(lines[3], count));
+        this.lastInQueue = inQueue;
+        this.lastInMatch = inMatch;
+
+        sign.setLine(0, replace(lines[0], inQueue, inMatch));
+        sign.setLine(1, replace(lines[1], inQueue, inMatch));
+        sign.setLine(2, replace(lines[2], inQueue, inMatch));
+        sign.setLine(3, replace(lines[3], inQueue, inMatch));
         sign.update(true);
     }
 

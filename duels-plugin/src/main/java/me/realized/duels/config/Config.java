@@ -149,6 +149,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean specRequiresClearedInventory;
     @Getter
+    private boolean specAddInvisibilityEffect;
+    @Getter
     private boolean specPreventBlockInteract;
     @Getter
     private List<String> specWhitelistedCommands;
@@ -220,16 +222,11 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean inheritKitItemType;
 
     @Getter
-    private boolean soupEnabled;
-    @Getter
-    private String soupNameStartingWith;
-    @Getter
     private double soupHeartsToRegen;
-
     @Getter
-    private boolean sumoEnabled;
+    private boolean soupRemoveEmptyBowl;
     @Getter
-    private String sumoNameStartingWith;
+    private boolean soupCancelIfAlreadyFull;
 
     private final Map<String, MessageSound> sounds = new HashMap<>();
 
@@ -312,6 +309,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         queueMatchesOnly = configuration.getBoolean("rating.queue-matches-only", true);
 
         specRequiresClearedInventory = configuration.getBoolean("spectate.requires-cleared-inventory", false);
+        specAddInvisibilityEffect = configuration.getBoolean("spectate.add-invisibility-effect", true);
         specPreventBlockInteract = configuration.getBoolean("spectate.prevent.block-interact", true);
         specWhitelistedCommands = configuration.getStringList("spectate.whitelisted-commands");
 
@@ -350,12 +348,9 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         queuesFillerData = (short) configuration.getInt("guis.queues.space-filler-item.data", 0);
         inheritKitItemType = configuration.getBoolean("guis.queues.inherit-kit-item-type", true);
 
-        soupEnabled = configuration.getBoolean("soup.enabled", true);
-        soupNameStartingWith = configuration.getString("soup.arena-name-starting-with", "soup arena");
         soupHeartsToRegen = Math.max(configuration.getDouble("soup.hearts-to-regen", 3.5), 0);
-
-        sumoEnabled = configuration.getBoolean("sumo.enabled", true);
-        sumoNameStartingWith = configuration.getString("sumo.arena-name-starting-with", "sumo arena");
+        soupRemoveEmptyBowl = configuration.getBoolean("soup.remove-empty-bowl", true);
+        soupCancelIfAlreadyFull = configuration.getBoolean("soup.cancel-if-already-full", true);
 
         final ConfigurationSection sounds = configuration.getConfigurationSection("sounds");
 

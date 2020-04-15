@@ -5,6 +5,7 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.Arena;
 import me.realized.duels.command.BaseCommand;
 import org.apache.commons.lang.StringUtils;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -12,12 +13,13 @@ import org.bukkit.entity.Player;
 public class TeleportCommand extends BaseCommand {
 
     public TeleportCommand(final DuelsPlugin plugin) {
-        super(plugin, "teleport", "teleport [name]", "Teleports to an arena.", 2, true, "tp", "goto");
+        super(plugin, "teleport", "teleport [name] <-2>", "Teleports to an arena.", 2, true, "tp", "goto");
     }
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
-        final String name = StringUtils.join(args, " ", 1, args.length).replace("-", " ");
+        final boolean second = args[args.length - 1].equals("-2");
+        final String name = StringUtils.join(args, " ", 1, args.length - (second ? 1 : 0)).replace("-", " ");
         final Arena arena = arenaManager.get(name);
 
         if (arena == null) {
@@ -30,8 +32,16 @@ public class TeleportCommand extends BaseCommand {
             return;
         }
 
-        ((Player) sender).teleport(arena.getPositions().values().iterator().next());
-        lang.sendMessage(sender, "COMMAND.duels.teleport", "name", name);
+        final int pos = second ? 2 : 1;
+        final Location location = arena.getPosition(pos);
+
+        if (location == null) {
+            lang.sendMessage(sender, "ERROR.arena.invalid-position");
+            return;
+        }
+
+        ((Player) sender).teleport(location);
+        lang.sendMessage(sender, "COMMAND.duels.teleport", "name", name, "position", pos);
     }
 
     @Override

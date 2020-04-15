@@ -1,5 +1,6 @@
 package me.realized.duels.api.arena;
 
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
@@ -36,4 +37,14 @@ public interface ArenaManager {
      * @return True if player was in a match. False otherwise.
      */
     boolean isInMatch(@Nonnull final Player player);
+
+
+    /**
+     * An UnmodifiableList of {@link Arena}s that are currently loaded.
+     *
+     * @return Never-null UnmodifiableList of {@link Arena}s that are currently loaded.
+     * @since 3.4.0
+     */
+    @Nonnull
+    List<? extends Arena> getArenas();
 }

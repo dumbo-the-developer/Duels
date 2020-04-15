@@ -34,9 +34,9 @@ public class Queue extends BaseButton implements DQueue {
         super(plugin, ItemBuilder
             .of((plugin.getConfiguration().isInheritKitItemType() && kit != null) ? kit.getDisplayed().clone() : ItemBuilder.of(Material.DIAMOND_SWORD).build())
             .name(plugin.getLang().getMessage("GUI.queues.buttons.queue.name",
-                "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("none"), "bet_amount", bet, "players", 0))
+                "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", 0, "in_match", 0))
             .lore(plugin.getLang().getMessage("GUI.queues.buttons.queue.lore",
-                "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("none"), "bet_amount", bet, "players", 0).split("\n"))
+                "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", 0, "in_match", 0).split("\n"))
             .build());
         this.kit = kit;
         this.bet = bet;
@@ -78,11 +78,17 @@ public class Queue extends BaseButton implements DQueue {
         return false;
     }
 
-    private void update() {
+    public long getPlayersInMatch() {
+        return arenaManager.getPlayersInMatch(this);
+    }
+
+    public void update() {
+        int inQueue = players.size();
+        long inMatch = getPlayersInMatch();
         setDisplayName(lang.getMessage("GUI.queues.buttons.queue.name",
-            "kit", kit != null ? kit.getName() : lang.getMessage("none"), "bet_amount", bet, "players", players.size()));
+            "kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch));
         setLore(lang.getMessage("GUI.queues.buttons.queue.lore",
-            "kit", kit != null ? kit.getName() : lang.getMessage("none"), "bet_amount", bet, "players", players.size()).split("\n"));
+            "kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch).split("\n"));
     }
 
     @Override

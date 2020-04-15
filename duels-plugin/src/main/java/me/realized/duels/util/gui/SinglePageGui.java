@@ -24,6 +24,10 @@ public class SinglePageGui<P extends JavaPlugin> extends AbstractGui<P> {
         set(inventory, from, to, height, button);
     }
 
+    public void update(final Player player, final Button<P> button) {
+        update(player, inventory, button);
+    }
+
     @Override
     public void open(final Player... players) {
         for (final Player player : players) {
@@ -35,11 +39,6 @@ public class SinglePageGui<P extends JavaPlugin> extends AbstractGui<P> {
     @Override
     public boolean isPart(final Inventory inventory) {
         return inventory.equals(this.inventory);
-    }
-
-    @Override
-    public boolean hasViewers() {
-        return !inventory.getViewers().isEmpty();
     }
 
     @Override

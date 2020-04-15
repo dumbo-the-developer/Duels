@@ -16,11 +16,6 @@ public class ItemBettingButton extends BaseButton {
 
     @Override
     public void update(final Player player) {
-        if (!config.isItemBettingEnabled()) {
-            setLore(lang.getMessage("GUI.settings.buttons.item-betting.lore-disabled").split("\n"));
-            return;
-        }
-
         if (config.isItemBettingUsePermission() && !player.hasPermission(Permissions.ITEM_BETTING) && !player.hasPermission(Permissions.SETTING_ALL)) {
             setLore(lang.getMessage("GUI.settings.buttons.item-betting.lore-no-permission").split("\n"));
             return;
@@ -34,11 +29,6 @@ public class ItemBettingButton extends BaseButton {
 
     @Override
     public void onClick(final Player player) {
-        if (!config.isItemBettingEnabled()) {
-            lang.sendMessage(player, "ERROR.setting.disabled-option", "option", lang.getMessage("GENERAL.item-betting"));
-            return;
-        }
-
         if (config.isItemBettingUsePermission() && !player.hasPermission(Permissions.ITEM_BETTING) && !player.hasPermission(Permissions.SETTING_ALL)) {
             lang.sendMessage(player, "ERROR.no-permission", "permission", Permissions.ITEM_BETTING);
             return;

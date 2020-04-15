@@ -119,7 +119,7 @@ public class AcceptCommand extends BaseCommand {
             settings.setGameMode(player, gameMode);
             bettingManager.open(settings, target, player);
         } else {
-            duelManager.startMatch(player, target, settings, null, false);
+            duelManager.startMatch(player, target, settings, null, null);
         }
     }
 }

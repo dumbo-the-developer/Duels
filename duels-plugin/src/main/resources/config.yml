@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 7
+config-version: 8
 
 # If set to 'true', a notification and a download link will be printed on the console whenever an update is available.
 # default: true
@@ -368,6 +368,10 @@ spectate:
   # default: false
   requires-cleared-inventory: false
 
+  # If set to 'true', players in spectator mode will receive invisibility effect.
+  # default: true
+  add-invisibility-effect: true
+
   prevent:
     # If set to 'true', spectators will not be able to interact with blocks.
     # default: true
@@ -513,28 +517,19 @@ guis:
 
 
 soup:
-  # If set to 'true', arenas with their name starting with 'soup arena' will have soup consuming enabled.
-  # default: true
-  enabled: true
-
-  # This is the value an arena's name must start with in order to have soup consuming enabled.
-  # default: 'soup arena'
-  arena-name-starting-with: 'soup arena'
-
   # Amount of hearts to regenerate on soup consume.
   # default: 3.5
   hearts-to-regen: 3.5
 
-
-sumo:
-  # If set to 'true', arenas with their name starting with 'sumo arena' will have sumo enabled.
-  # NOTE: Players will not take damage in sumo arenas unless they interact with a liquid block, such as water or lava.
+  # If set to 'true', the empty bowl will be automatically removed when a soup is consumed.
+  # NOTE: Only active for players in a duel!
   # default: true
-  enabled: true
+  remove-empty-bowl: true
 
-  # This is the value an arena's name must start with in order to have sumo enabled.
-  # default: 'sumo arena'
-  arena-name-starting-with: 'sumo arena'
+  # If set to 'true', soup will not consume if player's health is already full.
+  # NOTE: Only active for players in a duel!
+  # default: true
+  cancel-if-already-full: true
 
 
 # List of sound types:
