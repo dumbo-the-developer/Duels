@@ -38,7 +38,7 @@ Maven:
 #### Dependency
 Gradle:
 ```groovy
-compile (group: 'com.github.Realizedd.Duels', name: 'duels-api', version: '3.4.0') {
+compile (group: 'com.github.Realizedd.Duels', name: 'duels-api', version: '3.4.1') {
     transitive = false
 }
 ```  
@@ -48,7 +48,7 @@ Maven:
 <dependency>
     <groupId>com.github.Realizedd.Duels</groupId>
     <artifactId>duels-api</artifactId>
-    <version>3.4.0</version>
+    <version>3.4.1</version>
     <exclusions>
         <exclusion>
             <groupId>*</groupId>
