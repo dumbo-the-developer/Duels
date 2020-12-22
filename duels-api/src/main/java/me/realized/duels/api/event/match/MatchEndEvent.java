@@ -9,6 +9,8 @@ import org.bukkit.event.HandlerList;
 
 /**
  * Called when a {@link Match} is ending.
+ *
+ * Note: {@link Match#isFinished()} will return true only after this event is called.
  */
 public class MatchEndEvent extends MatchEvent {
 

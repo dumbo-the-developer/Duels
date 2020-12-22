@@ -5,10 +5,11 @@ import javax.annotation.Nullable;
 import lombok.Getter;
 import me.realized.duels.api.arena.Arena;
 import me.realized.duels.api.kit.Kit;
+import me.realized.duels.api.request.Request;
 import me.realized.duels.setting.Settings;
 import org.bukkit.entity.Player;
 
-public class Request implements me.realized.duels.api.request.Request {
+public class RequestImpl implements Request {
 
     @Getter
     private final UUID sender;
@@ -19,7 +20,7 @@ public class Request implements me.realized.duels.api.request.Request {
     @Getter
     private final long creation;
 
-    Request(final Player sender, final Player target, final Settings setting) {
+    RequestImpl(final Player sender, final Player target, final Settings setting) {
         this.sender = sender.getUniqueId();
         this.target = target.getUniqueId();
         this.settings = setting.lightCopy();

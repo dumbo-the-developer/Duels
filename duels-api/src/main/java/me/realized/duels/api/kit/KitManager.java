@@ -63,5 +63,5 @@ public interface KitManager {
      * @since 3.1.0
      */
     @Nonnull
-    List<? extends Kit> getKits();
+    List<Kit> getKits();
 }

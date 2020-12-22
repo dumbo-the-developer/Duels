@@ -11,11 +11,13 @@ import org.bukkit.permissions.PermissionAttachment;
 
 public class McMMOHook extends PluginHook<DuelsPlugin> {
 
+    public static final String NAME = "mcMMO";
+
     private final Config config;
     private final Map<UUID, PermissionAttachment> attachments = new HashMap<>();
 
     public McMMOHook(final DuelsPlugin plugin) {
-        super(plugin, "mcMMO");
+        super(plugin, NAME);
         this.config = plugin.getConfiguration();
     }
 

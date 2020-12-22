@@ -5,7 +5,6 @@ import java.util.GregorianCalendar;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.Permissions;
 import me.realized.duels.command.BaseCommand;
-import me.realized.duels.data.MatchData;
 import me.realized.duels.data.UserData;
 import me.realized.duels.util.DateUtil;
 import me.realized.duels.util.TextBuilder;
@@ -72,18 +71,17 @@ public class StatsCommand extends BaseCommand {
 
             final Calendar calendar = new GregorianCalendar();
 
-            for (final MatchData match : user.getMatches()) {
+            user.getMatches().forEach(match -> {
                 final String kit = match.getKit() != null ? match.getKit() : lang.getMessage("GENERAL.none");
                 final String duration = DateUtil.formatMilliseconds(match.getDuration());
-                final String timeSince = DateUtil.formatMilliseconds(calendar.getTimeInMillis() - match.getTime());
+                final String timeSince = DateUtil.formatMilliseconds(calendar.getTimeInMillis() - match.getCreation());
                 TextBuilder
                     .of(lang.getMessage("COMMAND.duel.stats.match.format", "winner", match.getWinner(), "loser", match.getLoser()))
                     .setHoverEvent(Action.SHOW_TEXT,
                         lang.getMessage("COMMAND.duel.stats.match.hover-text",
                             "kit", kit, "duration", duration, "time", timeSince, "health", match.getHealth()))
                     .send(sender);
-            }
-
+            });
             lang.sendMessage(sender, "COMMAND.duel.stats.match.footer", args);
         }
     }

@@ -4,6 +4,7 @@ import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import me.realized.duels.api.queue.sign.QueueSign;
 import me.realized.duels.queue.Queue;
 import me.realized.duels.util.StringUtil;
 import org.bukkit.Location;
@@ -11,7 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 
-public class QueueSign implements me.realized.duels.api.queue.sign.QueueSign {
+public class QueueSignImpl implements QueueSign {
 
     @Getter
     private final Location location;
@@ -26,7 +27,7 @@ public class QueueSign implements me.realized.duels.api.queue.sign.QueueSign {
     private int lastInQueue;
     private long lastInMatch;
 
-    public QueueSign(final Location location, final String format, final Queue queue) {
+    public QueueSignImpl(final Location location, final String format, final Queue queue) {
         this.location = location;
         this.queue = queue;
 
@@ -94,7 +95,7 @@ public class QueueSign implements me.realized.duels.api.queue.sign.QueueSign {
     public boolean equals(final Object o) {
         if (this == o) { return true; }
         if (o == null || getClass() != o.getClass()) { return false; }
-        final QueueSign queueSign = (QueueSign) o;
+        final QueueSignImpl queueSign = (QueueSignImpl) o;
         return Objects.equals(queue, queueSign.getQueue());
     }
 

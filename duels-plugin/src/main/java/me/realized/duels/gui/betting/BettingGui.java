@@ -122,7 +122,7 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
 
         final int slot = event.getSlot();
 
-        if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+        if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY || event.getAction() == InventoryAction.COLLECT_TO_CURSOR) {
             event.setCancelled(true);
             return;
         }

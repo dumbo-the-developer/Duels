@@ -3,7 +3,7 @@ package me.realized.duels.command.commands.duels.subcommands;
 import java.util.Arrays;
 import java.util.List;
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.arena.Arena;
+import me.realized.duels.arena.ArenaImpl;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.util.NumberUtil;
 import me.realized.duels.util.StringUtil;
@@ -22,7 +22,7 @@ public class SetCommand extends BaseCommand {
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final String name = StringUtils.join(args, " ", 1, args.length - 1).replace("-", " ");
-        final Arena arena = arenaManager.get(name);
+        final ArenaImpl arena = arenaManager.get(name);
 
         if (arena == null) {
             lang.sendMessage(sender, "ERROR.arena.not-found", "name", name);

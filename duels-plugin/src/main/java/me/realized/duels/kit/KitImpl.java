@@ -12,6 +12,7 @@ import lombok.Setter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.Permissions;
 import me.realized.duels.api.event.kit.KitEquipEvent;
+import me.realized.duels.api.kit.Kit;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.inventory.ItemBuilder;
@@ -20,7 +21,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
+public class KitImpl extends BaseButton implements Kit {
 
     @Getter
     private final String name;
@@ -38,7 +39,7 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
     @Setter(value = AccessLevel.PACKAGE)
     private boolean removed;
 
-    public Kit(final DuelsPlugin plugin, final String name, final ItemStack displayed, final boolean usePermission, final boolean arenaSpecific,
+    public KitImpl(final DuelsPlugin plugin, final String name, final ItemStack displayed, final boolean usePermission, final boolean arenaSpecific,
         final Set<Characteristic> characteristics) {
         super(plugin, displayed != null ? displayed : ItemBuilder
             .of(Material.DIAMOND_SWORD)
@@ -51,7 +52,7 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
         this.characteristics = characteristics;
     }
 
-    public Kit(final DuelsPlugin plugin, final String name, final PlayerInventory inventory) {
+    public KitImpl(final DuelsPlugin plugin, final String name, final PlayerInventory inventory) {
         this(plugin, name, null, false, false, new HashSet<>());
 
         final Map<Integer, ItemStack> contents = new HashMap<>();
@@ -83,6 +84,7 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
         items.put("ARMOR", armorContents);
     }
 
+    // Never-null since if null item is passed to the constructor, a default item is passed to super
     @Nonnull
     public ItemStack getDisplayed() {
         return super.getDisplayed();
@@ -144,7 +146,7 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
             return false;
         }
 
-        final Kit kit = (Kit) other;
+        final KitImpl kit = (KitImpl) other;
         return Objects.equals(name, kit.name);
     }
 
@@ -156,6 +158,8 @@ public class Kit extends BaseButton implements me.realized.duels.api.kit.Kit {
     public enum Characteristic {
 
         SOUP,
-        SUMO;
+        SUMO,
+        UHC,
+        COMBO;
     }
 }

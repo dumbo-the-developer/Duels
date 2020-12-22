@@ -26,19 +26,20 @@ import me.realized.duels.api.event.queue.QueueRemoveEvent;
 import me.realized.duels.api.kit.Kit;
 import me.realized.duels.api.queue.DQueue;
 import me.realized.duels.api.queue.DQueueManager;
-import me.realized.duels.arena.ArenaManager;
+import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.QueueData;
 import me.realized.duels.data.UserData;
-import me.realized.duels.data.UserManager;
+import me.realized.duels.data.UserManagerImpl;
 import me.realized.duels.duel.DuelManager;
 import me.realized.duels.hook.hooks.CombatTagPlusHook;
 import me.realized.duels.hook.hooks.PvPManagerHook;
 import me.realized.duels.hook.hooks.VaultHook;
 import me.realized.duels.hook.hooks.worldguard.WorldGuardHook;
+import me.realized.duels.kit.KitManagerImpl;
 import me.realized.duels.setting.Settings;
-import me.realized.duels.spectate.SpectateManager;
+import me.realized.duels.spectate.SpectateManagerImpl;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.RatingUtil;
@@ -61,9 +62,10 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
     private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
-    private final UserManager userManager;
-    private final ArenaManager arenaManager;
-    private final SpectateManager spectateManager;
+    private final UserManagerImpl userManager;
+    private final KitManagerImpl kitManager;
+    private final ArenaManagerImpl arenaManager;
+    private final SpectateManagerImpl spectateManager;
     private final DuelManager duelManager;
     private final File file;
     private final List<Queue> queues = new ArrayList<>();
@@ -83,6 +85,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
         this.userManager = plugin.getUserManager();
+        this.kitManager = plugin.getKitManager();
         this.arenaManager = plugin.getArenaManager();
         this.spectateManager = plugin.getSpectateManager();
         this.duelManager = plugin.getDuelManager();
@@ -158,7 +161,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
                         remove.add(opponent);
 
                         final Settings setting = new Settings(plugin);
-                        setting.setKit(queue.getKit());
+                        setting.setKit(kitManager.get(queue.getKit().getName()));
                         setting.setBet(queue.getBet());
                         setting.getCache().put(player.getUniqueId(), current.getInfo());
                         setting.getCache().put(other.getUniqueId(), opponent.getInfo());
@@ -243,7 +246,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
     @Nullable
     @Override
     public Queue create(@Nullable final CommandSender source, @Nullable final Kit kit, final int bet) {
-        final Queue queue = new Queue(plugin, (me.realized.duels.kit.Kit) kit, bet);
+        final Queue queue = new Queue(plugin, kit, bet);
 
         if (queues.contains(queue)) {
             return null;
@@ -275,8 +278,9 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         return remove(null, kit, bet);
     }
 
+    @Nonnull
     @Override
-    public List<Queue> getQueues() {
+    public List<DQueue> getQueues() {
         return Collections.unmodifiableList(queues);
     }
 
@@ -293,6 +297,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         return queue(player, (Queue) queue);
     }
 
+    @Nullable
     @Override
     public DQueue removeFromQueue(@Nonnull final Player player) {
         Objects.requireNonNull(player, "player");

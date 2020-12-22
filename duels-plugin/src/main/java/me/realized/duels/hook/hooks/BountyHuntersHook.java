@@ -1,7 +1,7 @@
 package me.realized.duels.hook.hooks;
 
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.arena.ArenaManager;
+import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.config.Config;
 import me.realized.duels.util.hook.PluginHook;
 import net.Indyuce.bountyhunters.api.event.BountyClaimEvent;
@@ -12,11 +12,13 @@ import org.bukkit.event.Listener;
 
 public class BountyHuntersHook extends PluginHook<DuelsPlugin> implements Listener {
 
+    public static final String NAME = "BountyHunters";
+
     private final Config config;
-    private final ArenaManager arenaManager;
+    private final ArenaManagerImpl arenaManager;
 
     public BountyHuntersHook(final DuelsPlugin plugin) {
-        super(plugin, "BountyHunters");
+        super(plugin, NAME);
         this.config = plugin.getConfiguration();
         this.arenaManager = plugin.getArenaManager();
 

@@ -2,7 +2,6 @@ package me.realized.duels.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +29,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public class ItemData {
+
+    public static transient final String DUELS_ITEM_IDENTIFIER = "DuelsKitContent";
 
     private String material;
     private int amount;
@@ -186,21 +187,19 @@ public class ItemData {
             item = new Attributes(item).addModifiers(attributeModifiers);
         }
 
-        final List<String> args = itemData != null ? Arrays.asList(itemData.split("-")) : Collections.emptyList();
-
         if (!CompatUtil.isPre1_9() && itemData != null) {
+            final List<String> args = Arrays.asList(itemData.split("-")) ;
+
             if (material.contains("POTION")) {
                 item = new Potions(PotionType.valueOf(args.get(0)), args).toItemStack(amount);
+            } else if (material.equals("TIPPED_ARROW")) {
+                final PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
+                final PotionData data = new PotionData(org.bukkit.potion.PotionType.valueOf(args.get(0)), args.contains("extended"), args.contains("upgraded"));
+                potionMeta.setBasePotionData(data);
+                item.setItemMeta(potionMeta);
             } else if (CompatUtil.isPre1_13() && material.equals("MONSTER_EGG")) {
                 item = new SpawnEggs(EntityType.valueOf(args.get(0))).toItemStack(amount);
             }
-        }
-
-        if (material.equals("TIPPED_ARROW")) {
-            final PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-            final PotionData data = new PotionData(org.bukkit.potion.PotionType.valueOf(args.get(0)), args.contains("extended"), args.contains("upgraded"));
-            potionMeta.setBasePotionData(data);
-            item.setItemMeta(potionMeta);
         }
 
         if (enchantments != null && !enchantments.isEmpty()) {
@@ -235,8 +234,8 @@ public class ItemData {
 
             for (final Map.Entry<String, String> entry : effects.entrySet()) {
                 final String[] data = entry.getValue().split("-");
-                final int duration = Integer.valueOf(data[0]);
-                final int amplifier = Integer.valueOf(data[1]);
+                final int duration = Integer.parseInt(data[0]);
+                final int amplifier = Integer.parseInt(data[1]);
                 potionMeta.addCustomEffect(new PotionEffect(PotionEffectType.getByName(entry.getKey()), duration, amplifier), true);
             }
         }
@@ -274,6 +273,6 @@ public class ItemData {
         }
 
         item.setItemMeta(meta);
-        return Tags.setKey(item, "DuelsKitContent");
+        return Tags.setKey(item, DUELS_ITEM_IDENTIFIER);
     }
 }

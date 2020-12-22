@@ -6,7 +6,7 @@ import me.realized.duels.Permissions;
 import me.realized.duels.api.user.UserManager.TopData;
 import me.realized.duels.api.user.UserManager.TopEntry;
 import me.realized.duels.command.BaseCommand;
-import me.realized.duels.kit.Kit;
+import me.realized.duels.kit.KitImpl;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
 
@@ -33,7 +33,7 @@ public class TopCommand extends BaseCommand {
             topEntry = userManager.getLosses();
         } else {
             final String name = StringUtils.join(args, " ", 1, args.length);
-            final Kit kit = kitManager.get(name);
+            final KitImpl kit = kitManager.get(name);
 
             if (kit == null) {
                 lang.sendMessage(sender, "ERROR.kit.not-found", "name", name);

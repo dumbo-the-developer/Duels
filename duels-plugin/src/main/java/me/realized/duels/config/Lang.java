@@ -94,31 +94,12 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
         }
 
         // Allow disabling any message by setting it to ''
-        if (message.isEmpty()) {
-            return null;
-        }
-
-        return message;
+        return !message.isEmpty() ? message : null;
     }
 
     public String getMessage(final String key) {
         final String message = getRawMessage(key);
-
-        if (message == null) {
-            return null;
-        }
-
-        return StringUtil.color(message);
-    }
-
-    public String getMessage(final String key, final Object... replacers) {
-        final String message = getMessage(key);
-
-        if (message == null) {
-            return null;
-        }
-
-        return replace(message, replacers);
+        return message != null ? StringUtil.color(message) : null;
     }
 
     private String replace(String message, Object... replacers) {
@@ -137,6 +118,11 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
         return message;
     }
 
+    public String getMessage(final String key, final Object... replacers) {
+        final String message = getMessage(key);
+        return message != null ? replace(message, replacers) : null;
+    }
+
     public void sendMessage(final CommandSender receiver, final String key, final Object... replacers) {
         final String message = getRawMessage(key);
 
@@ -152,12 +138,6 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
     }
 
     public void sendMessage(final Collection<Player> players, final String key, final Object... replacers) {
-        final String message = getMessage(key, replacers);
-
-        if (message == null) {
-            return;
-        }
-
-        players.forEach(player -> player.sendMessage(message));
+        players.forEach(player -> sendMessage(player, key, replacers));
     }
 }

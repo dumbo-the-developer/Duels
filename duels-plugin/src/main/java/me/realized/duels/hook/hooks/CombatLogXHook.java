@@ -1,39 +1,55 @@
 package me.realized.duels.hook.hooks;
 
-import com.SirBlobman.combatlogx.event.PlayerUntagEvent.UntagReason;
-import com.SirBlobman.combatlogx.utility.CombatUtil;
+import com.SirBlobman.combatlogx.api.ICombatLogX;
+import com.SirBlobman.combatlogx.api.event.PlayerPreTagEvent;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.config.Config;
 import me.realized.duels.util.hook.PluginHook;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 
 public class CombatLogXHook extends PluginHook<DuelsPlugin> {
 
+    public static final String NAME = "CombatLogX";
+
     private final Config config;
+    private final ArenaManagerImpl arenaManager;
 
     public CombatLogXHook(final DuelsPlugin plugin) {
-        super(plugin, "CombatLogX");
+        super(plugin, NAME);
         this.config = plugin.getConfiguration();
+        this.arenaManager = plugin.getArenaManager();
 
         try {
-            final Class<?> clazz = Class.forName("com.SirBlobman.combatlogx.utility.CombatUtil");
-            clazz.getMethod("isInCombat", Player.class);
-            final Class<?> reasonClazz = Class.forName("com.SirBlobman.combatlogx.event.PlayerUntagEvent$UntagReason");
-            clazz.getMethod("untag", Player.class, reasonClazz);
-        } catch (NoSuchMethodException | ClassNotFoundException ex) {
+            Class.forName("com.SirBlobman.combatlogx.api.event.PlayerPreTagEvent");
+        } catch (ClassNotFoundException ex) {
             throw new RuntimeException("This version of " + getName() + " is not supported. Please try upgrading to the latest version.");
         }
+
+        plugin.getServer().getPluginManager().registerEvents(new CombatLogXListener(), plugin);
     }
 
     public boolean isTagged(final Player player) {
-        return config.isClxPreventDuel() && CombatUtil.isInCombat(player);
+        return config.isClxPreventDuel() && ((ICombatLogX) getPlugin()).getCombatManager().isInCombat(player);
     }
 
-    public void removeTag(final Player player) {
-        if (!config.isClxUntag()) {
-            return;
-        }
+    public class CombatLogXListener implements Listener {
 
-        CombatUtil.untag(player, UntagReason.EXPIRE_ENEMY_DEATH);
+        @EventHandler(ignoreCancelled = true)
+        public void on(final PlayerPreTagEvent event) {
+            if (!config.isClxPreventTag()) {
+                return;
+            }
+
+            final Player player = event.getPlayer();
+
+            if (!arenaManager.isInMatch(player)) {
+                return;
+            }
+
+            event.setCancelled(true);
+        }
     }
 }

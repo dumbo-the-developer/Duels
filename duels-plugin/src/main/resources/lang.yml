@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 8
+config-version: 9
 
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
@@ -285,6 +285,7 @@ COMMAND:
 DUEL:
   start-failure:
     no-kit-selected: '{FAIL_PREFIX} No kit was selected!'
+    player-is-dead: '{FAIL_PREFIX} You or your opponent is not alive!'
     in-blacklisted-world: '{FAIL_PREFIX} You or your opponent is in a blacklisted world!'
     is-tagged: '{FAIL_PREFIX} You or your opponent is in combat!'
     player-moved: '{FAIL_PREFIX} You or your opponent moved after sending/accepting the request!'
@@ -316,7 +317,7 @@ DUEL:
 
 
 QUEUE:
-  add: '{PREFIX} &7You have been added to the queue for kit &3%kit% &7and bet &6$%bet_amount%&7. Click the sign again or type &f/duel leave &7to leave the queue.'
+  add: '{PREFIX} &7You have been added to the queue for kit &3%kit% &7and bet &6$%bet_amount%&7. Click the sign again or type &f/queue leave &7to leave the queue.'
   remove: '{PREFIX} &7You have been removed from the queue.'
   found-opponent: '{PREFIX} &7Opponent found: &f%name%&7! Starting match with kit &3%kit% &7and a bet of &6$%bet_amount%&7...'
 

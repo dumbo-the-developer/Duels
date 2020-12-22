@@ -1,6 +1,5 @@
 package me.realized.duels.arena;
 
-import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,13 +20,14 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.api.arena.Arena;
+import me.realized.duels.api.arena.ArenaManager;
 import me.realized.duels.api.event.arena.ArenaCreateEvent;
 import me.realized.duels.api.event.arena.ArenaRemoveEvent;
-import me.realized.duels.api.event.kit.KitRemoveEvent;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.ArenaData;
-import me.realized.duels.kit.Kit;
+import me.realized.duels.kit.KitImpl;
 import me.realized.duels.queue.Queue;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
@@ -46,7 +46,7 @@ import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.projectiles.ProjectileSource;
 
-public class ArenaManager implements Loadable, me.realized.duels.api.arena.ArenaManager, Listener {
+public class ArenaManagerImpl implements Loadable, ArenaManager, Listener {
 
     private static final long AUTO_SAVE_INTERVAL = 20L * 60 * 5;
 
@@ -55,12 +55,13 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
     private final Lang lang;
     private final File file;
 
-    private final List<Arena> arenas = new ArrayList<>();
+    private final List<ArenaImpl> arenas = new ArrayList<>();
+
     @Getter
     private MultiPageGui<DuelsPlugin> gui;
     private int autoSaveTask;
 
-    public ArenaManager(final DuelsPlugin plugin) {
+    public ArenaManagerImpl(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
@@ -126,7 +127,7 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
     private void saveArenas() throws IOException {
         final List<ArenaData> data = new ArrayList<>();
 
-        for (final Arena arena : arenas) {
+        for (final ArenaImpl arena : arenas) {
             data.add(new ArenaData(arena));
         }
 
@@ -142,14 +143,14 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
 
     @Nullable
     @Override
-    public Arena get(@Nonnull final String name) {
+    public ArenaImpl get(@Nonnull final String name) {
         Objects.requireNonNull(name, "name");
         return arenas.stream().filter(arena -> arena.getName().equals(name)).findFirst().orElse(null);
     }
 
     @Nullable
     @Override
-    public Arena get(@Nonnull final Player player) {
+    public ArenaImpl get(@Nonnull final Player player) {
         Objects.requireNonNull(player, "player");
         return arenas.stream().filter(arena -> arena.has(player)).findFirst().orElse(null);
     }
@@ -159,7 +160,7 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
             return false;
         }
 
-        final Arena arena = new Arena(plugin, name);
+        final ArenaImpl arena = new ArenaImpl(plugin, name);
         arenas.add(arena);
 
         final ArenaCreateEvent event = new ArenaCreateEvent(source, arena);
@@ -168,7 +169,7 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
         return true;
     }
 
-    public boolean remove(final CommandSender source, final Arena arena) {
+    public boolean remove(final CommandSender source, final ArenaImpl arena) {
         if (arenas.remove(arena)) {
             arena.setRemoved(true);
 
@@ -187,6 +188,10 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
         return get(player) != null;
     }
 
+    public List<ArenaImpl> getArenasImpl() {
+        return arenas;
+    }
+
     @Nonnull
     @Override
     public List<Arena> getArenas() {
@@ -201,7 +206,7 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
         return arenas.stream().filter(arena -> arena.isUsed() && arena.getMatch().isFromQueue() && arena.getMatch().getSource().equals(queue)).count() * 2;
     }
 
-    public boolean isSelectable(final Kit kit, final Arena arena) {
+    public boolean isSelectable(final KitImpl kit, final ArenaImpl arena) {
         if (!arena.isAvailable()) {
             return false;
         }
@@ -217,17 +222,17 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
         return arena.isBound(kit);
     }
 
-    public Arena randomArena(final Kit kit) {
-        final List<Arena> available = arenas.stream().filter(arena -> isSelectable(kit, arena)).collect(Collectors.toList());
+    public ArenaImpl randomArena(final KitImpl kit) {
+        final List<ArenaImpl> available = arenas.stream().filter(arena -> isSelectable(kit, arena)).collect(Collectors.toList());
         return !available.isEmpty() ? available.get(ThreadLocalRandom.current().nextInt(available.size())) : null;
     }
 
     public List<String> getNames() {
-        return arenas.stream().map(Arena::getName).collect(Collectors.toList());
+        return arenas.stream().map(ArenaImpl::getName).collect(Collectors.toList());
     }
 
     // remove bind on kit removal
-    public void clearBinds(final Kit kit) {
+    public void clearBinds(final KitImpl kit) {
         arenas.stream().filter(arena -> arena.isBound(kit)).forEach(arena -> arena.bind(kit));
     }
 
@@ -237,7 +242,7 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
             return;
         }
 
-        final Arena arena = get((Player) event.getEntity());
+        final ArenaImpl arena = get((Player) event.getEntity());
 
         if (arena == null || !arena.isCounting()) {
             return;
@@ -258,7 +263,7 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
             return;
         }
 
-        final Arena arena = get((Player) shooter);
+        final ArenaImpl arena = get((Player) shooter);
 
         if (arena == null || !arena.isCounting()) {
             return;
@@ -280,7 +285,7 @@ public class ArenaManager implements Loadable, me.realized.duels.api.arena.Arena
             return;
         }
 
-        final Arena arena = get(event.getPlayer());
+        final ArenaImpl arena = get(event.getPlayer());
 
         if (arena == null || !arena.isCounting()) {
             return;

@@ -4,7 +4,7 @@ import java.util.Arrays;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.config.Config;
 import me.realized.duels.data.UserData;
-import me.realized.duels.data.UserManager;
+import me.realized.duels.data.UserManagerImpl;
 import me.realized.duels.util.hook.PluginHook;
 import me.robin.leaderheads.datacollectors.OnlineDataCollector;
 import me.robin.leaderheads.objects.BoardType;
@@ -12,11 +12,13 @@ import org.bukkit.entity.Player;
 
 public class LeaderHeadsHook extends PluginHook<DuelsPlugin> {
 
+    public static final String NAME = "LeaderHeads";
+
     private final Config config;
-    private final UserManager userManager;
+    private final UserManagerImpl userManager;
 
     public LeaderHeadsHook(final DuelsPlugin plugin) {
-        super(plugin, "LeaderHeads");
+        super(plugin, NAME);
         this.config = plugin.getConfiguration();
         this.userManager = plugin.getUserManager();
 

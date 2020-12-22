@@ -82,7 +82,7 @@ public interface User {
      * @return Never-null UnmodifiableList of recent matches for this user.
      */
     @Nonnull
-    List<? extends MatchInfo> getMatches();
+    List<MatchInfo> getMatches();
 
 
     /**

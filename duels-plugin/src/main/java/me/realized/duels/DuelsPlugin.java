@@ -16,7 +16,7 @@ import javax.annotation.Nonnull;
 import lombok.Getter;
 import me.realized.duels.api.Duels;
 import me.realized.duels.api.command.SubCommand;
-import me.realized.duels.arena.ArenaManager;
+import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.betting.BettingManager;
 import me.realized.duels.command.commands.SpectateCommand;
 import me.realized.duels.command.commands.duel.DuelCommand;
@@ -24,28 +24,28 @@ import me.realized.duels.command.commands.duels.DuelsCommand;
 import me.realized.duels.command.commands.queue.QueueCommand;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
-import me.realized.duels.data.UserManager;
+import me.realized.duels.data.UserManagerImpl;
 import me.realized.duels.duel.DuelManager;
 import me.realized.duels.extension.ExtensionClassLoader;
 import me.realized.duels.extension.ExtensionManager;
 import me.realized.duels.hook.HookManager;
 import me.realized.duels.inventories.InventoryManager;
-import me.realized.duels.kit.KitManager;
+import me.realized.duels.kit.KitManagerImpl;
 import me.realized.duels.listeners.DamageListener;
+import me.realized.duels.listeners.EnderpearlListener;
 import me.realized.duels.listeners.KitItemListener;
+import me.realized.duels.listeners.KitOptionsListener;
 import me.realized.duels.listeners.PotionListener;
 import me.realized.duels.listeners.ProjectileHitListener;
-import me.realized.duels.listeners.SoupListener;
-import me.realized.duels.listeners.SumoListener;
 import me.realized.duels.listeners.TeleportListener;
 import me.realized.duels.logging.LogManager;
 import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.queue.QueueManager;
-import me.realized.duels.queue.sign.QueueSignManager;
+import me.realized.duels.queue.sign.QueueSignManagerImpl;
 import me.realized.duels.request.RequestManager;
 import me.realized.duels.setting.SettingsManager;
 import me.realized.duels.shaded.bstats.Metrics;
-import me.realized.duels.spectate.SpectateManager;
+import me.realized.duels.spectate.SpectateManagerImpl;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.Log.LogSource;
@@ -64,6 +64,7 @@ import org.inventivetalent.update.spiget.comparator.VersionComparator;
 
 public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
+    private static final int BSTATS_ID = 2696;
     private static final int RESOURCE_ID = 20171;
     private static final String SPIGOT_INSTALLATION_URL = "https://www.spigotmc.org/wiki/spigot-installation/";
 
@@ -82,19 +83,19 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private Lang lang;
     @Getter
-    private UserManager userManager;
+    private UserManagerImpl userManager;
     @Getter
     private GuiListener<DuelsPlugin> guiListener;
     @Getter
-    private KitManager kitManager;
+    private KitManagerImpl kitManager;
     @Getter
-    private ArenaManager arenaManager;
+    private ArenaManagerImpl arenaManager;
     @Getter
     private SettingsManager settingManager;
     @Getter
     private PlayerInfoManager playerManager;
     @Getter
-    private SpectateManager spectateManager;
+    private SpectateManagerImpl spectateManager;
     @Getter
     private BettingManager bettingManager;
     @Getter
@@ -104,7 +105,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private QueueManager queueManager;
     @Getter
-    private QueueSignManager queueSignManager;
+    private QueueSignManagerImpl queueSignManager;
     @Getter
     private RequestManager requestManager;
     @Getter
@@ -157,18 +158,18 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
         loadables.add(configuration = new Config(this));
         loadables.add(lang = new Lang(this));
-        loadables.add(userManager = new UserManager(this));
+        loadables.add(userManager = new UserManagerImpl(this));
         loadables.add(guiListener = new GuiListener<>(this));
-        loadables.add(kitManager = new KitManager(this));
-        loadables.add(arenaManager = new ArenaManager(this));
+        loadables.add(kitManager = new KitManagerImpl(this));
+        loadables.add(arenaManager = new ArenaManagerImpl(this));
         loadables.add(settingManager = new SettingsManager(this));
         loadables.add(playerManager = new PlayerInfoManager(this));
-        loadables.add(spectateManager = new SpectateManager(this));
+        loadables.add(spectateManager = new SpectateManagerImpl(this));
         loadables.add(bettingManager = new BettingManager(this));
         loadables.add(inventoryManager = new InventoryManager(this));
         loadables.add(duelManager = new DuelManager(this));
         loadables.add(queueManager = new QueueManager(this));
-        loadables.add(queueSignManager = new QueueSignManager(this));
+        loadables.add(queueSignManager = new QueueSignManagerImpl(this));
         loadables.add(requestManager = new RequestManager(this));
         hookManager = new HookManager(this);
         loadables.add(teleport = new Teleport(this));
@@ -183,11 +184,11 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         new DamageListener(this);
         new PotionListener(this);
         new TeleportListener(this);
-        new SoupListener(this);
-        new SumoListener(this);
         new ProjectileHitListener(this);
+        new EnderpearlListener(this);
+        new KitOptionsListener(this);
 
-        new Metrics(this);
+        new Metrics(this, BSTATS_ID);
 
         if (!configuration.isCheckForUpdates()) {
             return;
@@ -198,7 +199,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         updateChecker.checkForUpdate(new UpdateCallback() {
             @Override
             public void updateAvailable(final String newVersion, final String downloadUrl, final boolean hasDirectDownload) {
-                updateAvailable = true;
+                DuelsPlugin.this.updateAvailable = true;
                 DuelsPlugin.this.newVersion = newVersion;
                 Log.info("===============================================");
                 Log.info("An update for " + getName() + " is available!");

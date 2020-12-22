@@ -1,9 +1,9 @@
 package me.realized.duels.data;
 
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.kit.Kit;
+import me.realized.duels.kit.KitImpl;
 import me.realized.duels.queue.Queue;
-import me.realized.duels.queue.sign.QueueSign;
+import me.realized.duels.queue.sign.QueueSignImpl;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -17,7 +17,7 @@ public class QueueSignData {
     // for Gson
     private QueueSignData() {}
 
-    public QueueSignData(final QueueSign sign) {
+    public QueueSignData(final QueueSignImpl sign) {
         this.location = new LocationData(sign.getLocation());
 
         final Queue queue = sign.getQueue();
@@ -25,7 +25,7 @@ public class QueueSignData {
         this.bet = queue.getBet();
     }
 
-    public QueueSign toQueueSign(final DuelsPlugin plugin) {
+    public QueueSignImpl toQueueSign(final DuelsPlugin plugin) {
         final Location location = this.location.toLocation();
 
         if (location.getWorld() == null) {
@@ -38,7 +38,7 @@ public class QueueSignData {
             return null;
         }
 
-        final Kit kit = this.kit != null ? plugin.getKitManager().get(this.kit) : null;
+        final KitImpl kit = this.kit != null ? plugin.getKitManager().get(this.kit) : null;
         Queue queue = plugin.getQueueManager().get(kit, bet);
 
         if (queue == null) {
@@ -46,6 +46,6 @@ public class QueueSignData {
             queue = plugin.getQueueManager().get(kit, bet);
         }
 
-        return new QueueSign(location, plugin.getLang().getMessage("SIGN.format", "kit", this.kit != null ? this.kit : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet), queue);
+        return new QueueSignImpl(location, plugin.getLang().getMessage("SIGN.format", "kit", this.kit != null ? this.kit : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet), queue);
     }
 }

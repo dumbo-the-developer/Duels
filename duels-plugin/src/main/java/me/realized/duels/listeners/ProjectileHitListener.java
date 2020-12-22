@@ -1,7 +1,7 @@
 package me.realized.duels.listeners;
 
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.arena.ArenaManager;
+import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import org.bukkit.entity.LivingEntity;
@@ -12,11 +12,14 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
+/**
+ * Displays a message to shooter containing hit entity's health if enabled.
+ */
 public class ProjectileHitListener implements Listener {
 
     private final Config config;
     private final Lang lang;
-    private final ArenaManager arenaManager;
+    private final ArenaManagerImpl arenaManager;
 
     public ProjectileHitListener(final DuelsPlugin plugin) {
         this.config = plugin.getConfiguration();

@@ -11,11 +11,13 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 
 public class VaultHook extends PluginHook<DuelsPlugin> {
 
+    public static final String NAME = "Vault";
+
     @Getter
     private Economy economy;
 
     public VaultHook(final DuelsPlugin plugin) {
-        super(plugin, "Vault");
+        super(plugin, NAME);
 
         final RegisteredServiceProvider<Economy> provider = plugin.getServer().getServicesManager().getRegistration(Economy.class);
 

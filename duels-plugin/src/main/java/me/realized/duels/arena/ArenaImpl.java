@@ -1,5 +1,6 @@
 package me.realized.duels.arena;
 
+import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,13 +15,14 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.api.arena.Arena;
 import me.realized.duels.api.event.arena.ArenaSetPositionEvent;
 import me.realized.duels.api.event.arena.ArenaStateChangeEvent;
 import me.realized.duels.api.event.match.MatchEndEvent;
 import me.realized.duels.api.event.match.MatchEndEvent.Reason;
 import me.realized.duels.duel.DuelManager.OpponentInfo;
 import me.realized.duels.gui.BaseButton;
-import me.realized.duels.kit.Kit;
+import me.realized.duels.kit.KitImpl;
 import me.realized.duels.queue.Queue;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.compat.Items;
@@ -30,18 +32,18 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class Arena extends BaseButton implements me.realized.duels.api.arena.Arena {
+public class ArenaImpl extends BaseButton implements Arena {
 
     @Getter
     private final String name;
     @Getter
     private boolean disabled;
     @Getter
-    private final Set<Kit> kits = new HashSet<>();
+    private final Set<KitImpl> kits = new HashSet<>();
     @Getter
     private final Map<Integer, Location> positions = new HashMap<>();
     @Getter
-    private Match match;
+    private MatchImpl match;
     @Getter(value = AccessLevel.PACKAGE)
     @Setter(value = AccessLevel.PACKAGE)
     private Countdown countdown;
@@ -49,7 +51,7 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
     @Setter(value = AccessLevel.PACKAGE)
     private boolean removed;
 
-    public Arena(final DuelsPlugin plugin, final String name) {
+    public ArenaImpl(final DuelsPlugin plugin, final String name) {
         super(plugin, ItemBuilder
             .of(Items.EMPTY_MAP)
             .name(plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.name", "name", name))
@@ -115,11 +117,11 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
         return kits.isEmpty();
     }
 
-    public boolean isBound(final Kit kit) {
+    public boolean isBound(final KitImpl kit) {
         return kits.contains(kit);
     }
 
-    public void bind(final Kit kit) {
+    public void bind(final KitImpl kit) {
         if (isBound(kit)) {
             kits.remove(kit);
         } else {
@@ -136,8 +138,8 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
         return !isDisabled() && !isUsed() && getPosition(1) != null && getPosition(2) != null;
     }
 
-    public Match startMatch(final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet, final Queue source) {
-        this.match = new Match(this, kit, items, bet, source);
+    public MatchImpl startMatch(final KitImpl kit, final Map<UUID, List<ItemStack>> items, final int bet, final Queue source) {
+        this.match = new MatchImpl(this, kit, items, bet, source);
         setLore(lang.getMessage("GUI.arena-selector.buttons.arena.lore-unavailable").split("\n"));
         arenaManager.getGui().calculatePages();
         return match;
@@ -146,10 +148,11 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
     public void endMatch(final UUID winner, final UUID loser, final Reason reason) {
         spectateManager.stopSpectating(this);
 
-        final MatchEndEvent endEvent = new MatchEndEvent(match, winner, loser, reason);
-        plugin.getServer().getPluginManager().callEvent(endEvent);
+        final MatchEndEvent event = new MatchEndEvent(match, winner, loser, reason);
+        plugin.getServer().getPluginManager().callEvent(event);
 
         final Queue source = match.getSource();
+        match.setFinished();
         match = null;
 
         if (source != null) {
@@ -207,8 +210,11 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
     }
 
     public void broadcast(final String message) {
-        final Set<Player> receivers = new HashSet<>(getPlayers());
-        receivers.addAll(spectateManager.getSpectators(this));
+        final List<Player> receivers = Lists.newArrayList(getPlayers());
+        spectateManager.getSpectatorsImpl(this)
+            .stream()
+            .map(spectator -> plugin.getServer().getPlayer(spectator.getUuid()))
+            .forEach(receivers::add);
         receivers.forEach(player -> player.sendMessage(message));
     }
 
@@ -219,7 +225,7 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
         }
 
         final Settings settings = settingManager.getSafely(player);
-        final Kit kit = settings.getKit();
+        final KitImpl kit = settings.getKit();
 
         if (kit != null && !arenaManager.isSelectable(kit, this)) {
             lang.sendMessage(player, "ERROR.setting.arena-not-applicable", "kit", kit.getName());
@@ -234,7 +240,7 @@ public class Arena extends BaseButton implements me.realized.duels.api.arena.Are
     public boolean equals(final Object other) {
         if (this == other) { return true; }
         if (other == null || getClass() != other.getClass()) { return false; }
-        final Arena arena = (Arena) other;
+        final ArenaImpl arena = (ArenaImpl) other;
         return Objects.equals(name, arena.name);
     }
 

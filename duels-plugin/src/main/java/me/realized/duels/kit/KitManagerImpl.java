@@ -21,6 +21,8 @@ import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.kit.KitCreateEvent;
 import me.realized.duels.api.event.kit.KitRemoveEvent;
+import me.realized.duels.api.kit.Kit;
+import me.realized.duels.api.kit.KitManager;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.KitData;
@@ -34,7 +36,7 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class KitManager implements Loadable, me.realized.duels.api.kit.KitManager {
+public class KitManagerImpl implements Loadable, KitManager {
 
     private static final long AUTO_SAVE_INTERVAL = 20L * 60 * 5;
 
@@ -42,13 +44,13 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
     private final Config config;
     private final Lang lang;
     private final File file;
-    private final Map<String, Kit> kits = new LinkedHashMap<>();
+    private final Map<String, KitImpl> kits = new LinkedHashMap<>();
 
     @Getter
     private MultiPageGui<DuelsPlugin> gui;
     private int autoSaveTask;
 
-    public KitManager(final DuelsPlugin plugin) {
+    public KitManagerImpl(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
@@ -110,7 +112,7 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
     private void saveKits() throws IOException {
         final Map<String, KitData> data = new LinkedHashMap<>();
 
-        for (final Map.Entry<String, Kit> entry : kits.entrySet()) {
+        for (final Map.Entry<String, KitImpl> entry : kits.entrySet()) {
             data.put(entry.getKey(), new KitData(entry.getValue()));
         }
 
@@ -126,12 +128,12 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
 
     @Nullable
     @Override
-    public Kit get(@Nonnull final String name) {
+    public KitImpl get(@Nonnull final String name) {
         Objects.requireNonNull(name, "name");
         return kits.get(name);
     }
 
-    public Kit create(@Nonnull final Player creator, @Nonnull final String name, final boolean override) {
+    public KitImpl create(@Nonnull final Player creator, @Nonnull final String name, final boolean override) {
         Objects.requireNonNull(creator, "creator");
         Objects.requireNonNull(name, "name");
 
@@ -139,7 +141,7 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
             return null;
         }
 
-        final Kit kit = new Kit(plugin, name, creator.getInventory());
+        final KitImpl kit = new KitImpl(plugin, name, creator.getInventory());
         kits.put(name, kit);
 
         final KitCreateEvent event = new KitCreateEvent(creator, kit);
@@ -150,16 +152,16 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
 
     @Nullable
     @Override
-    public Kit create(@Nonnull final Player creator, @Nonnull final String name) {
+    public KitImpl create(@Nonnull final Player creator, @Nonnull final String name) {
         return create(creator, name, false);
     }
 
     @Nullable
     @Override
-    public Kit remove(@Nullable CommandSender source, @Nonnull final String name) {
+    public KitImpl remove(@Nullable CommandSender source, @Nonnull final String name) {
         Objects.requireNonNull(name, "name");
 
-        final Kit kit = kits.remove(name);
+        final KitImpl kit = kits.remove(name);
 
         if (kit == null) {
             return null;
@@ -176,7 +178,7 @@ public class KitManager implements Loadable, me.realized.duels.api.kit.KitManage
 
     @Nullable
     @Override
-    public Kit remove(@Nonnull final String name) {
+    public KitImpl remove(@Nonnull final String name) {
         return remove(null, name);
     }
 

@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.arena.Arena;
-import me.realized.duels.kit.Kit;
+import me.realized.duels.arena.ArenaImpl;
+import me.realized.duels.kit.KitImpl;
 
 public class ArenaData {
 
@@ -20,7 +20,7 @@ public class ArenaData {
     // for Gson
     private ArenaData() {}
 
-    public ArenaData(final Arena arena) {
+    public ArenaData(final ArenaImpl arena) {
         this.name = arena.getName();
         this.disabled = arena.isDisabled();
         arena.getKits().forEach(kit -> this.kits.add(kit.getName()));
@@ -28,12 +28,12 @@ public class ArenaData {
             .stream().filter(entry -> entry.getValue().getWorld() != null).forEach(entry -> positions.put(entry.getKey(), new LocationData(entry.getValue())));
     }
 
-    public Arena toArena(final DuelsPlugin plugin) {
-        final Arena arena = new Arena(plugin, name);
+    public ArenaImpl toArena(final DuelsPlugin plugin) {
+        final ArenaImpl arena = new ArenaImpl(plugin, name);
         arena.setDisabled(disabled);
 
         for (final String name : kits) {
-            final Kit kit = plugin.getKitManager().get(name);
+            final KitImpl kit = plugin.getKitManager().get(name);
 
             if (kit == null) {
                 continue;

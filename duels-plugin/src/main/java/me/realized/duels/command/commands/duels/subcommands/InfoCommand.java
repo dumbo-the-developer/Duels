@@ -3,9 +3,9 @@ package me.realized.duels.command.commands.duels.subcommands;
 import java.util.List;
 import java.util.stream.Collectors;
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.arena.Arena;
+import me.realized.duels.arena.ArenaImpl;
 import me.realized.duels.command.BaseCommand;
-import me.realized.duels.kit.Kit;
+import me.realized.duels.kit.KitImpl;
 import me.realized.duels.util.StringUtil;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.Command;
@@ -21,7 +21,7 @@ public class InfoCommand extends BaseCommand {
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final String name = StringUtils.join(args, " ", 1, args.length).replace("-", " ");
-        final Arena arena = arenaManager.get(name);
+        final ArenaImpl arena = arenaManager.get(name);
 
         if (arena == null) {
             lang.sendMessage(sender, "ERROR.arena.not-found", "name", name);
@@ -30,7 +30,7 @@ public class InfoCommand extends BaseCommand {
 
         final String inUse = arena.isUsed() ? lang.getMessage("GENERAL.true") : lang.getMessage("GENERAL.false");
         final String disabled = arena.isDisabled() ? lang.getMessage("GENERAL.true") : lang.getMessage("GENERAL.false");
-        final String kits = StringUtils.join(arena.getKits().stream().map(Kit::getName).collect(Collectors.toList()), ", ");
+        final String kits = StringUtils.join(arena.getKits().stream().map(KitImpl::getName).collect(Collectors.toList()), ", ");
         final String positions = StringUtils.join(arena.getPositions().values().stream().map(StringUtil::parse).collect(Collectors.toList()), ", ");
         final String players = StringUtils.join(arena.getPlayers().stream().map(Player::getName).collect(Collectors.toList()), ", ");
         lang.sendMessage(sender, "COMMAND.duels.info", "name", name, "in_use", inUse, "disabled", disabled, "kits",

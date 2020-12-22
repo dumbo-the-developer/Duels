@@ -1,6 +1,7 @@
 package me.realized.duels.duel;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,25 +14,24 @@ import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.match.MatchEndEvent.Reason;
 import me.realized.duels.api.event.match.MatchStartEvent;
-import me.realized.duels.arena.Arena;
-import me.realized.duels.arena.ArenaManager;
-import me.realized.duels.arena.Match;
+import me.realized.duels.arena.ArenaImpl;
+import me.realized.duels.arena.ArenaManagerImpl;
+import me.realized.duels.arena.MatchImpl;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.MatchData;
 import me.realized.duels.data.UserData;
-import me.realized.duels.data.UserManager;
+import me.realized.duels.data.UserManagerImpl;
 import me.realized.duels.hook.hooks.CombatLogXHook;
 import me.realized.duels.hook.hooks.CombatTagPlusHook;
 import me.realized.duels.hook.hooks.EssentialsHook;
 import me.realized.duels.hook.hooks.McMMOHook;
 import me.realized.duels.hook.hooks.MyPetHook;
 import me.realized.duels.hook.hooks.PvPManagerHook;
-import me.realized.duels.hook.hooks.SimpleClansHook;
 import me.realized.duels.hook.hooks.VaultHook;
 import me.realized.duels.hook.hooks.worldguard.WorldGuardHook;
 import me.realized.duels.inventories.InventoryManager;
-import me.realized.duels.kit.Kit;
+import me.realized.duels.kit.KitImpl;
 import me.realized.duels.player.PlayerInfo;
 import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.queue.Queue;
@@ -76,11 +76,13 @@ import org.bukkit.inventory.meta.FireworkMeta;
 
 public class DuelManager implements Loadable {
 
+    private static final Calendar GREGORIAN_CALENDAR = new GregorianCalendar();
+
     private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
-    private final UserManager userDataManager;
-    private final ArenaManager arenaManager;
+    private final UserManagerImpl userDataManager;
+    private final ArenaManagerImpl arenaManager;
     private final PlayerInfoManager playerManager;
     private final InventoryManager inventoryManager;
 
@@ -94,7 +96,6 @@ public class DuelManager implements Loadable {
     private McMMOHook mcMMO;
     private WorldGuardHook worldGuard;
     private MyPetHook myPet;
-    private SimpleClansHook simpleClans;
     private int durationCheckTask;
 
     public DuelManager(final DuelsPlugin plugin) {
@@ -120,14 +121,13 @@ public class DuelManager implements Loadable {
         this.mcMMO = plugin.getHookManager().getHook(McMMOHook.class);
         this.worldGuard = plugin.getHookManager().getHook(WorldGuardHook.class);
         this.myPet = plugin.getHookManager().getHook(MyPetHook.class);
-        this.simpleClans = plugin.getHookManager().getHook(SimpleClansHook.class);
 
         if (config.getMaxDuration() > 0) {
             this.durationCheckTask = plugin.doSyncRepeat(() -> {
                 final long now = System.currentTimeMillis();
 
-                for (final Arena arena : arenaManager.getArenas()) {
-                    final Match match = arena.getMatch();
+                for (final ArenaImpl arena : arenaManager.getArenasImpl()) {
+                    final MatchImpl match = arena.getMatch();
 
                     if (match == null || now - match.getStart() < (config.getMaxDuration() * 60 * 1000) || arena.size() <= 1) {
                         continue;
@@ -148,8 +148,8 @@ public class DuelManager implements Loadable {
     public void handleUnload() {
         plugin.cancelTask(durationCheckTask);
 
-        for (final Arena arena : arenaManager.getArenas()) {
-            final Match match = arena.getMatch();
+        for (final ArenaImpl arena : arenaManager.getArenasImpl()) {
+            final MatchImpl match = arena.getMatch();
 
             if (match == null) {
                 continue;
@@ -200,7 +200,7 @@ public class DuelManager implements Loadable {
         return copy.iterator().next();
     }
 
-    private void handleTiePlayer(final Player player, final Arena arena, final Match match, boolean alive) {
+    private void handleTiePlayer(final Player player, final ArenaImpl arena, final MatchImpl match, boolean alive) {
         arena.remove(player);
 
         if (vault != null && match.getBet() > 0) {
@@ -244,7 +244,7 @@ public class DuelManager implements Loadable {
         }
     }
 
-    private void handleWinner(final Player player, final Player opponent, final Arena arena, final Match match) {
+    private void handleWinner(final Player player, final Player opponent, final ArenaImpl arena, final MatchImpl match) {
         arena.remove(player);
 
         if (vault != null && match.getBet() > 0) {
@@ -310,10 +310,16 @@ public class DuelManager implements Loadable {
     }
 
     public void startMatch(final Player first, final Player second, final Settings settings, final Map<UUID, List<ItemStack>> items, final Queue source) {
-        final Kit kit = settings.getKit();
+        final KitImpl kit = settings.getKit();
 
         if (!config.isUseOwnInventoryEnabled() && kit == null) {
             lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure.no-kit-selected");
+            refundItems(items, first, second);
+            return;
+        }
+
+        if (first.isDead() || second.isDead()) {
+            lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure.player-is-dead");
             refundItems(items, first, second);
             return;
         }
@@ -348,7 +354,7 @@ public class DuelManager implements Loadable {
             return;
         }
 
-        final Arena arena = settings.getArena() != null ? settings.getArena() : arenaManager.randomArena(kit);
+        final ArenaImpl arena = settings.getArena() != null ? settings.getArena() : arenaManager.randomArena(kit);
 
         if (arena == null || !arena.isAvailable()) {
             lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure." + (settings.getArena() != null ? "arena-in-use" : "no-arena-available"));
@@ -374,7 +380,7 @@ public class DuelManager implements Loadable {
             vault.remove(bet, first, second);
         }
 
-        final Match match = arena.startMatch(kit, items, settings.getBet(), source);
+        final MatchImpl match = arena.startMatch(kit, items, settings.getBet(), source);
         addPlayers(source, arena, kit, arena.getPositions(), first, second);
 
         if (config.isCdEnabled()) {
@@ -427,11 +433,11 @@ public class DuelManager implements Loadable {
         return gameMode != null && player.getGameMode() != gameMode;
     }
 
-    private int getRating(final Kit kit, final UserData user) {
+    private int getRating(final KitImpl kit, final UserData user) {
         return user != null ? user.getRating(kit) : config.getDefaultRating();
     }
 
-    private void addPlayers(final Queue source, final Arena arena, final Kit kit, final Map<Integer, Location> locations, final Player... players) {
+    private void addPlayers(final Queue source, final ArenaImpl arena, final KitImpl kit, final Map<Integer, Location> locations, final Player... players) {
         int position = 0;
 
         for (final Player player : players) {
@@ -448,6 +454,7 @@ public class DuelManager implements Loadable {
 
             player.closeInventory();
             playerManager.put(player, new PlayerInfo(player, !config.isUseOwnInventoryEnabled()));
+            teleport.tryTeleport(player, locations.get(++position));
 
             if (!config.isUseOwnInventoryEnabled()) {
                 PlayerUtil.reset(player);
@@ -463,15 +470,13 @@ public class DuelManager implements Loadable {
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", player.getName()));
                     }
                 } catch (Exception ex) {
-                    Log.warn(DuelManager.this, "Error while running match start commands: " + ex.getMessage());
+                    Log.warn(this, "Error while running match start commands: " + ex.getMessage());
                 }
             }
 
             if (myPet != null) {
                 myPet.removePet(player);
             }
-
-            teleport.tryTeleport(player, locations.get(++position));
 
             if (essentials != null) {
                 essentials.tryUnvanish(player);
@@ -485,7 +490,7 @@ public class DuelManager implements Loadable {
         }
     }
 
-    private void handleInventories(final Match match) {
+    private void handleInventories(final MatchImpl match) {
         if (!config.isDisplayInventories()) {
             return;
         }
@@ -508,14 +513,14 @@ public class DuelManager implements Loadable {
         builder.send(match.getAllPlayers());
     }
 
-    private void handleEndUsers(final Match match, final UserData winner, final UserData loser, final MatchData matchData) {
+    private void handleEndUsers(final MatchImpl match, final UserData winner, final UserData loser, final MatchData matchData) {
         if (winner != null && loser != null) {
             winner.addWin();
             loser.addLoss();
             winner.addMatch(matchData);
             loser.addMatch(matchData);
 
-            final Kit kit = match.getKit();
+            final KitImpl kit = match.getKit();
             int winnerRating = kit == null ? winner.getRating() : winner.getRating(kit);
             int loserRating = kit == null ? loser.getRating() : loser.getRating(kit);
             int change = 0;
@@ -555,7 +560,7 @@ public class DuelManager implements Loadable {
         }
 
         final Player player = (Player) event.getEntity();
-        final Arena arena = arenaManager.get(player);
+        final ArenaImpl arena = arenaManager.get(player);
 
         if (arena == null) {
             return;
@@ -602,7 +607,7 @@ public class DuelManager implements Loadable {
         @EventHandler(priority = EventPriority.HIGHEST)
         public void on(final PlayerDeathEvent event) {
             final Player player = event.getEntity();
-            final Arena arena = arenaManager.get(player);
+            final ArenaImpl arena = arenaManager.get(player);
 
             if (arena == null) {
                 return;
@@ -610,10 +615,6 @@ public class DuelManager implements Loadable {
 
             if (mcMMO != null) {
                 mcMMO.enableSkills(player);
-            }
-
-            if (simpleClans != null) {
-                simpleClans.removeDeath(player);
             }
 
             event.setKeepInventory(config.isUseOwnInventoryEnabled() && config.isUseOwnInventoryKeepItems());
@@ -626,7 +627,7 @@ public class DuelManager implements Loadable {
             }
 
             plugin.doSyncAfter(() -> {
-                final Match match = arena.getMatch();
+                final MatchImpl match = arena.getMatch();
 
                 if (match == null) {
                     return;
@@ -655,7 +656,7 @@ public class DuelManager implements Loadable {
                 final double health = Math.ceil(winner.getHealth()) * 0.5;
                 final String kitName = match.getKit() != null ? match.getKit().getName() : lang.getMessage("GENERAL.none");
                 final long duration = System.currentTimeMillis() - match.getStart();
-                final long time = new GregorianCalendar().getTimeInMillis();
+                final long time = GREGORIAN_CALENDAR.getTimeInMillis();
                 final MatchData matchData = new MatchData(winner.getName(), player.getName(), kitName, time, duration, health);
                 handleEndUsers(match, userDataManager.get(winner), userDataManager.get(player), matchData);
                 handleInventories(match);
@@ -799,7 +800,7 @@ public class DuelManager implements Loadable {
 
         @EventHandler(ignoreCancelled = true)
         public void on(final PlayerItemDamageEvent event) {
-            if (!config.isUseOwnInventoryEnabled() || !arenaManager.isInMatch(event.getPlayer())) {
+            if (!config.isUseOwnInventoryEnabled() || !config.isUseOwnInventoryPreventDurabLoss() || !arenaManager.isInMatch(event.getPlayer())) {
                 return;
             }
 

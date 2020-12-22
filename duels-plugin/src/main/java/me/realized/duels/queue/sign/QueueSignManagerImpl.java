@@ -22,6 +22,8 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.Permissions;
 import me.realized.duels.api.event.queue.sign.QueueSignCreateEvent;
 import me.realized.duels.api.event.queue.sign.QueueSignRemoveEvent;
+import me.realized.duels.api.queue.sign.QueueSign;
+import me.realized.duels.api.queue.sign.QueueSignManager;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.QueueSignData;
 import me.realized.duels.queue.Queue;
@@ -38,7 +40,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-public class QueueSignManager implements Loadable, me.realized.duels.api.queue.sign.QueueSignManager, Listener {
+public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listener {
 
     private static final long AUTO_SAVE_INTERVAL = 20L * 60 * 5;
 
@@ -47,12 +49,12 @@ public class QueueSignManager implements Loadable, me.realized.duels.api.queue.s
     private final QueueManager queueManager;
     private final File file;
 
-    private final Map<Location, QueueSign> signs = new HashMap<>();
+    private final Map<Location, QueueSignImpl> signs = new HashMap<>();
 
     private int autoSaveTask;
     private int updateTask;
 
-    public QueueSignManager(final DuelsPlugin plugin) {
+    public QueueSignManagerImpl(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.lang = plugin.getLang();
         this.queueManager = plugin.getQueueManager();
@@ -70,7 +72,7 @@ public class QueueSignManager implements Loadable, me.realized.duels.api.queue.s
 
                 if (data != null) {
                     data.forEach(queueSignData -> {
-                        final QueueSign queueSign = queueSignData.toQueueSign(plugin);
+                        final QueueSignImpl queueSign = queueSignData.toQueueSign(plugin);
 
                         if (queueSign != null) {
                             signs.put(queueSign.getLocation(), queueSign);
@@ -106,7 +108,7 @@ public class QueueSignManager implements Loadable, me.realized.duels.api.queue.s
     private void saveQueueSigns() throws IOException {
         final List<QueueSignData> data = new ArrayList<>();
 
-        for (final QueueSign sign : signs.values()) {
+        for (final QueueSignImpl sign : signs.values()) {
             if (sign.getQueue().isRemoved()) {
                 continue;
             }
@@ -126,12 +128,12 @@ public class QueueSignManager implements Loadable, me.realized.duels.api.queue.s
 
     @Nullable
     @Override
-    public QueueSign get(@Nonnull final Sign sign) {
+    public QueueSignImpl get(@Nonnull final Sign sign) {
         Objects.requireNonNull(sign, "sign");
         return get(sign.getLocation());
     }
 
-    public QueueSign get(final Location location) {
+    public QueueSignImpl get(final Location location) {
         return signs.get(location);
     }
 
@@ -140,18 +142,18 @@ public class QueueSignManager implements Loadable, me.realized.duels.api.queue.s
             return false;
         }
 
-        final QueueSign created;
+        final QueueSignImpl created;
         final String kitName = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("GENERAL.none");
-        signs.put(location, created = new QueueSign(location, lang.getMessage("SIGN.format", "kit", kitName, "bet_amount", queue.getBet()), queue));
-        signs.values().stream().filter(sign -> sign.equals(created)).forEach(QueueSign::update);
+        signs.put(location, created = new QueueSignImpl(location, lang.getMessage("SIGN.format", "kit", kitName, "bet_amount", queue.getBet()), queue));
+        signs.values().stream().filter(sign -> sign.equals(created)).forEach(QueueSignImpl::update);
 
         final QueueSignCreateEvent event = new QueueSignCreateEvent(creator, created);
         plugin.getServer().getPluginManager().callEvent(event);
         return true;
     }
 
-    public QueueSign remove(final Player source, final Location location) {
-        final QueueSign queueSign = signs.remove(location);
+    public QueueSignImpl remove(final Player source, final Location location) {
+        final QueueSignImpl queueSign = signs.remove(location);
 
         if (queueSign == null) {
             return null;
@@ -164,7 +166,7 @@ public class QueueSignManager implements Loadable, me.realized.duels.api.queue.s
         return queueSign;
     }
 
-    public Collection<QueueSign> getSigns() {
+    public Collection<QueueSignImpl> getSigns() {
         return signs.values();
     }
 
@@ -183,13 +185,13 @@ public class QueueSignManager implements Loadable, me.realized.duels.api.queue.s
         }
 
         final Player player = event.getPlayer();
-        final QueueSign sign = get(block.getLocation());
+        final QueueSignImpl sign = get(block.getLocation());
 
         if (sign == null || !queueManager.queue(player, sign.getQueue())) {
             return;
         }
 
-        signs.values().stream().filter(queueSign -> queueSign.equals(sign)).forEach(QueueSign::update);
+        signs.values().stream().filter(queueSign -> queueSign.equals(sign)).forEach(QueueSignImpl::update);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

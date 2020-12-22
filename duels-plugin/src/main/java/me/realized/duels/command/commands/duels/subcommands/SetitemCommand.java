@@ -3,7 +3,7 @@ package me.realized.duels.command.commands.duels.subcommands;
 import java.util.List;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
-import me.realized.duels.kit.Kit;
+import me.realized.duels.kit.KitImpl;
 import me.realized.duels.util.inventory.InventoryUtil;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Material;
@@ -29,7 +29,7 @@ public class SetitemCommand extends BaseCommand {
         }
 
         final String name = StringUtils.join(args, " ", 1, args.length).replace("-", " ");
-        final Kit kit = kitManager.get(name);
+        final KitImpl kit = kitManager.get(name);
 
         if (kit == null) {
             lang.sendMessage(sender, "ERROR.kit.not-found", "name", name);

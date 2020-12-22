@@ -109,6 +109,7 @@ public interface DQueueManager {
      * @param player {@link Player} to remove from queue.
      * @return The {@link DQueue} that {@link Player} was in or null if {@link Player} was not in a queue.
      */
+    @Nullable
     DQueue removeFromQueue(@Nonnull final Player player);
 
 
@@ -117,5 +118,6 @@ public interface DQueueManager {
      *
      * @return Never-null UnmodifiableList of {@link DQueue}s that are currently loaded.
      */
-    List<? extends DQueue> getQueues();
+    @Nonnull
+    List<DQueue> getQueues();
 }

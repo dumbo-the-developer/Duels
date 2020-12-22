@@ -5,7 +5,7 @@ import java.util.List;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.data.UserData;
-import me.realized.duels.kit.Kit;
+import me.realized.duels.kit.KitImpl;
 import me.realized.duels.util.NumberUtil;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.Command;
@@ -26,7 +26,7 @@ public class SetratingCommand extends BaseCommand {
             return;
         }
 
-        Kit kit = null;
+        KitImpl kit = null;
 
         if (!args[2].equals("-")) {
             final String name = StringUtils.join(args, " ", 2, args.length - 1).replace("-", " ");

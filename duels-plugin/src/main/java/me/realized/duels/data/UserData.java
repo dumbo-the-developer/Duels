@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.kit.Kit;
+import me.realized.duels.api.user.MatchInfo;
 import me.realized.duels.api.user.User;
 import me.realized.duels.util.Log;
 import org.bukkit.Bukkit;
@@ -88,7 +89,7 @@ public class UserData implements User {
 
     @Nonnull
     @Override
-    public List<MatchData> getMatches() {
+    public List<MatchInfo> getMatches() {
         return Collections.unmodifiableList(matches);
     }
 

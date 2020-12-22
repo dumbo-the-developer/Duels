@@ -9,10 +9,12 @@ import org.bukkit.entity.Player;
 
 public class MyPetHook extends PluginHook<DuelsPlugin> {
 
+    public static final String NAME = "MyPet";
+
     private final Config config;
 
     public MyPetHook(final DuelsPlugin plugin) {
-        super(plugin, "MyPet");
+        super(plugin, NAME);
         this.config = plugin.getConfiguration();
 
         try {

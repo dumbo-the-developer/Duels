@@ -6,9 +6,9 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.arena.Arena;
+import me.realized.duels.arena.ArenaImpl;
 import me.realized.duels.gui.settings.SettingsGui;
-import me.realized.duels.kit.Kit;
+import me.realized.duels.kit.KitImpl;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -22,10 +22,10 @@ public class Settings {
     private UUID target;
     @Getter
     @Setter
-    private Kit kit;
+    private KitImpl kit;
     @Getter
     @Setter
-    private Arena arena;
+    private ArenaImpl arena;
     @Getter
     @Setter
     private int bet;

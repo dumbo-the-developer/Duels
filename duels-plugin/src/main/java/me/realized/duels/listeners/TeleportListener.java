@@ -3,9 +3,9 @@ package me.realized.duels.listeners;
 import java.util.Set;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.Permissions;
-import me.realized.duels.arena.ArenaManager;
+import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.config.Lang;
-import me.realized.duels.spectate.SpectateManager;
+import me.realized.duels.spectate.SpectateManagerImpl;
 import me.realized.duels.util.Teleport;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -14,11 +14,14 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
+/**
+ * Prevents players teleporting to players in a match or in spectator mode.
+ */
 public class TeleportListener implements Listener {
 
     private final Lang lang;
-    private final ArenaManager arenaManager;
-    private final SpectateManager spectateManager;
+    private final ArenaManagerImpl arenaManager;
+    private final SpectateManagerImpl spectateManager;
 
     public TeleportListener(final DuelsPlugin plugin) {
         this.lang = plugin.getLang();
@@ -28,6 +31,10 @@ public class TeleportListener implements Listener {
         if (plugin.getConfiguration().isPreventTpToMatchPlayers()) {
             plugin.getServer().getPluginManager().registerEvents(this, plugin);
         }
+    }
+
+    private boolean isSimilar(final Location first, final Location second) {
+        return Math.abs(first.getX() - second.getX()) + Math.abs(first.getY() - second.getY()) + Math.abs(first.getZ() - second.getZ()) < 5;
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -41,10 +48,10 @@ public class TeleportListener implements Listener {
 
         final Location to = event.getTo();
         final Set<Player> players = arenaManager.getPlayers();
-        players.addAll(spectateManager.getPlayers());
+        players.addAll(spectateManager.getAllSpectators());
 
         for (final Player target : players) {
-            if (player.equals(target) || !target.isOnline() || !isSimilar(target.getLocation(), to)) {
+            if (target == null || player.equals(target) || !target.isOnline() || !isSimilar(target.getLocation(), to)) {
                 continue;
             }
 
@@ -52,9 +59,5 @@ public class TeleportListener implements Listener {
             lang.sendMessage(player, "ERROR.duel.prevent-teleportation");
             return;
         }
-    }
-
-    private boolean isSimilar(final Location first, final Location second) {
-        return Math.abs(first.getX() - second.getX()) + Math.abs(first.getY() - second.getY()) + Math.abs(first.getZ() - second.getZ()) < 5;
     }
 }

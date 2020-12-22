@@ -46,5 +46,5 @@ public interface ArenaManager {
      * @since 3.4.0
      */
     @Nonnull
-    List<? extends Arena> getArenas();
+    List<Arena> getArenas();
 }

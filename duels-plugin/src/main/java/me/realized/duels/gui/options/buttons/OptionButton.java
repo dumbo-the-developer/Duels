@@ -7,17 +7,17 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.gui.options.OptionsGui;
 import me.realized.duels.gui.options.OptionsGui.Option;
-import me.realized.duels.kit.Kit;
+import me.realized.duels.kit.KitImpl;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.entity.Player;
 
 public class OptionButton extends BaseButton {
 
     private final OptionsGui gui;
-    private final Kit kit;
+    private final KitImpl kit;
     private final Option option;
 
-    public OptionButton(final DuelsPlugin plugin, final OptionsGui gui, final Kit kit, final Option option) {
+    public OptionButton(final DuelsPlugin plugin, final OptionsGui gui, final KitImpl kit, final Option option) {
         super(plugin, ItemBuilder.of(option.getDisplayed()).build());
         this.gui = gui;
         this.kit = kit;

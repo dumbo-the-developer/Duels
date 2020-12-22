@@ -10,7 +10,7 @@ buildscript {
 
 allprojects {
     group 'me.realized'
-    version '3.4.0'
+    version '3.4.1'
 }
 
 subprojects {
@@ -51,6 +51,11 @@ subprojects {
         maven {
             name 'inventive-repo'
             url 'https://repo.inventivetalent.org/content/groups/public/'
+        }
+
+        maven {
+            name 'codemc-repo'
+            url 'https://repo.codemc.io/repository/maven-public/'
         }
 
         flatDir {

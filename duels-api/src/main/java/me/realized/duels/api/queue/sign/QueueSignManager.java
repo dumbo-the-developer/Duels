@@ -28,5 +28,5 @@ public interface QueueSignManager {
      * @return Never-null UnmodifiableList of {@link QueueSign}s that are currently loaded.
      */
     @Nonnull
-    List<? extends QueueSign> getQueueSigns();
+    List<QueueSign> getQueueSigns();
 }

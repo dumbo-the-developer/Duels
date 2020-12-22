@@ -24,6 +24,7 @@ import me.realized.duels.Permissions;
 import me.realized.duels.api.event.user.UserCreateEvent;
 import me.realized.duels.api.kit.Kit;
 import me.realized.duels.api.user.User;
+import me.realized.duels.api.user.UserManager;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.player.PlayerInfo;
@@ -39,7 +40,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public class UserManager implements Loadable, Listener, me.realized.duels.api.user.UserManager {
+public class UserManagerImpl implements Loadable, Listener, UserManager {
 
     private static final String ADMIN_UPDATE_MESSAGE = "&9[Duels] &bDuels &fv%s &7is now available for download! Download at: &c%s";
 
@@ -64,7 +65,7 @@ public class UserManager implements Loadable, Listener, me.realized.duels.api.us
 
     private int topTask;
 
-    public UserManager(final DuelsPlugin plugin) {
+    public UserManagerImpl(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();

@@ -22,7 +22,7 @@ public class RequestManager implements Loadable, Listener {
     private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
-    private final Map<UUID, Map<UUID, Request>> requests = new HashMap<>();
+    private final Map<UUID, Map<UUID, RequestImpl>> requests = new HashMap<>();
 
     public RequestManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -39,8 +39,8 @@ public class RequestManager implements Loadable, Listener {
         requests.clear();
     }
 
-    private Map<UUID, Request> get(final Player player, final boolean create) {
-        Map<UUID, Request> cached = requests.get(player.getUniqueId());
+    private Map<UUID, RequestImpl> get(final Player player, final boolean create) {
+        Map<UUID, RequestImpl> cached = requests.get(player.getUniqueId());
 
         if (cached == null && create) {
             requests.put(player.getUniqueId(), cached = new HashMap<>());
@@ -51,7 +51,7 @@ public class RequestManager implements Loadable, Listener {
     }
 
     public void send(final Player sender, final Player target, final Settings settings) {
-        final Request request = new Request(sender, target, settings);
+        final RequestImpl request = new RequestImpl(sender, target, settings);
         final RequestSendEvent event = new RequestSendEvent(sender, target, request);
         plugin.getServer().getPluginManager().callEvent(event);
 
@@ -84,14 +84,14 @@ public class RequestManager implements Loadable, Listener {
         TextBuilder.of(lang.getMessage(path + "extra.text"), null, null, Action.SHOW_TEXT, lang.getMessage(path + "extra.hover-text")).send(target);
     }
 
-    public Request get(final Player sender, final Player target) {
-        final Map<UUID, Request> cached = get(sender, false);
+    public RequestImpl get(final Player sender, final Player target) {
+        final Map<UUID, RequestImpl> cached = get(sender, false);
 
         if (cached == null) {
             return null;
         }
 
-        final Request request = cached.get(target.getUniqueId());
+        final RequestImpl request = cached.get(target.getUniqueId());
 
         if (request == null) {
             return null;
@@ -109,14 +109,14 @@ public class RequestManager implements Loadable, Listener {
         return get(sender, target) != null;
     }
 
-    public Request remove(final Player sender, final Player target) {
-        final Map<UUID, Request> cached = get(sender, false);
+    public RequestImpl remove(final Player sender, final Player target) {
+        final Map<UUID, RequestImpl> cached = get(sender, false);
 
         if (cached == null) {
             return null;
         }
 
-        final Request request = cached.remove(target.getUniqueId());
+        final RequestImpl request = cached.remove(target.getUniqueId());
 
         if (request == null) {
             return null;

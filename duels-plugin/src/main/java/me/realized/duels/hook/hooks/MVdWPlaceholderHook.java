@@ -5,16 +5,18 @@ import be.maximvdw.placeholderapi.PlaceholderReplaceEvent;
 import be.maximvdw.placeholderapi.PlaceholderReplacer;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.data.UserData;
-import me.realized.duels.data.UserManager;
+import me.realized.duels.data.UserManagerImpl;
 import me.realized.duels.util.hook.PluginHook;
 import org.bukkit.entity.Player;
 
 public class MVdWPlaceholderHook extends PluginHook<DuelsPlugin> {
 
-    private final UserManager userDataManager;
+    public static final String NAME = "MVdWPlaceholderAPI";
+
+    private final UserManagerImpl userDataManager;
 
     public MVdWPlaceholderHook(final DuelsPlugin plugin) {
-        super(plugin, "MVdWPlaceholderAPI");
+        super(plugin, NAME);
         this.userDataManager = plugin.getUserManager();
 
         final Placeholders placeholders = new Placeholders();

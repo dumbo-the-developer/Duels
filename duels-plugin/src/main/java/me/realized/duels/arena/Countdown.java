@@ -14,15 +14,15 @@ import org.bukkit.scheduler.BukkitRunnable;
 class Countdown extends BukkitRunnable {
 
     private final Config config;
-    private final Arena arena;
+    private final ArenaImpl arena;
     private final String kit;
     private final Map<UUID, OpponentInfo> info;
     private final List<String> messages;
     private final List<String> titles;
 
-    private boolean ended;
+    private boolean finished;
 
-    Countdown(final DuelsPlugin plugin, final Arena arena, final String kit, final Map<UUID, OpponentInfo> info, final List<String> messages, final List<String> titles) {
+    Countdown(final DuelsPlugin plugin, final ArenaImpl arena, final String kit, final Map<UUID, OpponentInfo> info, final List<String> messages, final List<String> titles) {
         this.config = plugin.getConfiguration();
         this.arena = arena;
         this.kit = kit;
@@ -33,7 +33,7 @@ class Countdown extends BukkitRunnable {
 
     @Override
     public void run() {
-        if (ended) {
+        if (finished) {
             return;
         }
 
@@ -62,10 +62,10 @@ class Countdown extends BukkitRunnable {
             }
         });
 
-        if (arena.getMatch() == null || messages.isEmpty()) {
+        if (!arena.isUsed() || messages.isEmpty()) {
             arena.setCountdown(null);
             cancel();
-            ended = true;
+            finished = true;
         }
     }
 }

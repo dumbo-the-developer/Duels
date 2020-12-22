@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 8
+config-version: 9
 
 # If set to 'true', a notification and a download link will be printed on the console whenever an update is available.
 # default: true
@@ -15,25 +15,25 @@ supported-plugins:
     # default: true
     prevent-duel-if-tagged: true
 
-    # If set to 'true', players will be untagged at the end of the duel to prevent teleport being cancelled.
+    # If set to 'true', players will not be combat tagged while in duel.
     # default: true
-    untag-on-duel-teleport: true
+    prevent-tag-in-duel: true
   PvPManager:
     # If set to 'true', players will not be able to duel while combat tagged.
     # default: true
     prevent-duel-if-tagged: true
 
-    # If set to 'true', players will be untagged at the end of the duel to prevent teleport being cancelled.
+    # If set to 'true', players will not be combat tagged while in duel.
     # default: true
-    untag-on-duel-teleport: true
+    prevent-tag-in-duel: true
   CombatLogX:
     # If set to 'true', players will not be able to duel while combat tagged.
     # default: true
     prevent-duel-if-tagged: true
 
-    # If set to 'true', players will be untagged at the end of the duel to prevent teleport being cancelled.
+    # If set to 'true', players will not be combat tagged while in duel.
     # default: true
-    untag-on-duel-teleport: true
+    prevent-tag-in-duel: true
   Essentials:
     # If set to 'true', players in vanish will be automatically unvanished at the start of a duel.
     # default: true
@@ -71,9 +71,9 @@ supported-plugins:
     # default: true
     prevent-bounty-loss-in-duel: true
   SimpleClans:
-    # If set to 'true', player will not be added a death when they die in a duel.
+    # If set to 'true', SimpleClans KDR will not be affected by duels.
     # default: true
-    prevent-add-death-in-duel: true
+    prevent-kdr-change: true
   LeaderHeads:
     wins:
       menu:
@@ -144,6 +144,10 @@ duel:
     # If set to 'true', players will keep their inventory items on death.
     # default: false
     keep-items: false
+
+    # If set to 'true', players will not lose item durability during a duel.
+    # default: true
+    prevent-durability-loss: true
 
   match:
     # The max duration of a match, in minutes. Setting it to -1 will allow players to fight for as long as they like.

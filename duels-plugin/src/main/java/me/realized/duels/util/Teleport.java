@@ -2,10 +2,7 @@ package me.realized.duels.util;
 
 import java.util.function.Consumer;
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.hook.hooks.CombatLogXHook;
-import me.realized.duels.hook.hooks.CombatTagPlusHook;
 import me.realized.duels.hook.hooks.EssentialsHook;
-import me.realized.duels.hook.hooks.PvPManagerHook;
 import me.realized.duels.util.compat.Players;
 import me.realized.duels.util.metadata.MetadataUtil;
 import org.bukkit.Chunk;
@@ -21,14 +18,11 @@ import org.bukkit.event.player.PlayerTeleportEvent;
  */
 public final class Teleport implements Loadable, Listener {
 
-    public static final String METADATA_KEY = Teleport.class.getSimpleName();
+    public static final String METADATA_KEY = "Duels-Teleport";
 
     private final DuelsPlugin plugin;
 
     private EssentialsHook essentials;
-    private CombatTagPlusHook combatTagPlus;
-    private PvPManagerHook pvpManager;
-    private CombatLogXHook combatLogX;
 
     public Teleport(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -37,15 +31,22 @@ public final class Teleport implements Loadable, Listener {
     @Override
     public void handleLoad() {
         this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
-        this.combatTagPlus = plugin.getHookManager().getHook(CombatTagPlusHook.class);
-        this.pvpManager = plugin.getHookManager().getHook(PvPManagerHook.class);
-        this.combatLogX = plugin.getHookManager().getHook(CombatLogXHook.class);
-        plugin.doSyncAfter(() -> plugin.getServer().getPluginManager().registerEvents(this, plugin), 1L);
+
+        // Late-register the listener to override previously registered listeners
+        plugin.doSyncAfter(() -> plugin.registerListener(this), 1L);
     }
 
     @Override
     public void handleUnload() {}
 
+    /**
+     * Attempts to force-teleport a player by storing a metadata value in the player before teleportation
+     * and uncancelling the teleport by the player in a MONITOR-priority listener if cancelled by other plugins.
+     *
+     * @param player Player to force-teleport to a location
+     * @param location Location to force-teleport the player
+     * @param failHandler Called when teleportation has failed -- being when Player#teleport returns false.
+     */
     public void tryTeleport(final Player player, final Location location, final Consumer<Player> failHandler) {
         if (location == null || location.getWorld() == null) {
             Log.warn(this, "Could not teleport " + player.getName() + "! Location is null");
@@ -58,18 +59,6 @@ public final class Teleport implements Loadable, Listener {
 
         if (essentials != null) {
             essentials.setBackLocation(player, location);
-        }
-
-        if (combatTagPlus != null) {
-            combatTagPlus.removeTag(player);
-        }
-
-        if (pvpManager != null) {
-            pvpManager.removeTag(player);
-        }
-
-        if (combatLogX != null) {
-            combatLogX.removeTag(player);
         }
 
         final Chunk chunk = location.getChunk();
@@ -102,6 +91,11 @@ public final class Teleport implements Loadable, Listener {
         }), 1L);
     }
 
+    /**
+     * Calls {@link #tryTeleport(Player, Location, Consumer)} with a null FailHandler.
+     *
+     * @see #tryTeleport(Player, Location, Consumer)
+     */
     public void tryTeleport(final Player player, final Location location) {
         tryTeleport(player, location, null);
     }
@@ -109,17 +103,14 @@ public final class Teleport implements Loadable, Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void on(final PlayerTeleportEvent event) {
         final Player player = event.getPlayer();
+        final Object value = MetadataUtil.removeAndGet(plugin, player, METADATA_KEY);
 
-        if (!event.isCancelled()) {
-            MetadataUtil.remove(plugin, player, METADATA_KEY);
+        // Only handle the case where teleport is cancelled and player has force teleport metadata value
+        if (!event.isCancelled() || value == null) {
             return;
         }
 
-        final Object value = MetadataUtil.removeAndGet(plugin, player, METADATA_KEY);
-
-        if (value != null) {
-            event.setCancelled(false);
-            event.setTo((Location) value);
-        }
+        event.setCancelled(false);
+        event.setTo((Location) value);
     }
 }

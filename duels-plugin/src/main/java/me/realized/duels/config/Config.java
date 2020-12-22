@@ -23,15 +23,15 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean ctpPreventDuel;
     @Getter
-    private boolean ctpUntag;
+    private boolean ctpPreventTag;
     @Getter
     private boolean pmPreventDuel;
     @Getter
-    private boolean pmUntag;
+    private boolean pmPreventTag;
     @Getter
     private boolean clxPreventDuel;
     @Getter
-    private boolean clxUntag;
+    private boolean clxPreventTag;
     @Getter
     private boolean autoUnvanish;
     @Getter
@@ -51,7 +51,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean preventBountyLoss;
     @Getter
-    private boolean preventAddDeath;
+    private boolean preventKDRChange;
     @Getter
     private String lhWinsCmd;
     @Getter
@@ -84,6 +84,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean useOwnInventoryEnabled;
     @Getter
     private boolean useOwnInventoryKeepItems;
+    @Getter
+    private boolean useOwnInventoryPreventDurabLoss;
     @Getter
     private int maxDuration;
     @Getter
@@ -244,11 +246,11 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         checkForUpdates = configuration.getBoolean("check-for-updates", true);
 
         ctpPreventDuel = configuration.getBoolean("supported-plugins.CombatTagPlus.prevent-duel-if-tagged", true);
-        ctpUntag = configuration.getBoolean("supported-plugins.CombatTagPlus.untag-on-duel-teleport", true);
+        ctpPreventTag = configuration.getBoolean("supported-plugins.CombatTagPlus.prevent-tag-in-duel", true);
         pmPreventDuel = configuration.getBoolean("supported-plugins.PvPManager.prevent-duel-if-tagged", true);
-        pmUntag = configuration.getBoolean("supported-plugins.PvPManager.untag-on-duel-teleport", true);
+        pmPreventTag = configuration.getBoolean("supported-plugins.PvPManager.prevent-tag-in-duel", true);
         clxPreventDuel = configuration.getBoolean("supported-plugins.CombatLogX.prevent-duel-if-tagged", true);
-        clxUntag = configuration.getBoolean("supported-plugins.CombatLogX.untag-on-duel-teleport", true);
+        clxPreventTag = configuration.getBoolean("supported-plugins.CombatLogX.prevent-tag-in-duel", true);
         autoUnvanish = configuration.getBoolean("supported-plugins.Essentials.auto-unvanish", true);
         setBackLocation = configuration.getBoolean("supported-plugins.Essentials.set-back-location", true);
         disableSkills = configuration.getBoolean("supported-plugins.mcMMO.disable-skills-in-duel", true);
@@ -258,7 +260,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         duelzones = configuration.getStringList("supported-plugins.WorldGuard.duelzone.regions");
         myPetDespawn = configuration.getBoolean("supported-plugins.MyPet.despawn-pet-in-duel", false);
         preventBountyLoss = configuration.getBoolean("supported-plugins.BountyHunters.prevent-bounty-loss-in-duel", true);
-        preventAddDeath = configuration.getBoolean("supported-plugins.SimpleClans.prevent-add-death-in-duel", true);
+        preventKDRChange = configuration.getBoolean("supported-plugins.SimpleClans.prevent-kdr-change", true);
         lhWinsCmd = configuration.getString("supported-plugins.LeaderHeads.wins.menu.command", "openwins");
         lhWinsTitle = configuration.getString("supported-plugins.LeaderHeads.wins.menu.title", "Duel Wins");
         lhLossesCmd = configuration.getString("supported-plugins.LeaderHeads.losses.menu.command", "openlosses");
@@ -276,6 +278,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
 
         useOwnInventoryEnabled = configuration.getBoolean("duel.use-own-inventory.enabled", false);
         useOwnInventoryKeepItems = configuration.getBoolean("duel.use-own-inventory.keep-items", false);
+        useOwnInventoryPreventDurabLoss = configuration.getBoolean("duel.use-own-inventory.prevent-durability-loss", true);
         maxDuration = configuration.getInt("duel.match.max-duration", -1);
         startCommandsEnabled = configuration.getBoolean("duel.match.start-commands.enabled", false);
         startCommands = configuration.getStringList("duel.match.start-commands.commands");

@@ -6,6 +6,7 @@ import me.realized.duels.api.command.SubCommand;
 import me.realized.duels.api.kit.KitManager;
 import me.realized.duels.api.queue.DQueueManager;
 import me.realized.duels.api.queue.sign.QueueSignManager;
+import me.realized.duels.api.spectate.SpectateManager;
 import me.realized.duels.api.user.UserManager;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
@@ -14,22 +15,57 @@ import org.bukkit.scheduler.BukkitTask;
 
 public interface Duels extends Plugin {
 
+    /**
+     * Gets the UserManager singleton used by Duels.
+     *
+     * @return UserManager singleton
+     */
     @Nonnull
     UserManager getUserManager();
 
 
+    /**
+     * Gets the ArenaManager singleton used by Duels.
+     *
+     * @return ArenaManager singleton
+     */
     @Nonnull
     ArenaManager getArenaManager();
 
 
+    /**
+     * Gets the KitManager singleton used by Duels.
+     *
+     * @return KitManager singleton
+     */
     @Nonnull
     KitManager getKitManager();
 
 
+    /**
+     * Gets the SpectateManager singleton used by Duels.
+     *
+     * @return SpectateManager singleton
+     * @since 3.4.1
+     */
+    @Nonnull
+    SpectateManager getSpectateManager();
+
+
+    /**
+     * Gets the DQueueManager singleton used by Duels.
+     *
+     * @return DQueueManager singleton
+     */
     @Nonnull
     DQueueManager getQueueManager();
 
 
+    /**
+     * Gets the QueueSignManager singleton used by Duels.
+     *
+     * @return QueueSignManager singleton
+     */
     @Nonnull
     QueueSignManager getQueueSignManager();
 
@@ -45,7 +81,7 @@ public interface Duels extends Plugin {
 
 
     /**
-     * Registers a {@link Listener} that will be automatically unregistered on plugin disable.
+     * Registers a {@link Listener} that will be automatically unregistered on unload of Duels.
      *
      * @param listener {@link Listener} to register.
      * @since 3.1.2

@@ -3,7 +3,7 @@ package me.realized.duels.command.commands.duel.subcommands;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.request.RequestDenyEvent;
 import me.realized.duels.command.BaseCommand;
-import me.realized.duels.request.Request;
+import me.realized.duels.request.RequestImpl;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -24,7 +24,7 @@ public class DenyCommand extends BaseCommand {
             return;
         }
 
-        final Request request;
+        final RequestImpl request;
 
         if ((request = requestManager.remove(target, player)) == null) {
             lang.sendMessage(sender, "ERROR.duel.no-request", "name", target.getName());

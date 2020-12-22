@@ -5,8 +5,8 @@ import java.util.function.Function;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.gui.options.buttons.OptionButton;
-import me.realized.duels.kit.Kit;
-import me.realized.duels.kit.Kit.Characteristic;
+import me.realized.duels.kit.KitImpl;
+import me.realized.duels.kit.KitImpl.Characteristic;
 import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.gui.SinglePageGui;
 import me.realized.duels.util.inventory.Slots;
@@ -21,7 +21,7 @@ public class OptionsGui extends SinglePageGui<DuelsPlugin> {
     private final DuelsPlugin plugin;
     private final Player owner;
 
-    public OptionsGui(final DuelsPlugin plugin, final Player player, final Kit kit) {
+    public OptionsGui(final DuelsPlugin plugin, final Player player, final KitImpl kit) {
         super(plugin, plugin.getLang().getMessage("GUI.options.title", "kit", kit.getName()), 2);
         this.plugin = plugin;
         this.owner = player;
@@ -43,20 +43,22 @@ public class OptionsGui extends SinglePageGui<DuelsPlugin> {
 
     public enum Option {
 
-        USEPERMISSION(Items.BARRIER, Kit::isUsePermission, kit -> kit.setUsePermission(!kit.isUsePermission()), "When enabled, players must", "have the permission duels.kits.%kit%", "to select this kit for duel."),
-        ARENASPECIFIC(Items.EMPTY_MAP, Kit::isArenaSpecific, kit -> kit.setArenaSpecific(!kit.isArenaSpecific()), "When enabled, kit %kit%", "can only be used in", "arenas it is bound to."),
+        USEPERMISSION(Items.BARRIER, KitImpl::isUsePermission, kit -> kit.setUsePermission(!kit.isUsePermission()), "When enabled, players must", "have the permission duels.kits.%kit%", "to select this kit for duel."),
+        ARENASPECIFIC(Items.EMPTY_MAP, KitImpl::isArenaSpecific, kit -> kit.setArenaSpecific(!kit.isArenaSpecific()), "When enabled, kit %kit%", "can only be used in", "arenas it is bound to."),
         SOUP(Items.MUSHROOM_SOUP, Characteristic.SOUP, "When enabled, players will", "receive the amount of health", "defined in config when", "right-clicking a soup."),
-        SUMO(Material.SLIME_BALL, Characteristic.SUMO, "When enabled, players will ", "lose health only when", "interacting with water or lava.");
+        SUMO(Material.SLIME_BALL, Characteristic.SUMO, "When enabled, players will ", "lose health only when", "interacting with water or lava."),
+        UHC(Material.GOLDEN_APPLE, Characteristic.UHC, "When enabled, player's health", "will not naturally regenerate."),
+        COMBO(Material.IRON_SWORD, Characteristic.COMBO, "When enabled, players will", "have no delay between hits.");
 
         @Getter
         private final Material displayed;
         @Getter
         private final String[] description;
 
-        private final Function<Kit, Boolean> getter;
-        private final Consumer<Kit> setter;
+        private final Function<KitImpl, Boolean> getter;
+        private final Consumer<KitImpl> setter;
 
-        Option(final Material displayed, final Function<Kit, Boolean> getter, final Consumer<Kit> setter, final String... description) {
+        Option(final Material displayed, final Function<KitImpl, Boolean> getter, final Consumer<KitImpl> setter, final String... description) {
             this.displayed = displayed;
             this.description = description;
             this.getter = getter;
@@ -70,11 +72,11 @@ public class OptionsGui extends SinglePageGui<DuelsPlugin> {
             this.setter = kit -> kit.toggleCharacteristic(characteristic);
         }
 
-        public boolean get(final Kit kit) {
+        public boolean get(final KitImpl kit) {
             return getter.apply(kit);
         }
 
-        public void set(final Kit kit) {
+        public void set(final KitImpl kit) {
             setter.accept(kit);
         }
     }

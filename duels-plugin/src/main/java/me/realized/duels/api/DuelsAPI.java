@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
  *
  * @deprecated As of v3.0.0, use {@link Duels} instead.
  */
-
+@Deprecated
 public class DuelsAPI {
 
 

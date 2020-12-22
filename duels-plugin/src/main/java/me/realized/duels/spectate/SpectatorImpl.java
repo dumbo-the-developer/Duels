@@ -3,24 +3,21 @@ package me.realized.duels.spectate;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.Getter;
-import lombok.Setter;
-import me.realized.duels.arena.Arena;
+import me.realized.duels.api.spectate.Spectator;
+import me.realized.duels.arena.ArenaImpl;
 import org.bukkit.entity.Player;
 
-public class Spectator {
+public class SpectatorImpl implements Spectator {
 
     @Getter
-    private final UUID owner;
+    private final UUID uuid;
     @Getter
     private final String targetName;
     @Getter
-    private final Arena arena;
-    @Getter
-    @Setter
-    private boolean teleported;
+    private final ArenaImpl arena;
 
-    Spectator(final Player owner, final Player target, final Arena arena) {
-        this.owner = owner.getUniqueId();
+    SpectatorImpl(final Player owner, final Player target, final ArenaImpl arena) {
+        this.uuid = owner.getUniqueId();
         this.targetName = target.getName();
         this.arena = arena;
     }
@@ -35,12 +32,12 @@ public class Spectator {
             return false;
         }
 
-        final Spectator spectator = (Spectator) other;
-        return Objects.equals(owner, spectator.owner);
+        final SpectatorImpl spectator = (SpectatorImpl) other;
+        return Objects.equals(uuid, spectator.uuid);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(owner);
+        return Objects.hash(uuid);
     }
 }

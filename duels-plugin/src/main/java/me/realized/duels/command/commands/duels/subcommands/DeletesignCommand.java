@@ -1,10 +1,10 @@
 package me.realized.duels.command.commands.duels.subcommands;
 
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.api.kit.Kit;
 import me.realized.duels.command.BaseCommand;
-import me.realized.duels.kit.Kit;
 import me.realized.duels.queue.Queue;
-import me.realized.duels.queue.sign.QueueSign;
+import me.realized.duels.queue.sign.QueueSignImpl;
 import me.realized.duels.util.BlockUtil;
 import me.realized.duels.util.StringUtil;
 import org.bukkit.Location;
@@ -29,7 +29,7 @@ public class DeletesignCommand extends BaseCommand {
             return;
         }
 
-        final QueueSign queueSign = queueSignManager.remove(player, sign.getLocation());
+        final QueueSignImpl queueSign = queueSignManager.remove(player, sign.getLocation());
 
         if (queueSign == null) {
             lang.sendMessage(sender, "ERROR.sign.not-found");

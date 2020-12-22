@@ -4,7 +4,7 @@ import com.massivecraft.factions.entity.MPlayer;
 import com.massivecraft.factions.event.EventFactionsPowerChange;
 import com.massivecraft.factions.event.PowerLossEvent;
 import me.realized.duels.DuelsPlugin;
-import me.realized.duels.arena.ArenaManager;
+import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.config.Config;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.compat.ReflectionUtil;
@@ -15,11 +15,13 @@ import org.bukkit.event.Listener;
 
 public class FactionsHook extends PluginHook<DuelsPlugin> {
 
+    public static final String NAME = "Factions";
+
     private final Config config;
-    private final ArenaManager arenaManager;
+    private final ArenaManagerImpl arenaManager;
 
     public FactionsHook(final DuelsPlugin plugin) {
-        super(plugin, "Factions");
+        super(plugin, NAME);
         this.config = plugin.getConfiguration();
         this.arenaManager = plugin.getArenaManager();
 

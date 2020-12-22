@@ -3,16 +3,18 @@ package me.realized.duels.hook.hooks;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.data.UserData;
-import me.realized.duels.data.UserManager;
+import me.realized.duels.data.UserManagerImpl;
 import me.realized.duels.util.hook.PluginHook;
 import org.bukkit.entity.Player;
 
 public class PlaceholderHook extends PluginHook<DuelsPlugin> {
 
-    private final UserManager userDataManager;
+    public static final String NAME = "PlaceholderAPI";
+
+    private final UserManagerImpl userDataManager;
 
     public PlaceholderHook(final DuelsPlugin plugin) {
-        super(plugin, "PlaceholderAPI");
+        super(plugin, NAME);
         this.userDataManager = plugin.getUserManager();
         new Placeholders().register();
     }

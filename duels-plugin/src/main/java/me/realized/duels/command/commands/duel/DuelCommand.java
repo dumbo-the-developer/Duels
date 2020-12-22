@@ -17,7 +17,7 @@ import me.realized.duels.hook.hooks.CombatTagPlusHook;
 import me.realized.duels.hook.hooks.PvPManagerHook;
 import me.realized.duels.hook.hooks.VaultHook;
 import me.realized.duels.hook.hooks.worldguard.WorldGuardHook;
-import me.realized.duels.kit.Kit;
+import me.realized.duels.kit.KitImpl;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.NumberUtil;
 import me.realized.duels.util.inventory.InventoryUtil;
@@ -198,7 +198,7 @@ public class DuelCommand extends BaseCommand {
                     sendRequest = true;
                 } else if (args.length > 3) {
                     final String name = StringUtils.join(args, " ", 3, args.length);
-                    final Kit kit = kitManager.get(name);
+                    final KitImpl kit = kitManager.get(name);
 
                     if (kit == null) {
                         lang.sendMessage(sender, "ERROR.kit.not-found", "name", name);

@@ -4,7 +4,7 @@ import java.util.List;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.data.UserData;
-import me.realized.duels.kit.Kit;
+import me.realized.duels.kit.KitImpl;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -33,7 +33,7 @@ public class ResetratingCommand extends BaseCommand {
             lang.sendMessage(sender, "COMMAND.duels.reset-rating", "name", user.getName(), "kit", lang.getMessage("GENERAL.none"));
         } else {
             final String name = StringUtils.join(args, " ", 2, args.length).replace("-", " ");
-            final Kit kit = kitManager.get(name);
+            final KitImpl kit = kitManager.get(name);
 
             if (kit == null) {
                 lang.sendMessage(sender, "ERROR.kit.not-found", "name", name);

@@ -9,11 +9,13 @@ import org.bukkit.entity.Player;
 
 public class WorldGuardHook extends PluginHook<DuelsPlugin> {
 
+    public static final String NAME = "WorldGuard";
+
     private final Config config;
     private final WorldGuardHandler handler;
 
     public WorldGuardHook(final DuelsPlugin plugin) {
-        super(plugin, "WorldGuard");
+        super(plugin, NAME);
         this.config = plugin.getConfiguration();
         this.handler = ReflectionUtil.getClassUnsafe("com.sk89q.worldguard.WorldGuard") != null ? new WorldGuard7Handler() : new WorldGuard6Handler();
     }

@@ -1,15 +1,28 @@
 package me.realized.duels.spectate;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.Permissions;
-import me.realized.duels.arena.Arena;
-import me.realized.duels.arena.ArenaManager;
-import me.realized.duels.arena.Match;
+import me.realized.duels.api.arena.Arena;
+import me.realized.duels.api.event.spectate.SpectateEndEvent;
+import me.realized.duels.api.event.spectate.SpectateStartEvent;
+import me.realized.duels.api.spectate.SpectateManager;
+import me.realized.duels.api.spectate.Spectator;
+import me.realized.duels.arena.ArenaImpl;
+import me.realized.duels.arena.ArenaManagerImpl;
+import me.realized.duels.arena.MatchImpl;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.hook.hooks.MyPetHook;
@@ -21,10 +34,8 @@ import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.Teleport;
 import me.realized.duels.util.compat.Collisions;
 import me.realized.duels.util.compat.CompatUtil;
-import me.realized.duels.util.compat.Players;
 import me.realized.duels.util.inventory.InventoryUtil;
 import me.realized.duels.util.inventory.ItemBuilder;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -45,29 +56,38 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-public class SpectateManager implements Loadable {
+public class SpectateManagerImpl implements Loadable, SpectateManager {
+
+    // The location of the stop spec item in player's hotbar.
+    private static final int STOP_SPEC_ITEM_SLOT = 8;
 
     private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
-    private final ArenaManager arenaManager;
+    private final ArenaManagerImpl arenaManager;
     private final PlayerInfoManager playerManager;
-    private final Map<UUID, Spectator> spectators = new HashMap<>();
+
+    // Map UUID to a spectator
+    private final Map<UUID, SpectatorImpl> spectators = Maps.newHashMap();
+    // Map arena to a collection of spectators
+    private final Multimap<Arena, SpectatorImpl> arenas = HashMultimap.create();
 
     private Teleport teleport;
     private MyPetHook myPet;
 
-    public SpectateManager(final DuelsPlugin plugin) {
+    public SpectateManagerImpl(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
         this.arenaManager = plugin.getArenaManager();
         this.playerManager = plugin.getPlayerManager();
+
         plugin.getServer().getPluginManager().registerEvents(new SpectateListener(), plugin);
     }
 
     @Override
     public void handleLoad() {
+        // Late-init since SpectateManager is loaded before below variables are loaded
         this.teleport = plugin.getTeleport();
         this.myPet = plugin.getHookManager().getHook(MyPetHook.class);
     }
@@ -77,84 +97,106 @@ public class SpectateManager implements Loadable {
         spectators.clear();
     }
 
-    public Spectator get(final Player player) {
+    @Nullable
+    @Override
+    public SpectatorImpl get(@Nonnull final Player player) {
+        Objects.requireNonNull(player, "player");
         return spectators.get(player.getUniqueId());
     }
 
-    public boolean isSpectating(final Player player) {
+    @Override
+    public boolean isSpectating(@Nonnull final Player player) {
+        Objects.requireNonNull(player, "player");
         return get(player) != null;
     }
 
-    public void startSpectating(final Player player, final Player target) {
+    @Nonnull
+    @Override
+    public Result startSpectating(@Nonnull final Player player, @Nonnull final Player target) {
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(target, "target");
+
         if (isSpectating(player)) {
-            lang.sendMessage(player, "ERROR.spectate.already-spectating.sender");
-            return;
+            return Result.ALREADY_SPECTATING;
         }
 
         if (plugin.getQueueManager().isInQueue(player)) {
-            lang.sendMessage(player, "ERROR.duel.already-in-queue");
-            return;
+            return Result.IN_QUEUE;
         }
 
         if (arenaManager.isInMatch(player)) {
-            lang.sendMessage(player, "ERROR.duel.already-in-match.sender");
-            return;
+            return Result.IN_MATCH;
         }
 
-        final Arena arena = arenaManager.get(target);
+        final ArenaImpl arena = arenaManager.get(target);
 
         if (arena == null) {
-            lang.sendMessage(player, "ERROR.spectate.not-in-match", "name", target.getName());
-            return;
+            return Result.TARGET_NOT_IN_MATCH;
         }
 
-        playerManager.put(player, new PlayerInfo(player, !config.isSpecRequiresClearedInventory()));
-        PlayerUtil.reset(player);
+        final SpectatorImpl spectator = new SpectatorImpl(player, target, arena);
+        final SpectateStartEvent event = new SpectateStartEvent(player, spectator);
+        plugin.getServer().getPluginManager().callEvent(event);
 
-        final Match match = arena.getMatch();
+        if (event.isCancelled()) {
+            return Result.EVENT_CANCELLED;
+        }
 
+        final MatchImpl match = arena.getMatch();
+
+        // Hide from players in match
         if (match != null) {
-            match.getAllPlayers().forEach(arenaPlayer -> {
-                if (arenaPlayer.isOnline() && arenaPlayer.canSee(player)) {
-                    arenaPlayer.hidePlayer(player);
-                }
-            });
+            match.getAllPlayers()
+                .stream()
+                .filter(arenaPlayer -> arenaPlayer.isOnline() && arenaPlayer.canSee(player))
+                .forEach(arenaPlayer -> arenaPlayer.hidePlayer(player));
         }
 
+        // Remove pet before teleport
         if (myPet != null) {
             myPet.removePet(player);
         }
 
-        final Spectator spectator = new Spectator(player, target, arena);
-        spectators.put(player.getUniqueId(), spectator);
+        // Cache current player state to return to after spectating is over
+        playerManager.put(player, new PlayerInfo(player, !config.isSpecRequiresClearedInventory()));
+        PlayerUtil.reset(player);
+
+        // Teleport before putting in map prevent teleport being cancelled by SpectateListener
         teleport.tryTeleport(player, target.getLocation().clone().add(0, 2, 0));
-        spectator.setTeleported(true);
-        player.getInventory().setItem(8, ItemBuilder.of(Material.PAPER).name(lang.getMessage("SPECTATE.stop-item.name")).build());
+        spectators.put(player.getUniqueId(), spectator);
+        arenas.put(arena, spectator);
+        player.getInventory().setItem(STOP_SPEC_ITEM_SLOT, ItemBuilder.of(Material.PAPER).name(lang.getMessage("SPECTATE.stop-item.name")).build());
         player.setAllowFlight(true);
         player.setFlying(true);
+
+        // Ignore collision for spectators. This allows projectiles, such as arrows, to pass through.
         Collisions.setCollidable(player, false);
 
         if (config.isSpecAddInvisibilityEffect()) {
-            // particles parameter does not exist in 1.7
+            // Particles parameter (last parameter) does not exist in 1.7
             final PotionEffect effect = CompatUtil.isPre1_8() ?
                 new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false) :
                 new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false);
             player.addPotionEffect(effect);
         }
 
-        lang.sendMessage(player, "COMMAND.spectate.start-spectate", "name", target.getName());
-
-        if (player.hasPermission(Permissions.SPEC_ANON)) {
-            return;
+        // Broadcast to the arena that player has begun spectating if player does not have the SPEC_ANON permission.
+        if (!player.hasPermission(Permissions.SPEC_ANON)) {
+            arena.getMatch().getAllPlayers().forEach(matchPlayer -> lang.sendMessage(matchPlayer, "SPECTATE.arena-broadcast", "name", player.getName()));
         }
 
-        arena.getMatch().getAllPlayers().forEach(matchPlayer -> lang.sendMessage(matchPlayer, "SPECTATE.arena-broadcast", "name", player.getName()));
+        return Result.SUCCESS;
     }
 
-    public void stopSpectating(final Player player, final Spectator spectator, final boolean end) {
-        if (!end) {
-            spectators.remove(player.getUniqueId());
-        }
+    /**
+     * Puts player out of spectator mode.
+     *
+     * @param player Player to put out of spectator mode
+     * @param spectator {@link SpectatorImpl} instance associated to this player
+     */
+    public void stopSpectating(final Player player, final SpectatorImpl spectator) {
+        spectators.remove(player.getUniqueId());
+        arenas.remove(spectator.getArena(), spectator);
 
         PlayerUtil.reset(player);
         player.setFlying(false);
@@ -173,43 +215,71 @@ public class SpectateManager implements Loadable {
             teleport.tryTeleport(player, playerManager.getLobby());
         }
 
-        final Match match = spectator.getArena().getMatch();
+        final MatchImpl match = spectator.getArena().getMatch();
 
+        // Show to players in match
         if (match != null) {
-            match.getAllPlayers().stream().filter(Player::isOnline).forEach(matchPlayer -> matchPlayer.showPlayer(player));
+            match.getAllPlayers()
+                .stream()
+                .filter(Player::isOnline)
+                .forEach(matchPlayer -> matchPlayer.showPlayer(player));
         }
 
-        if (!end) {
-            lang.sendMessage(player, "COMMAND.spectate.stop-spectate", "name", spectator.getTargetName());
-        } else {
-            lang.sendMessage(player, "SPECTATE.match-end");
+        final SpectateEndEvent event = new SpectateEndEvent(player, spectator);
+        plugin.getServer().getPluginManager().callEvent(event);
+    }
+
+    /**
+     * Puts player out of spectator mode.
+     *
+     * @see #stopSpectating(Player, SpectatorImpl)
+     */
+    @Override
+    public void stopSpectating(@Nonnull final Player player) {
+        Objects.requireNonNull(player, "player");
+        stopSpectating(player, get(player));
+    }
+
+    /**
+     * Puts all spectators of the given {@link ArenaImpl} out of spectator mode.
+     *
+     * @param arena {@link ArenaImpl} to end spectating
+     */
+    public void stopSpectating(final ArenaImpl arena) {
+        final Collection<SpectatorImpl> spectators = arenas.asMap().remove(arena);
+
+        if (spectators == null || spectators.isEmpty()) {
+            return;
         }
-    }
 
-    public void stopSpectating(final Player player, final boolean end) {
-        stopSpectating(player, get(player), end);
-    }
+        spectators.forEach(spectator -> {
+            final Player player = plugin.getServer().getPlayer(spectator.getUuid());
 
-    public void stopSpectating(final Arena arena) {
-        spectators.entrySet().removeIf(entry -> {
-            final Spectator spectator = entry.getValue();
-
-            if (!spectator.getArena().equals(arena)) {
-                return false;
+            if (player == null) {
+                return;
             }
 
-            stopSpectating(Bukkit.getPlayer(entry.getKey()), spectator, true);
-            return true;
+            stopSpectating(player, spectator);
+            lang.sendMessage(player, "SPECTATE.match-end");
         });
     }
 
-    public Collection<Player> getPlayers() {
-        return Players.getOnlinePlayers().stream().filter(this::isSpectating).collect(Collectors.toList());
+    @Nonnull
+    @Override
+    public List<Spectator> getSpectators(@Nonnull final Arena arena) {
+        Objects.requireNonNull(arena, "arena");
+        return Collections.unmodifiableList(Lists.newArrayList(getSpectatorsImpl(arena)));
     }
 
-    public Collection<Player> getSpectators(final Arena arena) {
-        return spectators.entrySet()
-            .stream().filter(entry -> entry.getValue().getArena().equals(arena)).map(spectator -> Bukkit.getPlayer(spectator.getKey())).collect(Collectors.toSet());
+    public Collection<SpectatorImpl> getSpectatorsImpl(final Arena arena) {
+        return arenas.asMap().getOrDefault(arena, Collections.emptyList());
+    }
+
+    public Collection<Player> getAllSpectators() {
+        return spectators.values()
+            .stream()
+            .map(spectator -> plugin.getServer().getPlayer(spectator.getUuid()))
+            .collect(Collectors.toList());
     }
 
     private class SpectateListener implements Listener {
@@ -217,7 +287,7 @@ public class SpectateManager implements Loadable {
         @EventHandler
         public void on(final PlayerInteractEvent event) {
             final Player player = event.getPlayer();
-            final Spectator spectator = get(player);
+            final SpectatorImpl spectator = get(player);
 
             if (spectator == null) {
                 return;
@@ -237,19 +307,20 @@ public class SpectateManager implements Loadable {
                 return;
             }
 
-            stopSpectating(player, spectator, false);
+            stopSpectating(player, spectator);
+            lang.sendMessage(player, "COMMAND.spectate.stop-spectate", "name", spectator.getTargetName());
         }
 
         @EventHandler
         public void on(final PlayerQuitEvent event) {
             final Player player = event.getPlayer();
-            final Spectator spectator = get(player);
+            final SpectatorImpl spectator = get(player);
 
             if (spectator == null) {
                 return;
             }
 
-            stopSpectating(player, spectator, false);
+            stopSpectating(player, spectator);
         }
 
         @EventHandler(ignoreCancelled = true)
@@ -273,9 +344,9 @@ public class SpectateManager implements Loadable {
         @EventHandler(ignoreCancelled = true)
         public void on(final PlayerTeleportEvent event) {
             final Player player = event.getPlayer();
-            final Spectator spectator = get(player);
+            final SpectatorImpl spectator = get(player);
 
-            if (spectator == null || !spectator.isTeleported()) {
+            if (spectator == null) {
                 return;
             }
 

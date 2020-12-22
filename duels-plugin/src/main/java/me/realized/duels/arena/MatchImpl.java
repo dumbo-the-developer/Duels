@@ -12,27 +12,33 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.Getter;
-import me.realized.duels.kit.Kit;
+import me.realized.duels.api.match.Match;
+import me.realized.duels.kit.KitImpl;
 import me.realized.duels.queue.Queue;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class Match implements me.realized.duels.api.match.Match {
+public class MatchImpl implements Match {
 
     @Getter
-    private final Arena arena;
+    private final ArenaImpl arena;
     @Getter
     private final long start;
     @Getter
-    private final Kit kit;
+    private final KitImpl kit;
     private final Map<UUID, List<ItemStack>> items;
     @Getter
     private final int bet;
     @Getter
     private final Queue source;
+
+    @Getter
+    private boolean finished;
+
+    // Default value for players is false, which is set to true if player is killed in the match.
     private final Map<Player, Boolean> players = new HashMap<>();
 
-    Match(final Arena arena, final Kit kit, final Map<UUID, List<ItemStack>> items, final int bet, final Queue source) {
+    MatchImpl(final ArenaImpl arena, final KitImpl kit, final Map<UUID, List<ItemStack>> items, final int bet, final Queue source) {
         this.arena = arena;
         this.start = System.currentTimeMillis();
         this.kit = kit;
@@ -65,6 +71,10 @@ public class Match implements me.realized.duels.api.match.Match {
         return items != null ? items.values().stream().flatMap(Collection::stream).collect(Collectors.toList()) : Collections.emptyList();
     }
 
+    void setFinished() {
+        finished = true;
+    }
+
     @Nonnull
     @Override
     public List<ItemStack> getItems(@Nonnull final Player player) {
@@ -82,5 +92,11 @@ public class Match implements me.realized.duels.api.match.Match {
     @Override
     public Set<Player> getPlayers() {
         return Collections.unmodifiableSet(getAlivePlayers());
+    }
+
+    @Nonnull
+    @Override
+    public Set<Player> getStartingPlayers() {
+        return Collections.unmodifiableSet(getAllPlayers());
     }
 }

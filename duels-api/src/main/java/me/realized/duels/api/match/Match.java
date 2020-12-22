@@ -43,10 +43,10 @@ public interface Match {
 
 
     /**
-     * UnmodifiableList of {@link ItemStack}s {@link Player} has bet for this {@link Match}.
+     * UnmodifiableList of ItemStacks the player has bet for this {@link Match}.
      *
-     * @param player {@link Player} to get the bet items.
-     * @return Never-null UnmodifiableList of {@link ItemStack}s {@link Player} has bet for this {@link Match}.
+     * @param player {@link Player} to get the list of bet items.
+     * @return Never-null UnmodifiableList of ItemStacks the player has bet for this {@link Match}.
      */
     @Nonnull
     List<ItemStack> getItems(@Nonnull final Player player);
@@ -61,12 +61,33 @@ public interface Match {
 
 
     /**
-     * UnmodifiableSet of alive {@link Player}s in this {@link Match}.
+     * Whether or not this {@link Match} is finished.
      *
-     * @return Never-null UnmodifiableSet of alive {@link Player}s in this {@link Match}.
+     * @return true if this {@link Match} has finished or false otherwise.
+     * @since 3.4.1
+     */
+    boolean isFinished();
+
+
+    /**
+     * UnmodifiableSet of alive players in this {@link Match}.
+     *
+     * @return Never-null UnmodifiableSet of alive players in this {@link Match}.
      * @since 3.1.0
      */
     @Nonnull
     Set<Player> getPlayers();
 
+
+    /**
+     * UnmodifiableSet of players who started this {@link Match}.
+     * Note: This set includes players who are offline. If you keep a reference
+     * to this match, all the player objects of those who started this match will
+     * not be garbage-collected.
+     *
+     * @return Never-null UnmodifiableSet of players who started this {@link Match}.
+     * @since 3.4.1
+     */
+    @Nonnull
+    Set<Player> getStartingPlayers();
 }

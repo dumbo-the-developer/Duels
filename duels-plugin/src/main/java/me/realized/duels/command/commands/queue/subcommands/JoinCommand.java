@@ -5,7 +5,7 @@ import java.util.List;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.Permissions;
 import me.realized.duels.command.BaseCommand;
-import me.realized.duels.kit.Kit;
+import me.realized.duels.kit.KitImpl;
 import me.realized.duels.queue.Queue;
 import me.realized.duels.util.NumberUtil;
 import org.apache.commons.lang.StringUtils;
@@ -22,7 +22,7 @@ public class JoinCommand extends BaseCommand {
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final Player player = (Player) sender;
-        Kit kit = null;
+        KitImpl kit = null;
 
         if (!args[1].equals("-")) {
             String name = StringUtils.join(args, " ", 1, args.length - (args.length > 2 ? 1 : 0)).replace("-", " ");
