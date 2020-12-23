@@ -8,6 +8,7 @@ import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.arena.MatchImpl;
 import me.realized.duels.config.Config;
 import me.realized.duels.kit.KitImpl.Characteristic;
+import me.realized.duels.util.compat.CompatUtil;
 import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.metadata.MetadataUtil;
 import org.bukkit.Material;
@@ -16,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
@@ -39,6 +41,7 @@ public class KitOptionsListener implements Listener {
         this.config = plugin.getConfiguration();
         this.arenaManager = plugin.getArenaManager();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        plugin.getServer().getPluginManager().registerEvents(CompatUtil.isPre1_14() ? new SumoPre1_14Listener() : new SumoPost1_14Listener(), plugin);
     }
 
     private boolean isEnabled(final ArenaImpl arena, final Characteristic characteristic) {
@@ -128,42 +131,65 @@ public class KitOptionsListener implements Listener {
         event.setCancelled(true);
     }
 
-    @EventHandler
-    public void on(final MatchStartEvent event) {
-        final ArenaImpl arena = arenaManager.get(event.getMatch().getArena().getName());
+    private class SumoPre1_14Listener implements Listener {
 
-        if (arena == null || !isEnabled(arena, Characteristic.COMBO)) {
-            return;
-        }
 
-        for (final Player player : event.getPlayers()) {
-            MetadataUtil.put(plugin, player, METADATA_KEY, player.getMaximumNoDamageTicks());
-            player.setMaximumNoDamageTicks(0);
-        }
-    }
+        @EventHandler
+        public void on(final MatchStartEvent event) {
+            final ArenaImpl arena = arenaManager.get(event.getMatch().getArena().getName());
 
-    @EventHandler
-    public void on(final MatchEndEvent event) {
-        final ArenaImpl arena = arenaManager.get(event.getMatch().getArena().getName());
-
-        if (arena == null || !isEnabled(arena, Characteristic.COMBO)) {
-            return;
-        }
-
-        final MatchImpl match = arena.getMatch();
-
-        if (match == null) {
-            return;
-        }
-
-        match.getAllPlayers().forEach(player -> {
-            final Object value = MetadataUtil.removeAndGet(plugin, player, METADATA_KEY);
-
-            if (value == null) {
+            if (arena == null || !isEnabled(arena, Characteristic.COMBO)) {
                 return;
             }
 
-            player.setMaximumNoDamageTicks((Integer) value);
-        });
+            for (final Player player : event.getPlayers()) {
+                MetadataUtil.put(plugin, player, METADATA_KEY, player.getMaximumNoDamageTicks());
+                player.setMaximumNoDamageTicks(1);
+            }
+        }
+
+        @EventHandler
+        public void on(final MatchEndEvent event) {
+            final ArenaImpl arena = arenaManager.get(event.getMatch().getArena().getName());
+
+            if (arena == null || !isEnabled(arena, Characteristic.COMBO)) {
+                return;
+            }
+
+            final MatchImpl match = arena.getMatch();
+
+            if (match == null) {
+                return;
+            }
+
+            match.getAllPlayers().forEach(player -> {
+                final Object value = MetadataUtil.removeAndGet(plugin, player, METADATA_KEY);
+
+                if (value == null) {
+                    return;
+                }
+
+                player.setMaximumNoDamageTicks((Integer) value);
+            });
+        }
+    }
+
+    private class SumoPost1_14Listener implements Listener {
+
+        @EventHandler
+        public void on(final EntityDamageByEntityEvent event) {
+            if (!(event.getEntity() instanceof Player)) {
+                return;
+            }
+
+            final Player player = (Player) event.getEntity();
+            final ArenaImpl arena = arenaManager.get(player);
+
+            if (arena == null || !isEnabled(arena, Characteristic.COMBO)) {
+                return;
+            }
+
+            plugin.doSyncAfter(() -> player.setNoDamageTicks(0), 1);
+        }
     }
 }

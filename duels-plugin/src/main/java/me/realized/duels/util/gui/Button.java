@@ -8,6 +8,8 @@ import lombok.Setter;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.compat.CompatUtil;
 import me.realized.duels.util.compat.Items;
+import me.realized.duels.util.inventory.ItemBuilder;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -55,6 +57,14 @@ public class Button<P extends JavaPlugin> {
     }
 
     protected void setGlow(final boolean glow) {
+        // Normal golden apples do not have enchantment glint even with an enchantment applied, so we change the item type.
+        if (displayed.getType().name().endsWith("GOLDEN_APPLE")) {
+            final ItemStack item = glow ? Items.ENCHANTED_GOLDEN_APPLE.clone() : ItemBuilder.of(Material.GOLDEN_APPLE).build();
+            item.setItemMeta(getDisplayed().getItemMeta());
+            setDisplayed(item);
+            return;
+        }
+
         editMeta(meta -> {
             if (glow) {
                 meta.addEnchant(Enchantment.DURABILITY, 1, false);

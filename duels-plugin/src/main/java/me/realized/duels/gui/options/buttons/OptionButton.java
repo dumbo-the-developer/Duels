@@ -33,7 +33,7 @@ public class OptionButton extends BaseButton {
         final List<String> lore = new ArrayList<>();
 
         for (final String line : option.getDescription()) {
-            lore.add("&r" + line.replace("%kit%", kit.getName()));
+            lore.add("&f" + line.replace("%kit%", kit.getName()));
         }
 
         Collections.addAll(lore,
