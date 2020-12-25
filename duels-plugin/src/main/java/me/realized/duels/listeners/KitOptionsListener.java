@@ -40,8 +40,14 @@ public class KitOptionsListener implements Listener {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.arenaManager = plugin.getArenaManager();
+
+        // Do not register the listener if own inventory is enabled
+        if (config.isUseOwnInventoryEnabled()) {
+            return;
+        }
+
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
-        plugin.getServer().getPluginManager().registerEvents(CompatUtil.isPre1_14() ? new SumoPre1_14Listener() : new SumoPost1_14Listener(), plugin);
+        plugin.getServer().getPluginManager().registerEvents(CompatUtil.isPre1_14() ? new ComboPre1_14Listener() : new ComboPost1_14Listener(), plugin);
     }
 
     private boolean isEnabled(final ArenaImpl arena, final Characteristic characteristic) {
@@ -131,8 +137,7 @@ public class KitOptionsListener implements Listener {
         event.setCancelled(true);
     }
 
-    private class SumoPre1_14Listener implements Listener {
-
+    private class ComboPre1_14Listener implements Listener {
 
         @EventHandler
         public void on(final MatchStartEvent event) {
@@ -144,7 +149,7 @@ public class KitOptionsListener implements Listener {
 
             for (final Player player : event.getPlayers()) {
                 MetadataUtil.put(plugin, player, METADATA_KEY, player.getMaximumNoDamageTicks());
-                player.setMaximumNoDamageTicks(1);
+                player.setMaximumNoDamageTicks(0);
             }
         }
 
@@ -174,7 +179,7 @@ public class KitOptionsListener implements Listener {
         }
     }
 
-    private class SumoPost1_14Listener implements Listener {
+    private class ComboPost1_14Listener implements Listener {
 
         @EventHandler
         public void on(final EntityDamageByEntityEvent event) {
