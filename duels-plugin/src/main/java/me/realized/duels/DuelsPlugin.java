@@ -35,6 +35,7 @@ import me.realized.duels.listeners.DamageListener;
 import me.realized.duels.listeners.EnderpearlListener;
 import me.realized.duels.listeners.KitItemListener;
 import me.realized.duels.listeners.KitOptionsListener;
+import me.realized.duels.listeners.LingerPotionListener;
 import me.realized.duels.listeners.PotionListener;
 import me.realized.duels.listeners.ProjectileHitListener;
 import me.realized.duels.listeners.TeleportListener;
@@ -187,6 +188,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         new ProjectileHitListener(this);
         new EnderpearlListener(this);
         new KitOptionsListener(this);
+        new LingerPotionListener(this);
 
         new Metrics(this, BSTATS_ID);
 

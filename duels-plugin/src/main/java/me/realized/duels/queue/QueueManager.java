@@ -161,7 +161,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
                         remove.add(opponent);
 
                         final Settings setting = new Settings(plugin);
-                        setting.setKit(kitManager.get(queue.getKit().getName()));
+                        setting.setKit(queue.getKit() != null ? kitManager.get(queue.getKit().getName()) : null);
                         setting.setBet(queue.getBet());
                         setting.getCache().put(player.getUniqueId(), current.getInfo());
                         setting.getCache().put(other.getUniqueId(), opponent.getInfo());

@@ -11,6 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -50,7 +51,7 @@ public class KitItemListener implements Listener {
         return item != null && item.getType() != Material.AIR && Tags.hasKey(item, ItemData.DUELS_ITEM_IDENTIFIER);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void on(final InventoryClickEvent event) {
         final Player player = (Player) event.getWhoClicked();
 
@@ -75,7 +76,7 @@ public class KitItemListener implements Listener {
         Log.warn(String.format(WARNING_CONSOLE, player.getName()));
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void on(final PlayerInteractEvent event) {
         final Player player = event.getPlayer();
 
@@ -95,7 +96,7 @@ public class KitItemListener implements Listener {
         Log.warn(String.format(WARNING_CONSOLE, player.getName()));
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void on(final PlayerPickupItemEvent event) {
         final Player player = event.getPlayer();
 

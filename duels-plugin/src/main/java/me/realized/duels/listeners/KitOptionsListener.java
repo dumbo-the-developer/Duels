@@ -23,6 +23,7 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -112,6 +113,18 @@ public class KitOptionsListener implements Listener {
 
         if (config.isSoupCancelIfAlreadyFull() && player.getHealth() == player.getMaxHealth()) {
             return;
+        }
+
+        final ItemStack bowl = config.isSoupRemoveEmptyBowl() ? null : new ItemStack(Material.BOWL);
+
+        if (CompatUtil.isPre1_10()) {
+            player.getInventory().setItem(player.getInventory().getHeldItemSlot(), bowl);
+        } else {
+            if (event.getHand() == EquipmentSlot.OFF_HAND) {
+                player.getInventory().setItemInOffHand(bowl);
+            } else {
+                player.getInventory().setItemInMainHand(bowl);
+            }
         }
 
         player.getInventory().setItem(player.getInventory().getHeldItemSlot(), config.isSoupRemoveEmptyBowl() ? null : new ItemStack(Material.BOWL));

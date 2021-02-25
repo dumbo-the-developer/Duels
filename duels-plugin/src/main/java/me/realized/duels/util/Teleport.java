@@ -5,7 +5,6 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.hook.hooks.EssentialsHook;
 import me.realized.duels.util.compat.Players;
 import me.realized.duels.util.metadata.MetadataUtil;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -61,12 +60,6 @@ public final class Teleport implements Loadable, Listener {
             essentials.setBackLocation(player, location);
         }
 
-        final Chunk chunk = location.getChunk();
-
-        if (!chunk.isLoaded()) {
-            chunk.load();
-        }
-
         MetadataUtil.put(plugin, player, METADATA_KEY, location.clone());
 
         if (!player.teleport(location)) {
@@ -81,14 +74,20 @@ public final class Teleport implements Loadable, Listener {
             return;
         }
 
-        plugin.doSyncAfter(() -> Players.getOnlinePlayers().forEach(online -> {
-            if (player.canSee(online) && online.canSee(player)) {
-                player.hidePlayer(online);
-                online.hidePlayer(player);
-                player.showPlayer(online);
-                online.showPlayer(player);
+        plugin.doSyncAfter(() -> {
+            if (!player.isOnline()) {
+                return;
             }
-        }), 1L);
+
+            Players.getOnlinePlayers().forEach(online -> {
+                if (player.canSee(online) && online.canSee(player)) {
+                    player.hidePlayer(online);
+                    online.hidePlayer(player);
+                    player.showPlayer(online);
+                    online.showPlayer(player);
+                }
+            });
+        }, 1L);
     }
 
     /**

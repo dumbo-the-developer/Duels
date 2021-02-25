@@ -48,6 +48,10 @@ public final class CompatUtil {
         return SUB_VERSION < 12;
     }
 
+    public static boolean isPre1_10() {
+        return SUB_VERSION < 10;
+    }
+
     public static boolean isPre1_9() {
         return SUB_VERSION < 9;
     }

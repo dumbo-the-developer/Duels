@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 9
+config-version: 10
 
 # If set to 'true', a notification and a download link will be printed on the console whenever an update is available.
 # default: true
@@ -159,6 +159,10 @@ duel:
       # default: false
       enabled: false
 
+      # If set to 'true', start commands will run only for matches started through the queue system.
+      # default: false
+      queue-matches-only: false
+
       # Available placeholders:
       # %player% - Name of the player entering the match
       commands:
@@ -168,6 +172,10 @@ duel:
       # If set to 'true', the commands listed below will run at the end of a match.
       # default: false
       enabled: false
+
+      # If set to 'true', end commands will run only for matches started through the queue system.
+      # default: false
+      queue-matches-only: false
 
       # Available placeholders:
       # %winner% - Name of the winner of the match

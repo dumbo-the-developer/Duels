@@ -52,7 +52,7 @@ public class FactionsHook extends PluginHook<DuelsPlugin> {
             final MPlayer mPlayer = event.getMPlayer();
             final Player player = mPlayer.getPlayer();
 
-            if (!arenaManager.isInMatch(player)) {
+            if (player == null || !arenaManager.isInMatch(player)) {
                 return;
             }
 
@@ -70,7 +70,7 @@ public class FactionsHook extends PluginHook<DuelsPlugin> {
 
             final Player player = event.getfPlayer().getPlayer();
 
-            if (!arenaManager.isInMatch(player)) {
+            if (player == null || !arenaManager.isInMatch(player)) {
                 return;
             }
 

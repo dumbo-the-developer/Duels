@@ -91,9 +91,13 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean startCommandsEnabled;
     @Getter
+    private boolean startCommandsQueueOnly;
+    @Getter
     private List<String> startCommands;
     @Getter
     private boolean endCommandsEnabled;
+    @Getter
+    private boolean endCommandsQueueOnly;
     @Getter
     private List<String> endCommands;
     @Getter
@@ -146,7 +150,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private int defaultRating;
     @Getter
-    private boolean queueMatchesOnly;
+    private boolean ratingQueueOnly;
 
     @Getter
     private boolean specRequiresClearedInventory;
@@ -281,8 +285,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         useOwnInventoryPreventDurabLoss = configuration.getBoolean("duel.use-own-inventory.prevent-durability-loss", true);
         maxDuration = configuration.getInt("duel.match.max-duration", -1);
         startCommandsEnabled = configuration.getBoolean("duel.match.start-commands.enabled", false);
+        startCommandsQueueOnly = configuration.getBoolean("duel.match.start-commands.queue-matches-only", false);
         startCommands = configuration.getStringList("duel.match.start-commands.commands");
         endCommandsEnabled = configuration.getBoolean("duel.match.end-commands.enabled", false);
+        endCommandsQueueOnly = configuration.getBoolean("duel.match.end-commands.queue-matches-only", false);
         endCommands = configuration.getStringList("duel.match.end-commands.commands");
         projectileHitMessageEnabled = configuration.getBoolean("duel.projectile-hit-message.enabled", true);
         projectileHitMessageTypes = configuration.getStringList("duel.projectile-hit-message.types");
@@ -309,7 +315,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         ratingEnabled = configuration.getBoolean("rating.enabled", true);
         kFactor = Math.max(configuration.getInt("rating.k-factor", 32), 1);
         defaultRating = Math.max(configuration.getInt("rating.default-rating", 1400), 0);
-        queueMatchesOnly = configuration.getBoolean("rating.queue-matches-only", true);
+        ratingQueueOnly = configuration.getBoolean("rating.queue-matches-only", true);
 
         specRequiresClearedInventory = configuration.getBoolean("spectate.requires-cleared-inventory", false);
         specAddInvisibilityEffect = configuration.getBoolean("spectate.add-invisibility-effect", true);

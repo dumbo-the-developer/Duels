@@ -464,7 +464,7 @@ public class DuelManager implements Loadable {
                 }
             }
 
-            if (config.isStartCommandsEnabled()) {
+            if (config.isStartCommandsEnabled() && !(source == null && config.isStartCommandsQueueOnly())) {
                 try {
                     for (final String command : config.getStartCommands()) {
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", player.getName()));
@@ -525,7 +525,7 @@ public class DuelManager implements Loadable {
             int loserRating = kit == null ? loser.getRating() : loser.getRating(kit);
             int change = 0;
 
-            if (config.isRatingEnabled() && !(!match.isFromQueue() && config.isQueueMatchesOnly())) {
+            if (config.isRatingEnabled() && !(!match.isFromQueue() && config.isRatingQueueOnly())) {
                 change = RatingUtil.getChange(config.getKFactor(), winnerRating, loserRating);
                 winner.setRating(kit, winnerRating = winnerRating + change);
                 loser.setRating(kit, loserRating = loserRating - change);
@@ -663,7 +663,7 @@ public class DuelManager implements Loadable {
                 plugin.doSyncAfter(() -> {
                     handleWinner(winner, player, arena, match);
 
-                    if (config.isEndCommandsEnabled()) {
+                    if (config.isEndCommandsEnabled() && !(!match.isFromQueue() && config.isEndCommandsQueueOnly())) {
                         try {
                             for (final String command : config.getEndCommands()) {
                                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command

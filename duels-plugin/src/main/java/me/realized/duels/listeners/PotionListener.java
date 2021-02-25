@@ -2,11 +2,13 @@ package me.realized.duels.listeners;
 
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManagerImpl;
+import me.realized.duels.util.compat.CompatUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -40,11 +42,19 @@ public class PotionListener implements Listener {
             return;
         }
 
-        final int amount = item.getAmount();
-        final int heldSlot = player.getInventory().getHeldItemSlot();
         plugin.doSync(() -> {
-            if (amount <= 1) {
-                player.getInventory().setItem(heldSlot, null);
+            if (item.getAmount() <= 1) {
+                if (CompatUtil.isPre1_10()) {
+                    player.getInventory().setItem(player.getInventory().getHeldItemSlot(), null);
+                } else {
+                    final ItemStack held = player.getInventory().getItemInMainHand();
+
+                    if (held.getType() == Material.GLASS_BOTTLE) {
+                        player.getInventory().setItemInMainHand(null);
+                    } else {
+                        player.getInventory().setItemInOffHand(null);
+                    }
+                }
             } else {
                 player.getInventory().removeItem(new ItemStack(Material.GLASS_BOTTLE, 1));
             }

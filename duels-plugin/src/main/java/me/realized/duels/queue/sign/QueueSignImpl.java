@@ -52,7 +52,7 @@ public class QueueSignImpl implements QueueSign {
         sign.setLine(1, replace(lines[1], 0, 0));
         sign.setLine(2, replace(lines[2], 0, 0));
         sign.setLine(3, replace(lines[3], 0, 0));
-        sign.update(true);
+        sign.update();
     }
 
     private String replace(final String line, final int inQueue, final long inMatch) {
@@ -70,7 +70,7 @@ public class QueueSignImpl implements QueueSign {
 
         if (queue.isRemoved()) {
             sign.setType(Material.AIR);
-            sign.update(true);
+            sign.update();
             return;
         }
 
@@ -88,7 +88,7 @@ public class QueueSignImpl implements QueueSign {
         sign.setLine(1, replace(lines[1], inQueue, inMatch));
         sign.setLine(2, replace(lines[2], inQueue, inMatch));
         sign.setLine(3, replace(lines[3], inQueue, inMatch));
-        sign.update(true);
+        sign.update();
     }
 
     @Override
