@@ -68,7 +68,6 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
@@ -178,7 +177,7 @@ public class DuelManager implements Loadable {
         }
 
         Players.getOnlinePlayers().stream().filter(Player::isDead).forEach(player -> {
-            final PlayerInfo info = playerManager.removeAndGet(player);
+            final PlayerInfo info = playerManager.remove(player);
 
             if (info != null) {
                 player.spigot().respawn();
@@ -453,7 +452,7 @@ public class DuelManager implements Loadable {
             }
 
             player.closeInventory();
-            playerManager.put(player, new PlayerInfo(player, !config.isUseOwnInventoryEnabled()));
+            playerManager.create(player, !config.isUseOwnInventoryEnabled());
             teleport.tryTeleport(player, locations.get(++position));
 
             if (!config.isUseOwnInventoryEnabled()) {
@@ -562,11 +561,7 @@ public class DuelManager implements Loadable {
         final Player player = (Player) event.getEntity();
         final ArenaImpl arena = arenaManager.get(player);
 
-        if (arena == null) {
-            return;
-        }
-
-        if (arena.size() > 1) {
+        if (arena == null || arena.size() > 1) {
             return;
         }
 
@@ -680,30 +675,6 @@ public class DuelManager implements Loadable {
                     arena.endMatch(winner.getUniqueId(), player.getUniqueId(), Reason.OPPONENT_DEFEAT);
                 }, config.getTeleportDelay() * 20L);
             }, 1L);
-        }
-
-        @EventHandler(priority = EventPriority.HIGHEST)
-        public void on(final PlayerRespawnEvent event) {
-            final Player player = event.getPlayer();
-            final PlayerInfo info = playerManager.removeAndGet(player);
-
-            if (info != null) {
-                event.setRespawnLocation(info.getLocation());
-
-                if (essentials != null) {
-                    essentials.setBackLocation(player, event.getRespawnLocation());
-                }
-
-                plugin.doSyncAfter(() -> {
-                    if (!player.isOnline()) {
-                        info.setGiveOnLogin(true);
-                        playerManager.put(player, info);
-                        return;
-                    }
-
-                    info.restore(player);
-                }, 1L);
-            }
         }
 
         @EventHandler(ignoreCancelled = true)

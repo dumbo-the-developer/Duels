@@ -27,7 +27,6 @@ import me.realized.duels.api.user.User;
 import me.realized.duels.api.user.UserManager;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
-import me.realized.duels.player.PlayerInfo;
 import me.realized.duels.util.DateUtil;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
@@ -296,13 +295,6 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
 
         if (plugin.isUpdateAvailable() && (player.isOp() || player.hasPermission(Permissions.ADMIN))) {
             player.sendMessage(StringUtil.color(String.format(ADMIN_UPDATE_MESSAGE, plugin.getNewVersion(), plugin.getDescription().getWebsite())));
-        }
-
-        final PlayerInfo info;
-
-        if (!player.isDead() && (info = plugin.getPlayerManager().get(player)) != null && info.isGiveOnLogin()) {
-            plugin.getPlayerManager().remove(player);
-            info.restore(player);
         }
 
         final UserData user = users.get(player.getUniqueId());

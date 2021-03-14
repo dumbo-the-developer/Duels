@@ -158,7 +158,7 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
         }
 
         // Cache current player state to return to after spectating is over
-        playerManager.put(player, new PlayerInfo(player, !config.isSpecRequiresClearedInventory()));
+        playerManager.create(player, !config.isSpecRequiresClearedInventory());
         PlayerUtil.reset(player);
 
         // Teleport before putting in map prevent teleport being cancelled by SpectateListener
@@ -203,7 +203,7 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
         player.setAllowFlight(false);
         Collisions.setCollidable(player, true);
 
-        final PlayerInfo info = playerManager.removeAndGet(player);
+        final PlayerInfo info = playerManager.remove(player);
 
         if (info != null) {
             teleport.tryTeleport(player, info.getLocation(), failed -> {

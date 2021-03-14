@@ -10,13 +10,29 @@ import org.bukkit.inventory.ItemStack;
 
 public final class PlayerUtil {
 
-    private PlayerUtil() {}
+    private static final double DEFAULT_MAX_HEALTH = 20.0D;
+    private static final int DEFAULT_MAX_FOOD_LEVEL = 20;
+
+    private static void setMaxHealth(final Player player) {
+        if (CompatUtil.isPre1_9()) {
+            player.setHealth(player.getMaxHealth());
+        } else {
+            final AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+
+            if (attribute == null) {
+                player.setHealth(DEFAULT_MAX_HEALTH);
+                return;
+            }
+
+            player.setHealth(attribute.getDefaultValue());
+        }
+    }
 
     public static void reset(final Player player) {
         player.setFireTicks(0);
         player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
         setMaxHealth(player);
-        player.setFoodLevel(20);
+        player.setFoodLevel(DEFAULT_MAX_FOOD_LEVEL);
         player.setItemOnCursor(null);
 
         final Inventory top = player.getOpenInventory().getTopInventory();
@@ -30,25 +46,5 @@ public final class PlayerUtil {
         player.updateInventory();
     }
 
-    private static void setMaxHealth(final Player player) {
-        if (CompatUtil.isPre1_9()) {
-            player.setHealth(player.getMaxHealth());
-        } else {
-            final AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
-
-            if (attribute == null) {
-                player.setHealth(20.0D);
-                return;
-            }
-
-            final double maxHealth = attribute.getValue();
-
-            if (maxHealth == 0.0D) {
-                player.setHealth(attribute.getDefaultValue());
-                return;
-            }
-
-            player.setHealth(maxHealth);
-        }
-    }
+    private PlayerUtil() {}
 }

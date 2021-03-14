@@ -26,13 +26,9 @@ public class PlayerInfo {
     @Setter
     private Location location;
 
-    @Getter
-    @Setter
-    private boolean giveOnLogin;
-
-    public PlayerInfo(final Player player, final boolean inventory) {
-        this.inventory = inventory ? player.getInventory().getContents().clone() : new ItemStack[0];
-        this.armor = inventory ? player.getInventory().getArmorContents().clone() : new ItemStack[0];
+    public PlayerInfo(final Player player, final boolean cacheInventory) {
+        this.inventory = cacheInventory ? player.getInventory().getContents().clone() : new ItemStack[0];
+        this.armor = cacheInventory ? player.getInventory().getArmorContents().clone() : new ItemStack[0];
         this.effects = player.getActivePotionEffects();
         this.health = player.getHealth();
         this.hunger = player.getFoodLevel();
