@@ -13,19 +13,22 @@ public final class PlayerUtil {
     private static final double DEFAULT_MAX_HEALTH = 20.0D;
     private static final int DEFAULT_MAX_FOOD_LEVEL = 20;
 
-    private static void setMaxHealth(final Player player) {
+    public static double getMaxHealth(final Player player) {
         if (CompatUtil.isPre1_9()) {
-            player.setHealth(player.getMaxHealth());
+            return player.getMaxHealth();
         } else {
             final AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
 
             if (attribute == null) {
-                player.setHealth(DEFAULT_MAX_HEALTH);
-                return;
+                return DEFAULT_MAX_HEALTH;
             }
 
-            player.setHealth(attribute.getDefaultValue());
+            return attribute.getDefaultValue();
         }
+    }
+
+    private static void setMaxHealth(final Player player) {
+        player.setHealth(getMaxHealth(player));
     }
 
     public static void reset(final Player player) {

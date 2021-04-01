@@ -9,10 +9,6 @@ public final class Titles extends CompatBase {
     private Titles() {}
 
     public static void send(final Player player, final String title, final String subtitle, final int fadeIn, final int stay, final int fadeOut) {
-        if (CompatUtil.isPre1_8()) {
-            return;
-        }
-
         if (CompatUtil.hasSendTitle()) {
             player.sendTitle(StringUtil.color(title), subtitle != null ? StringUtil.color(subtitle) : null, fadeIn, stay, fadeOut);
         } else {

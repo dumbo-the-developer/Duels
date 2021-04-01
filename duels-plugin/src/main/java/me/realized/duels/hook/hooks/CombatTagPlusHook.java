@@ -6,6 +6,7 @@ import me.realized.duels.config.Config;
 import me.realized.duels.util.hook.PluginHook;
 import net.minelink.ctplus.CombatTagPlus;
 import net.minelink.ctplus.event.PlayerCombatTagEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,7 +22,7 @@ public class CombatTagPlusHook extends PluginHook<DuelsPlugin> {
         super(plugin, NAME);
         this.config = plugin.getConfiguration();
         this.arenaManager = plugin.getArenaManager();
-        plugin.getServer().getPluginManager().registerEvents(new CombatTagPlusListener(), plugin);
+        Bukkit.getPluginManager().registerEvents(new CombatTagPlusListener(), plugin);
     }
 
     public boolean isTagged(final Player player) {

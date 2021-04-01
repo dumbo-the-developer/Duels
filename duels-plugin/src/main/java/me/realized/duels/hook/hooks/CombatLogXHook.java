@@ -6,6 +6,7 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.config.Config;
 import me.realized.duels.util.hook.PluginHook;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -28,7 +29,7 @@ public class CombatLogXHook extends PluginHook<DuelsPlugin> {
             throw new RuntimeException("This version of " + getName() + " is not supported. Please try upgrading to the latest version.");
         }
 
-        plugin.getServer().getPluginManager().registerEvents(new CombatLogXListener(), plugin);
+        Bukkit.getPluginManager().registerEvents(new CombatLogXListener(), plugin);
     }
 
     public boolean isTagged(final Player player) {

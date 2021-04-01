@@ -18,7 +18,7 @@ public class QueueSignData {
     private QueueSignData() {}
 
     public QueueSignData(final QueueSignImpl sign) {
-        this.location = new LocationData(sign.getLocation());
+        this.location = LocationData.fromLocation(sign.getLocation());
 
         final Queue queue = sign.getQueue();
         this.kit = queue.getKit() != null ? queue.getKit().getName() : null;

@@ -24,6 +24,7 @@ import me.realized.duels.command.commands.duels.DuelsCommand;
 import me.realized.duels.command.commands.queue.QueueCommand;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
+import me.realized.duels.data.ItemData;
 import me.realized.duels.data.UserManagerImpl;
 import me.realized.duels.duel.DuelManager;
 import me.realized.duels.extension.ExtensionClassLoader;
@@ -47,13 +48,14 @@ import me.realized.duels.request.RequestManager;
 import me.realized.duels.setting.SettingsManager;
 import me.realized.duels.shaded.bstats.Metrics;
 import me.realized.duels.spectate.SpectateManagerImpl;
+import me.realized.duels.teleport.Teleport;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.Log.LogSource;
 import me.realized.duels.util.Reloadable;
-import me.realized.duels.util.Teleport;
 import me.realized.duels.util.command.AbstractCommand;
 import me.realized.duels.util.gui.GuiListener;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -73,7 +75,12 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private static DuelsPlugin instance;
 
     @Getter
-    private final Gson gson = new GsonBuilder().excludeFieldsWithModifiers(Modifier.TRANSIENT).setPrettyPrinting().create();
+    private final Gson gson = new GsonBuilder()
+        .excludeFieldsWithModifiers(Modifier.TRANSIENT)
+        .setPrettyPrinting()
+        .registerTypeAdapter(ItemData.class, ItemData.DESERIALIZER)
+        .create();
+
     private final List<Loadable> loadables = new ArrayList<>();
     private int lastLoad;
 
@@ -118,8 +125,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     private final Map<String, AbstractCommand<DuelsPlugin>> commands = new HashMap<>();
     private final List<Listener> registeredListeners = new ArrayList<>();
-    @Getter
-    private boolean disabling;
 
     @Getter
     private volatile boolean updateAvailable;
@@ -219,7 +224,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     @Override
     public void onDisable() {
-        disabling = true;
         final long start = System.currentTimeMillis();
         long last = start;
         logManager.debug("onDisable start -> " + start + "\n");
@@ -229,7 +233,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         logManager.debug("Log#clearSources done (took " + Math.abs(last - System.currentTimeMillis()) + "ms)");
         logManager.handleDisable();
         instance = null;
-        disabling = false;
         log(Level.INFO, "Disable process took " + (System.currentTimeMillis() - start) + "ms.");
     }
 
@@ -333,7 +336,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     public void registerListener(@Nonnull final Listener listener) {
         Objects.requireNonNull(listener, "listener");
         registeredListeners.add(listener);
-        getServer().getPluginManager().registerEvents(listener, this);
+        Bukkit.getPluginManager().registerEvents(listener, this);
     }
 
     @Override
@@ -369,37 +372,37 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Override
     public BukkitTask doSync(@Nonnull final Runnable task) {
         Objects.requireNonNull(task, "task");
-        return getServer().getScheduler().runTask(this, task);
+        return Bukkit.getScheduler().runTask(this, task);
     }
 
     @Override
     public BukkitTask doSyncAfter(@Nonnull final Runnable task, final long delay) {
         Objects.requireNonNull(task, "task");
-        return getServer().getScheduler().runTaskLater(this, task, delay);
+        return Bukkit.getScheduler().runTaskLater(this, task, delay);
     }
 
     @Override
     public BukkitTask doSyncRepeat(@Nonnull final Runnable task, final long delay, final long period) {
         Objects.requireNonNull(task, "task");
-        return getServer().getScheduler().runTaskTimer(this, task, delay, period);
+        return Bukkit.getScheduler().runTaskTimer(this, task, delay, period);
     }
 
     @Override
     public BukkitTask doAsync(@Nonnull final Runnable task) {
         Objects.requireNonNull(task, "task");
-        return getServer().getScheduler().runTaskAsynchronously(this, task);
+        return Bukkit.getScheduler().runTaskAsynchronously(this, task);
     }
 
     @Override
     public BukkitTask doAsyncAfter(@Nonnull final Runnable task, final long delay) {
         Objects.requireNonNull(task, "task");
-        return getServer().getScheduler().runTaskLaterAsynchronously(this, task, delay);
+        return Bukkit.getScheduler().runTaskLaterAsynchronously(this, task, delay);
     }
 
     @Override
     public BukkitTask doAsyncRepeat(@Nonnull final Runnable task, final long delay, final long period) {
         Objects.requireNonNull(task, "task");
-        return getServer().getScheduler().runTaskTimerAsynchronously(this, task, delay, period);
+        return Bukkit.getScheduler().runTaskTimerAsynchronously(this, task, delay, period);
     }
 
     @Override
@@ -410,7 +413,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     @Override
     public void cancelTask(final int id) {
-        getServer().getScheduler().cancelTask(id);
+        Bukkit.getScheduler().cancelTask(id);
     }
 
     @Override

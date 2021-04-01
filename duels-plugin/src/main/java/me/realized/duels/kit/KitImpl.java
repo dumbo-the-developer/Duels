@@ -15,7 +15,9 @@ import me.realized.duels.api.event.kit.KitEquipEvent;
 import me.realized.duels.api.kit.Kit;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.setting.Settings;
+import me.realized.duels.util.inventory.InventoryUtil;
 import me.realized.duels.util.inventory.ItemBuilder;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -54,34 +56,7 @@ public class KitImpl extends BaseButton implements Kit {
 
     public KitImpl(final DuelsPlugin plugin, final String name, final PlayerInventory inventory) {
         this(plugin, name, null, false, false, new HashSet<>());
-
-        final Map<Integer, ItemStack> contents = new HashMap<>();
-
-        for (int i = 0; i < inventory.getSize(); i++) {
-            final ItemStack item = inventory.getItem(i);
-
-            if (item == null || item.getType() == Material.AIR) {
-                continue;
-            }
-
-            contents.put(i, item.clone());
-        }
-
-        items.put("INVENTORY", contents);
-
-        final Map<Integer, ItemStack> armorContents = new HashMap<>();
-
-        for (int i = inventory.getArmorContents().length - 1; i >= 0; i--) {
-            final ItemStack item = inventory.getArmorContents()[i];
-
-            if (item == null || item.getType() == Material.AIR) {
-                continue;
-            }
-
-            armorContents.put(4 - i, inventory.getArmorContents()[i].clone());
-        }
-
-        items.put("ARMOR", armorContents);
+        InventoryUtil.addToMap(inventory, items);
     }
 
     // Never-null since if null item is passed to the constructor, a default item is passed to super
@@ -106,19 +81,13 @@ public class KitImpl extends BaseButton implements Kit {
     public boolean equip(@Nonnull final Player player) {
         Objects.requireNonNull(player, "player");
         final KitEquipEvent event = new KitEquipEvent(player, this);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
 
         if (event.isCancelled()) {
             return false;
         }
 
-        for (final Map.Entry<Integer, ItemStack> entry : items.get("INVENTORY").entrySet()) {
-            player.getInventory().setItem(entry.getKey(), entry.getValue().clone());
-        }
-
-        final ItemStack[] armor = new ItemStack[4];
-        items.get("ARMOR").forEach((slot, item) -> armor[4 - slot] = item.clone());
-        player.getInventory().setArmorContents(armor);
+        InventoryUtil.fillFromMap(player.getInventory(), items);
         player.updateInventory();
         return true;
     }

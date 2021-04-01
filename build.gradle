@@ -34,6 +34,11 @@ subprojects {
         }
 
         maven {
+            name 'mojang-repo'
+            url 'https://libraries.minecraft.net/'
+        }
+
+        maven {
             name 'mvdw-repo'
             url 'http://repo.mvdw-software.com/content/groups/public/'
         }

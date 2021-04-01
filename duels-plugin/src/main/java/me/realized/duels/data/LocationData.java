@@ -6,6 +6,10 @@ import org.bukkit.World;
 
 public class LocationData {
 
+    public static LocationData fromLocation(final Location location) {
+        return new LocationData(location);
+    }
+
     private String world;
     private double x;
     private double y;
@@ -16,20 +20,16 @@ public class LocationData {
     // for Gson
     private LocationData() {}
 
-    public LocationData(final World world, final double x, final double y, final double z) {
+    private LocationData(final World world, final double x, final double y, final double z, final float pitch, final float yaw) {
         this.x = x;
         this.y = y;
         this.z = z;
         this.world = world.getName();
-    }
-
-    public LocationData(final World world, final double x, final double y, final double z, final float pitch, final float yaw) {
-        this(world, x, y, z);
         this.pitch = pitch;
         this.yaw = yaw;
     }
 
-    public LocationData(final Location location) {
+    private LocationData(final Location location) {
         this(location.getWorld(), location.getX(), location.getY(), location.getZ(), location.getPitch(), location.getYaw());
     }
 

@@ -4,6 +4,7 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.spectate.SpectateManagerImpl;
 import me.realized.duels.util.compat.CompatUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,7 +27,7 @@ public class LingerPotionListener {
             return;
         }
 
-        plugin.getServer().getPluginManager().registerEvents(new Post1_9Listener(), plugin);
+        Bukkit.getPluginManager().registerEvents(new Post1_9Listener(), plugin);
     }
 
     public class Post1_9Listener implements Listener {

@@ -1,176 +1,61 @@
 package me.realized.duels.data;
 
-import java.util.ArrayList;
+import com.google.common.collect.Sets;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import java.lang.reflect.Type;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import me.realized.duels.util.EnumUtil;
 import me.realized.duels.util.StringUtil;
-import me.realized.duels.util.compat.Attributes;
 import me.realized.duels.util.compat.CompatUtil;
 import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.compat.Potions;
-import me.realized.duels.util.compat.Potions.PotionType;
-import me.realized.duels.util.compat.SpawnEggs;
-import me.realized.duels.util.compat.Tags;
+import me.realized.duels.util.compat.nbt.NBT;
+import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionData;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 
 public class ItemData {
 
+    public static transient final ItemDataDeserializer DESERIALIZER = new ItemDataDeserializer();
     public static transient final String DUELS_ITEM_IDENTIFIER = "DuelsKitContent";
+
+    public static ItemData fromItemStack(final ItemStack item) {
+        return new ItemData(item);
+    }
 
     private String material;
     private int amount;
     private short data;
 
-    private String itemData;
-    private List<AttributeData> attributeModifiers;
-    private Map<String, Integer> enchantments;
-    private String displayName;
-    private List<String> lore;
-    private List<String> flags;
-    private String owner;
-    private String author;
-    private String title;
-    private List<String> contents;
-    private Map<String, String> effects;
-    private String color;
-    private boolean unbreakable;
+    private String nbt;
 
-    // for Gson
+    // For Gson deserializer
     private ItemData() {}
 
-    public ItemData(final ItemStack item) {
+    private ItemData(ItemStack item) {
         this.material = item.getType().name();
         this.amount = item.getAmount() == 0 ? 1 : item.getAmount();
         this.data = Items.getDurability(item);
 
-        final Attributes attributes = new Attributes(item);
-        final List<AttributeData> modifiers = attributes.getModifiers();
+        item = NBT.removeItemTag(item, DUELS_ITEM_IDENTIFIER);
+        final Object tag = NBT.getTag(item);
 
-        if (!modifiers.isEmpty()) {
-            this.attributeModifiers = new ArrayList<>();
-            attributeModifiers.addAll(modifiers);
-        }
-
-        if (!CompatUtil.isPre1_9()) {
-            if (material.contains("POTION")) {
-                final Potions potion = Potions.fromItemStack(item);
-
-                if (potion != null) {
-                    this.itemData = potion.getType().name() + "-"
-                        + (potion.isExtended() ? "extended-" : "")
-                        + (potion.isLinger() ? "linger-" : "")
-                        + (potion.isSplash() ? "splash-" : "")
-                        + (potion.isStrong() ? "strong-" : "");
-                }
-            } else if (CompatUtil.isPre1_13() && material.equals("MONSTER_EGG")) {
-                final SpawnEggs spawnEgg = SpawnEggs.fromItemStack(item);
-
-                if (spawnEgg != null) {
-                    this.itemData = spawnEgg.getType().name() + "-";
-                }
-            }
-        }
-
-        if (material.equals("TIPPED_ARROW")) {
-            final PotionMeta meta = (PotionMeta) item.getItemMeta();
-            final PotionData potionData = meta.getBasePotionData();
-
-            if (potionData.getType().getEffectType() != null) {
-                this.itemData = potionData.getType().name() + "-"
-                    + (potionData.isExtended() ? "extended-" : "")
-                    + (potionData.isUpgraded() ? "upgraded-" : "");
-            }
-        }
-
-        if (!item.getEnchantments().isEmpty()) {
-            this.enchantments = new HashMap<>();
-
-            for (final Map.Entry<Enchantment, Integer> entry : item.getEnchantments().entrySet()) {
-                enchantments.put(entry.getKey().getName(), entry.getValue());
-            }
-        }
-
-        if (item.hasItemMeta()) {
-            final ItemMeta meta = item.getItemMeta();
-
-            if (meta.hasDisplayName()) {
-                displayName = StringUtil.reverseColor(meta.getDisplayName());
-            }
-
-            if (meta.hasLore()) {
-                lore = StringUtil.reverseColor(meta.getLore());
-            }
-
-            if (CompatUtil.hasItemFlag() && !meta.getItemFlags().isEmpty()) {
-                this.flags = new ArrayList<>();
-
-                for (final ItemFlag flag : meta.getItemFlags()) {
-                    flags.add(flag.name());
-                }
-            }
-
-            if (Items.equals(Items.HEAD, item)) {
-                final SkullMeta skullMeta = (SkullMeta) meta;
-
-                if (skullMeta.hasOwner()) {
-                    owner = skullMeta.getOwner();
-                }
-            }
-
-            if (item.getType() == Material.POTION) {
-                final PotionMeta potionMeta = (PotionMeta) meta;
-
-                if (potionMeta.hasCustomEffects()) {
-                    this.effects = new HashMap<>();
-
-                    for (final PotionEffect effect : potionMeta.getCustomEffects()) {
-                        effects.put(effect.getType().getName(), effect.getDuration() + "-" + effect.getAmplifier());
-                    }
-                }
-            }
-
-            if (item.getType() == Material.WRITTEN_BOOK) {
-                final BookMeta bookMeta = (BookMeta) meta;
-
-                if (bookMeta.hasAuthor()) {
-                    author = bookMeta.getAuthor();
-                }
-
-                if (bookMeta.hasTitle()) {
-                    title = StringUtil.reverseColor(bookMeta.getTitle());
-                }
-
-                if (bookMeta.hasPages()) {
-                    contents = StringUtil.reverseColor(bookMeta.getPages());
-                }
-            }
-
-            if (item.getType().name().contains("LEATHER_")) {
-                final LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) meta;
-
-                if (DyeColor.getByColor(leatherArmorMeta.getColor()) != null) {
-                    color = DyeColor.getByColor(leatherArmorMeta.getColor()).name();
-                }
-            }
-
-            if (!CompatUtil.isPre1_8() && (CompatUtil.isPre1_12() ? meta.spigot().isUnbreakable() : meta.isUnbreakable())) {
-                unbreakable = true;
-            }
+        if (tag != null) {
+            this.nbt = NBT.toString(tag);
         }
     }
 
@@ -181,98 +66,216 @@ public class ItemData {
             return null;
         }
 
-        ItemStack item = new ItemStack(type, amount, data);
+        ItemStack item = new ItemStack(type, amount);
+        Items.setDurability(item, data);
 
-        if (attributeModifiers != null) {
-            item = new Attributes(item).addModifiers(attributeModifiers);
+        if (nbt != null) {
+            item = NBT.parseAndSetTag(item, nbt);
         }
 
-        if (!CompatUtil.isPre1_9() && itemData != null) {
-            final List<String> args = Arrays.asList(itemData.split("-")) ;
+        return NBT.setItemString(item, DUELS_ITEM_IDENTIFIER, true);
+    }
 
-            if (material.contains("POTION")) {
-                item = new Potions(PotionType.valueOf(args.get(0)), args).toItemStack(amount);
-            } else if (material.equals("TIPPED_ARROW")) {
-                final PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-                final PotionData data = new PotionData(org.bukkit.potion.PotionType.valueOf(args.get(0)), args.contains("extended"), args.contains("upgraded"));
-                potionMeta.setBasePotionData(data);
-                item.setItemMeta(potionMeta);
-            } else if (CompatUtil.isPre1_13() && material.equals("MONSTER_EGG")) {
-                item = new SpawnEggs(EntityType.valueOf(args.get(0))).toItemStack(amount);
-            }
-        }
+    @Override
+    public String toString() {
+        return "{\"material\":" + material + ", \"amount\":" + amount + ", \"data\":" + data + ", \"nbt\":" + nbt + "}";
+    }
 
-        if (enchantments != null && !enchantments.isEmpty()) {
-            for (final Map.Entry<String, Integer> entry : enchantments.entrySet()) {
-                item.addUnsafeEnchantment(Enchantment.getByName(entry.getKey()), entry.getValue());
-            }
-        }
+    public static class ItemDataDeserializer implements JsonDeserializer<ItemData> {
 
-        final ItemMeta meta = item.getItemMeta();
+        private static final Set<String> OLD_KEYS = Sets.newHashSet(
+            "itemData", "attributeModifiers", "enchantments",
+            "displayName", "lore", "flags", "owner", "author", "title",
+            "contents", "effects", "color", "unbreakable"
+        );
 
-        if (displayName != null) {
-            meta.setDisplayName(StringUtil.color(displayName));
-        }
-
-        if (lore != null && !lore.isEmpty()) {
-            meta.setLore(StringUtil.color(lore));
-        }
-
-        if (CompatUtil.hasItemFlag() && flags != null && !flags.isEmpty()) {
-            for (final String flag : flags) {
-                meta.addItemFlags(ItemFlag.valueOf(flag));
-            }
-        }
-
-        if (owner != null && Items.equals(Items.HEAD, item)) {
-            final SkullMeta skullMeta = (SkullMeta) meta;
-            skullMeta.setOwner(owner);
-        }
-
-        if (item.getType() == Material.POTION && effects != null && !effects.isEmpty()) {
-            final PotionMeta potionMeta = (PotionMeta) meta;
-
-            for (final Map.Entry<String, String> entry : effects.entrySet()) {
-                final String[] data = entry.getValue().split("-");
-                final int duration = Integer.parseInt(data[0]);
-                final int amplifier = Integer.parseInt(data[1]);
-                potionMeta.addCustomEffect(new PotionEffect(PotionEffectType.getByName(entry.getKey()), duration, amplifier), true);
-            }
-        }
-
-        if (item.getType() == Material.WRITTEN_BOOK) {
-            final BookMeta bookMeta = (BookMeta) meta;
-
-            if (author != null) {
-                bookMeta.setAuthor(author);
+        @Override
+        public ItemData deserialize(final JsonElement element, final Type type, final JsonDeserializationContext context) throws JsonParseException {
+            if (!element.isJsonObject()) {
+                throw new JsonParseException("not a JsonObject");
             }
 
-            if (title != null) {
-                bookMeta.setTitle(StringUtil.color(title));
+            final JsonObject object = element.getAsJsonObject();
+
+            if (!object.has("material")) {
+                throw new JsonParseException("material undefined");
             }
 
-            if (contents != null && !contents.isEmpty()) {
-                bookMeta.setPages(StringUtil.color(contents));
+            final String material = object.get("material").getAsString();
+            final ItemData data = new ItemData();
+            data.material = material;
+            data.amount = object.has("amount") ? object.get("amount").getAsInt() : 1;
+            data.data = object.has("data") ? object.get("data").getAsShort() : 0;
+
+            if (object.has("nbt")) {
+                data.nbt = object.get("nbt").getAsString();
+            } else if (OLD_KEYS.stream().anyMatch(object::has)) {
+                // BACKWARD COMPATIBILITY SUPPORT:
+                // If no nbt field is available, the given JsonObject may be an older ItemData without nbt support.
+                // The old fields are converted into an nbt tag and then discarded.
+                final Object tag = NBT.newTag();
+
+                if (object.has("displayName")) {
+                    final String displayName = StringUtil.color(object.get("displayName").getAsString());
+                    final Object displayTag = NBT.getOrCreateTag(tag, "display");
+                    NBT.setString(displayTag, "Name", displayName);
+                    NBT.set(tag, "display", displayTag);
+                }
+
+                if (object.has("lore")) {
+                    final Object displayTag = NBT.getOrCreateTag(tag, "display");
+                    final Object loreList = NBT.getOrCreateList(displayTag, "Lore", 8);
+                    object.getAsJsonArray("lore").forEach(jsonElement -> NBT.add(loreList, NBT.newString(StringUtil.color(jsonElement.getAsString()))));
+                    NBT.set(displayTag, "Lore", loreList);
+                    NBT.set(tag, "display", displayTag);
+                }
+
+                if (object.has("enchantments")) {
+                    final boolean hasId = CompatUtil.hasEnchantmentId();
+                    final String fieldName = hasId ? "ench" : "Enchantments";
+                    final Object enchantsList = NBT.getOrCreateList(tag, fieldName, 10);
+                    final JsonObject enchantments = object.getAsJsonObject("enchantments");
+                    enchantments.entrySet().forEach(entry -> {
+                        final Object enchantTag = NBT.newTag();
+                        final Enchantment enchantment = Enchantment.getByName(entry.getKey());
+
+                        if (enchantment == null) {
+                            return;
+                        }
+
+                        if (hasId) {
+                            NBT.setShort(enchantTag, "id", (short) CompatUtil.getEnchantmentId(Enchantment.getByName(entry.getKey())));
+                        } else {
+                            NBT.setString(enchantTag, "id", enchantment.getKey().toString());
+                        }
+
+                        NBT.setShort(enchantTag, "lvl", entry.getValue().getAsShort());
+                        NBT.add(enchantsList, enchantTag);
+                    });
+
+                    NBT.set(tag, fieldName, enchantsList);
+                }
+
+                if (object.has("unbreakable") && object.get("unbreakable").getAsBoolean()) {
+                    NBT.setBoolean(tag, "Unbreakable", true);
+                }
+
+                if (object.has("author")) {
+                    NBT.setString(tag, "author", object.get("author").getAsString());
+                }
+
+                if (object.has("title")) {
+                    NBT.setString(tag, "title", object.get("title").getAsString());
+                }
+
+                if (object.has("contents")) {
+                    final Object pagesList = NBT.getOrCreateList(tag, "pages", 8);
+                    object.getAsJsonArray("contents").forEach(jsonElement -> {
+                        final String page = "{\"text\": \"" + StringUtil.color(jsonElement.getAsString()) + "\"}";
+                        NBT.add(pagesList, NBT.newString(page));
+                    });
+                    NBT.set(tag, "pages", pagesList);
+                }
+
+                if (object.has("color")) {
+                    final Object displayTag = NBT.getOrCreateTag(tag, "display");
+                    final Color color = DyeColor.valueOf(object.get("color").getAsString()).getColor();
+                    NBT.setInt(displayTag, "color", color.asRGB());
+                    NBT.set(tag, "display", displayTag);
+                }
+
+                if (object.has("attributeModifiers")) {
+                    final Object attributesList = NBT.getOrCreateList(tag, "AttributeModifiers", 10);
+                    object.getAsJsonArray("attributeModifiers").forEach(jsonElement -> {
+                        final JsonObject attributeObject = jsonElement.getAsJsonObject();
+                        final Object attributeTag = NBT.newTag();
+                        NBT.setString(attributeTag, "Name", attributeObject.get("name").getAsString());
+                        NBT.setString(attributeTag, "AttributeName", attributeObject.get("attrName").getAsString());
+                        NBT.setInt(attributeTag, "Operation", attributeObject.get("operation").getAsInt());
+                        NBT.setDouble(attributeTag, "Amount", attributeObject.get("amount").getAsDouble());
+
+                        final UUID random = UUID.randomUUID();
+                        NBT.setLong(attributeTag, "UUIDMost", random.getMostSignificantBits());
+                        NBT.setLong(attributeTag, "UUIDLeast", random.getLeastSignificantBits());
+
+                        if (attributeObject.has("slot")) {
+                            NBT.setString(attributeTag, "Slot", attributeObject.get("slot").getAsString());
+                        }
+
+                        NBT.add(attributesList, attributeTag);
+                    });
+                    NBT.set(tag, "AttributeModifiers", attributesList);
+                }
+
+                if (CompatUtil.hasItemFlag() && object.has("flags")) {
+                    int hideFlag = 0;
+
+                    for (final JsonElement jsonElement : object.getAsJsonArray("flags")) {
+                        ItemFlag flag = EnumUtil.getByName(jsonElement.getAsString(), ItemFlag.class);
+
+                        if (flag == null) {
+                            continue;
+                        }
+
+                        hideFlag |= (byte) (1 << flag.ordinal());
+                    }
+
+                    NBT.setInt(tag, "HideFlags", hideFlag);
+                }
+
+                if (object.has("owner")) {
+                    NBT.set(tag, "SkullOwner", NBT.getProfileTag(object.get("owner").getAsString()));
+                }
+
+                if (object.has("effects")) {
+                    final Object effectsList = NBT.getOrCreateList(tag, "CustomPotionEffects", 10);
+                    final JsonObject enchantments = object.getAsJsonObject("effects");
+                    enchantments.entrySet().forEach(entry -> {
+                        final Object effectTag = NBT.newTag();
+                        final PotionEffectType effectType = PotionEffectType.getByName(entry.getKey());
+
+                        if (effectType == null) {
+                            return;
+                        }
+
+                        final String[] effectData = entry.getValue().getAsString().split("-");
+                        NBT.setByte(effectTag, "Id", (byte) effectType.getId());
+                        NBT.setByte(effectTag, "Amplifier", (byte) Integer.parseInt(effectData[1]));
+                        NBT.setInt(effectTag, "Duration", Integer.parseInt(effectData[0]));
+                        NBT.setBoolean(effectTag, "Ambient", true);
+                        NBT.setBoolean(effectTag, "ShowParticles", true);
+                        NBT.add(effectsList, effectTag);
+                    });
+
+                    NBT.set(tag, "CustomPotionEffects", effectsList);
+                }
+
+                if (!CompatUtil.isPre1_9() && object.has("itemData")) {
+                    final List<String> args = Arrays.asList(object.get("itemData").getAsString().split("-"));
+
+                    if (material.contains("POTION") || material.equals("TIPPED_ARROW")) {
+                        final PotionType potionType = EnumUtil.getByName(args.get(0), PotionType.class);
+
+                        if (potionType != null) {
+                            final PotionData potionData = new PotionData(potionType, args.contains("extended"), args.contains("strong") || args.contains("upgraded"));
+                            NBT.setString(tag, "Potion", Potions.fromBukkit(potionData));
+                        }
+                    } else if (CompatUtil.isPre1_13() && material.equals("MONSTER_EGG")) {
+                        final EntityType entityType = EnumUtil.getByName(args.get(0), EntityType.class);
+
+                        if (entityType != null) {
+                            final Object idTag = NBT.newTag();
+                            NBT.setString(idTag, "id", entityType.getName());
+                            NBT.set(tag, "EntityTag", idTag);
+                        }
+                    }
+                }
+
+                data.nbt = NBT.toString(tag);
+                System.out.println(data.nbt);
             }
+
+            return data;
         }
-
-        if (item.getType().name().contains("LEATHER_")) {
-            final LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) meta;
-
-            if (color != null) {
-                leatherArmorMeta.setColor(DyeColor.valueOf(color).getColor());
-            }
-        }
-
-        if (!CompatUtil.isPre1_8() && unbreakable) {
-            if (CompatUtil.isPre1_12()) {
-                meta.spigot().setUnbreakable(true);
-            } else {
-                meta.setUnbreakable(true);
-            }
-        }
-
-        item.setItemMeta(meta);
-        return Tags.setKey(item, DUELS_ITEM_IDENTIFIER);
     }
 }

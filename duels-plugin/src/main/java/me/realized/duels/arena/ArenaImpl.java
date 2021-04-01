@@ -27,6 +27,7 @@ import me.realized.duels.queue.Queue;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.inventory.ItemBuilder;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -76,7 +77,7 @@ public class ArenaImpl extends BaseButton implements Arena {
         }
 
         final ArenaSetPositionEvent event = new ArenaSetPositionEvent(source, this, pos, location);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
 
         if (event.isCancelled()) {
             return false;
@@ -96,7 +97,7 @@ public class ArenaImpl extends BaseButton implements Arena {
     @Override
     public boolean setDisabled(@Nullable final CommandSender source, final boolean disabled) {
         final ArenaStateChangeEvent event = new ArenaStateChangeEvent(source, this, disabled);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
 
         if (event.isCancelled()) {
             return false;
@@ -149,7 +150,7 @@ public class ArenaImpl extends BaseButton implements Arena {
         spectateManager.stopSpectating(this);
 
         final MatchEndEvent event = new MatchEndEvent(match, winner, loser, reason);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
 
         final Queue source = match.getSource();
         match.setFinished();
@@ -197,6 +198,10 @@ public class ArenaImpl extends BaseButton implements Arena {
         }
     }
 
+    public boolean isEndGame() {
+        return size() <= 1;
+    }
+
     public int size() {
         return isUsed() ? match.getAlivePlayers().size() : 0;
     }
@@ -213,7 +218,7 @@ public class ArenaImpl extends BaseButton implements Arena {
         final List<Player> receivers = Lists.newArrayList(getPlayers());
         spectateManager.getSpectatorsImpl(this)
             .stream()
-            .map(spectator -> plugin.getServer().getPlayer(spectator.getUuid()))
+            .map(spectator -> Bukkit.getPlayer(spectator.getUuid()))
             .forEach(receivers::add);
         receivers.forEach(player -> player.sendMessage(message));
     }

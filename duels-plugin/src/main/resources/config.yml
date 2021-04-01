@@ -380,15 +380,6 @@ spectate:
   # default: false
   requires-cleared-inventory: false
 
-  # If set to 'true', players in spectator mode will receive invisibility effect.
-  # default: true
-  add-invisibility-effect: true
-
-  prevent:
-    # If set to 'true', spectators will not be able to interact with blocks.
-    # default: true
-    block-interact: true
-
   # List of commands to allow while spectating.
   whitelisted-commands:
     - 'msg'
@@ -446,6 +437,9 @@ countdown:
     # default: true
     pvp: true
 
+    # If set to 'true', block interaction will be cancelled while the countdown is ongoing.
+    # default: true
+    interact: true
 
 stats:
   # If set to 'true', kit ratings of a player will be displayed when the command '/duel stats' is executed.

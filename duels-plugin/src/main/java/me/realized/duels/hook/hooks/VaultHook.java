@@ -6,6 +6,7 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.hook.PluginHook;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
@@ -19,7 +20,7 @@ public class VaultHook extends PluginHook<DuelsPlugin> {
     public VaultHook(final DuelsPlugin plugin) {
         super(plugin, NAME);
 
-        final RegisteredServiceProvider<Economy> provider = plugin.getServer().getServicesManager().getRegistration(Economy.class);
+        final RegisteredServiceProvider<Economy> provider = Bukkit.getServicesManager().getRegistration(Economy.class);
 
         if (provider == null) {
             Log.warn("Found no available economy plugin that supports Vault. Money betting will not be available.");

@@ -155,10 +155,6 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean specRequiresClearedInventory;
     @Getter
-    private boolean specAddInvisibilityEffect;
-    @Getter
-    private boolean specPreventBlockInteract;
-    @Getter
     private List<String> specWhitelistedCommands;
 
     @Getter
@@ -173,6 +169,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean preventLaunchProjectile;
     @Getter
     private boolean preventPvp;
+    @Getter
+    private boolean preventInteract;
 
     @Getter
     private boolean displayKitRatings;
@@ -318,8 +316,6 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         ratingQueueOnly = configuration.getBoolean("rating.queue-matches-only", true);
 
         specRequiresClearedInventory = configuration.getBoolean("spectate.requires-cleared-inventory", false);
-        specAddInvisibilityEffect = configuration.getBoolean("spectate.add-invisibility-effect", true);
-        specPreventBlockInteract = configuration.getBoolean("spectate.prevent.block-interact", true);
         specWhitelistedCommands = configuration.getStringList("spectate.whitelisted-commands");
 
         cdEnabled = configuration.getBoolean("countdown.enabled", true);
@@ -328,6 +324,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         preventMovement = configuration.getBoolean("countdown.prevent.movement", true);
         preventLaunchProjectile = configuration.getBoolean("countdown.prevent.launch-projectile", true);
         preventPvp = configuration.getBoolean("countdown.prevent.pvp", true);
+        preventInteract = configuration.getBoolean("countdown.prevent.interact", true);
 
         displayKitRatings = configuration.getBoolean("stats.display-kit-ratings", true);
         displayNoKitRating = configuration.getBoolean("stats.display-nokit-rating", false);

@@ -9,6 +9,7 @@ import java.util.UUID;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.match.MatchStartEvent;
 import me.realized.duels.arena.ArenaManagerImpl;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -33,7 +34,7 @@ public class EnderpearlListener implements Listener {
 
     public EnderpearlListener(final DuelsPlugin plugin) {
         this.arenaManager = plugin.getArenaManager();
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     private void removeExpired(final Player player) {

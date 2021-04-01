@@ -32,7 +32,7 @@ import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.UUIDUtil;
-import me.realized.duels.util.compat.Players;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -74,7 +74,7 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
             folder.mkdir();
         }
 
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @Override
@@ -170,7 +170,7 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
     public void handleUnload() {
         plugin.cancelTask(topTask);
         loaded = false;
-        saveUsers(Players.getOnlinePlayers());
+        saveUsers(Bukkit.getOnlinePlayers());
         users.clear();
         names.clear();
         topRatings.clear();
@@ -251,7 +251,7 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
 
         if (!file.exists()) {
             final UserData user = new UserData(plugin, folder, defaultRating, matchesToDisplay, player);
-            plugin.doSync(() -> plugin.getServer().getPluginManager().callEvent(new UserCreateEvent(user)));
+            plugin.doSync(() -> Bukkit.getPluginManager().callEvent(new UserCreateEvent(user)));
             return user;
         }
 

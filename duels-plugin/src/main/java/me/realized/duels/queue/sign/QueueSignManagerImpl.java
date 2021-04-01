@@ -1,5 +1,6 @@
 package me.realized.duels.queue.sign;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
 import java.io.File;
@@ -30,6 +31,7 @@ import me.realized.duels.queue.Queue;
 import me.realized.duels.queue.QueueManager;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -42,7 +44,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listener {
 
-    private static final long AUTO_SAVE_INTERVAL = 20L * 60 * 5;
+    private static final String FILE_NAME = "signs.json";
+
+    private static final String SIGNS_LOADED = "Loaded %s queue sign(s).";
 
     private final DuelsPlugin plugin;
     private final Lang lang;
@@ -51,23 +55,21 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
 
     private final Map<Location, QueueSignImpl> signs = new HashMap<>();
 
-    private int autoSaveTask;
     private int updateTask;
 
     public QueueSignManagerImpl(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.lang = plugin.getLang();
         this.queueManager = plugin.getQueueManager();
-        this.file = new File(plugin.getDataFolder(), "signs.json");
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        this.file = new File(plugin.getDataFolder(), FILE_NAME);
+
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @Override
-    public void handleLoad() throws Exception {
-        if (!file.exists()) {
-            file.createNewFile();
-        } else {
-            try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
+    public void handleLoad() throws IOException {
+        if (file.exists()) {
+            try (Reader reader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8)) {
                 final List<QueueSignData> data = plugin.getGson().fromJson(reader, new TypeToken<List<QueueSignData>>() {}.getType());
 
                 if (data != null) {
@@ -80,17 +82,12 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
                     });
                 }
             }
+        } else {
+            file.createNewFile();
         }
 
-        Log.info(this, "Loaded " + signs.size() + " queue sign(s).");
+        Log.info(this, String.format(SIGNS_LOADED, signs.size()));
 
-        this.autoSaveTask = plugin.doSyncRepeat(() -> {
-            try {
-                saveQueueSigns();
-            } catch (IOException ex) {
-                Log.error(this, ex.getMessage(), ex);
-            }
-        }, AUTO_SAVE_INTERVAL, AUTO_SAVE_INTERVAL).getTaskId();
         this.updateTask = plugin.doSyncRepeat(() -> signs.entrySet().removeIf(entry -> {
             entry.getValue().update();
             return entry.getValue().getQueue().isRemoved();
@@ -98,14 +95,12 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
     }
 
     @Override
-    public void handleUnload() throws Exception {
-        plugin.cancelTask(autoSaveTask);
+    public void handleUnload() {
         plugin.cancelTask(updateTask);
-        saveQueueSigns();
         signs.clear();
     }
 
-    private void saveQueueSigns() throws IOException {
+    private void saveQueueSigns() {
         final List<QueueSignData> data = new ArrayList<>();
 
         for (final QueueSignImpl sign : signs.values()) {
@@ -116,13 +111,11 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
             data.add(new QueueSignData(sign));
         }
 
-        if (!file.exists()) {
-            file.createNewFile();
-        }
-
-        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file))) {
+        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
             plugin.getGson().toJson(data, writer);
             writer.flush();
+        } catch (IOException ex) {
+            Log.error(this, ex.getMessage(), ex);
         }
     }
 
@@ -146,9 +139,10 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
         final String kitName = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("GENERAL.none");
         signs.put(location, created = new QueueSignImpl(location, lang.getMessage("SIGN.format", "kit", kitName, "bet_amount", queue.getBet()), queue));
         signs.values().stream().filter(sign -> sign.equals(created)).forEach(QueueSignImpl::update);
+        saveQueueSigns();
 
         final QueueSignCreateEvent event = new QueueSignCreateEvent(creator, created);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
         return true;
     }
 
@@ -160,9 +154,10 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
         }
 
         queueSign.setRemoved(true);
+        saveQueueSigns();
 
         final QueueSignRemoveEvent event = new QueueSignRemoveEvent(source, queueSign);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
         return queueSign;
     }
 

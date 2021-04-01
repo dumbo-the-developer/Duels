@@ -3,12 +3,12 @@ package me.realized.duels.listeners;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.util.compat.CompatUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -24,7 +24,7 @@ public class PotionListener implements Listener {
         this.arenaManager = plugin.getArenaManager();
 
         if (plugin.getConfiguration().isRemoveEmptyBottle()) {
-            plugin.getServer().getPluginManager().registerEvents(this, plugin);
+            Bukkit.getPluginManager().registerEvents(this, plugin);
         }
     }
 

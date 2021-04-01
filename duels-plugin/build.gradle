@@ -17,6 +17,7 @@ processResources {
 }
 
 dependencies {
+    compile 'com.mojang:authlib:1.5.21'
     compile 'org.projectlombok:lombok:1.16.20'
     compile 'me.clip:placeholderapi:2.10.5'
     compile('be.maximvdw:MVdWPlaceholderAPI:3.0.1-SNAPSHOT') { transitive = false }

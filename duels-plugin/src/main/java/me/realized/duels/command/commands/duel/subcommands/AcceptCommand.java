@@ -85,7 +85,7 @@ public class AcceptCommand extends BaseCommand {
         }
 
         final RequestAcceptEvent event = new RequestAcceptEvent(player, target, request);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
 
         if (event.isCancelled()) {
             return;

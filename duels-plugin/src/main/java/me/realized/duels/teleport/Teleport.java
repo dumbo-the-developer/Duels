@@ -1,9 +1,10 @@
-package me.realized.duels.util;
+package me.realized.duels.teleport;
 
 import java.util.function.Consumer;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.hook.hooks.EssentialsHook;
-import me.realized.duels.util.compat.Players;
+import me.realized.duels.util.Loadable;
+import me.realized.duels.util.Log;
 import me.realized.duels.util.metadata.MetadataUtil;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -69,25 +70,6 @@ public final class Teleport implements Loadable, Listener {
                 failHandler.accept(player);
             }
         }
-
-        if (plugin.isDisabling()) {
-            return;
-        }
-
-        plugin.doSyncAfter(() -> {
-            if (!player.isOnline()) {
-                return;
-            }
-
-            Players.getOnlinePlayers().forEach(online -> {
-                if (player.canSee(online) && online.canSee(player)) {
-                    player.hidePlayer(online);
-                    online.hidePlayer(player);
-                    player.showPlayer(online);
-                    online.showPlayer(player);
-                }
-            });
-        }, 1L);
     }
 
     /**

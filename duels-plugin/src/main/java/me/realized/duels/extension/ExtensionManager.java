@@ -10,6 +10,7 @@ import me.realized.duels.api.extension.DuelsExtension;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.NumberUtil;
+import org.bukkit.Bukkit;
 
 public class ExtensionManager implements Loadable {
 
@@ -54,7 +55,7 @@ public class ExtensionManager implements Loadable {
                     continue;
                 }
 
-                if (!info.getDepends().isEmpty() && info.getDepends().stream().anyMatch(depend -> !plugin.getServer().getPluginManager().isPluginEnabled(depend))) {
+                if (!info.getDepends().isEmpty() && info.getDepends().stream().anyMatch(depend -> !Bukkit.getPluginManager().isPluginEnabled(depend))) {
                     Log.error(this, "Could not load extension " + file.getName() + ": This extension require the following plugins to enable - " + info.getDepends());
                     continue;
                 }
@@ -81,7 +82,7 @@ public class ExtensionManager implements Loadable {
 
                 INIT_EXTENSION.invoke(extension, plugin, info.getName(), folder, file);
                 extension.setEnabled(true);
-                Log.info(this, "Extension '" + extension.getName() + "' is now enabled.");
+                Log.info(this, "Extension '" + extension.getName() + " " + info.getVersion() + "' is now enabled.");
                 extensions.put(extension.getName(), extension);
                 this.info.put(extension, info);
             } catch (Throwable thrown) {

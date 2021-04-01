@@ -7,6 +7,7 @@ import me.realized.duels.gui.inventory.buttons.HealthButton;
 import me.realized.duels.gui.inventory.buttons.HungerButton;
 import me.realized.duels.gui.inventory.buttons.PotionCounterButton;
 import me.realized.duels.util.compat.Items;
+import me.realized.duels.util.compat.Potions;
 import me.realized.duels.util.gui.SinglePageGui;
 import me.realized.duels.util.inventory.Slots;
 import org.bukkit.Material;
@@ -27,7 +28,7 @@ public class InventoryGui extends SinglePageGui<DuelsPlugin> {
 
         for (final ItemStack item : player.getInventory().getContents()) {
             if (item != null && item.getType() != Material.AIR) {
-                if (item.equals(Items.HEAL_SPLASH_POTION)) {
+                if (Potions.isHealSplash(item)) {
                     potions++;
                 }
 

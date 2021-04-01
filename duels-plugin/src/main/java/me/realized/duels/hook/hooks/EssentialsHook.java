@@ -5,8 +5,8 @@ import com.earth2me.essentials.User;
 import java.lang.reflect.Field;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.config.Config;
-import me.realized.duels.util.compat.ReflectionUtil;
 import me.realized.duels.util.hook.PluginHook;
+import me.realized.duels.util.reflect.ReflectionUtil;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 

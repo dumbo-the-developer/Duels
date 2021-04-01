@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import me.realized.duels.util.Loadable;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -24,7 +25,7 @@ public class GuiListener<P extends JavaPlugin> implements Loadable, Listener {
     private final List<AbstractGui<P>> publicGuis = new ArrayList<>();
 
     public GuiListener(final P plugin) {
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @Override

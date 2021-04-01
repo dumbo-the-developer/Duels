@@ -3,13 +3,10 @@ package me.realized.duels.util.inventory;
 import java.util.Arrays;
 import java.util.List;
 import me.realized.duels.util.StringUtil;
-import me.realized.duels.util.compat.Items;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 
@@ -64,16 +61,6 @@ public final class ItemBuilder {
         ItemMeta meta = result.getItemMeta();
         meta.setLore(StringUtil.color(lore));
         result.setItemMeta(meta);
-        return this;
-    }
-
-    public ItemBuilder head(final Player player) {
-        if (Items.equals(Items.HEAD, result)) {
-            final SkullMeta meta = (SkullMeta) result.getItemMeta();
-            meta.setOwner(player.getName());
-            result.setItemMeta(meta);
-        }
-
         return this;
     }
 

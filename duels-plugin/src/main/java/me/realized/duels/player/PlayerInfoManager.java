@@ -1,7 +1,7 @@
 package me.realized.duels.player;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.Maps;
+import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -10,16 +10,19 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.config.Config;
 import me.realized.duels.data.LocationData;
+import me.realized.duels.data.PlayerData;
 import me.realized.duels.hook.hooks.EssentialsHook;
+import me.realized.duels.teleport.Teleport;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
-import me.realized.duels.util.Teleport;
+import me.realized.duels.util.PlayerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -37,17 +40,19 @@ import org.bukkit.event.player.PlayerRespawnEvent;
  */
 public class PlayerInfoManager implements Loadable {
 
-    private static final String FILE_NAME = "lobby.json";
+    private static final String CACHE_FILE_NAME = "player-cache.json";
 
+    private static final String LOBBY_FILE_NAME = "lobby.json";
     private static final String ERROR_LOBBY_LOAD = "Could not load lobby location!";
     private static final String ERROR_LOBBY_SAVE = "Could not save lobby location!";
     private static final String ERROR_LOBBY_DEFAULT = "Lobby location was not set, using %s's spawn location as default. Use the command /duels setlobby in-game to set the lobby location.";
 
     private final DuelsPlugin plugin;
     private final Config config;
-    private final File file;
+    private final File cacheFile;
+    private final File lobbyFile;
 
-    private final Map<UUID, PlayerInfo> cache = Maps.newHashMap();
+    private final Map<UUID, PlayerInfo> cache = new HashMap<>();
 
     private Teleport teleport;
     private EssentialsHook essentials;
@@ -58,17 +63,32 @@ public class PlayerInfoManager implements Loadable {
     public PlayerInfoManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
-        this.file = new File(plugin.getDataFolder(), FILE_NAME);
-        plugin.doSyncAfter(() -> plugin.getServer().getPluginManager().registerEvents(new PlayerInfoListener(), plugin), 1L);
+        this.cacheFile = new File(plugin.getDataFolder(), CACHE_FILE_NAME);
+        this.lobbyFile = new File(plugin.getDataFolder(), LOBBY_FILE_NAME);
+        plugin.doSyncAfter(() -> Bukkit.getPluginManager().registerEvents(new PlayerInfoListener(), plugin), 1L);
     }
 
     @Override
-    public void handleLoad() {
+    public void handleLoad() throws IOException {
         this.teleport = plugin.getTeleport();
         this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
 
-        if (file.exists()) {
-            try (Reader reader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8)) {
+        if (cacheFile.exists()) {
+            try (Reader reader = new InputStreamReader(new FileInputStream(cacheFile), Charsets.UTF_8)) {
+                final Map<UUID, PlayerData> data = plugin.getGson().fromJson(reader, new TypeToken<HashMap<UUID, PlayerData>>() {}.getType());
+
+                if (data != null) {
+                    for (final Map.Entry<UUID, PlayerData> entry : data.entrySet()) {
+                        cache.put(entry.getKey(), entry.getValue().toPlayerInfo());
+                    }
+                }
+            }
+
+            cacheFile.delete();
+        }
+
+        if (lobbyFile.exists()) {
+            try (Reader reader = new InputStreamReader(new FileInputStream(lobbyFile), Charsets.UTF_8)) {
                 this.lobby = plugin.getGson().fromJson(reader, LocationData.class).toLocation();
             } catch (IOException ex) {
                 Log.error(this, ERROR_LOBBY_LOAD, ex);
@@ -83,9 +103,36 @@ public class PlayerInfoManager implements Loadable {
         }
     }
 
-    // TODO: 3/14/21 Store PlayerInfo cache on a separate file or in each userdata file.
     @Override
-    public void handleUnload() {}
+    public void handleUnload() throws IOException {
+        Bukkit.getOnlinePlayers().stream().filter(Player::isDead).forEach(player -> {
+            final PlayerInfo info = remove(player);
+
+            if (info != null) {
+                player.spigot().respawn();
+                teleport.tryTeleport(player, info.getLocation());
+                PlayerUtil.reset(player);
+                info.restore(player);
+            }
+        });
+
+        if (cache.isEmpty()) {
+            return;
+        }
+
+        final Map<UUID, PlayerData> data = new HashMap<>();
+
+        for (final Map.Entry<UUID, PlayerInfo> entry : cache.entrySet()) {
+            data.put(entry.getKey(), PlayerData.fromPlayerInfo(entry.getValue()));
+        }
+
+        try (Writer writer = new OutputStreamWriter(new FileOutputStream(cacheFile), Charsets.UTF_8)) {
+            plugin.getGson().toJson(data, writer);
+            writer.flush();
+        }
+
+        cache.clear();
+    }
 
     /**
      * Sets a lobby location at given player's location.
@@ -97,8 +144,8 @@ public class PlayerInfoManager implements Loadable {
         final Location lobby = player.getLocation().clone();
 
         try {
-            try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
-                plugin.getGson().toJson(new LocationData(lobby), writer);
+            try (Writer writer = new OutputStreamWriter(new FileOutputStream(lobbyFile), Charsets.UTF_8)) {
+                plugin.getGson().toJson(LocationData.fromLocation(lobby), writer);
                 writer.flush();
             }
 
@@ -124,10 +171,9 @@ public class PlayerInfoManager implements Loadable {
      * Creates a cached PlayerInfo instance for given player.
      *
      * @param player Player to create a cached PlayerInfo instance
-     * @param cacheInventory true to cache inventory im PlayerInfo, false otherwise
      */
-    public void create(final Player player, final boolean cacheInventory) {
-        final PlayerInfo info = new PlayerInfo(player, cacheInventory);
+    public void create(final Player player) {
+        final PlayerInfo info = new PlayerInfo(player);
 
         if (!config.isTeleportToLastLocation()) {
             info.setLocation(lobby.clone());
@@ -172,23 +218,25 @@ public class PlayerInfoManager implements Loadable {
             final Player player = event.getPlayer();
             final PlayerInfo info = get(player);
 
-            if (info != null) {
-                event.setRespawnLocation(info.getLocation());
+            if (info == null) {
+                return;
+            }
 
-                if (essentials != null) {
-                    essentials.setBackLocation(player, event.getRespawnLocation());
+            event.setRespawnLocation(info.getLocation());
+
+            if (essentials != null) {
+                essentials.setBackLocation(player, event.getRespawnLocation());
+            }
+
+            plugin.doSyncAfter(() -> {
+                // Do not remove cached data if player left while respawning.
+                if (!player.isOnline()) {
+                    return;
                 }
 
-                plugin.doSyncAfter(() -> {
-                    // Do not remove cached data if player left while respawning.
-                    if (!player.isOnline()) {
-                        return;
-                    }
-
-                    remove(player);
-                    info.restore(player);
-                }, 1L);
-            }
+                remove(player);
+                info.restore(player);
+            }, 1L);
         }
     }
 }

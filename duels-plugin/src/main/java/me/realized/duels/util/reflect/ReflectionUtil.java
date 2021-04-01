@@ -1,4 +1,4 @@
-package me.realized.duels.util.compat;
+package me.realized.duels.util.reflect;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -47,13 +47,20 @@ public final class ReflectionUtil {
         return getNMSClass(name, true);
     }
 
-    public static Class<?> getCBClass(final String path) {
+    public static Class<?> getCBClass(final String path, final boolean logError) {
         try {
             return Class.forName("org.bukkit.craftbukkit." + VERSION + "." + path);
         } catch (ClassNotFoundException ex) {
-            Log.error(ex.getMessage(), ex);
+            if (logError) {
+                Log.error(ex.getMessage(), ex);
+            }
+
             return null;
         }
+    }
+
+    public static Class<?> getCBClass(final String path) {
+        return getCBClass(path, true);
     }
 
     public static Method getMethod(final Class<?> clazz, final String name, final Class<?>... parameters) {

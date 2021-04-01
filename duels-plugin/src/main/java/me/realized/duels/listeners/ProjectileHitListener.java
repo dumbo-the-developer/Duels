@@ -4,6 +4,7 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -27,7 +28,7 @@ public class ProjectileHitListener implements Listener {
         this.arenaManager = plugin.getArenaManager();
 
         if (plugin.getConfiguration().isProjectileHitMessageEnabled()) {
-            plugin.getServer().getPluginManager().registerEvents(this, plugin);
+            Bukkit.getPluginManager().registerEvents(this, plugin);
         }
     }
 

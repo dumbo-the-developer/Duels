@@ -25,7 +25,7 @@ public class ArenaData {
         this.disabled = arena.isDisabled();
         arena.getKits().forEach(kit -> this.kits.add(kit.getName()));
         arena.getPositions().entrySet()
-            .stream().filter(entry -> entry.getValue().getWorld() != null).forEach(entry -> positions.put(entry.getKey(), new LocationData(entry.getValue())));
+            .stream().filter(entry -> entry.getValue().getWorld() != null).forEach(entry -> positions.put(entry.getKey(), LocationData.fromLocation(entry.getValue())));
     }
 
     public ArenaImpl toArena(final DuelsPlugin plugin) {
