@@ -2,3 +2,14 @@ dependencies {
     compileOnly 'org.jetbrains:annotations-java5:22.0.0'
     implementation 'org.spigotmc:spigot-api:1.14.4-R0.1-SNAPSHOT'
 }
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = project.group.toString()
+            artifactId = project.name.toLowerCase()
+            version = project.version
+            from components.java
+        }
+    }
+}
