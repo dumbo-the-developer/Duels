@@ -6,7 +6,7 @@ dependencies {
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId = "com.github.Realizedd." + parent.name
+            groupId = project.group.toString()
             artifactId = project.name.toLowerCase()
             version = project.version
             from components.java
