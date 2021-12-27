@@ -1,7 +1,8 @@
 package me.realized.duels.kit;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
-import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -10,13 +11,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.kit.KitCreateEvent;
@@ -32,29 +32,37 @@ import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.gui.MultiPageGui;
 import me.realized.duels.util.inventory.ItemBuilder;
+import me.realized.duels.util.io.FileUtil;
+import me.realized.duels.util.json.JsonUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class KitManagerImpl implements Loadable, KitManager {
 
-    private static final long AUTO_SAVE_INTERVAL = 20L * 60 * 5;
+    private static final String FILE_NAME = "kits.json";
+
+    private static final String ERROR_NOT_ALPHANUMERIC = "Could not load kit %s: Name is not alphanumeric.";
+    private static final String KITS_LOADED = "Loaded %s kit(s).";
 
     private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
     private final File file;
+
     private final Map<String, KitImpl> kits = new LinkedHashMap<>();
 
     @Getter
     private MultiPageGui<DuelsPlugin> gui;
-    private int autoSaveTask;
 
     public KitManagerImpl(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
-        this.file = new File(plugin.getDataFolder(), "kits.json");
+        this.file = new File(plugin.getDataFolder(), FILE_NAME);
     }
 
     @Override
@@ -66,16 +74,14 @@ public class KitManagerImpl implements Loadable, KitManager {
         gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.empty.name")).build());
         plugin.getGuiListener().addGui(gui);
 
-        if (!file.exists()) {
-            file.createNewFile();
-        } else {
-            try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
-                final Map<String, KitData> data = plugin.getGson().fromJson(reader, new TypeToken<LinkedHashMap<String, KitData>>() {}.getType());
+        if (FileUtil.checkNonEmpty(file, true)) {
+            try (final Reader reader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8)) {
+                final Map<String, KitData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<LinkedHashMap<String, KitData>>() {});
 
                 if (data != null) {
                     for (final Map.Entry<String, KitData> entry : data.entrySet()) {
                         if (!StringUtil.isAlphanumeric(entry.getKey())) {
-                            Log.warn(this, "Excluding kit '" + entry.getKey() + "' from load: Name is not alphanumeric.");
+                            Log.warn(this, String.format(ERROR_NOT_ALPHANUMERIC, entry.getKey()));
                             continue;
                         }
 
@@ -85,55 +91,42 @@ public class KitManagerImpl implements Loadable, KitManager {
             }
         }
 
-        Log.info(this, "Loaded " + kits.size() + " kit(s).");
+        Log.info(this, String.format(KITS_LOADED, kits.size()));
         gui.calculatePages();
-
-        this.autoSaveTask = plugin.doSyncRepeat(() -> {
-            try {
-                saveKits();
-            } catch (IOException ex) {
-                Log.error(this, ex.getMessage(), ex);
-            }
-        }, AUTO_SAVE_INTERVAL, AUTO_SAVE_INTERVAL).getTaskId();
     }
 
     @Override
-    public void handleUnload() throws IOException {
-        plugin.cancelTask(autoSaveTask);
-
+    public void handleUnload() {
         if (gui != null) {
             plugin.getGuiListener().removeGui(gui);
         }
 
-        saveKits();
         kits.clear();
     }
 
-    private void saveKits() throws IOException {
+    void saveKits() {
         final Map<String, KitData> data = new LinkedHashMap<>();
 
         for (final Map.Entry<String, KitImpl> entry : kits.entrySet()) {
-            data.put(entry.getKey(), new KitData(entry.getValue()));
+            data.put(entry.getKey(), KitData.fromKit(entry.getValue()));
         }
 
-        if (!file.exists()) {
-            file.createNewFile();
-        }
-
-        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file))) {
-            plugin.getGson().toJson(data, writer);
+        try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
+            JsonUtil.getObjectWriter().writeValue(writer, data);
             writer.flush();
+        } catch (IOException ex) {
+            Log.error(this, ex.getMessage(), ex);
         }
     }
 
     @Nullable
     @Override
-    public KitImpl get(@Nonnull final String name) {
+    public KitImpl get(@NotNull final String name) {
         Objects.requireNonNull(name, "name");
         return kits.get(name);
     }
 
-    public KitImpl create(@Nonnull final Player creator, @Nonnull final String name, final boolean override) {
+    public KitImpl create(@NotNull final Player creator, @NotNull final String name, final boolean override) {
         Objects.requireNonNull(creator, "creator");
         Objects.requireNonNull(name, "name");
 
@@ -143,22 +136,23 @@ public class KitManagerImpl implements Loadable, KitManager {
 
         final KitImpl kit = new KitImpl(plugin, name, creator.getInventory());
         kits.put(name, kit);
+        saveKits();
 
         final KitCreateEvent event = new KitCreateEvent(creator, kit);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
         gui.calculatePages();
         return kit;
     }
 
     @Nullable
     @Override
-    public KitImpl create(@Nonnull final Player creator, @Nonnull final String name) {
+    public KitImpl create(@NotNull final Player creator, @NotNull final String name) {
         return create(creator, name, false);
     }
 
     @Nullable
     @Override
-    public KitImpl remove(@Nullable CommandSender source, @Nonnull final String name) {
+    public KitImpl remove(@Nullable CommandSender source, @NotNull final String name) {
         Objects.requireNonNull(name, "name");
 
         final KitImpl kit = kits.remove(name);
@@ -169,28 +163,28 @@ public class KitManagerImpl implements Loadable, KitManager {
 
         kit.setRemoved(true);
         plugin.getArenaManager().clearBinds(kit);
+        saveKits();
 
         final KitRemoveEvent event = new KitRemoveEvent(source, kit);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
         gui.calculatePages();
         return kit;
     }
 
     @Nullable
     @Override
-    public KitImpl remove(@Nonnull final String name) {
+    public KitImpl remove(@NotNull final String name) {
         return remove(null, name);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public List<Kit> getKits() {
         return Collections.unmodifiableList(Lists.newArrayList(kits.values()));
     }
 
     public List<String> getNames(final boolean nokit) {
-        final List<String> names = Lists.newArrayList();
-        names.addAll(kits.keySet());
+        final List<String> names = new ArrayList<>(kits.keySet());
 
         if (nokit) {
             names.add("-"); // Special case: Change the nokit rating

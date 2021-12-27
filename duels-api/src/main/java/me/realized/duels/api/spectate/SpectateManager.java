@@ -1,12 +1,12 @@
 package me.realized.duels.api.spectate;
 
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import me.realized.duels.api.arena.Arena;
 import me.realized.duels.api.event.spectate.SpectateEndEvent;
 import me.realized.duels.api.event.spectate.SpectateStartEvent;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents the SpectateManager singleton used by Duels.
@@ -22,7 +22,7 @@ public interface SpectateManager {
      * @return {@link Spectator} instance associated to player if exists or null otherwise.
      */
     @Nullable
-    Spectator get(@Nonnull final Player player);
+    Spectator get(@NotNull final Player player);
 
 
     /**
@@ -31,7 +31,7 @@ public interface SpectateManager {
      * @param player Player to check if spectating. Should not be null!
      * @return true if player is spectating or false otherwise.
      */
-    boolean isSpectating(@Nonnull final Player player);
+    boolean isSpectating(@NotNull final Player player);
 
 
     /**
@@ -50,8 +50,8 @@ public interface SpectateManager {
      * @param target Target player to teleport to. Should not be null!
      * @return Never-null {@link Result} instance indicating the outcome of this call.
      */
-    @Nonnull
-    Result startSpectating(@Nonnull final Player player, @Nonnull final Player target);
+    @NotNull
+    Result startSpectating(@NotNull final Player player, @NotNull final Player target);
 
 
     /**
@@ -61,7 +61,7 @@ public interface SpectateManager {
      *
      * @param player Player to stop spectating. Should not be null!
      */
-    void stopSpectating(@Nonnull final Player player);
+    void stopSpectating(@NotNull final Player player);
 
 
     /**
@@ -70,8 +70,8 @@ public interface SpectateManager {
      * @param arena {@link Arena} to get spectators
      * @return Never-null UnmodifiableList of {@link Spectator}s spectating given {@link Arena}
      */
-    @Nonnull
-    List<Spectator> getSpectators(@Nonnull final Arena arena);
+    @NotNull
+    List<Spectator> getSpectators(@NotNull final Arena arena);
 
 
     enum Result {

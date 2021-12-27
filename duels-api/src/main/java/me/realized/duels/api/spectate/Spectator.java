@@ -1,8 +1,8 @@
 package me.realized.duels.api.spectate;
 
 import java.util.UUID;
-import javax.annotation.Nonnull;
 import me.realized.duels.api.arena.Arena;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents a Spectator spectating a match.
@@ -16,7 +16,7 @@ public interface Spectator {
      *
      * @return {@link UUID} of this spectator.
      */
-    @Nonnull
+    @NotNull
     UUID getUuid();
 
     /**
@@ -24,6 +24,6 @@ public interface Spectator {
      *
      * @return {@link Arena} this spectator is spectating.
      */
-    @Nonnull
+    @NotNull
     Arena getArena();
 }

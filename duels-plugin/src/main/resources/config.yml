@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 9
+config-version: 10
 
 # If set to 'true', a notification and a download link will be printed on the console whenever an update is available.
 # default: true
@@ -102,8 +102,27 @@ request:
   # default: false
   prevent-creative-mode: false
 
+  use-own-inventory:
+    # If set to 'true', players will be able to choose to enable or disable own inventory duel through the Request Settings GUI.
+    # NOTE: If set to 'false', Kit Selector will first open instead of Request Settings GUI when initiating a duel request.
+    # default: true
+    enabled: true
+
+    # If set to 'true', players without the permission 'duels.use.own-inventory' will not be able to enable own inventory option.
+    # default: false
+    use-permission: false
+
+  kit-selecting:
+    # If set to 'true', players will be able to choose a kit they wish to fight with through the Kit Selector GUI.
+    # default: true
+    enabled: true
+
+    # If set to 'true', players without the permission 'duels.use.kit-select' will not be able to select a kit.
+    # default: false
+    use-permission: false
+
   arena-selecting:
-    # If set to 'true', players will be able to choose an arena they wish to fight in through a GUI.
+    # If set to 'true', players will be able to choose an arena they wish to fight in through the Arena Selector GUI.
     # default: true
     enabled: true
 
@@ -112,7 +131,7 @@ request:
     use-permission: false
 
   item-betting:
-    # If set to 'true', players will be able to choose to enable or disable item betting in the Setting GUI.
+    # If set to 'true', players will be able to choose to enable or disable item betting in the Request Settings GUI.
     # default: true
     enabled: true
 
@@ -135,20 +154,6 @@ request:
 
 
 duel:
-  use-own-inventory:
-    # If set to 'true', player's own inventory will be used in a duel instead of kits.
-    # NOTE: If this option is enabled, Kit Selector will be inaccessible in the Setting GUI.
-    # default: false
-    enabled: false
-
-    # If set to 'true', players will keep their inventory items on death.
-    # default: false
-    keep-items: false
-
-    # If set to 'true', players will not lose item durability during a duel.
-    # default: true
-    prevent-durability-loss: true
-
   match:
     # The max duration of a match, in minutes. Setting it to -1 will allow players to fight for as long as they like.
     # default: -1
@@ -159,6 +164,10 @@ duel:
       # default: false
       enabled: false
 
+      # If set to 'true', start commands will run only for matches started through the queue system.
+      # default: false
+      queue-matches-only: false
+
       # Available placeholders:
       # %player% - Name of the player entering the match
       commands:
@@ -168,6 +177,10 @@ duel:
       # If set to 'true', the commands listed below will run at the end of a match.
       # default: false
       enabled: false
+
+      # If set to 'true', end commands will run only for matches started through the queue system.
+      # default: false
+      queue-matches-only: false
 
       # Available placeholders:
       # %winner% - Name of the winner of the match
@@ -372,15 +385,6 @@ spectate:
   # default: false
   requires-cleared-inventory: false
 
-  # If set to 'true', players in spectator mode will receive invisibility effect.
-  # default: true
-  add-invisibility-effect: true
-
-  prevent:
-    # If set to 'true', spectators will not be able to interact with blocks.
-    # default: true
-    block-interact: true
-
   # List of commands to allow while spectating.
   whitelisted-commands:
     - 'msg'
@@ -416,7 +420,6 @@ countdown:
     - '&7Now in a match against &f%opponent%&7(&a%opponent_rating%&7) with kit &3%kit% &7in arena &e%arena%&7.'
 
   # Titles to display along with the countdown. Must have the same size as the countdown list size.
-  # NOTE: Titles will only display on 1.8 or above!
   titles:
     - '&f&l5'
     - '&f&l4'
@@ -438,6 +441,9 @@ countdown:
     # default: true
     pvp: true
 
+    # If set to 'true', block interaction will be cancelled while the countdown is ongoing.
+    # default: true
+    interact: true
 
 stats:
   # If set to 'true', kit ratings of a player will be displayed when the command '/duel stats' is executed.
@@ -551,7 +557,7 @@ sounds:
     - '&7Starting in &f3 &7seconds!'
     - '&7Starting in &f2 &7seconds!'
     - '&7Starting in &f1 &7second!'
-  # Remove this sound if your server version is 1.8 or lower!
+  # Remove this sound if your server version is 1.8!
   countdown-ongoing-sound-1-9:
     type: BLOCK_NOTE_PLING
     pitch: 0.95
@@ -569,7 +575,7 @@ sounds:
     volume: 1.0
     trigger-messages:
     - '&7Now in a match against &f%opponent%&7(&a%opponent_rating%&7) with kit &3%kit% &7in arena &e%arena%&7.'
-  # Remove this sound if your server version is 1.8 or lower!
+  # Remove this sound if your server version is 1.8!
   countdown-end-sound-1-9:
     type: BLOCK_NOTE_PLING
     pitch: 1.9

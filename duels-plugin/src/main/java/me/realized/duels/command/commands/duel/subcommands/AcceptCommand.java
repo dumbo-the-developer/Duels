@@ -39,9 +39,7 @@ public class AcceptCommand extends BaseCommand {
             return;
         }
 
-        GameMode gameMode = null;
-
-        if (config.isPreventCreativeMode() && (gameMode = player.getGameMode()) == GameMode.CREATIVE) {
+        if (config.isPreventCreativeMode() && player.getGameMode() == GameMode.CREATIVE) {
             lang.sendMessage(sender, "ERROR.duel.in-creative-mode");
             return;
         }
@@ -85,7 +83,7 @@ public class AcceptCommand extends BaseCommand {
         }
 
         final RequestAcceptEvent event = new RequestAcceptEvent(player, target, request);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
 
         if (event.isCancelled()) {
             return;
@@ -116,7 +114,6 @@ public class AcceptCommand extends BaseCommand {
         if (settings.isItemBetting()) {
             settings.setBaseLoc(player);
             settings.setDuelzone(player, duelzone);
-            settings.setGameMode(player, gameMode);
             bettingManager.open(settings, target, player);
         } else {
             duelManager.startMatch(player, target, settings, null, null);

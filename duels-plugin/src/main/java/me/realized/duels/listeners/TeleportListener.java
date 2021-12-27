@@ -6,7 +6,8 @@ import me.realized.duels.Permissions;
 import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.config.Lang;
 import me.realized.duels.spectate.SpectateManagerImpl;
-import me.realized.duels.util.Teleport;
+import me.realized.duels.teleport.Teleport;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -29,7 +30,7 @@ public class TeleportListener implements Listener {
         this.spectateManager = plugin.getSpectateManager();
 
         if (plugin.getConfiguration().isPreventTpToMatchPlayers()) {
-            plugin.getServer().getPluginManager().registerEvents(this, plugin);
+            Bukkit.getPluginManager().registerEvents(this, plugin);
         }
     }
 

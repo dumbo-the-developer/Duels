@@ -1,12 +1,12 @@
 package me.realized.duels.api.kit;
 
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import me.realized.duels.api.event.kit.KitCreateEvent;
 import me.realized.duels.api.event.kit.KitRemoveEvent;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents the KitManager singleton used by Duels.
@@ -20,7 +20,7 @@ public interface KitManager {
      * @return {@link Kit} instance that has a name matching with the given name or null if not exists.
      */
     @Nullable
-    Kit get(@Nonnull final String name);
+    Kit get(@NotNull final String name);
 
 
     /**
@@ -32,7 +32,7 @@ public interface KitManager {
      * @return The newly created {@link Kit} or null if a kit with given name already exists.
      */
     @Nullable
-    Kit create(@Nonnull final Player creator, @Nonnull final String name);
+    Kit create(@NotNull final Player creator, @NotNull final String name);
 
 
     /**
@@ -44,7 +44,7 @@ public interface KitManager {
      * @return The removed {@link Kit} or null if no {@link Kit} was found with the given name.
      */
     @Nullable
-    Kit remove(@Nullable CommandSender source, @Nonnull final String name);
+    Kit remove(@Nullable CommandSender source, @NotNull final String name);
 
 
     /**
@@ -53,7 +53,7 @@ public interface KitManager {
      * @see #remove(CommandSender, String)
      */
     @Nullable
-    Kit remove(@Nonnull final String name);
+    Kit remove(@NotNull final String name);
 
 
     /**
@@ -62,6 +62,6 @@ public interface KitManager {
      * @return Never-null UnmodifiableList of {@link Kit}s that are currently loaded.
      * @since 3.1.0
      */
-    @Nonnull
+    @NotNull
     List<Kit> getKits();
 }

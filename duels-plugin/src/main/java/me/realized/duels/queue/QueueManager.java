@@ -1,6 +1,7 @@
 package me.realized.duels.queue;
 
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.base.Charsets;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -15,8 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.queue.QueueCreateEvent;
@@ -42,11 +41,14 @@ import me.realized.duels.setting.Settings;
 import me.realized.duels.spectate.SpectateManagerImpl;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
-import me.realized.duels.util.RatingUtil;
+import me.realized.duels.util.NumberUtil;
 import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.gui.MultiPageGui;
 import me.realized.duels.util.inventory.InventoryUtil;
 import me.realized.duels.util.inventory.ItemBuilder;
+import me.realized.duels.util.io.FileUtil;
+import me.realized.duels.util.json.JsonUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -54,10 +56,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class QueueManager implements Loadable, DQueueManager, Listener {
 
-    private static final long AUTO_SAVE_INTERVAL = 20L * 60 * 5;
+    private static final String FILE_NAME = "queues.json";
+
+    private static final String QUEUES_LOADED = "Loaded %s queue(s).";
 
     private final DuelsPlugin plugin;
     private final Config config;
@@ -68,6 +74,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
     private final SpectateManagerImpl spectateManager;
     private final DuelManager duelManager;
     private final File file;
+
     private final List<Queue> queues = new ArrayList<>();
 
     private CombatTagPlusHook combatTagPlus;
@@ -78,7 +85,6 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
     @Getter
     private MultiPageGui<DuelsPlugin> gui;
-    private int autoSaveTask;
 
     public QueueManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -89,17 +95,28 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         this.arenaManager = plugin.getArenaManager();
         this.spectateManager = plugin.getSpectateManager();
         this.duelManager = plugin.getDuelManager();
-        this.file = new File(plugin.getDataFolder(), "queues.json");
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        this.file = new File(plugin.getDataFolder(), FILE_NAME);
+
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
+
+    private boolean canFight(final Kit kit, final UserData first, final UserData second) {
+        if (kit == null || !config.isRatingEnabled()) {
+            return true;
+        }
+
+        if (first != null && second != null) {
+            final int firstRating = first.getRating(kit);
+            final int secondRating = second.getRating(kit);
+            final int kFactor = config.getKFactor();
+            return NumberUtil.getChange(kFactor, firstRating, secondRating) != 0 && NumberUtil.getChange(kFactor, secondRating, firstRating) != 0;
+        }
+
+        return false;
     }
 
     @Override
-    public void handleLoad() throws Exception {
-        this.combatTagPlus = plugin.getHookManager().getHook(CombatTagPlusHook.class);
-        this.pvpManager = plugin.getHookManager().getHook(PvPManagerHook.class);
-        this.worldGuard = plugin.getHookManager().getHook(WorldGuardHook.class);
-        this.vault = plugin.getHookManager().getHook(VaultHook.class);
-
+    public void handleLoad() throws IOException {
         this.gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.queues.title"), config.getQueuesRows(), queues);
         gui.setSpaceFiller(Items.from(config.getQueuesFillerType(), config.getQueuesFillerData()));
         gui.setPrevButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.previous-page.name")).build());
@@ -107,11 +124,9 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.empty.name")).build());
         plugin.getGuiListener().addGui(gui);
 
-        if (!file.exists()) {
-            file.createNewFile();
-        } else {
-            try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
-                final List<QueueData> data = plugin.getGson().fromJson(reader, new TypeToken<List<QueueData>>() {}.getType());
+        if (FileUtil.checkNonEmpty(file, true)) {
+            try (final Reader reader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8)) {
+                final List<QueueData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<List<QueueData>>() {});
 
                 if (data != null) {
                     data.forEach(queueData -> {
@@ -125,16 +140,13 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
             }
         }
 
-        Log.info(this, "Loaded " + queues.size() + " queue(s).");
+        Log.info(this, String.format(QUEUES_LOADED, queues.size()));
         gui.calculatePages();
 
-        this.autoSaveTask = plugin.doSyncRepeat(() -> {
-            try {
-                saveQueues();
-            } catch (IOException ex) {
-                Log.error(this, ex.getMessage(), ex);
-            }
-        }, AUTO_SAVE_INTERVAL, AUTO_SAVE_INTERVAL).getTaskId();
+        this.combatTagPlus = plugin.getHookManager().getHook(CombatTagPlusHook.class);
+        this.pvpManager = plugin.getHookManager().getHook(PvPManagerHook.class);
+        this.worldGuard = plugin.getHookManager().getHook(WorldGuardHook.class);
+        this.vault = plugin.getHookManager().getHook(VaultHook.class);
         this.queueTask = plugin.doSyncRepeat(() -> {
             boolean update = false;
 
@@ -161,7 +173,13 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
                         remove.add(opponent);
 
                         final Settings setting = new Settings(plugin);
-                        setting.setKit(kitManager.get(queue.getKit().getName()));
+
+                        if (queue.getKit() != null) {
+                            setting.setKit(kitManager.get(queue.getKit().getName()));
+                        } else {
+                            setting.setOwnInventory(true);
+                        }
+
                         setting.setBet(queue.getBet());
                         setting.getCache().put(player.getUniqueId(), current.getInfo());
                         setting.getCache().put(other.getUniqueId(), opponent.getInfo());
@@ -185,48 +203,29 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         }, 20L, 40L).getTaskId();
     }
 
-    private boolean canFight(final Kit kit, final UserData first, final UserData second) {
-        if (kit == null || !config.isRatingEnabled()) {
-            return true;
-        }
-
-        if (first != null && second != null) {
-            final int firstRating = first.getRating(kit);
-            final int secondRating = second.getRating(kit);
-            final int kFactor = config.getKFactor();
-            return RatingUtil.getChange(kFactor, firstRating, secondRating) != 0 && RatingUtil.getChange(kFactor, secondRating, firstRating) != 0;
-        }
-
-        return false;
-    }
-
     @Override
-    public void handleUnload() throws Exception {
-        plugin.cancelTask(autoSaveTask);
+    public void handleUnload() {
         plugin.cancelTask(queueTask);
 
         if (gui != null) {
             plugin.getGuiListener().removeGui(gui);
         }
 
-        saveQueues();
         queues.clear();
     }
 
-    private void saveQueues() throws IOException {
+    private void saveQueues() {
         final List<QueueData> data = new ArrayList<>();
 
         for (final Queue queue : queues) {
             data.add(new QueueData(queue));
         }
 
-        if (!file.exists()) {
-            file.createNewFile();
-        }
-
-        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file))) {
-            plugin.getGson().toJson(data, writer);
+        try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
+            JsonUtil.getObjectWriter().writeValue(writer, data);
             writer.flush();
+        } catch (IOException ex) {
+            Log.error(this, ex.getMessage(), ex);
         }
     }
 
@@ -238,7 +237,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
     @Nullable
     @Override
-    public Queue get(@Nonnull final Player player) {
+    public Queue get(@NotNull final Player player) {
         Objects.requireNonNull(player, "player");
         return queues.stream().filter(queue -> queue.isInQueue(player)).findFirst().orElse(null);
     }
@@ -253,10 +252,11 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         }
 
         queues.add(queue);
-        gui.calculatePages();
+        saveQueues();
 
         final QueueCreateEvent event = new QueueCreateEvent(source, queue);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
+        gui.calculatePages();
         return queue;
     }
 
@@ -278,20 +278,20 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         return remove(null, kit, bet);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public List<DQueue> getQueues() {
         return Collections.unmodifiableList(queues);
     }
 
     @Override
-    public boolean isInQueue(@Nonnull final Player player) {
+    public boolean isInQueue(@NotNull final Player player) {
         Objects.requireNonNull(player, "player");
         return queues.stream().anyMatch(queue -> queue.isInQueue(player));
     }
 
     @Override
-    public boolean addToQueue(@Nonnull final Player player, @Nonnull final DQueue queue) {
+    public boolean addToQueue(@NotNull final Player player, @NotNull final DQueue queue) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(queue, "queue");
         return queue(player, (Queue) queue);
@@ -299,7 +299,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
     @Nullable
     @Override
-    public DQueue removeFromQueue(@Nonnull final Player player) {
+    public DQueue removeFromQueue(@NotNull final Player player) {
         Objects.requireNonNull(player, "player");
         return remove(player);
     }
@@ -309,13 +309,14 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
             return null;
         }
 
-        gui.calculatePages();
+        saveQueues();
         queue.getPlayers().forEach(entry -> lang.sendMessage(entry.getPlayer(), "QUEUE.remove"));
         queue.getPlayers().clear();
         queue.setRemoved(true);
 
         final QueueRemoveEvent event = new QueueRemoveEvent(source, queue);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
+        gui.calculatePages();
         return queue;
     }
 
@@ -348,9 +349,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
             return false;
         }
 
-        GameMode gameMode = null;
-
-        if (config.isPreventCreativeMode() && (gameMode = player.getGameMode()) == GameMode.CREATIVE) {
+        if (config.isPreventCreativeMode() && player.getGameMode() == GameMode.CREATIVE) {
             lang.sendMessage(player, "ERROR.duel.in-creative-mode");
             return false;
         }
@@ -373,13 +372,13 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         }
 
         final QueueJoinEvent event = new QueueJoinEvent(player, queue);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
 
         if (event.isCancelled()) {
             return false;
         }
 
-        queue.addPlayer(new QueueEntry(player, player.getLocation().clone(), duelzone, gameMode));
+        queue.addPlayer(new QueueEntry(player, player.getLocation().clone(), duelzone));
 
         final String kit = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("GENERAL.none");
         lang.sendMessage(player, "QUEUE.add", "kit", kit, "bet_amount", queue.getBet());
@@ -390,7 +389,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         for (final Queue queue : queues) {
             if (queue.removePlayer(player)) {
                 final QueueLeaveEvent event = new QueueLeaveEvent(player, queue);
-                plugin.getServer().getPluginManager().callEvent(event);
+                Bukkit.getPluginManager().callEvent(event);
                 lang.sendMessage(player, "QUEUE.remove");
                 return queue;
             }

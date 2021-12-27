@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.config.converters.ConfigConverter9_10;
 import me.realized.duels.util.EnumUtil;
 import me.realized.duels.util.config.AbstractConfiguration;
 import org.bukkit.Sound;
@@ -66,6 +67,14 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean preventCreativeMode;
     @Getter
+    private boolean ownInventoryEnabled;
+    @Getter
+    private boolean ownInventoryUsePermission;
+    @Getter
+    private boolean kitSelectingEnabled;
+    @Getter
+    private boolean kitSelectingUsePermission;
+    @Getter
     private boolean arenaSelectingEnabled;
     @Getter
     private boolean arenaSelectingUsePermission;
@@ -81,19 +90,17 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private int expiration;
 
     @Getter
-    private boolean useOwnInventoryEnabled;
-    @Getter
-    private boolean useOwnInventoryKeepItems;
-    @Getter
-    private boolean useOwnInventoryPreventDurabLoss;
-    @Getter
     private int maxDuration;
     @Getter
     private boolean startCommandsEnabled;
     @Getter
+    private boolean startCommandsQueueOnly;
+    @Getter
     private List<String> startCommands;
     @Getter
     private boolean endCommandsEnabled;
+    @Getter
+    private boolean endCommandsQueueOnly;
     @Getter
     private List<String> endCommands;
     @Getter
@@ -146,14 +153,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private int defaultRating;
     @Getter
-    private boolean queueMatchesOnly;
+    private boolean ratingQueueOnly;
 
     @Getter
     private boolean specRequiresClearedInventory;
-    @Getter
-    private boolean specAddInvisibilityEffect;
-    @Getter
-    private boolean specPreventBlockInteract;
     @Getter
     private List<String> specWhitelistedCommands;
 
@@ -169,6 +172,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean preventLaunchProjectile;
     @Getter
     private boolean preventPvp;
+    @Getter
+    private boolean preventInteract;
 
     @Getter
     private boolean displayKitRatings;
@@ -238,7 +243,11 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
 
     @Override
     protected void loadValues(FileConfiguration configuration) throws Exception {
-        if (configuration.getInt("config-version", 0) < getLatestVersion()) {
+        final int prevVersion = configuration.getInt("config-version", 0);
+
+        if (prevVersion < 10) {
+            configuration = convert(new ConfigConverter9_10());
+        } else if (prevVersion < getLatestVersion()) {
             configuration = convert(null);
         }
 
@@ -268,6 +277,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
 
         requiresClearedInventory = configuration.getBoolean("request.requires-cleared-inventory", true);
         preventCreativeMode = configuration.getBoolean("request.prevent-creative-mode", false);
+        ownInventoryEnabled = configuration.getBoolean("request.use-own-inventory.enabled", true);
+        ownInventoryUsePermission = configuration.getBoolean("request.use-own-inventory.use-permission", false);
+        kitSelectingEnabled = configuration.getBoolean("request.kit-selecting.enabled", true);
+        kitSelectingUsePermission = configuration.getBoolean("request.kit-selecting.use-permission", false);
         arenaSelectingEnabled = configuration.getBoolean("request.arena-selecting.enabled", true);
         arenaSelectingUsePermission = configuration.getBoolean("request.arena-selecting.use-permission", false);
         itemBettingEnabled = configuration.getBoolean("request.item-betting.enabled", true);
@@ -276,13 +289,12 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         moneyBettingUsePermission = configuration.getBoolean("request.money-betting.use-permission", false);
         expiration = Math.max(configuration.getInt("request.expiration", 30), 0);
 
-        useOwnInventoryEnabled = configuration.getBoolean("duel.use-own-inventory.enabled", false);
-        useOwnInventoryKeepItems = configuration.getBoolean("duel.use-own-inventory.keep-items", false);
-        useOwnInventoryPreventDurabLoss = configuration.getBoolean("duel.use-own-inventory.prevent-durability-loss", true);
         maxDuration = configuration.getInt("duel.match.max-duration", -1);
         startCommandsEnabled = configuration.getBoolean("duel.match.start-commands.enabled", false);
+        startCommandsQueueOnly = configuration.getBoolean("duel.match.start-commands.queue-matches-only", false);
         startCommands = configuration.getStringList("duel.match.start-commands.commands");
         endCommandsEnabled = configuration.getBoolean("duel.match.end-commands.enabled", false);
+        endCommandsQueueOnly = configuration.getBoolean("duel.match.end-commands.queue-matches-only", false);
         endCommands = configuration.getStringList("duel.match.end-commands.commands");
         projectileHitMessageEnabled = configuration.getBoolean("duel.projectile-hit-message.enabled", true);
         projectileHitMessageTypes = configuration.getStringList("duel.projectile-hit-message.types");
@@ -309,11 +321,9 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         ratingEnabled = configuration.getBoolean("rating.enabled", true);
         kFactor = Math.max(configuration.getInt("rating.k-factor", 32), 1);
         defaultRating = Math.max(configuration.getInt("rating.default-rating", 1400), 0);
-        queueMatchesOnly = configuration.getBoolean("rating.queue-matches-only", true);
+        ratingQueueOnly = configuration.getBoolean("rating.queue-matches-only", true);
 
         specRequiresClearedInventory = configuration.getBoolean("spectate.requires-cleared-inventory", false);
-        specAddInvisibilityEffect = configuration.getBoolean("spectate.add-invisibility-effect", true);
-        specPreventBlockInteract = configuration.getBoolean("spectate.prevent.block-interact", true);
         specWhitelistedCommands = configuration.getStringList("spectate.whitelisted-commands");
 
         cdEnabled = configuration.getBoolean("countdown.enabled", true);
@@ -322,6 +332,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         preventMovement = configuration.getBoolean("countdown.prevent.movement", true);
         preventLaunchProjectile = configuration.getBoolean("countdown.prevent.launch-projectile", true);
         preventPvp = configuration.getBoolean("countdown.prevent.pvp", true);
+        preventInteract = configuration.getBoolean("countdown.prevent.interact", true);
 
         displayKitRatings = configuration.getBoolean("stats.display-kit-ratings", true);
         displayNoKitRating = configuration.getBoolean("stats.display-nokit-rating", false);

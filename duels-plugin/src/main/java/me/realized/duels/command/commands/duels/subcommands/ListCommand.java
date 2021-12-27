@@ -10,7 +10,6 @@ import me.realized.duels.arena.ArenaImpl;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.queue.sign.QueueSignImpl;
 import me.realized.duels.util.StringUtil;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
 
 public class ListCommand extends BaseCommand {
@@ -23,11 +22,11 @@ public class ListCommand extends BaseCommand {
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final List<String> arenas = new ArrayList<>();
         arenaManager.getArenasImpl().forEach(arena -> arenas.add("&" + getColor(arena) + arena.getName()));
-        final String kits = StringUtils.join(kitManager.getKits().stream().map(Kit::getName).collect(Collectors.toList()), ", ");
-        final String queues = StringUtils.join(queueManager.getQueues().stream().map(DQueue::toString).collect(Collectors.toList()), ", ");
-        final String signs = StringUtils.join(queueSignManager.getSigns().stream().map(QueueSignImpl::toString).collect(Collectors.toList()), ", ");
+        final String kits = StringUtil.join(kitManager.getKits().stream().map(Kit::getName).collect(Collectors.toList()), ", ");
+        final String queues = StringUtil.join(queueManager.getQueues().stream().map(DQueue::toString).collect(Collectors.toList()), ", ");
+        final String signs = StringUtil.join(queueSignManager.getSigns().stream().map(QueueSignImpl::toString).collect(Collectors.toList()), ", ");
         lang.sendMessage(sender, "COMMAND.duels.list",
-            "arenas", !arenas.isEmpty() ? StringUtils.join(arenas, "&r, &r") : lang.getMessage("GENERAL.none"),
+            "arenas", !arenas.isEmpty() ? StringUtil.join(arenas, "&r, &r") : lang.getMessage("GENERAL.none"),
             "kits", !kits.isEmpty() ? kits : lang.getMessage("GENERAL.none"),
             "queues", !queues.isEmpty() ? queues : lang.getMessage("GENERAL.none"),
             "queue_signs", !signs.isEmpty() ? signs : lang.getMessage("GENERAL.none"),

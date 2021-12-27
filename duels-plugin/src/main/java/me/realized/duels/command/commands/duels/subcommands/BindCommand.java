@@ -5,7 +5,7 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.gui.bind.BindGui;
 import me.realized.duels.kit.KitImpl;
-import org.apache.commons.lang.StringUtils;
+import me.realized.duels.util.StringUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -18,7 +18,7 @@ public class BindCommand extends BaseCommand {
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
-        final String name = StringUtils.join(args, " ", 1, args.length).replace("-", " ");
+        final String name = StringUtil.join(args, " ", 1, args.length).replace("-", " ");
         final KitImpl kit = kitManager.get(name);
 
         if (kit == null) {

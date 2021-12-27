@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.util.Loadable;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,7 +18,7 @@ public class SettingsManager implements Loadable, Listener {
 
     public SettingsManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @Override

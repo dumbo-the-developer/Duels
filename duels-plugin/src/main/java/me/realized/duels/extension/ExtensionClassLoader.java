@@ -16,7 +16,6 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import lombok.Getter;
 import me.realized.duels.api.extension.DuelsExtension;
-import sun.misc.CompoundEnumeration;
 
 public class ExtensionClassLoader extends URLClassLoader {
 
@@ -100,10 +99,7 @@ public class ExtensionClassLoader extends URLClassLoader {
 
     @Override
     public Enumeration<URL> getResources(final String name) throws IOException {
-        @SuppressWarnings("unchecked")
-        final Enumeration<URL>[] tmp = (Enumeration<URL>[]) new Enumeration<?>[2];
-        tmp[1] = findResources(name);
-        return new CompoundEnumeration<>(tmp);
+        return findResources(name);
     }
 
     @Override

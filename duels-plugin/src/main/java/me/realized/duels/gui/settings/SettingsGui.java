@@ -9,6 +9,7 @@ import me.realized.duels.gui.settings.buttons.ArenaSelectButton;
 import me.realized.duels.gui.settings.buttons.CancelButton;
 import me.realized.duels.gui.settings.buttons.ItemBettingButton;
 import me.realized.duels.gui.settings.buttons.KitSelectButton;
+import me.realized.duels.gui.settings.buttons.OwnInventoryButton;
 import me.realized.duels.gui.settings.buttons.RequestDetailsButton;
 import me.realized.duels.gui.settings.buttons.RequestSendButton;
 import me.realized.duels.util.compat.Items;
@@ -21,7 +22,8 @@ public class SettingsGui extends SinglePageGui<DuelsPlugin> {
     private static final int[][] PATTERNS = {
         {13},
         {12, 14},
-        {12, 13, 14}
+        {12, 13, 14},
+        {12, 13, 14, 22}
     };
 
     public SettingsGui(final DuelsPlugin plugin) {
@@ -35,8 +37,12 @@ public class SettingsGui extends SinglePageGui<DuelsPlugin> {
 
         final List<BaseButton> buttons = new ArrayList<>();
 
-        if (!config.isUseOwnInventoryEnabled()) {
+        if (config.isKitSelectingEnabled()) {
             buttons.add(new KitSelectButton(plugin));
+        }
+
+        if (config.isOwnInventoryEnabled()) {
+            buttons.add(new OwnInventoryButton(plugin));
         }
 
         if (config.isArenaSelectingEnabled()) {

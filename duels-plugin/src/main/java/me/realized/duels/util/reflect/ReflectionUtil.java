@@ -1,19 +1,26 @@
-package me.realized.duels.util.compat;
+package me.realized.duels.util.reflect;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import me.realized.duels.util.Log;
+import me.realized.duels.util.NumberUtil;
 import org.bukkit.Bukkit;
 
 public final class ReflectionUtil {
 
-    private final static String VERSION;
+    private static final String PACKAGE_VERSION;
+    private static final int MAJOR_VERSION;
 
     static {
-        VERSION = Bukkit.getServer().getClass().getName().split("\\.")[3];
+        final String packageName = Bukkit.getServer().getClass().getPackage().getName();
+        PACKAGE_VERSION = packageName.substring(packageName.lastIndexOf('.') + 1);
+        MAJOR_VERSION = NumberUtil.parseInt(PACKAGE_VERSION.split("_")[1]).orElse(0);
     }
 
-    private ReflectionUtil() {}
+    public static int getMajorVersion() {
+        return MAJOR_VERSION;
+    }
 
     public static Class<?> getClassUnsafe(final String name) {
         try {
@@ -33,7 +40,7 @@ public final class ReflectionUtil {
 
     public static Class<?> getNMSClass(final String name, final boolean logError) {
         try {
-            return Class.forName("net.minecraft.server." + VERSION + "." + name);
+            return Class.forName("net.minecraft" + (getMajorVersion() < 17 ? (".server." + PACKAGE_VERSION) : "") + "." + name);
         } catch (ClassNotFoundException ex) {
             if (logError) {
                 Log.error(ex.getMessage(), ex);
@@ -47,13 +54,20 @@ public final class ReflectionUtil {
         return getNMSClass(name, true);
     }
 
-    public static Class<?> getCBClass(final String path) {
+    public static Class<?> getCBClass(final String path, final boolean logError) {
         try {
-            return Class.forName("org.bukkit.craftbukkit." + VERSION + "." + path);
+            return Class.forName("org.bukkit.craftbukkit." + PACKAGE_VERSION + "." + path);
         } catch (ClassNotFoundException ex) {
-            Log.error(ex.getMessage(), ex);
+            if (logError) {
+                Log.error(ex.getMessage(), ex);
+            }
+
             return null;
         }
+    }
+
+    public static Class<?> getCBClass(final String path) {
+        return getCBClass(path, true);
     }
 
     public static Method getMethod(final Class<?> clazz, final String name, final Class<?>... parameters) {
@@ -84,4 +98,15 @@ public final class ReflectionUtil {
             return null;
         }
     }
+
+    public static Constructor<?> getConstructor(final Class<?> clazz, final Class<?>... parameters) {
+        try {
+            return clazz.getConstructor(parameters);
+        } catch (NoSuchMethodException ex) {
+            Log.error(ex.getMessage(), ex);
+            return null;
+        }
+    }
+
+    private ReflectionUtil() {}
 }

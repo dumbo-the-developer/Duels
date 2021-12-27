@@ -4,7 +4,6 @@ import java.util.Arrays;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.util.StringUtil;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -17,7 +16,7 @@ public class SavekitCommand extends BaseCommand {
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final String[] argsNoOptions = Arrays.stream(args).filter(s -> !s.startsWith("-")).toArray(String[]::new);
-        final String name = StringUtils.join(argsNoOptions, " ", 1, argsNoOptions.length);
+        final String name = StringUtil.join(argsNoOptions, " ", 1, argsNoOptions.length);
 
         if (!StringUtil.isAlphanumeric(name)) {
             lang.sendMessage(sender, "ERROR.command.name-not-alphanumeric", "name", name);

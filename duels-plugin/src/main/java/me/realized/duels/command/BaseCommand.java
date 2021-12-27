@@ -100,7 +100,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
 
     protected List<String> handleTabCompletion(final String argument, final Collection<String> collection) {
         return collection.stream()
-            .filter(value ->value.toLowerCase().startsWith(argument.toLowerCase()))
+            .filter(value -> value.toLowerCase().startsWith(argument.toLowerCase()))
             .map(value -> value.replace(" ", "-"))
             .collect(Collectors.toList());
     }

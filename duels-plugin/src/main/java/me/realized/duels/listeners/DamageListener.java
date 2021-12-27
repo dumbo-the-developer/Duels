@@ -1,9 +1,11 @@
 package me.realized.duels.listeners;
 
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.arena.ArenaImpl;
 import me.realized.duels.arena.ArenaManagerImpl;
+import me.realized.duels.util.EventUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -20,7 +22,7 @@ public class DamageListener implements Listener {
         this.arenaManager = plugin.getArenaManager();
 
         if (plugin.getConfiguration().isForceAllowCombat()) {
-            plugin.doSyncAfter(() -> plugin.getServer().getPluginManager().registerEvents(this, plugin), 1L);
+            plugin.doSyncAfter(() -> Bukkit.getPluginManager().registerEvents(this, plugin), 1L);
         }
     }
 
@@ -31,17 +33,16 @@ public class DamageListener implements Listener {
         }
 
         final Player player = (Player) event.getEntity();
-        final Player damager;
+        final Player damager = EventUtil.getDamager(event);
 
-        if (event.getDamager() instanceof Player) {
-            damager = (Player) event.getDamager();
-        } else if (event.getDamager() instanceof Projectile && ((Projectile) event.getDamager()).getShooter() instanceof Player) {
-            damager = (Player) ((Projectile) event.getDamager()).getShooter();
-        } else {
+        if (damager == null) {
             return;
         }
 
-        if (!(arenaManager.isInMatch(player) && arenaManager.isInMatch(damager))) {
+        final ArenaImpl arena = arenaManager.get(player);
+
+        // Only activate when winner is undeclared
+        if (arena == null || !arenaManager.isInMatch(damager) || arena.isEndGame()) {
             return;
         }
 

@@ -1,5 +1,6 @@
 package me.realized.duels.util.hook;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -19,6 +20,6 @@ public class PluginHook<P extends JavaPlugin> {
     }
 
     public Plugin getPlugin() {
-        return plugin.getServer().getPluginManager().getPlugin(name);
+        return Bukkit.getPluginManager().getPlugin(name);
     }
 }

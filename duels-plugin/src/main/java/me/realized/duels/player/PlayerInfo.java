@@ -1,11 +1,14 @@
 package me.realized.duels.player;
 
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
+import me.realized.duels.util.PlayerUtil;
+import me.realized.duels.util.inventory.InventoryUtil;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -13,46 +16,39 @@ import org.bukkit.potion.PotionEffect;
 
 public class PlayerInfo {
 
-    private final ItemStack[] inventory;
-    private final ItemStack[] armor;
-    private final Collection<PotionEffect> effects;
+    @Getter
+    private final Map<String, Map<Integer, ItemStack>> items = new HashMap<>();
+    @Getter
+    private final List<PotionEffect> effects;
+    @Getter
     private final double health;
+    @Getter
     private final int hunger;
-
     @Getter
     private final List<ItemStack> extra = new ArrayList<>();
-
     @Getter
     @Setter
     private Location location;
 
-    @Getter
-    @Setter
-    private boolean giveOnLogin;
+    public PlayerInfo(final List<PotionEffect> effects, final double health, final int hunger, final Location location) {
+        this.effects = effects;
+        this.health = health;
+        this.hunger = hunger;
+        this.location = location;
+    }
 
-    public PlayerInfo(final Player player, final boolean inventory) {
-        this.inventory = inventory ? player.getInventory().getContents().clone() : new ItemStack[0];
-        this.armor = inventory ? player.getInventory().getArmorContents().clone() : new ItemStack[0];
-        this.effects = player.getActivePotionEffects();
-        this.health = player.getHealth();
-        this.hunger = player.getFoodLevel();
-        this.location = player.getLocation().clone();
+    public PlayerInfo(final Player player) {
+        this(Lists.newArrayList(player.getActivePotionEffects()), player.getHealth(), player.getFoodLevel(), player.getLocation().clone());
+        InventoryUtil.addToMap(player.getInventory(), items);
     }
 
     public void restore(final Player player) {
+        final double maxHealth = PlayerUtil.getMaxHealth(player);
         player.addPotionEffects(effects);
-        player.setHealth(health > player.getMaxHealth() ? player.getMaxHealth() : health);
+        player.setHealth(health > maxHealth ? maxHealth : health);
         player.setFoodLevel(hunger);
-
-        if (armor.length > 0) {
-            player.getInventory().setArmorContents(armor);
-        }
-
-        if (inventory.length > 0) {
-            player.getInventory().setContents(inventory);
-        }
-
-        extra.stream().filter(Objects::nonNull).forEach(item -> player.getInventory().addItem(item));
+        InventoryUtil.fillFromMap(player.getInventory(), items);
+        InventoryUtil.addOrDrop(player, extra);
         player.updateInventory();
     }
 }

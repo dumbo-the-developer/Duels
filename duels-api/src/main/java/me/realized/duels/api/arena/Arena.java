@@ -1,7 +1,5 @@
 package me.realized.duels.api.arena;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import me.realized.duels.api.event.arena.ArenaRemoveEvent;
 import me.realized.duels.api.event.arena.ArenaSetPositionEvent;
 import me.realized.duels.api.event.arena.ArenaStateChangeEvent;
@@ -9,6 +7,8 @@ import me.realized.duels.api.match.Match;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents an Arena loaded on the server.
@@ -20,7 +20,7 @@ public interface Arena {
      *
      * @return Never-null {@link String} that is the name of this arena.
      */
-    @Nonnull
+    @NotNull
     String getName();
 
 
@@ -72,7 +72,7 @@ public interface Arena {
      * @param location Location to be the spawnpoint. Should not be null!
      * @return True if the spawnpoint was set successfully. False if called {@link ArenaSetPositionEvent} was cancelled by a plugin.
      */
-    boolean setPosition(@Nullable final Player source, final int pos, @Nonnull final Location location);
+    boolean setPosition(@Nullable final Player source, final int pos, @NotNull final Location location);
 
 
     /**
@@ -81,7 +81,7 @@ public interface Arena {
      * @return True if the spawnpoint was set successfully. False if called {@link ArenaSetPositionEvent} was cancelled by a plugin.
      * @see #setPosition(Player, int, Location)
      */
-    boolean setPosition(final int pos, @Nonnull final Location location);
+    boolean setPosition(final int pos, @NotNull final Location location);
 
 
     /**
@@ -107,7 +107,7 @@ public interface Arena {
      * @param player {@link Player} to check if in this arena. Should not be null!
      * @return True if the player is in this arena. False otherwise.
      */
-    boolean has(@Nonnull final Player player);
+    boolean has(@NotNull final Player player);
 
 
     /**

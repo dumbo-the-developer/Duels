@@ -1,6 +1,7 @@
 package me.realized.duels.arena;
 
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.base.Charsets;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,8 +17,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.arena.Arena;
@@ -35,6 +34,9 @@ import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.gui.MultiPageGui;
 import me.realized.duels.util.inventory.ItemBuilder;
+import me.realized.duels.util.io.FileUtil;
+import me.realized.duels.util.json.JsonUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -43,12 +45,18 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.projectiles.ProjectileSource;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class ArenaManagerImpl implements Loadable, ArenaManager, Listener {
+public class ArenaManagerImpl implements Loadable, ArenaManager {
 
-    private static final long AUTO_SAVE_INTERVAL = 20L * 60 * 5;
+    private static final String FILE_NAME = "arenas.json";
+
+    private static final String ERROR_NOT_ALPHANUMERIC = "Could not load arena %s: Name is not alphanumeric.";
+    private static final String ARENAS_LOADED = "Loaded %s arena(s).";
 
     private final DuelsPlugin plugin;
     private final Config config;
@@ -59,13 +67,14 @@ public class ArenaManagerImpl implements Loadable, ArenaManager, Listener {
 
     @Getter
     private MultiPageGui<DuelsPlugin> gui;
-    private int autoSaveTask;
 
     public ArenaManagerImpl(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
-        this.file = new File(plugin.getDataFolder(), "arenas.json");
+        this.file = new File(plugin.getDataFolder(), FILE_NAME);
+
+        Bukkit.getPluginManager().registerEvents(new ArenaListener(), plugin);
     }
 
     @Override
@@ -77,20 +86,14 @@ public class ArenaManagerImpl implements Loadable, ArenaManager, Listener {
         gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.empty.name")).build());
         plugin.getGuiListener().addGui(gui);
 
-        if (config.isCdEnabled()) {
-            plugin.getServer().getPluginManager().registerEvents(this, plugin);
-        }
-
-        if (!file.exists()) {
-            file.createNewFile();
-        } else {
-            try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
-                final List<ArenaData> data = plugin.getGson().fromJson(reader, new TypeToken<List<ArenaData>>() {}.getType());
+        if (FileUtil.checkNonEmpty(file, true)) {
+            try (final Reader reader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8)) {
+                final List<ArenaData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<List<ArenaData>>() {});
 
                 if (data != null) {
                     for (final ArenaData arenaData : data) {
                         if (!StringUtil.isAlphanumeric(arenaData.getName())) {
-                            Log.warn(this, "Excluding arena '" + arenaData.getName() + "' from load: Name is not alphanumeric.");
+                            Log.warn(this, String.format(ERROR_NOT_ALPHANUMERIC, arenaData.getName()));
                             continue;
                         }
 
@@ -100,59 +103,58 @@ public class ArenaManagerImpl implements Loadable, ArenaManager, Listener {
             }
         }
 
-        Log.info(this, "Loaded " + arenas.size() + " arena(s).");
+        Log.info(this, String.format(ARENAS_LOADED, arenas.size()));
         gui.calculatePages();
-
-        this.autoSaveTask = plugin.doSyncRepeat(() -> {
-            try {
-                saveArenas();
-            } catch (IOException ex) {
-                Log.error(this, ex.getMessage(), ex);
-            }
-        }, AUTO_SAVE_INTERVAL, AUTO_SAVE_INTERVAL).getTaskId();
     }
 
     @Override
-    public void handleUnload() throws IOException {
-        plugin.cancelTask(autoSaveTask);
-
+    public void handleUnload() {
         if (gui != null) {
             plugin.getGuiListener().removeGui(gui);
         }
 
-        saveArenas();
         arenas.clear();
     }
 
-    private void saveArenas() throws IOException {
+    void saveArenas() {
         final List<ArenaData> data = new ArrayList<>();
 
         for (final ArenaImpl arena : arenas) {
             data.add(new ArenaData(arena));
         }
 
-        if (!file.exists()) {
-            file.createNewFile();
-        }
-
-        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file))) {
-            plugin.getGson().toJson(data, writer);
+        try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
+            JsonUtil.getObjectWriter().writeValue(writer, data);
             writer.flush();
+        } catch (IOException ex) {
+            Log.error(this, ex.getMessage(), ex);
         }
     }
 
     @Nullable
     @Override
-    public ArenaImpl get(@Nonnull final String name) {
+    public ArenaImpl get(@NotNull final String name) {
         Objects.requireNonNull(name, "name");
         return arenas.stream().filter(arena -> arena.getName().equals(name)).findFirst().orElse(null);
     }
 
     @Nullable
     @Override
-    public ArenaImpl get(@Nonnull final Player player) {
+    public ArenaImpl get(@NotNull final Player player) {
         Objects.requireNonNull(player, "player");
         return arenas.stream().filter(arena -> arena.has(player)).findFirst().orElse(null);
+    }
+
+    @Override
+    public boolean isInMatch(@NotNull final Player player) {
+        Objects.requireNonNull(player, "player");
+        return get(player) != null;
+    }
+
+    @NotNull
+    @Override
+    public List<Arena> getArenas() {
+        return Collections.unmodifiableList(arenas);
     }
 
     public boolean create(final CommandSender source, final String name) {
@@ -162,9 +164,10 @@ public class ArenaManagerImpl implements Loadable, ArenaManager, Listener {
 
         final ArenaImpl arena = new ArenaImpl(plugin, name);
         arenas.add(arena);
+        saveArenas();
 
         final ArenaCreateEvent event = new ArenaCreateEvent(source, arena);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
         gui.calculatePages();
         return true;
     }
@@ -172,9 +175,10 @@ public class ArenaManagerImpl implements Loadable, ArenaManager, Listener {
     public boolean remove(final CommandSender source, final ArenaImpl arena) {
         if (arenas.remove(arena)) {
             arena.setRemoved(true);
+            saveArenas();
 
             final ArenaRemoveEvent event = new ArenaRemoveEvent(source, arena);
-            plugin.getServer().getPluginManager().callEvent(event);
+            Bukkit.getPluginManager().callEvent(event);
             gui.calculatePages();
             return true;
         }
@@ -182,20 +186,8 @@ public class ArenaManagerImpl implements Loadable, ArenaManager, Listener {
         return false;
     }
 
-    @Override
-    public boolean isInMatch(@Nonnull final Player player) {
-        Objects.requireNonNull(player, "player");
-        return get(player) != null;
-    }
-
     public List<ArenaImpl> getArenasImpl() {
         return arenas;
-    }
-
-    @Nonnull
-    @Override
-    public List<Arena> getArenas() {
-        return Collections.unmodifiableList(arenas);
     }
 
     public Set<Player> getPlayers() {
@@ -231,66 +223,84 @@ public class ArenaManagerImpl implements Loadable, ArenaManager, Listener {
         return arenas.stream().map(ArenaImpl::getName).collect(Collectors.toList());
     }
 
-    // remove bind on kit removal
+    // Called on kit removal
     public void clearBinds(final KitImpl kit) {
         arenas.stream().filter(arena -> arena.isBound(kit)).forEach(arena -> arena.bind(kit));
     }
 
-    @EventHandler(ignoreCancelled = true)
-    public void on(final EntityDamageEvent event) {
-        if (!config.isPreventPvp() || !(event.getEntity() instanceof Player)) {
-            return;
+    private class ArenaListener implements Listener {
+
+        @EventHandler(ignoreCancelled = true)
+        public void on(final PlayerInteractEvent event) {
+            if (!event.hasBlock() || !config.isPreventInteract()) {
+                return;
+            }
+
+            final ArenaImpl arena = get(event.getPlayer());
+
+            if (arena == null || !arena.isCounting()) {
+                return;
+            }
+
+            event.setCancelled(true);
         }
 
-        final ArenaImpl arena = get((Player) event.getEntity());
+        @EventHandler(ignoreCancelled = true)
+        public void on(final EntityDamageEvent event) {
+            if (!config.isPreventPvp() || !(event.getEntity() instanceof Player)) {
+                return;
+            }
 
-        if (arena == null || !arena.isCounting()) {
-            return;
+            final ArenaImpl arena = get((Player) event.getEntity());
+
+            if (arena == null || !arena.isCounting()) {
+                return;
+            }
+
+            event.setCancelled(true);
         }
 
-        event.setCancelled(true);
-    }
+        @EventHandler(ignoreCancelled = true)
+        public void on(final ProjectileLaunchEvent event) {
+            if (!config.isPreventLaunchProjectile()) {
+                return;
+            }
 
-    @EventHandler(ignoreCancelled = true)
-    public void on(final ProjectileLaunchEvent event) {
-        if (!config.isPreventLaunchProjectile()) {
-            return;
+            final ProjectileSource shooter = event.getEntity().getShooter();
+
+            if (!(shooter instanceof Player)) {
+                return;
+            }
+
+            final ArenaImpl arena = get((Player) shooter);
+
+            if (arena == null || !arena.isCounting()) {
+                return;
+            }
+
+            event.setCancelled(true);
         }
 
-        final ProjectileSource shooter = event.getEntity().getShooter();
+        @EventHandler(ignoreCancelled = true)
+        public void on(final PlayerMoveEvent event) {
+            if (!config.isPreventMovement()) {
+                return;
+            }
 
-        if (!(shooter instanceof Player)) {
-            return;
+            final Location from = event.getFrom();
+            final Location to = event.getTo();
+
+            if (from.getBlockX() == to.getBlockX() && from.getBlockY() == to.getBlockY() && from.getBlockZ() == to.getBlockZ()) {
+                return;
+            }
+
+            final ArenaImpl arena = get(event.getPlayer());
+
+            if (arena == null || !arena.isCounting()) {
+                return;
+            }
+
+            event.setTo(event.getFrom());
         }
-
-        final ArenaImpl arena = get((Player) shooter);
-
-        if (arena == null || !arena.isCounting()) {
-            return;
-        }
-
-        event.setCancelled(true);
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void on(final PlayerMoveEvent event) {
-        if (!config.isPreventMovement()) {
-            return;
-        }
-
-        final Location from = event.getFrom();
-        final Location to = event.getTo();
-
-        if (from.getBlockX() == to.getBlockX() && from.getBlockY() == to.getBlockY() && from.getBlockZ() == to.getBlockZ()) {
-            return;
-        }
-
-        final ArenaImpl arena = get(event.getPlayer());
-
-        if (arena == null || !arena.isCounting()) {
-            return;
-        }
-
-        event.setTo(event.getFrom());
     }
 }

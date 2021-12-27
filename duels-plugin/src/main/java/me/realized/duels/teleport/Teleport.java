@@ -1,11 +1,10 @@
-package me.realized.duels.util;
+package me.realized.duels.teleport;
 
-import java.util.function.Consumer;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.hook.hooks.EssentialsHook;
-import me.realized.duels.util.compat.Players;
+import me.realized.duels.util.Loadable;
+import me.realized.duels.util.Log;
 import me.realized.duels.util.metadata.MetadataUtil;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -45,15 +44,10 @@ public final class Teleport implements Loadable, Listener {
      *
      * @param player Player to force-teleport to a location
      * @param location Location to force-teleport the player
-     * @param failHandler Called when teleportation has failed -- being when Player#teleport returns false.
      */
-    public void tryTeleport(final Player player, final Location location, final Consumer<Player> failHandler) {
+    public void tryTeleport(final Player player, final Location location) {
         if (location == null || location.getWorld() == null) {
             Log.warn(this, "Could not teleport " + player.getName() + "! Location is null");
-
-            if (failHandler != null) {
-                failHandler.accept(player);
-            }
             return;
         }
 
@@ -61,43 +55,11 @@ public final class Teleport implements Loadable, Listener {
             essentials.setBackLocation(player, location);
         }
 
-        final Chunk chunk = location.getChunk();
-
-        if (!chunk.isLoaded()) {
-            chunk.load();
-        }
-
         MetadataUtil.put(plugin, player, METADATA_KEY, location.clone());
 
         if (!player.teleport(location)) {
             Log.warn(this, "Could not teleport " + player.getName() + "! Player is dead or is vehicle");
-
-            if (failHandler != null) {
-                failHandler.accept(player);
-            }
         }
-
-        if (plugin.isDisabling()) {
-            return;
-        }
-
-        plugin.doSyncAfter(() -> Players.getOnlinePlayers().forEach(online -> {
-            if (player.canSee(online) && online.canSee(player)) {
-                player.hidePlayer(online);
-                online.hidePlayer(player);
-                player.showPlayer(online);
-                online.showPlayer(player);
-            }
-        }), 1L);
-    }
-
-    /**
-     * Calls {@link #tryTeleport(Player, Location, Consumer)} with a null FailHandler.
-     *
-     * @see #tryTeleport(Player, Location, Consumer)
-     */
-    public void tryTeleport(final Player player, final Location location) {
-        tryTeleport(player, location, null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

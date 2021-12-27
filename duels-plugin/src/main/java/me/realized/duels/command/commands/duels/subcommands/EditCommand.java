@@ -12,7 +12,7 @@ import me.realized.duels.api.user.User;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.data.UserData;
 import me.realized.duels.util.NumberUtil;
-import me.realized.duels.util.TriFunction;
+import me.realized.duels.util.function.TriFunction;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 

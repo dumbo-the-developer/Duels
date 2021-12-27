@@ -8,9 +8,11 @@ import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.arena.MatchImpl;
 import me.realized.duels.config.Config;
 import me.realized.duels.kit.KitImpl.Characteristic;
+import me.realized.duels.util.PlayerUtil;
 import me.realized.duels.util.compat.CompatUtil;
 import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.metadata.MetadataUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -23,6 +25,7 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -30,7 +33,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public class KitOptionsListener implements Listener {
 
-    public static final String METADATA_KEY = "Duels-MaxNoDamageTicks";
+    private static final String METADATA_KEY = "Duels-MaxNoDamageTicks";
 
     private final DuelsPlugin plugin;
     private final Config config;
@@ -41,13 +44,8 @@ public class KitOptionsListener implements Listener {
         this.config = plugin.getConfiguration();
         this.arenaManager = plugin.getArenaManager();
 
-        // Do not register the listener if own inventory is enabled
-        if (config.isUseOwnInventoryEnabled()) {
-            return;
-        }
-
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
-        plugin.getServer().getPluginManager().registerEvents(CompatUtil.isPre1_14() ? new ComboPre1_14Listener() : new ComboPost1_14Listener(), plugin);
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+        Bukkit.getPluginManager().registerEvents(CompatUtil.isPre1_14() ? new ComboPre1_14Listener() : new ComboPost1_14Listener(), plugin);
     }
 
     private boolean isEnabled(final ArenaImpl arena, final Characteristic characteristic) {
@@ -76,7 +74,7 @@ public class KitOptionsListener implements Listener {
         final Player player = event.getPlayer();
         final ArenaImpl arena = arenaManager.get(player);
 
-        if (player.isDead() || arena == null || !isEnabled(arena, Characteristic.SUMO)) {
+        if (player.isDead() || arena == null || !isEnabled(arena, Characteristic.SUMO) || arena.isEndGame()) {
             return;
         }
 
@@ -110,15 +108,28 @@ public class KitOptionsListener implements Listener {
 
         event.setUseItemInHand(Result.DENY);
 
-        if (config.isSoupCancelIfAlreadyFull() && player.getHealth() == player.getMaxHealth()) {
+        if (config.isSoupCancelIfAlreadyFull() && player.getHealth() == PlayerUtil.getMaxHealth(player)) {
             return;
+        }
+
+        final ItemStack bowl = config.isSoupRemoveEmptyBowl() ? null : new ItemStack(Material.BOWL);
+
+        if (CompatUtil.isPre1_10()) {
+            player.getInventory().setItem(player.getInventory().getHeldItemSlot(), bowl);
+        } else {
+            if (event.getHand() == EquipmentSlot.OFF_HAND) {
+                player.getInventory().setItemInOffHand(bowl);
+            } else {
+                player.getInventory().setItemInMainHand(bowl);
+            }
         }
 
         player.getInventory().setItem(player.getInventory().getHeldItemSlot(), config.isSoupRemoveEmptyBowl() ? null : new ItemStack(Material.BOWL));
 
         final double regen = config.getSoupHeartsToRegen() * 2.0;
         final double oldHealth = player.getHealth();
-        player.setHealth(oldHealth + regen > player.getMaxHealth() ? player.getMaxHealth() : oldHealth + regen);
+        final double maxHealth = PlayerUtil.getMaxHealth(player);
+        player.setHealth(Math.min(oldHealth + regen, maxHealth));
     }
 
     @EventHandler(ignoreCancelled = true)

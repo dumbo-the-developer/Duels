@@ -43,7 +43,7 @@ public class OptionsGui extends SinglePageGui<DuelsPlugin> {
 
     public enum Option {
 
-        USEPERMISSION(Items.BARRIER, KitImpl::isUsePermission, kit -> kit.setUsePermission(!kit.isUsePermission()), "When enabled, players must", "have the permission duels.kits.%kit%", "to select this kit for duel."),
+        USEPERMISSION(Material.BARRIER, KitImpl::isUsePermission, kit -> kit.setUsePermission(!kit.isUsePermission()), "When enabled, players must", "have the permission duels.kits.%kit%", "to select this kit for duel."),
         ARENASPECIFIC(Items.EMPTY_MAP, KitImpl::isArenaSpecific, kit -> kit.setArenaSpecific(!kit.isArenaSpecific()), "When enabled, kit %kit%", "can only be used in", "arenas it is bound to."),
         SOUP(Items.MUSHROOM_SOUP, Characteristic.SOUP, "When enabled, players will", "receive the amount of health", "defined in config when", "right-clicking a soup."),
         SUMO(Material.SLIME_BALL, Characteristic.SUMO, "When enabled, players will ", "lose health only when", "interacting with water or lava."),

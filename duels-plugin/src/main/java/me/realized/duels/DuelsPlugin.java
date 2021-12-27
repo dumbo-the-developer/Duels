@@ -1,10 +1,7 @@
 package me.realized.duels;
 
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.io.IOException;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +9,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 import lombok.Getter;
 import me.realized.duels.api.Duels;
 import me.realized.duels.api.command.SubCommand;
@@ -24,6 +20,8 @@ import me.realized.duels.command.commands.duels.DuelsCommand;
 import me.realized.duels.command.commands.queue.QueueCommand;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
+import me.realized.duels.data.ItemData;
+import me.realized.duels.data.ItemData.ItemDataDeserializer;
 import me.realized.duels.data.UserManagerImpl;
 import me.realized.duels.duel.DuelManager;
 import me.realized.duels.extension.ExtensionClassLoader;
@@ -35,6 +33,7 @@ import me.realized.duels.listeners.DamageListener;
 import me.realized.duels.listeners.EnderpearlListener;
 import me.realized.duels.listeners.KitItemListener;
 import me.realized.duels.listeners.KitOptionsListener;
+import me.realized.duels.listeners.LingerPotionListener;
 import me.realized.duels.listeners.PotionListener;
 import me.realized.duels.listeners.ProjectileHitListener;
 import me.realized.duels.listeners.TeleportListener;
@@ -46,21 +45,22 @@ import me.realized.duels.request.RequestManager;
 import me.realized.duels.setting.SettingsManager;
 import me.realized.duels.shaded.bstats.Metrics;
 import me.realized.duels.spectate.SpectateManagerImpl;
+import me.realized.duels.teleport.Teleport;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.Log.LogSource;
 import me.realized.duels.util.Reloadable;
-import me.realized.duels.util.Teleport;
+import me.realized.duels.util.UpdateChecker;
 import me.realized.duels.util.command.AbstractCommand;
 import me.realized.duels.util.gui.GuiListener;
+import me.realized.duels.util.json.JsonUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
-import org.inventivetalent.update.spiget.SpigetUpdate;
-import org.inventivetalent.update.spiget.UpdateCallback;
-import org.inventivetalent.update.spiget.comparator.VersionComparator;
+import org.jetbrains.annotations.NotNull;
 
 public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
@@ -71,8 +71,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private static DuelsPlugin instance;
 
-    @Getter
-    private final Gson gson = new GsonBuilder().excludeFieldsWithModifiers(Modifier.TRANSIENT).setPrettyPrinting().create();
     private final List<Loadable> loadables = new ArrayList<>();
     private int lastLoad;
 
@@ -117,8 +115,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     private final Map<String, AbstractCommand<DuelsPlugin>> commands = new HashMap<>();
     private final List<Listener> registeredListeners = new ArrayList<>();
-    @Getter
-    private boolean disabling;
 
     @Getter
     private volatile boolean updateAvailable;
@@ -129,6 +125,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     public void onEnable() {
         instance = this;
         Log.addSource(this);
+        JsonUtil.registerDeserializer(ItemData.class, ItemDataDeserializer.class);
 
         try {
             logManager = new LogManager(this);
@@ -187,6 +184,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         new ProjectileHitListener(this);
         new EnderpearlListener(this);
         new KitOptionsListener(this);
+        new LingerPotionListener(this);
 
         new Metrics(this, BSTATS_ID);
 
@@ -194,11 +192,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             return;
         }
 
-        final SpigetUpdate updateChecker = new SpigetUpdate(this, RESOURCE_ID);
-        updateChecker.setVersionComparator(VersionComparator.SEM_VER_SNAPSHOT);
-        updateChecker.checkForUpdate(new UpdateCallback() {
-            @Override
-            public void updateAvailable(final String newVersion, final String downloadUrl, final boolean hasDirectDownload) {
+        final UpdateChecker updateChecker = new UpdateChecker(this, RESOURCE_ID);
+        updateChecker.check((hasUpdate, newVersion) -> {
+            if (hasUpdate) {
                 DuelsPlugin.this.updateAvailable = true;
                 DuelsPlugin.this.newVersion = newVersion;
                 Log.info("===============================================");
@@ -206,10 +202,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                 Log.info("Download " + getName() + " v" + newVersion + " here:");
                 Log.info(getDescription().getWebsite());
                 Log.info("===============================================");
-            }
-
-            @Override
-            public void upToDate() {
+            } else {
                 Log.info("No updates were available. You are on the latest version!");
             }
         });
@@ -217,7 +210,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     @Override
     public void onDisable() {
-        disabling = true;
         final long start = System.currentTimeMillis();
         long last = start;
         logManager.debug("onDisable start -> " + start + "\n");
@@ -227,7 +219,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         logManager.debug("Log#clearSources done (took " + Math.abs(last - System.currentTimeMillis()) + "ms)");
         logManager.handleDisable();
         instance = null;
-        disabling = false;
         log(Level.INFO, "Disable process took " + (System.currentTimeMillis() - start) + "ms.");
     }
 
@@ -308,7 +299,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     }
 
     @Override
-    public boolean registerSubCommand(@Nonnull final String command, @Nonnull final SubCommand subCommand) {
+    public boolean registerSubCommand(@NotNull final String command, @NotNull final SubCommand subCommand) {
         Objects.requireNonNull(command, "command");
         Objects.requireNonNull(subCommand, "subCommand");
 
@@ -328,10 +319,10 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     }
 
     @Override
-    public void registerListener(@Nonnull final Listener listener) {
+    public void registerListener(@NotNull final Listener listener) {
         Objects.requireNonNull(listener, "listener");
         registeredListeners.add(listener);
-        getServer().getPluginManager().registerEvents(listener, this);
+        Bukkit.getPluginManager().registerEvents(listener, this);
     }
 
     @Override
@@ -365,72 +356,72 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     }
 
     @Override
-    public BukkitTask doSync(@Nonnull final Runnable task) {
+    public BukkitTask doSync(@NotNull final Runnable task) {
         Objects.requireNonNull(task, "task");
-        return getServer().getScheduler().runTask(this, task);
+        return Bukkit.getScheduler().runTask(this, task);
     }
 
     @Override
-    public BukkitTask doSyncAfter(@Nonnull final Runnable task, final long delay) {
+    public BukkitTask doSyncAfter(@NotNull final Runnable task, final long delay) {
         Objects.requireNonNull(task, "task");
-        return getServer().getScheduler().runTaskLater(this, task, delay);
+        return Bukkit.getScheduler().runTaskLater(this, task, delay);
     }
 
     @Override
-    public BukkitTask doSyncRepeat(@Nonnull final Runnable task, final long delay, final long period) {
+    public BukkitTask doSyncRepeat(@NotNull final Runnable task, final long delay, final long period) {
         Objects.requireNonNull(task, "task");
-        return getServer().getScheduler().runTaskTimer(this, task, delay, period);
+        return Bukkit.getScheduler().runTaskTimer(this, task, delay, period);
     }
 
     @Override
-    public BukkitTask doAsync(@Nonnull final Runnable task) {
+    public BukkitTask doAsync(@NotNull final Runnable task) {
         Objects.requireNonNull(task, "task");
-        return getServer().getScheduler().runTaskAsynchronously(this, task);
+        return Bukkit.getScheduler().runTaskAsynchronously(this, task);
     }
 
     @Override
-    public BukkitTask doAsyncAfter(@Nonnull final Runnable task, final long delay) {
+    public BukkitTask doAsyncAfter(@NotNull final Runnable task, final long delay) {
         Objects.requireNonNull(task, "task");
-        return getServer().getScheduler().runTaskLaterAsynchronously(this, task, delay);
+        return Bukkit.getScheduler().runTaskLaterAsynchronously(this, task, delay);
     }
 
     @Override
-    public BukkitTask doAsyncRepeat(@Nonnull final Runnable task, final long delay, final long period) {
+    public BukkitTask doAsyncRepeat(@NotNull final Runnable task, final long delay, final long period) {
         Objects.requireNonNull(task, "task");
-        return getServer().getScheduler().runTaskTimerAsynchronously(this, task, delay, period);
+        return Bukkit.getScheduler().runTaskTimerAsynchronously(this, task, delay, period);
     }
 
     @Override
-    public void cancelTask(@Nonnull final BukkitTask task) {
+    public void cancelTask(@NotNull final BukkitTask task) {
         Objects.requireNonNull(task, "task");
         task.cancel();
     }
 
     @Override
     public void cancelTask(final int id) {
-        getServer().getScheduler().cancelTask(id);
+        Bukkit.getScheduler().cancelTask(id);
     }
 
     @Override
-    public void info(@Nonnull final String message) {
+    public void info(@NotNull final String message) {
         Objects.requireNonNull(message, "message");
         Log.info(message);
     }
 
     @Override
-    public void warn(@Nonnull final String message) {
+    public void warn(@NotNull final String message) {
         Objects.requireNonNull(message, "message");
         Log.warn(message);
     }
 
     @Override
-    public void error(@Nonnull final String message) {
+    public void error(@NotNull final String message) {
         Objects.requireNonNull(message, "message");
         Log.error(message);
     }
 
     @Override
-    public void error(@Nonnull final String message, @Nonnull final Throwable thrown) {
+    public void error(@NotNull final String message, @NotNull final Throwable thrown) {
         Objects.requireNonNull(message, "message");
         Objects.requireNonNull(thrown, "thrown");
         Log.error(message, thrown);

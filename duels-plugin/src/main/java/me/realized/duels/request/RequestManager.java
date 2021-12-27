@@ -12,6 +12,7 @@ import me.realized.duels.util.Loadable;
 import me.realized.duels.util.TextBuilder;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent.Action;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -28,7 +29,7 @@ public class RequestManager implements Loadable, Listener {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @Override
@@ -53,7 +54,7 @@ public class RequestManager implements Loadable, Listener {
     public void send(final Player sender, final Player target, final Settings settings) {
         final RequestImpl request = new RequestImpl(sender, target, settings);
         final RequestSendEvent event = new RequestSendEvent(sender, target, request);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
 
         if (event.isCancelled()) {
             return;

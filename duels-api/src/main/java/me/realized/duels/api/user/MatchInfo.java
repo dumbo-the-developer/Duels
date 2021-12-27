@@ -1,8 +1,8 @@
 package me.realized.duels.api.user;
 
 import java.util.GregorianCalendar;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents the data of a match that had occured in the past.
@@ -14,7 +14,7 @@ public interface MatchInfo {
      *
      * @return Never-null name of the winner of this match.
      */
-    @Nonnull
+    @NotNull
     String getWinner();
 
 
@@ -23,7 +23,7 @@ public interface MatchInfo {
      *
      * @return Never-null name of the loser of this match.
      */
-    @Nonnull
+    @NotNull
     String getLoser();
 
 

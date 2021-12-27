@@ -48,17 +48,16 @@ public class InventoryManager implements Loadable {
         return inventories.get(uuid);
     }
 
-    public void create(final Player player) {
-        final InventoryGui gui = new InventoryGui(plugin, player);
-        guiListener.addGui(gui);
-        inventories.put(player.getUniqueId(), gui);
-    }
-
-    public void remove(final Player player) {
-        final InventoryGui gui = inventories.remove(player.getUniqueId());
+    public void create(final Player player, final boolean dead) {
+        // Remove previously existing gui
+        InventoryGui gui = inventories.remove(player.getUniqueId());
 
         if (gui != null) {
             guiListener.removeGui(gui);
         }
+
+        gui = new InventoryGui(plugin, player, dead);
+        guiListener.addGui(gui);
+        inventories.put(player.getUniqueId(), gui);
     }
 }

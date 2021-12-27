@@ -1,278 +1,209 @@
 package me.realized.duels.data;
 
-import java.util.ArrayList;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
+import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import me.realized.duels.util.StringUtil;
-import me.realized.duels.util.compat.Attributes;
+import java.util.stream.Collectors;
+import me.realized.duels.util.EnumUtil;
+import me.realized.duels.util.collection.StreamUtil;
 import me.realized.duels.util.compat.CompatUtil;
-import me.realized.duels.util.compat.Items;
-import me.realized.duels.util.compat.Potions;
-import me.realized.duels.util.compat.Potions.PotionType;
-import me.realized.duels.util.compat.SpawnEggs;
-import me.realized.duels.util.compat.Tags;
-import org.bukkit.DyeColor;
+import me.realized.duels.util.compat.Identifiers;
+import me.realized.duels.util.inventory.ItemBuilder;
+import me.realized.duels.util.json.DefaultBasedDeserializer;
+import me.realized.duels.util.yaml.YamlUtil;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 
 public class ItemData {
 
-    public static transient final String DUELS_ITEM_IDENTIFIER = "DuelsKitContent";
+    public static ItemData fromItemStack(final ItemStack item) {
+        return new ItemData(item);
+    }
 
-    private String material;
-    private int amount;
-    private short data;
+    @SuppressWarnings("unchecked")
+    private static void patchItemFlags(final Map<String, Object> item) {
+        final Object meta = item.get("meta");
 
-    private String itemData;
-    private List<AttributeData> attributeModifiers;
-    private Map<String, Integer> enchantments;
-    private String displayName;
-    private List<String> lore;
-    private List<String> flags;
-    private String owner;
-    private String author;
-    private String title;
-    private List<String> contents;
-    private Map<String, String> effects;
-    private String color;
-    private boolean unbreakable;
+        if (meta instanceof Map) {
+            final Map<String, Object> metaAsMap = (Map<String, Object>) meta;
+            final Object itemFlags = metaAsMap.get("ItemFlags");
 
-    // for Gson
-    private ItemData() {}
-
-    public ItemData(final ItemStack item) {
-        this.material = item.getType().name();
-        this.amount = item.getAmount() == 0 ? 1 : item.getAmount();
-        this.data = Items.getDurability(item);
-
-        final Attributes attributes = new Attributes(item);
-        final List<AttributeData> modifiers = attributes.getModifiers();
-
-        if (!modifiers.isEmpty()) {
-            this.attributeModifiers = new ArrayList<>();
-            attributeModifiers.addAll(modifiers);
-        }
-
-        if (!CompatUtil.isPre1_9()) {
-            if (material.contains("POTION")) {
-                final Potions potion = Potions.fromItemStack(item);
-
-                if (potion != null) {
-                    this.itemData = potion.getType().name() + "-"
-                        + (potion.isExtended() ? "extended-" : "")
-                        + (potion.isLinger() ? "linger-" : "")
-                        + (potion.isSplash() ? "splash-" : "")
-                        + (potion.isStrong() ? "strong-" : "");
-                }
-            } else if (CompatUtil.isPre1_13() && material.equals("MONSTER_EGG")) {
-                final SpawnEggs spawnEgg = SpawnEggs.fromItemStack(item);
-
-                if (spawnEgg != null) {
-                    this.itemData = spawnEgg.getType().name() + "-";
-                }
-            }
-        }
-
-        if (material.equals("TIPPED_ARROW")) {
-            final PotionMeta meta = (PotionMeta) item.getItemMeta();
-            final PotionData potionData = meta.getBasePotionData();
-
-            if (potionData.getType().getEffectType() != null) {
-                this.itemData = potionData.getType().name() + "-"
-                    + (potionData.isExtended() ? "extended-" : "")
-                    + (potionData.isUpgraded() ? "upgraded-" : "");
-            }
-        }
-
-        if (!item.getEnchantments().isEmpty()) {
-            this.enchantments = new HashMap<>();
-
-            for (final Map.Entry<Enchantment, Integer> entry : item.getEnchantments().entrySet()) {
-                enchantments.put(entry.getKey().getName(), entry.getValue());
-            }
-        }
-
-        if (item.hasItemMeta()) {
-            final ItemMeta meta = item.getItemMeta();
-
-            if (meta.hasDisplayName()) {
-                displayName = StringUtil.reverseColor(meta.getDisplayName());
-            }
-
-            if (meta.hasLore()) {
-                lore = StringUtil.reverseColor(meta.getLore());
-            }
-
-            if (CompatUtil.hasItemFlag() && !meta.getItemFlags().isEmpty()) {
-                this.flags = new ArrayList<>();
-
-                for (final ItemFlag flag : meta.getItemFlags()) {
-                    flags.add(flag.name());
-                }
-            }
-
-            if (Items.equals(Items.HEAD, item)) {
-                final SkullMeta skullMeta = (SkullMeta) meta;
-
-                if (skullMeta.hasOwner()) {
-                    owner = skullMeta.getOwner();
-                }
-            }
-
-            if (item.getType() == Material.POTION) {
-                final PotionMeta potionMeta = (PotionMeta) meta;
-
-                if (potionMeta.hasCustomEffects()) {
-                    this.effects = new HashMap<>();
-
-                    for (final PotionEffect effect : potionMeta.getCustomEffects()) {
-                        effects.put(effect.getType().getName(), effect.getDuration() + "-" + effect.getAmplifier());
-                    }
-                }
-            }
-
-            if (item.getType() == Material.WRITTEN_BOOK) {
-                final BookMeta bookMeta = (BookMeta) meta;
-
-                if (bookMeta.hasAuthor()) {
-                    author = bookMeta.getAuthor();
-                }
-
-                if (bookMeta.hasTitle()) {
-                    title = StringUtil.reverseColor(bookMeta.getTitle());
-                }
-
-                if (bookMeta.hasPages()) {
-                    contents = StringUtil.reverseColor(bookMeta.getPages());
-                }
-            }
-
-            if (item.getType().name().contains("LEATHER_")) {
-                final LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) meta;
-
-                if (DyeColor.getByColor(leatherArmorMeta.getColor()) != null) {
-                    color = DyeColor.getByColor(leatherArmorMeta.getColor()).name();
-                }
-            }
-
-            if (!CompatUtil.isPre1_8() && (CompatUtil.isPre1_12() ? meta.spigot().isUnbreakable() : meta.isUnbreakable())) {
-                unbreakable = true;
+            if (itemFlags instanceof Iterable) {
+                metaAsMap.put("ItemFlags", StreamUtil.asStream((Iterable<?>) itemFlags).map(Object::toString).collect(Collectors.toSet()));
             }
         }
     }
 
-    public ItemStack toItemStack() {
-        final Material type = Material.getMaterial(material);
+    private Map<String, Object> item;
 
-        if (type == null) {
+    private ItemData() {}
+
+    private ItemData(ItemStack item) {
+        item = Identifiers.removeIdentifier(item);
+        final String dumped = YamlUtil.bukkitYamlDump(item);
+        this.item = YamlUtil.yamlLoad(dumped);
+    }
+
+    public ItemStack toItemStack(final boolean kitItem) {
+        if (item == null || item.isEmpty()) {
             return null;
         }
 
-        ItemStack item = new ItemStack(type, amount, data);
-
-        if (attributeModifiers != null) {
-            item = new Attributes(item).addModifiers(attributeModifiers);
+        if (CompatUtil.isPre1_12()) {
+            patchItemFlags(item);
         }
 
-        if (!CompatUtil.isPre1_9() && itemData != null) {
-            final List<String> args = Arrays.asList(itemData.split("-")) ;
+        final String dumped = YamlUtil.yamlDump(item);
+        ItemStack item = YamlUtil.bukkitYamlLoadAs(dumped, ItemStack.class);
+        return kitItem ? Identifiers.addIdentifier(item) : item;
+    }
 
-            if (material.contains("POTION")) {
-                item = new Potions(PotionType.valueOf(args.get(0)), args).toItemStack(amount);
-            } else if (material.equals("TIPPED_ARROW")) {
-                final PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-                final PotionData data = new PotionData(org.bukkit.potion.PotionType.valueOf(args.get(0)), args.contains("extended"), args.contains("upgraded"));
-                potionMeta.setBasePotionData(data);
-                item.setItemMeta(potionMeta);
-            } else if (CompatUtil.isPre1_13() && material.equals("MONSTER_EGG")) {
-                item = new SpawnEggs(EntityType.valueOf(args.get(0))).toItemStack(amount);
-            }
+    public ItemStack toItemStack() {
+        return toItemStack(true);
+    }
+
+    public static class ItemDataDeserializer extends DefaultBasedDeserializer<ItemData> {
+
+        private static boolean checkOldJson = true;
+
+        public ItemDataDeserializer(final JsonDeserializer<?> defaultDeserializer) {
+            super(ItemData.class, defaultDeserializer);
         }
 
-        if (enchantments != null && !enchantments.isEmpty()) {
-            for (final Map.Entry<String, Integer> entry : enchantments.entrySet()) {
-                item.addUnsafeEnchantment(Enchantment.getByName(entry.getKey()), entry.getValue());
-            }
-        }
+        @Override
+        public ItemData deserialize(final JsonParser parser, final DeserializationContext context) throws IOException {
+            JsonNode node = null;
+            JsonParser actual = parser;
 
-        final ItemMeta meta = item.getItemMeta();
-
-        if (displayName != null) {
-            meta.setDisplayName(StringUtil.color(displayName));
-        }
-
-        if (lore != null && !lore.isEmpty()) {
-            meta.setLore(StringUtil.color(lore));
-        }
-
-        if (CompatUtil.hasItemFlag() && flags != null && !flags.isEmpty()) {
-            for (final String flag : flags) {
-                meta.addItemFlags(ItemFlag.valueOf(flag));
-            }
-        }
-
-        if (owner != null && Items.equals(Items.HEAD, item)) {
-            final SkullMeta skullMeta = (SkullMeta) meta;
-            skullMeta.setOwner(owner);
-        }
-
-        if (item.getType() == Material.POTION && effects != null && !effects.isEmpty()) {
-            final PotionMeta potionMeta = (PotionMeta) meta;
-
-            for (final Map.Entry<String, String> entry : effects.entrySet()) {
-                final String[] data = entry.getValue().split("-");
-                final int duration = Integer.parseInt(data[0]);
-                final int amplifier = Integer.parseInt(data[1]);
-                potionMeta.addCustomEffect(new PotionEffect(PotionEffectType.getByName(entry.getKey()), duration, amplifier), true);
-            }
-        }
-
-        if (item.getType() == Material.WRITTEN_BOOK) {
-            final BookMeta bookMeta = (BookMeta) meta;
-
-            if (author != null) {
-                bookMeta.setAuthor(author);
+            // Create a copy of current json as node tree in case old json version is detected.
+            if (checkOldJson) {
+                node = parser.readValueAsTree();
+                actual = parser.getCodec().treeAsTokens(node);
+                actual.nextToken();
             }
 
-            if (title != null) {
-                bookMeta.setTitle(StringUtil.color(title));
+            ItemData data = (ItemData) defaultDeserializer.deserialize(actual, context);
+
+            if (data.item != null) {
+                // If an item was successfully parsed to new json, disable old json check (assume kit file is in new json format) to reduce overhead.
+                checkOldJson = false;
+            } else if (node != null) {
+                if (!node.isObject()) {
+                    return null;
+                }
+
+                final String material = node.get("material").textValue();
+                final int amount = node.has("amount") ? node.get("amount").intValue() : 1;
+                final short damage = node.has("data") ? node.get("data").shortValue() : 0;
+                final Material type = Material.getMaterial(material);
+
+                if (type == null) {
+                    return null;
+                }
+
+                final ItemBuilder builder = ItemBuilder.of(type, amount, damage);
+
+                if (node.has("displayName")) {
+                    builder.name(node.get("displayName").textValue());
+                }
+
+                if (node.has("lore")) {
+                    builder.lore(StreamUtil.asStream(node.get("lore")).map(JsonNode::textValue).collect(Collectors.toList()));
+                }
+
+                if (node.has("enchantments")) {
+                    final JsonNode enchantments = node.get("enchantments");
+
+                    StreamUtil.asStream(enchantments.fieldNames()).forEach(entry -> {
+                        final Enchantment enchantment = Enchantment.getByName(entry);
+
+                        if (enchantment == null) {
+                            return;
+                        }
+
+                        builder.enchant(enchantment, enchantments.get(entry).asInt());
+                    });
+                }
+
+                if (node.has("flags") && CompatUtil.hasItemFlag()) {
+                    final JsonNode flags = node.get("flags");
+                    StreamUtil.asStream(flags).forEach(flagNode -> {
+                        final ItemFlag flag = EnumUtil.getByName(flagNode.textValue(), ItemFlag.class);
+
+                        if (flag == null) {
+                            return;
+                        }
+
+                        builder.editMeta(meta -> meta.addItemFlags(flag));
+                    });
+                }
+
+                if (node.has("unbreakable") && node.get("unbreakable").booleanValue()) {
+                    builder.unbreakable();
+                }
+
+                if (node.has("owner")) {
+                    builder.head(node.get("owner").textValue());
+                }
+
+                if (node.has("color")) {
+                    builder.leatherArmorColor(node.get("color").textValue());
+                }
+
+                if (node.has("effects")) {
+                    final JsonNode effects = node.get("effects");
+                    builder.editMeta(meta -> {
+                        final PotionMeta potionMeta = (PotionMeta) meta;
+
+                        StreamUtil.asStream(effects.fieldNames()).forEach(entry -> {
+                            final String[] split = effects.get(entry).textValue().split("-");
+                            final int duration = Integer.parseInt(split[0]);
+                            final int amplifier = Integer.parseInt(split[1]);
+                            final PotionEffectType effectType = PotionEffectType.getByName(entry);
+
+                            if (effectType == null) {
+                                return;
+                            }
+
+                            potionMeta.addCustomEffect(new PotionEffect(effectType, duration, amplifier), true);
+                        });
+                    });
+                }
+
+                if (node.has("itemData") && !CompatUtil.isPre1_9()) {
+                    final List<String> args = Arrays.asList(node.get("itemData").textValue().split("-"));
+                    final PotionType potionType = EnumUtil.getByName(args.get(0), PotionType.class);
+
+                    if (potionType != null) {
+                        builder.potion(potionType, args.contains("extended"), args.contains("strong"));
+                    }
+                }
+
+                if (node.has("attributeModifiers") && CompatUtil.hasAttributes()) {
+                    final JsonNode attributes = node.get("attributeModifiers");
+                    StreamUtil.asStream(attributes).forEach(attributeNode -> builder.attribute(
+                        attributeNode.get("name").textValue(),
+                        attributeNode.get("operation").intValue(),
+                        attributeNode.get("amount").doubleValue(),
+                        attributeNode.has("slot") ? attributeNode.get("slot").textValue() : null
+                    ));
+                }
+
+                data = new ItemData(builder.build());
             }
 
-            if (contents != null && !contents.isEmpty()) {
-                bookMeta.setPages(StringUtil.color(contents));
-            }
+            return data;
         }
-
-        if (item.getType().name().contains("LEATHER_")) {
-            final LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) meta;
-
-            if (color != null) {
-                leatherArmorMeta.setColor(DyeColor.valueOf(color).getColor());
-            }
-        }
-
-        if (!CompatUtil.isPre1_8() && unbreakable) {
-            if (CompatUtil.isPre1_12()) {
-                meta.spigot().setUnbreakable(true);
-            } else {
-                meta.setUnbreakable(true);
-            }
-        }
-
-        item.setItemMeta(meta);
-        return Tags.setKey(item, DUELS_ITEM_IDENTIFIER);
     }
 }

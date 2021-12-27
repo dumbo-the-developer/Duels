@@ -33,7 +33,7 @@ public class RequestSendButton extends BaseButton {
             return;
         }
 
-        if (!config.isUseOwnInventoryEnabled() && settings.getKit() == null) {
+        if (!settings.isOwnInventory() && settings.getKit() == null) {
             player.closeInventory();
             return;
         }

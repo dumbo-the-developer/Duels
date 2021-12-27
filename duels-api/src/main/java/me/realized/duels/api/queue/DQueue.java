@@ -1,10 +1,10 @@
 package me.realized.duels.api.queue;
 
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import me.realized.duels.api.kit.Kit;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a Queue loaded on the server.
@@ -34,7 +34,7 @@ public interface DQueue {
      * @param player Player to check if in this {@link DQueue}. Must not be null!
      * @return True if player is in this {@link DQueue}. False otherwise.
      */
-    boolean isInQueue(@Nonnull final Player player);
+    boolean isInQueue(@NotNull final Player player);
 
 
     /**
@@ -42,7 +42,7 @@ public interface DQueue {
      *
      * @return Never-null UnmodifiableList of {@link Player}s in this queue.
      */
-    @Nonnull
+    @NotNull
     List<Player> getQueuedPlayers();
 
 

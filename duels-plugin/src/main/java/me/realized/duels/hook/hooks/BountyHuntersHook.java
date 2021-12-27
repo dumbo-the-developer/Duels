@@ -6,6 +6,7 @@ import me.realized.duels.config.Config;
 import me.realized.duels.util.hook.PluginHook;
 import net.Indyuce.bountyhunters.api.event.BountyClaimEvent;
 import net.Indyuce.bountyhunters.api.event.BountyCreateEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,7 +30,7 @@ public class BountyHuntersHook extends PluginHook<DuelsPlugin> implements Listen
             throw new RuntimeException("This version of " + getName() + " is not supported. Please try upgrading to the latest version.");
         }
 
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler(ignoreCancelled = true)

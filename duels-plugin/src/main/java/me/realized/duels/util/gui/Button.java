@@ -8,6 +8,7 @@ import lombok.Setter;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.compat.CompatUtil;
 import me.realized.duels.util.compat.Items;
+import me.realized.duels.util.compat.Skulls;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -48,12 +49,10 @@ public class Button<P extends JavaPlugin> {
         setLore(Arrays.asList(lore));
     }
 
-    protected void setOwner(final String name) {
-        editMeta(meta -> {
-            if (Items.equals(Items.HEAD, displayed)) {
-                ((SkullMeta) meta).setOwner(name);
-            }
-        });
+    protected void setOwner(final Player player) {
+        if (Items.equals(displayed, Items.HEAD)) {
+            editMeta(meta -> Skulls.setProfile((SkullMeta) meta, player));
+        }
     }
 
     protected void setGlow(final boolean glow) {

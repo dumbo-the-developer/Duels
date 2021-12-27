@@ -12,7 +12,6 @@ import me.realized.duels.util.Log;
 import me.realized.duels.util.Reloadable;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.config.AbstractConfiguration;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -66,7 +65,7 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
             for (final Map.Entry<String, String> entry : strings.entrySet()) {
                 final String placeholder = "{" + entry.getKey() + "}";
 
-                if (StringUtils.containsIgnoreCase(value, placeholder)) {
+                if (StringUtil.containsIgnoreCase(value, placeholder)) {
                     value = value.replaceAll("(?i)" + Pattern.quote(placeholder), entry.getValue());
                 }
             }
@@ -103,6 +102,7 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
     }
 
     private String replace(String message, Object... replacers) {
+        // If given an array of replacers as a single parameter, expand the array.
         if (replacers.length == 1 && replacers[0] instanceof Object[]) {
             replacers = (Object[]) replacers[0];
         }

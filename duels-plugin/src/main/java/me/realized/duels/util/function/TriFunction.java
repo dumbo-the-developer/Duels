@@ -1,4 +1,4 @@
-package me.realized.duels.util;
+package me.realized.duels.util.function;
 
 import java.util.Objects;
 import java.util.function.Function;

@@ -6,7 +6,7 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Reloadable;
-import org.apache.commons.lang.StringUtils;
+import me.realized.duels.util.StringUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -23,8 +23,7 @@ public class ReloadCommand extends BaseCommand {
             final Loadable target = plugin.find(args[1]);
 
             if (!(target instanceof Reloadable)) {
-                sender
-                    .sendMessage(ChatColor.RED + "Invalid module. The following modules are available for a reload: " + StringUtils.join(plugin.getReloadables(), ", "));
+                sender.sendMessage(ChatColor.RED + "Invalid module. The following modules are available for a reload: " + StringUtil.join(plugin.getReloadables(), ", "));
                 return;
             }
 

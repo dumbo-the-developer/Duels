@@ -4,8 +4,8 @@ import java.util.List;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.kit.KitImpl;
+import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.inventory.InventoryUtil;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -28,7 +28,7 @@ public class SetitemCommand extends BaseCommand {
             return;
         }
 
-        final String name = StringUtils.join(args, " ", 1, args.length).replace("-", " ");
+        final String name = StringUtil.join(args, " ", 1, args.length).replace("-", " ");
         final KitImpl kit = kitManager.get(name);
 
         if (kit == null) {

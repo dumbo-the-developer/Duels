@@ -4,8 +4,6 @@ import java.util.OptionalInt;
 
 public final class NumberUtil {
 
-    private NumberUtil() {}
-
     /**
      * Copy of {@link Integer#parseInt(String)} (String)} but returns an empty {@link OptionalInt} instead of throwing a {@link NumberFormatException}.
      *
@@ -69,4 +67,22 @@ public final class NumberUtil {
 
         return OptionalInt.of(negative ? result : -result);
     }
+
+    public static int getChange(final int k, final int winnerRating, final int loserRating) {
+        final double wr = r(winnerRating);
+        final double lr = r(loserRating);
+        return (int) Math.floor(k * (1 - (wr / (wr + lr))));
+    }
+
+    private static double r(final int rating) {
+        return Math.pow(10.0, rating / 400.0);
+    }
+
+    public static boolean isLower(String version, String otherVersion) {
+        version = version.replace("-SNAPSHOT", "").replace(".", "");
+        otherVersion = otherVersion.replace("-SNAPSHOT", "").replace(".", "");
+        return NumberUtil.parseInt(version).orElse(0) < NumberUtil.parseInt(otherVersion).orElse(0);
+    }
+
+    private NumberUtil() {}
 }

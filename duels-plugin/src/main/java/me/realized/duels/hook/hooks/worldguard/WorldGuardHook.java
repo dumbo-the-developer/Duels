@@ -3,8 +3,8 @@ package me.realized.duels.hook.hooks.worldguard;
 import java.util.Collection;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.config.Config;
-import me.realized.duels.util.compat.ReflectionUtil;
 import me.realized.duels.util.hook.PluginHook;
+import me.realized.duels.util.reflect.ReflectionUtil;
 import org.bukkit.entity.Player;
 
 public class WorldGuardHook extends PluginHook<DuelsPlugin> {

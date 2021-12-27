@@ -1,9 +1,9 @@
 package me.realized.duels.api.arena;
 
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents the ArenaManager singleton used by Duels.
@@ -17,7 +17,7 @@ public interface ArenaManager {
      * @return {@link Arena} instance that has a name matching with the given name or null if not exists.
      */
     @Nullable
-    Arena get(@Nonnull final String name);
+    Arena get(@NotNull final String name);
 
 
     /**
@@ -27,7 +27,7 @@ public interface ArenaManager {
      * @return {@link Arena} instance that contains the player or null if not exists.
      */
     @Nullable
-    Arena get(@Nonnull final Player player);
+    Arena get(@NotNull final Player player);
 
 
     /**
@@ -36,7 +36,7 @@ public interface ArenaManager {
      * @param player Player to check if in match. Should not be null!
      * @return True if player was in a match. False otherwise.
      */
-    boolean isInMatch(@Nonnull final Player player);
+    boolean isInMatch(@NotNull final Player player);
 
 
     /**
@@ -45,6 +45,6 @@ public interface ArenaManager {
      * @return Never-null UnmodifiableList of {@link Arena}s that are currently loaded.
      * @since 3.4.0
      */
-    @Nonnull
+    @NotNull
     List<Arena> getArenas();
 }

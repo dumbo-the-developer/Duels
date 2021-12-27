@@ -1,10 +1,4 @@
 dependencies {
-    compile 'com.google.code.findbugs:jsr305:3.0.2'
-    compile 'org.spigotmc:spigot-api:1.13.2-R0.1-SNAPSHOT'
+    compileOnly 'org.jetbrains:annotations-java5:22.0.0'
+    implementation 'org.spigotmc:spigot-api:1.14.4-R0.1-SNAPSHOT'
 }
-
-shadowJar {
-    archiveName = project.name + '-' + project.version + '.jar'
-}
-
-build.dependsOn(shadowJar)

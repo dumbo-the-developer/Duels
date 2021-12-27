@@ -2,8 +2,8 @@ package me.realized.duels.api.user;
 
 import java.util.List;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 import me.realized.duels.api.kit.Kit;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents a User loaded on the server.
@@ -15,7 +15,7 @@ public interface User {
      *
      * @return {@link UUID} of this user.
      */
-    @Nonnull
+    @NotNull
     UUID getUuid();
 
 
@@ -24,7 +24,7 @@ public interface User {
      *
      * @return Name of this user.
      */
-    @Nonnull
+    @NotNull
     String getName();
 
 
@@ -81,7 +81,7 @@ public interface User {
      *
      * @return Never-null UnmodifiableList of recent matches for this user.
      */
-    @Nonnull
+    @NotNull
     List<MatchInfo> getMatches();
 
 
@@ -100,7 +100,7 @@ public interface User {
      * @param kit {@link Kit} to check for rating.
      * @return Rating for this {@link Kit}.
      */
-    int getRating(@Nonnull final Kit kit);
+    int getRating(@NotNull final Kit kit);
 
 
     /**
@@ -116,7 +116,7 @@ public interface User {
      *
      * @param kit {@link Kit} to reset the rating to default.
      */
-    void resetRating(@Nonnull final Kit kit);
+    void resetRating(@NotNull final Kit kit);
 
 
     /**

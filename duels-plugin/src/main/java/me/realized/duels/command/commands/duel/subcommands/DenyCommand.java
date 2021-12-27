@@ -32,7 +32,7 @@ public class DenyCommand extends BaseCommand {
         }
 
         final RequestDenyEvent event = new RequestDenyEvent(player, target, request);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
 
         lang.sendMessage(player, "COMMAND.duel.request.deny.receiver", "name", target.getName());
         lang.sendMessage(target, "COMMAND.duel.request.deny.sender", "name", player.getName());

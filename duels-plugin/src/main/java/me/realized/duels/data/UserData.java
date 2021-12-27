@@ -1,5 +1,6 @@
 package me.realized.duels.data;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,18 +12,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
-import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.kit.Kit;
 import me.realized.duels.api.user.MatchInfo;
 import me.realized.duels.api.user.User;
 import me.realized.duels.util.Log;
+import me.realized.duels.util.json.JsonUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 public class UserData implements User {
+
+    private static transient final String ERROR_USER_SAVE = "An error occured while saving userdata of %s!";
 
     @Getter
     private UUID uuid;
@@ -38,16 +41,13 @@ public class UserData implements User {
     private ConcurrentHashMap<String, Integer> rating;
     private List<MatchData> matches = new ArrayList<>();
 
-    transient DuelsPlugin plugin;
     transient File folder;
     transient int defaultRating;
     transient int matchesToDisplay;
 
-    // for Gson
     private UserData() {}
 
-    public UserData(final DuelsPlugin plugin, final File folder, final int defaultRating, final int matchesToDisplay, final Player player) {
-        this.plugin = plugin;
+    public UserData(final File folder, final int defaultRating, final int matchesToDisplay, final Player player) {
         this.folder = folder;
         this.defaultRating = defaultRating;
         this.matchesToDisplay = matchesToDisplay;
@@ -87,7 +87,7 @@ public class UserData implements User {
         }
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public List<MatchInfo> getMatches() {
         return Collections.unmodifiableList(matches);
@@ -99,7 +99,7 @@ public class UserData implements User {
     }
 
     @Override
-    public int getRating(@Nonnull final Kit kit) {
+    public int getRating(@NotNull final Kit kit) {
         return getRatingUnsafe(kit);
     }
 
@@ -109,7 +109,7 @@ public class UserData implements User {
     }
 
     @Override
-    public void resetRating(@Nonnull final Kit kit) {
+    public void resetRating(@NotNull final Kit kit) {
         setRating(kit, defaultRating);
     }
 
@@ -181,12 +181,12 @@ public class UserData implements User {
                 file.createNewFile();
             }
 
-            try (Writer writer = new OutputStreamWriter(new FileOutputStream(file))) {
-                plugin.getGson().toJson(this, writer);
+            try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
+                JsonUtil.getObjectWriter().writeValue(writer, this);
                 writer.flush();
             }
         } catch (IOException ex) {
-            Log.error("An error occured while saving userdata of " + name + "!", ex);
+            Log.error(String.format(ERROR_USER_SAVE, name), ex);
         }
     }
 

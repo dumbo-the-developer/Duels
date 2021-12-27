@@ -10,6 +10,7 @@ import me.realized.duels.api.extension.DuelsExtension;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.NumberUtil;
+import org.bukkit.Bukkit;
 
 public class ExtensionManager implements Loadable {
 
@@ -54,12 +55,12 @@ public class ExtensionManager implements Loadable {
                     continue;
                 }
 
-                if (!info.getDepends().isEmpty() && info.getDepends().stream().anyMatch(depend -> !plugin.getServer().getPluginManager().isPluginEnabled(depend))) {
+                if (!info.getDepends().isEmpty() && info.getDepends().stream().anyMatch(depend -> !Bukkit.getPluginManager().isPluginEnabled(depend))) {
                     Log.error(this, "Could not load extension " + file.getName() + ": This extension require the following plugins to enable - " + info.getDepends());
                     continue;
                 }
 
-                if (info.getApiVersion() != null && isLower(plugin.getVersion(), info.getApiVersion())) {
+                if (info.getApiVersion() != null && NumberUtil.isLower(plugin.getVersion(), info.getApiVersion())) {
                     Log.error(this, "Could not load extension " + file.getName() + ": This extension requires Duels v" + info.getApiVersion() + " or higher!");
                     continue;
                 }
@@ -74,26 +75,20 @@ public class ExtensionManager implements Loadable {
 
                 final String requiredVersion = extension.getRequiredVersion();
 
-                if (requiredVersion != null && isLower(plugin.getVersion(), requiredVersion)) {
+                if (requiredVersion != null && NumberUtil.isLower(plugin.getVersion(), requiredVersion)) {
                     Log.error(this, "Could not load extension " + file.getName() + ": This extension requires Duels v" + requiredVersion + " or higher!");
                     continue;
                 }
 
                 INIT_EXTENSION.invoke(extension, plugin, info.getName(), folder, file);
                 extension.setEnabled(true);
-                Log.info(this, "Extension '" + extension.getName() + "' is now enabled.");
+                Log.info(this, "Extension '" + extension.getName() + " " + info.getVersion() + "' is now enabled.");
                 extensions.put(extension.getName(), extension);
                 this.info.put(extension, info);
             } catch (Throwable thrown) {
                 Log.error(this, "Could not enable extension " + file.getName() + "!", thrown);
             }
         }
-    }
-
-    private boolean isLower(String version, String otherVersion) {
-        version = version.replace("-SNAPSHOT", "").replace(".", "");
-        otherVersion = otherVersion.replace("-SNAPSHOT", "").replace(".", "");
-        return NumberUtil.parseInt(version).orElse(0) < NumberUtil.parseInt(otherVersion).orElse(0);
     }
 
     @Override

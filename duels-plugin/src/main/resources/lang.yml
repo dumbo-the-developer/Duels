@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 9
+config-version: 10
 
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
@@ -276,7 +276,7 @@ COMMAND:
     - '{LINE}'
     - '&f/spectate [player] &e- &7Spectates the a player in duel.'
     - '{LINE}'
-    start-spectate: '{PREFIX} &7You are now spectating &f%name%&7.'
+    start-spectate: '{PREFIX} &7You are now spectating &f%name%&7. Type &f/spectate &7to stop spectating.'
     stop-spectate: '{PREFIX} &7You are no longer spectating &f%name%&7.'
 
   sub-command-usage: '{PREFIX} &f/%command% %usage% &e- &7%description%'
@@ -284,7 +284,7 @@ COMMAND:
 
 DUEL:
   start-failure:
-    no-kit-selected: '{FAIL_PREFIX} No kit was selected!'
+    mode-unselected: '{FAIL_PREFIX} &cYou must either choose a kit or enable own inventory.'
     player-is-dead: '{FAIL_PREFIX} You or your opponent is not alive!'
     in-blacklisted-world: '{FAIL_PREFIX} You or your opponent is in a blacklisted world!'
     is-tagged: '{FAIL_PREFIX} You or your opponent is in combat!'
@@ -331,15 +331,11 @@ SIGN:
 
 
 SPECTATE:
-  stop-item:
-    name: '&cStop Spectating'
   arena-broadcast: '{PREFIX} &f%name% &7is now spectating the match!'
   match-end: '{PREFIX} &7The match you were spectating has ended.'
   prevent:
-    item-drop: '&cYou cannot drop items while in spectator mode.'
     command: '&cYou cannot use ''%command%'' while in spectator mode.'
     teleportation: '&cYou cannot teleport while in spectator mode.'
-    pvp: '&cYou cannot do this while in spectator mode.'
 
 
 GUI:
@@ -351,6 +347,7 @@ GUI:
         lore:
         - '&7Opponent: &f%opponent%'
         - '&7Kit: &3%kit%'
+        - '&7Own Inventory: &r%own_inventory%'
         - '&7Arena: &e%arena%'
         - '&7Bet Items: &r%item_betting%'
         - '&7Bet: &6$%bet_amount%'
@@ -364,6 +361,18 @@ GUI:
         - '&7Selected Kit: &3%kit%'
         - ' '
         - '&aClick to Change Kit!'
+        lore-no-permission:
+          - '&cYou do not have permission to'
+          - '&cuse this option.'
+      use-own-inventory:
+        name: '&9Use Own Inventory'
+        lore:
+          - '&7Own Inventory: &r%own_inventory%'
+          - ' '
+          - '&aClick to Toggle Own Inventory!'
+        lore-no-permission:
+          - '&cYou do not have permission to'
+          - '&cuse this option.'
       arena-selector:
         name: '&9Arena Selection'
         lore:

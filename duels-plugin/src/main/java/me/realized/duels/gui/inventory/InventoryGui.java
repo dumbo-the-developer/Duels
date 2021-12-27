@@ -15,7 +15,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class InventoryGui extends SinglePageGui<DuelsPlugin> {
 
-    public InventoryGui(final DuelsPlugin plugin, final Player player) {
+    public InventoryGui(final DuelsPlugin plugin, final Player player, final boolean dead) {
         super(plugin, plugin.getLang().getMessage("GUI.inventory-view.title", "name", player.getName()), 6);
 
         final ItemStack spacing = Items.GRAY_PANE.clone();
@@ -27,7 +27,7 @@ public class InventoryGui extends SinglePageGui<DuelsPlugin> {
 
         for (final ItemStack item : player.getInventory().getContents()) {
             if (item != null && item.getType() != Material.AIR) {
-                if (item.equals(Items.HEAL_SPLASH_POTION)) {
+                if (Items.isHealSplash(item)) {
                     potions++;
                 }
 
@@ -51,6 +51,6 @@ public class InventoryGui extends SinglePageGui<DuelsPlugin> {
         set(50, new PotionCounterButton(plugin, potions));
         set(51, new EffectsButton(plugin, player));
         set(52, new HungerButton(plugin, player));
-        set(53, new HealthButton(plugin, player));
+        set(53, new HealthButton(plugin, player, dead));
     }
 }

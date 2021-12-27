@@ -2,12 +2,12 @@ package me.realized.duels.api.match;
 
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import me.realized.duels.api.arena.Arena;
 import me.realized.duels.api.kit.Kit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents an ongoing Match.
@@ -20,7 +20,7 @@ public interface Match {
      *
      * @return {@link Arena} this {@link Match} is taking place in.
      */
-    @Nonnull
+    @NotNull
     Arena getArena();
 
 
@@ -48,8 +48,8 @@ public interface Match {
      * @param player {@link Player} to get the list of bet items.
      * @return Never-null UnmodifiableList of ItemStacks the player has bet for this {@link Match}.
      */
-    @Nonnull
-    List<ItemStack> getItems(@Nonnull final Player player);
+    @NotNull
+    List<ItemStack> getItems(@NotNull final Player player);
 
 
     /**
@@ -75,7 +75,7 @@ public interface Match {
      * @return Never-null UnmodifiableSet of alive players in this {@link Match}.
      * @since 3.1.0
      */
-    @Nonnull
+    @NotNull
     Set<Player> getPlayers();
 
 
@@ -88,6 +88,6 @@ public interface Match {
      * @return Never-null UnmodifiableSet of players who started this {@link Match}.
      * @since 3.4.1
      */
-    @Nonnull
+    @NotNull
     Set<Player> getStartingPlayers();
 }

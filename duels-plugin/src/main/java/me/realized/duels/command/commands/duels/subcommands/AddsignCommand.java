@@ -9,7 +9,6 @@ import me.realized.duels.queue.Queue;
 import me.realized.duels.util.BlockUtil;
 import me.realized.duels.util.NumberUtil;
 import me.realized.duels.util.StringUtil;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
@@ -36,7 +35,7 @@ public class AddsignCommand extends BaseCommand {
         KitImpl kit = null;
 
         if (!args[2].equals("-")) {
-            String name = StringUtils.join(args, " ", 2, args.length).replace("-", " ");
+            String name = StringUtil.join(args, " ", 2, args.length).replace("-", " ");
             kit = kitManager.get(name);
 
             if (kit == null) {

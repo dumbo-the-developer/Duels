@@ -7,8 +7,9 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.config.Config;
 import me.realized.duels.util.Log;
-import me.realized.duels.util.compat.ReflectionUtil;
 import me.realized.duels.util.hook.PluginHook;
+import me.realized.duels.util.reflect.ReflectionUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -38,7 +39,7 @@ public class FactionsHook extends PluginHook<DuelsPlugin> {
             return;
         }
 
-        plugin.getServer().getPluginManager().registerEvents(listener, plugin);
+        Bukkit.getPluginManager().registerEvents(listener, plugin);
     }
 
     public class Factions2Listener implements Listener {
@@ -52,7 +53,7 @@ public class FactionsHook extends PluginHook<DuelsPlugin> {
             final MPlayer mPlayer = event.getMPlayer();
             final Player player = mPlayer.getPlayer();
 
-            if (!arenaManager.isInMatch(player)) {
+            if (player == null || !arenaManager.isInMatch(player)) {
                 return;
             }
 
@@ -70,7 +71,7 @@ public class FactionsHook extends PluginHook<DuelsPlugin> {
 
             final Player player = event.getfPlayer().getPlayer();
 
-            if (!arenaManager.isInMatch(player)) {
+            if (player == null || !arenaManager.isInMatch(player)) {
                 return;
             }
 
