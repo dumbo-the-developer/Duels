@@ -6,7 +6,7 @@ dependencies {
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId = project.group.toString()
+            groupId = project.group.toString() + "." + parent.name.toLowerCase()
             artifactId = project.name.toLowerCase()
             version = project.version
             from components.java
