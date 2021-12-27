@@ -1,6 +1,5 @@
 package me.realized.duels.api;
 
-import javax.annotation.Nonnull;
 import me.realized.duels.api.arena.ArenaManager;
 import me.realized.duels.api.command.SubCommand;
 import me.realized.duels.api.kit.KitManager;
@@ -11,6 +10,7 @@ import me.realized.duels.api.user.UserManager;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
 
 
 public interface Duels extends Plugin {
@@ -20,7 +20,7 @@ public interface Duels extends Plugin {
      *
      * @return UserManager singleton
      */
-    @Nonnull
+    @NotNull
     UserManager getUserManager();
 
 
@@ -29,7 +29,7 @@ public interface Duels extends Plugin {
      *
      * @return ArenaManager singleton
      */
-    @Nonnull
+    @NotNull
     ArenaManager getArenaManager();
 
 
@@ -38,7 +38,7 @@ public interface Duels extends Plugin {
      *
      * @return KitManager singleton
      */
-    @Nonnull
+    @NotNull
     KitManager getKitManager();
 
 
@@ -48,7 +48,7 @@ public interface Duels extends Plugin {
      * @return SpectateManager singleton
      * @since 3.4.1
      */
-    @Nonnull
+    @NotNull
     SpectateManager getSpectateManager();
 
 
@@ -57,7 +57,7 @@ public interface Duels extends Plugin {
      *
      * @return DQueueManager singleton
      */
-    @Nonnull
+    @NotNull
     DQueueManager getQueueManager();
 
 
@@ -66,7 +66,7 @@ public interface Duels extends Plugin {
      *
      * @return QueueSignManager singleton
      */
-    @Nonnull
+    @NotNull
     QueueSignManager getQueueSignManager();
 
 
@@ -77,7 +77,7 @@ public interface Duels extends Plugin {
      * @param subCommand {@link SubCommand} to register.
      * @return True if sub command was successfully registered. False otherwise.
      */
-    boolean registerSubCommand(@Nonnull final String command, @Nonnull final SubCommand subCommand);
+    boolean registerSubCommand(@NotNull final String command, @NotNull final SubCommand subCommand);
 
 
     /**
@@ -86,7 +86,7 @@ public interface Duels extends Plugin {
      * @param listener {@link Listener} to register.
      * @since 3.1.2
      */
-    void registerListener(@Nonnull final Listener listener);
+    void registerListener(@NotNull final Listener listener);
 
 
     /**
@@ -104,7 +104,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    BukkitTask doSync(@Nonnull final Runnable task);
+    BukkitTask doSync(@NotNull final Runnable task);
 
 
     /**
@@ -115,7 +115,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    BukkitTask doSyncAfter(@Nonnull final Runnable task, long delay);
+    BukkitTask doSyncAfter(@NotNull final Runnable task, long delay);
 
 
     /**
@@ -127,7 +127,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    BukkitTask doSyncRepeat(@Nonnull final Runnable task, long delay, long interval);
+    BukkitTask doSyncRepeat(@NotNull final Runnable task, long delay, long interval);
 
 
     /**
@@ -137,7 +137,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    BukkitTask doAsync(@Nonnull final Runnable task);
+    BukkitTask doAsync(@NotNull final Runnable task);
 
 
     /**
@@ -148,7 +148,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    BukkitTask doAsyncAfter(@Nonnull final Runnable task, long delay);
+    BukkitTask doAsyncAfter(@NotNull final Runnable task, long delay);
 
 
     /**
@@ -160,7 +160,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    BukkitTask doAsyncRepeat(@Nonnull final Runnable task, long delay, long interval);
+    BukkitTask doAsyncRepeat(@NotNull final Runnable task, long delay, long interval);
 
 
     /**
@@ -169,7 +169,7 @@ public interface Duels extends Plugin {
      * @param task Task to cancel if not already cancelled.
      * @since 3.2.0
      */
-    void cancelTask(@Nonnull final BukkitTask task);
+    void cancelTask(@NotNull final BukkitTask task);
 
 
     /**
@@ -187,7 +187,7 @@ public interface Duels extends Plugin {
      * @param message message to log.
      * @since 3.1.0
      */
-    void info(@Nonnull final String message);
+    void info(@NotNull final String message);
 
 
     /**
@@ -196,7 +196,7 @@ public interface Duels extends Plugin {
      * @param message message to log.
      * @since 3.1.0
      */
-    void warn(@Nonnull final String message);
+    void warn(@NotNull final String message);
 
 
     /**
@@ -205,7 +205,7 @@ public interface Duels extends Plugin {
      * @param message message to log.
      * @since 3.1.0
      */
-    void error(@Nonnull final String message);
+    void error(@NotNull final String message);
 
 
     /**
@@ -215,7 +215,7 @@ public interface Duels extends Plugin {
      * @param thrown {@link Throwable} to log.
      * @since 3.1.0
      */
-    void error(@Nonnull final String message, @Nonnull Throwable thrown);
+    void error(@NotNull final String message, @NotNull Throwable thrown);
 
 
     /**

@@ -1,7 +1,7 @@
 package me.realized.duels.player;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Charsets;
-import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -23,6 +23,8 @@ import me.realized.duels.teleport.Teleport;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.PlayerUtil;
+import me.realized.duels.util.io.FileUtil;
+import me.realized.duels.util.json.JsonUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -73,9 +75,9 @@ public class PlayerInfoManager implements Loadable {
         this.teleport = plugin.getTeleport();
         this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
 
-        if (cacheFile.exists()) {
-            try (Reader reader = new InputStreamReader(new FileInputStream(cacheFile), Charsets.UTF_8)) {
-                final Map<UUID, PlayerData> data = plugin.getGson().fromJson(reader, new TypeToken<HashMap<UUID, PlayerData>>() {}.getType());
+        if (FileUtil.checkNonEmpty(cacheFile, false)) {
+            try (final Reader reader = new InputStreamReader(new FileInputStream(cacheFile), Charsets.UTF_8)) {
+                final Map<UUID, PlayerData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<HashMap<UUID, PlayerData>>() {});
 
                 if (data != null) {
                     for (final Map.Entry<UUID, PlayerData> entry : data.entrySet()) {
@@ -87,9 +89,9 @@ public class PlayerInfoManager implements Loadable {
             cacheFile.delete();
         }
 
-        if (lobbyFile.exists()) {
-            try (Reader reader = new InputStreamReader(new FileInputStream(lobbyFile), Charsets.UTF_8)) {
-                this.lobby = plugin.getGson().fromJson(reader, LocationData.class).toLocation();
+        if (FileUtil.checkNonEmpty(lobbyFile, false)) {
+            try (final Reader reader = new InputStreamReader(new FileInputStream(lobbyFile), Charsets.UTF_8)) {
+                this.lobby = JsonUtil.getObjectMapper().readValue(reader, LocationData.class).toLocation();
             } catch (IOException ex) {
                 Log.error(this, ERROR_LOBBY_LOAD, ex);
             }
@@ -126,8 +128,8 @@ public class PlayerInfoManager implements Loadable {
             data.put(entry.getKey(), PlayerData.fromPlayerInfo(entry.getValue()));
         }
 
-        try (Writer writer = new OutputStreamWriter(new FileOutputStream(cacheFile), Charsets.UTF_8)) {
-            plugin.getGson().toJson(data, writer);
+        try (final Writer writer = new OutputStreamWriter(new FileOutputStream(cacheFile), Charsets.UTF_8)) {
+            JsonUtil.getObjectWriter().writeValue(writer, data);
             writer.flush();
         }
 
@@ -143,12 +145,9 @@ public class PlayerInfoManager implements Loadable {
     public boolean setLobby(final Player player) {
         final Location lobby = player.getLocation().clone();
 
-        try {
-            try (Writer writer = new OutputStreamWriter(new FileOutputStream(lobbyFile), Charsets.UTF_8)) {
-                plugin.getGson().toJson(LocationData.fromLocation(lobby), writer);
-                writer.flush();
-            }
-
+        try (final Writer writer = new OutputStreamWriter(new FileOutputStream(lobbyFile), Charsets.UTF_8)) {
+            JsonUtil.getObjectWriter().writeValue(writer, LocationData.fromLocation(lobby));
+            writer.flush();
             this.lobby = lobby;
             return true;
         } catch (IOException ex) {

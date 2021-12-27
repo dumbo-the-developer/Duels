@@ -1,8 +1,10 @@
 package me.realized.duels.util.inventory;
 
 import com.google.common.collect.ObjectArrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -63,6 +65,20 @@ public final class InventoryUtil {
         }
 
         return false;
+    }
+
+    public static boolean addOrDrop(final Player player, final Collection<ItemStack> items) {
+        if (items.isEmpty()) {
+            return false;
+        }
+
+        final Map<Integer, ItemStack> result = player.getInventory().addItem(items.stream().filter(Objects::nonNull).toArray(ItemStack[]::new));
+
+        if (!result.isEmpty()) {
+            result.values().forEach(item -> player.getWorld().dropItemNaturally(player.getLocation(), item));
+        }
+
+        return true;
     }
 
     public static ItemStack getItemInHand(final Player player) {

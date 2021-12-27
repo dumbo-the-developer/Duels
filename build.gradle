@@ -1,6 +1,7 @@
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
+        gradlePluginPortal()
     }
 
     dependencies {
@@ -10,11 +11,12 @@ buildscript {
 
 allprojects {
     group 'me.realized'
-    version '3.4.2-SNAPSHOT'
+    version '3.5.0'
 }
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'java-library'
     apply plugin: 'com.github.johnrengelman.shadow'
 
     sourceCompatibility = 1.8
@@ -39,28 +41,23 @@ subprojects {
         }
 
         maven {
-            name 'mvdw-repo'
-            url 'http://repo.mvdw-software.com/content/groups/public/'
-        }
-
-        maven {
             name 'clip-repo'
-            url 'http://repo.extendedclip.com/content/repositories/placeholderapi/'
+            url 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
         }
 
         maven {
             name 'sk89q-repo'
-            url 'http://maven.sk89q.com/repo/'
-        }
-
-        maven {
-            name 'inventive-repo'
-            url 'https://repo.inventivetalent.org/content/groups/public/'
+            url 'https://maven.sk89q.com/repo/'
         }
 
         maven {
             name 'codemc-repo'
             url 'https://repo.codemc.io/repository/maven-public/'
+        }
+
+        maven {
+            name 'essentialsx-repo'
+            url 'https://repo.essentialsx.net/releases/'
         }
 
         flatDir {

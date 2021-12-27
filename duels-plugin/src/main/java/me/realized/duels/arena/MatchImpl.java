@@ -10,13 +10,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 import lombok.Getter;
 import me.realized.duels.api.match.Match;
 import me.realized.duels.kit.KitImpl;
 import me.realized.duels.queue.Queue;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 public class MatchImpl implements Match {
 
@@ -75,9 +75,13 @@ public class MatchImpl implements Match {
         finished = true;
     }
 
-    @Nonnull
+    public long getDurationInMillis() {
+        return System.currentTimeMillis() - start;
+    }
+
+    @NotNull
     @Override
-    public List<ItemStack> getItems(@Nonnull final Player player) {
+    public List<ItemStack> getItems(@NotNull final Player player) {
         Objects.requireNonNull(player, "player");
 
         if (this.items == null) {
@@ -88,13 +92,13 @@ public class MatchImpl implements Match {
         return items != null ? items : Collections.emptyList();
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public Set<Player> getPlayers() {
         return Collections.unmodifiableSet(getAlivePlayers());
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public Set<Player> getStartingPlayers() {
         return Collections.unmodifiableSet(getAllPlayers());

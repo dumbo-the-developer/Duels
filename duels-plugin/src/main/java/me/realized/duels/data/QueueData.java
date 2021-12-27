@@ -8,7 +8,6 @@ public class QueueData {
     private String kit;
     private int bet;
 
-    // for Gson
     private QueueData() {}
 
     public QueueData(final Queue queue) {

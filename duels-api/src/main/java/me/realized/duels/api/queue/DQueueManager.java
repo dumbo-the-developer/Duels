@@ -1,8 +1,6 @@
 package me.realized.duels.api.queue;
 
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import me.realized.duels.api.event.queue.QueueCreateEvent;
 import me.realized.duels.api.event.queue.QueueJoinEvent;
 import me.realized.duels.api.event.queue.QueueLeaveEvent;
@@ -10,6 +8,8 @@ import me.realized.duels.api.event.queue.QueueRemoveEvent;
 import me.realized.duels.api.kit.Kit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents the QueueManager singleton used by Duels.
@@ -36,7 +36,7 @@ public interface DQueueManager {
      * @return The queue player is in or null if not in queue
      */
     @Nullable
-    DQueue get(@Nonnull final Player player);
+    DQueue get(@NotNull final Player player);
 
 
     /**
@@ -88,7 +88,7 @@ public interface DQueueManager {
      * @param player {@link Player} to check if in queue.
      * @return True if {@link Player} is in a queue. False otherwise.
      */
-    boolean isInQueue(@Nonnull final Player player);
+    boolean isInQueue(@NotNull final Player player);
 
 
     /**
@@ -99,7 +99,7 @@ public interface DQueueManager {
      * @param queue {@link DQueue} to add the {@link Player}.
      * @return True if {@link Player} was successfully queued. False otherwise.
      */
-    boolean addToQueue(@Nonnull final Player player, @Nonnull final DQueue queue);
+    boolean addToQueue(@NotNull final Player player, @NotNull final DQueue queue);
 
 
     /**
@@ -110,7 +110,7 @@ public interface DQueueManager {
      * @return The {@link DQueue} that {@link Player} was in or null if {@link Player} was not in a queue.
      */
     @Nullable
-    DQueue removeFromQueue(@Nonnull final Player player);
+    DQueue removeFromQueue(@NotNull final Player player);
 
 
     /**
@@ -118,6 +118,6 @@ public interface DQueueManager {
      *
      * @return Never-null UnmodifiableList of {@link DQueue}s that are currently loaded.
      */
-    @Nonnull
+    @NotNull
     List<DQueue> getQueues();
 }

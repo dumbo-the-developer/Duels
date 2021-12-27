@@ -7,9 +7,9 @@ import me.realized.duels.arena.ArenaImpl;
 import me.realized.duels.gui.BaseButton;
 import me.realized.duels.gui.bind.BindGui;
 import me.realized.duels.kit.KitImpl;
+import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.inventory.ItemBuilder;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.entity.Player;
 
 public class BindButton extends BaseButton {
@@ -31,7 +31,7 @@ public class BindButton extends BaseButton {
         final boolean state = arena.isBound(kit);
         setGlow(state);
 
-        String kits = StringUtils.join(arena.getKits().stream().map(KitImpl::getName).collect(Collectors.toList()), ", ");
+        String kits = StringUtil.join(arena.getKits().stream().map(KitImpl::getName).collect(Collectors.toList()), ", ");
         kits = kits.isEmpty() ? lang.getMessage("GENERAL.none") : kits;
         setLore(lang.getMessage("GUI.bind.buttons.arena.lore-" + (state ? "bound" : "not-bound"), "kits", kits).split("\n"));
     }

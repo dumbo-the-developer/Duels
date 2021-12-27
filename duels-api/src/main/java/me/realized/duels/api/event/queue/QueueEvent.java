@@ -1,11 +1,11 @@
 package me.realized.duels.api.event.queue;
 
 import java.util.Objects;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import me.realized.duels.api.event.SourcedEvent;
 import me.realized.duels.api.queue.DQueue;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents an event caused by a {@link DQueue}.
@@ -16,7 +16,7 @@ public abstract class QueueEvent extends SourcedEvent {
 
     private final DQueue queue;
 
-    QueueEvent(@Nullable final CommandSender source, @Nonnull final DQueue queue) {
+    QueueEvent(@Nullable final CommandSender source, @NotNull final DQueue queue) {
         super(source);
         Objects.requireNonNull(queue, "queue");
         this.queue = queue;
@@ -27,7 +27,7 @@ public abstract class QueueEvent extends SourcedEvent {
      *
      * @return Never-null {@link DQueue} instance associated with this event.
      */
-    @Nonnull
+    @NotNull
     public DQueue getQueue() {
         return queue;
     }

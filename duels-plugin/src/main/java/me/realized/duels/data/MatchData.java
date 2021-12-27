@@ -18,7 +18,6 @@ public class MatchData implements MatchInfo {
     @Getter
     private double health;
 
-    // for Gson
     private MatchData() {}
 
     public MatchData(final String winner, final String loser, final String kit, final long time, final long duration, final double health) {

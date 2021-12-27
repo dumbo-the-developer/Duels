@@ -168,8 +168,8 @@ public abstract class AbstractCommand<P extends JavaPlugin> implements TabComple
 
         if (args.length == 1 && children != null) {
             return children.values().stream()
-                .filter(child -> child.getName().startsWith(args[0].toLowerCase()))
                 .map(AbstractCommand::getName)
+                .filter(childName -> childName.startsWith(args[0].toLowerCase()))
                 .distinct()
                 .sorted(String::compareTo)
                 .collect(Collectors.toList());

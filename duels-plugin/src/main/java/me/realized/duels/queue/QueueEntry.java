@@ -3,7 +3,6 @@ package me.realized.duels.queue;
 import java.util.Objects;
 import lombok.Getter;
 import me.realized.duels.setting.CachedInfo;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -14,9 +13,9 @@ public class QueueEntry {
     @Getter
     private final CachedInfo info;
 
-    QueueEntry(final Player player, final Location location, final String duelzone, final GameMode gameMode) {
+    QueueEntry(final Player player, final Location location, final String duelzone) {
         this.player = player;
-        this.info = new CachedInfo(location, duelzone, gameMode);
+        this.info = new CachedInfo(location, duelzone);
     }
 
     @Override

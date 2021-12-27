@@ -20,8 +20,8 @@ import me.realized.duels.hook.hooks.worldguard.WorldGuardHook;
 import me.realized.duels.kit.KitImpl;
 import me.realized.duels.setting.Settings;
 import me.realized.duels.util.NumberUtil;
+import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.inventory.InventoryUtil;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.command.Command;
@@ -77,9 +77,7 @@ public class DuelCommand extends BaseCommand {
             return true;
         }
 
-        GameMode gameMode = null;
-
-        if (config.isPreventCreativeMode() && (gameMode = player.getGameMode()) == GameMode.CREATIVE) {
+        if (config.isPreventCreativeMode() && player.getGameMode() == GameMode.CREATIVE) {
             lang.sendMessage(sender, "ERROR.duel.in-creative-mode");
             return true;
         }
@@ -153,7 +151,13 @@ public class DuelCommand extends BaseCommand {
         }
 
         final Settings settings = settingManager.getSafely(player);
+        // Reset bet and own inventory to prevent accidents
         settings.setBet(0);
+        settings.setOwnInventory(false);
+
+        settings.setTarget(target);
+        settings.setBaseLoc(player);
+        settings.setDuelzone(player, duelzone);
 
         boolean sendRequest = false;
 
@@ -194,42 +198,57 @@ public class DuelCommand extends BaseCommand {
                     settings.setItemBetting(true);
                 }
 
-                if (config.isUseOwnInventoryEnabled()) {
-                    sendRequest = true;
-                } else if (args.length > 3) {
-                    final String name = StringUtils.join(args, " ", 3, args.length);
-                    final KitImpl kit = kitManager.get(name);
+                if (args.length > 3) {
+                    if (args[3].equals("-")) {
+                        if (!config.isOwnInventoryEnabled()) {
+                            lang.sendMessage(player, "ERROR.setting.disabled-option", "option", lang.getMessage("GENERAL.own-inventory"));
+                            return true;
+                        }
 
-                    if (kit == null) {
-                        lang.sendMessage(sender, "ERROR.kit.not-found", "name", name);
+                        if (config.isOwnInventoryUsePermission() && !player.hasPermission(Permissions.OWN_INVENTORY) && !player.hasPermission(Permissions.SETTING_ALL)) {
+                            lang.sendMessage(player, "ERROR.no-permission", "permission", Permissions.OWN_INVENTORY);
+                            return true;
+                        }
+
+                        settings.setOwnInventory(true);
+                    } else if (!config.isKitSelectingEnabled()) {
+                        lang.sendMessage(player, "ERROR.setting.disabled-option", "option", lang.getMessage("GENERAL.kit-selector"));
                         return true;
+                    } else {
+                        final String name = StringUtil.join(args, " ", 3, args.length);
+                        final KitImpl kit = kitManager.get(name);
+
+                        if (kit == null) {
+                            lang.sendMessage(sender, "ERROR.kit.not-found", "name", name);
+                            return true;
+                        }
+
+                        final String permission = String.format(Permissions.KIT, name.replace(" ", "-").toLowerCase());
+
+                        if (kit.isUsePermission() && !player.hasPermission(Permissions.KIT_ALL) && !player.hasPermission(permission)) {
+                            lang.sendMessage(player, "ERROR.no-permission", "permission", permission);
+                            return true;
+                        }
+
+                        settings.setKit(kit);
                     }
 
-                    final String permission = String.format(Permissions.KIT, name.replace(" ", "-").toLowerCase());
-
-                    if (kit.isUsePermission() && !player.hasPermission(Permissions.KIT_ALL) && !player.hasPermission(permission)) {
-                        lang.sendMessage(player, "ERROR.no-permission", "permission", permission);
-                        return true;
-                    }
-
-                    settings.setKit(kit);
                     sendRequest = true;
                 }
             }
         }
 
-        settings.setTarget(target);
-        settings.setBaseLoc(player);
-        settings.setDuelzone(player, duelzone);
-        settings.setGameMode(player, gameMode);
-
         if (sendRequest) {
+            // If all settings were selected via command, send request without opening settings GUI.
             requestManager.send(player, target, settings);
-        } else if (config.isUseOwnInventoryEnabled()) {
+        } else if (config.isOwnInventoryEnabled()) {
+            // If own inventory is enabled, prompt request settings GUI.
             settings.openGui(player);
         } else {
+            // Maintain old behavior: If own inventory is disabled, prompt kit selector first instead of request settings GUI.
             kitManager.getGui().open(player);
         }
+
         return true;
     }
 

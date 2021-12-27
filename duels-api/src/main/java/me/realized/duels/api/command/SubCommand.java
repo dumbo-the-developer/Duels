@@ -1,10 +1,10 @@
 package me.realized.duels.api.command;
 
 import java.util.Objects;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import me.realized.duels.api.Duels;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * An abstract SubCommand class that hooks into commands registered by Duels.
@@ -29,7 +29,7 @@ public abstract class SubCommand {
      * @param length Length of this subcommand. Must be greater than or equal to 1.
      * @param aliases Aliases of this subcommand.
      */
-    public SubCommand(@Nonnull final String name, @Nullable final String usage, @Nullable final String description, @Nullable final String permission,
+    public SubCommand(@NotNull final String name, @Nullable final String usage, @Nullable final String description, @Nullable final String permission,
         final boolean playerOnly, final int length, final String... aliases) {
         Objects.requireNonNull(name, "name");
         this.name = name;

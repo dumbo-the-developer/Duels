@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.config.converters.ConfigConverter9_10;
 import me.realized.duels.util.EnumUtil;
 import me.realized.duels.util.config.AbstractConfiguration;
 import org.bukkit.Sound;
@@ -66,6 +67,14 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean preventCreativeMode;
     @Getter
+    private boolean ownInventoryEnabled;
+    @Getter
+    private boolean ownInventoryUsePermission;
+    @Getter
+    private boolean kitSelectingEnabled;
+    @Getter
+    private boolean kitSelectingUsePermission;
+    @Getter
     private boolean arenaSelectingEnabled;
     @Getter
     private boolean arenaSelectingUsePermission;
@@ -80,12 +89,6 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private int expiration;
 
-    @Getter
-    private boolean useOwnInventoryEnabled;
-    @Getter
-    private boolean useOwnInventoryKeepItems;
-    @Getter
-    private boolean useOwnInventoryPreventDurabLoss;
     @Getter
     private int maxDuration;
     @Getter
@@ -240,7 +243,11 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
 
     @Override
     protected void loadValues(FileConfiguration configuration) throws Exception {
-        if (configuration.getInt("config-version", 0) < getLatestVersion()) {
+        final int prevVersion = configuration.getInt("config-version", 0);
+
+        if (prevVersion < 10) {
+            configuration = convert(new ConfigConverter9_10());
+        } else if (prevVersion < getLatestVersion()) {
             configuration = convert(null);
         }
 
@@ -270,6 +277,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
 
         requiresClearedInventory = configuration.getBoolean("request.requires-cleared-inventory", true);
         preventCreativeMode = configuration.getBoolean("request.prevent-creative-mode", false);
+        ownInventoryEnabled = configuration.getBoolean("request.use-own-inventory.enabled", true);
+        ownInventoryUsePermission = configuration.getBoolean("request.use-own-inventory.use-permission", false);
+        kitSelectingEnabled = configuration.getBoolean("request.kit-selecting.enabled", true);
+        kitSelectingUsePermission = configuration.getBoolean("request.kit-selecting.use-permission", false);
         arenaSelectingEnabled = configuration.getBoolean("request.arena-selecting.enabled", true);
         arenaSelectingUsePermission = configuration.getBoolean("request.arena-selecting.use-permission", false);
         itemBettingEnabled = configuration.getBoolean("request.item-betting.enabled", true);
@@ -278,9 +289,6 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         moneyBettingUsePermission = configuration.getBoolean("request.money-betting.use-permission", false);
         expiration = Math.max(configuration.getInt("request.expiration", 30), 0);
 
-        useOwnInventoryEnabled = configuration.getBoolean("duel.use-own-inventory.enabled", false);
-        useOwnInventoryKeepItems = configuration.getBoolean("duel.use-own-inventory.keep-items", false);
-        useOwnInventoryPreventDurabLoss = configuration.getBoolean("duel.use-own-inventory.prevent-durability-loss", true);
         maxDuration = configuration.getInt("duel.match.max-duration", -1);
         startCommandsEnabled = configuration.getBoolean("duel.match.start-commands.enabled", false);
         startCommandsQueueOnly = configuration.getBoolean("duel.match.start-commands.queue-matches-only", false);

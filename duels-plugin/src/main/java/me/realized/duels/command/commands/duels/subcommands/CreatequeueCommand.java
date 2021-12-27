@@ -6,7 +6,7 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.kit.KitImpl;
 import me.realized.duels.util.NumberUtil;
-import org.apache.commons.lang.StringUtils;
+import me.realized.duels.util.StringUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -22,7 +22,7 @@ public class CreatequeueCommand extends BaseCommand {
         KitImpl kit = null;
 
         if (!args[2].equals("-")) {
-            String name = StringUtils.join(args, " ", 2, args.length).replace("-", " ");
+            String name = StringUtil.join(args, " ", 2, args.length).replace("-", " ");
             kit = kitManager.get(name);
 
             if (kit == null) {

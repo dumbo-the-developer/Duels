@@ -17,7 +17,6 @@ public class LocationData {
     private float pitch;
     private float yaw;
 
-    // for Gson
     private LocationData() {}
 
     private LocationData(final World world, final double x, final double y, final double z, final float pitch, final float yaw) {

@@ -5,6 +5,7 @@ import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -12,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.projectiles.ProjectileSource;
 
 /**
  * Displays a message to shooter containing hit entity's health if enabled.
@@ -32,15 +34,25 @@ public class ProjectileHitListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void on(final EntityDamageByEntityEvent event) {
-        if (!(event.getEntity() instanceof LivingEntity
-            && event.getDamager() instanceof Projectile && config.getProjectileHitMessageTypes().contains(event.getDamager().getType().name())
-            && ((Projectile) event.getDamager()).getShooter() instanceof Player)) {
+        if (!(event.getEntity() instanceof LivingEntity)) {
             return;
         }
 
-        final Player player = (Player) ((Projectile) event.getDamager()).getShooter();
+        final Entity damager = event.getDamager();
+
+        if (!(damager instanceof Projectile) || !config.getProjectileHitMessageTypes().contains(damager.getType().name())) {
+            return;
+        }
+
+        final ProjectileSource source = ((Projectile) damager).getShooter();
+
+        if (!(source instanceof Player)) {
+            return;
+        }
+
+        final Player player = (Player) source;
 
         if (!arenaManager.isInMatch(player)) {
             return;

@@ -1,12 +1,3 @@
-plugins {
-    id 'java'
-}
-
-group 'me.realized'
-version '3.3.0-SNAPSHOT'
-
-sourceCompatibility = 1.8
-
 dependencies {
-    compile 'org.spigotmc:spigot-api:1.13.2-R0.1-SNAPSHOT'
+    api 'org.spigotmc:spigot-api:1.14.4-R0.1-SNAPSHOT'
 }

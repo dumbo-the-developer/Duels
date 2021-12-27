@@ -2,10 +2,10 @@ package me.realized.duels.api.event.match;
 
 import java.util.Objects;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import me.realized.duels.api.match.Match;
 import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Called when a {@link Match} is ending.
@@ -19,7 +19,7 @@ public class MatchEndEvent extends MatchEvent {
     private final UUID winner, loser;
     private final Reason reason;
 
-    public MatchEndEvent(@Nonnull final Match match, @Nullable final UUID winner, @Nullable final UUID loser, @Nonnull final Reason reason) {
+    public MatchEndEvent(@NotNull final Match match, @Nullable final UUID winner, @Nullable final UUID loser, @NotNull final Reason reason) {
         super(match);
         Objects.requireNonNull(reason, "reason");
         this.winner = winner;
@@ -52,7 +52,7 @@ public class MatchEndEvent extends MatchEvent {
      *
      * @return {@link Reason} that is the end reason of the {@link Match}.
      */
-    @Nonnull
+    @NotNull
     public Reason getReason() {
         return reason;
     }

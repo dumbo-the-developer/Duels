@@ -8,11 +8,11 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Objects;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import me.realized.duels.api.Duels;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class DuelsExtension {
 
@@ -36,27 +36,27 @@ public abstract class DuelsExtension {
         this.configFile = new File(dataFolder, "config.yml");
     }
 
-    @Nonnull
+    @NotNull
     public Duels getApi() {
         return api;
     }
 
-    @Nonnull
+    @NotNull
     public final String getName() {
         return name;
     }
 
-    @Nonnull
+    @NotNull
     public File getFolder() {
         return folder;
     }
 
-    @Nonnull
+    @NotNull
     public File getFile() {
         return file;
     }
 
-    @Nonnull
+    @NotNull
     public File getDataFolder() {
         return dataFolder;
     }
@@ -79,7 +79,7 @@ public abstract class DuelsExtension {
         this.enabled = enabled;
     }
 
-    public void saveResource(@Nonnull String resourcePath) {
+    public void saveResource(@NotNull String resourcePath) {
         Objects.requireNonNull(resourcePath, "resourcePath");
         resourcePath = resourcePath.replace('\\', '/');
 
@@ -94,7 +94,7 @@ public abstract class DuelsExtension {
 
             final File outFile = new File(dataFolder, resourcePath);
             int lastIndex = resourcePath.lastIndexOf('/');
-            File outDir = new File(dataFolder, resourcePath.substring(0, lastIndex >= 0 ? lastIndex : 0));
+            File outDir = new File(dataFolder, resourcePath.substring(0, Math.max(lastIndex, 0)));
 
             if (!outDir.exists()) {
                 outDir.mkdirs();
@@ -114,7 +114,7 @@ public abstract class DuelsExtension {
     }
 
     @Nullable
-    public InputStream getResource(@Nonnull final String filename) {
+    public InputStream getResource(@NotNull final String filename) {
         Objects.requireNonNull(filename, "filename");
 
         try {

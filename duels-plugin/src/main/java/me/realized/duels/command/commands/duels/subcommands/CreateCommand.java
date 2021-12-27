@@ -3,7 +3,6 @@ package me.realized.duels.command.commands.duels.subcommands;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.util.StringUtil;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
 
 public class CreateCommand extends BaseCommand {
@@ -14,7 +13,7 @@ public class CreateCommand extends BaseCommand {
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
-        final String name = StringUtils.join(args, " ", 1, args.length);
+        final String name = StringUtil.join(args, " ", 1, args.length);
 
         if (!StringUtil.isAlphanumeric(name)) {
             lang.sendMessage(sender, "ERROR.command.name-not-alphanumeric", "name", name);

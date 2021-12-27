@@ -8,7 +8,7 @@ import me.realized.duels.command.BaseCommand;
 import me.realized.duels.kit.KitImpl;
 import me.realized.duels.queue.Queue;
 import me.realized.duels.util.NumberUtil;
-import org.apache.commons.lang.StringUtils;
+import me.realized.duels.util.StringUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -25,7 +25,7 @@ public class JoinCommand extends BaseCommand {
         KitImpl kit = null;
 
         if (!args[1].equals("-")) {
-            String name = StringUtils.join(args, " ", 1, args.length - (args.length > 2 ? 1 : 0)).replace("-", " ");
+            String name = StringUtil.join(args, " ", 1, args.length - (args.length > 2 ? 1 : 0)).replace("-", " ");
             kit = kitManager.get(name);
 
             if (kit == null) {

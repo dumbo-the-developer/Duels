@@ -44,11 +44,6 @@ public class KitOptionsListener implements Listener {
         this.config = plugin.getConfiguration();
         this.arenaManager = plugin.getArenaManager();
 
-        // Do not register the listener if own inventory is enabled
-        if (config.isUseOwnInventoryEnabled()) {
-            return;
-        }
-
         Bukkit.getPluginManager().registerEvents(this, plugin);
         Bukkit.getPluginManager().registerEvents(CompatUtil.isPre1_14() ? new ComboPre1_14Listener() : new ComboPost1_14Listener(), plugin);
     }

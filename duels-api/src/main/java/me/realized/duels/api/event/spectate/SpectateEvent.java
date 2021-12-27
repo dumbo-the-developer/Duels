@@ -1,10 +1,10 @@
 package me.realized.duels.api.event.spectate;
 
 import java.util.Objects;
-import javax.annotation.Nonnull;
 import me.realized.duels.api.event.SourcedEvent;
 import me.realized.duels.api.spectate.Spectator;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents an event caused by a {@link Spectator}.
@@ -14,7 +14,7 @@ public abstract class SpectateEvent extends SourcedEvent {
     private final Player source;
     private final Spectator spectator;
 
-    SpectateEvent(@Nonnull final Player source, @Nonnull Spectator spectator) {
+    SpectateEvent(@NotNull final Player source, @NotNull Spectator spectator) {
         super(source);
         Objects.requireNonNull(source, "source");
         Objects.requireNonNull(spectator, "spectator");
@@ -22,7 +22,7 @@ public abstract class SpectateEvent extends SourcedEvent {
         this.spectator = spectator;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public Player getSource() {
         return source;
@@ -33,7 +33,7 @@ public abstract class SpectateEvent extends SourcedEvent {
      *
      * @return Never-null {@link Spectator} instance associated with this event.
      */
-    @Nonnull
+    @NotNull
     public Spectator getSpectator() {
         return spectator;
     }

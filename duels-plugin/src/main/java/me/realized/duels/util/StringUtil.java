@@ -1,10 +1,10 @@
 package me.realized.duels.util;
 
-import com.google.common.collect.Lists;
+import java.util.Collection;
 import java.util.List;
 import java.util.TreeMap;
-import java.util.function.Function;
 import java.util.regex.Pattern;
+import me.realized.duels.util.reflect.ReflectionUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 
@@ -12,6 +12,7 @@ public final class StringUtil {
 
     private static final Pattern ALPHANUMERIC = Pattern.compile("^[a-zA-Z0-9_]+$");
     private static final TreeMap<Integer, String> ROMAN_NUMERALS = new TreeMap<>();
+    private static final boolean COMMONS_LANG3;
 
     static {
         ROMAN_NUMERALS.put(1000, "M");
@@ -27,6 +28,7 @@ public final class StringUtil {
         ROMAN_NUMERALS.put(5, "V");
         ROMAN_NUMERALS.put(4, "IV");
         ROMAN_NUMERALS.put(1, "I");
+        COMMONS_LANG3 = ReflectionUtil.getClassUnsafe(" org.apache.commons.lang3.StringUtils") != null;
     }
 
     private StringUtil() {}
@@ -62,31 +64,49 @@ public final class StringUtil {
         return "(" + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ() + ")";
     }
 
-    public static String reverseColor(final String s) {
-        return s.replace(ChatColor.COLOR_CHAR, '&');
-    }
-
-    public static List<String> reverseColor(List<String> input) {
-        // In case input is an unmodifiable list
-        input = Lists.newArrayList(input);
-        input.replaceAll(s -> s = reverseColor(s));
-        return input;
-    }
-
     public static String color(final String input) {
         return ChatColor.translateAlternateColorCodes('&', input);
     }
 
     public static List<String> color(final List<String> input) {
-        return color(input, null);
-    }
-
-    public static List<String> color(final List<String> input, final Function<String, String> function) {
-        input.replaceAll(s -> s = color(function != null ? function.apply(s) : s));
+        input.replaceAll(s -> s = color(s));
         return input;
     }
 
     public static boolean isAlphanumeric(final String input) {
         return ALPHANUMERIC.matcher(input.replace(" ", "")).matches();
+    }
+
+    // In some versions of spigot, commons-lang3 is not available
+    public static String join(final Object[] array, final String separator, final int startIndex, final int endIndex) {
+        if (COMMONS_LANG3) {
+            return org.apache.commons.lang3.StringUtils.join(array, separator, startIndex, endIndex);
+        } else {
+            return org.apache.commons.lang.StringUtils.join(array, separator, startIndex, endIndex);
+        }
+    }
+
+    public static String join(final Collection<?> collection, final String separator) {
+        if (COMMONS_LANG3) {
+            return org.apache.commons.lang3.StringUtils.join(collection, separator);
+        } else {
+            return org.apache.commons.lang.StringUtils.join(collection, separator);
+        }
+    }
+
+    public static String capitalize(final String s) {
+        if (COMMONS_LANG3) {
+            return org.apache.commons.lang3.StringUtils.capitalize(s);
+        } else {
+            return org.apache.commons.lang.StringUtils.capitalize(s);
+        }
+    }
+
+    public static boolean containsIgnoreCase(final String str, final String searchStr) {
+        if (COMMONS_LANG3) {
+            return org.apache.commons.lang3.StringUtils.containsIgnoreCase(str, searchStr);
+        } else {
+            return org.apache.commons.lang.StringUtils.containsIgnoreCase(str, searchStr);
+        }
     }
 }

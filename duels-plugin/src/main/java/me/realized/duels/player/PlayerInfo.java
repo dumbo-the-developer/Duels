@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 import me.realized.duels.util.PlayerUtil;
@@ -49,7 +48,7 @@ public class PlayerInfo {
         player.setHealth(health > maxHealth ? maxHealth : health);
         player.setFoodLevel(hunger);
         InventoryUtil.fillFromMap(player.getInventory(), items);
-        extra.stream().filter(Objects::nonNull).forEach(item -> player.getInventory().addItem(item));
+        InventoryUtil.addOrDrop(player, extra);
         player.updateInventory();
     }
 }

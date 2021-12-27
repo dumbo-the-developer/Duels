@@ -9,7 +9,6 @@ import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaImpl;
 import me.realized.duels.gui.settings.SettingsGui;
 import me.realized.duels.kit.KitImpl;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -21,7 +20,6 @@ public class Settings {
     @Getter
     private UUID target;
     @Getter
-    @Setter
     private KitImpl kit;
     @Getter
     @Setter
@@ -32,6 +30,8 @@ public class Settings {
     @Getter
     @Setter
     private boolean itemBetting;
+    @Getter
+    private boolean ownInventory;
     @Getter
     private Map<UUID, CachedInfo> cache = new HashMap<>();
 
@@ -50,6 +50,7 @@ public class Settings {
         arena = null;
         bet = 0;
         itemBetting = false;
+        ownInventory = false;
     }
 
     public void setTarget(final Player target) {
@@ -98,18 +99,17 @@ public class Settings {
         return info.getDuelzone();
     }
 
-    public void setGameMode(final Player player, final GameMode gameMode) {
-        this.cache.computeIfAbsent(player.getUniqueId(), result -> new CachedInfo()).setGameMode(gameMode);
+    public void setKit(final KitImpl kit) {
+        this.kit = kit;
+        this.ownInventory = false;
     }
 
-    public GameMode getGameMode(final Player player) {
-        final CachedInfo info = cache.get(player.getUniqueId());
+    public void setOwnInventory(final boolean ownInventory) {
+        this.ownInventory = ownInventory;
 
-        if (info == null) {
-            return null;
+        if (ownInventory) {
+            this.kit = null;
         }
-
-        return info.getGameMode();
     }
 
     // Don't copy the gui since it won't be required to start a match
@@ -120,6 +120,7 @@ public class Settings {
         copy.arena = arena;
         copy.bet = bet;
         copy.itemBetting = itemBetting;
+        copy.ownInventory = ownInventory;
         copy.cache = new HashMap<>(cache);
         return copy;
     }

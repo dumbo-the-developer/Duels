@@ -3,10 +3,10 @@ package me.realized.duels.api.user;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import me.realized.duels.api.kit.Kit;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents the UserManager singleton used by Duels.
@@ -30,7 +30,7 @@ public interface UserManager {
      * @return {@link User} with the given name or null if not exists.
      */
     @Nullable
-    User get(@Nonnull final String name);
+    User get(@NotNull final String name);
 
 
     /**
@@ -41,7 +41,7 @@ public interface UserManager {
      * @return {@link User} with the given {@link UUID} or null if not exists.
      */
     @Nullable
-    User get(@Nonnull final UUID uuid);
+    User get(@NotNull final UUID uuid);
 
 
     /**
@@ -50,7 +50,7 @@ public interface UserManager {
      * @see #get(UUID)
      */
     @Nullable
-    User get(@Nonnull final Player player);
+    User get(@NotNull final Player player);
 
 
     /**
@@ -88,7 +88,7 @@ public interface UserManager {
      * @return {@link TopEntry} containing name and rating of the top 10 Rating for kit or null if the leaderboard has not loaded yet.
      */
     @Nullable
-    TopEntry getTopRatings(@Nonnull final Kit kit);
+    TopEntry getTopRatings(@NotNull final Kit kit);
 
 
     class TopEntry {
@@ -97,7 +97,7 @@ public interface UserManager {
         private final String type, identifier;
         private final List<TopData> data;
 
-        public TopEntry(@Nonnull final String type, @Nonnull final String identifier, @Nonnull final List<TopData> data) {
+        public TopEntry(@NotNull final String type, @NotNull final String identifier, @NotNull final List<TopData> data) {
             Objects.requireNonNull(type, "type");
             Objects.requireNonNull(identifier, "identifier");
             Objects.requireNonNull(data, "data");
@@ -149,7 +149,7 @@ public interface UserManager {
         private final String name;
         private final int value;
 
-        public TopData(@Nonnull final UUID uuid, @Nonnull final String name, final int value) {
+        public TopData(@NotNull final UUID uuid, @NotNull final String name, final int value) {
             Objects.requireNonNull(uuid, "uuid");
             Objects.requireNonNull(name, "name");
             this.uuid = uuid;
@@ -170,7 +170,7 @@ public interface UserManager {
         }
 
         @Override
-        public int compareTo(@Nonnull final TopData data) {
+        public int compareTo(@NotNull final TopData data) {
             Objects.requireNonNull(data, "data");
             return Integer.compare(value, data.value);
         }

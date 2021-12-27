@@ -1,7 +1,7 @@
 package me.realized.duels.arena;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Charsets;
-import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,8 +17,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.arena.Arena;
@@ -36,6 +34,8 @@ import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.compat.Items;
 import me.realized.duels.util.gui.MultiPageGui;
 import me.realized.duels.util.inventory.ItemBuilder;
+import me.realized.duels.util.io.FileUtil;
+import me.realized.duels.util.json.JsonUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -48,6 +48,8 @@ import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.projectiles.ProjectileSource;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ArenaManagerImpl implements Loadable, ArenaManager {
 
@@ -84,9 +86,9 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
         gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.empty.name")).build());
         plugin.getGuiListener().addGui(gui);
 
-        if (file.exists()) {
-            try (Reader reader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8)) {
-                final List<ArenaData> data = plugin.getGson().fromJson(reader, new TypeToken<List<ArenaData>>() {}.getType());
+        if (FileUtil.checkNonEmpty(file, true)) {
+            try (final Reader reader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8)) {
+                final List<ArenaData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<List<ArenaData>>() {});
 
                 if (data != null) {
                     for (final ArenaData arenaData : data) {
@@ -99,8 +101,6 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
                     }
                 }
             }
-        } else {
-            file.createNewFile();
         }
 
         Log.info(this, String.format(ARENAS_LOADED, arenas.size()));
@@ -116,15 +116,15 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
         arenas.clear();
     }
 
-    private void saveArenas() {
+    void saveArenas() {
         final List<ArenaData> data = new ArrayList<>();
 
         for (final ArenaImpl arena : arenas) {
             data.add(new ArenaData(arena));
         }
 
-        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
-            plugin.getGson().toJson(data, writer);
+        try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
+            JsonUtil.getObjectWriter().writeValue(writer, data);
             writer.flush();
         } catch (IOException ex) {
             Log.error(this, ex.getMessage(), ex);
@@ -133,25 +133,25 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
 
     @Nullable
     @Override
-    public ArenaImpl get(@Nonnull final String name) {
+    public ArenaImpl get(@NotNull final String name) {
         Objects.requireNonNull(name, "name");
         return arenas.stream().filter(arena -> arena.getName().equals(name)).findFirst().orElse(null);
     }
 
     @Nullable
     @Override
-    public ArenaImpl get(@Nonnull final Player player) {
+    public ArenaImpl get(@NotNull final Player player) {
         Objects.requireNonNull(player, "player");
         return arenas.stream().filter(arena -> arena.has(player)).findFirst().orElse(null);
     }
 
     @Override
-    public boolean isInMatch(@Nonnull final Player player) {
+    public boolean isInMatch(@NotNull final Player player) {
         Objects.requireNonNull(player, "player");
         return get(player) != null;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public List<Arena> getArenas() {
         return Collections.unmodifiableList(arenas);

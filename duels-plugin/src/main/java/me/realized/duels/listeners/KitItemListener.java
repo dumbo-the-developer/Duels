@@ -3,10 +3,9 @@ package me.realized.duels.listeners;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.Permissions;
 import me.realized.duels.arena.ArenaManagerImpl;
-import me.realized.duels.data.ItemData;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.StringUtil;
-import me.realized.duels.util.compat.nbt.NBT;
+import me.realized.duels.util.compat.Identifiers;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Item;
@@ -49,7 +48,7 @@ public class KitItemListener implements Listener {
     }
 
     private boolean isKitItem(final ItemStack item) {
-        return item != null && item.getType() != Material.AIR && NBT.hasItemKey(item, ItemData.DUELS_ITEM_IDENTIFIER);
+        return item != null && item.getType() != Material.AIR && Identifiers.hasIdentifier(item);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

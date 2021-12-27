@@ -13,7 +13,6 @@ public class PotionEffectData {
     private int duration;
     private int amplifier;
 
-    // For Gson
     private PotionEffectData() {}
 
     private PotionEffectData(final PotionEffect effect) {

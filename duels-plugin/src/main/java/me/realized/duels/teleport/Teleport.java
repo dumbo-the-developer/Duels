@@ -1,6 +1,5 @@
 package me.realized.duels.teleport;
 
-import java.util.function.Consumer;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.hook.hooks.EssentialsHook;
 import me.realized.duels.util.Loadable;
@@ -45,15 +44,10 @@ public final class Teleport implements Loadable, Listener {
      *
      * @param player Player to force-teleport to a location
      * @param location Location to force-teleport the player
-     * @param failHandler Called when teleportation has failed -- being when Player#teleport returns false.
      */
-    public void tryTeleport(final Player player, final Location location, final Consumer<Player> failHandler) {
+    public void tryTeleport(final Player player, final Location location) {
         if (location == null || location.getWorld() == null) {
             Log.warn(this, "Could not teleport " + player.getName() + "! Location is null");
-
-            if (failHandler != null) {
-                failHandler.accept(player);
-            }
             return;
         }
 
@@ -65,20 +59,7 @@ public final class Teleport implements Loadable, Listener {
 
         if (!player.teleport(location)) {
             Log.warn(this, "Could not teleport " + player.getName() + "! Player is dead or is vehicle");
-
-            if (failHandler != null) {
-                failHandler.accept(player);
-            }
         }
-    }
-
-    /**
-     * Calls {@link #tryTeleport(Player, Location, Consumer)} with a null FailHandler.
-     *
-     * @see #tryTeleport(Player, Location, Consumer)
-     */
-    public void tryTeleport(final Player player, final Location location) {
-        tryTeleport(player, location, null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

@@ -1,8 +1,8 @@
 package me.realized.duels.queue.sign;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
-import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,8 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.Permissions;
 import me.realized.duels.api.event.queue.sign.QueueSignCreateEvent;
@@ -31,6 +29,8 @@ import me.realized.duels.queue.Queue;
 import me.realized.duels.queue.QueueManager;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.Log;
+import me.realized.duels.util.io.FileUtil;
+import me.realized.duels.util.json.JsonUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -41,6 +41,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listener {
 
@@ -68,9 +70,9 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
 
     @Override
     public void handleLoad() throws IOException {
-        if (file.exists()) {
-            try (Reader reader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8)) {
-                final List<QueueSignData> data = plugin.getGson().fromJson(reader, new TypeToken<List<QueueSignData>>() {}.getType());
+        if (FileUtil.checkNonEmpty(file, true)) {
+            try (final Reader reader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8)) {
+                final List<QueueSignData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<List<QueueSignData>>() {});
 
                 if (data != null) {
                     data.forEach(queueSignData -> {
@@ -82,8 +84,6 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
                     });
                 }
             }
-        } else {
-            file.createNewFile();
         }
 
         Log.info(this, String.format(SIGNS_LOADED, signs.size()));
@@ -111,8 +111,8 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
             data.add(new QueueSignData(sign));
         }
 
-        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
-            plugin.getGson().toJson(data, writer);
+        try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
+            JsonUtil.getObjectWriter().writeValue(writer, data);
             writer.flush();
         } catch (IOException ex) {
             Log.error(this, ex.getMessage(), ex);
@@ -121,7 +121,7 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
 
     @Nullable
     @Override
-    public QueueSignImpl get(@Nonnull final Sign sign) {
+    public QueueSignImpl get(@NotNull final Sign sign) {
         Objects.requireNonNull(sign, "sign");
         return get(sign.getLocation());
     }
@@ -165,7 +165,7 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
         return signs.values();
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public List<QueueSign> getQueueSigns() {
         return Lists.newArrayList(getSigns());

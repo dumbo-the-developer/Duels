@@ -4,7 +4,7 @@ import java.util.List;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaImpl;
 import me.realized.duels.command.BaseCommand;
-import org.apache.commons.lang.StringUtils;
+import me.realized.duels.util.StringUtil;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -19,7 +19,7 @@ public class TeleportCommand extends BaseCommand {
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final boolean second = args[args.length - 1].equals("-2");
-        final String name = StringUtils.join(args, " ", 1, args.length - (second ? 1 : 0)).replace("-", " ");
+        final String name = StringUtil.join(args, " ", 1, args.length - (second ? 1 : 0)).replace("-", " ");
         final ArenaImpl arena = arenaManager.get(name);
 
         if (arena == null) {

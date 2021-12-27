@@ -3,11 +3,11 @@ package me.realized.duels.data;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.arena.ArenaImpl;
-import me.realized.duels.kit.KitImpl;
 
 public class ArenaData {
 
@@ -17,7 +17,6 @@ public class ArenaData {
     private Set<String> kits = new HashSet<>();
     private Map<Integer, LocationData> positions = new HashMap<>();
 
-    // for Gson
     private ArenaData() {}
 
     public ArenaData(final ArenaImpl arena) {
@@ -29,23 +28,12 @@ public class ArenaData {
     }
 
     public ArenaImpl toArena(final DuelsPlugin plugin) {
-        final ArenaImpl arena = new ArenaImpl(plugin, name);
-        arena.setDisabled(disabled);
+        final ArenaImpl arena = new ArenaImpl(plugin, name, disabled);
 
-        for (final String name : kits) {
-            final KitImpl kit = plugin.getKitManager().get(name);
-
-            if (kit == null) {
-                continue;
-            }
-
-            arena.bind(kit);
-        }
-
-        for (final Map.Entry<Integer, LocationData> entry : positions.entrySet()) {
-            arena.setPosition(entry.getKey(), entry.getValue().toLocation());
-        }
-
+        // Manually bind kits and add locations to prevent saveArenas being called
+        kits.stream().map(name -> plugin.getKitManager().get(name)).filter(Objects::nonNull).forEach(kit -> arena.getKits().add(kit));
+        positions.forEach((key, value) -> arena.getPositions().put(key, value.toLocation()));
+        arena.refreshGui(arena.isAvailable());
         return arena;
     }
 }

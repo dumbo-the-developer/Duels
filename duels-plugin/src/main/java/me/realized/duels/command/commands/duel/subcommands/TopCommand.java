@@ -7,7 +7,7 @@ import me.realized.duels.api.user.UserManager.TopData;
 import me.realized.duels.api.user.UserManager.TopEntry;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.kit.KitImpl;
-import org.apache.commons.lang.StringUtils;
+import me.realized.duels.util.StringUtil;
 import org.bukkit.command.CommandSender;
 
 public class TopCommand extends BaseCommand {
@@ -32,7 +32,7 @@ public class TopCommand extends BaseCommand {
         } else if (args[1].equalsIgnoreCase("losses")) {
             topEntry = userManager.getLosses();
         } else {
-            final String name = StringUtils.join(args, " ", 1, args.length);
+            final String name = StringUtil.join(args, " ", 1, args.length);
             final KitImpl kit = kitManager.get(name);
 
             if (kit == null) {

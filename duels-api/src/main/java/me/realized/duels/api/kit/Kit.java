@@ -1,10 +1,10 @@
 package me.realized.duels.api.kit;
 
-import javax.annotation.Nonnull;
 import me.realized.duels.api.event.kit.KitEquipEvent;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents an Kit loaded on the server.
@@ -16,7 +16,7 @@ public interface Kit {
      *
      * @return Never-null {@link String} that is the name of this kit.
      */
-    @Nonnull
+    @NotNull
     String getName();
 
 
@@ -25,7 +25,7 @@ public interface Kit {
      *
      * @return item displayed in the kit selector gui.
      */
-    @Nonnull
+    @NotNull
     ItemStack getDisplayed();
 
 
@@ -70,7 +70,7 @@ public interface Kit {
      * @param player {@link Player} to equip this kit.
      * @return True if {@link Player} has successfully equipped this kit. False otherwise.
      */
-    boolean equip(@Nonnull final Player player);
+    boolean equip(@NotNull final Player player);
 
 
     /**

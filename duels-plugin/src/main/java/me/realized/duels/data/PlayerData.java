@@ -26,7 +26,6 @@ public class PlayerData {
     private LocationData location;
     private List<ItemData> extra = new ArrayList<>();
 
-    // for Gson
     private PlayerData() {}
 
     private PlayerData(final PlayerInfo info) {
@@ -57,7 +56,7 @@ public class PlayerData {
         for (final Map.Entry<String, Map<Integer, ItemData>> entry : items.entrySet()) {
             final Map<Integer, ItemStack> data = new HashMap<>();
             entry.getValue().forEach(((slot, itemData) -> {
-                final ItemStack item = itemData.toItemStack();
+                final ItemStack item = itemData.toItemStack(false);
 
                 if (item == null) {
                     Log.warn(String.format(ITEM_LOAD_FAILURE, itemData.toString()));
@@ -69,7 +68,7 @@ public class PlayerData {
             info.getItems().put(entry.getKey(), data);
         }
 
-        info.getExtra().addAll(extra.stream().map(ItemData::toItemStack).filter(Objects::nonNull).collect(Collectors.toList()));
+        info.getExtra().addAll(extra.stream().map(data -> data.toItemStack(false)).filter(Objects::nonNull).collect(Collectors.toList()));
         return info;
     }
 }

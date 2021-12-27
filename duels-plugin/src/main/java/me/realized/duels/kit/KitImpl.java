@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import javax.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +21,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.jetbrains.annotations.NotNull;
 
 public class KitImpl extends BaseButton implements Kit {
 
@@ -30,10 +30,8 @@ public class KitImpl extends BaseButton implements Kit {
     @Getter
     private final Map<String, Map<Integer, ItemStack>> items = new HashMap<>();
     @Getter
-    @Setter
     private boolean usePermission;
     @Getter
-    @Setter
     private boolean arenaSpecific;
     @Getter
     private Set<Characteristic> characteristics;
@@ -60,7 +58,7 @@ public class KitImpl extends BaseButton implements Kit {
     }
 
     // Never-null since if null item is passed to the constructor, a default item is passed to super
-    @Nonnull
+    @NotNull
     public ItemStack getDisplayed() {
         return super.getDisplayed();
     }
@@ -75,10 +73,23 @@ public class KitImpl extends BaseButton implements Kit {
         } else {
             characteristics.add(characteristic);
         }
+        kitManager.saveKits();
     }
 
     @Override
-    public boolean equip(@Nonnull final Player player) {
+    public void setUsePermission(final boolean usePermission) {
+        this.usePermission = usePermission;
+        kitManager.saveKits();
+    }
+
+    @Override
+    public void setArenaSpecific(final boolean arenaSpecific) {
+        this.arenaSpecific = arenaSpecific;
+        kitManager.saveKits();
+    }
+
+    @Override
+    public boolean equip(@NotNull final Player player) {
         Objects.requireNonNull(player, "player");
         final KitEquipEvent event = new KitEquipEvent(player, this);
         Bukkit.getPluginManager().callEvent(event);

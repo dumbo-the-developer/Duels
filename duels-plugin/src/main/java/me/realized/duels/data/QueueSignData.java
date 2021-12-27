@@ -14,7 +14,6 @@ public class QueueSignData {
     private String kit;
     private int bet;
 
-    // for Gson
     private QueueSignData() {}
 
     public QueueSignData(final QueueSignImpl sign) {

@@ -19,6 +19,7 @@ import me.realized.duels.util.gui.AbstractGui;
 import me.realized.duels.util.gui.Button;
 import me.realized.duels.util.gui.GuiListener;
 import me.realized.duels.util.inventory.InventoryBuilder;
+import me.realized.duels.util.inventory.InventoryUtil;
 import me.realized.duels.util.inventory.Slots;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -186,7 +187,7 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
         }
 
         cancelWait = true;
-        getSection(player).collect().forEach(item -> player.getInventory().addItem(item));
+        InventoryUtil.addOrDrop(player, getSection(player).collect());
         guiListener.removeGui(player, this);
 
         final Player other = Bukkit.getPlayer(first.equals(player.getUniqueId()) ? second : first);
@@ -206,8 +207,8 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
         final Player second = Bukkit.getPlayer(BettingGui.this.second);
 
         if (first != null && second != null) {
-            getSection(first).collect().forEach(item -> first.getInventory().addItem(item));
-            getSection(second).collect().forEach(item -> second.getInventory().addItem(item));
+            InventoryUtil.addOrDrop(first, getSection(first).collect());
+            InventoryUtil.addOrDrop(second, getSection(second).collect());
         }
 
         super.clear();

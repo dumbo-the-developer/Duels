@@ -1,10 +1,10 @@
 package me.realized.duels.api.request;
 
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import me.realized.duels.api.arena.Arena;
 import me.realized.duels.api.kit.Kit;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a Request sent.
@@ -16,7 +16,7 @@ public interface Request {
      *
      * @return Never-null {@link UUID} of the sender of this {@link Request}.
      */
-    @Nonnull
+    @NotNull
     UUID getSender();
 
 
@@ -25,7 +25,7 @@ public interface Request {
      *
      * @return Never-null {@link UUID} of the receiver of this {@link Request}.
      */
-    @Nonnull
+    @NotNull
     UUID getTarget();
 
 
