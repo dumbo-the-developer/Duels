@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,8 +27,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.config.convert.Converter;
+import me.realized.duels.util.reflect.ReflectionUtil;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.FileConfigurationOptions;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -131,7 +135,16 @@ public abstract class AbstractConfiguration<P extends JavaPlugin> implements Loa
             }
 
             configuration = YamlConfiguration.loadConfiguration(file);
-            configuration.options().header(null);
+            final FileConfigurationOptions options = configuration.options();
+            options.header(null);
+
+            final Method method = ReflectionUtil.getDeclaredMethodUnsafe(FileConfigurationOptions.class, "parseComments", Boolean.TYPE);
+
+            if (method != null) {
+                try {
+                    method.invoke(options, false);
+                } catch (IllegalAccessException | InvocationTargetException ignored) {}
+            }
 
             // Transfer values from the old configuration
             for (Map.Entry<String, Object> entry : oldValues.entrySet()) {

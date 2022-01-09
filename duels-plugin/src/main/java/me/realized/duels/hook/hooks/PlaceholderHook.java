@@ -27,11 +27,6 @@ public class PlaceholderHook extends PluginHook<DuelsPlugin> {
         }
 
         @Override
-        public String getPlugin() {
-            return plugin.getName();
-        }
-
-        @Override
         public String getAuthor() {
             return "Realized";
         }

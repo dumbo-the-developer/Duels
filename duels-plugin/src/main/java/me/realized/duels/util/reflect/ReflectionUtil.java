@@ -79,7 +79,7 @@ public final class ReflectionUtil {
         }
     }
 
-    public static Method findDeclaredMethod(final Class<?> clazz, final String name, final Class<?>... parameters) throws NoSuchMethodException {
+    private static Method findDeclaredMethod(final Class<?> clazz, final String name, final Class<?>... parameters) throws NoSuchMethodException {
         final Method method = clazz.getDeclaredMethod(name, parameters);
         method.setAccessible(true);
         return method;
