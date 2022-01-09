@@ -35,6 +35,7 @@ public class RequestSendButton extends BaseButton {
 
         if (!settings.isOwnInventory() && settings.getKit() == null) {
             player.closeInventory();
+            lang.sendMessage(player, "ERROR.duel.mode-unselected");
             return;
         }
 

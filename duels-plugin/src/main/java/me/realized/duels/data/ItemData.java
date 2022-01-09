@@ -14,6 +14,7 @@ import me.realized.duels.util.collection.StreamUtil;
 import me.realized.duels.util.compat.CompatUtil;
 import me.realized.duels.util.compat.Identifiers;
 import me.realized.duels.util.inventory.ItemBuilder;
+import me.realized.duels.util.inventory.ItemUtil;
 import me.realized.duels.util.json.DefaultBasedDeserializer;
 import me.realized.duels.util.yaml.YamlUtil;
 import org.bukkit.Material;
@@ -101,6 +102,10 @@ public class ItemData {
             } else if (node != null) {
                 if (!node.isObject()) {
                     return null;
+                }
+
+                if (node.has("serializedItem")) {
+                    return new ItemData(ItemUtil.itemFrom64(node.get("serializedItem").textValue()));
                 }
 
                 final String material = node.get("material").textValue();
@@ -200,7 +205,7 @@ public class ItemData {
                     ));
                 }
 
-                data = new ItemData(builder.build());
+                return new ItemData(builder.build());
             }
 
             return data;

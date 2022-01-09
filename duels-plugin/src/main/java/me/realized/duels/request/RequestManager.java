@@ -20,13 +20,11 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class RequestManager implements Loadable, Listener {
 
-    private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
     private final Map<UUID, Map<UUID, RequestImpl>> requests = new HashMap<>();
 
     public RequestManager(final DuelsPlugin plugin) {
-        this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -62,14 +60,15 @@ public class RequestManager implements Loadable, Listener {
 
         get(sender, true).put(target.getUniqueId(), request);
         final String kit = settings.getKit() != null ? settings.getKit().getName() : lang.getMessage("GENERAL.not-selected");
+        final String ownInventory = settings.isOwnInventory() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled");
         final String arena = settings.getArena() != null ? settings.getArena().getName() : lang.getMessage("GENERAL.random");
         final int betAmount = settings.getBet();
         final String itemBetting = settings.isItemBetting() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled");
 
         lang.sendMessage(sender, "COMMAND.duel.request.send.sender",
-            "name", target.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
+            "name", target.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
         lang.sendMessage(target, "COMMAND.duel.request.send.receiver",
-            "name", sender.getName(), "kit", kit, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
+            "name", sender.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
 
         final String path = "COMMAND.duel.request.send.clickable-text.";
 

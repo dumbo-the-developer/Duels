@@ -3,6 +3,8 @@ package me.realized.duels.command.commands;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.Permissions;
 import me.realized.duels.api.spectate.SpectateManager.Result;
+import me.realized.duels.arena.ArenaImpl;
+import me.realized.duels.arena.MatchImpl;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.spectate.SpectatorImpl;
 import me.realized.duels.util.inventory.InventoryUtil;
@@ -63,7 +65,22 @@ public class SpectateCommand extends BaseCommand {
                 lang.sendMessage(player, "ERROR.spectate.not-in-match", "name", target.getName());
                 return;
             case SUCCESS:
-                lang.sendMessage(player, "COMMAND.spectate.start-spectate", "name", target.getName());
+                final ArenaImpl arena = arenaManager.get(target);
+
+                // Meaningless checks to halt IDE warnings as target is guaranteed to be in a match if result is SUCCESS.
+                if (arena == null || arena.getMatch() == null) {
+                    return;
+                }
+
+                final MatchImpl match = arena.getMatch();
+                final String kit = match.getKit() != null ? match.getKit().getName() : lang.getMessage("GENERAL.none");
+                lang.sendMessage(player, "COMMAND.spectate.start-spectate",
+                    "name", target.getName(),
+                    "opponent", arena.getOpponent(target).getName(),
+                    "kit", kit,
+                    "arena", arena.getName(),
+                    "bet_amount", match.getBet()
+                );
         }
     }
 }

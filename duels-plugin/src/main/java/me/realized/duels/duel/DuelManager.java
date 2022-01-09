@@ -328,7 +328,7 @@ public class DuelManager implements Loadable {
         }
 
         if (kit != null && !arenaManager.isSelectable(kit, arena)) {
-            lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure.arena-not-applicable");
+            lang.sendMessage(Arrays.asList(first, second), "DUEL.start-failure.arena-not-applicable", "kit", kit.getName(), "arena", arena.getName());
             refundItems(items, first, second);
             return;
         }

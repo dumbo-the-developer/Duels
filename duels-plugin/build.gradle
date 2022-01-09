@@ -2,7 +2,6 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 clean.doFirst {
     delete "$rootDir/out/"
-    println "Running clean!"
 }
 
 processResources {

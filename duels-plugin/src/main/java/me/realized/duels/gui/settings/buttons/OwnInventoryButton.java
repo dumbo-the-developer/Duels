@@ -34,6 +34,11 @@ public class OwnInventoryButton extends BaseButton {
             return;
         }
 
+        if (!config.isKitSelectingEnabled()) {
+            lang.sendMessage(player, "ERROR.duel.mode-fixed");
+            return;
+        }
+
         final Settings settings = settingManager.getSafely(player);
         settings.setOwnInventory(!settings.isOwnInventory());
         settings.updateGui(player);

@@ -198,17 +198,17 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
         return arenas.stream().filter(arena -> arena.isUsed() && arena.getMatch().isFromQueue() && arena.getMatch().getSource().equals(queue)).count() * 2;
     }
 
-    public boolean isSelectable(final KitImpl kit, final ArenaImpl arena) {
+    public boolean isSelectable(@Nullable final KitImpl kit, @NotNull final ArenaImpl arena) {
         if (!arena.isAvailable()) {
             return false;
         }
 
-        if (kit == null) {
-            return true;
-        }
-
         if (arena.isBoundless()) {
-            return !kit.isArenaSpecific();
+            if (kit == null) {
+                return true;
+            } else {
+                return !kit.isArenaSpecific();
+            }
         }
 
         return arena.isBound(kit);

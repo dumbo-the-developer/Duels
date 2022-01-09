@@ -63,6 +63,12 @@ public class KitImpl extends BaseButton implements Kit {
         return super.getDisplayed();
     }
 
+    @Override
+    public void setDisplayed(final ItemStack displayed) {
+        super.setDisplayed(displayed);
+        kitManager.saveKits();
+    }
+
     public boolean hasCharacteristic(final Characteristic characteristic) {
         return characteristics.contains(characteristic);
     }
@@ -113,6 +119,12 @@ public class KitImpl extends BaseButton implements Kit {
         }
 
         final Settings settings = settingManager.getSafely(player);
+
+        if (settings.getArena() != null && !arenaManager.isSelectable(this, settings.getArena())) {
+            lang.sendMessage(player, "ERROR.setting.arena-not-applicable", "kit", name, "arena", settings.getArena().getName());
+            return;
+        }
+
         settings.setKit(this);
         settings.openGui(player);
     }

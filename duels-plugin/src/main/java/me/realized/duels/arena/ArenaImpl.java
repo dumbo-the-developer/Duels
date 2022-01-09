@@ -128,8 +128,8 @@ public class ArenaImpl extends BaseButton implements Arena {
         return kits.isEmpty();
     }
 
-    public boolean isBound(final KitImpl kit) {
-        return kits.contains(kit);
+    public boolean isBound(@Nullable final KitImpl kit) {
+        return kit != null && kits.contains(kit);
     }
 
     public void bind(final KitImpl kit) {
@@ -243,10 +243,10 @@ public class ArenaImpl extends BaseButton implements Arena {
         }
 
         final Settings settings = settingManager.getSafely(player);
-        final KitImpl kit = settings.getKit();
+        final String kitName = settings.getKit() != null ? settings.getKit().getName() : lang.getMessage("GENERAL.none");
 
-        if (kit != null && !arenaManager.isSelectable(kit, this)) {
-            lang.sendMessage(player, "ERROR.setting.arena-not-applicable", "kit", kit.getName());
+        if (!arenaManager.isSelectable(settings.getKit(), this)) {
+            lang.sendMessage(player, "ERROR.setting.arena-not-applicable", "kit", kitName, "arena", name);
             return;
         }
 

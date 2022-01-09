@@ -16,7 +16,7 @@ import org.bukkit.entity.Player;
 public class JoinCommand extends BaseCommand {
 
     public JoinCommand(final DuelsPlugin plugin) {
-        super(plugin, "join", "join [-:kit] [bet]", "Joins a queue.", Permissions.QUEUE, 3, true, "j");
+        super(plugin, "join", "join [-:kit] [bet]", "Joins a queue.", Permissions.QUEUE, 2, true, "j");
     }
 
     @Override
@@ -24,7 +24,7 @@ public class JoinCommand extends BaseCommand {
         final Player player = (Player) sender;
         KitImpl kit = null;
 
-        if (!args[1].equals("-")) {
+        if (!args[1].startsWith("-")) {
             String name = StringUtil.join(args, " ", 1, args.length - (args.length > 2 ? 1 : 0)).replace("-", " ");
             kit = kitManager.get(name);
 
@@ -36,7 +36,7 @@ public class JoinCommand extends BaseCommand {
 
         final String kitName = kit != null ? kit.getName() : lang.getMessage("GENERAL.none");
         final int bet = args.length > 2 ? NumberUtil.parseInt(args[args.length - 1]).orElse(0) : 0;
-        final Queue queue = queueManager.get(kit, bet);
+        final Queue queue = args[1].equals("-r") ? queueManager.randomQueue() : queueManager.get(kit, bet);
 
         if (queue == null) {
             lang.sendMessage(sender, "ERROR.queue.not-found", "bet_amount", bet, "kit", kitName);

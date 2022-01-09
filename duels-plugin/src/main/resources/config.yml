@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 10
+config-version: 11
 
 # If set to 'true', a notification and a download link will be printed on the console whenever an update is available.
 # default: true
@@ -361,6 +361,11 @@ duel:
   - 'playervaults:playervaults'
 
 
+queue:
+  # List of commands to block while in a queue.
+  blacklisted-commands: []
+
+
 rating:
   # If set to 'true', player's rating will change after match based on their opponent.
   # default: true
@@ -384,6 +389,15 @@ spectate:
   # If set to 'true', players will be required to have a cleared inventory in order to start spectating.
   # default: false
   requires-cleared-inventory: false
+
+  # If set to 'true', players will be in spectator gamemode while spectating.
+  # default: false
+  use-spectator-gamemode: false
+
+  # If set to 'true', players spectating will receive invisibility effect.
+  # NOTE: This option will not take effect if use-spectator-gamemode is set to true.
+  # default: true
+  add-invisibility-effect: true
 
   # List of commands to allow while spectating.
   whitelisted-commands:

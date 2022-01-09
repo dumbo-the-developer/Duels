@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 10
+config-version: 11
 
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
@@ -60,6 +60,8 @@ ERROR:
       target: '{PREFIX} &c%name% is already in a duel.'
     already-in-queue: '{PREFIX} &cYou cannot do this while in a queue.'
     prevent-teleportation: '{PREFIX} &cCannot teleport to a player in a duel.'
+    mode-unselected: '{PREFIX} &cYou must either choose a kit or enable own inventory mode.'
+    mode-fixed: '{PREFIX} &cYou are not allowed to disable own inventory mode.'
   spectate:
     already-spectating:
       sender: '{PREFIX} &cYou cannot do this while in spectator mode.'
@@ -67,7 +69,7 @@ ERROR:
     not-in-match: '{PREFIX} &c%name% is not in a duel.'
   setting:
     disabled-option: '{PREFIX} &c%option% is currently disabled.'
-    arena-not-applicable: '{PREFIX} &cYou cannot use kit %kit% on this arena.'
+    arena-not-applicable: '{PREFIX} &cYou cannot use kit %kit% on arena %arena%.'
   inventory-view:
     not-a-uuid: '{PREFIX} &c%input% is not a valid UUID.'
     not-found: '{PREFIX} &cNo inventory exists with the UUID ''%uuid%''.'
@@ -111,6 +113,7 @@ COMMAND:
         - '{LINE}'
         - '&7Duel request sent to &f%name%&7.'
         - '&6- &7Kit: &3%kit%'
+        - '&7Own Inventory: &r%own_inventory%'
         - '&6- &7Arena: &e%arena%'
         - '&6- &7Bet: &6$%bet_amount%'
         - '&6- &7Item Betting: &r%item_betting%'
@@ -119,6 +122,7 @@ COMMAND:
         - '{LINE}'
         - '&7Duel request received from &f%name%&7.'
         - '&6- &7Kit: &3%kit%'
+        - '&7Own Inventory: &r%own_inventory%'
         - '&6- &7Arena: &e%arena%'
         - '&6- &7Bet: &6$%bet_amount%'
         - '&6- &7Item Betting: &r%item_betting%'
@@ -276,7 +280,7 @@ COMMAND:
     - '{LINE}'
     - '&f/spectate [player] &e- &7Spectates the a player in duel.'
     - '{LINE}'
-    start-spectate: '{PREFIX} &7You are now spectating &f%name%&7. Type &f/spectate &7to stop spectating.'
+    start-spectate: '{PREFIX} &7Now spectating &f%name%&7 vs &f%opponent%&7 in arena &e%arena%&7. Type &f/spectate &7to stop spectating.'
     stop-spectate: '{PREFIX} &7You are no longer spectating &f%name%&7.'
 
   sub-command-usage: '{PREFIX} &f/%command% %usage% &e- &7%description%'
@@ -317,6 +321,8 @@ DUEL:
 
 
 QUEUE:
+  prevent:
+    command: '&cYou cannot use ''%command%'' while in a queue.'
   add: '{PREFIX} &7You have been added to the queue for kit &3%kit% &7and bet &6$%bet_amount%&7. Click the sign again or type &f/queue leave &7to leave the queue.'
   remove: '{PREFIX} &7You have been removed from the queue.'
   found-opponent: '{PREFIX} &7Opponent found: &f%name%&7! Starting match with kit &3%kit% &7and a bet of &6$%bet_amount%&7...'

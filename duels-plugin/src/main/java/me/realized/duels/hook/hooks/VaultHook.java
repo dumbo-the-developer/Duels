@@ -28,6 +28,7 @@ public class VaultHook extends PluginHook<DuelsPlugin> {
         }
 
         economy = provider.getProvider();
+        Log.info("Using Economy Provider: " + economy.getClass().getName());
     }
 
     public boolean has(final int amount, final Player... players) {

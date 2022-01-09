@@ -11,7 +11,7 @@ buildscript {
 
 allprojects {
     group 'me.realized'
-    version '3.5.0'
+    version '3.5.1'
 }
 
 subprojects {
@@ -47,8 +47,8 @@ subprojects {
         }
 
         maven {
-            name 'sk89q-repo'
-            url 'https://maven.sk89q.com/repo/'
+            name 'enginehub-repo'
+            url 'https://maven.enginehub.org/repo/'
         }
 
         maven {

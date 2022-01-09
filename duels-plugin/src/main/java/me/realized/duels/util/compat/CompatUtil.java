@@ -1,17 +1,21 @@
 package me.realized.duels.util.compat;
 
 import me.realized.duels.util.reflect.ReflectionUtil;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
 
 public final class CompatUtil {
 
-    private static final boolean ATTRIBUTES, ITEM_FLAGS, SEND_TITLE;
+    private static final boolean ATTRIBUTES, ITEM_FLAGS, SEND_TITLE, HIDE_PLAYER, SET_COLLIDABLE;
 
     static {
         ATTRIBUTES = ReflectionUtil.getMethodUnsafe(ItemMeta.class, "getAttributeModifiers") != null;
         ITEM_FLAGS = ReflectionUtil.getClassUnsafe("org.bukkit.inventory.ItemFlag") != null;
         SEND_TITLE = ReflectionUtil.getMethodUnsafe(Player.class, "sendTitle", String.class, String.class, Integer.TYPE, Integer.TYPE, Integer.TYPE) != null;
+        HIDE_PLAYER = ReflectionUtil.getMethodUnsafe(Player.class, "hidePlayer", Plugin.class, Player.class) != null;
+        SET_COLLIDABLE = ReflectionUtil.getMethodUnsafe(LivingEntity.class, "setCollidable", Boolean.TYPE) != null;
     }
 
     public static boolean is1_13() {
@@ -48,6 +52,14 @@ public final class CompatUtil {
 
     public static boolean hasSendTitle() {
         return SEND_TITLE;
+    }
+
+    public static boolean hasHidePlayer() {
+        return HIDE_PLAYER;
+    }
+
+    public static boolean hasSetCollidable() {
+        return SET_COLLIDABLE;
     }
 
     private CompatUtil() {}

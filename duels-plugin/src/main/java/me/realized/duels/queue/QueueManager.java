@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.queue.QueueCreateEvent;
@@ -55,6 +56,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -243,6 +245,11 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
     }
 
     @Nullable
+    public Queue randomQueue() {
+        return !queues.isEmpty() ? queues.get(ThreadLocalRandom.current().nextInt(queues.size())) : null;
+    }
+
+    @Nullable
     @Override
     public Queue create(@Nullable final CommandSender source, @Nullable final Kit kit, final int bet) {
         final Queue queue = new Queue(plugin, kit, bet);
@@ -401,5 +408,17 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
     @EventHandler
     public void on(final PlayerQuitEvent event) {
         remove(event.getPlayer());
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void on(final PlayerCommandPreprocessEvent event) {
+        final String command = event.getMessage().substring(1).split(" ")[0].toLowerCase();
+
+        if (!isInQueue(event.getPlayer()) || !config.getQueueBlacklistedCommands().contains(command)) {
+            return;
+        }
+
+        event.setCancelled(true);
+        lang.sendMessage(event.getPlayer(), "QUEUE.prevent.command", "command", event.getMessage());
     }
 }

@@ -122,7 +122,7 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
                         names.putIfAbsent(user.getName().toLowerCase(), uuid);
                         users.putIfAbsent(uuid, user);
                     } catch (IOException ex) {
-                        Log.error(this, "Failed to load data of " + uuid + "!", ex);
+                        Log.error(this, "Could not load userdata from file: " + fileName, ex);
                     }
                 }
             }

@@ -151,10 +151,8 @@ public class DuelCommand extends BaseCommand {
         }
 
         final Settings settings = settingManager.getSafely(player);
-        // Reset bet and own inventory to prevent accidents
+        // Reset bet to prevent accidents
         settings.setBet(0);
-        settings.setOwnInventory(false);
-
         settings.setTarget(target);
         settings.setBaseLoc(player);
         settings.setDuelzone(player, duelzone);

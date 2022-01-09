@@ -147,6 +147,9 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private List<String> blacklistedCommands;
 
     @Getter
+    private List<String> queueBlacklistedCommands;
+
+    @Getter
     private boolean ratingEnabled;
     @Getter
     private int kFactor;
@@ -157,6 +160,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
 
     @Getter
     private boolean specRequiresClearedInventory;
+    @Getter
+    private boolean specUseSpectatorGamemode;
+    @Getter
+    private boolean specAddInvisibilityEffect;
     @Getter
     private List<String> specWhitelistedCommands;
 
@@ -318,12 +325,16 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         whitelistedCommands = configuration.getStringList("duel.whitelisted-commands");
         blacklistedCommands = configuration.getStringList("duel.blacklisted-commands");
 
+        queueBlacklistedCommands = configuration.getStringList("queue.blacklisted-commands");
+
         ratingEnabled = configuration.getBoolean("rating.enabled", true);
         kFactor = Math.max(configuration.getInt("rating.k-factor", 32), 1);
         defaultRating = Math.max(configuration.getInt("rating.default-rating", 1400), 0);
         ratingQueueOnly = configuration.getBoolean("rating.queue-matches-only", true);
 
         specRequiresClearedInventory = configuration.getBoolean("spectate.requires-cleared-inventory", false);
+        specUseSpectatorGamemode = configuration.getBoolean("spectate.use-spectator-gamemode", false);
+        specAddInvisibilityEffect = configuration.getBoolean("spectate.add-invisibility-effect", true);
         specWhitelistedCommands = configuration.getStringList("spectate.whitelisted-commands");
 
         cdEnabled = configuration.getBoolean("countdown.enabled", true);

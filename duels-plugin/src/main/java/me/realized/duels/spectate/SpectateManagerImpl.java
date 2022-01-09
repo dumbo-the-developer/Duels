@@ -20,22 +20,33 @@ import me.realized.duels.api.spectate.SpectateManager;
 import me.realized.duels.api.spectate.Spectator;
 import me.realized.duels.arena.ArenaImpl;
 import me.realized.duels.arena.ArenaManagerImpl;
+import me.realized.duels.arena.MatchImpl;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.hook.hooks.MyPetHook;
 import me.realized.duels.player.PlayerInfo;
 import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.teleport.Teleport;
+import me.realized.duels.util.BlockUtil;
 import me.realized.duels.util.Loadable;
 import me.realized.duels.util.PlayerUtil;
+import me.realized.duels.util.compat.CompatUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockCanBuildEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -122,6 +133,22 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
             return Result.EVENT_CANCELLED;
         }
 
+        final MatchImpl match = arena.getMatch();
+
+        // Hide from players in match
+        if (match != null) {
+            match.getAllPlayers()
+                .stream()
+                .filter(arenaPlayer -> arenaPlayer.isOnline() && arenaPlayer.canSee(player))
+                .forEach(arenaPlayer -> {
+                    if (CompatUtil.hasHidePlayer()) {
+                        arenaPlayer.hidePlayer(plugin, player);
+                    } else {
+                        arenaPlayer.hidePlayer(player);
+                    }
+                });
+        }
+
         // Remove pet before teleport
         if (myPet != null) {
             myPet.removePet(player);
@@ -135,7 +162,24 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
         teleport.tryTeleport(player, target.getLocation().clone().add(0, 2, 0));
         spectators.put(player.getUniqueId(), spectator);
         arenas.put(arena, spectator);
-        player.setGameMode(GameMode.SPECTATOR);
+
+        if (!config.isSpecUseSpectatorGamemode()) {
+            player.setGameMode(GameMode.ADVENTURE);
+            player.setAllowFlight(true);
+            player.setFlying(true);
+        } else {
+            player.setGameMode(GameMode.SPECTATOR);
+        }
+
+        if (CompatUtil.hasSetCollidable()) {
+            player.setCollidable(false);
+        } else {
+            player.spigot().setCollidesWithEntities(false);
+        }
+
+        if (config.isSpecAddInvisibilityEffect()) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false));
+        }
 
         // Broadcast to the arena that player has begun spectating if player does not have the SPEC_ANON permission.
         if (!player.hasPermission(Permissions.SPEC_ANON)) {
@@ -155,7 +199,15 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
         spectators.remove(player.getUniqueId());
         arenas.remove(spectator.getArena(), spectator);
         player.setGameMode(GameMode.SURVIVAL);
+        player.setFlying(false);
+        player.setAllowFlight(false);
         PlayerUtil.reset(player);
+
+        if (CompatUtil.hasSetCollidable()) {
+            player.setCollidable(true);
+        } else {
+            player.spigot().setCollidesWithEntities(true);
+        }
 
         final PlayerInfo info = playerManager.remove(player);
 
@@ -164,6 +216,22 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
             info.restore(player);
         } else {
             teleport.tryTeleport(player, playerManager.getLobby());
+        }
+
+        final MatchImpl match = spectator.getArena().getMatch();
+
+        // Show to players in match
+        if (match != null) {
+            match.getAllPlayers()
+                .stream()
+                .filter(Player::isOnline)
+                .forEach(arenaPlayer -> {
+                    if (CompatUtil.hasHidePlayer()) {
+                        arenaPlayer.showPlayer(plugin, player);
+                    } else {
+                        arenaPlayer.showPlayer(player);
+                    }
+                });
         }
 
         final SpectateEndEvent event = new SpectateEndEvent(player, spectator);
@@ -266,6 +334,86 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
 
             event.setCancelled(true);
             lang.sendMessage(player, "SPECTATE.prevent.teleportation");
+        }
+
+
+        @EventHandler(ignoreCancelled = true)
+        public void on(final PlayerInteractEvent event) {
+            if (!isSpectating(event.getPlayer())) {
+                return;
+            }
+
+            event.setCancelled(true);
+        }
+
+        @EventHandler(ignoreCancelled = true)
+        public void on(final PlayerPickupItemEvent event) {
+            if (!isSpectating(event.getPlayer())) {
+                return;
+            }
+
+            event.setCancelled(true);
+        }
+
+        @EventHandler(ignoreCancelled = true)
+        public void on(final EntityDamageByEntityEvent event) {
+            final Player player;
+
+            if (event.getDamager() instanceof Player) {
+                player = (Player) event.getDamager();
+            } else if (event.getDamager() instanceof Projectile && ((Projectile) event.getDamager()).getShooter() instanceof Player) {
+                player = (Player) ((Projectile) event.getDamager()).getShooter();
+            } else {
+                return;
+            }
+
+            if (!isSpectating(player)) {
+                return;
+            }
+
+            event.setCancelled(true);
+        }
+
+        @EventHandler(ignoreCancelled = true)
+        public void on(final EntityDamageEvent event) {
+            if (!(event.getEntity() instanceof Player) || !isSpectating((Player) event.getEntity())) {
+                return;
+            }
+
+            event.setCancelled(true);
+        }
+
+        // Prevents spectators (in adventure mode) blocking players from placing blocks.
+        @EventHandler
+        public void on(final BlockCanBuildEvent event) {
+            if (config.isSpecUseSpectatorGamemode()) {
+                return;
+            }
+
+            final Player player = event.getPlayer();
+
+            if (player == null || BlockUtil.near(player, event.getBlock(), 0, 2)) {
+                return;
+            }
+
+            final ArenaImpl arena = arenaManager.get(player);
+
+            if (arena == null) {
+                return;
+            }
+
+            for (final SpectatorImpl spectator : getSpectatorsImpl(arena)) {
+                final Player specPlayer = spectator.getPlayer();
+
+                if (specPlayer == null) {
+                    continue;
+                }
+
+                if (BlockUtil.near(specPlayer, event.getBlock(), 1, 2)) {
+                    event.setBuildable(true);
+                    break;
+                }
+            }
         }
     }
 }
