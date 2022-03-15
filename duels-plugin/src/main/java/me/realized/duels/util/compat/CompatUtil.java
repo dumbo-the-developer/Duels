@@ -3,12 +3,13 @@ package me.realized.duels.util.compat;
 import me.realized.duels.util.reflect.ReflectionUtil;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockCanBuildEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
 public final class CompatUtil {
 
-    private static final boolean ATTRIBUTES, ITEM_FLAGS, SEND_TITLE, HIDE_PLAYER, SET_COLLIDABLE;
+    private static final boolean ATTRIBUTES, ITEM_FLAGS, SEND_TITLE, HIDE_PLAYER, SET_COLLIDABLE, GET_PLAYER;
 
     static {
         ATTRIBUTES = ReflectionUtil.getMethodUnsafe(ItemMeta.class, "getAttributeModifiers") != null;
@@ -16,6 +17,7 @@ public final class CompatUtil {
         SEND_TITLE = ReflectionUtil.getMethodUnsafe(Player.class, "sendTitle", String.class, String.class, Integer.TYPE, Integer.TYPE, Integer.TYPE) != null;
         HIDE_PLAYER = ReflectionUtil.getMethodUnsafe(Player.class, "hidePlayer", Plugin.class, Player.class) != null;
         SET_COLLIDABLE = ReflectionUtil.getMethodUnsafe(LivingEntity.class, "setCollidable", Boolean.TYPE) != null;
+        GET_PLAYER = ReflectionUtil.getMethodUnsafe(BlockCanBuildEvent.class, "getPlayer") != null;
     }
 
     public static boolean is1_13() {
@@ -60,6 +62,10 @@ public final class CompatUtil {
 
     public static boolean hasSetCollidable() {
         return SET_COLLIDABLE;
+    }
+
+    public static boolean hasGetPlayer() {
+        return GET_PLAYER;
     }
 
     private CompatUtil() {}
