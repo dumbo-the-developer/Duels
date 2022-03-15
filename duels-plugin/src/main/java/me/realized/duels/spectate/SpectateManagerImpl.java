@@ -386,7 +386,7 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
         // Prevents spectators (in adventure mode) blocking players from placing blocks.
         @EventHandler
         public void on(final BlockCanBuildEvent event) {
-            if (config.isSpecUseSpectatorGamemode()) {
+            if (!CompatUtil.hasGetPlayer() || config.isSpecUseSpectatorGamemode()) {
                 return;
             }
 
