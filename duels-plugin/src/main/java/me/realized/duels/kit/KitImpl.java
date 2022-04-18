@@ -120,9 +120,9 @@ public class KitImpl extends BaseButton implements Kit {
 
         final Settings settings = settingManager.getSafely(player);
 
+        // Reset arena selection if this kit is incompatible with selected arena
         if (settings.getArena() != null && !arenaManager.isSelectable(this, settings.getArena())) {
-            lang.sendMessage(player, "ERROR.setting.arena-not-applicable", "kit", name, "arena", settings.getArena().getName());
-            return;
+            settings.setArena(null);
         }
 
         settings.setKit(this);
