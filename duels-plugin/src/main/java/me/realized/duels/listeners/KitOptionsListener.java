@@ -124,8 +124,6 @@ public class KitOptionsListener implements Listener {
             }
         }
 
-        player.getInventory().setItem(player.getInventory().getHeldItemSlot(), config.isSoupRemoveEmptyBowl() ? null : new ItemStack(Material.BOWL));
-
         final double regen = config.getSoupHeartsToRegen() * 2.0;
         final double oldHealth = player.getHealth();
         final double maxHealth = PlayerUtil.getMaxHealth(player);
