@@ -23,7 +23,7 @@ public final class PlayerUtil {
                 return DEFAULT_MAX_HEALTH;
             }
 
-            return attribute.getDefaultValue();
+            return attribute.getValue();
         }
     }
 
