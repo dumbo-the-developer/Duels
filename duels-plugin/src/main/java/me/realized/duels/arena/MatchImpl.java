@@ -67,6 +67,10 @@ public class MatchImpl implements Match {
         return source != null;
     }
 
+    public boolean isOwnInventory() {
+        return kit == null;
+    }
+    
     public List<ItemStack> getItems() {
         return items != null ? items.values().stream().flatMap(Collection::stream).collect(Collectors.toList()) : Collections.emptyList();
     }

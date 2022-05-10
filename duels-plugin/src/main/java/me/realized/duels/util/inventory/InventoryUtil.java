@@ -46,13 +46,21 @@ public final class InventoryUtil {
     }
 
     public static void fillFromMap(final PlayerInventory inventory, final Map<String, Map<Integer, ItemStack>> items) {
-        for (final Map.Entry<Integer, ItemStack> entry : items.get("INVENTORY").entrySet()) {
-            inventory.setItem(entry.getKey(), entry.getValue().clone());
+        final Map<Integer, ItemStack> inventoryItems = items.get(INVENTORY_IDENTIFIER);
+
+        if (inventoryItems != null) {
+            for (final Map.Entry<Integer, ItemStack> entry : inventoryItems.entrySet()) {
+                inventory.setItem(entry.getKey(), entry.getValue().clone());
+            }
         }
 
-        final ItemStack[] armor = new ItemStack[4];
-        items.get("ARMOR").forEach((slot, item) -> armor[4 - slot] = item.clone());
-        inventory.setArmorContents(armor);
+        final Map<Integer, ItemStack> armorItems = items.get(ARMOR_IDENTIFIER);
+
+        if (armorItems != null) {
+            final ItemStack[] armor = new ItemStack[4];
+            armorItems.forEach((slot, item) -> armor[4 - slot] = item.clone());
+            inventory.setArmorContents(armor);
+        }
     }
 
     public static boolean hasItem(final Player player) {

@@ -37,8 +37,13 @@ public class PlayerInfo {
         this.location = location;
     }
 
-    public PlayerInfo(final Player player) {
+    public PlayerInfo(final Player player, final boolean excludeInventory) {
         this(Lists.newArrayList(player.getActivePotionEffects()), player.getHealth(), player.getFoodLevel(), player.getLocation().clone());
+
+        if (excludeInventory) {
+            return;
+        }
+        
         InventoryUtil.addToMap(player.getInventory(), items);
     }
 

@@ -259,7 +259,10 @@ public class DuelManager implements Loadable {
 
         if (!player.isDead()) {
             playerManager.remove(player);
-            PlayerUtil.reset(player);
+
+            if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {
+                PlayerUtil.reset(player);
+            }
 
             if (info != null) {
                 teleport.tryTeleport(player, info.getLocation());
@@ -395,11 +398,11 @@ public class DuelManager implements Loadable {
         return user != null ? user.getRating(kit) : config.getDefaultRating();
     }
 
-    private void addPlayers(final Queue source, final ArenaImpl arena, final KitImpl kit, final Map<Integer, Location> locations, final Player... players) {
+    private void addPlayers(final MatchImpl match, final ArenaImpl arena, final KitImpl kit, final Map<Integer, Location> locations, final Player... players) {
         int position = 0;
 
         for (final Player player : players) {
-            if (source == null) {
+            if (match.getSource() == null) {
                 queueManager.remove(player);
             }
 
@@ -409,7 +412,7 @@ public class DuelManager implements Loadable {
             }
 
             player.closeInventory();
-            playerManager.create(player);
+            playerManager.create(player, match.isOwnInventory() && config.isOwnInventoryDropInventoryItems());
             teleport.tryTeleport(player, locations.get(++position));
 
             if (kit != null) {
@@ -417,7 +420,7 @@ public class DuelManager implements Loadable {
                 kit.equip(player);
             }
 
-            if (config.isStartCommandsEnabled() && !(source == null && config.isStartCommandsQueueOnly())) {
+            if (config.isStartCommandsEnabled() && !(match.getSource() == null && config.isStartCommandsQueueOnly())) {
                 try {
                     for (final String command : config.getStartCommands()) {
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", player.getName()));
@@ -508,15 +511,6 @@ public class DuelManager implements Loadable {
 
     private class DuelListener implements Listener {
 
-        @EventHandler(priority = EventPriority.LOWEST)
-        public void onLowest(final PlayerDeathEvent event) {
-            if (!arenaManager.isInMatch(event.getEntity())) {
-                return;
-            }
-
-            event.getDrops().clear();
-        }
-
         @EventHandler(priority = EventPriority.HIGHEST)
         public void on(final PlayerDeathEvent event) {
             final Player player = event.getEntity();
@@ -530,17 +524,20 @@ public class DuelManager implements Loadable {
                 mcMMO.enableSkills(player);
             }
 
-            event.setKeepLevel(true);
-            event.setDroppedExp(0);
-            event.setKeepInventory(false);
-            inventoryManager.create(player, true);
-
             final MatchImpl match = arena.getMatch();
 
             if (match == null) {
                 return;
             }
-
+            
+            if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {    
+                event.getDrops().clear();
+                event.setKeepLevel(true);
+                event.setDroppedExp(0);
+                event.setKeepInventory(false);
+            }
+            
+            inventoryManager.create(player, true);
             arena.remove(player);
 
             // Call end task only on the first death

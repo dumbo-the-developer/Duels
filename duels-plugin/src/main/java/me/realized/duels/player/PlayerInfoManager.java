@@ -170,15 +170,25 @@ public class PlayerInfoManager implements Loadable {
      * Creates a cached PlayerInfo instance for given player.
      *
      * @param player Player to create a cached PlayerInfo instance
+     * @param excludeInventory true to exclude inventory contents from being stored in PlayerInfo, false otherwise
      */
-    public void create(final Player player) {
-        final PlayerInfo info = new PlayerInfo(player);
+    public void create(final Player player, final boolean excludeInventory) {
+        final PlayerInfo info = new PlayerInfo(player, excludeInventory);
 
         if (!config.isTeleportToLastLocation()) {
             info.setLocation(lobby.clone());
         }
 
         cache.put(player.getUniqueId(), info);
+    }
+
+    /**
+     * Calls {@link #create(Player, boolean)} with excludeInventory defaulting to false.
+     *
+     * @see {@link #create(Player, boolean)}
+     */
+    public void create(final Player player) {
+        create(player, false);
     }
 
     /**
