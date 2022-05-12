@@ -349,7 +349,7 @@ public class DuelManager implements Loadable {
         }
 
         final MatchImpl match = arena.startMatch(kit, items, settings.getBet(), source);
-        addPlayers(source, arena, kit, arena.getPositions(), first, second);
+        addPlayers(match, arena, kit, arena.getPositions(), first, second);
 
         if (config.isCdEnabled()) {
             final Map<UUID, Pair<String, Integer>> info = new HashMap<>();
