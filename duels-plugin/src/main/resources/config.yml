@@ -108,7 +108,8 @@ request:
     # default: true
     enabled: true
     
-    # If set to 'true', players will drop their inventory items on death in an own inventory duel. 
+    # If set to 'true', players will drop their inventory items on death in an own inventory duel.
+    # WARNING: Players will NOT have their inventories restored after the duel with this option! Increase 'teleport-delay' so that the winner has time to pick up dropped items.
     # default: false
     drop-inventory-items: false
 
