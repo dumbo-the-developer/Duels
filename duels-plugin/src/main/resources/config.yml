@@ -1,7 +1,7 @@
 # DO NOT EDIT THIS VALUE!
 config-version: 12
 
-# If set to 'true', a notification and a download link will be printed on the console whenever an update is available.
+# If set to 'true', a notification and a download link will be printed on both console and in-game when a new update is available.
 # default: true
 check-for-updates: true
 
@@ -94,7 +94,7 @@ supported-plugins:
 
 
 request:
-  # If set to 'true', players will be forced to have a cleared inventory in order to send or accept a duel request.
+  # If set to 'true', players will need to have a cleared inventory in order to send or accept a duel request.
   # default: false
   requires-cleared-inventory: false
 
@@ -109,7 +109,8 @@ request:
     enabled: true
     
     # If set to 'true', players will drop their inventory items on death in an own inventory duel.
-    # WARNING: Players will NOT have their inventories restored after the duel with this option! Increase 'teleport-delay' so that the winner has time to pick up dropped items.
+    # WARNING: Players will NOT have their inventories restored after the duel if this option is enabled! 
+    #          Increase 'teleport-delay' so that the winner has time to pick up dropped items.
     # default: false
     drop-inventory-items: false
 
@@ -160,7 +161,7 @@ request:
 
 duel:
   match:
-    # The max duration of a match, in minutes. Setting it to -1 will allow players to fight for as long as they like.
+    # The max duration of a match, in minutes. Setting it to -1 will disable duration limit.
     # default: -1
     max-duration: -1
 
