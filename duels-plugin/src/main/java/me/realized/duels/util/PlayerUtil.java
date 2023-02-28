@@ -40,7 +40,7 @@ public final class PlayerUtil {
 
         final Inventory top = player.getOpenInventory().getTopInventory();
 
-        if (top != null && top.getType() == InventoryType.CRAFTING) {
+        if (top.getType() == InventoryType.CRAFTING) {
             top.clear();
         }
 

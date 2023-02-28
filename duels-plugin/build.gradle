@@ -60,7 +60,7 @@ shadowJar {
     }
 
     final String group = project.group.toString() + "." + parent.name.toLowerCase() + ".shaded."
-    relocate 'om.fasterxml.jackson.core', group + 'jackson-core'
+    relocate 'com.fasterxml.jackson.core', group + 'jackson-core'
 }
 
 // To build Duels plugin jar, run './gradlew clean build'.

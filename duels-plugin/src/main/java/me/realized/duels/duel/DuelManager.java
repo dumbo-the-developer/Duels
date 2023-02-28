@@ -63,12 +63,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 
@@ -528,6 +530,12 @@ public class DuelManager implements Loadable {
 
             if (match == null) {
                 return;
+            }
+
+            final Inventory top = player.getOpenInventory().getTopInventory();
+
+            if (top.getType() == InventoryType.CRAFTING) {
+                top.clear();
             }
             
             if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {    
