@@ -11,6 +11,8 @@ import org.bukkit.inventory.ItemStack;
 public final class PlayerUtil {
 
     private static final double DEFAULT_MAX_HEALTH = 20.0D;
+    private static final float DEFAULT_EXHAUSTION = 0.0F;
+    private static final float DEFAULT_SATURATION = 5.0F;
     private static final int DEFAULT_MAX_FOOD_LEVEL = 20;
 
     public static double getMaxHealth(final Player player) {
@@ -35,6 +37,8 @@ public final class PlayerUtil {
         player.setFireTicks(0);
         player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
         setMaxHealth(player);
+        player.setExhaustion(DEFAULT_EXHAUSTION);
+        player.setSaturation(DEFAULT_SATURATION);
         player.setFoodLevel(DEFAULT_MAX_FOOD_LEVEL);
         player.setItemOnCursor(null);
 
