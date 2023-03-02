@@ -37,6 +37,11 @@ public class PlaceholderHook extends PluginHook<DuelsPlugin> {
         }
 
         @Override
+        public boolean persist() {
+            return true;
+        }
+
+        @Override
         public String onPlaceholderRequest(final Player player, final String identifier) {
             if (player == null) {
                 return "Player is required";
