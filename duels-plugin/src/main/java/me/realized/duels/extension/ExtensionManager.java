@@ -82,7 +82,7 @@ public class ExtensionManager implements Loadable {
 
                 INIT_EXTENSION.invoke(extension, plugin, info.getName(), folder, file);
                 extension.setEnabled(true);
-                Log.info(this, "Extension '" + extension.getName() + " " + info.getVersion() + "' is now enabled.");
+                Log.info(this, "Extension '" + extension.getName() + " v" + info.getVersion() + "' is now enabled.");
                 extensions.put(extension.getName(), extension);
                 this.info.put(extension, info);
             } catch (Throwable thrown) {
@@ -102,7 +102,7 @@ public class ExtensionManager implements Loadable {
                     ((ExtensionClassLoader) classLoader).close();
                 }
 
-                Log.info(this, "Extension '" + extension.getName() + "' is now disabled.");
+                Log.info(this, "Extension '" + extension.getName() + " v" + info.get(extension).getVersion() + "' is now disabled.");
             } catch (Exception ex) {
                 Log.error(this, "Could not disable extension " + extension.getName() + "!", ex);
             }

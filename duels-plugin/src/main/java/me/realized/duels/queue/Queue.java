@@ -98,7 +98,7 @@ public class Queue extends BaseButton implements DQueue {
 
     @Override
     public String toString() {
-        return (kit != null ? kit.getName() : "none") + " - $" + bet;
+        return (kit != null ? kit.getName() : "none") + " ($" + bet + ")";
     }
 
     @Override

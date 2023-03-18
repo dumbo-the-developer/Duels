@@ -47,6 +47,7 @@ Maven:
     <groupId>com.github.Realizedd.Duels</groupId>
     <artifactId>duels-api</artifactId>
     <version>3.5.1</version>
+    <scope>provided</scope>
 </dependency>
 ```
 

@@ -1,7 +1,7 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 11
+config-version: 12
 
-# If set to 'true', a notification and a download link will be printed on the console whenever an update is available.
+# If set to 'true', a notification and a download link will be printed on both console and in-game when a new update is available.
 # default: true
 check-for-updates: true
 
@@ -94,7 +94,7 @@ supported-plugins:
 
 
 request:
-  # If set to 'true', players will be forced to have a cleared inventory in order to send or accept a duel request.
+  # If set to 'true', players will need to have a cleared inventory in order to send or accept a duel request.
   # default: false
   requires-cleared-inventory: false
 
@@ -107,6 +107,12 @@ request:
     # NOTE: If set to 'false', Kit Selector will first open instead of Request Settings GUI when initiating a duel request.
     # default: true
     enabled: true
+    
+    # If set to 'true', players will drop their inventory items on death in an own inventory duel.
+    # WARNING: Players will NOT have their inventories restored after the duel if this option is enabled! 
+    #          Increase 'teleport-delay' so that the winner has time to pick up dropped items.
+    # default: false
+    drop-inventory-items: false
 
     # If set to 'true', players without the permission 'duels.use.own-inventory' will not be able to enable own inventory option.
     # default: false
@@ -155,7 +161,7 @@ request:
 
 duel:
   match:
-    # The max duration of a match, in minutes. Setting it to -1 will allow players to fight for as long as they like.
+    # The max duration of a match, in minutes. Setting it to -1 will disable duration limit.
     # default: -1
     max-duration: -1
 
@@ -254,8 +260,8 @@ duel:
   prevent-item-drop: false
 
   # If set to 'true', players in duel will not be able to pickup items on the ground.
-  # default: true
-  prevent-item-pickup: true
+  # default: false
+  prevent-item-pickup: false
 
   limit-teleportation:
     # If set to 'true', teleportation while in duel will be limited to the distance specified below.
