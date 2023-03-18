@@ -274,7 +274,7 @@ public class DuelManager implements Loadable {
             if (InventoryUtil.addOrDrop(player, items)) {
                 lang.sendMessage(player, "DUEL.reward.items.message", "name", opponentName);
             }
-        } else {
+        } else if (info != null) {
             info.getExtra().addAll(items);
         }
     }
