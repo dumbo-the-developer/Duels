@@ -1,9 +1,10 @@
 package me.realized.duels.api.user;
 
-import java.util.List;
-import java.util.UUID;
 import me.realized.duels.api.kit.Kit;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Represents a User loaded on the server.

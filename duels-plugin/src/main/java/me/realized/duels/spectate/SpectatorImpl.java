@@ -2,6 +2,7 @@ package me.realized.duels.spectate;
 
 import java.util.Objects;
 import java.util.UUID;
+
 import lombok.Getter;
 import me.realized.duels.api.spectate.Spectator;
 import me.realized.duels.arena.ArenaImpl;

@@ -1,13 +1,14 @@
 package me.realized.duels.api.match;
 
-import java.util.List;
-import java.util.Set;
 import me.realized.duels.api.arena.Arena;
 import me.realized.duels.api.kit.Kit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * Represents an ongoing Match.

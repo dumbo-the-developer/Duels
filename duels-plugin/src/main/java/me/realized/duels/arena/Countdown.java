@@ -1,9 +1,11 @@
 package me.realized.duels.arena;
 
 import com.google.common.collect.Lists;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.config.Config;
 import me.realized.duels.util.StringUtil;
@@ -24,7 +26,7 @@ class Countdown extends BukkitRunnable {
 
     private boolean finished;
 
-    Countdown(final DuelsPlugin plugin, final ArenaImpl arena, final String kit, final Map<UUID,  Pair<String, Integer>> info, final List<String> messages, final List<String> titles) {
+    Countdown(final DuelsPlugin plugin, final ArenaImpl arena, final String kit, final Map<UUID, Pair<String, Integer>> info, final List<String> messages, final List<String> titles) {
         this.config = plugin.getConfiguration();
         this.arena = arena;
         this.kit = kit;

@@ -2,16 +2,6 @@ package me.realized.duels.data;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import lombok.Setter;
 import me.realized.duels.api.kit.Kit;
@@ -23,10 +13,19 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class UserData implements User {
 
     private static transient final String ERROR_USER_SAVE = "An error occured while saving userdata of %s!";
-
+    transient File folder;
+    transient int defaultRating;
+    transient int matchesToDisplay;
     @Getter
     private UUID uuid;
     @Getter
@@ -37,15 +36,11 @@ public class UserData implements User {
     @Getter
     private volatile int losses;
     private boolean requests = true;
-
     private ConcurrentHashMap<String, Integer> rating;
     private List<MatchData> matches = new ArrayList<>();
 
-    transient File folder;
-    transient int defaultRating;
-    transient int matchesToDisplay;
-
-    private UserData() {}
+    private UserData() {
+    }
 
     public UserData(final File folder, final int defaultRating, final int matchesToDisplay, final Player player) {
         this.folder = folder;
@@ -193,13 +188,13 @@ public class UserData implements User {
     @Override
     public String toString() {
         return "UserData{" +
-            "uuid=" + uuid +
-            ", name='" + name + '\'' +
-            ", wins=" + wins +
-            ", losses=" + losses +
-            ", requests=" + requests +
-            ", matches=" + matches +
-            ", rating=" + rating +
-            '}';
+                "uuid=" + uuid +
+                ", name='" + name + '\'' +
+                ", wins=" + wins +
+                ", losses=" + losses +
+                ", requests=" + requests +
+                ", matches=" + matches +
+                ", rating=" + rating +
+                '}';
     }
 }

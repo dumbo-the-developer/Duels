@@ -3,6 +3,7 @@ package me.realized.duels.setting;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.util.Loadable;
 import org.bukkit.Bukkit;
@@ -22,7 +23,8 @@ public class SettingsManager implements Loadable, Listener {
     }
 
     @Override
-    public void handleLoad() {}
+    public void handleLoad() {
+    }
 
     @Override
     public void handleUnload() {

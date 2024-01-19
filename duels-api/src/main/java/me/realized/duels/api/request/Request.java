@@ -1,10 +1,11 @@
 package me.realized.duels.api.request;
 
-import java.util.UUID;
 import me.realized.duels.api.arena.Arena;
 import me.realized.duels.api.kit.Kit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
 
 /**
  * Represents a Request sent.

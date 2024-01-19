@@ -1,6 +1,7 @@
 package me.realized.duels.command.commands.duel.subcommands;
 
 import java.util.UUID;
+
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.gui.inventory.InventoryGui;

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.function.BiConsumer;
+
 import org.bukkit.plugin.Plugin;
 
 public final class UpdateChecker {
@@ -32,7 +33,8 @@ public final class UpdateChecker {
 
                 final boolean updateAvailable = NumberUtil.isLower(currentVersion, latestVersion);
                 callback.accept(updateAvailable, updateAvailable ? latestVersion : currentVersion);
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
         });
     }
 }

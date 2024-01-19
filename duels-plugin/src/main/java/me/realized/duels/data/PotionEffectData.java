@@ -5,20 +5,20 @@ import org.bukkit.potion.PotionEffectType;
 
 public class PotionEffectData {
 
-    public static PotionEffectData fromPotionEffect(final PotionEffect effect) {
-        return new PotionEffectData(effect);
-    }
-
     private String type;
     private int duration;
     private int amplifier;
-
-    private PotionEffectData() {}
+    private PotionEffectData() {
+    }
 
     private PotionEffectData(final PotionEffect effect) {
         this.type = effect.getType().getName();
         this.duration = effect.getDuration();
         this.amplifier = effect.getAmplifier();
+    }
+
+    public static PotionEffectData fromPotionEffect(final PotionEffect effect) {
+        return new PotionEffectData(effect);
     }
 
     public PotionEffect toPotionEffect() {

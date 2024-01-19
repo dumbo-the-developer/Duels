@@ -1,10 +1,5 @@
 package me.realized.duels.data;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.kit.KitImpl;
 import me.realized.duels.kit.KitImpl.Characteristic;
@@ -13,24 +8,21 @@ import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.*;
+
 public class KitData {
 
     private static transient final String SLOT_LOAD_FAILURE = "Could not load slot %s for kit %s!";
     private static transient final String ITEM_LOAD_FAILURE = "Could not load item %s for kit %s!";
-
-    public static KitData fromKit(final KitImpl kit) {
-        return new KitData(kit);
-    }
-
     private String name;
     private ItemData displayed;
     private boolean usePermission;
     private boolean arenaSpecific;
     private Set<Characteristic> characteristics = new HashSet<>();
     private Map<String, Map<Integer, ItemData>> items = new HashMap<>();
-
     // for Gson deserializer
-    private KitData() {}
+    private KitData() {
+    }
 
     private KitData(final KitImpl kit) {
         this.name = kit.getName();
@@ -42,11 +34,15 @@ public class KitData {
         for (final Map.Entry<String, Map<Integer, ItemStack>> entry : kit.getItems().entrySet()) {
             final Map<Integer, ItemData> data = new HashMap<>();
             entry.getValue().entrySet()
-                .stream()
-                .filter(value -> Objects.nonNull(value.getValue()))
-                .forEach(value -> data.put(value.getKey(), ItemData.fromItemStack(value.getValue())));
+                    .stream()
+                    .filter(value -> Objects.nonNull(value.getValue()))
+                    .forEach(value -> data.put(value.getKey(), ItemData.fromItemStack(value.getValue())));
             items.put(entry.getKey(), data);
         }
+    }
+
+    public static KitData fromKit(final KitImpl kit) {
+        return new KitData(kit);
     }
 
     public KitImpl toKit(final DuelsPlugin plugin) {

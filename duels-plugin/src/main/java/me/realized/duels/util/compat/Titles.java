@@ -1,11 +1,12 @@
 package me.realized.duels.util.compat;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.reflect.ReflectionUtil;
 import org.bukkit.entity.Player;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 
 public final class Titles {
@@ -46,7 +47,8 @@ public final class Titles {
         }
     }
 
-    private Titles() {}
+    private Titles() {
+    }
 
     public static void send(final Player player, final String title, final String subtitle, final int fadeIn, final int stay, final int fadeOut) {
         if (CompatUtil.hasSendTitle()) {

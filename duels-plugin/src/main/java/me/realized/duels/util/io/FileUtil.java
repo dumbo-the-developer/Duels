@@ -5,6 +5,9 @@ import java.io.IOException;
 
 public final class FileUtil {
 
+    private FileUtil() {
+    }
+
     public static boolean checkNonEmpty(final File file, final boolean create) throws IOException {
         if (!file.exists()) {
             if (create) {
@@ -15,6 +18,4 @@ public final class FileUtil {
 
         return file.length() > 0;
     }
-
-    private FileUtil() {}
 }

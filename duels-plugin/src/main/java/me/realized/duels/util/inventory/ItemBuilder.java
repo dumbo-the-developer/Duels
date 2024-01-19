@@ -1,9 +1,5 @@
 package me.realized.duels.util.inventory;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Consumer;
 import me.realized.duels.util.EnumUtil;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.compat.CompatUtil;
@@ -22,6 +18,11 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 public final class ItemBuilder {
 

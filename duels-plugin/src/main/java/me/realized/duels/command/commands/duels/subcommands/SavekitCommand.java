@@ -1,6 +1,7 @@
 package me.realized.duels.command.commands.duels.subcommands;
 
 import java.util.Arrays;
+
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.util.StringUtil;

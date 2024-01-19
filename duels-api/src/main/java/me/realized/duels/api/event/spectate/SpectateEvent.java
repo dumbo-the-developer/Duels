@@ -1,10 +1,11 @@
 package me.realized.duels.api.event.spectate;
 
-import java.util.Objects;
 import me.realized.duels.api.event.SourcedEvent;
 import me.realized.duels.api.spectate.Spectator;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 /**
  * Represents an event caused by a {@link Spectator}.

@@ -1,6 +1,7 @@
 package me.realized.duels.extension;
 
 import com.google.common.io.ByteStreams;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+
 import lombok.Getter;
 import me.realized.duels.api.extension.DuelsExtension;
 
@@ -27,7 +29,7 @@ public class ExtensionClassLoader extends URLClassLoader {
     private final DuelsExtension extension;
 
     ExtensionClassLoader(final File file, final ExtensionInfo info, final ClassLoader parent) throws Exception {
-        super(new URL[] {file.toURI().toURL()}, parent);
+        super(new URL[]{file.toURI().toURL()}, parent);
         this.jar = new JarFile(file);
         this.manifest = jar.getManifest();
         this.url = file.toURI().toURL();

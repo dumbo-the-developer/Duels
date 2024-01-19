@@ -11,9 +11,9 @@ public class PotionCounterButton extends BaseButton {
 
     public PotionCounterButton(final DuelsPlugin plugin, final int count) {
         super(plugin, ItemBuilder
-            .of(Items.HEAL_SPLASH_POTION.clone())
-            .name(plugin.getLang().getMessage("GUI.inventory-view.buttons.potion-counter.name", "potions", count))
-            .build()
+                .of(Items.HEAL_SPLASH_POTION.clone())
+                .name(plugin.getLang().getMessage("GUI.inventory-view.buttons.potion-counter.name", "potions", count))
+                .build()
         );
         editMeta(meta -> {
             if (CompatUtil.hasItemFlag()) {

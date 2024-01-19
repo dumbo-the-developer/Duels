@@ -2,6 +2,7 @@ package me.realized.duels.command.commands.duel.subcommands;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.Permissions;
 import me.realized.duels.command.BaseCommand;
@@ -55,12 +56,12 @@ public class StatsCommand extends BaseCommand {
 
             if (config.isDisplayNoKitRating()) {
                 lang.sendMessage(sender, "COMMAND.duel.stats.rating.format",
-                    "type", config.getTopNoKitType(), "kit", config.getTopNoKitType(), "rating", user.getRating());
+                        "type", config.getTopNoKitType(), "kit", config.getTopNoKitType(), "rating", user.getRating());
             }
 
             if (config.isDisplayKitRatings()) {
                 kitManager.getKits().forEach(kit -> lang.sendMessage(sender, "COMMAND.duel.stats.rating.format",
-                    "type", kit.getName(), "kit", kit.getName(), "rating", user.getRating(kit)));
+                        "type", kit.getName(), "kit", kit.getName(), "rating", user.getRating(kit)));
             }
 
             lang.sendMessage(sender, "COMMAND.duel.stats.rating.footer", args);
@@ -76,11 +77,11 @@ public class StatsCommand extends BaseCommand {
                 final String duration = DateUtil.formatMilliseconds(match.getDuration());
                 final String timeSince = DateUtil.formatMilliseconds(calendar.getTimeInMillis() - match.getCreation());
                 TextBuilder
-                    .of(lang.getMessage("COMMAND.duel.stats.match.format", "winner", match.getWinner(), "loser", match.getLoser()))
-                    .setHoverEvent(Action.SHOW_TEXT,
-                        lang.getMessage("COMMAND.duel.stats.match.hover-text",
-                            "kit", kit, "duration", duration, "time", timeSince, "health", match.getHealth()))
-                    .send(sender);
+                        .of(lang.getMessage("COMMAND.duel.stats.match.format", "winner", match.getWinner(), "loser", match.getLoser()))
+                        .setHoverEvent(Action.SHOW_TEXT,
+                                lang.getMessage("COMMAND.duel.stats.match.hover-text",
+                                        "kit", kit, "duration", duration, "time", timeSince, "health", match.getHealth()))
+                        .send(sender);
             });
             lang.sendMessage(sender, "COMMAND.duel.stats.match.footer", args);
         }

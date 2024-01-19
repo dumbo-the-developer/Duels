@@ -20,6 +20,9 @@ public final class CompatUtil {
         GET_PLAYER = ReflectionUtil.getMethodUnsafe(BlockCanBuildEvent.class, "getPlayer") != null;
     }
 
+    private CompatUtil() {
+    }
+
     public static boolean is1_13() {
         return ReflectionUtil.getMajorVersion() == 13;
     }
@@ -67,6 +70,4 @@ public final class CompatUtil {
     public static boolean hasGetPlayer() {
         return GET_PLAYER;
     }
-
-    private CompatUtil() {}
 }

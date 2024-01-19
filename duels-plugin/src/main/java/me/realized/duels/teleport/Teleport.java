@@ -36,13 +36,14 @@ public final class Teleport implements Loadable, Listener {
     }
 
     @Override
-    public void handleUnload() {}
+    public void handleUnload() {
+    }
 
     /**
      * Attempts to force-teleport a player by storing a metadata value in the player before teleportation
      * and uncancelling the teleport by the player in a MONITOR-priority listener if cancelled by other plugins.
      *
-     * @param player Player to force-teleport to a location
+     * @param player   Player to force-teleport to a location
      * @param location Location to force-teleport the player
      */
     public void tryTeleport(final Player player, final Location location) {

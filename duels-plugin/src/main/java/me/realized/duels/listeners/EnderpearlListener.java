@@ -2,10 +2,12 @@ package me.realized.duels.listeners;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.UUID;
+
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.event.match.MatchStartEvent;
 import me.realized.duels.arena.ArenaManagerImpl;

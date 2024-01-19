@@ -1,6 +1,7 @@
 package me.realized.duels.queue;
 
 import java.util.Objects;
+
 import lombok.Getter;
 import me.realized.duels.setting.CachedInfo;
 import org.bukkit.Location;
@@ -20,8 +21,12 @@ public class QueueEntry {
 
     @Override
     public boolean equals(final Object other) {
-        if (this == other) { return true; }
-        if (other == null || getClass() != other.getClass()) { return false; }
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
         final QueueEntry that = (QueueEntry) other;
         return Objects.equals(player, that.player);
     }

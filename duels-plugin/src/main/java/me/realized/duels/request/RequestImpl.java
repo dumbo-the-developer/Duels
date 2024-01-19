@@ -1,6 +1,7 @@
 package me.realized.duels.request;
 
 import java.util.UUID;
+
 import lombok.Getter;
 import me.realized.duels.api.arena.Arena;
 import me.realized.duels.api.kit.Kit;

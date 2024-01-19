@@ -1,11 +1,12 @@
 package me.realized.duels.api;
 
-import java.util.UUID;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.api.arena.ArenaManager;
 import me.realized.duels.api.user.UserManager;
 import me.realized.duels.data.UserData;
 import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 /**
  * A static API for Duels.

@@ -1,10 +1,11 @@
 package me.realized.duels.api.event.match;
 
-import java.util.Objects;
 import me.realized.duels.api.match.Match;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 /**
  * Called when a {@link Match} has started.
@@ -21,6 +22,10 @@ public class MatchStartEvent extends MatchEvent {
         this.players = players;
     }
 
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
     /**
      * The starters of the {@link Match}.
      *
@@ -29,10 +34,6 @@ public class MatchStartEvent extends MatchEvent {
     @NotNull
     public Player[] getPlayers() {
         return players;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
     }
 
     @Override

@@ -1,4 +1,4 @@
-rootProject.name = 'Duels'
+rootProject.name = 'Duels-Optimised'
 
 include 'duels-worldguard'
 include 'duels-worldguard-v6'

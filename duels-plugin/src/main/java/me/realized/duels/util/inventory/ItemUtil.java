@@ -1,12 +1,16 @@
 package me.realized.duels.util.inventory;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
 public final class ItemUtil {
+
+    private ItemUtil() {
+    }
 
     public static ItemStack itemFrom64(final String data) {
         try {
@@ -19,6 +23,4 @@ public final class ItemUtil {
             return null;
         }
     }
-
-    private ItemUtil() {}
 }

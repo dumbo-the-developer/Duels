@@ -8,8 +8,8 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 public abstract class DefaultBasedDeserializer<T> extends StdDeserializer<T> implements ResolvableDeserializer {
 
-    private final Class<T> target;
     protected final JsonDeserializer<?> defaultDeserializer;
+    private final Class<T> target;
 
     public DefaultBasedDeserializer(final Class<T> target, final JsonDeserializer<?> defaultDeserializer) {
         super(target);

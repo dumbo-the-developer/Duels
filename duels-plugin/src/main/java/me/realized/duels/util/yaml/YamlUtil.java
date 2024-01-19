@@ -22,6 +22,9 @@ public final class YamlUtil {
         YAML = new Yaml(options);
     }
 
+    private YamlUtil() {
+    }
+
     public static String yamlDump(final Object object) {
         return YAML.dump(object);
     }
@@ -52,6 +55,4 @@ public final class YamlUtil {
             this.yamlConstructors.put(new Tag(Tag.PREFIX + "org.bukkit.inventory.ItemStack"), yamlConstructors.get(Tag.MAP));
         }
     }
-
-    private YamlUtil() {}
 }

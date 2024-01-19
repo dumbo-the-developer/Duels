@@ -18,12 +18,16 @@ public class RequestAcceptEvent extends RequestEvent implements Cancellable {
     private boolean cancelled;
 
     /**
-     * @param source {@link Player} who is accepting this {@link Request}.
-     * @param target {@link Player} who sent this {@link Request}.
+     * @param source  {@link Player} who is accepting this {@link Request}.
+     * @param target  {@link Player} who sent this {@link Request}.
      * @param request {@link Request} that is being handled.
      */
     public RequestAcceptEvent(@NotNull final Player source, @NotNull final Player target, @NotNull final Request request) {
         super(source, target, request);
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
     /**
@@ -49,10 +53,6 @@ public class RequestAcceptEvent extends RequestEvent implements Cancellable {
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 }

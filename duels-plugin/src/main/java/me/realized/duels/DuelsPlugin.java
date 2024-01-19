@@ -1,6 +1,7 @@
 package me.realized.duels;
 
 import com.google.common.collect.Lists;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+
 import lombok.Getter;
 import me.realized.duels.api.Duels;
 import me.realized.duels.api.command.SubCommand;
@@ -64,7 +66,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
-    private static final int BSTATS_ID = 2696;
+    private static final int BSTATS_ID = 20778;
     private static final int RESOURCE_ID = 20171;
     private static final String SPIGOT_INSTALLATION_URL = "https://www.spigotmc.org/wiki/spigot-installation/";
 
@@ -72,8 +74,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private static DuelsPlugin instance;
 
     private final List<Loadable> loadables = new ArrayList<>();
+    private final Map<String, AbstractCommand<DuelsPlugin>> commands = new HashMap<>();
+    private final List<Listener> registeredListeners = new ArrayList<>();
     private int lastLoad;
-
     @Getter
     private LogManager logManager;
     @Getter
@@ -112,10 +115,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private Teleport teleport;
     @Getter
     private ExtensionManager extensionManager;
-
-    private final Map<String, AbstractCommand<DuelsPlugin>> commands = new HashMap<>();
-    private final List<Listener> registeredListeners = new ArrayList<>();
-
     @Getter
     private volatile boolean updateAvailable;
     @Getter
@@ -227,10 +226,10 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
      */
     private boolean load() {
         registerCommands(
-            new DuelCommand(this),
-            new QueueCommand(this),
-            new SpectateCommand(this),
-            new DuelsCommand(this)
+                new DuelCommand(this),
+                new QueueCommand(this),
+                new SpectateCommand(this),
+                new DuelsCommand(this)
         );
 
         for (final Loadable loadable : loadables) {
@@ -264,9 +263,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         registeredListeners.clear();
         // Unregister all extension listeners that isn't using the method Duels#registerListener
         HandlerList.getRegisteredListeners(this)
-            .stream()
-            .filter(listener -> listener.getListener().getClass().getClassLoader().getClass().isAssignableFrom(ExtensionClassLoader.class))
-            .forEach(listener -> HandlerList.unregisterAll(listener.getListener()));
+                .stream()
+                .filter(listener -> listener.getListener().getClass().getClassLoader().getClass().isAssignableFrom(ExtensionClassLoader.class))
+                .forEach(listener -> HandlerList.unregisterAll(listener.getListener()));
         commands.clear();
 
         for (final Loadable loadable : Lists.reverse(loadables)) {
@@ -349,8 +348,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             return true;
         } catch (Exception ex) {
             Log.error("There was an error while " + (unloaded ? "loading " : "unloading ")
-                + loadable.getClass().getSimpleName()
-                + "! If you believe this is an issue from the plugin, please contact the developer.", ex);
+                    + loadable.getClass().getSimpleName()
+                    + "! If you believe this is an issue from the plugin, please contact the developer.", ex);
             return false;
         }
     }
@@ -433,9 +432,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     public List<String> getReloadables() {
         return loadables.stream()
-            .filter(loadable -> loadable instanceof Reloadable)
-            .map(loadable -> loadable.getClass().getSimpleName())
-            .collect(Collectors.toList());
+                .filter(loadable -> loadable instanceof Reloadable)
+                .map(loadable -> loadable.getClass().getSimpleName())
+                .collect(Collectors.toList());
     }
 
     @Override

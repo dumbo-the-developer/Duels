@@ -2,6 +2,7 @@ package me.realized.duels.command.commands.duels.subcommands;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import me.realized.duels.config.Config.MessageSound;
@@ -32,8 +33,8 @@ public class PlaysoundCommand extends BaseCommand {
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         if (args.length == 2) {
             return config.getSounds().stream()
-                .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase()))
-                .collect(Collectors.toList());
+                    .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase()))
+                    .collect(Collectors.toList());
         }
 
         return null;

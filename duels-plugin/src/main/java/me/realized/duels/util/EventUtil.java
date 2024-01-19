@@ -6,6 +6,9 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
 public final class EventUtil {
 
+    private EventUtil() {
+    }
+
     public static Player getDamager(final EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Player) {
             return (Player) event.getDamager();
@@ -15,6 +18,4 @@ public final class EventUtil {
 
         return null;
     }
-
-    private EventUtil() {}
 }

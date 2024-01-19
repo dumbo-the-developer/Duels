@@ -1,21 +1,6 @@
 package me.realized.duels.data;
 
 import com.google.common.collect.Lists;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.Permissions;
@@ -25,11 +10,7 @@ import me.realized.duels.api.user.User;
 import me.realized.duels.api.user.UserManager;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
-import me.realized.duels.util.DateUtil;
-import me.realized.duels.util.Loadable;
-import me.realized.duels.util.Log;
-import me.realized.duels.util.StringUtil;
-import me.realized.duels.util.UUIDUtil;
+import me.realized.duels.util.*;
 import me.realized.duels.util.json.JsonUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -39,6 +20,12 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class UserManagerImpl implements Loadable, Listener, UserManager {
 
@@ -50,7 +37,7 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
     private final File folder;
     private final Map<UUID, UserData> users = new ConcurrentHashMap<>();
     private final Map<String, UUID> names = new ConcurrentHashMap<>();
-
+    private final Map<Kit, TopEntry> topRatings = new ConcurrentHashMap<>();
     private volatile int defaultRating;
     private volatile int matchesToDisplay;
     @Getter
@@ -61,8 +48,6 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
     private volatile TopEntry losses;
     @Getter
     private volatile TopEntry noKit;
-    private final Map<Kit, TopEntry> topRatings = new ConcurrentHashMap<>();
-
     private int topTask;
 
     public UserManagerImpl(final DuelsPlugin plugin) {
@@ -158,7 +143,7 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
                     final TopEntry entry = topRatings.get(kit);
 
                     if ((top = get(config.getTopUpdateInterval(), entry, user -> user.getRating(kit), config.getTopKitType().replace("%kit%", kit.getName()),
-                        config.getTopKitIdentifier())) != null) {
+                            config.getTopKitIdentifier())) != null) {
                         topRatings.put(kit, top);
                     }
                 }
@@ -241,9 +226,9 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
 
     private List<TopData> sorted(final Function<User, Integer> function) {
         return users.values().stream()
-            .map(data -> new TopData(data.getUuid(), data.getName(), function.apply(data)))
-            .sorted(Comparator.reverseOrder())
-            .collect(Collectors.toList());
+                .map(data -> new TopData(data.getUuid(), data.getName(), function.apply(data)))
+                .sorted(Comparator.reverseOrder())
+                .collect(Collectors.toList());
     }
 
     private UserData tryLoad(final Player player) {

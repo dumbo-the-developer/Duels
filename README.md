@@ -15,11 +15,12 @@ A duel plugin for spigot. <a href="https://www.spigotmc.org/resources/duels.2017
 * **[lang.yml](https://github.com/Realizedd/Duels/blob/master/duels-plugin/src/main/resources/lang.yml)**
 * **[Support Discord](https://discord.gg/RNy45sg)**
 
-
 ### Getting the dependency
 
 #### Repository
+
 Gradle:
+
 ```groovy
 maven {
     name 'jitpack-repo'
@@ -28,6 +29,7 @@ maven {
 ```
 
 Maven:
+
 ```xml
 <repository>
   <id>jitpack-repo</id>
@@ -36,12 +38,15 @@ Maven:
 ```
 
 #### Dependency
+
 Gradle:
+
 ```groovy
 compile group: 'com.github.Realizedd.Duels', name: 'duels-api', version: '3.5.1'
 ```  
 
 Maven:
+
 ```xml
 <dependency>
     <groupId>com.github.Realizedd.Duels</groupId>
@@ -52,7 +57,9 @@ Maven:
 ```
 
 ### plugin.yml
+
 Add Duels as a soft-depend to ensure Duels is fully loaded before your plugin.
+
 ```yaml
 soft-depend: [Duels]
 ```

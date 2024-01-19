@@ -75,11 +75,11 @@ public class SpectateCommand extends BaseCommand {
                 final MatchImpl match = arena.getMatch();
                 final String kit = match.getKit() != null ? match.getKit().getName() : lang.getMessage("GENERAL.none");
                 lang.sendMessage(player, "COMMAND.spectate.start-spectate",
-                    "name", target.getName(),
-                    "opponent", arena.getOpponent(target).getName(),
-                    "kit", kit,
-                    "arena", arena.getName(),
-                    "bet_amount", match.getBet()
+                        "name", target.getName(),
+                        "opponent", arena.getOpponent(target).getName(),
+                        "kit", kit,
+                        "arena", arena.getName(),
+                        "bet_amount", match.getBet()
                 );
         }
     }

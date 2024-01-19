@@ -73,7 +73,7 @@ public interface Duels extends Plugin {
     /**
      * Registers a {@link SubCommand} to a Command registered by Duels.
      *
-     * @param command Name of the parent command to register the {@link SubCommand}.
+     * @param command    Name of the parent command to register the {@link SubCommand}.
      * @param subCommand {@link SubCommand} to register.
      * @return True if sub command was successfully registered. False otherwise.
      */
@@ -110,7 +110,7 @@ public interface Duels extends Plugin {
     /**
      * Runs the task after delay on server thread.
      *
-     * @param task Task to run.
+     * @param task  Task to run.
      * @param delay time to delay. 20L = 1s
      * @return BukkitTask executed.
      * @since 3.1.0
@@ -121,8 +121,8 @@ public interface Duels extends Plugin {
     /**
      * Runs the task after delay on server thread repeatedly.
      *
-     * @param task Task to run.
-     * @param delay time to delay the start of repeat. 20L = 1s
+     * @param task     Task to run.
+     * @param delay    time to delay the start of repeat. 20L = 1s
      * @param interval interval of this task. 20L = 1s
      * @return BukkitTask executed.
      * @since 3.1.0
@@ -143,7 +143,7 @@ public interface Duels extends Plugin {
     /**
      * Runs the task after delay asynchronously.
      *
-     * @param task Task to run asynchronously.
+     * @param task  Task to run asynchronously.
      * @param delay time to delay. 20L = 1s
      * @return BukkitTask executed.
      * @since 3.1.0
@@ -154,8 +154,8 @@ public interface Duels extends Plugin {
     /**
      * Runs the task after delay asynchronously repeatedly.
      *
-     * @param task Task to run asynchronously.
-     * @param delay time to delay the start of repeat. 20L = 1s
+     * @param task     Task to run asynchronously.
+     * @param delay    time to delay the start of repeat. 20L = 1s
      * @param interval interval of this task. 20L = 1s
      * @return BukkitTask executed.
      * @since 3.1.0
@@ -212,7 +212,7 @@ public interface Duels extends Plugin {
      * Logs a message and the {@link Throwable} provided with {@link java.util.logging.Level#SEVERE}.
      *
      * @param message message to log.
-     * @param thrown {@link Throwable} to log.
+     * @param thrown  {@link Throwable} to log.
      * @since 3.1.0
      */
     void error(@NotNull final String message, @NotNull Throwable thrown);

@@ -1,9 +1,10 @@
 package me.realized.duels.api.queue.sign;
 
-import java.util.List;
 import org.bukkit.block.Sign;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * Represents the QueueSignManager singleton used by Duels.

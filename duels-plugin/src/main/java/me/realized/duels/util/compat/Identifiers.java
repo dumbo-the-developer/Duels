@@ -11,6 +11,9 @@ public final class Identifiers {
 
     private static transient final String DUELS_ITEM_IDENTIFIER = "DuelsKitContent";
 
+    private Identifiers() {
+    }
+
     public static ItemStack addIdentifier(final ItemStack item) {
         if (CompatUtil.isPre1_14()) {
             return NBT.setItemString(item, DUELS_ITEM_IDENTIFIER, true);
@@ -46,6 +49,4 @@ public final class Identifiers {
         item.setItemMeta(meta);
         return item;
     }
-
-    private Identifiers() {}
 }

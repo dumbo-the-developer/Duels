@@ -1,10 +1,11 @@
 package me.realized.duels.api.spectate;
 
-import java.util.UUID;
 import me.realized.duels.api.arena.Arena;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
 
 /**
  * Represents a Spectator spectating a match.

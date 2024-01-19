@@ -1,18 +1,15 @@
 package me.realized.duels.api.extension;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Objects;
 import me.realized.duels.api.Duels;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Objects;
 
 public abstract class DuelsExtension {
 
@@ -157,13 +154,14 @@ public abstract class DuelsExtension {
         }
     }
 
-    public void onEnable() {}
+    public void onEnable() {
+    }
 
-    public void onDisable() {}
+    public void onDisable() {
+    }
 
     /**
      * @return The version of Duels that this extension requires in order to enable.
-     *
      * @deprecated As of v3.2.0. Specify 'api-version' in extension.yml instead.
      */
     @Deprecated

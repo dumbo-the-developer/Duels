@@ -1,10 +1,11 @@
 package me.realized.duels.util.compat;
 
+import me.realized.duels.util.reflect.ReflectionUtil;
+import org.bukkit.inventory.Inventory;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import me.realized.duels.util.reflect.ReflectionUtil;
-import org.bukkit.inventory.Inventory;
 
 public final class Inventories {
 
@@ -16,6 +17,9 @@ public final class Inventories {
         CB_INVENTORY = ReflectionUtil.getDeclaredField(ReflectionUtil.getCBClass("inventory.CraftInventory"), "inventory");
         CB_INVENTORY_TITLE = ReflectionUtil.getDeclaredField(ReflectionUtil.getCBClass("inventory.CraftInventoryCustom$MinecraftInventory"), "title");
         CHAT_SERIALIZER_A = CompatUtil.is1_13() ? ReflectionUtil.getMethod(ReflectionUtil.getNMSClass("IChatBaseComponent$ChatSerializer"), "a", String.class) : null;
+    }
+
+    private Inventories() {
     }
 
     public static void setTitle(final Inventory inventory, final String title) {
@@ -32,6 +36,4 @@ public final class Inventories {
             ex.printStackTrace();
         }
     }
-
-    private Inventories() {}
 }

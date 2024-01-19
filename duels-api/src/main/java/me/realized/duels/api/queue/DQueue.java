@@ -1,10 +1,11 @@
 package me.realized.duels.api.queue;
 
-import java.util.List;
 import me.realized.duels.api.kit.Kit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * Represents a Queue loaded on the server.

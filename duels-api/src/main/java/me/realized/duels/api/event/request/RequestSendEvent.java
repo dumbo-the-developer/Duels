@@ -19,6 +19,10 @@ public class RequestSendEvent extends RequestEvent implements Cancellable {
         super(source, target, request);
     }
 
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
     /**
      * Whether or not this event has been cancelled.
      *
@@ -41,10 +45,6 @@ public class RequestSendEvent extends RequestEvent implements Cancellable {
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 }

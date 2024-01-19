@@ -3,6 +3,7 @@ package me.realized.duels.setting;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
 import lombok.Getter;
 import lombok.Setter;
 import me.realized.duels.DuelsPlugin;

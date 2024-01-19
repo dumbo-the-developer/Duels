@@ -14,7 +14,8 @@ public class QueueSignData {
     private String kit;
     private int bet;
 
-    private QueueSignData() {}
+    private QueueSignData() {
+    }
 
     public QueueSignData(final QueueSignImpl sign) {
         this.location = LocationData.fromLocation(sign.getLocation());

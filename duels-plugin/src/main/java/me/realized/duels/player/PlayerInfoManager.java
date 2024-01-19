@@ -2,6 +2,7 @@ package me.realized.duels.player;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Charsets;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -13,6 +14,7 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.config.Config;
@@ -77,7 +79,8 @@ public class PlayerInfoManager implements Loadable {
 
         if (FileUtil.checkNonEmpty(cacheFile, false)) {
             try (final Reader reader = new InputStreamReader(new FileInputStream(cacheFile), Charsets.UTF_8)) {
-                final Map<UUID, PlayerData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<HashMap<UUID, PlayerData>>() {});
+                final Map<UUID, PlayerData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<HashMap<UUID, PlayerData>>() {
+                });
 
                 if (data != null) {
                     for (final Map.Entry<UUID, PlayerData> entry : data.entrySet()) {
@@ -169,7 +172,7 @@ public class PlayerInfoManager implements Loadable {
     /**
      * Creates a cached PlayerInfo instance for given player.
      *
-     * @param player Player to create a cached PlayerInfo instance
+     * @param player           Player to create a cached PlayerInfo instance
      * @param excludeInventory true to exclude inventory contents from being stored in PlayerInfo, false otherwise
      */
     public void create(final Player player, final boolean excludeInventory) {

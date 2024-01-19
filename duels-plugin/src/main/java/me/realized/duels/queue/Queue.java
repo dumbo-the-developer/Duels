@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,12 +33,12 @@ public class Queue extends BaseButton implements DQueue {
 
     public Queue(final DuelsPlugin plugin, final Kit kit, final int bet) {
         super(plugin, ItemBuilder
-            .of((plugin.getConfiguration().isInheritKitItemType() && kit != null) ? kit.getDisplayed().clone() : ItemBuilder.of(Material.DIAMOND_SWORD).build())
-            .name(plugin.getLang().getMessage("GUI.queues.buttons.queue.name",
-                "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", 0, "in_match", 0))
-            .lore(plugin.getLang().getMessage("GUI.queues.buttons.queue.lore",
-                "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", 0, "in_match", 0).split("\n"))
-            .build());
+                .of((plugin.getConfiguration().isInheritKitItemType() && kit != null) ? kit.getDisplayed().clone() : ItemBuilder.of(Material.DIAMOND_SWORD).build())
+                .name(plugin.getLang().getMessage("GUI.queues.buttons.queue.name",
+                        "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", 0, "in_match", 0))
+                .lore(plugin.getLang().getMessage("GUI.queues.buttons.queue.lore",
+                        "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", 0, "in_match", 0).split("\n"))
+                .build());
         this.kit = kit;
         this.bet = bet;
     }
@@ -86,9 +87,9 @@ public class Queue extends BaseButton implements DQueue {
         int inQueue = players.size();
         long inMatch = getPlayersInMatch();
         setDisplayName(lang.getMessage("GUI.queues.buttons.queue.name",
-            "kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch));
+                "kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch));
         setLore(lang.getMessage("GUI.queues.buttons.queue.lore",
-            "kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch).split("\n"));
+                "kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch).split("\n"));
     }
 
     @Override

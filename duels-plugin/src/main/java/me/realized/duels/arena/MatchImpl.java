@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 import lombok.Getter;
 import me.realized.duels.api.match.Match;
 import me.realized.duels.kit.KitImpl;
@@ -31,12 +32,10 @@ public class MatchImpl implements Match {
     private final int bet;
     @Getter
     private final Queue source;
-
-    @Getter
-    private boolean finished;
-
     // Default value for players is false, which is set to true if player is killed in the match.
     private final Map<Player, Boolean> players = new HashMap<>();
+    @Getter
+    private boolean finished;
 
     MatchImpl(final ArenaImpl arena, final KitImpl kit, final Map<UUID, List<ItemStack>> items, final int bet, final Queue source) {
         this.arena = arena;
@@ -70,7 +69,7 @@ public class MatchImpl implements Match {
     public boolean isOwnInventory() {
         return kit == null;
     }
-    
+
     public List<ItemStack> getItems() {
         return items != null ? items.values().stream().flatMap(Collection::stream).collect(Collectors.toList()) : Collections.emptyList();
     }

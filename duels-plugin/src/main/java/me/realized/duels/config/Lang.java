@@ -1,12 +1,14 @@
 package me.realized.duels.config;
 
 import com.google.common.collect.Sets;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.util.Log;
 import me.realized.duels.util.Reloadable;

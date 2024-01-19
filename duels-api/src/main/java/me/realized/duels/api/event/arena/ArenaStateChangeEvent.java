@@ -24,6 +24,10 @@ public class ArenaStateChangeEvent extends ArenaEvent implements Cancellable {
         this.disabled = disabled;
     }
 
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
     /**
      * Whether or not the {@link Arena} is disabling.
      *
@@ -50,10 +54,6 @@ public class ArenaStateChangeEvent extends ArenaEvent implements Cancellable {
     @Override
     public void setCancelled(final boolean cancelled) {
         this.cancelled = cancelled;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
     }
 
     @Override

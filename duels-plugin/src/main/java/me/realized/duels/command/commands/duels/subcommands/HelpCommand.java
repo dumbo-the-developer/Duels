@@ -1,8 +1,10 @@
 package me.realized.duels.command.commands.duels.subcommands;
 
 import com.google.common.collect.Lists;
+
 import java.util.List;
 import java.util.stream.Collectors;
+
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.command.BaseCommand;
 import org.bukkit.command.Command;
@@ -30,8 +32,8 @@ public class HelpCommand extends BaseCommand {
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         if (args.length == 2) {
             return categories.stream()
-                .filter(category -> category.toLowerCase().startsWith(args[1].toLowerCase()))
-                .collect(Collectors.toList());
+                    .filter(category -> category.toLowerCase().startsWith(args[1].toLowerCase()))
+                    .collect(Collectors.toList());
         }
 
         return null;

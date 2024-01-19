@@ -1,11 +1,12 @@
 package me.realized.duels.api.event.kit;
 
-import java.util.Objects;
 import me.realized.duels.api.kit.Kit;
 import me.realized.duels.api.kit.KitManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 /**
  * Called when a {@link Kit} is created.
@@ -24,14 +25,14 @@ public class KitCreateEvent extends KitEvent {
         this.source = source;
     }
 
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
     @NotNull
     @Override
     public Player getSource() {
         return source;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
     }
 
     @Override

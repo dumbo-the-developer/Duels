@@ -8,7 +8,8 @@ public class QueueData {
     private String kit;
     private int bet;
 
-    private QueueData() {}
+    private QueueData() {
+    }
 
     public QueueData(final Queue queue) {
         this.kit = queue.getKit() != null ? queue.getKit().getName() : null;

@@ -1,11 +1,12 @@
 package me.realized.duels.api.event.queue;
 
-import java.util.Objects;
 import me.realized.duels.api.event.SourcedEvent;
 import me.realized.duels.api.queue.DQueue;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 /**
  * Represents an event caused by a {@link DQueue}.

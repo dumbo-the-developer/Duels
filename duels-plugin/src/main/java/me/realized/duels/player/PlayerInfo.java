@@ -1,10 +1,12 @@
 package me.realized.duels.player;
 
 import com.google.common.collect.Lists;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import lombok.Getter;
 import lombok.Setter;
 import me.realized.duels.util.PlayerUtil;
@@ -43,7 +45,7 @@ public class PlayerInfo {
         if (excludeInventory) {
             return;
         }
-        
+
         InventoryUtil.addToMap(player.getInventory(), items);
     }
 
