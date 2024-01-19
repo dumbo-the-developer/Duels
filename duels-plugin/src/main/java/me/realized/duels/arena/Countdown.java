@@ -9,6 +9,8 @@ import me.realized.duels.config.Config;
 import me.realized.duels.util.StringUtil;
 import me.realized.duels.util.compat.Titles;
 import me.realized.duels.util.function.Pair;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.scheduler.BukkitRunnable;
 
 class Countdown extends BukkitRunnable {
@@ -42,16 +44,18 @@ class Countdown extends BukkitRunnable {
         final String title = !titles.isEmpty() ? titles.remove(0) : null;
 
         arena.getPlayers().forEach(player -> {
+            // Place barrier blocks around the player during the countdown
+            placeBarrierBlocks(player.getLocation());
             config.playSound(player, rawMessage);
 
-            final  Pair<String, Integer> info = this.info.get(player.getUniqueId());
+            final Pair<String, Integer> info = this.info.get(player.getUniqueId());
 
             if (info != null) {
                 player.sendMessage(message
-                    .replace("%opponent%", info.getKey())
-                    .replace("%opponent_rating%", String.valueOf(info.getValue()))
-                    .replace("%kit%", kit)
-                    .replace("%arena%", arena.getName())
+                        .replace("%opponent%", info.getKey())
+                        .replace("%opponent_rating%", String.valueOf(info.getValue()))
+                        .replace("%kit%", kit)
+                        .replace("%arena%", arena.getName())
                 );
             } else {
                 player.sendMessage(message);
@@ -60,12 +64,42 @@ class Countdown extends BukkitRunnable {
             if (title != null) {
                 Titles.send(player, title, null, 0, 20, 50);
             }
+
         });
 
         if (!arena.isUsed() || messages.isEmpty()) {
             arena.setCountdown(null);
             cancel();
             finished = true;
+
+            // Remove barrier blocks around the players when the countdown ends
+            arena.getPlayers().forEach(player -> removeBarrierBlocks(player.getLocation()));
         }
+    }
+
+    private void placeBarrierBlocks(Location location) {
+        // Place barrier blocks in front, back, and on top of the player
+        placeBarrierBlock(location.clone().add(1, 0, 0)); // Right
+        placeBarrierBlock(location.clone().add(-1, 0, 0)); // Left
+        placeBarrierBlock(location.clone().add(0, 2, 0)); // Top
+        placeBarrierBlock(location.clone().add(0, 0, 1)); // Front
+        placeBarrierBlock(location.clone().add(0, 0, -1));
+    }
+
+    private void placeBarrierBlock(Location location) {
+        location.getBlock().setType(Material.BARRIER);
+    }
+
+    private void removeBarrierBlocks(Location location) {
+        // Remove barrier blocks on top, front, and back of the player
+        removeBarrierBlock(location.clone().add(1, 0, 0)); // Right
+        removeBarrierBlock(location.clone().add(-1, 0, 0)); // Left
+        removeBarrierBlock(location.clone().add(0, 2, 0)); // Top
+        removeBarrierBlock(location.clone().add(0, 0, 1)); // Front
+        removeBarrierBlock(location.clone().add(0, 0, -1));
+    }
+
+    private void removeBarrierBlock(Location location) {
+        location.getBlock().setType(Material.AIR);
     }
 }

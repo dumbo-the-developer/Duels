@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -71,7 +72,7 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
     @Override
     public void handleLoad() throws IOException {
         if (FileUtil.checkNonEmpty(file, true)) {
-            try (final Reader reader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8)) {
+            try (final Reader reader = new InputStreamReader(Files.newInputStream(file.toPath()), Charsets.UTF_8)) {
                 final List<QueueSignData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<List<QueueSignData>>() {});
 
                 if (data != null) {
@@ -111,7 +112,7 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
             data.add(new QueueSignData(sign));
         }
 
-        try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
+        try (final Writer writer = new OutputStreamWriter(Files.newOutputStream(file.toPath()), Charsets.UTF_8)) {
             JsonUtil.getObjectWriter().writeValue(writer, data);
             writer.flush();
         } catch (IOException ex) {
@@ -173,20 +174,23 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
 
     @EventHandler
     public void on(final PlayerInteractEvent event) {
-        final Block block;
-
-        if (!event.hasBlock() || !((block = event.getClickedBlock()).getState() instanceof Sign)) {
+        if (!event.hasBlock()) {
             return;
         }
 
-        final Player player = event.getPlayer();
-        final QueueSignImpl sign = get(block.getLocation());
-
-        if (sign == null || !queueManager.queue(player, sign.getQueue())) {
+        Block block = event.getClickedBlock();
+        if (block == null || !(block.getState() instanceof Sign)) {
             return;
         }
 
-        signs.values().stream().filter(queueSign -> queueSign.equals(sign)).forEach(QueueSignImpl::update);
+        Player player = event.getPlayer();
+        QueueSignImpl sign = get(block.getLocation());
+
+        if (sign != null && queueManager.queue(player, sign.getQueue())) {
+            signs.values().stream()
+                    .filter(queueSign -> queueSign.equals(sign))
+                    .forEach(QueueSignImpl::update);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
