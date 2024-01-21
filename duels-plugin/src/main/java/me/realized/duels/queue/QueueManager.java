@@ -67,7 +67,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
     private static final String FILE_NAME = "queues.json";
 
-    private static final String QUEUES_LOADED = "Loaded %s queue(s).";
+    private static final String QUEUES_LOADED = "&aLoaded %s queue(s).";
 
     private final DuelsPlugin plugin;
     private final Config config;
@@ -145,7 +145,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
             }
         }
 
-        Log.info(this, String.format(QUEUES_LOADED, queues.size()));
+        DuelsPlugin.sendMessage(String.format(QUEUES_LOADED, queues.size()));
         gui.calculatePages();
 
         this.combatTagPlus = plugin.getHookManager().getHook(CombatTagPlusHook.class);

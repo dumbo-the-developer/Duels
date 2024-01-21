@@ -48,15 +48,13 @@ import me.realized.duels.setting.SettingsManager;
 import me.realized.duels.shaded.bstats.Metrics;
 import me.realized.duels.spectate.SpectateManagerImpl;
 import me.realized.duels.teleport.Teleport;
-import me.realized.duels.util.Loadable;
-import me.realized.duels.util.Log;
+import me.realized.duels.util.*;
 import me.realized.duels.util.Log.LogSource;
-import me.realized.duels.util.Reloadable;
-import me.realized.duels.util.UpdateChecker;
 import me.realized.duels.util.command.AbstractCommand;
 import me.realized.duels.util.gui.GuiListener;
 import me.realized.duels.util.json.JsonUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -67,7 +65,7 @@ import org.jetbrains.annotations.NotNull;
 public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     private static final int BSTATS_ID = 20778;
-    private static final int RESOURCE_ID = 20171;
+    private static final int RESOURCE_ID = 114595;
     private static final String SPIGOT_INSTALLATION_URL = "https://www.spigotmc.org/wiki/spigot-installation/";
 
     @Getter
@@ -122,6 +120,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     @Override
     public void onEnable() {
+        long start = System.currentTimeMillis();
         instance = this;
         Log.addSource(this);
         JsonUtil.registerDeserializer(ItemData.class, ItemDataDeserializer.class);
@@ -129,7 +128,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         try {
             logManager = new LogManager(this);
         } catch (IOException ex) {
-            Log.error("Could not load LogManager. Please contact the developer.");
+            sendMessage("&c&lCould not load LogManager. Please contact the developer.");
 
             // Manually print the stacktrace since Log#error only prints errors to non-plugin log sources.
             ex.printStackTrace();
@@ -143,11 +142,11 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         try {
             Class.forName("org.spigotmc.SpigotConfig");
         } catch (ClassNotFoundException ex) {
-            Log.error("================= *** DUELS LOAD FAILURE *** =================");
-            Log.error("Duels requires a spigot server to run, but this server was not running on spigot!");
-            Log.error("To run your server on spigot, follow this guide: " + SPIGOT_INSTALLATION_URL);
-            Log.error("Spigot is compatible with CraftBukkit/Bukkit plugins.");
-            Log.error("================= *** DUELS LOAD FAILURE *** =================");
+            sendMessage("&c&l================= *** DUELS LOAD FAILURE *** =================");
+            sendMessage("&c&lDuels requires a spigot server to run, but this server was not running on spigot!");
+            sendMessage("&c&lTo run your server on spigot, follow this guide: " + SPIGOT_INSTALLATION_URL);
+            sendMessage("&c&lSpigot is compatible with CraftBukkit/Bukkit plugins.");
+            sendMessage("&c&l================= *** DUELS LOAD FAILURE *** =================");
             getPluginLoader().disablePlugin(this);
             return;
         }
@@ -196,15 +195,17 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             if (hasUpdate) {
                 DuelsPlugin.this.updateAvailable = true;
                 DuelsPlugin.this.newVersion = newVersion;
-                Log.info("===============================================");
-                Log.info("An update for " + getName() + " is available!");
-                Log.info("Download " + getName() + " v" + newVersion + " here:");
+                sendMessage("&a===============================================");
+                sendMessage("&aAn update for " + getName() + " is available!");
+                sendMessage("&aDownload " + getName() + " v" + newVersion + " here:");
                 Log.info(getDescription().getWebsite());
-                Log.info("===============================================");
+                sendMessage("&a===============================================");
             } else {
-                Log.info("No updates were available. You are on the latest version!");
+                sendMessage("&aNo updates were available. You are on the latest version!");
             }
         });
+        long end = System.currentTimeMillis();
+        sendMessage("&aSuccessfully enabled Duels in " + CC.getTimeDifferenceAndColor(start, end) + "&a.");
     }
 
     @Override
@@ -218,7 +219,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         logManager.debug("Log#clearSources done (took " + Math.abs(last - System.currentTimeMillis()) + "ms)");
         logManager.handleDisable();
         instance = null;
-        log(Level.INFO, "Disable process took " + (System.currentTimeMillis() - start) + "ms.");
+        sendMessage("&aDisable process took " + (System.currentTimeMillis() - start) + "ms.");
     }
 
     /**
@@ -247,7 +248,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                     ex.printStackTrace();
                 }
 
-                Log.error("There was an error while loading " + name + "! If you believe this is an issue from the plugin, please contact the developer.", ex);
+                sendMessage("&c&lThere was an error while loading " + name + "! If you believe this is an issue from the plugin, please contact the developer.");
                 return false;
             }
         }
@@ -281,7 +282,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                 loadable.handleUnload();
                 logManager.debug(name + " has been unloaded. (took " + (System.currentTimeMillis() - now) + "ms)");
             } catch (Exception ex) {
-                Log.error("There was an error while unloading " + name + "! If you believe this is an issue from the plugin, please contact the developer.", ex);
+                sendMessage("&c&lThere was an error while unloading " + name + "! If you believe this is an issue from the plugin, please contact the developer.");
                 return false;
             }
         }
@@ -291,10 +292,13 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     @SafeVarargs
     private final void registerCommands(final AbstractCommand<DuelsPlugin>... commands) {
+        sendMessage("&eRegistering commands...");
+        long start = System.currentTimeMillis();
         for (final AbstractCommand<DuelsPlugin> command : commands) {
             this.commands.put(command.getName().toLowerCase(), command);
             command.register();
         }
+        sendMessage("&dSuccessfully registered commands [" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + ChatColor.WHITE + "]");
     }
 
     @Override
@@ -319,9 +323,14 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     @Override
     public void registerListener(@NotNull final Listener listener) {
+        sendMessage("&eRegistering listeners...");
+        long start = System.currentTimeMillis();
+
         Objects.requireNonNull(listener, "listener");
         registeredListeners.add(listener);
         Bukkit.getPluginManager().registerEvents(listener, this);
+
+        sendMessage("&dSuccessfully registered listeners [" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + ChatColor.WHITE + "]");
     }
 
     @Override
@@ -347,9 +356,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             loadable.handleLoad();
             return true;
         } catch (Exception ex) {
-            Log.error("There was an error while " + (unloaded ? "loading " : "unloading ")
+            sendMessage("&c&lThere was an error while " + (unloaded ? "loading " : "unloading ")
                     + loadable.getClass().getSimpleName()
-                    + "! If you believe this is an issue from the plugin, please contact the developer.", ex);
+                    + "! If you believe this is an issue from the plugin, please contact the developer.");
             return false;
         }
     }
@@ -441,9 +450,14 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     public void log(final Level level, final String s) {
         getLogger().log(level, s);
     }
-
     @Override
     public void log(final Level level, final String s, final Throwable thrown) {
         getLogger().log(level, s, thrown);
+    }
+    public static String getPrefix(){
+        return ChatColor.translateAlternateColorCodes('&', "&7[&aDuels&bOptimised&7] &f");
+    }
+    public static void sendMessage(String message){
+        Bukkit.getConsoleSender().sendMessage(getPrefix() + CC.translate(message));
     }
 }

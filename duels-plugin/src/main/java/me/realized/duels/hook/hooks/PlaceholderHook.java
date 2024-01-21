@@ -33,7 +33,7 @@ public class PlaceholderHook extends PluginHook<DuelsPlugin> {
 
         @Override
         public String getVersion() {
-            return "1.0";
+            return plugin.getVersion();
         }
 
         @Override

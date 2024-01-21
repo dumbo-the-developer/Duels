@@ -25,9 +25,9 @@ public class BettingManager implements Loadable, Listener {
         final VaultHook vaultHook = plugin.getHookManager().getHook(VaultHook.class);
 
         if (vaultHook == null) {
-            Log.info(this, "Vault was not found! Money betting feature will be automatically disabled.");
+            DuelsPlugin.sendMessage("&bVault was not found! Money betting feature will be automatically disabled.");
         } else if (vaultHook.getEconomy() == null) {
-            Log.info(this, "Economy plugin supporting Vault was not found! Money betting feature will be automatically disabled.");
+            DuelsPlugin.sendMessage("&bEconomy plugin supporting Vault was not found! Money betting feature will be automatically disabled.");
         }
     }
 

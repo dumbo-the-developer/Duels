@@ -51,7 +51,7 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
 
     private static final String FILE_NAME = "signs.json";
 
-    private static final String SIGNS_LOADED = "Loaded %s queue sign(s).";
+    private static final String SIGNS_LOADED = "&aLoaded %s queue sign(s).";
 
     private final DuelsPlugin plugin;
     private final Lang lang;
@@ -90,7 +90,7 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
             }
         }
 
-        Log.info(this, String.format(SIGNS_LOADED, signs.size()));
+        DuelsPlugin.sendMessage(String.format(SIGNS_LOADED, signs.size()));
 
         this.updateTask = plugin.doSyncRepeat(() -> signs.entrySet().removeIf(entry -> {
             entry.getValue().update();

@@ -1,5 +1,6 @@
 package me.realized.duels.util.hook;
 
+import me.realized.duels.DuelsPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -29,13 +30,13 @@ public abstract class AbstractHookManager<P extends JavaPlugin> {
                 return;
             }
 
-            plugin.getLogger().info("Successfully hooked into '" + name + "'!");
+            DuelsPlugin.sendMessage("&aSuccessfully hooked into '" + name + "'!");
         } catch (Throwable throwable) {
             if (throwable.getCause() != null) {
                 throwable = throwable.getCause();
             }
 
-            plugin.getLogger().warning("Failed to hook into " + name + ": " + throwable.getMessage());
+            DuelsPlugin.sendMessage("&b&lFailed to hook into " + name + ": " + throwable.getMessage());
         }
     }
 
