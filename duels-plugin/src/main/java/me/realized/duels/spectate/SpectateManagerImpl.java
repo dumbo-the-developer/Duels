@@ -141,7 +141,7 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
         final MatchImpl match = arena.getMatch();
 
         // Hide from players in match
-        if (match != null && !essentials.isVanished(player)) {
+        if (match != null) {
             match.getAllPlayers()
                     .stream()
                     .filter(arenaPlayer -> arenaPlayer.isOnline() && arenaPlayer.canSee(player))
