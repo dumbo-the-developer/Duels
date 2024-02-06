@@ -47,7 +47,6 @@ class Countdown extends BukkitRunnable {
 
         arena.getPlayers().forEach(player -> {
             // Place barrier blocks around the player during the countdown
-            placeBarrierBlocks(player.getLocation());
             config.playSound(player, rawMessage);
 
             final Pair<String, Integer> info = this.info.get(player.getUniqueId());
@@ -75,7 +74,6 @@ class Countdown extends BukkitRunnable {
             finished = true;
 
             // Remove barrier blocks around the players when the countdown ends
-            arena.getPlayers().forEach(player -> removeBarrierBlocks(player.getLocation()));
         }
     }
 
