@@ -1,4 +1,4 @@
-<h1>Duels</h1> 
+<h1>Duels</h1>
 
 [![](https://jitpack.io/v/Realizedd/Duels.svg)](https://jitpack.io/#Realizedd/Duels)
 
