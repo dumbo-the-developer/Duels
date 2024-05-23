@@ -602,3 +602,14 @@ sounds:
     volume: 1.0
     trigger-messages:
       - '&7Now in a match against &f%opponent%&7(&a%opponent_rating%&7) with kit &3%kit% &7in arena &e%arena%&7.'
+
+
+# Firework configuration settings
+firework:
+  # Available color options:
+  # AQUA, BLACK, BLUE, FUCHSIA, GRAY, GREEN, LIME, MAROON, NAVY, OLIVE, ORANGE, PURPLE, RED, SILVER, TEAL, WHITE, YELLOW
+  color: AQUA
+
+  # Available type options:
+  # BALL, BALL_LARGE, BURST, CREEPER, STAR
+  type: BALL_LARGE

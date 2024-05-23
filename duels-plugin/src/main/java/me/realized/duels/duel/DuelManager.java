@@ -6,6 +6,7 @@ import me.realized.duels.api.event.match.MatchStartEvent;
 import me.realized.duels.arena.ArenaImpl;
 import me.realized.duels.arena.ArenaManagerImpl;
 import me.realized.duels.arena.MatchImpl;
+import me.realized.duels.arena.fireworks.FireworkUtils;
 import me.realized.duels.config.Config;
 import me.realized.duels.config.Lang;
 import me.realized.duels.data.MatchData;
@@ -542,8 +543,12 @@ public class DuelManager implements Loadable {
                 if (config.isSpawnFirework()) {
                     final Firework firework = (Firework) winner.getWorld().spawnEntity(winner.getEyeLocation(), EntityType.FIREWORK);
                     final FireworkMeta meta = firework.getFireworkMeta();
+                    String colourName = config.getFireworkColour();
+                    String typeName = config.getFireworkType();
+                    Color colour = FireworkUtils.getColor(colourName);
+                    FireworkEffect.Type type = FireworkUtils.getType(typeName);
                     meta.setPower(0);
-                    meta.addEffect(FireworkEffect.builder().withColor(Color.AQUA).with(FireworkEffect.Type.BALL_LARGE).withTrail().build());
+                    meta.addEffect(FireworkEffect.builder().withColor(colour).with(type).withTrail().build());
                     firework.setFireworkMeta(meta);
                 }
 
