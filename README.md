@@ -72,3 +72,4 @@ public void onEnable() {
   Duels api = (Duels) Bukkit.getServer().getPluginManager().getPlugin("Duels");
 }
 ```
+
