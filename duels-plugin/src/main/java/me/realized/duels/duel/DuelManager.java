@@ -565,11 +565,37 @@ public class DuelManager implements Loadable {
                     if (config.isEndCommandsEnabled() && !(!match.isFromQueue() && config.isEndCommandsQueueOnly())) {
                         try {
                             for (final String command : config.getEndCommands()) {
-                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command
-                                        .replace("%winner%", winner.getName()).replace("%loser%", player.getName())
-                                        .replace("%kit%", kitName).replace("%arena%", arena.getName())
-                                        .replace("%bet_amount%", String.valueOf(match.getBet()))
-                                );
+                                int delay = 0;
+                                String cmd = command;
+                                if (command.contains("{delay:")) {
+                                    int delayStart = command.indexOf("{delay:") + 7;
+                                    int delayEnd = command.indexOf("}", delayStart);
+                                    if (delayEnd > delayStart) {
+                                        String delayStr = command.substring(delayStart, delayEnd);
+                                        try {
+                                            delay = Integer.parseInt(delayStr);
+                                        } catch (NumberFormatException e) {
+                                            Log.warn(DuelManager.this, "Invalid delay format in command: " + command);
+                                        }
+                                        // Remove the delay part from the command string
+                                        cmd = command.substring(0, delayStart - 7) + command.substring(delayEnd + 1);
+                                    }
+                                }
+
+                                String finalCommand = cmd.replace("%winner%", winner.getName())
+                                        .replace("%loser%", player.getName())
+                                        .replace("%kit%", kitName)
+                                        .replace("%arena%", arena.getName())
+                                        .replace("%bet_amount%", String.valueOf(match.getBet()));
+
+                                if (delay > 0) {
+                                    int ticks = Math.max(delay / 50, 1);
+                                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand);
+                                    }, ticks);
+                                } else {
+                                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand);
+                                }
                             }
                         } catch (Exception ex) {
                             Log.warn(DuelManager.this, "Error while running match end commands: " + ex.getMessage());

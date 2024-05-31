@@ -191,9 +191,13 @@ duel:
       # Available placeholders:
       # %winner% - Name of the winner of the match
       # %loser% - Name of the loser of the match
+      # {delay:x} - Used to give x ms of delay before running any command
       commands:
         - 'give %winner% diamond 1'
         - 'give %loser% dirt 1'
+        - 'give %winner% diamond 1{delay:10}'
+        - 'give %loser% dirt 1{delay:50}'
+        - 'say Congratulations %winner%!{delay:100}'
 
   projectile-hit-message:
     # If set to 'true', a message from lang.yml will be sent to the shooter of the projectile.
