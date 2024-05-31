@@ -11,15 +11,15 @@ import java.lang.reflect.Method;
 public final class ReflectionUtil {
 
     private static final String PACKAGE_VERSION;
-    private static final Long MAJOR_VERSION;
+    private static final int MAJOR_VERSION;
 
     static {
-    	final String packageName = Bukkit.getServer().getBukkitVersion().split(".")[1];
+        final String packageName = Bukkit.getServer().getClass().getPackage().getName();
         PACKAGE_VERSION = packageName.substring(packageName.lastIndexOf('.') + 1);
-        MAJOR_VERSION = NumberUtil.parseLong(packageName).orElse(0);
+        MAJOR_VERSION = NumberUtil.parseInt(PACKAGE_VERSION.split("_")[1]).orElse(0);
     }
 
-    public static Long getMajorVersion() {
+    public static int getMajorVersion() {
         return MAJOR_VERSION;
     }
     private ReflectionUtil() {
