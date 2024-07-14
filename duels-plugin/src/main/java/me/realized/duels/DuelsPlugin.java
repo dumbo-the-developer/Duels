@@ -1,7 +1,6 @@
 package me.realized.duels;
 
 import com.google.common.collect.Lists;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +9,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-
 import lombok.Getter;
 import me.realized.duels.api.Duels;
 import me.realized.duels.api.command.SubCommand;
@@ -31,14 +29,7 @@ import me.realized.duels.extension.ExtensionManager;
 import me.realized.duels.hook.HookManager;
 import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.KitManagerImpl;
-import me.realized.duels.listeners.DamageListener;
-import me.realized.duels.listeners.EnderpearlListener;
-import me.realized.duels.listeners.KitItemListener;
-import me.realized.duels.listeners.KitOptionsListener;
-import me.realized.duels.listeners.LingerPotionListener;
-import me.realized.duels.listeners.PotionListener;
-import me.realized.duels.listeners.ProjectileHitListener;
-import me.realized.duels.listeners.TeleportListener;
+import me.realized.duels.listeners.*;
 import me.realized.duels.logging.LogManager;
 import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.queue.QueueManager;
@@ -243,6 +234,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                 logManager.debug(name + " has been loaded. (took " + (System.currentTimeMillis() - now) + "ms)");
                 lastLoad = loadables.indexOf(loadable);
             } catch (Exception ex) {
+                // Print the stacktrace to help with debugging
+                ex.printStackTrace();
+
                 // Handles the case of exceptions from LogManager not being logged in file
                 if (loadable instanceof LogSource) {
                     ex.printStackTrace();
@@ -450,14 +444,17 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     public void log(final Level level, final String s) {
         getLogger().log(level, s);
     }
+
     @Override
     public void log(final Level level, final String s, final Throwable thrown) {
         getLogger().log(level, s, thrown);
     }
-    public static String getPrefix(){
+
+    public static String getPrefix() {
         return ChatColor.translateAlternateColorCodes('&', "&7[&aDuels&bOptimised&7] &f");
     }
-    public static void sendMessage(String message){
+
+    public static void sendMessage(String message) {
         Bukkit.getConsoleSender().sendMessage(getPrefix() + CC.translate(message));
     }
 }

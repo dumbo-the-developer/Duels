@@ -51,7 +51,7 @@ public class Button<P extends JavaPlugin> {
     }
 
     protected void setOwner(final Player player) {
-        if (Items.equals(displayed, Items.HEAD)) {
+        if (Items.itemEquals(displayed, Items.HEAD)) {
             editMeta(meta -> Skulls.setProfile((SkullMeta) meta, player));
         }
     }
