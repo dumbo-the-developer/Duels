@@ -517,7 +517,7 @@ guis:
 
     # Item used to fill empty spaces in the kit selector GUI.
     space-filler-item:
-      type: STAINED_GLASS_PANE
+      type: WHITE_STAINED_GLASS_PANE
       data: 0
   arena-selector:
     # Amount of rows to display in one page of the arena selector GUI.
@@ -527,12 +527,12 @@ guis:
 
     # Item used to fill empty spaces in the arena selector GUI.
     space-filler-item:
-      type: STAINED_GLASS_PANE
+      type: WHITE_STAINED_GLASS_PANE
       data: 0
   settings:
     # Item used to fill empty spaces in the settings GUI.
     space-filler-item:
-      type: STAINED_GLASS_PANE
+      type: WHITE_STAINED_GLASS_PANE
       data: 0
   queues:
     # Amount of rows to display in one page of the queues GUI.
@@ -542,7 +542,7 @@ guis:
 
     # Item used to fill empty spaces in the queues GUI.
     space-filler-item:
-      type: STAINED_GLASS_PANE
+      type: WHITE_STAINED_GLASS_PANE
       data: 0
 
     # If set to 'true', the type of the queue's displayed item will be its kit's displayed item type.
