@@ -11,7 +11,7 @@ buildscript {
 
 allprojects {
     group 'me.realized'
-    version '1.00-BETA'
+    version '1.02-BETA'
 }
 
 subprojects {
