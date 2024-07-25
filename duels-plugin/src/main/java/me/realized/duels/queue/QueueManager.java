@@ -21,6 +21,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import lombok.Getter;
 import me.realized.duels.DuelsPlugin;
+import me.realized.duels.Permissions;
 import me.realized.duels.api.event.queue.QueueCreateEvent;
 import me.realized.duels.api.event.queue.QueueJoinEvent;
 import me.realized.duels.api.event.queue.QueueLeaveEvent;
@@ -165,6 +166,12 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
                     }
 
                     final Player player = current.getPlayer();
+
+                    if(!player.hasPermission(Permissions.DUEL)) {
+                        lang.sendMessage(player, "ERROR.no-permission", "permission", Permissions.DUEL);
+                        remove.add(current);
+                        continue;
+                    }
 
                     for (final QueueEntry opponent : queue.getPlayers()) {
                         final Player other = opponent.getPlayer();
