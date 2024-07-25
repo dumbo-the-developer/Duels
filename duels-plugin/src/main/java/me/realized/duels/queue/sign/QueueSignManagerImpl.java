@@ -187,6 +187,11 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
         }
 
         Player player = event.getPlayer();
+        if(!player.hasPermission(Permissions.DUEL)) {
+            lang.sendMessage(player, "ERROR.no-permission", "permission", Permissions.DUEL);
+            return;
+        }
+
         QueueSignImpl sign = get(block.getLocation());
 
         if (sign != null && queueManager.queue(player, sign.getQueue())) {
