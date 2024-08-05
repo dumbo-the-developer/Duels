@@ -63,6 +63,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import space.arim.morepaperlib.scheduling.ScheduledTask;
 
 public class QueueManager implements Loadable, DQueueManager, Listener {
 
@@ -86,7 +87,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
     private PvPManagerHook pvpManager;
     private WorldGuardHook worldGuard;
     private VaultHook vault;
-    private int queueTask;
+    private ScheduledTask queueTask;
 
     @Getter
     private MultiPageGui<DuelsPlugin> gui;
@@ -212,7 +213,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
             if (update) {
                 gui.calculatePages();
             }
-        }, 20L, 40L).getTaskId();
+        }, 20L, 40L);
     }
 
     @Override

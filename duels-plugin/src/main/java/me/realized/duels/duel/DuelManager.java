@@ -44,7 +44,9 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
+import space.arim.morepaperlib.scheduling.ScheduledTask;
 
+import java.time.Duration;
 import java.util.*;
 
 public class DuelManager implements Loadable {
@@ -70,7 +72,7 @@ public class DuelManager implements Loadable {
     private WorldGuardHook worldGuard;
     private MyPetHook myPet;
 
-    private int durationCheckTask;
+    private ScheduledTask durationCheckTask;
 
     public DuelManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -114,7 +116,7 @@ public class DuelManager implements Loadable {
 
                     arena.endMatch(null, null, Reason.MAX_TIME_REACHED);
                 }
-            }, 0L, 20L).getTaskId();
+            }, 0L, 20L);
         }
     }
 
@@ -236,17 +238,21 @@ public class DuelManager implements Loadable {
             playerManager.remove(player);
 
             if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {
-                PlayerUtil.reset(player);
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> PlayerUtil.reset(player), null);
             }
 
             if (info != null) {
-                teleport.tryTeleport(player, info.getLocation());
-                info.restore(player);
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    teleport.tryTeleport(player, info.getLocation());
+                    info.restore(player);
+                }, null);
             }
 
-            if (InventoryUtil.addOrDrop(player, items)) {
-                lang.sendMessage(player, "DUEL.reward.items.message", "name", opponentName);
-            }
+            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                if (InventoryUtil.addOrDrop(player, items)) {
+                    lang.sendMessage(player, "DUEL.reward.items.message", "name", opponentName);
+                }
+            }, null);
         } else if (info != null) {
             info.getExtra().addAll(items);
         }
@@ -526,7 +532,7 @@ public class DuelManager implements Loadable {
                 return;
             }
 
-            plugin.doSyncAfter(() -> {
+            DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(arena.first().getLocation()).runDelayed(() -> {
                 if (arena.size() == 0) {
                     match.getAllPlayers().forEach(matchPlayer -> {
                         handleTie(matchPlayer, arena, match, false);
@@ -541,15 +547,17 @@ public class DuelManager implements Loadable {
                 inventoryManager.create(winner, false);
 
                 if (config.isSpawnFirework()) {
-                    final Firework firework = (Firework) winner.getWorld().spawnEntity(winner.getEyeLocation(), EntityType.FIREWORK);
-                    final FireworkMeta meta = firework.getFireworkMeta();
-                    String colourName = config.getFireworkColour();
-                    String typeName = config.getFireworkType();
-                    Color colour = FireworkUtils.getColor(colourName);
-                    FireworkEffect.Type type = FireworkUtils.getType(typeName);
-                    meta.setPower(0);
-                    meta.addEffect(FireworkEffect.builder().withColor(colour).with(type).withTrail().build());
-                    firework.setFireworkMeta(meta);
+                    DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(winner.getLocation()).run(() -> {
+                        final Firework firework = (Firework) winner.getWorld().spawnEntity(winner.getEyeLocation(), EntityType.FIREWORK);
+                        final FireworkMeta meta = firework.getFireworkMeta();
+                        String colourName = config.getFireworkColour();
+                        String typeName = config.getFireworkType();
+                        Color colour = FireworkUtils.getColor(colourName);
+                        FireworkEffect.Type type = FireworkUtils.getType(typeName);
+                        meta.setPower(0);
+                        meta.addEffect(FireworkEffect.builder().withColor(colour).with(type).withTrail().build());
+                        firework.setFireworkMeta(meta);
+                    });
                 }
 
                 final double health = Math.ceil(winner.getHealth()) * 0.5;
@@ -559,7 +567,7 @@ public class DuelManager implements Loadable {
                 final MatchData matchData = new MatchData(winner.getName(), player.getName(), kitName, time, duration, health);
                 handleStats(match, userDataManager.get(winner), userDataManager.get(player), matchData);
                 plugin.doSyncAfter(() -> handleInventories(match), 1L);
-                plugin.doSyncAfter(() -> {
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).runDelayed(() -> {
                     handleWin(winner, player, arena, match);
 
                     if (config.isEndCommandsEnabled() && !(!match.isFromQueue() && config.isEndCommandsQueueOnly())) {
@@ -590,9 +598,7 @@ public class DuelManager implements Loadable {
 
                                 if (delay > 0) {
                                     int ticks = Math.max(delay / 50, 1);
-                                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand);
-                                    }, ticks);
+                                    DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().runDelayed(() -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand), ticks);
                                 } else {
                                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand);
                                 }
@@ -603,7 +609,7 @@ public class DuelManager implements Loadable {
                     }
 
                     arena.endMatch(winner.getUniqueId(), player.getUniqueId(), Reason.OPPONENT_DEFEAT);
-                }, config.getTeleportDelay() * 20L);
+                }, null, config.getTeleportDelay() * 20L);
             }, 1L);
         }
 

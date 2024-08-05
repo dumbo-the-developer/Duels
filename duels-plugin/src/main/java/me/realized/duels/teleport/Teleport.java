@@ -12,6 +12,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
+import static io.papermc.lib.PaperLib.teleportAsync;
+
 /**
  * Handles force teleporting of players.
  */
@@ -58,9 +60,11 @@ public final class Teleport implements Loadable, Listener {
 
         MetadataUtil.put(plugin, player, METADATA_KEY, location.clone());
 
-        if (!player.teleport(location)) {
-            Log.warn(this, "Could not teleport " + player.getName() + "! Player is dead or is vehicle");
-        }
+        teleportAsync(player, location).thenAccept(success -> {
+            if (!success) {
+                Log.warn(this, "Could not teleport " + player.getName() + "! Player is dead or is in a vehicle");
+            }
+        });
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

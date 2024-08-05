@@ -9,8 +9,8 @@ import me.realized.duels.api.spectate.SpectateManager;
 import me.realized.duels.api.user.UserManager;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
+import space.arim.morepaperlib.scheduling.ScheduledTask;
 
 
 public interface Duels extends Plugin {
@@ -104,7 +104,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    BukkitTask doSync(@NotNull final Runnable task);
+    ScheduledTask doSync(@NotNull final Runnable task);
 
 
     /**
@@ -115,7 +115,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    BukkitTask doSyncAfter(@NotNull final Runnable task, long delay);
+    ScheduledTask doSyncAfter(@NotNull final Runnable task, long delay);
 
 
     /**
@@ -127,7 +127,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    BukkitTask doSyncRepeat(@NotNull final Runnable task, long delay, long interval);
+    ScheduledTask doSyncRepeat(@NotNull final Runnable task, long delay, long interval);
 
 
     /**
@@ -137,7 +137,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    BukkitTask doAsync(@NotNull final Runnable task);
+    ScheduledTask doAsync(@NotNull final Runnable task);
 
 
     /**
@@ -148,7 +148,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    BukkitTask doAsyncAfter(@NotNull final Runnable task, long delay);
+    ScheduledTask doAsyncAfter(@NotNull final Runnable task, long delay);
 
 
     /**
@@ -160,7 +160,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    BukkitTask doAsyncRepeat(@NotNull final Runnable task, long delay, long interval);
+    ScheduledTask doAsyncRepeat(@NotNull final Runnable task, long delay, long interval);
 
 
     /**
@@ -169,17 +169,7 @@ public interface Duels extends Plugin {
      * @param task Task to cancel if not already cancelled.
      * @since 3.2.0
      */
-    void cancelTask(@NotNull final BukkitTask task);
-
-
-    /**
-     * Cancels a task with id if found and running.
-     *
-     * @param id Id of the task to cancel.
-     * @since 3.2.0
-     */
-    void cancelTask(final int id);
-
+    void cancelTask(@NotNull final ScheduledTask task);
 
     /**
      * Logs a message with {@link java.util.logging.Level#INFO}.

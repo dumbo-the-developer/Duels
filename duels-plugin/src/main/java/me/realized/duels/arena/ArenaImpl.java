@@ -184,7 +184,7 @@ public class ArenaImpl extends BaseButton implements Arena {
         }
 
         this.countdown = new Countdown(plugin, this, kit, info, messages, config.getTitles());
-        countdown.runTaskTimer(plugin, 0L, 20L);
+        countdown.startCountdown(0L, 20L);
     }
 
     boolean isCounting() {

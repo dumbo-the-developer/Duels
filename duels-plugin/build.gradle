@@ -42,6 +42,8 @@ dependencies {
     implementation project(':duels-worldguard')
     implementation project(':duels-worldguard-v6')
     implementation project(':duels-worldguard-v7')
+    implementation 'io.papermc:paperlib:1.0.7'
+    implementation 'space.arim.morepaperlib:morepaperlib:0.4.3'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
 }
 
@@ -57,10 +59,14 @@ shadowJar {
         include(project(':duels-worldguard-v6'))
         include(project(':duels-worldguard-v7'))
         include(dependency('com.fasterxml.jackson.core:.*'))
+        include(dependency('io.papermc:.*'))
+        include(dependency('space.arim.morepaperlib:.*'))
     }
 
     final String group = project.group.toString() + "." + parent.name.toLowerCase() + ".shaded."
     relocate 'com.fasterxml.jackson.core', group + 'jackson-core'
+    relocate 'io.papermc.lib', group + 'paperlib'
+    relocate 'space.arim.morepaperlib', group + 'morepaperlib'
 }
 
 // To build Duels plugin jar, run './gradlew clean build'.
