@@ -46,7 +46,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import space.arim.morepaperlib.scheduling.ScheduledTask;
 
-import java.time.Duration;
 import java.util.*;
 
 public class DuelManager implements Loadable {
@@ -116,13 +115,15 @@ public class DuelManager implements Loadable {
 
                     arena.endMatch(null, null, Reason.MAX_TIME_REACHED);
                 }
-            }, 0L, 20L);
+            }, 1L, 20L);
         }
     }
 
     @Override
     public void handleUnload() {
-        plugin.cancelTask(durationCheckTask);
+        if (config.getMaxDuration() > 0) {
+            plugin.cancelTask(durationCheckTask);
+        }
 
         /*
         3 Cases:
