@@ -168,12 +168,6 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
                     final Player player = current.getPlayer();
 
-                    if(!player.hasPermission(Permissions.DUEL)) {
-                        lang.sendMessage(player, "ERROR.no-permission", "permission", Permissions.DUEL);
-                        remove.add(current);
-                        continue;
-                    }
-
                     for (final QueueEntry opponent : queue.getPlayers()) {
                         final Player other = opponent.getPlayer();
 
