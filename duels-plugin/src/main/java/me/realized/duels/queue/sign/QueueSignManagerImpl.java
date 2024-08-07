@@ -46,6 +46,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import space.arim.morepaperlib.scheduling.ScheduledTask;
 
 public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listener {
 
@@ -60,7 +61,7 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
 
     private final Map<Location, QueueSignImpl> signs = new HashMap<>();
 
-    private int updateTask;
+    private ScheduledTask updateTask;
 
     public QueueSignManagerImpl(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -95,7 +96,7 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
         this.updateTask = plugin.doSyncRepeat(() -> signs.entrySet().removeIf(entry -> {
             entry.getValue().update();
             return entry.getValue().getQueue().isRemoved();
-        }), 20L, 20L).getTaskId();
+        }), 20L, 20L);
     }
 
     @Override

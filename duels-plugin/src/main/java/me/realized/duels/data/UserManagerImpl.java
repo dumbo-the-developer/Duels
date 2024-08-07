@@ -20,6 +20,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import space.arim.morepaperlib.scheduling.ScheduledTask;
 
 import java.io.*;
 import java.util.*;
@@ -48,7 +49,7 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
     private volatile TopEntry losses;
     @Getter
     private volatile TopEntry noKit;
-    private int topTask;
+    private ScheduledTask topTask;
 
     public UserManagerImpl(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -148,7 +149,7 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
                     }
                 }
             });
-        }, 20L * 5, 20L).getTaskId();
+        }, 20L * 5, 20L);
     }
 
     @Override

@@ -203,7 +203,7 @@ public class KitOptionsListener implements Listener {
                 return;
             }
 
-            plugin.doSyncAfter(() -> player.setNoDamageTicks(0), 1);
+            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).runDelayed(() -> player.setNoDamageTicks((0)) ,null, 1);
         }
     }
 }

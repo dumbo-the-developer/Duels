@@ -244,7 +244,7 @@ public class PlayerInfoManager implements Loadable {
                 }
 
                 remove(player);
-                info.restore(player);
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> info.restore(player), null);
             }, 1L);
         }
     }

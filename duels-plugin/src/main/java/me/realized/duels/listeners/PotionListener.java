@@ -42,7 +42,7 @@ public class PotionListener implements Listener {
             return;
         }
 
-        plugin.doSync(() -> {
+        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
             if (item.getAmount() <= 1) {
                 if (CompatUtil.isPre1_10()) {
                     player.getInventory().setItem(player.getInventory().getHeldItemSlot(), null);
@@ -58,6 +58,6 @@ public class PotionListener implements Listener {
             } else {
                 player.getInventory().removeItem(new ItemStack(Material.GLASS_BOTTLE, 1));
             }
-        });
+        }, null);
     }
 }

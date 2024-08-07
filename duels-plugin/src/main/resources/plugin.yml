@@ -46,3 +46,5 @@ permissions:
       duels.top: true
   duels.duel:
     default: true
+
+folia-supported: true
