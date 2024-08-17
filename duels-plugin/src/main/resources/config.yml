@@ -262,6 +262,7 @@ duel:
   # If set to 'true', players in duel will not be able to drop items.
   # default: false
   prevent-item-drop: false
+  clear-items-after-duel: true
 
   # If set to 'true', players in duel will not be able to pickup items on the ground.
   # default: false

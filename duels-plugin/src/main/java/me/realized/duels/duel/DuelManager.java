@@ -104,11 +104,16 @@ public class DuelManager implements Loadable {
                     final MatchImpl match = arena.getMatch();
 
                     // Only handle undecided matches (size > 1)
-                    if (match == null || match.getDurationInMillis() < (config.getMaxDuration() * 60 * 1000L) || arena.size() <= 1) {
+                    if (match == null
+                            || match.getDurationInMillis() < (config.getMaxDuration() * 60 * 1000L)
+                            || arena.size() <= 1) {
                         continue;
                     }
 
-                    for (final Player player : match.getAllPlayers()) {
+                    Set<Player> members = match.getAllPlayers();
+
+                    for (final Player player : members) {
+
                         handleTie(player, arena, match, true);
                         lang.sendMessage(player, "DUEL.on-end.tie");
                     }
@@ -182,8 +187,12 @@ public class DuelManager implements Loadable {
         final List<ItemStack> items = match.getItems(player);
 
         if (alive) {
-            PlayerUtil.reset(player);
+
             playerManager.remove(player);
+
+            if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {
+                PlayerUtil.reset(player);
+            }
 
             if (info != null) {
                 teleport.tryTeleport(player, info.getLocation());
@@ -643,12 +652,17 @@ public class DuelManager implements Loadable {
 
         @EventHandler(ignoreCancelled = true)
         public void on(final PlayerDropItemEvent event) {
-            if (!config.isPreventItemDrop() || !arenaManager.isInMatch(event.getPlayer())) {
+            Player player = event.getPlayer();
+            if (!arenaManager.isInMatch(event.getPlayer())) {
                 return;
             }
+            if(config.isPreventItemDrop()) {
+                event.setCancelled(true);
+                lang.sendMessage(event.getPlayer(), "DUEL.prevent.item-drop");
+            }else if(config.isClearItemsAfterMatch()) {
+                arenaManager.get(player).getMatch().droppedItems.add(event.getItemDrop());
+            }
 
-            event.setCancelled(true);
-            lang.sendMessage(event.getPlayer(), "DUEL.prevent.item-drop");
         }
 
         @EventHandler(ignoreCancelled = true)

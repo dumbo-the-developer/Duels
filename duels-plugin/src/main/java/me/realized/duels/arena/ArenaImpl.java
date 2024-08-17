@@ -30,6 +30,7 @@ import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -166,6 +167,11 @@ public class ArenaImpl extends BaseButton implements Arena {
 
         final Queue source = match.getSource();
         match.setFinished();
+
+        if(config.isClearItemsAfterMatch()) {
+            match.droppedItems.forEach(Entity::remove);
+        }
+
         match = null;
 
         if (source != null) {

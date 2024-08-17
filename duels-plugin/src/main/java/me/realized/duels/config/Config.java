@@ -238,6 +238,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private String fireworkColour;
     @Getter
     private String fireworkType;
+    @Getter
+    private boolean clearItemsAfterMatch;
 
     public Config(final DuelsPlugin plugin) {
         super(plugin, "config");
@@ -314,6 +316,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         arenaOnlyEndMessage = configuration.getBoolean("duel.arena-only-end-message", false);
         displayInventories = configuration.getBoolean("duel.display-inventories", true);
         preventItemDrop = configuration.getBoolean("duel.prevent-item-drop", false);
+        clearItemsAfterMatch = configuration.getBoolean("duel.clear-items-after-duel", false);
         preventItemPickup = configuration.getBoolean("duel.prevent-item-pickup", true);
         limitTeleportEnabled = configuration.getBoolean("duel.limit-teleportation.enabled", true);
         distanceAllowed = configuration.getDouble("duel.limit-teleportation.distance-allowed", 5.0);

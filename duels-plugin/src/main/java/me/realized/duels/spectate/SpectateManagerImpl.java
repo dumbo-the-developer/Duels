@@ -227,7 +227,7 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
         final MatchImpl match = spectator.getArena().getMatch();
 
         // Show to players in match
-        if (match != null && !essentials.isVanished(player)) {
+        if (match != null && !(essentials != null && essentials.isVanished(player))) {
             match.getAllPlayers()
                     .stream()
                     .filter(Player::isOnline)

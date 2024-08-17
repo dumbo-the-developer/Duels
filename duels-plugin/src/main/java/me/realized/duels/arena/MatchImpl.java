@@ -1,20 +1,14 @@
 package me.realized.duels.arena;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
 import me.realized.duels.api.match.Match;
 import me.realized.duels.kit.KitImpl;
 import me.realized.duels.queue.Queue;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -36,6 +30,8 @@ public class MatchImpl implements Match {
     private final Map<Player, Boolean> players = new HashMap<>();
     @Getter
     private boolean finished;
+    @Getter
+    public List<Item> droppedItems = new ArrayList<>();
 
     MatchImpl(final ArenaImpl arena, final KitImpl kit, final Map<UUID, List<ItemStack>> items, final int bet, final Queue source) {
         this.arena = arena;
