@@ -61,7 +61,7 @@ class Countdown implements Runnable {
             }
 
             if (title != null) {
-                Titles.send(player, title, null, 0, 20, 50);
+                Titles.send(player, title, null, 20, 40, 75);
             }
 
         });
