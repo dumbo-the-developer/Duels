@@ -1,16 +1,11 @@
 package me.realized.duels.util.inventory;
 
-import me.realized.duels.util.EnumUtil;
-import me.realized.duels.util.StringUtil;
-import me.realized.duels.util.compat.CompatUtil;
-import me.realized.duels.util.compat.Items;
-import org.bukkit.DyeColor;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -29,8 +24,11 @@ public final class ItemBuilder {
     private final ItemStack result;
 
     private ItemBuilder(final Material type, final int amount, final short durability) {
+        if (type == null) {
+            throw new IllegalArgumentException("Material cannot be null");
+        }
         this.result = new ItemStack(type, amount);
-        Items.setDurability(result, durability);
+        result.setDurability(durability);
     }
 
     private ItemBuilder(final String type, final int amount, final short durability) {
@@ -38,6 +36,9 @@ public final class ItemBuilder {
     }
 
     private ItemBuilder(final ItemStack item) {
+        if (item == null || item.getType() == null) {
+            throw new IllegalArgumentException("ItemStack or Material cannot be null");
+        }
         this.result = item;
     }
 
@@ -54,7 +55,12 @@ public final class ItemBuilder {
     }
 
     public static ItemBuilder of(final String type, final int amount, final short durability) {
-        return new ItemBuilder(type, amount, durability);
+        Material material = Material.matchMaterial(type);
+        if (material == null) {
+            System.out.println("Debug: Invalid material type: " + type);
+            throw new IllegalArgumentException("Invalid material type: " + type);
+        }
+        return new ItemBuilder(material, amount, durability);
     }
 
     public static ItemBuilder of(final ItemStack item) {
@@ -69,11 +75,11 @@ public final class ItemBuilder {
     }
 
     public ItemBuilder name(final String name) {
-        return editMeta(meta -> meta.setDisplayName(StringUtil.color(name)));
+        return editMeta(meta -> meta.setDisplayName(name));
     }
 
     public ItemBuilder lore(final List<String> lore) {
-        return editMeta(meta -> meta.setLore(StringUtil.color(lore)));
+        return editMeta(meta -> meta.setLore(lore));
     }
 
     public ItemBuilder lore(final String... lore) {
@@ -86,83 +92,48 @@ public final class ItemBuilder {
     }
 
     public ItemBuilder unbreakable() {
-        return editMeta(meta -> {
-            if (CompatUtil.isPre1_12()) {
-                meta.spigot().setUnbreakable(true);
-            } else {
-                meta.setUnbreakable(true);
-            }
-        });
+        return editMeta(meta -> meta.setUnbreakable(true));
     }
 
     public ItemBuilder head(final String owner) {
         return editMeta(meta -> {
-            if (owner != null && Items.equals(Items.HEAD, result)) {
-                final SkullMeta skullMeta = (SkullMeta) meta;
-                skullMeta.setOwner(owner);
+            if (meta instanceof SkullMeta) {
+                ((SkullMeta) meta).setOwner(owner);
             }
         });
     }
 
     public ItemBuilder leatherArmorColor(final String color) {
         return editMeta(meta -> {
-            final LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) meta;
-
-            if (color != null) {
-                leatherArmorMeta.setColor(DyeColor.valueOf(color).getColor());
+            if (meta instanceof LeatherArmorMeta) {
+                ((LeatherArmorMeta) meta).setColor(Color.fromRGB(Integer.parseInt(color, 16)));
             }
         });
     }
 
     public ItemBuilder potion(final PotionType type, final boolean extended, final boolean upgraded) {
-        PotionMeta meta = (PotionMeta) result.getItemMeta();
-        meta.setBasePotionData(new PotionData(type, extended, upgraded));
-        result.setItemMeta(meta);
-        return this;
+        return editMeta(meta -> {
+            if (meta instanceof PotionMeta) {
+                ((PotionMeta) meta).setBasePotionData(new PotionData(type, extended, upgraded));
+            }
+        });
     }
 
     public ItemBuilder attribute(final String name, final int operation, final double amount, final String slotName) {
         return editMeta(meta -> {
-            final Attribute attribute = EnumUtil.getByName(attributeNameToEnum(name), Attribute.class);
-
-            if (attribute == null) {
-                return;
-            }
-
-            final AttributeModifier modifier;
+            Attribute attribute = Attribute.valueOf(name.toUpperCase());
+            Operation op = Operation.values()[operation];
+            UUID uuid = UUID.randomUUID();
+            AttributeModifier modifier;
 
             if (slotName != null) {
-                final EquipmentSlot slot = EnumUtil.getByName(slotName, EquipmentSlot.class);
-
-                if (slot == null) {
-                    return;
-                }
-
-                modifier = new AttributeModifier(UUID.randomUUID(), name, amount, Operation.values()[operation], slot);
+                modifier = new AttributeModifier(uuid, name, amount, op, org.bukkit.inventory.EquipmentSlot.valueOf(slotName.toUpperCase()));
             } else {
-                modifier = new AttributeModifier(UUID.randomUUID(), name, amount, Operation.values()[operation]);
+                modifier = new AttributeModifier(uuid, name, amount, op);
             }
 
             meta.addAttributeModifier(attribute, modifier);
         });
-    }
-
-    private String attributeNameToEnum(String name) {
-        int len = name.length();
-        int capitalLetterIndex = -1;
-
-        for (int i = 0; i < len; i++) {
-            if (Character.isUpperCase(name.charAt(i))) {
-                capitalLetterIndex = i;
-                break;
-            }
-        }
-
-        if (capitalLetterIndex != -1) {
-            name = name.substring(0, capitalLetterIndex) + "_" + name.substring(capitalLetterIndex);
-        }
-
-        return name.replace(".", "_").toUpperCase();
     }
 
     public ItemStack build() {

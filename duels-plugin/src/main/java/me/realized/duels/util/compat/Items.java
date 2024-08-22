@@ -3,8 +3,6 @@ package me.realized.duels.util.compat;
 import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionType;
 
@@ -26,78 +24,79 @@ public final class Items {
     public static final ItemStack HEAL_SPLASH_POTION;
     public static final ItemStack WATER_BREATHING_POTION;
     public static final ItemStack ENCHANTED_GOLDEN_APPLE;
-    private static final String PANE = "STAINED_GLASS_PANE";
 
     static {
-        ORANGE_PANE = (CompatUtil.isPre1_13() ? ItemBuilder.of(PANE, 1, (short) 1) : ItemBuilder.of(Material.ORANGE_STAINED_GLASS_PANE)).name(" ").build();
-        BLUE_PANE = (CompatUtil.isPre1_13() ? ItemBuilder.of(PANE, 1, (short) 11) : ItemBuilder.of(Material.BLUE_STAINED_GLASS_PANE)).name(" ").build();
-        RED_PANE = (CompatUtil.isPre1_13() ? ItemBuilder.of(PANE, 1, (short) 14) : ItemBuilder.of(Material.RED_STAINED_GLASS_PANE)).build();
-        GRAY_PANE = (CompatUtil.isPre1_13() ? ItemBuilder.of(PANE, 1, (short) 7) : ItemBuilder.of(Material.GRAY_STAINED_GLASS_PANE)).name(" ").build();
-        WHITE_PANE = (CompatUtil.isPre1_13() ? ItemBuilder.of(PANE, 1, (short) 0) : ItemBuilder.of(Material.WHITE_STAINED_GLASS_PANE)).name(" ").build();
-        GREEN_PANE = (CompatUtil.isPre1_13() ? ItemBuilder.of(PANE, 1, (short) 5) : ItemBuilder.of(Material.LIME_STAINED_GLASS_PANE)).build();
-        HEAD = (CompatUtil.isPre1_13() ? ItemBuilder.of("SKULL_ITEM", 1, (short) 3) : ItemBuilder.of(Material.PLAYER_HEAD)).build();
-        SKELETON_HEAD = CompatUtil.isPre1_13() ? Material.matchMaterial("SKULL_ITEM") : Material.SKELETON_SKULL;
-        OFF = (CompatUtil.isPre1_13() ? ItemBuilder.of("INK_SACK", 1, (short) 8) : ItemBuilder.of(Material.GRAY_DYE)).build();
-        ON = (CompatUtil.isPre1_13() ? ItemBuilder.of("INK_SACK", 1, (short) 10) : ItemBuilder.of(Material.LIME_DYE)).build();
-        MUSHROOM_SOUP = CompatUtil.isPre1_13() ? Material.matchMaterial("MUSHROOM_SOUP") : Material.MUSHROOM_STEW;
-        EMPTY_MAP = CompatUtil.isPre1_13() ? Material.matchMaterial("EMPTY_MAP") : Material.MAP;
-        SIGN = CompatUtil.isPre1_14() ? Material.matchMaterial("SIGN") : Material.OAK_SIGN;
-        HEAL_SPLASH_POTION = (CompatUtil.isPre1_9() ? ItemBuilder.of(Material.POTION, 1, (short) 16421) : ItemBuilder.of(Material.SPLASH_POTION).potion(
-                PotionType.INSTANT_HEAL, false, true)).build();
-        WATER_BREATHING_POTION = (CompatUtil.isPre1_9() ? ItemBuilder.of(Material.POTION, 1, (short) 8237) : ItemBuilder.of(Material.POTION).potion(
-                PotionType.WATER_BREATHING, false, false)).build();
-        ENCHANTED_GOLDEN_APPLE = CompatUtil.isPre1_13() ?
-                ItemBuilder.of(Material.GOLDEN_APPLE, 1, (short) 1).build() : ItemBuilder.of(Material.ENCHANTED_GOLDEN_APPLE).build();
+        ORANGE_PANE = createPane("ORANGE_STAINED_GLASS_PANE");
+        BLUE_PANE = createPane("BLUE_STAINED_GLASS_PANE");
+        RED_PANE = createPane("RED_STAINED_GLASS_PANE");
+        GRAY_PANE = createPane("GRAY_STAINED_GLASS_PANE");
+        WHITE_PANE = createPane("WHITE_STAINED_GLASS_PANE");
+        GREEN_PANE = createPane("LIME_STAINED_GLASS_PANE");
+        HEAD = createItem("PLAYER_HEAD");
+        SKELETON_HEAD = Material.SKELETON_SKULL;
+        OFF = createItem("GRAY_DYE");
+        ON = createItem("LIME_DYE");
+        MUSHROOM_SOUP = Material.MUSHROOM_STEW;
+        EMPTY_MAP = Material.MAP;
+        SIGN = Material.OAK_SIGN;
+        HEAL_SPLASH_POTION = createPotion(Material.SPLASH_POTION, PotionType.INSTANT_HEAL, false, true);
+        WATER_BREATHING_POTION = createPotion(Material.POTION, PotionType.WATER_BREATHING, false, false);
+        ENCHANTED_GOLDEN_APPLE = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE);
     }
 
-    private Items() {
-    }
+    private Items() {}
 
-    public static boolean equals(final ItemStack item, final ItemStack other) {
-        return item.getType() == other.getType() && getDurability(item) == getDurability(other);
-    }
-
-    public static ItemStack from(final String type, final short data) {
-        if (type.equalsIgnoreCase("STAINED_GLASS_PANE") && !CompatUtil.isPre1_13()) {
-            return ItemBuilder.of(Panes.from(data)).name(" ").build();
+    private static ItemStack createPane(String type) {
+        Material material = Material.matchMaterial(type);
+        if (material == null) {
+            System.out.println("Debug: Invalid material type for pane: " + type);
+            throw new IllegalArgumentException("Invalid material type: " + type);
         }
-
-        return ItemBuilder.of(type, 1, data).name(" ").build();
+        return ItemBuilder.of(material).name(" ").build();
     }
 
-    public static short getDurability(final ItemStack item) {
-        if (CompatUtil.isPre1_13()) {
-            return item.getDurability();
+    private static ItemStack createItem(String type) {
+        Material material = Material.matchMaterial(type);
+        if (material == null) {
+            System.out.println("Debug: Invalid material type: " + type);
+            throw new IllegalArgumentException("Invalid material type: " + type);
         }
-
-        final ItemMeta meta;
-        return ((meta = item.getItemMeta()) == null) ? 0 : (short) ((Damageable) meta).getDamage();
+        return ItemBuilder.of(material).build();
     }
 
-    public static void setDurability(final ItemStack item, final short durability) {
-        if (CompatUtil.isPre1_13()) {
-            item.setDurability(durability);
-            return;
-        }
-
-        final ItemMeta meta = item.getItemMeta();
-
-        if (meta != null) {
-            ((Damageable) meta).setDamage(durability);
-            item.setItemMeta(meta);
-        }
+    private static ItemStack createPotion(Material material, PotionType type, boolean extended, boolean upgraded) {
+        return ItemBuilder.of(material).potion(type, extended, upgraded).build();
     }
 
-    public static boolean isHealSplash(final ItemStack item) {
-        if (CompatUtil.isPre1_9()) {
-            return Items.equals(Items.HEAL_SPLASH_POTION, item);
-        }
-
-        if (item.getType() != Material.SPLASH_POTION) {
+    public static boolean itemEquals(ItemStack item1, ItemStack item2) {
+        if (item1 == null || item2 == null) {
             return false;
         }
+        if (item1.getType() != item2.getType()) {
+            return false;
+        }
+        if (item1.hasItemMeta() && item2.hasItemMeta()) {
+            return item1.getItemMeta().equals(item2.getItemMeta());
+        }
+        return !item1.hasItemMeta() && !item2.hasItemMeta();
+    }
 
-        final PotionMeta meta = (PotionMeta) item.getItemMeta();
-        return meta != null && meta.getBasePotionData().getType() == PotionType.INSTANT_HEAL;
+    public static ItemStack from(String type, short data) {
+        Material material = Material.matchMaterial(type);
+        if (material == null) {
+            throw new IllegalArgumentException("Invalid material type: " + type);
+        }
+        return ItemBuilder.of(material).build();
+    }
+
+    public static boolean isHealSplash(ItemStack item) {
+        if (item == null || item.getType() != Material.SPLASH_POTION) {
+            return false;
+        }
+        if (!(item.getItemMeta() instanceof PotionMeta)) {
+            return false;
+        }
+        PotionMeta meta = (PotionMeta) item.getItemMeta();
+        return meta.getBasePotionData().getType() == PotionType.INSTANT_HEAL;
     }
 }

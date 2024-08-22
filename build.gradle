@@ -11,7 +11,7 @@ buildscript {
 
 allprojects {
     group 'me.realized'
-    version '0.71-BETA'
+    version '3.0-BETA'
 }
 
 subprojects {
@@ -29,6 +29,11 @@ subprojects {
         maven {
             name 'spigot-repo'
             url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+        }
+
+        maven {
+            name 'papermc'
+            url 'https://repo.papermc.io/repository/maven-public/'
         }
 
         maven {
@@ -59,6 +64,11 @@ subprojects {
         maven {
             name 'essentialsx-repo'
             url 'https://repo.essentialsx.net/releases/'
+        }
+
+        maven {
+            name 'arim-mvn-lgpl3'
+            url 'https://mvn-repo.arim.space/lesser-gpl3/'
         }
 
         flatDir {

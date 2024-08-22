@@ -30,6 +30,7 @@ import me.realized.duels.util.inventory.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -166,6 +167,11 @@ public class ArenaImpl extends BaseButton implements Arena {
 
         final Queue source = match.getSource();
         match.setFinished();
+
+        if(config.isClearItemsAfterMatch()) {
+            match.droppedItems.forEach(Entity::remove);
+        }
+
         match = null;
 
         if (source != null) {
@@ -184,7 +190,7 @@ public class ArenaImpl extends BaseButton implements Arena {
         }
 
         this.countdown = new Countdown(plugin, this, kit, info, messages, config.getTitles());
-        countdown.runTaskTimer(plugin, 0L, 20L);
+        countdown.startCountdown(0L, 20L);
     }
 
     boolean isCounting() {

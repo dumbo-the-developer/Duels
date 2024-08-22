@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.function.BiConsumer;
 
+import me.realized.duels.DuelsPlugin;
 import org.bukkit.plugin.Plugin;
 
 public final class UpdateChecker {
@@ -23,7 +24,7 @@ public final class UpdateChecker {
     public void check(final BiConsumer<Boolean, String> callback) {
         final String currentVersion = plugin.getDescription().getVersion();
 
-        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+        DuelsPlugin.getMorePaperLib().scheduling().asyncScheduler().run(() -> {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(new URL(String.format(API_URL, id)).openStream()))) {
                 final String latestVersion = reader.readLine();
 

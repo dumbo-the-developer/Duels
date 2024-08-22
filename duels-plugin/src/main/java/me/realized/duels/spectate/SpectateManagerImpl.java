@@ -168,29 +168,30 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
         spectators.put(player.getUniqueId(), spectator);
         arenas.put(arena, spectator);
 
-        if (!config.isSpecUseSpectatorGamemode()) {
-            player.setGameMode(GameMode.ADVENTURE);
-            player.setAllowFlight(true);
-            player.setFlying(true);
-        } else {
-            player.setGameMode(GameMode.SPECTATOR);
-        }
+        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+            if (!config.isSpecUseSpectatorGamemode()) {
+                player.setGameMode(GameMode.ADVENTURE);
+                player.setAllowFlight(true);
+                player.setFlying(true);
+            } else {
+                player.setGameMode(GameMode.SPECTATOR);
+            }
 
-        if (CompatUtil.hasSetCollidable()) {
-            player.setCollidable(false);
-        } else {
-            player.spigot().setCollidesWithEntities(false);
-        }
+            if (CompatUtil.hasSetCollidable()) {
+                player.setCollidable(false);
+            } else {
+                player.spigot().setCollidesWithEntities(false);
+            }
 
-        if (config.isSpecAddInvisibilityEffect()) {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false));
-        }
+            if (config.isSpecAddInvisibilityEffect()) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false));
+            }
 
-        // Broadcast to the arena that player has begun spectating if player does not have the SPEC_ANON permission.
-        if (!player.hasPermission(Permissions.SPEC_ANON)) {
-            arena.getMatch().getAllPlayers().forEach(matchPlayer -> lang.sendMessage(matchPlayer, "SPECTATE.arena-broadcast", "name", player.getName()));
-        }
-
+            // Broadcast to the arena that player has begun spectating if player does not have the SPEC_ANON permission.
+            if (!player.hasPermission(Permissions.SPEC_ANON)) {
+                arena.getMatch().getAllPlayers().forEach(matchPlayer -> lang.sendMessage(matchPlayer, "SPECTATE.arena-broadcast", "name", player.getName()));
+            }
+        }, null);
         return Result.SUCCESS;
     }
 
@@ -226,7 +227,7 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
         final MatchImpl match = spectator.getArena().getMatch();
 
         // Show to players in match
-        if (match != null && !essentials.isVanished(player)) {
+        if (match != null && !(essentials != null && essentials.isVanished(player))) {
             match.getAllPlayers()
                     .stream()
                     .filter(Player::isOnline)

@@ -1,11 +1,6 @@
 package me.realized.duels.arena;
 
 import com.google.common.collect.Lists;
-
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import me.realized.duels.DuelsPlugin;
 import me.realized.duels.config.Config;
 import me.realized.duels.util.StringUtil;
@@ -13,9 +8,13 @@ import me.realized.duels.util.compat.Titles;
 import me.realized.duels.util.function.Pair;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.scheduler.BukkitRunnable;
 
-class Countdown extends BukkitRunnable {
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+class Countdown implements Runnable {
 
     private final Config config;
     private final ArenaImpl arena;
@@ -46,7 +45,6 @@ class Countdown extends BukkitRunnable {
         final String title = !titles.isEmpty() ? titles.remove(0) : null;
 
         arena.getPlayers().forEach(player -> {
-            // Place barrier blocks around the player during the countdown
             config.playSound(player, rawMessage);
 
             final Pair<String, Integer> info = this.info.get(player.getUniqueId());
@@ -63,27 +61,23 @@ class Countdown extends BukkitRunnable {
             }
 
             if (title != null) {
-                Titles.send(player, title, null, 0, 20, 50);
+                Titles.send(player, title, null, 20, 40, 75);
             }
 
         });
 
         if (!arena.isUsed() || messages.isEmpty()) {
             arena.setCountdown(null);
-            cancel();
             finished = true;
-
-            // Remove barrier blocks around the players when the countdown ends
         }
     }
 
     private void placeBarrierBlocks(Location location) {
-        // Place barrier blocks in front, back, and on top of the player
         placeBarrierBlock(location.clone().add(1, 0, 0)); // Right
         placeBarrierBlock(location.clone().add(-1, 0, 0)); // Left
         placeBarrierBlock(location.clone().add(0, 2, 0)); // Top
         placeBarrierBlock(location.clone().add(0, 0, 1)); // Front
-        placeBarrierBlock(location.clone().add(0, 0, -1));
+        placeBarrierBlock(location.clone().add(0, 0, -1)); // Back
     }
 
     private void placeBarrierBlock(Location location) {
@@ -91,15 +85,18 @@ class Countdown extends BukkitRunnable {
     }
 
     private void removeBarrierBlocks(Location location) {
-        // Remove barrier blocks on top, front, and back of the player
         removeBarrierBlock(location.clone().add(1, 0, 0)); // Right
         removeBarrierBlock(location.clone().add(-1, 0, 0)); // Left
         removeBarrierBlock(location.clone().add(0, 2, 0)); // Top
         removeBarrierBlock(location.clone().add(0, 0, 1)); // Front
-        removeBarrierBlock(location.clone().add(0, 0, -1));
+        removeBarrierBlock(location.clone().add(0, 0, -1)); // Back
     }
 
     private void removeBarrierBlock(Location location) {
         location.getBlock().setType(Material.AIR);
+    }
+
+    public void startCountdown(long delay, long period) {
+        DuelsPlugin.getMorePaperLib().scheduling().asyncScheduler().runAtFixedRate(this, Duration.ofMillis(delay * 50), Duration.ofMillis(period * 50));
     }
 }

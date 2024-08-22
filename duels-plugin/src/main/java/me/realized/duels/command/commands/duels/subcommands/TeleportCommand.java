@@ -9,7 +9,10 @@ import me.realized.duels.util.StringUtil;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+
+import static io.papermc.lib.PaperLib.teleportAsync;
 
 public class TeleportCommand extends BaseCommand {
 
@@ -41,7 +44,7 @@ public class TeleportCommand extends BaseCommand {
             return;
         }
 
-        ((Player) sender).teleport(location);
+        teleportAsync((Player) sender, location);
         lang.sendMessage(sender, "COMMAND.duels.teleport", "name", name, "position", pos);
     }
 

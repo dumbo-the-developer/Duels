@@ -1,8 +1,8 @@
 package me.realized.duels;
 
 import com.google.common.collect.Lists;
-
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-
 import lombok.Getter;
 import me.realized.duels.api.Duels;
 import me.realized.duels.api.command.SubCommand;
@@ -31,14 +30,7 @@ import me.realized.duels.extension.ExtensionManager;
 import me.realized.duels.hook.HookManager;
 import me.realized.duels.inventories.InventoryManager;
 import me.realized.duels.kit.KitManagerImpl;
-import me.realized.duels.listeners.DamageListener;
-import me.realized.duels.listeners.EnderpearlListener;
-import me.realized.duels.listeners.KitItemListener;
-import me.realized.duels.listeners.KitOptionsListener;
-import me.realized.duels.listeners.LingerPotionListener;
-import me.realized.duels.listeners.PotionListener;
-import me.realized.duels.listeners.ProjectileHitListener;
-import me.realized.duels.listeners.TeleportListener;
+import me.realized.duels.listeners.*;
 import me.realized.duels.logging.LogManager;
 import me.realized.duels.player.PlayerInfoManager;
 import me.realized.duels.queue.QueueManager;
@@ -59,8 +51,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
+import space.arim.morepaperlib.MorePaperLib;
+import space.arim.morepaperlib.scheduling.ScheduledTask;
 
 public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
@@ -70,6 +63,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     @Getter
     private static DuelsPlugin instance;
+    @Getter
+    private static MorePaperLib morePaperLib;
 
     private final List<Loadable> loadables = new ArrayList<>();
     private final Map<String, AbstractCommand<DuelsPlugin>> commands = new HashMap<>();
@@ -122,6 +117,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     public void onEnable() {
         long start = System.currentTimeMillis();
         instance = this;
+        morePaperLib = new MorePaperLib(this);
         Log.addSource(this);
         JsonUtil.registerDeserializer(ItemData.class, ItemDataDeserializer.class);
 
@@ -243,6 +239,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                 logManager.debug(name + " has been loaded. (took " + (System.currentTimeMillis() - now) + "ms)");
                 lastLoad = loadables.indexOf(loadable);
             } catch (Exception ex) {
+                // Print the stacktrace to help with debugging
+                ex.printStackTrace();
+
                 // Handles the case of exceptions from LogManager not being logged in file
                 if (loadable instanceof LogSource) {
                     ex.printStackTrace();
@@ -364,50 +363,45 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     }
 
     @Override
-    public BukkitTask doSync(@NotNull final Runnable task) {
+    public ScheduledTask doSync(@NotNull final Runnable task) {
         Objects.requireNonNull(task, "task");
-        return Bukkit.getScheduler().runTask(this, task);
+        return DuelsPlugin.morePaperLib.scheduling().globalRegionalScheduler().run(task);
     }
 
     @Override
-    public BukkitTask doSyncAfter(@NotNull final Runnable task, final long delay) {
+    public ScheduledTask doSyncAfter(@NotNull final Runnable task, final long delay) {
         Objects.requireNonNull(task, "task");
-        return Bukkit.getScheduler().runTaskLater(this, task, delay);
+        return DuelsPlugin.morePaperLib.scheduling().globalRegionalScheduler().runDelayed(task, delay);
     }
 
     @Override
-    public BukkitTask doSyncRepeat(@NotNull final Runnable task, final long delay, final long period) {
+    public ScheduledTask doSyncRepeat(@NotNull final Runnable task, final long delay, final long period) {
         Objects.requireNonNull(task, "task");
-        return Bukkit.getScheduler().runTaskTimer(this, task, delay, period);
+        return DuelsPlugin.morePaperLib.scheduling().globalRegionalScheduler().runAtFixedRate(task, delay, period);
     }
 
     @Override
-    public BukkitTask doAsync(@NotNull final Runnable task) {
+    public ScheduledTask doAsync(@NotNull final Runnable task) {
         Objects.requireNonNull(task, "task");
-        return Bukkit.getScheduler().runTaskAsynchronously(this, task);
+        return DuelsPlugin.morePaperLib.scheduling().asyncScheduler().run(task);
     }
 
     @Override
-    public BukkitTask doAsyncAfter(@NotNull final Runnable task, final long delay) {
+    public ScheduledTask doAsyncAfter(@NotNull final Runnable task, final long delay) {
         Objects.requireNonNull(task, "task");
-        return Bukkit.getScheduler().runTaskLaterAsynchronously(this, task, delay);
+        return DuelsPlugin.morePaperLib.scheduling().asyncScheduler().runDelayed(task, Duration.ofMillis(delay * 50));
     }
 
     @Override
-    public BukkitTask doAsyncRepeat(@NotNull final Runnable task, final long delay, final long period) {
+    public ScheduledTask doAsyncRepeat(@NotNull final Runnable task, final long delay, final long period) {
         Objects.requireNonNull(task, "task");
-        return Bukkit.getScheduler().runTaskTimerAsynchronously(this, task, delay, period);
+        return DuelsPlugin.morePaperLib.scheduling().asyncScheduler().runAtFixedRate(task, Duration.ofMillis(delay * 50), Duration.ofMillis(period * 50));
     }
 
     @Override
-    public void cancelTask(@NotNull final BukkitTask task) {
+    public void cancelTask(@NotNull final ScheduledTask task) {
         Objects.requireNonNull(task, "task");
         task.cancel();
-    }
-
-    @Override
-    public void cancelTask(final int id) {
-        Bukkit.getScheduler().cancelTask(id);
     }
 
     @Override
@@ -450,14 +444,17 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     public void log(final Level level, final String s) {
         getLogger().log(level, s);
     }
+
     @Override
     public void log(final Level level, final String s, final Throwable thrown) {
         getLogger().log(level, s, thrown);
     }
-    public static String getPrefix(){
+
+    public static String getPrefix() {
         return ChatColor.translateAlternateColorCodes('&', "&7[&aDuels&bOptimised&7] &f");
     }
-    public static void sendMessage(String message){
+
+    public static void sendMessage(String message) {
         Bukkit.getConsoleSender().sendMessage(getPrefix() + CC.translate(message));
     }
 }
