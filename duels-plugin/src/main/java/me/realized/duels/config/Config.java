@@ -153,6 +153,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private int kFactor;
     @Getter
+    private int maxDifference;
+    @Getter
     private int defaultRating;
     @Getter
     private boolean ratingQueueOnly;
@@ -328,6 +330,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
 
         ratingEnabled = configuration.getBoolean("rating.enabled", true);
         kFactor = Math.max(configuration.getInt("rating.k-factor", 32), 1);
+        maxDifference = Math.max(configuration.getInt("rating.max-difference", 400), 1);
         defaultRating = Math.max(configuration.getInt("rating.default-rating", 1400), 0);
         ratingQueueOnly = configuration.getBoolean("rating.queue-matches-only", true);
 

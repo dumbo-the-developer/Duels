@@ -387,6 +387,10 @@ rating:
   # default: 32
   k-factor: 32
 
+  # Max possible rating difference when matching players in queue
+  # default: 400
+  max-difference: 400
+
   # The default rating for all kits.
   # default: 1400
   default-rating: 1400
