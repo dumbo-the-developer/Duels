@@ -67,13 +67,13 @@ public class Button<P extends JavaPlugin> {
 
         editMeta(meta -> {
             if (glow) {
-                meta.addEnchant(Enchantment.DURABILITY, 1, false);
+                meta.addEnchant(Enchantment.UNBREAKING, 1, false);
 
                 if (CompatUtil.hasItemFlag()) {
                     meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                 }
             } else {
-                meta.removeEnchant(Enchantment.DURABILITY);
+                meta.removeEnchant(Enchantment.UNBREAKING);
 
                 if (CompatUtil.hasItemFlag()) {
                     meta.removeItemFlags(ItemFlag.HIDE_ENCHANTS);

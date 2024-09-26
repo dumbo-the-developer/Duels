@@ -25,7 +25,7 @@ public class EffectsButton extends BaseButton {
                 .build());
         editMeta(meta -> {
             if (CompatUtil.hasItemFlag()) {
-                meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+                meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             }
         });
     }

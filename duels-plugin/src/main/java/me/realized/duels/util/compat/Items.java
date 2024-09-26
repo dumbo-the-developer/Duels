@@ -39,7 +39,7 @@ public final class Items {
         MUSHROOM_SOUP = Material.MUSHROOM_STEW;
         EMPTY_MAP = Material.MAP;
         SIGN = Material.OAK_SIGN;
-        HEAL_SPLASH_POTION = createPotion(Material.SPLASH_POTION, PotionType.INSTANT_HEAL, false, true);
+        HEAL_SPLASH_POTION = createPotion(Material.SPLASH_POTION, PotionType.STRONG_HEALING, false, true);
         WATER_BREATHING_POTION = createPotion(Material.POTION, PotionType.WATER_BREATHING, false, false);
         ENCHANTED_GOLDEN_APPLE = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE);
     }
@@ -97,6 +97,6 @@ public final class Items {
             return false;
         }
         PotionMeta meta = (PotionMeta) item.getItemMeta();
-        return meta.getBasePotionData().getType() == PotionType.INSTANT_HEAL;
+        return meta.getBasePotionType() == PotionType.STRONG_HEALING;
     }
 }

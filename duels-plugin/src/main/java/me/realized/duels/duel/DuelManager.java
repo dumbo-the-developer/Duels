@@ -558,7 +558,7 @@ public class DuelManager implements Loadable {
 
                 if (config.isSpawnFirework()) {
                     DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(winner.getLocation()).run(() -> {
-                        final Firework firework = (Firework) winner.getWorld().spawnEntity(winner.getEyeLocation(), EntityType.FIREWORK);
+                        final Firework firework = (Firework) winner.getWorld().spawnEntity(winner.getEyeLocation(), EntityType.FIREWORK_ROCKET);
                         final FireworkMeta meta = firework.getFireworkMeta();
                         String colourName = config.getFireworkColour();
                         String typeName = config.getFireworkType();

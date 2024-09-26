@@ -128,7 +128,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
             // Manually print the stacktrace since Log#error only prints errors to non-plugin log sources.
             ex.printStackTrace();
-            getPluginLoader().disablePlugin(this);
+            getServer().getPluginManager().disablePlugin(this);
             return;
         }
 
@@ -143,7 +143,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             sendMessage("&c&lTo run your server on spigot, follow this guide: " + SPIGOT_INSTALLATION_URL);
             sendMessage("&c&lSpigot is compatible with CraftBukkit/Bukkit plugins.");
             sendMessage("&c&l================= *** DUELS LOAD FAILURE *** =================");
-            getPluginLoader().disablePlugin(this);
+            getServer().getPluginManager().disablePlugin(this);
             return;
         }
 
@@ -167,7 +167,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(extensionManager = new ExtensionManager(this));
 
         if (!load()) {
-            getPluginLoader().disablePlugin(this);
+            getServer().getPluginManager().disablePlugin(this);
             return;
         }
 
@@ -335,7 +335,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Override
     public boolean reload() {
         if (!(unload() && load())) {
-            getPluginLoader().disablePlugin(this);
+            getServer().getPluginManager().disablePlugin(this);
             return false;
         }
 
