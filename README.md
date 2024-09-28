@@ -42,16 +42,16 @@ Maven:
 Gradle:
 
 ```groovy
-compile group: 'com.github.Realizedd.Duels', name: 'duels-api', version: '3.5.1'
+compile group: 'com.github.dumbo-the-developer.Duels', name: 'duels-api', version: '1.0'
 ```  
 
 Maven:
 
 ```xml
 <dependency>
-    <groupId>com.github.Realizedd.Duels</groupId>
+    <groupId>com.github.dubo-the-developer.Duels</groupId>
     <artifactId>duels-api</artifactId>
-    <version>3.5.1</version>
+    <version>1.0</version>
     <scope>provided</scope>
 </dependency>
 ```
