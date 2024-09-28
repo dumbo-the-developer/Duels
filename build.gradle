@@ -9,8 +9,8 @@ buildscript {
 }
 
 allprojects {
-    group = 'me.realized'
-    version = '3.2-BETA'
+    group = 'com.meteordevelopments'
+    version = '1.0'
 }
 
 subprojects {
@@ -19,8 +19,8 @@ subprojects {
     apply plugin: 'com.gradleup.shadow'
     apply plugin: 'maven-publish'
 
-    sourceCompatibility = 21
-    targetCompatibility = 21
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 
 
     repositories {
