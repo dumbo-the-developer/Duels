@@ -165,6 +165,10 @@ public class ArenaImpl extends BaseButton implements Arena {
             map.getKey().getBlock().setBlockData(map.getValue());
         }
 
+        for (Entity entity : match.placedEntities){
+            entity.remove();
+        }
+
         for (Block block : match.liquids) {
             Location loc = block.getLocation();
             int radius = 1;

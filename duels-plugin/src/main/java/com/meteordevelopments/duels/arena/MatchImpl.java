@@ -7,6 +7,7 @@ import com.meteordevelopments.duels.queue.Queue;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -52,6 +53,7 @@ public class MatchImpl implements Match {
     public List<Block> placedBlocks = new ArrayList<>();
     public List<Block> liquids = new ArrayList<>();
     public HashMap<Location, BlockData> brokenBlocks = new HashMap<>();
+    public List<Entity> placedEntities = new ArrayList<>();
 
     // Default value for players is false, which is set to true if player is killed in the match.
     private final Map<Player, PlayerStatus> players = new HashMap<>();

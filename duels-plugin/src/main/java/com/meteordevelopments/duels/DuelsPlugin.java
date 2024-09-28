@@ -55,8 +55,10 @@ import java.util.stream.Collectors;
 public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     private static final int BSTATS_ID = 20778;
-    private static final int RESOURCE_ID = 114595;
+    private static final int RESOURCE_ID = 118881;
     private static final String SPIGOT_INSTALLATION_URL = "https://www.spigotmc.org/wiki/spigot-installation/";
+    @Getter
+    private UpdateManager updateManager;
 
     @Getter
     private static DuelsPlugin instance;
@@ -105,10 +107,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private Teleport teleport;
     @Getter
     private ExtensionManager extensionManager;
-    @Getter
-    private volatile boolean updateAvailable;
-    @Getter
-    private volatile String newVersion;
 
     @Override
     public void onEnable() {
@@ -183,20 +181,16 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             return;
         }
 
-        final UpdateChecker updateChecker = new UpdateChecker(this, RESOURCE_ID);
-        updateChecker.check((hasUpdate, newVersion) -> {
-            if (hasUpdate) {
-                DuelsPlugin.this.updateAvailable = true;
-                DuelsPlugin.this.newVersion = newVersion;
-                sendMessage("&a===============================================");
-                sendMessage("&aAn update for " + getName() + " is available!");
-                sendMessage("&aDownload " + getName() + " v" + newVersion + " here:");
-                Log.info(getDescription().getWebsite());
-                sendMessage("&a===============================================");
-            } else {
-                sendMessage("&aNo updates were available. You are on the latest version!");
-            }
-        });
+        this.updateManager = new UpdateManager(this);
+        this.updateManager.checkForUpdate();
+        if (updateManager.updateIsAvailable()){
+            sendMessage("&a===============================================");
+            sendMessage("&aAn update for " + getName() + " is available!");
+            sendMessage("&aDownload " + getName() + " v" + updateManager.getLatestVersion() + " here:");
+            sendMessage("&e" + getDescription().getWebsite());
+            sendMessage("&a===============================================");
+        }
+
         long end = System.currentTimeMillis();
         sendMessage("&aSuccessfully enabled Duels in " + CC.getTimeDifferenceAndColor(start, end) + "&a.");
     }
@@ -454,4 +448,5 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     public static void sendMessage(String message) {
         Bukkit.getConsoleSender().sendMessage(getPrefix() + CC.translate(message));
     }
+
 }

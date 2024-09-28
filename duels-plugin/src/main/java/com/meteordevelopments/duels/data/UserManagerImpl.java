@@ -279,8 +279,8 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
         final Player player = event.getPlayer();
 
         plugin.doSyncAfter(() -> {
-            if (plugin.isUpdateAvailable() && (player.isOp() || player.hasPermission(Permissions.ADMIN))) {
-                player.sendMessage(StringUtil.color(String.format(ADMIN_UPDATE_MESSAGE, plugin.getNewVersion(), plugin.getDescription().getWebsite())));
+            if (plugin.getUpdateManager().updateIsAvailable() && (player.isOp() || player.hasPermission(Permissions.ADMIN))) {
+                player.sendMessage(StringUtil.color(String.format(ADMIN_UPDATE_MESSAGE, plugin.getUpdateManager().getLatestVersion(), plugin.getDescription().getWebsite())));
             }
         }, 5L);
 
