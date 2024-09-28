@@ -15,11 +15,12 @@ processResources {
 
 dependencies {
     compileOnly 'org.jetbrains:annotations-java5:22.0.0'
-    compileOnly 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
     implementation 'org.spigotmc:spigot-api:1.14.4-R0.1-SNAPSHOT'
-    implementation 'com.mojang:authlib:1.5.21'
-    implementation 'me.clip:placeholderapi:2.11.1'
+    implementation 'commons-lang:commons-lang:2.6'
+    implementation 'com.mojang:authlib:1.5.25'
+    implementation 'me.clip:placeholderapi:2.11.6'
     implementation 'com.SirBlobman.combatlogx:CombatLogX-API:10.0.0.0-SNAPSHOT'
     implementation('net.essentialsx:EssentialsX:2.19.2') {
         transitive = false
@@ -42,6 +43,10 @@ dependencies {
     implementation project(':duels-worldguard')
     implementation project(':duels-worldguard-v6')
     implementation project(':duels-worldguard-v7')
+    implementation project(':duels-common')
+    implementation project(':duels-above_1_13')
+    implementation project(':duels-below_1_13')
+    implementation project(':duels-legacy')
     implementation 'io.papermc:paperlib:1.0.7'
     implementation 'space.arim.morepaperlib:morepaperlib:0.4.3'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
@@ -58,6 +63,10 @@ shadowJar {
         include(project(':duels-worldguard'))
         include(project(':duels-worldguard-v6'))
         include(project(':duels-worldguard-v7'))
+        include(project(':duels-common'))
+        include(project(':duels-above_1_13'))
+        include(project(':duels-below_1_13'))
+        include(project(':duels-legacy'))
         include(dependency('com.fasterxml.jackson.core:.*'))
         include(dependency('io.papermc:.*'))
         include(dependency('space.arim.morepaperlib:.*'))

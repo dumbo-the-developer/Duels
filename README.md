@@ -1,6 +1,6 @@
 <h1>Duels</h1>
 
-[![](https://jitpack.io/v/Realizedd/Duels.svg)](https://jitpack.io/#Realizedd/Duels)
+[![](https://jitpack.io/v/dumbo-the-developer/Duels.svg)](https://jitpack.io/#dumbo-the-developer/Duels)
 
 A duel plugin for spigot. <a href="https://www.spigotmc.org/resources/duels.20171/">Spigot Project Page</a>
 
@@ -42,16 +42,16 @@ Maven:
 Gradle:
 
 ```groovy
-compile group: 'com.github.Realizedd.Duels', name: 'duels-api', version: '3.5.1'
+compile group: 'com.github.dumbo-the-developer.Duels', name: 'duels-api', version: '1.0'
 ```  
 
 Maven:
 
 ```xml
 <dependency>
-    <groupId>com.github.Realizedd.Duels</groupId>
+    <groupId>com.github.dubo-the-developer.Duels</groupId>
     <artifactId>duels-api</artifactId>
-    <version>3.5.1</version>
+    <version>1.0</version>
     <scope>provided</scope>
 </dependency>
 ```
@@ -72,4 +72,3 @@ public void onEnable() {
   Duels api = (Duels) Bukkit.getServer().getPluginManager().getPlugin("Duels");
 }
 ```
-
