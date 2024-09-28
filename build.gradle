@@ -27,43 +27,43 @@ subprojects {
         mavenCentral()
 
         maven {
-            name 'spigot-repo'
-            url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+            name = 'spigot-repo'
+            url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
         }
 
         maven {
-            name 'papermc'
-            url 'https://repo.papermc.io/repository/maven-public/'
+            name = 'papermc'
+            url = 'https://repo.papermc.io/repository/maven-public/'
         }
 
         maven {
-            name 'bungeecord-repo'
-            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+            name = 'bungeecord-repo'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
         }
 
         maven {
-            name 'mojang-repo'
-            url 'https://libraries.minecraft.net/'
+            name = 'mojang-repo'
+            url = 'https://libraries.minecraft.net/'
         }
 
         maven {
-            name 'clip-repo'
-            url 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+            name = 'clip-repo'
+            url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
         }
 
         maven {
-            name 'enginehub-repo'
-            url 'https://maven.enginehub.org/repo/'
+            name = 'enginehub-repo'
+            url = 'https://maven.enginehub.org/repo/'
         }
 
         maven {
-            name 'codemc-repo'
-            url 'https://repo.codemc.io/repository/maven-public/'
+            name = 'codemc-repo'
+            url = 'https://repo.codemc.io/repository/maven-public/'
         }
 
         maven {
-            name 'essentialsx-repo'
-            url 'https://repo.essentialsx.net/releases/'
+            name = 'essentialsx-repo'
+            url = 'https://repo.essentialsx.net/releases/'
         }
 
         maven {
