@@ -1,5 +1,5 @@
 name: Bug Report
-description: File a bug report for DecentHolograms
+description: File a bug report for Duels
 labels: [ bug ]
 body:
   - type: markdown
