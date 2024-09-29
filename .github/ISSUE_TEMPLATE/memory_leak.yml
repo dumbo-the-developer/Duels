@@ -1,5 +1,5 @@
 name: Memory leak
-description: Memory leak caused by TAB.
+description: Memory leak caused by Duels.
 labels: ["Type: Memory leak"]
 body:
   - type: input
