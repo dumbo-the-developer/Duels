@@ -1,6 +1,6 @@
 name: Memory leak
 description: Memory leak caused by Duels.
-labels: ["Type: Memory leak"]
+labels: ["Type: Memory Leak"]
 body:
   - type: input
     attributes:
