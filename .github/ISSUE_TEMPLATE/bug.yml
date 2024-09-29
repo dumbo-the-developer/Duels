@@ -1,6 +1,6 @@
 name: Bug Report
 description: Plugin does not work as described.
-labels: [ bug ]
+labels: ["Type: Bug"]
 body:
   - type: input
     attributes:
