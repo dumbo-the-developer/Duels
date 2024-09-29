@@ -1,74 +1,73 @@
 name: Bug Report
-description: File a bug report for Duels
+description: Plugin does not work as described.
 labels: [ bug ]
 body:
-  - type: markdown
+  - type: input
     attributes:
-      value: |
-        Thanks for taking the time to fill out this bug report!
-        If this format doesn't suit your needs, feel free to use the [blank](https://github.com/DecentSoftware-eu/DecentHolograms/issues/new) one instead.
-  - type: checkboxes
-    id: making-sure
-    attributes:
-      label: Just making sure
-      description: 'Please make sure, all the following are true:'
-      options:
-        - label: I made sure, this bug is not already known or reported.
-          required: true
-        - label: I believe, that this bug is fixable.
-          required: true
-  - type: textarea
-    id: reproduction
-    attributes:
-      label: Reproduction
-      description: Please tell us how you reached the problem.
-      value: |
-        1. Install Duels...
-        2. Do something...
-        3. Do something else...
-        4. This happens...
+      label: Server version
+      description: Version and type of used server software where Duels is installed.
+      placeholder: Paper 1.21.1
     validations:
       required: true
-  - type: textarea
-    id: solution
+
+  - type: input
     attributes:
-      label: Solution
-      description: Please explain what you think causes the problem (optional)
-      placeholder: e.g. There is a missing null check at...
+      label: Duels version
+      description: Full version in numbers, "latest" is not a version.
+      placeholder: 1.2.3
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Plugin list
+      description: Full list of plugins (output of /plugins)
+      placeholder: ...
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Describe the bug
+      description: How the plugin behaves
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected behavior
+      description: How the plugin is supposed to behave instead with your configuration.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      description: What to do in order to reproduce this issue
+      placeholder: |
+        Step 1: ..
+        Step 2: ..
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Additional info
+      description: Anything else you want to provide that will help in resolving the issue faster, such as screenshots or videos.
     validations:
       required: false
-  - type: input
-    id: server_version
+  - type: checkboxes
     attributes:
-      label: Server Version
-      description: What version of Minecraft is the server on?
-      placeholder: DO NOT SAY "LATEST"
-    validations:
-      required: true
-  - type: input
-    id: client_version
-    attributes:
-      label: Client Version
-      description: What version of Minecraft is the client on?
-      placeholder: DO NOT SAY "LATEST"
-    validations:
-      required: true
-  - type: input
-    id: plugin_version
-    attributes:
-      label: Plugin Version
-      description: What version of Duels are you running?
-      placeholder: DO NOT SAY "LATEST"
-    validations:
-      required: true
-  - type: input
-    id: log
-    attributes:
-      label: Log
-      description: Paste a full log. Always use [Pastebin](https://pastebin.com/) or [HelpChat](https://paste.helpch.at/). Must be a full log, not a crash report, or a screenshot.
-      placeholder: https://pastebin.com/...
-    validations:
-      required: true
-  - type: markdown
-    attributes:
-      value: "Thank you for filling this out! We will look into your report as soon as possible."
+      label: Checklist
+      description: Let's make sure this report is valid
+      options:
+        - label: I am running latest version of the plugin
+          required: true
+        - label: I have read the wiki to make sure it's not an issue with configuration
+          required: true
+        - label: I ticked all of the boxes without actually reading them
+          required: false
+        - label: I have read the Compatibility wiki page and am not trying to run the plugin on an unsupported server version / platform
+          required: true
+        - label: I am willing to cooperate to get this issue resolved faster, including providing any additional information requested or testing new builds
+          required: true
