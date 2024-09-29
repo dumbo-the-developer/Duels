@@ -22,7 +22,7 @@ dependencies {
     implementation 'com.mojang:authlib:1.5.25'
     implementation 'me.clip:placeholderapi:2.11.6'
     implementation 'com.SirBlobman.combatlogx:CombatLogX-API:10.0.0.0-SNAPSHOT'
-    implementation('net.essentialsx:EssentialsX:2.19.2') {
+    implementation('net.essentialsx:EssentialsX:2.20.1') {
         transitive = false
     }
     implementation(name: 'MVdWPlaceholderAPI-3.1.1') {
