@@ -242,6 +242,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private String fireworkType;
     @Getter
     private boolean clearItemsAfterMatch;
+    @Getter
+    private boolean stayUpToDate;
 
     public Config(final DuelsPlugin plugin) {
         super(plugin, "config");
@@ -380,6 +382,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         soupCancelIfAlreadyFull = configuration.getBoolean("soup.cancel-if-already-full", true);
         fireworkColour = configuration.getString("firework.colour", "AQUA");
         fireworkType = configuration.getString("firework.type", "BALL_LARGE");
+        stayUpToDate = configuration.getBoolean("stay-up-to-date", true);
 
         final ConfigurationSection sounds = configuration.getConfigurationSection("sounds");
 

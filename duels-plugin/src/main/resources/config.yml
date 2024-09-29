@@ -4,7 +4,7 @@ config-version: 12
 # If set to 'true', a notification and a download link will be printed on both console and in-game when a new update is available.
 # default: true
 check-for-updates: true
-
+stay-up-to-date: true
 
 # NOTE: The following options will only activate if the message '[Duels] Hooked into <plugin name>!' is displayed on console.
 # If the plugin in the following list is enabled on your server but Duels fails to hook into them,
