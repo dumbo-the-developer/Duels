@@ -2,8 +2,6 @@
 
 [![](https://jitpack.io/v/dumbo-the-developer/Duels.svg)](https://jitpack.io/#dumbo-the-developer/Duels)
 
-A duel plugin for spigot. <a href="https://www.spigotmc.org/resources/duels.20171/">Spigot Project Page</a>
-
 ---
 
 * **[Wiki](https://github.com/Realizedd/Duels/wiki)**

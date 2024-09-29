@@ -1,0 +1,9 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "org.spigotmc:spigot"
+      - dependency-name: "com.sk89q.worldguard:worldguard"

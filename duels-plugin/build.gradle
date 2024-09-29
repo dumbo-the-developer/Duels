@@ -14,7 +14,7 @@ processResources {
 }
 
 dependencies {
-    compileOnly 'org.jetbrains:annotations-java5:22.0.0'
+    compileOnly 'org.jetbrains:annotations-java5:24.1.0'
     compileOnly 'org.projectlombok:lombok:1.18.34'
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
     implementation 'org.spigotmc:spigot-api:1.14.4-R0.1-SNAPSHOT'
@@ -22,7 +22,7 @@ dependencies {
     implementation 'com.mojang:authlib:1.5.25'
     implementation 'me.clip:placeholderapi:2.11.6'
     implementation 'com.SirBlobman.combatlogx:CombatLogX-API:10.0.0.0-SNAPSHOT'
-    implementation('net.essentialsx:EssentialsX:2.19.2') {
+    implementation('net.essentialsx:EssentialsX:2.20.1') {
         transitive = false
     }
     implementation(name: 'MVdWPlaceholderAPI-3.1.1') {
@@ -48,7 +48,7 @@ dependencies {
     implementation project(':duels-below_1_13')
     implementation project(':duels-legacy')
     implementation 'io.papermc:paperlib:1.0.7'
-    implementation 'space.arim.morepaperlib:morepaperlib:0.4.3'
+    implementation 'space.arim.morepaperlib:morepaperlib:0.4.4'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
     implementation 'org.json:json:20211205'
 }
