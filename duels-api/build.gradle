@@ -5,6 +5,15 @@ dependencies {
     implementation('space.arim.morepaperlib:morepaperlib:0.4.4')
 }
 
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
@@ -12,6 +21,7 @@ publishing {
             artifactId = project.name.toLowerCase()
             version = project.version
             from components.java
+            artifact javadocJar
         }
     }
 }
