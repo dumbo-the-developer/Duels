@@ -59,7 +59,7 @@ public class UpdateManager {
 
     public String getCurrentVersion() {
         if (this.currentVersion == null) {
-            this.currentVersion = "v" + this.main.getDescription().getVersion();
+            this.currentVersion = this.main.getDescription().getVersion();
         }
 
         return this.currentVersion;
