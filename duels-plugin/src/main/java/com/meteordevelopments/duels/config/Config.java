@@ -244,6 +244,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean clearItemsAfterMatch;
     @Getter
     private boolean stayUpToDate;
+    @Getter
+    private boolean disableEnderpearlInEndgame;
+    @Getter
+    private boolean disableMovementInEndgame;
 
     public Config(final DuelsPlugin plugin) {
         super(plugin, "config");
@@ -383,6 +387,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         fireworkColour = configuration.getString("firework.colour", "AQUA");
         fireworkType = configuration.getString("firework.type", "BALL_LARGE");
         stayUpToDate = configuration.getBoolean("stay-up-to-date", true);
+        disableEnderpearlInEndgame = configuration.getBoolean("disable-enderpearl-in-endgame", true);
+        disableMovementInEndgame = configuration.getBoolean("disable-movement-in-endgame", false);
 
         final ConfigurationSection sounds = configuration.getConfigurationSection("sounds");
 

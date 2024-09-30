@@ -222,21 +222,21 @@ public class DuelManager implements Loadable {
      */
     private void handleWin(final Player player, final Player opponent, final ArenaImpl arena, final MatchImpl match) {
         arena.remove(player);
-
         final String opponentName = opponent != null ? opponent.getName() : lang.getMessage("GENERAL.none");
 
+        // Handle vault rewards if bet exists
         if (vault != null && match.getBet() > 0) {
             final int amount = match.getBet() * 2;
             vault.add(amount, player);
             lang.sendMessage(player, "DUEL.reward.money.message", "name", opponentName, "money", amount);
 
             final String title = lang.getMessage("DUEL.reward.money.title", "name", opponentName, "money", amount);
-
             if (title != null) {
                 Titles.send(player, title, null, 0, 20, 50);
             }
         }
 
+        // Enable mcMMO skills after the match
         if (mcMMO != null) {
             mcMMO.enableSkills(player);
         }
@@ -244,6 +244,8 @@ public class DuelManager implements Loadable {
         final PlayerInfo info = playerManager.get(player);
         final List<ItemStack> items = match.getItems();
 
+
+        // If the player is still alive, reset their state and teleport
         if (!player.isDead()) {
             playerManager.remove(player);
 
@@ -251,6 +253,7 @@ public class DuelManager implements Loadable {
                 DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> PlayerUtil.reset(player), null);
             }
 
+            // Restore player's inventory and teleport them after the match
             if (info != null) {
                 DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
                     teleport.tryTeleport(player, info.getLocation());
@@ -258,6 +261,7 @@ public class DuelManager implements Loadable {
                 }, null);
             }
 
+            // Add or drop items to the player's inventory after teleportation
             DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
                 if (InventoryUtil.addOrDrop(player, items)) {
                     lang.sendMessage(player, "DUEL.reward.items.message", "name", opponentName);
@@ -640,6 +644,38 @@ public class DuelManager implements Loadable {
         }
 
         @EventHandler
+        public void on (final PlayerInteractEvent event) {
+            if (!config.isDisableEnderpearlInEndgame()){
+                return;
+            }
+
+            final Player player = event.getPlayer();
+            final ArenaImpl arena = arenaManager.get(player);
+
+            if (arena == null || !arena.isEndGame()) {
+                return;
+            }
+
+            event.setCancelled(true);
+        }
+
+        @EventHandler
+        public void on(final PlayerMoveEvent event) {
+            if (!config.isDisableMovementInEndgame()){
+                return;
+            }
+
+            final Player player = event.getPlayer();
+            final ArenaImpl arena = arenaManager.get(player);
+
+            if (arena == null || !arena.isEndGame()) {
+                return;
+            }
+
+            event.setCancelled(true);
+        }
+
+        @EventHandler
         public void on(final PlayerQuitEvent event) {
             final Player player = event.getPlayer();
 
@@ -729,5 +765,6 @@ public class DuelManager implements Loadable {
             event.setCancelled(true);
             lang.sendMessage(player, "DUEL.prevent.inventory-open");
         }
+
     }
 }

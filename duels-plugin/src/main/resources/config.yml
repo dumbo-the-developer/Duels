@@ -622,3 +622,6 @@ firework:
   # Available type options:
   # BALL, BALL_LARGE, BURST, CREEPER, STAR
   type: BALL_LARGE
+
+disable-enderpearl-in-endgame: true
+disable-movement-in-endgame: false
