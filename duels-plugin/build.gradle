@@ -47,7 +47,7 @@ dependencies {
     implementation project(':duels-above_1_13')
     implementation project(':duels-below_1_13')
     implementation project(':duels-legacy')
-    implementation 'io.papermc:paperlib:1.0.7'
+    implementation 'io.papermc:paperlib:1.0.8'
     implementation 'space.arim.morepaperlib:morepaperlib:0.4.4'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
     implementation 'org.json:json:20211205'
