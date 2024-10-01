@@ -46,12 +46,12 @@ implementation 'com.github.dumbo-the-developer.Duels:duels-api:1.3'
 Maven:
 
 ```xml
-	<dependency>
-	    <groupId>com.github.dumbo-the-developer.Duels</groupId>
-	    <artifactId>duels-api</artifactId>
-	    <version>1.3</version>
-        <scope>provided</scope>
-	</dependency>
+<dependency>
+    <groupId>com.github.dumbo-the-developer.Duels</groupId>
+    <artifactId>duels-api</artifactId>
+    <version>1.3</version>
+    <scope>provided</scope>
+</dependency>
 ```
 
 ### plugin.yml
