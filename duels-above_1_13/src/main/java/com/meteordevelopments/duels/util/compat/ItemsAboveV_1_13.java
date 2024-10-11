@@ -11,7 +11,7 @@ public class ItemsAboveV_1_13 implements ItemsCompat {
 
     @Override
     public ItemStack createPane(String type) {
-        Material material = Material.matchMaterial(type);
+        Material material = matchLegacyMaterial(type);
         if (material == null) {
             System.out.println("Debug: Invalid material type for pane: " + type);
             throw new IllegalArgumentException("Invalid material type: " + type);
@@ -21,7 +21,7 @@ public class ItemsAboveV_1_13 implements ItemsCompat {
 
     @Override
     public ItemStack createItem(String type) {
-        Material material = Material.matchMaterial(type);
+        Material material = matchLegacyMaterial(type);
         if (material == null) {
             System.out.println("Debug: Invalid material type: " + type);
             throw new IllegalArgumentException("Invalid material type: " + type);
@@ -50,7 +50,7 @@ public class ItemsAboveV_1_13 implements ItemsCompat {
 
     @Override
     public ItemStack from(String type, short data) {
-        Material material = Material.matchMaterial(type);
+        Material material = matchLegacyMaterial(type);
         if (material == null) {
             throw new IllegalArgumentException("Invalid material type: " + type);
         }
@@ -72,6 +72,16 @@ public class ItemsAboveV_1_13 implements ItemsCompat {
     @Override
     public PotionType getHealingPotionType() {
         return PotionType.INSTANT_HEAL;  // Minecraft 1.20.6 and above uses HEALING
+    }
+
+    private Material matchLegacyMaterial(String type) {
+        switch (type) {
+            // Stained Glass Pane
+            case "STAINED_GLASS_PANE":
+                return Material.WHITE_STAINED_GLASS_PANE;
+            default:
+                return Material.matchMaterial(type);
+        }
     }
 }
 
