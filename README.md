@@ -40,7 +40,7 @@ Maven:
 Gradle:
 
 ```groovy
-implementation 'com.github.dumbo-the-developer.Duels:duels-api:1.3'
+implementation 'com.github.dumbo-the-developer.Duels:duels-api:VERSION'
 ```  
 
 Maven:
@@ -49,7 +49,7 @@ Maven:
 <dependency>
     <groupId>com.github.dumbo-the-developer.Duels</groupId>
     <artifactId>duels-api</artifactId>
-    <version>1.3</version>
+    <version>VERSION</version>
     <scope>provided</scope>
 </dependency>
 ```
