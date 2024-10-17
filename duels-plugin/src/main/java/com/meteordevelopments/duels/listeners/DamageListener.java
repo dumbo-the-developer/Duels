@@ -46,6 +46,21 @@ public class DamageListener implements Listener {
             return;
         }
 
+        if (arena.getMatch().getKit() != null) {
+            KitImpl.Characteristic characteristic = arena.getMatch().getKit().getCharacteristics().stream().filter(
+                    c -> c == KitImpl.Characteristic.BOXING).findFirst().orElse(null);
+            if(characteristic != null) {
+                if(arena.getMatch().getHits(damager) >= 100) {
+                    player.damage(player.getMaxHealth());
+                    return;
+                }
+                event.setDamage(0);
+                return;
+            }
+        }
+
+        arena.getMatch().addDamageToPlayer(damager, event.getFinalDamage());
+
         if(!event.isCancelled()) return;
 
         event.setCancelled(false);
