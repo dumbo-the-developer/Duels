@@ -17,14 +17,9 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockExplodeEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -32,7 +27,6 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -92,128 +86,31 @@ public class KitOptionsListener implements Listener {
         event.setCancelled(true);
     }
 
-    @EventHandler
-    public void onInteractLiquid(PlayerInteractEvent event) {
-        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || !event.hasBlock()) {
-            return;
-        }
-
-        ArenaImpl arena = arenaManager.get(event.getPlayer());
-
-        if (arena == null || !isEnabled(arena, Characteristic.PLACE)) {
-            return;
-        }
-
-        ItemStack item = event.getItem();
-
-        if (item == null) {
-            return;
-        }
-
-        String itemType = item.getType().name().toLowerCase();
-
-        if (!itemType.contains("water") && !itemType.contains("lava")) {
-            return;
-        }
-
-        arena.getMatch().liquids.add(event.getClickedBlock());
-    }
-
-    @EventHandler
-    public void on(BlockPlaceEvent event) {
-        final Player player = event.getPlayer();
-        final ArenaImpl arena = arenaManager.get(player);
-
-        if (arena == null) {
-            return;
-        }
-
-        if(isEnabled(arena, Characteristic.PLACE)) {
-            Material blockType = event.getBlockReplacedState().getType();
-            if(blockType == Material.AIR || blockType == Material.WATER || blockType == Material.LAVA) {
-                arena.getMatch().placedBlocks.add(event.getBlock());
-                return;
-            }
-        }
-
-        event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void on(BlockBreakEvent event) {
-        final Player player = event.getPlayer();
-        final ArenaImpl arena = arenaManager.get(player);
-
-        if (arena == null || arena.getMatch() == null) {
-            return;
-        }
-
-        if(arena.getMatch().placedBlocks.contains(event.getBlock())) {
-            return;
-        }
-
-        if(isEnabled(arena, Characteristic.BREAK)) {
-            if(arena.getMatch().brokenBlocks.containsKey(event.getBlock().getLocation())) {
-                return;
-            }
-
-            arena.getMatch().brokenBlocks.put(event.getBlock().getLocation(), event.getBlock().getBlockData().clone());
-            return;
-        }
-
-        event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void on(BlockExplodeEvent event) {
-        handleExplosion(event.blockList(), event, findClosestPlayer(event.getBlock().getLocation()));
-    }
-
-    @EventHandler
-    public void on(EntityExplodeEvent event) {
-        Entity entity = event.getEntity();
-        Player player = null;
-
-        // Check if the entity is an Ender Crystal
-        if (entity instanceof EnderCrystal) {
-            player = findClosestPlayer(event.getLocation()); // Find the closest player to the explosion
-        } else if (entity instanceof TNTPrimed) {
-            Entity source = ((TNTPrimed) entity).getSource();
-            if (source instanceof Player) {
-                player = (Player) source;
-            }
-        } else if (entity instanceof Creeper || entity instanceof Fireball) {
-            player = findClosestPlayer(event.getLocation());
-        }
-
-        handleExplosion(event.blockList(), event, player);
-    }
-
-    private void handleExplosion(List<Block> blocks, Cancellable event, Player player) {
-        if (player == null) {
-            return;
-        }
-
-        ArenaImpl arena = arenaManager.get(player);
-
-        if (arena == null || arena.getMatch() == null) {
-            return;
-        }
-
-        for (Block block : blocks) {
-            if (arena.getMatch().placedBlocks.contains(block)) {
-                continue;
-            }
-
-            if (isEnabled(arena, Characteristic.BREAK)) {
-                if (!arena.getMatch().brokenBlocks.containsKey(block.getLocation())) {
-                    arena.getMatch().brokenBlocks.put(block.getLocation(), block.getBlockData().clone());
-                }
-            } else {
-                event.setCancelled(true);
-            }
-        }
-    }
+//    private void handleExplosion(List<Block> blocks, Cancellable event, Player player) {
+//        if (player == null) {
+//            return;
+//        }
+//
+//        ArenaImpl arena = arenaManager.get(player);
+//
+//        if (arena == null || arena.getMatch() == null) {
+//            return;
+//        }
+//
+//        for (Block block : blocks) {
+//            if (arena.getMatch().placedBlocks.contains(block)) {
+//                continue;
+//            }
+//
+//            if (isEnabled(arena, Characteristic.BREAK)) {
+//                if (!arena.getMatch().brokenBlocks.containsKey(block.getLocation())) {
+//                    arena.getMatch().brokenBlocks.put(block.getLocation(), block.getBlockData().clone());
+//                }
+//            } else {
+//                event.setCancelled(true);
+//            }
+//        }
+//    }
 
     private Player findClosestPlayer(Location location) {
         double radius = 10;

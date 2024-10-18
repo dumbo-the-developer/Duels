@@ -376,6 +376,7 @@ GUI:
           - '&cuse this option.'
       use-own-inventory:
         name: '&9Use Own Inventory'
+        material: CHEST
         lore:
           - '&7Own Inventory: &r%own_inventory%'
           - ' '

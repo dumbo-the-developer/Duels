@@ -150,8 +150,6 @@ public class KitImpl extends BaseButton implements Kit {
         UHC,
         COMBO,
         HUNGER,
-        PLACE,
-        BREAK,
         BOXING;
     }
 }

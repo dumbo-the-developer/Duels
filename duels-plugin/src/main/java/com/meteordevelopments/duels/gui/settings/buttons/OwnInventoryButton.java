@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 public class OwnInventoryButton extends BaseButton {
 
     public OwnInventoryButton(final DuelsPlugin plugin) {
-        super(plugin, ItemBuilder.of(Material.CHEST).name(plugin.getLang().getMessage("GUI.settings.buttons.use-own-inventory.name")).build());
+        super(plugin, ItemBuilder.of(Material.getMaterial(plugin.getLang().getMessage("GUI.settings.buttons.use-own-inventory.material").toUpperCase())).name(plugin.getLang().getMessage("GUI.settings.buttons.use-own-inventory.name")).build());
     }
 
     @Override

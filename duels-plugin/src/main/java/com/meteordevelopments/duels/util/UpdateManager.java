@@ -17,6 +17,7 @@ import com.meteordevelopments.duels.DuelsPlugin;
 import lombok.Getter;
 import org.json.JSONObject;
 
+@SuppressWarnings("all")
 public class UpdateManager {
     private DuelsPlugin main;
     private URL spigotUrl;
