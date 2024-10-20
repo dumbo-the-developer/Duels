@@ -180,7 +180,7 @@ public class KitManagerImpl implements Loadable, KitManager {
     public List<String> getNames(final boolean nokit) {
         final List<String> names = new ArrayList<>(kits.keySet());
         if (nokit) {
-            names.add("-"); // Special case: Change the nokit rating
+            names.add("-");
         }
         return names;
     }

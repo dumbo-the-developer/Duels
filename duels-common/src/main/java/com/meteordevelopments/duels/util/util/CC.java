@@ -1,4 +1,4 @@
-package com.meteordevelopments.duels.util;
+package com.meteordevelopments.duels.util.util;
 
 import org.bukkit.ChatColor;
 
