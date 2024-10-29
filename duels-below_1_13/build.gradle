@@ -1,4 +1,4 @@
 dependencies {
-    implementation 'org.spigotmc:spigot-api:1.9-R0.1-SNAPSHOT'
+    implementation 'org.spigotmc:spigot-api:1.21.3-R0.1-SNAPSHOT'
     implementation project(':duels-common')
 }
