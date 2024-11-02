@@ -91,4 +91,11 @@ public interface Match {
      */
     @NotNull
     Set<Player> getStartingPlayers();
+
+    /**
+     * The hits amount for this {@link Match}.
+     *
+     * @return hits Hit amount for this {@link Match} or 0 if no hit was specified.
+     */
+     int getHits(Player player);
 }

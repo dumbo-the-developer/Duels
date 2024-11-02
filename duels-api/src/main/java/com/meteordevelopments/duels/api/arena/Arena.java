@@ -100,6 +100,14 @@ public interface Arena {
     @Nullable
     Match getMatch();
 
+    /**
+     * The {@link Match} opponent playing in this arena. May be null if no match is being played.
+     *
+     * @return {@link Match} instance if a duel is currently being played in this arena. null otherwise.
+     */
+    @Nullable
+    Player getOpponent(Player player);
+
 
     /**
      * Whether or not the player is playing in this arena.

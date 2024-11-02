@@ -81,6 +81,7 @@ public class MatchImpl implements Match {
         status.hits++;
     }
 
+    @Override
     public int getHits(Player player) {
         return players.get(player).hits;
     }

@@ -257,6 +257,7 @@ public class ArenaImpl extends BaseButton implements Arena {
         return isUsed() ? match.getAlivePlayers().iterator().next() : null;
     }
 
+    @Override
     public Player getOpponent(final Player player) {
         return isUsed() ? match.getAllPlayers().stream().filter(other -> !player.equals(other)).findFirst().orElse(null) : null;
     }
