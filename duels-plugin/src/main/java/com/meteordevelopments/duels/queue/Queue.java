@@ -75,6 +75,7 @@ public class Queue extends BaseButton implements DQueue {
         return false;
     }
 
+    @Override
     public long getPlayersInMatch() {
         return arenaManager.getPlayersInMatch(this);
     }

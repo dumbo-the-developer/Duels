@@ -46,6 +46,13 @@ public interface DQueue {
     @NotNull
     List<Player> getQueuedPlayers();
 
+    /**
+     * An UnmodifiableList of {@link Player}s playing in this queue.
+     *
+     * @return Never-null UnmodifiableList of {@link Player}s playing in this queue.
+     */
+    @NotNull
+    long getPlayersInMatch();
 
     /**
      * Whether or not this {@link DQueue} has been removed.
