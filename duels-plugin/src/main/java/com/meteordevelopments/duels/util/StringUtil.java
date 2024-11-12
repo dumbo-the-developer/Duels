@@ -29,12 +29,13 @@ public final class StringUtil {
         ROMAN_NUMERALS.put(5, "V");
         ROMAN_NUMERALS.put(4, "IV");
         ROMAN_NUMERALS.put(1, "I");
-        COMMONS_LANG3 = ReflectionUtil.getClassUnsafe("org.apache.commons.lang3.StringUtils") != null;
+        COMMONS_LANG3 = ReflectionUtil.getClassUnsafe(" org.apache.commons.lang3.StringUtils") != null;
     }
 
     private StringUtil() {
     }
 
+    // Source: https://stackoverflow.com/questions/12967896/converting-integers-to-roman-numerals-java
     public static String toRoman(final int number) {
         if (number <= 0) {
             return String.valueOf(number);
@@ -70,7 +71,7 @@ public final class StringUtil {
     }
 
     public static List<String> color(final List<String> input) {
-        input.replaceAll(StringUtil::color);
+        input.replaceAll(s -> s = color(s));
         return input;
     }
 
@@ -78,27 +79,36 @@ public final class StringUtil {
         return ALPHANUMERIC.matcher(input.replace(" ", "")).matches();
     }
 
+    // In some versions of spigot, commons-lang3 is not available
     public static String join(final Object[] array, final String separator, final int startIndex, final int endIndex) {
-        return COMMONS_LANG3
-                ? org.apache.commons.lang3.StringUtils.join(array, separator, startIndex, endIndex)
-                : org.apache.commons.lang.StringUtils.join(array, separator, startIndex, endIndex);
+        if (COMMONS_LANG3) {
+            return org.apache.commons.lang3.StringUtils.join(array, separator, startIndex, endIndex);
+        } else {
+            return org.apache.commons.lang.StringUtils.join(array, separator, startIndex, endIndex);
+        }
     }
 
     public static String join(final Collection<?> collection, final String separator) {
-        return COMMONS_LANG3
-                ? org.apache.commons.lang3.StringUtils.join(collection, separator)
-                : org.apache.commons.lang.StringUtils.join(collection, separator);
+        if (COMMONS_LANG3) {
+            return org.apache.commons.lang3.StringUtils.join(collection, separator);
+        } else {
+            return org.apache.commons.lang.StringUtils.join(collection, separator);
+        }
     }
 
     public static String capitalize(final String s) {
-        return COMMONS_LANG3
-                ? org.apache.commons.lang3.StringUtils.capitalize(s)
-                : org.apache.commons.lang.StringUtils.capitalize(s);
+        if (COMMONS_LANG3) {
+            return org.apache.commons.lang3.StringUtils.capitalize(s);
+        } else {
+            return org.apache.commons.lang.StringUtils.capitalize(s);
+        }
     }
 
     public static boolean containsIgnoreCase(final String str, final String searchStr) {
-        return COMMONS_LANG3
-                ? org.apache.commons.lang3.StringUtils.containsIgnoreCase(str, searchStr)
-                : org.apache.commons.lang.StringUtils.containsIgnoreCase(str, searchStr);
+        if (COMMONS_LANG3) {
+            return org.apache.commons.lang3.StringUtils.containsIgnoreCase(str, searchStr);
+        } else {
+            return org.apache.commons.lang.StringUtils.containsIgnoreCase(str, searchStr);
+        }
     }
 }

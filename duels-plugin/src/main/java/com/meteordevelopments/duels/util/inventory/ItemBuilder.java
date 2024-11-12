@@ -1,12 +1,16 @@
 package com.meteordevelopments.duels.util.inventory;
 
-import com.meteordevelopments.duels.util.Version;
+import com.meteordevelopments.duels.util.EnumUtil;
+import com.meteordevelopments.duels.util.StringUtil;
+import com.meteordevelopments.duels.util.compat.CompatUtil;
+import com.meteordevelopments.duels.util.compat.Items;
 import org.bukkit.Color;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -14,22 +18,19 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
+import org.bukkit.util.Consumer;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 public final class ItemBuilder {
 
     private final ItemStack result;
 
     private ItemBuilder(final Material type, final int amount, final short durability) {
-        if (type == null) {
-            throw new IllegalArgumentException("Material cannot be null");
-        }
         this.result = new ItemStack(type, amount);
-        result.setDurability(durability);
+        Items.setDurability(result, durability);
     }
 
     private ItemBuilder(final String type, final int amount, final short durability) {
@@ -37,9 +38,6 @@ public final class ItemBuilder {
     }
 
     private ItemBuilder(final ItemStack item) {
-        if (item == null || item.getType() == null) {
-            throw new IllegalArgumentException("ItemStack or Material cannot be null");
-        }
         this.result = item;
     }
 
@@ -56,12 +54,7 @@ public final class ItemBuilder {
     }
 
     public static ItemBuilder of(final String type, final int amount, final short durability) {
-        Material material = Material.matchMaterial(type);
-        if (material == null) {
-            System.out.println("Debug: Invalid material type: " + type);
-            throw new IllegalArgumentException("Invalid material type: " + type);
-        }
-        return new ItemBuilder(material, amount, durability);
+        return new ItemBuilder(type, amount, durability);
     }
 
     public static ItemBuilder of(final ItemStack item) {
@@ -76,11 +69,11 @@ public final class ItemBuilder {
     }
 
     public ItemBuilder name(final String name) {
-        return editMeta(meta -> meta.setDisplayName(name));
+        return editMeta(meta -> meta.setDisplayName(StringUtil.color(name)));
     }
 
     public ItemBuilder lore(final List<String> lore) {
-        return editMeta(meta -> meta.setLore(lore));
+        return editMeta(meta -> meta.setLore(StringUtil.color(lore)));
     }
 
     public ItemBuilder lore(final String... lore) {
@@ -93,51 +86,83 @@ public final class ItemBuilder {
     }
 
     public ItemBuilder unbreakable() {
-        return editMeta(meta -> meta.setUnbreakable(true));
+        return editMeta(meta -> {
+            if (CompatUtil.isPre1_12()) {
+                meta.spigot().setUnbreakable(true);
+            } else {
+                meta.setUnbreakable(true);
+            }
+        });
     }
 
     public ItemBuilder head(final String owner) {
         return editMeta(meta -> {
-            if (meta instanceof SkullMeta) {
-                ((SkullMeta) meta).setOwner(owner);
+            if (owner != null && Items.equals(Items.HEAD, result)) {
+                final SkullMeta skullMeta = (SkullMeta) meta;
+                skullMeta.setOwner(owner);
             }
         });
     }
 
     public ItemBuilder leatherArmorColor(final String color) {
         return editMeta(meta -> {
-            if (meta instanceof LeatherArmorMeta) {
-                ((LeatherArmorMeta) meta).setColor(Color.fromRGB(Integer.parseInt(color, 16)));
+            final LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) meta;
+
+            if (color != null) {
+                leatherArmorMeta.setColor(DyeColor.valueOf(color).getColor());
             }
         });
     }
 
     public ItemBuilder potion(final PotionType type, final boolean extended, final boolean upgraded) {
-        return editMeta(meta -> {
-            if (meta instanceof PotionMeta) {
-                if (!Version.isCurrentVersionEqualOrAbove("1.9") || !Version.isCurrentVersionEqualOrAbove("1.13")) {
-                    return;
-                }
-                ((PotionMeta) meta).setBasePotionData(new PotionData(type, extended, upgraded));
-            }
-        });
+        PotionMeta meta = (PotionMeta) result.getItemMeta();
+        meta.setBasePotionData(new PotionData(type, extended, upgraded));
+        result.setItemMeta(meta);
+        return this;
     }
 
     public ItemBuilder attribute(final String name, final int operation, final double amount, final String slotName) {
         return editMeta(meta -> {
-            Attribute attribute = Attribute.valueOf(name.toUpperCase());
-            Operation op = Operation.values()[operation];
-            UUID uuid = UUID.randomUUID();
-            AttributeModifier modifier;
+            final Attribute attribute = EnumUtil.getByName(attributeNameToEnum(name), Attribute.class);
+
+            if (attribute == null) {
+                return;
+            }
+
+            final AttributeModifier modifier;
 
             if (slotName != null) {
-                modifier = new AttributeModifier(uuid, name, amount, op, org.bukkit.inventory.EquipmentSlot.valueOf(slotName.toUpperCase()));
+                final EquipmentSlot slot = EnumUtil.getByName(slotName, EquipmentSlot.class);
+
+                if (slot == null) {
+                    return;
+                }
+
+                modifier = new AttributeModifier(UUID.randomUUID(), name, amount, AttributeModifier.Operation.values()[operation], slot);
             } else {
-                modifier = new AttributeModifier(uuid, name, amount, op);
+                modifier = new AttributeModifier(UUID.randomUUID(), name, amount, AttributeModifier.Operation.values()[operation]);
             }
 
             meta.addAttributeModifier(attribute, modifier);
         });
+    }
+
+    private String attributeNameToEnum(String name) {
+        int len = name.length();
+        int capitalLetterIndex = -1;
+
+        for (int i = 0; i < len; i++) {
+            if (Character.isUpperCase(name.charAt(i))) {
+                capitalLetterIndex = i;
+                break;
+            }
+        }
+
+        if (capitalLetterIndex != -1) {
+            name = name.substring(0, capitalLetterIndex) + "_" + name.substring(capitalLetterIndex);
+        }
+
+        return name.replace(".", "_").toUpperCase();
     }
 
     public ItemStack build() {

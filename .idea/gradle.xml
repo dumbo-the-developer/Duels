@@ -8,11 +8,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/duels-above_1_13" />
             <option value="$PROJECT_DIR$/duels-api" />
-            <option value="$PROJECT_DIR$/duels-below_1_13" />
             <option value="$PROJECT_DIR$/duels-common" />
-            <option value="$PROJECT_DIR$/duels-legacy" />
             <option value="$PROJECT_DIR$/duels-plugin" />
             <option value="$PROJECT_DIR$/duels-worldguard" />
             <option value="$PROJECT_DIR$/duels-worldguard-v6" />

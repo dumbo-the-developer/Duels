@@ -89,6 +89,7 @@ public class ExtensionManager implements Loadable {
                 this.info.put(extension, info);
             } catch (Throwable thrown) {
                 Log.error(this, "Could not enable extension " + file.getName() + "!", thrown);
+                thrown.printStackTrace();
             }
         }
     }
