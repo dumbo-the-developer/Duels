@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.arena.ArenaImpl;
@@ -18,6 +19,7 @@ import com.meteordevelopments.duels.util.compat.Titles;
 import com.meteordevelopments.duels.util.function.Pair;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import space.arim.morepaperlib.scheduling.ScheduledTask;
 
 public class DuelCountdown extends BukkitRunnable {
 
@@ -32,6 +34,8 @@ public class DuelCountdown extends BukkitRunnable {
 
     private final Map<UUID, Pair<String, Integer>> info = new HashMap<>();
     private int index = 0;
+
+    private final AtomicReference<ScheduledTask> scheduledTask = new AtomicReference<>();
 
     protected DuelCountdown(final DuelsPlugin plugin, final ArenaImpl arena, final DuelMatch match, final List<String> messages, final List<String> titles) {
         this.config = plugin.getConfiguration();
@@ -86,10 +90,16 @@ public class DuelCountdown extends BukkitRunnable {
     public void run() {
         if (!arena.isUsed() || index >= messages.size()) {
             arena.setCountdown(null);
-            cancel();
+
+            // Cancel the MorePaperLib task
+            ScheduledTask task = scheduledTask.get();
+            if (task != null) {
+                task.cancel();
+            }
+
             return;
         }
-        
+
         final String rawMessage = messages.get(index);
         final String message = StringUtil.color(rawMessage);
         final String title = (titles.size() >= index + 1) ? titles.get(index) : null;
@@ -98,6 +108,14 @@ public class DuelCountdown extends BukkitRunnable {
     }
 
     public void startCountdown(long delay, long period) {
-        DuelsPlugin.getMorePaperLib().scheduling().asyncScheduler().runAtFixedRate(this, Duration.ofMillis(delay * 50), Duration.ofMillis(period * 50));
+        ScheduledTask task = DuelsPlugin.getMorePaperLib()
+                .scheduling()
+                .asyncScheduler()
+                .runAtFixedRate(
+                        this,
+                        Duration.ofMillis(delay * 50),
+                        Duration.ofMillis(period * 50)
+                );
+        scheduledTask.set(task); // Store the task reference
     }
 }
