@@ -12,7 +12,7 @@ import com.meteordevelopments.duels.api.spectate.SpectateManager;
 import com.meteordevelopments.duels.api.spectate.Spectator;
 import com.meteordevelopments.duels.arena.ArenaImpl;
 import com.meteordevelopments.duels.arena.ArenaManagerImpl;
-import com.meteordevelopments.duels.arena.MatchImpl;
+import com.meteordevelopments.duels.match.DuelMatch;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.config.Lang;
 import com.meteordevelopments.duels.hook.hooks.EssentialsHook;
@@ -21,6 +21,7 @@ import com.meteordevelopments.duels.player.PlayerInfo;
 import com.meteordevelopments.duels.player.PlayerInfoManager;
 import com.meteordevelopments.duels.teleport.Teleport;
 import com.meteordevelopments.duels.util.BlockUtil;
+import com.meteordevelopments.duels.util.EventUtil;
 import com.meteordevelopments.duels.util.Loadable;
 import com.meteordevelopments.duels.util.PlayerUtil;
 import com.meteordevelopments.duels.util.compat.CompatUtil;
@@ -127,7 +128,7 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
             return Result.EVENT_CANCELLED;
         }
 
-        final MatchImpl match = arena.getMatch();
+        final DuelMatch match = arena.getMatch();
 
         // Hide from players in match
         if (match != null) {
@@ -205,7 +206,7 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
             teleport.tryTeleport(player, playerManager.getLobby());
         }
 
-        final MatchImpl match = spectator.getArena().getMatch();
+        final DuelMatch match = spectator.getArena().getMatch();
 
         // Show to players in match
         if (match != null && !(essentials != null && essentials.isVanished(player))) {
@@ -344,17 +345,9 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
 
         @EventHandler(ignoreCancelled = true)
         public void on(final EntityDamageByEntityEvent event) {
-            final Player player;
+            final Player damager = EventUtil.getDamager(event);
 
-            if (event.getDamager() instanceof Player) {
-                player = (Player) event.getDamager();
-            } else if (event.getDamager() instanceof Projectile && ((Projectile) event.getDamager()).getShooter() instanceof Player) {
-                player = (Player) ((Projectile) event.getDamager()).getShooter();
-            } else {
-                return;
-            }
-
-            if (!isSpectating(player)) {
+            if (damager == null || !isSpectating(damager)) {
                 return;
             }
 

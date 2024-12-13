@@ -38,31 +38,31 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
     private final DuelManager duelManager;
     private final Settings settings;
     private final Inventory inventory;
-    private final UUID first, second;
+    private final UUID sender, target;
     private boolean firstReady, secondReady, waitDone, cancelWait;
 
-    public BettingGui(final DuelsPlugin plugin, final Settings settings, final Player first, final Player second) {
+    public BettingGui(final DuelsPlugin plugin, final Settings settings, final Player sender, final Player target) {
         super(plugin);
         this.guiListener = plugin.getGuiListener();
         this.duelManager = plugin.getDuelManager();
         this.settings = settings;
         this.inventory = InventoryBuilder.of(plugin.getLang().getMessage("GUI.item-betting.title"), 54).build();
-        this.first = first.getUniqueId();
-        this.second = second.getUniqueId();
+        this.sender = sender.getUniqueId();
+        this.target = target.getUniqueId();
         set(inventory, 13, 14, 5, new CancelButton(plugin));
         Slots.run(0, 3, slot -> inventory.setItem(slot, Items.ORANGE_PANE.clone()));
         Slots.run(45, 48, slot -> inventory.setItem(slot, Items.ORANGE_PANE.clone()));
         Slots.run(6, 9, slot -> inventory.setItem(slot, Items.BLUE_PANE.clone()));
         Slots.run(51, 54, slot -> inventory.setItem(slot, Items.BLUE_PANE.clone()));
-        set(inventory, 3, new StateButton(plugin, this, first));
+        set(inventory, 3, new StateButton(plugin, this, sender));
         set(inventory, 4, new DetailsButton(plugin, settings));
-        set(inventory, 5, new StateButton(plugin, this, second));
-        set(inventory, 48, new HeadButton(plugin, first));
-        set(inventory, 50, new HeadButton(plugin, second));
+        set(inventory, 5, new StateButton(plugin, this, target));
+        set(inventory, 48, new HeadButton(plugin, sender));
+        set(inventory, 50, new HeadButton(plugin, target));
     }
 
     private boolean isFirst(final Player player) {
-        return player.getUniqueId().equals(first);
+        return player.getUniqueId().equals(sender);
     }
 
     private Section getSection(final Player player) {
@@ -186,7 +186,7 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
         InventoryUtil.addOrDrop(player, getSection(player).collect());
         guiListener.removeGui(player, this);
 
-        final Player other = Bukkit.getPlayer(first.equals(player.getUniqueId()) ? second : first);
+        final Player other = Bukkit.getPlayer(sender.equals(player.getUniqueId()) ? target : sender);
 
         if (other != null) {
             DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(other).run(() -> {
@@ -199,8 +199,8 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
 
     @Override
     public void clear() {
-        final Player first = Bukkit.getPlayer(BettingGui.this.first);
-        final Player second = Bukkit.getPlayer(BettingGui.this.second);
+        final Player first = Bukkit.getPlayer(BettingGui.this.sender);
+        final Player second = Bukkit.getPlayer(BettingGui.this.target);
 
         if (first != null && second != null) {
             InventoryUtil.addOrDrop(first, getSection(first).collect());
@@ -287,23 +287,23 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
             task.cancel();
             waitDone = true;
 
-            final Player first = Bukkit.getPlayer(BettingGui.this.first);
-            final Player second = Bukkit.getPlayer(BettingGui.this.second);
+            final Player sender = Bukkit.getPlayer(BettingGui.this.sender);
+            final Player target = Bukkit.getPlayer(BettingGui.this.target);
 
-            if (first == null || second == null) {
+            if (sender == null || target == null) {
                 return;
             }
 
-            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(first).run((Runnable) first::closeInventory, () -> {});
-            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(second).run((Runnable) second::closeInventory, () -> {});
+            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(sender).run(sender::closeInventory, () -> {});
+            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(target).run(target::closeInventory, () -> {});
 
             final Map<UUID, List<ItemStack>> items = new HashMap<>();
-            items.put(first.getUniqueId(), getSection(first).collect());
-            items.put(second.getUniqueId(), getSection(second).collect());
+            items.put(sender.getUniqueId(), getSection(sender).collect());
+            items.put(target.getUniqueId(), getSection(target).collect());
 
-            guiListener.removeGui(first, BettingGui.this);
-            guiListener.removeGui(second, BettingGui.this);
-            duelManager.startMatch(first, second, settings, items, null);
+            guiListener.removeGui(sender, BettingGui.this);
+            guiListener.removeGui(target, BettingGui.this);
+            duelManager.startMatch(sender, target, settings, items, null);
         }
     }
 }

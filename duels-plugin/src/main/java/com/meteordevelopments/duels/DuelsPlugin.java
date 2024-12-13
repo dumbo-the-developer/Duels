@@ -1,9 +1,12 @@
 package com.meteordevelopments.duels;
 
 import com.google.common.collect.Lists;
+import com.meteordevelopments.duels.command.commands.party.PartyCommand;
 import com.meteordevelopments.duels.listeners.*;
+import com.meteordevelopments.duels.party.PartyManagerImpl;
 import com.meteordevelopments.duels.util.*;
 import com.meteordevelopments.duels.util.util.CC;
+import com.meteordevelopments.duels.validator.ValidatorManager;
 import lombok.Getter;
 import com.meteordevelopments.duels.api.Duels;
 import com.meteordevelopments.duels.api.command.SubCommand;
@@ -108,6 +111,10 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private Teleport teleport;
     @Getter
     private ExtensionManager extensionManager;
+    @Getter
+    private PartyManagerImpl partyManager;
+    @Getter
+    private ValidatorManager validatorManager;
 
     @Override
     public void onEnable() {
@@ -147,6 +154,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(lang = new Lang(this));
         loadables.add(userManager = new UserManagerImpl(this));
         loadables.add(guiListener = new GuiListener<>(this));
+        loadables.add(partyManager = new PartyManagerImpl(this));
         loadables.add(kitManager = new KitManagerImpl(this));
         loadables.add(arenaManager = new ArenaManagerImpl(this));
         loadables.add(settingManager = new SettingsManager(this));
@@ -159,6 +167,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadables.add(queueSignManager = new QueueSignManagerImpl(this));
         loadables.add(requestManager = new RequestManager(this));
         hookManager = new HookManager(this);
+        loadables.add(validatorManager = new ValidatorManager(this));
         loadables.add(teleport = new Teleport(this));
         loadables.add(extensionManager = new ExtensionManager(this));
 
@@ -216,6 +225,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private boolean load() {
         registerCommands(
                 new DuelCommand(this),
+                new PartyCommand(this),
                 new QueueCommand(this),
                 new SpectateCommand(this),
                 new DuelsCommand(this)

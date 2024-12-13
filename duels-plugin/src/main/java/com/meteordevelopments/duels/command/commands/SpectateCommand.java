@@ -4,7 +4,7 @@ import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.Permissions;
 import com.meteordevelopments.duels.api.spectate.SpectateManager.Result;
 import com.meteordevelopments.duels.arena.ArenaImpl;
-import com.meteordevelopments.duels.arena.MatchImpl;
+import com.meteordevelopments.duels.match.DuelMatch;
 import com.meteordevelopments.duels.command.BaseCommand;
 import com.meteordevelopments.duels.spectate.SpectatorImpl;
 import com.meteordevelopments.duels.util.inventory.InventoryUtil;
@@ -53,16 +53,15 @@ public class SpectateCommand extends BaseCommand {
             case EVENT_CANCELLED:
                 return;
             case IN_MATCH:
-                lang.sendMessage(player, "ERROR.spectate.already-spectating.sender");
+                lang.sendMessage(player, "ERROR.duel.already-spectating.sender");
                 return;
             case IN_QUEUE:
                 lang.sendMessage(player, "ERROR.duel.already-in-queue");
-                return;
             case ALREADY_SPECTATING:
                 lang.sendMessage(player, "ERROR.duel.already-in-match.sender");
                 return;
             case TARGET_NOT_IN_MATCH:
-                lang.sendMessage(player, "ERROR.spectate.not-in-match", "name", target.getName());
+                lang.sendMessage(player, "ERROR.duel.not-in-match", "name", target.getName());
                 return;
             case SUCCESS:
                 final ArenaImpl arena = arenaManager.get(target);
@@ -72,7 +71,7 @@ public class SpectateCommand extends BaseCommand {
                     return;
                 }
 
-                final MatchImpl match = arena.getMatch();
+                final DuelMatch match = arena.getMatch();
                 final String kit = match.getKit() != null ? match.getKit().getName() : lang.getMessage("GENERAL.none");
                 lang.sendMessage(player, "COMMAND.spectate.start-spectate",
                         "name", target.getName(),

@@ -98,8 +98,8 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         }
 
         if (first != null && second != null) {
-            final int firstRating = first.getRating(kit);
-            final int secondRating = second.getRating(kit);
+            final int firstRating = first.getRatingUnsafe(kit);
+            final int secondRating = second.getRatingUnsafe(kit);
             final int kFactor = config.getKFactor();
             final int maxDifference = config.getMaxDifference();
             return firstRating - secondRating <= maxDifference && secondRating - firstRating <= maxDifference && NumberUtil.getChange(kFactor, firstRating, secondRating) != 0 && NumberUtil.getChange(kFactor, secondRating, firstRating) != 0;
@@ -334,7 +334,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         }
 
         if (spectateManager.isSpectating(player)) {
-            lang.sendMessage(player, "ERROR.spectate.already-spectating.sender");
+            lang.sendMessage(player, "ERROR.duel.already-spectating.sender");
             return false;
         }
 

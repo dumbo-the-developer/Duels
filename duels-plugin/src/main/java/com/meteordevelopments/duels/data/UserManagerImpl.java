@@ -1,6 +1,10 @@
 package com.meteordevelopments.duels.data;
 
 import com.google.common.collect.Lists;
+import com.meteordevelopments.duels.kit.KitImpl;
+import com.meteordevelopments.duels.match.DuelMatch;
+import com.meteordevelopments.duels.match.party.PartyDuelMatch;
+import com.meteordevelopments.duels.party.Party;
 import com.meteordevelopments.duels.util.*;
 import lombok.Getter;
 import com.meteordevelopments.duels.DuelsPlugin;
@@ -30,6 +34,7 @@ import java.util.stream.Collectors;
 
 public class UserManagerImpl implements Loadable, Listener, UserManager {
 
+    private static final Calendar GREGORIAN_CALENDAR = new GregorianCalendar();
     private static final String ADMIN_UPDATE_MESSAGE = "&9[Duels] &bDuels &fv%s &7is now available for download! Download at: &c%s";
 
     private final DuelsPlugin plugin;
@@ -324,4 +329,72 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
             });
         }
     }
+
+    public void handleMatchEnd(final DuelMatch match, final Set<Player> winners) {
+        final Player winner = winners.iterator().next();
+        final String kitName = match.getKit() != null ? match.getKit().getName() : lang.getMessage("GENERAL.none");
+        final String message;
+
+        if (!(match instanceof PartyDuelMatch)) {
+            final long duration = System.currentTimeMillis() - match.getStart();
+            final long time = GREGORIAN_CALENDAR.getTimeInMillis();
+            final Player loser = match.getArena().getOpponent(winner);
+            final double health = Math.ceil(winner.getHealth()) * 0.5;
+            final MatchData matchData = new MatchData(winner.getName(), loser.getName(), kitName, time, duration, health);
+            final UserData winnerData = get(winner);
+            final UserData loserData = get(loser);
+
+            if (winnerData != null && loserData != null) {
+                winnerData.addWin();
+                loserData.addLoss();
+                winnerData.addMatch(matchData);
+                loserData.addMatch(matchData);
+
+                final KitImpl kit = match.getKit();
+                int winnerRating = winnerData.getRatingUnsafe(kit);
+                int loserRating = loserData.getRatingUnsafe(kit);
+                int change = 0;
+
+                if (config.isRatingEnabled() && !(!match.isFromQueue() && config.isRatingQueueOnly())) {
+                    change = NumberUtil.getChange(config.getKFactor(), winnerRating, loserRating);
+                    winnerData.setRating(kit, winnerRating = winnerRating + change);
+                    loserData.setRating(kit, loserRating = loserRating - change);
+                }
+
+                message = lang.getMessage("DUEL.on-end.opponent-defeat",
+                        "winner", winner.getName(),
+                        "loser", loser.getName(),
+                        "health", matchData.getHealth(),
+                        "kit", kitName,
+                        "arena", match.getArena().getName(),
+                        "winner_rating", winnerRating,
+                        "loser_rating", loserRating,
+                        "change", change
+                );
+            } else {
+                message = null;
+            }
+        } else {
+            final PartyDuelMatch partyMatch = (PartyDuelMatch) match;
+            final Party winnerParty = partyMatch.getPlayerToParty().get(winner);
+            final Party loserParty = match.getArena().getOpponent(winnerParty);
+            message = lang.getMessage("DUEL.on-end.party-opponent-defeat",
+                    "winners", StringUtil.join(partyMatch.getNames(winnerParty), ", "),
+                    "losers", StringUtil.join(partyMatch.getNames(loserParty), ", "),
+                    "kit", kitName,
+                    "arena", match.getArena().getName()
+            );
+        }
+
+        if (message == null) {
+            return;
+        }
+
+        if (config.isArenaOnlyEndMessage()) {
+            match.getArena().broadcast(message);
+        } else {
+            Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(message));
+        }
+    }
+
 }

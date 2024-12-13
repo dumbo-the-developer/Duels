@@ -7,26 +7,25 @@ import com.meteordevelopments.duels.hook.hooks.CombatLogXHook;
 import com.meteordevelopments.duels.hook.hooks.CombatTagPlusHook;
 import com.meteordevelopments.duels.hook.hooks.PvPManagerHook;
 import com.meteordevelopments.duels.hook.hooks.worldguard.WorldGuardHook;
+import com.meteordevelopments.duels.party.Party;
 import com.meteordevelopments.duels.request.RequestImpl;
 import com.meteordevelopments.duels.setting.Settings;
+import com.meteordevelopments.duels.util.function.Pair;
 import com.meteordevelopments.duels.util.inventory.InventoryUtil;
+import com.meteordevelopments.duels.util.validator.ValidatorUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class AcceptCommand extends BaseCommand {
+import java.util.Collection;
+import java.util.Collections;
 
-    private final CombatTagPlusHook combatTagPlus;
-    private final PvPManagerHook pvpManager;
-    private final CombatLogXHook combatLogX;
+public class AcceptCommand extends BaseCommand {
     private final WorldGuardHook worldGuard;
 
     public AcceptCommand(final DuelsPlugin plugin) {
         super(plugin, "accept", "accept [player]", "Accepts a duel request.", 2, true);
-        this.combatTagPlus = hookManager.getHook(CombatTagPlusHook.class);
-        this.pvpManager = hookManager.getHook(PvPManagerHook.class);
-        this.combatLogX = plugin.getHookManager().getHook(CombatLogXHook.class);
         this.worldGuard = hookManager.getHook(WorldGuardHook.class);
     }
 
@@ -34,37 +33,10 @@ public class AcceptCommand extends BaseCommand {
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final Player player = (Player) sender;
 
-        if (config.isRequiresClearedInventory() && InventoryUtil.hasItem(player)) {
-            lang.sendMessage(sender, "ERROR.duel.inventory-not-empty");
-            return;
-        }
+        final Party party = partyManager.get(player);
+        final Collection<Player> players = party == null ? Collections.singleton(player) : party.getOnlineMembers();
 
-        if (config.isPreventCreativeMode() && player.getGameMode() == GameMode.CREATIVE) {
-            lang.sendMessage(sender, "ERROR.duel.in-creative-mode");
-            return;
-        }
-
-        if ((combatTagPlus != null && combatTagPlus.isTagged(player))
-                || (pvpManager != null && pvpManager.isTagged(player))
-                || (combatLogX != null && combatLogX.isTagged(player))) {
-            lang.sendMessage(sender, "ERROR.duel.is-tagged");
-            return;
-        }
-
-        String duelzone = null;
-
-        if (worldGuard != null && config.isDuelzoneEnabled() && (duelzone = worldGuard.findDuelZone(player)) == null) {
-            lang.sendMessage(sender, "ERROR.duel.not-in-duelzone", "regions", config.getDuelzones());
-            return;
-        }
-
-        if (arenaManager.isInMatch(player)) {
-            lang.sendMessage(sender, "ERROR.duel.already-in-match.sender");
-            return;
-        }
-
-        if (spectateManager.isSpectating(player)) {
-            lang.sendMessage(sender, "ERROR.spectate.already-spectating.sender");
+        if (!ValidatorUtil.validate(validatorManager.getDuelAcceptSelfValidators(), player, party, players)) {
             return;
         }
 
@@ -75,13 +47,14 @@ public class AcceptCommand extends BaseCommand {
             return;
         }
 
-        final RequestImpl request = requestManager.get(target, player);
+        final Party targetParty = partyManager.get(target);
+        final Collection<Player> targetPlayers = targetParty == null ? Collections.singleton(target) : targetParty.getOnlineMembers();
 
-        if (request == null) {
-            lang.sendMessage(sender, "ERROR.duel.no-request", "name", target.getName());
+        if (!ValidatorUtil.validate(validatorManager.getDuelAcceptTargetValidators(), new Pair<>(player, target), targetParty, targetPlayers)) {
             return;
         }
 
+        final RequestImpl request = requestManager.remove(target, player);
         final RequestAcceptEvent event = new RequestAcceptEvent(player, target, request);
         Bukkit.getPluginManager().callEvent(event);
 
@@ -89,34 +62,34 @@ public class AcceptCommand extends BaseCommand {
             return;
         }
 
-        requestManager.remove(target, player);
-
-        if (arenaManager.isInMatch(target)) {
-            lang.sendMessage(sender, "ERROR.duel.already-in-match.target", "name", target.getName());
-            return;
-        }
-
-        if (spectateManager.isSpectating(target)) {
-            lang.sendMessage(sender, "ERROR.spectate.already-spectating.target", "name", target.getName());
-            return;
-        }
-
         final Settings settings = request.getSettings();
         final String kit = settings.getKit() != null ? settings.getKit().getName() : lang.getMessage("GENERAL.not-selected");
+        final String ownInventory = settings.isOwnInventory() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled");
         final String arena = settings.getArena() != null ? settings.getArena().getName() : lang.getMessage("GENERAL.random");
-        final double bet = settings.getBet();
-        final String itemBetting = settings.isItemBetting() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled");
-        lang.sendMessage(player, "COMMAND.duel.request.accept.receiver",
-                "name", target.getName(), "kit", kit, "arena", arena, "bet_amount", bet, "item_betting", itemBetting);
-        lang.sendMessage(target, "COMMAND.duel.request.accept.sender",
-                "name", player.getName(), "kit", kit, "arena", arena, "bet_amount", bet, "item_betting", itemBetting);
+        if (request.isPartyDuel()) {
+            final Collection<Player> senderPartyMembers = request.getSenderParty().getOnlineMembers();
+            final Collection<Player> targetPartyMembers = request.getTargetParty().getOnlineMembers();
+            lang.sendMessage(senderPartyMembers, "COMMAND.duel.party-request.accept.receiver-party",
+                    "owner", player.getName(), "name", target.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena);
+            lang.sendMessage(targetPartyMembers, "COMMAND.duel.party-request.accept.sender-party",
+                    "owner", target.getName(), "name", player.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena);
+        } else {
+            final double bet = settings.getBet();
+            final String itemBetting = settings.isItemBetting() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled");
+            lang.sendMessage(player, "COMMAND.duel.request.accept.receiver",
+                    "name", target.getName(), "kit", kit, "arena", arena, "bet_amount", bet, "item_betting", itemBetting);
+            lang.sendMessage(target, "COMMAND.duel.request.accept.sender",
+                    "name", player.getName(), "kit", kit, "arena", arena, "bet_amount", bet, "item_betting", itemBetting);
+        }
 
         if (settings.isItemBetting()) {
-            settings.setBaseLoc(player);
-            settings.setDuelzone(player, duelzone);
+            players.forEach(all -> {
+                settings.setBaseLoc(all);
+                settings.setDuelzone(all, worldGuard != null ? worldGuard.findDuelZone(all) : null);
+            });
             bettingManager.open(settings, target, player);
         } else {
-            duelManager.startMatch(player, target, settings, null, null);
+            duelManager.startMatch(target, player, settings, null, null);
         }
     }
 }

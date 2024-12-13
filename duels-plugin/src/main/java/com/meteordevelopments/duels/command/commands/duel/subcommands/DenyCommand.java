@@ -4,9 +4,14 @@ import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.api.event.request.RequestDenyEvent;
 import com.meteordevelopments.duels.command.BaseCommand;
 import com.meteordevelopments.duels.request.RequestImpl;
+import com.meteordevelopments.duels.util.function.Pair;
+import com.meteordevelopments.duels.util.validator.ValidatorUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.Collection;
+import java.util.Collections;
 
 public class DenyCommand extends BaseCommand {
 
@@ -24,17 +29,22 @@ public class DenyCommand extends BaseCommand {
             return;
         }
 
-        final RequestImpl request;
-
-        if ((request = requestManager.remove(target, player)) == null) {
-            lang.sendMessage(sender, "ERROR.duel.no-request", "name", target.getName());
+        if (!ValidatorUtil.validate(validatorManager.getDuelDenyTargetValidators(), new Pair<>(player, target), partyManager.get(target), Collections.emptyList())) {
             return;
         }
 
+        final RequestImpl request = requestManager.remove(target, player);
         final RequestDenyEvent event = new RequestDenyEvent(player, target, request);
         Bukkit.getPluginManager().callEvent(event);
 
-        lang.sendMessage(player, "COMMAND.duel.request.deny.receiver", "name", target.getName());
-        lang.sendMessage(target, "COMMAND.duel.request.deny.sender", "name", player.getName());
+        if (request.isPartyDuel()) {
+            final Collection<Player> senderPartyMembers = request.getSenderParty().getOnlineMembers();
+            final Collection<Player> targetPartyMembers = request.getTargetParty().getOnlineMembers();
+            lang.sendMessage(senderPartyMembers, "COMMAND.duel.party-request.deny.receiver-party", "owner", player.getName(), "name", target.getName());
+            lang.sendMessage(targetPartyMembers, "COMMAND.duel.party-request.deny.sender-party", "owner", target.getName(), "name", player.getName());
+        } else {
+            lang.sendMessage(player, "COMMAND.duel.request.deny.receiver", "name", target.getName());
+            lang.sendMessage(target, "COMMAND.duel.request.deny.sender", "name", player.getName());
+        }
     }
 }

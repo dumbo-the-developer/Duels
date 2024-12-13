@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.core.util.Separators;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +27,7 @@ public final class JsonUtil {
         factory.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
         factory.disable(JsonParser.Feature.AUTO_CLOSE_SOURCE);
 
-        OBJECT_MAPPER = new ObjectMapper(factory);
+        OBJECT_MAPPER = JsonMapper.builder(factory).build();
         OBJECT_MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         OBJECT_MAPPER.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
         OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);

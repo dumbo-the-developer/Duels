@@ -35,6 +35,12 @@ public class ItemBettingButton extends BaseButton {
         }
 
         final Settings settings = settingManager.getSafely(player);
+
+        if (settings.isPartyDuel()) {
+            lang.sendMessage(player, "ERROR.party-duel.option-unavailable");
+            return;
+        }
+
         settings.setItemBetting(!settings.isItemBetting());
         settings.updateGui(player);
     }

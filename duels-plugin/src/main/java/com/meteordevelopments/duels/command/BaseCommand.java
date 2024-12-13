@@ -10,6 +10,7 @@ import com.meteordevelopments.duels.duel.DuelManager;
 import com.meteordevelopments.duels.hook.HookManager;
 import com.meteordevelopments.duels.inventories.InventoryManager;
 import com.meteordevelopments.duels.kit.KitManagerImpl;
+import com.meteordevelopments.duels.party.PartyManagerImpl;
 import com.meteordevelopments.duels.player.PlayerInfoManager;
 import com.meteordevelopments.duels.queue.QueueManager;
 import com.meteordevelopments.duels.queue.sign.QueueSignManagerImpl;
@@ -17,6 +18,7 @@ import com.meteordevelopments.duels.request.RequestManager;
 import com.meteordevelopments.duels.setting.SettingsManager;
 import com.meteordevelopments.duels.spectate.SpectateManagerImpl;
 import com.meteordevelopments.duels.util.command.AbstractCommand;
+import com.meteordevelopments.duels.validator.ValidatorManager;
 import org.bukkit.command.CommandSender;
 
 import java.util.Collection;
@@ -41,6 +43,8 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
     protected final DuelManager duelManager;
     protected final RequestManager requestManager;
     protected final HookManager hookManager;
+    protected final PartyManagerImpl partyManager;
+    protected final ValidatorManager validatorManager;
 
     /**
      * Constructor for a sub command
@@ -52,6 +56,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
         this.userManager = plugin.getUserManager();
+        this.partyManager = plugin.getPartyManager();
         this.kitManager = plugin.getKitManager();
         this.arenaManager = plugin.getArenaManager();
         this.queueManager = plugin.getQueueManager();
@@ -64,6 +69,7 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
         this.duelManager = plugin.getDuelManager();
         this.requestManager = plugin.getRequestManager();
         this.hookManager = plugin.getHookManager();
+        this.validatorManager = plugin.getValidatorManager();
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.meteordevelopments.duels.setting;
 
+import com.meteordevelopments.duels.party.Party;
 import lombok.Getter;
 import lombok.Setter;
 import com.meteordevelopments.duels.DuelsPlugin;
@@ -35,6 +36,12 @@ public class Settings {
     private boolean ownInventory;
     @Getter
     private Map<UUID, CachedInfo> cache = new HashMap<>();
+    @Getter
+    @Setter
+    private Party senderParty;
+    @Getter
+    @Setter
+    private Party targetParty;
 
     public Settings(final DuelsPlugin plugin, final Player player) {
         this.plugin = plugin;
@@ -49,11 +56,14 @@ public class Settings {
 
     public void reset() {
         target = null;
+        senderParty = null;
+        targetParty = null;
         kit = null;
         arena = null;
         bet = 0;
         itemBetting = false;
         ownInventory = !plugin.getConfiguration().isKitSelectingEnabled();
+        clearCache();
     }
 
     public void setTarget(final Player target) {
@@ -68,6 +78,10 @@ public class Settings {
         if (gui != null) {
             gui.update(player);
         }
+    }
+
+    public void clearCache() {
+        cache.clear();
     }
 
     public void openGui(final Player player) {
@@ -102,6 +116,10 @@ public class Settings {
         return info.getDuelzone();
     }
 
+    public boolean isPartyDuel() {
+        return senderParty != null && targetParty != null;
+    }
+
     public void setKit(final KitImpl kit) {
         this.kit = kit;
         this.ownInventory = false;
@@ -119,6 +137,8 @@ public class Settings {
     public Settings lightCopy() {
         final Settings copy = new Settings(plugin);
         copy.target = target;
+        copy.senderParty = senderParty;
+        copy.targetParty = targetParty;
         copy.kit = kit;
         copy.arena = arena;
         copy.bet = bet;

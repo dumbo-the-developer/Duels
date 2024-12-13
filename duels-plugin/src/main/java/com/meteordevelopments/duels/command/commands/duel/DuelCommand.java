@@ -11,23 +11,25 @@ import com.meteordevelopments.duels.hook.hooks.PvPManagerHook;
 import com.meteordevelopments.duels.hook.hooks.VaultHook;
 import com.meteordevelopments.duels.hook.hooks.worldguard.WorldGuardHook;
 import com.meteordevelopments.duels.kit.KitImpl;
+import com.meteordevelopments.duels.party.Party;
 import com.meteordevelopments.duels.setting.Settings;
 import com.meteordevelopments.duels.util.NumberUtil;
 import com.meteordevelopments.duels.util.StringUtil;
+import com.meteordevelopments.duels.util.function.Pair;
 import com.meteordevelopments.duels.util.inventory.InventoryUtil;
+import com.meteordevelopments.duels.util.validator.ValidatorUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class DuelCommand extends BaseCommand {
 
-    private final CombatTagPlusHook combatTagPlus;
-    private final PvPManagerHook pvpManager;
-    private final CombatLogXHook combatLogX;
     private final WorldGuardHook worldGuard;
     private final VaultHook vault;
 
@@ -42,9 +44,6 @@ public class DuelCommand extends BaseCommand {
                 new InventoryCommand(plugin),
                 new VersionCommand(plugin)
         );
-        this.combatTagPlus = hookManager.getHook(CombatTagPlusHook.class);
-        this.pvpManager = hookManager.getHook(PvPManagerHook.class);
-        this.combatLogX = hookManager.getHook(CombatLogXHook.class);
         this.worldGuard = hookManager.getHook(WorldGuardHook.class);
         this.vault = hookManager.getHook(VaultHook.class);
     }
@@ -67,81 +66,18 @@ public class DuelCommand extends BaseCommand {
             return false;
         }
 
-        if (config.isRequiresClearedInventory() && InventoryUtil.hasItem(player)) {
-            lang.sendMessage(sender, "ERROR.duel.inventory-not-empty");
-            return true;
-        }
+        final Party party = partyManager.get(player);
+        final Collection<Player> players = party == null ? Collections.singleton(player) : party.getOnlineMembers();
 
-        if (config.isPreventCreativeMode() && player.getGameMode() == GameMode.CREATIVE) {
-            lang.sendMessage(sender, "ERROR.duel.in-creative-mode");
-            return true;
-        }
-
-        if (config.getBlacklistedWorlds().contains(player.getWorld().getName())) {
-            lang.sendMessage(sender, "ERROR.duel.in-blacklisted-world");
-            return true;
-        }
-
-        if ((combatTagPlus != null && combatTagPlus.isTagged(player))
-                || (pvpManager != null && pvpManager.isTagged(player))
-                || (combatLogX != null && combatLogX.isTagged(player))) {
-            lang.sendMessage(sender, "ERROR.duel.is-tagged");
-            return true;
-        }
-
-        String duelzone = null;
-
-        if (worldGuard != null && config.isDuelzoneEnabled() && (duelzone = worldGuard.findDuelZone(player)) == null) {
-            lang.sendMessage(sender, "ERROR.duel.not-in-duelzone", "regions", config.getDuelzones());
-            return true;
-        }
-
-        if (arenaManager.isInMatch(player)) {
-            lang.sendMessage(sender, "ERROR.duel.already-in-match.sender");
-            return true;
-        }
-
-        if (spectateManager.isSpectating(player)) {
-            lang.sendMessage(sender, "ERROR.spectate.already-spectating.sender");
+        if (!ValidatorUtil.validate(validatorManager.getDuelSelfValidators(), player, party, players)) {
             return true;
         }
 
         final Player target = Bukkit.getPlayerExact(args[0]);
 
-        if (target == null || !player.canSee(target)) {
-            lang.sendMessage(sender, "ERROR.player.not-found", "name", args[0]);
-            return true;
-        }
-
-        if (player.equals(target)) {
-            lang.sendMessage(sender, "ERROR.duel.is-self");
-            return true;
-        }
-
-        final UserData user = userManager.get(target);
-
-        if (user == null) {
-            lang.sendMessage(sender, "ERROR.data.not-found", "name", target.getName());
-            return true;
-        }
-
-        if (!sender.hasPermission(Permissions.ADMIN) && !user.canRequest()) {
-            lang.sendMessage(sender, "ERROR.duel.requests-disabled", "name", target.getName());
-            return true;
-        }
-
-        if (requestManager.has(player, target)) {
-            lang.sendMessage(sender, "ERROR.duel.already-has-request", "name", target.getName());
-            return true;
-        }
-
-        if (arenaManager.isInMatch(target)) {
-            lang.sendMessage(sender, "ERROR.duel.already-in-match.target", "name", target.getName());
-            return true;
-        }
-
-        if (spectateManager.isSpectating(target)) {
-            lang.sendMessage(sender, "ERROR.spectate.already-spectating.target", "name", target.getName());
+        final Party targetParty = partyManager.get(target);
+        final Collection<Player> targetPlayers = targetParty == null ? Collections.singleton(target) : targetParty.getOnlineMembers();
+        if (!ValidatorUtil.validate(validatorManager.getDuelTargetValidators(), new Pair<>(player, target), targetParty, targetPlayers)) {
             return true;
         }
 
@@ -149,12 +85,22 @@ public class DuelCommand extends BaseCommand {
         // Reset bet to prevent accidents
         settings.setBet(0);
         settings.setTarget(target);
-        settings.setBaseLoc(player);
-        settings.setDuelzone(player, duelzone);
+        settings.setSenderParty(party);
+        settings.setTargetParty(targetParty);
+        settings.clearCache();
+        players.forEach(all -> {
+            settings.setBaseLoc(all);
+            settings.setDuelzone(all, worldGuard != null ? worldGuard.findDuelZone(all) : null);
+        });
 
         boolean sendRequest = false;
 
         if (args.length > 1) {
+            if (party != null) {
+                lang.sendMessage(sender, "ERROR.party-duel.option-unavailable");
+                return true;
+            }
+
             final int amount = NumberUtil.parseInt(args[1]).orElse(0);
 
             if (amount > 0 && config.isMoneyBettingEnabled()) {

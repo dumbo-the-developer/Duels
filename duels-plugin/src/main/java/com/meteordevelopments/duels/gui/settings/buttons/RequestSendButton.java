@@ -2,6 +2,7 @@ package com.meteordevelopments.duels.gui.settings.buttons;
 
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.gui.BaseButton;
+import com.meteordevelopments.duels.party.Party;
 import com.meteordevelopments.duels.setting.Settings;
 import com.meteordevelopments.duels.util.compat.Items;
 import com.meteordevelopments.duels.util.inventory.ItemBuilder;
@@ -36,6 +37,15 @@ public class RequestSendButton extends BaseButton {
         if (!settings.isOwnInventory() && settings.getKit() == null) {
             player.closeInventory();
             lang.sendMessage(player, "ERROR.duel.mode-unselected");
+            return;
+        }
+
+        final Party senderParty = settings.getSenderParty();
+        final Party targetParty = settings.getTargetParty();
+
+        if ((senderParty != null && senderParty.isRemoved()) || (targetParty != null && targetParty.isRemoved())) {
+            player.closeInventory();
+            lang.sendMessage(player, "ERROR.party.not-found");
             return;
         }
 

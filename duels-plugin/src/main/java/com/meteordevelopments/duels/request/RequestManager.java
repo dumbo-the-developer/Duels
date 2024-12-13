@@ -15,9 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class RequestManager implements Loadable, Listener {
 
@@ -60,20 +58,33 @@ public class RequestManager implements Loadable, Listener {
             return;
         }
 
-        get(sender, true).put(target.getUniqueId(), request);
+        final boolean isParty = request.isPartyDuel();
+        get(sender, true).put(isParty ? request.getTargetParty().getOwner().getUuid() : target.getUniqueId(), request);
+
         final String kit = settings.getKit() != null ? settings.getKit().getName() : lang.getMessage("GENERAL.not-selected");
         final String ownInventory = settings.isOwnInventory() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled");
         final String arena = settings.getArena() != null ? settings.getArena().getName() : lang.getMessage("GENERAL.random");
-        final int betAmount = settings.getBet();
-        final String itemBetting = settings.isItemBetting() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled");
 
-        lang.sendMessage(sender, "COMMAND.duel.request.send.sender",
-                "name", target.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
-        lang.sendMessage(target, "COMMAND.duel.request.send.receiver",
-                "name", sender.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
+        if (request.isPartyDuel()) {
+            final Collection<Player> senderPartyMembers = request.getSenderParty().getOnlineMembers();
+            final Collection<Player> targetPartyMembers = request.getTargetParty().getOnlineMembers();
+            lang.sendMessage(senderPartyMembers, "COMMAND.duel.party-request.send.sender-party",
+                    "owner", sender.getName(), "name", target.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena);
+            lang.sendMessage(targetPartyMembers, "COMMAND.duel.party-request.send.receiver-party",
+                    "name", sender.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena);
+            sendClickableMessage("COMMAND.duel.party-request.send.clickable-text.", sender, targetPartyMembers);
+        } else {
+            final int betAmount = settings.getBet();
+            final String itemBetting = settings.isItemBetting() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled");
+            lang.sendMessage(sender, "COMMAND.duel.request.send.sender",
+                    "name", target.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
+            lang.sendMessage(target, "COMMAND.duel.request.send.receiver",
+                    "name", sender.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
+            sendClickableMessage("COMMAND.duel.request.send.clickable-text.", sender, Collections.singleton(target));
+        }
+    }
 
-        final String path = "COMMAND.duel.request.send.clickable-text.";
-
+    private void sendClickableMessage(final String path, final Player sender, final Collection<Player> targets) {
         TextBuilder
                 .of(lang.getMessage(path + "info.text"), null, null, Action.SHOW_TEXT, lang.getMessage(path + "info.hover-text"))
                 .add(lang.getMessage(path + "accept.text"),
@@ -82,8 +93,8 @@ public class RequestManager implements Loadable, Listener {
                 .add(lang.getMessage(path + "deny.text"),
                         ClickEvent.Action.RUN_COMMAND, "/duel deny " + sender.getName(),
                         Action.SHOW_TEXT, lang.getMessage(path + "deny.hover-text"))
-                .send(target);
-        TextBuilder.of(lang.getMessage(path + "extra.text"), null, null, Action.SHOW_TEXT, lang.getMessage(path + "extra.hover-text")).send(target);
+                .add(lang.getMessage(path + "extra.text"), null, null, Action.SHOW_TEXT, lang.getMessage(path + "extra.hover-text"))
+                .send(targets);
     }
 
     public RequestImpl get(final Player sender, final Player target) {

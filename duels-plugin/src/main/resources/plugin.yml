@@ -14,6 +14,9 @@ commands:
   duel:
     description: Send, accept, or deny a duel request.
     aliases: [ 1v1 ]
+  party:
+    description: Create, join, and duel parties.
+    aliases: [ p, duelparty, dp ]
   queue:
     description: Join or leave a queue.
     aliases: [ q ]

@@ -1,5 +1,7 @@
 package com.meteordevelopments.duels.config;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import lombok.Getter;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.config.converters.ConfigConverter9_10;
@@ -169,10 +171,6 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean cdEnabled;
     @Getter
-    private List<String> cdMessages;
-    @Getter
-    private List<String> titles;
-    @Getter
     private boolean preventMovement;
     @Getter
     private boolean preventLaunchProjectile;
@@ -248,6 +246,26 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean disableEnderpearlInEndgame;
     @Getter
     private boolean disableMovementInEndgame;
+    @Getter
+    private boolean sendDeathMessages;
+    @Getter
+    private int partyInviteExpiration;
+    @Getter
+    private int partyAutoDisbandAfter;
+    @Getter
+    private int partyMaxSize;
+    @Getter
+    private boolean partySameSizeOnly;
+    @Getter
+    private List<String> cdDuelMessages;
+    @Getter
+    private List<String> cdDuelTitles;
+    @Getter
+    private List<String> cdPartyDuelMessages;
+    @Getter
+    private List<String> cdPartyDuelTitles;
+
+    private final Multimap<String, MessageSound> messageToSounds = HashMultimap.create();
 
     public Config(final DuelsPlugin plugin) {
         super(plugin, "config");
@@ -346,8 +364,6 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         specWhitelistedCommands = configuration.getStringList("spectate.whitelisted-commands");
 
         cdEnabled = configuration.getBoolean("countdown.enabled", true);
-        cdMessages = configuration.getStringList("countdown.messages");
-        titles = configuration.getStringList("countdown.titles");
         preventMovement = configuration.getBoolean("countdown.prevent.movement", true);
         preventLaunchProjectile = configuration.getBoolean("countdown.prevent.launch-projectile", true);
         preventPvp = configuration.getBoolean("countdown.prevent.pvp", true);
@@ -390,6 +406,16 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         disableEnderpearlInEndgame = configuration.getBoolean("disable-enderpearl-in-endgame", true);
         disableMovementInEndgame = configuration.getBoolean("disable-movement-in-endgame", false);
 
+        sendDeathMessages = configuration.getBoolean("duel.send-death-messages", true);
+        partyInviteExpiration = configuration.getInt("party.invite-expiration", 30);
+        partyAutoDisbandAfter = configuration.getInt("party.auto-disband-after", 10);
+        partyMaxSize = configuration.getInt("party.max-size", 10);
+        partySameSizeOnly = configuration.getBoolean("party.same-size-only", true);
+        cdDuelMessages = configuration.getStringList("countdown.duel.messages");
+        cdDuelTitles = configuration.getStringList("countdown.duel.titles");
+        cdPartyDuelMessages = configuration.getStringList("countdown.party-duel.messages");
+        cdPartyDuelTitles = configuration.getStringList("countdown.party-duel.titles");
+
         final ConfigurationSection sounds = configuration.getConfigurationSection("sounds");
 
         if (sounds != null) {
@@ -401,7 +427,11 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
                     continue;
                 }
 
-                this.sounds.put(name, new MessageSound(type, sound.getDouble("pitch"), sound.getDouble("volume"), sound.getStringList("trigger-messages")));
+                final List<String> triggers = sound.getStringList("trigger-messages");
+                final MessageSound messageSound = new MessageSound(type, sound.getDouble("pitch"), sound.getDouble("volume"), triggers);
+                this.sounds.put(name, messageSound);
+                triggers.forEach(message -> messageToSounds.put(message, messageSound));
+
             }
         }
     }

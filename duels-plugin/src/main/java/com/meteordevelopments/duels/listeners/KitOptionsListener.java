@@ -5,7 +5,7 @@ import com.meteordevelopments.duels.api.event.match.MatchEndEvent;
 import com.meteordevelopments.duels.api.event.match.MatchStartEvent;
 import com.meteordevelopments.duels.arena.ArenaImpl;
 import com.meteordevelopments.duels.arena.ArenaManagerImpl;
-import com.meteordevelopments.duels.arena.MatchImpl;
+import com.meteordevelopments.duels.match.DuelMatch;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.kit.KitImpl.Characteristic;
 import com.meteordevelopments.duels.util.PlayerUtil;
@@ -50,7 +50,7 @@ public class KitOptionsListener implements Listener {
     }
 
     private boolean isEnabled(final ArenaImpl arena, final Characteristic characteristic) {
-        final MatchImpl match = arena.getMatch();
+        final DuelMatch match = arena.getMatch();
         return match != null && match.getKit() != null && match.getKit().hasCharacteristic(characteristic);
     }
 
@@ -293,7 +293,7 @@ public class KitOptionsListener implements Listener {
                 return;
             }
 
-            final MatchImpl match = arena.getMatch();
+            final DuelMatch match = arena.getMatch();
 
             if (match == null) {
                 return;

@@ -1,14 +1,14 @@
 package com.meteordevelopments.duels.api.match;
 
+import java.util.List;
+import java.util.Set;
+
 import com.meteordevelopments.duels.api.arena.Arena;
 import com.meteordevelopments.duels.api.kit.Kit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * Represents an ongoing Match.
@@ -91,11 +91,4 @@ public interface Match {
      */
     @NotNull
     Set<Player> getStartingPlayers();
-
-    /**
-     * The hits amount for this {@link Match}.
-     *
-     * @return hits Hit amount for this {@link Match} or 0 if no hit was specified.
-     */
-     int getHits(Player player);
 }

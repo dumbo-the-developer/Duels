@@ -10,12 +10,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.util.Arrays;
+import java.util.Collection;
 
+@Getter
 public class VaultHook extends PluginHook<DuelsPlugin> {
 
     public static final String NAME = "Vault";
 
-    @Getter
     private Economy economy;
 
     public VaultHook(final DuelsPlugin plugin) {
@@ -32,7 +33,7 @@ public class VaultHook extends PluginHook<DuelsPlugin> {
         Log.info("Using Economy Provider: " + economy.getClass().getName());
     }
 
-    public boolean has(final int amount, final Player... players) {
+    public boolean has(final int amount, final Collection<Player> players) {
         if (economy == null) {
             return false;
         }
@@ -46,15 +47,29 @@ public class VaultHook extends PluginHook<DuelsPlugin> {
         return true;
     }
 
-    public void add(final int amount, final Player... players) {
+    public boolean has(final int amount, final Player... players) {
+        return has(amount, Arrays.asList(players));
+    }
+
+    public void add(final int amount, final Collection<Player> players) {
         if (economy != null) {
-            Arrays.stream(players).forEach(player -> economy.depositPlayer(player, amount));
+            players.forEach(player -> economy.depositPlayer(player, amount));
+        }
+    }
+
+    public void add(final int amount, final Player... players) {
+        add(amount, Arrays.asList(players));
+    }
+
+
+    public void remove(final int amount, final Collection<Player> players) {
+        if (economy != null) {
+            players.forEach(player -> economy.withdrawPlayer(player, amount));
         }
     }
 
     public void remove(final int amount, final Player... players) {
-        if (economy != null) {
-            Arrays.stream(players).forEach(player -> economy.withdrawPlayer(player, amount));
-        }
+        remove(amount, Arrays.asList(players));
     }
+
 }

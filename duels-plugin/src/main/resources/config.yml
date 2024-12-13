@@ -239,6 +239,10 @@ duel:
   blacklisted-worlds:
     - 'world_name_here'
 
+  # If set to 'true', death messages will be sent to players in match & spectators of the arena.
+  # default: true
+  send-death-messages: true
+
   # If set to 'true', players will be teleported to the location where they were before the duel instead of duel lobby.
   # default: false
   teleport-to-last-location: false
@@ -371,6 +375,23 @@ duel:
     - 'playervaults:pv'
     - 'playervaults:playervaults'
 
+party:
+  # Party invite expiration, in seconds.
+  # default: 30
+  invite-expiration: 30
+
+  # If the party owner is offline for the time (in minutes) specified below, the party will be automatically disbanded. Set to -1 to disable.
+  # default: 10
+  auto-disband-after: 10
+
+  # The max size a party can have.
+  # default: 10
+  max-size: 10
+
+  # If set to 'true', only parties that are equally sized may duel each other.
+  # default: true
+  same-size-only: true
+
 
 queue:
   # List of commands to block while in a queue.
@@ -435,28 +456,6 @@ countdown:
   # default: true
   enabled: true
 
-  # Available placeholders:
-  # %opponent% - Name of the opponent of the match
-  # %opponent_rating% - Rating of the opponent
-  # %kit% - Name of the kit used in this match. If players are using their own inventory, it will display 'none'
-  # %arena% - Name of the arena used for this match.
-  messages:
-    - '&7Starting in &f5 &7seconds!'
-    - '&7Starting in &f4 &7seconds!'
-    - '&7Starting in &f3 &7seconds!'
-    - '&7Starting in &f2 &7seconds!'
-    - '&7Starting in &f1 &7second!'
-    - '&7Now in a match against &f%opponent%&7(&a%opponent_rating%&7) with kit &3%kit% &7in arena &e%arena%&7.'
-
-  # Titles to display along with the countdown. Must have the same size as the countdown list size.
-  titles:
-    - '&f&l5'
-    - '&f&l4'
-    - '&e&l3'
-    - '&6&l2'
-    - '&c&l1'
-    - '&a&lGO!'
-
   prevent:
     # If set to 'true', movements will be cancelled while the countdown is ongoing.
     # default: true
@@ -473,6 +472,51 @@ countdown:
     # If set to 'true', block interaction will be cancelled while the countdown is ongoing.
     # default: true
     interact: true
+
+  duel:
+    # Available placeholders:
+    # %opponent% - Name of the opponent of the match
+    # %opponent_rating% - Rating of the opponent
+    # %kit% - Name of the kit used in this match. If players are using their own inventory, it will display 'none'
+    # %arena% - Name of the arena used for this match.
+    messages:
+      - '&7Starting in &f5 &7seconds!'
+      - '&7Starting in &f4 &7seconds!'
+      - '&7Starting in &f3 &7seconds!'
+      - '&7Starting in &f2 &7seconds!'
+      - '&7Starting in &f1 &7second!'
+      - '&7Now in a match against &f%opponent%&7(&a%opponent_rating%&7) with kit &3%kit% &7in arena &e%arena%&7.'
+
+    # Titles to display along with the countdown. Must have the same size as the countdown list size.
+    titles:
+      - '&f&l5'
+      - '&f&l4'
+      - '&e&l3'
+      - '&6&l2'
+      - '&c&l1'
+      - '&a&lGO!'
+
+  party-duel:
+    # Available placeholders:
+    # %opponents% - Player names of the opposing party of the match
+    # %kit% - Name of the kit used in this match. If players are using their own inventory, it will display 'none'
+    # %arena% - Name of the arena used for this match.
+    messages:
+      - '&7Starting in &f5 &7seconds!'
+      - '&7Starting in &f4 &7seconds!'
+      - '&7Starting in &f3 &7seconds!'
+      - '&7Starting in &f2 &7seconds!'
+      - '&7Starting in &f1 &7second!'
+      - '&7Now in a match against &f%opponents% &7with kit &3%kit% &7in arena &e%arena%&7.'
+
+    # Titles to display along with the countdown. Must have the same size as the countdown list size.
+    titles:
+      - '&f&l5'
+      - '&f&l4'
+      - '&e&l3'
+      - '&6&l2'
+      - '&c&l1'
+      - '&a&lGO!'
 
 stats:
   # If set to 'true', kit ratings of a player will be displayed when the command '/duel stats' is executed.

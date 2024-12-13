@@ -1,6 +1,12 @@
 package com.meteordevelopments.duels.arena;
 
 import com.google.common.collect.Lists;
+import com.meteordevelopments.duels.countdown.DuelCountdown;
+import com.meteordevelopments.duels.countdown.party.PartyDuelCountdown;
+import com.meteordevelopments.duels.match.DuelMatch;
+import com.meteordevelopments.duels.match.party.PartyDuelMatch;
+import com.meteordevelopments.duels.party.Party;
+import com.meteordevelopments.duels.spectate.SpectatorImpl;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,11 +44,11 @@ public class ArenaImpl extends BaseButton implements Arena {
     private boolean disabled;
     private final Set<KitImpl> kits = new HashSet<>();
     private final Map<Integer, Location> positions = new HashMap<>();
-    private MatchImpl match;
-    @Setter(value = AccessLevel.PACKAGE)
-    private Countdown countdown;
+    private DuelMatch match;
     @Setter(value = AccessLevel.PACKAGE)
     private boolean removed;
+    @Setter
+    private DuelCountdown countdown;
 
     public ArenaImpl(final DuelsPlugin plugin, final String name, final boolean disabled) {
         super(plugin, ItemBuilder
@@ -85,7 +91,7 @@ public class ArenaImpl extends BaseButton implements Arena {
             return false;
         }
 
-        positions.put(pos, location);
+        positions.put(event.getPos(), event.getLocation());
         arenaManager.saveArenas();
         refreshGui(isAvailable());
         return true;
@@ -142,8 +148,8 @@ public class ArenaImpl extends BaseButton implements Arena {
         return !isDisabled() && !isUsed() && getPosition(1) != null && getPosition(2) != null;
     }
 
-    public MatchImpl startMatch(final KitImpl kit, final Map<UUID, List<ItemStack>> items, final int bet, final Queue source) {
-        this.match = new MatchImpl(this, kit, items, bet, source);
+    public DuelMatch startMatch(final KitImpl kit, final Map<UUID, List<ItemStack>> items, final Settings settings, final Queue source) {
+        this.match = settings.isPartyDuel() ? new PartyDuelMatch(plugin, this, kit, items, settings.getBet(), source) : new DuelMatch(plugin, this, kit, items, settings.getBet(), source);
         refreshGui(false);
         return match;
     }
@@ -212,14 +218,8 @@ public class ArenaImpl extends BaseButton implements Arena {
         refreshGui(true);
     }
 
-    public void startCountdown(final String kit, final Map<UUID, Pair<String, Integer>> info) {
-        final List<String> messages = config.getCdMessages();
-
-        if (messages.isEmpty()) {
-            return;
-        }
-
-        this.countdown = new Countdown(plugin, this, kit, info, messages, config.getTitles());
+    public void startCountdown() {
+        this.countdown = match instanceof PartyDuelMatch ? new PartyDuelCountdown(plugin, this, (PartyDuelMatch) match) : new DuelCountdown(plugin, this, match);
         countdown.startCountdown(0L, 20L);
     }
 
@@ -230,18 +230,18 @@ public class ArenaImpl extends BaseButton implements Arena {
     @Override
     public boolean has(@NotNull final Player player) {
         Objects.requireNonNull(player, "player");
-        return isUsed() && !match.getPlayerMap().getOrDefault(player, new MatchImpl.PlayerStatus(true)).isDead;
+        return isUsed() && !match.isDead(player);
     }
 
     public void add(final Player player) {
         if (isUsed()) {
-            match.getPlayerMap().put(player, new MatchImpl.PlayerStatus(false));
+            match.addPlayer(player);
         }
     }
 
     public void remove(final Player player) {
-        if (isUsed() && match.getPlayerMap().containsKey(player)) {
-            match.getPlayerMap().put(player, new MatchImpl.PlayerStatus(true));
+        if (isUsed()) {
+            match.markAsDead(player);
         }
     }
 
@@ -250,7 +250,7 @@ public class ArenaImpl extends BaseButton implements Arena {
     }
 
     public int size() {
-        return isUsed() ? match.getAlivePlayers().size() : 0;
+        return isUsed() ? match.size() : 0;
     }
 
     public Player first() {
@@ -262,17 +262,17 @@ public class ArenaImpl extends BaseButton implements Arena {
         return isUsed() ? match.getAllPlayers().stream().filter(other -> !player.equals(other)).findFirst().orElse(null) : null;
     }
 
+    public Party getOpponent(final Party party) {
+        return isUsed() ? ((PartyDuelMatch) match).getAllParties().stream().filter(other -> !party.equals(other)).findFirst().orElse(null) : null;
+    }
+
     public Set<Player> getPlayers() {
         return isUsed() ? match.getAllPlayers() : Collections.emptySet();
     }
 
     public void broadcast(final String message) {
-        final List<Player> receivers = Lists.newArrayList(getPlayers());
-        spectateManager.getSpectatorsImpl(this)
-                .stream()
-                .map(spectator -> Bukkit.getPlayer(spectator.getUuid()))
-                .forEach(receivers::add);
-        receivers.forEach(player -> player.sendMessage(message));
+        getPlayers().forEach(player -> player.sendMessage(message));
+        spectateManager.getSpectatorsImpl(this).stream().map(SpectatorImpl::getPlayer).filter(Objects::nonNull).forEach(player -> player.sendMessage(message));
     }
 
     @Override

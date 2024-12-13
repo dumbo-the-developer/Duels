@@ -3,7 +3,7 @@ package com.meteordevelopments.duels.listeners;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.arena.ArenaImpl;
 import com.meteordevelopments.duels.arena.ArenaManagerImpl;
-import com.meteordevelopments.duels.kit.KitImpl;
+import com.meteordevelopments.duels.party.PartyManagerImpl;
 import com.meteordevelopments.duels.util.EventUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -18,9 +18,11 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 public class DamageListener implements Listener {
 
     private final ArenaManagerImpl arenaManager;
+    private final PartyManagerImpl partyManager;
 
     public DamageListener(final DuelsPlugin plugin) {
         this.arenaManager = plugin.getArenaManager();
+        this.partyManager = plugin.getPartyManager();
 
         if (plugin.getConfiguration().isForceAllowCombat()) {
             plugin.doSyncAfter(() -> Bukkit.getPluginManager().registerEvents(this, plugin), 1L);
@@ -29,39 +31,22 @@ public class DamageListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDamage(final EntityDamageByEntityEvent event) {
-        if (!(event.getEntity() instanceof Player)) {
+        if (!event.isCancelled() || !(event.getEntity() instanceof Player)) {
             return;
         }
-        Player player = (Player) event.getEntity();
+
+        final Player damaged = (Player) event.getEntity();
         final Player damager = EventUtil.getDamager(event);
 
         if (damager == null) {
             return;
         }
 
-        final ArenaImpl arena = arenaManager.get(player);
+        final ArenaImpl arena = arenaManager.get(damaged);
 
-        // Only activate when winner is undeclared
-        if (arena == null || !arenaManager.isInMatch(damager) || arena.isEndGame()) {
+        if (arena == null || !arenaManager.isInMatch(damager) || arena.isEndGame() || !partyManager.canDamage(damager, damaged)) {
             return;
         }
-
-        if (arena.getMatch().getKit() != null) {
-            KitImpl.Characteristic characteristic = arena.getMatch().getKit().getCharacteristics().stream().filter(
-                    c -> c == KitImpl.Characteristic.BOXING).findFirst().orElse(null);
-            if(characteristic != null) {
-                if(arena.getMatch().getHits(damager) >= 100) {
-                    player.damage(player.getMaxHealth());
-                    return;
-                }
-                event.setDamage(0);
-                return;
-            }
-        }
-
-        arena.getMatch().addDamageToPlayer(damager, event.getFinalDamage());
-
-        if(!event.isCancelled()) return;
 
         event.setCancelled(false);
     }
