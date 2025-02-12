@@ -75,6 +75,11 @@ public class DuelCommand extends BaseCommand {
 
         final Player target = Bukkit.getPlayerExact(args[0]);
 
+        if (target == null) {
+            lang.sendMessage(sender, "ERROR.player.not-found", args[0]);
+            return true;
+        }
+
         final Party targetParty = partyManager.get(target);
         final Collection<Player> targetPlayers = targetParty == null ? Collections.singleton(target) : targetParty.getOnlineMembers();
         if (!ValidatorUtil.validate(validatorManager.getDuelTargetValidators(), new Pair<>(player, target), targetParty, targetPlayers)) {

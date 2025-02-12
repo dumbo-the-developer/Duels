@@ -21,23 +21,21 @@ public class PlayerInfo {
     private final float experience;
     private final int level;
     private final int hunger;
-    private final ItemStack offHand;
     private final List<ItemStack> extra = new ArrayList<>();
     @Setter
     private Location location;
 
-    public PlayerInfo(final List<PotionEffect> effects, final double health, final float experience, final int level, final int hunger, final ItemStack offHand, final Location location) {
+    public PlayerInfo(final List<PotionEffect> effects, final double health, final float experience, final int level, final int hunger, final Location location) {
         this.effects = effects;
         this.health = health;
         this.experience = experience;
         this.level = level;
         this.hunger = hunger;
         this.location = location;
-        this.offHand = offHand;
     }
 
     public PlayerInfo(final Player player, final boolean excludeInventory) {
-        this(Lists.newArrayList(player.getActivePotionEffects()), player.getHealth(), player.getExp(), player.getLevel(), player.getFoodLevel(), player.getInventory().getItemInOffHand(), player.getLocation().clone());
+        this(Lists.newArrayList(player.getActivePotionEffects()), player.getHealth(), player.getExp(), player.getLevel(), player.getFoodLevel(), player.getLocation().clone());
         if (excludeInventory) {
             return;
         }
@@ -54,7 +52,6 @@ public class PlayerInfo {
         player.setFoodLevel(hunger);
         InventoryUtil.fillFromMap(player.getInventory(), items);
         InventoryUtil.addOrDrop(player, extra);
-        player.getInventory().setItemInOffHand(offHand);
         player.updateInventory();
     }
 }

@@ -16,7 +16,6 @@ public class PlayerData {
     private float experience;
     private int level;
     private int hunger;
-    private ItemStack offHand;
     private LocationData location;
     private List<ItemData> extra = new ArrayList<>();
     private PlayerData() {
@@ -27,7 +26,6 @@ public class PlayerData {
         this.experience = info.getExperience();
         this.level = info.getLevel();
         this.hunger = info.getHunger();
-        this.offHand = info.getOffHand();
         this.location = LocationData.fromLocation(info.getLocation());
 
         for (final Map.Entry<String, Map<Integer, ItemStack>> entry : info.getItems().entrySet()) {
@@ -53,7 +51,6 @@ public class PlayerData {
                 experience,
                 level,
                 hunger,
-                offHand,
                 location.toLocation()
         );
 
