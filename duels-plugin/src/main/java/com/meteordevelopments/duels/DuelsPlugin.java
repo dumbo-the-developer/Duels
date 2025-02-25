@@ -49,7 +49,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import space.arim.morepaperlib.MorePaperLib;
 import space.arim.morepaperlib.scheduling.ScheduledTask;
-
 import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
