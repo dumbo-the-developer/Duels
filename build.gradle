@@ -10,7 +10,7 @@ buildscript {
 
 allprojects {
     group = 'com.meteordevelopments'
-    version = '2.2'
+    version = '2.5'
 }
 
 subprojects {
@@ -69,6 +69,16 @@ subprojects {
         maven {
             name = 'arim-mvn-lgpl3'
             url = 'https://mvn-repo.arim.space/lesser-gpl3/'
+        }
+
+        maven {
+            name = "combatlogx"
+            url = "https://nexus.sirblobman.xyz/public/"
+        }
+
+        maven {
+            name = "jitpack"
+            url = "https://jitpack.io"
         }
 
         flatDir {

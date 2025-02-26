@@ -21,7 +21,9 @@ dependencies {
     implementation 'commons-lang:commons-lang:2.6'
     implementation 'com.mojang:authlib:1.5.25'
     implementation 'me.clip:placeholderapi:2.11.6'
-    implementation 'com.SirBlobman.combatlogx:CombatLogX-API:10.0.0.0-SNAPSHOT'
+    implementation 'com.github.sirblobman.api:core:2.9-SNAPSHOT'
+    implementation 'com.github.timderspieler:DeluxeCombat-API:1.5.1'
+    implementation 'com.github.sirblobman.combatlogx:api:11.4-SNAPSHOT'
     implementation('net.essentialsx:EssentialsX:2.20.1') {
         transitive = false
     }

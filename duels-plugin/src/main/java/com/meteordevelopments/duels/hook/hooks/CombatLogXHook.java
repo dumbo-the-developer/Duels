@@ -1,7 +1,7 @@
 package com.meteordevelopments.duels.hook.hooks;
 
-import com.SirBlobman.combatlogx.api.ICombatLogX;
-import com.SirBlobman.combatlogx.api.event.PlayerPreTagEvent;
+import com.github.sirblobman.combatlogx.api.ICombatLogX;
+import com.github.sirblobman.combatlogx.api.event.PlayerPreTagEvent;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.arena.ArenaManagerImpl;
 import com.meteordevelopments.duels.config.Config;
@@ -24,7 +24,7 @@ public class CombatLogXHook extends PluginHook<DuelsPlugin> {
         this.arenaManager = plugin.getArenaManager();
 
         try {
-            Class.forName("com.SirBlobman.combatlogx.api.event.PlayerPreTagEvent");
+            Class.forName("com.github.sirblobman.combatlogx.api.event.PlayerPreTagEvent");
         } catch (ClassNotFoundException ex) {
             throw new RuntimeException("This version of " + getName() + " is not supported. Please try upgrading to the latest version.");
         }

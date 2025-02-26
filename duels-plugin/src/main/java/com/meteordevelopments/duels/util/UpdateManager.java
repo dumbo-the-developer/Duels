@@ -21,7 +21,6 @@ import org.json.JSONObject;
 public class UpdateManager {
     private DuelsPlugin main;
     private URL spigotUrl;
-    private int pluginId = 118881;
     private boolean updateIsAvailable = false;
     private String currentVersion;
     @Getter
@@ -35,7 +34,7 @@ public class UpdateManager {
         // Check for the latest version from Spigot
         if (this.spigotUrl == null) {
             try {
-                this.spigotUrl = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + this.pluginId);
+                this.spigotUrl = new URL("https://meteordevelopments.com/legacy/update.php");
             } catch (Exception e) {
                 e.printStackTrace();
             }
