@@ -58,7 +58,6 @@ import java.util.stream.Collectors;
 public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     private static final int BSTATS_ID = 20778;
-    private static final int RESOURCE_ID = 118881;
     private static final String SPIGOT_INSTALLATION_URL = "https://www.spigotmc.org/wiki/spigot-installation/";
     @Getter
     private UpdateManager updateManager;
@@ -378,8 +377,14 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Override
     public ScheduledTask doSyncRepeat(@NotNull final Runnable task, final long delay, final long period) {
         Objects.requireNonNull(task, "task");
-        return DuelsPlugin.morePaperLib.scheduling().globalRegionalScheduler().runAtFixedRate(task, delay, period);
+
+        long safeDelay = Math.max(1, delay);
+
+        return DuelsPlugin.morePaperLib.scheduling()
+                .globalRegionalScheduler()
+                .runAtFixedRate(task, safeDelay, period);
     }
+
 
     @Override
     public ScheduledTask doAsync(@NotNull final Runnable task) {
