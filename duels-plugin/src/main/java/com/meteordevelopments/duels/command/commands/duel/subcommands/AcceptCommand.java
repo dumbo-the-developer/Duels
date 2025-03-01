@@ -3,18 +3,14 @@ package com.meteordevelopments.duels.command.commands.duel.subcommands;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.api.event.request.RequestAcceptEvent;
 import com.meteordevelopments.duels.command.BaseCommand;
-import com.meteordevelopments.duels.hook.hooks.CombatLogXHook;
-import com.meteordevelopments.duels.hook.hooks.CombatTagPlusHook;
-import com.meteordevelopments.duels.hook.hooks.PvPManagerHook;
 import com.meteordevelopments.duels.hook.hooks.worldguard.WorldGuardHook;
 import com.meteordevelopments.duels.party.Party;
 import com.meteordevelopments.duels.request.RequestImpl;
 import com.meteordevelopments.duels.setting.Settings;
 import com.meteordevelopments.duels.util.function.Pair;
-import com.meteordevelopments.duels.util.inventory.InventoryUtil;
+
 import com.meteordevelopments.duels.util.validator.ValidatorUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 

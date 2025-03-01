@@ -12,6 +12,7 @@ public class HookManager extends AbstractHookManager<DuelsPlugin> {
         register(BountyHuntersHook.NAME, BountyHuntersHook.class);
         register(CombatLogXHook.NAME, CombatLogXHook.class);
         register(CombatTagPlusHook.NAME, CombatTagPlusHook.class);
+        register(DeluxeCombatHook.NAME, DeluxeCombatHook.class);
         register(EssentialsHook.NAME, EssentialsHook.class);
         register(FactionsHook.NAME, FactionsHook.class);
         register(LeaderHeadsHook.NAME, LeaderHeadsHook.class);

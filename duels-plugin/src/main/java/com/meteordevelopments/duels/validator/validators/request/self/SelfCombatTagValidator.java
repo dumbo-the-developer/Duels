@@ -4,6 +4,7 @@ import java.util.Collection;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.hook.hooks.CombatLogXHook;
 import com.meteordevelopments.duels.hook.hooks.CombatTagPlusHook;
+import com.meteordevelopments.duels.hook.hooks.DeluxeCombatHook;
 import com.meteordevelopments.duels.hook.hooks.PvPManagerHook;
 import com.meteordevelopments.duels.party.Party;
 import com.meteordevelopments.duels.validator.BaseTriValidator;
@@ -17,25 +18,29 @@ public class SelfCombatTagValidator extends BaseTriValidator<Player, Party, Coll
     private final CombatTagPlusHook combatTagPlus;
     private final PvPManagerHook pvpManager;
     private final CombatLogXHook combatLogX;
+    private final DeluxeCombatHook deluxeCombat;
 
     public SelfCombatTagValidator(final DuelsPlugin plugin) {
         super(plugin);
         this.combatTagPlus = plugin.getHookManager().getHook(CombatTagPlusHook.class);
         this.pvpManager = plugin.getHookManager().getHook(PvPManagerHook.class);
         this.combatLogX = plugin.getHookManager().getHook(CombatLogXHook.class);
+        this.deluxeCombat = plugin.getHookManager().getHook(DeluxeCombatHook.class);
     }
 
     @Override
     public boolean shouldValidate() {
         return (combatTagPlus != null && config.isCtpPreventDuel())
-            || (pvpManager != null && config.isPmPreventDuel())
-            || (combatLogX != null && config.isClxPreventDuel());
+                || (pvpManager != null && config.isPmPreventDuel())
+                || (combatLogX != null && config.isClxPreventDuel())
+                || (deluxeCombat != null && config.isDcPreventDuel());
     }
 
     private boolean isTagged(final Player player) {
         return (combatTagPlus != null && combatTagPlus.isTagged(player))
-            || (pvpManager != null && pvpManager.isTagged(player))
-            || (combatLogX != null && combatLogX.isTagged(player));
+                || (pvpManager != null && pvpManager.isTagged(player))
+                || (combatLogX != null && combatLogX.isTagged(player))
+                || (deluxeCombat != null && deluxeCombat.isTagged(player));
     }
 
     @Override
