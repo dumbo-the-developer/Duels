@@ -343,6 +343,14 @@ public class KitOptionsListener implements Listener {
                 return;
             }
 
+            boolean isCritical = !player.isOnGround() &&
+                    !player.isSneaking() &&
+                    player.getFallDistance() > 0;
+            if (isCritical) {
+                // Cancel the extra critical damage by setting it to normal attack damage
+                event.setDamage(event.getDamage() / 1.5); // Critical hits are 150%, reverse it
+            }
+
             plugin.doSyncAfter(() -> player.setNoDamageTicks(0), 1);
         }
     }
