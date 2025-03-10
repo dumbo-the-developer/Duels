@@ -71,6 +71,23 @@ public class KitOptionsListener implements Listener {
     }
 
     @EventHandler
+    public void on(final EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof Player)) {
+            return;
+        }
+
+        final Player player = (Player) event.getEntity();
+        final ArenaImpl arena = arenaManager.get(player);
+
+        if (arena == null || !isEnabled(arena, Characteristic.LOKA)) {
+            return;
+        }
+        double originalDamage = event.getDamage();
+        double increaseDamage = originalDamage * 1.33;
+        event.setDamage(increaseDamage);
+    }
+
+    @EventHandler
     public void on(final FoodLevelChangeEvent event) {
         if (!(event.getEntity() instanceof Player)) {
             return;

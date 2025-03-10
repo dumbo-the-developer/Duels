@@ -34,6 +34,14 @@ supported-plugins:
     # If set to 'true', players will not be combat tagged while in duel.
     # default: true
     prevent-tag-in-duel: true
+  DeluxeCombat:
+    # If set to 'true', players will not be able to duel while combat tagged.
+    # default: true
+    prevent-duel-if-tagged: true
+
+    # If set to 'true', players will not be combat tagged while in duel.
+    # default: true
+    prevent-tag-in-duel: true
   Essentials:
     # If set to 'true', players in vanish will be automatically unvanished at the start of a duel.
     # default: true
