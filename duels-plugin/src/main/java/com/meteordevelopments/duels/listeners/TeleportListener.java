@@ -62,4 +62,10 @@ public class TeleportListener implements Listener {
             return;
         }
     }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+    public void onTP(final PlayerTeleportEvent event) {
+        final Player player = event.getPlayer();
+        player.closeInventory();
+    }
 }

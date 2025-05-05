@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
@@ -113,6 +114,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private PartyManagerImpl partyManager;
     @Getter
     private ValidatorManager validatorManager;
+    private static final Logger LOGGER = Logger.getLogger("[Duels-Optimised]");
 
     @Override
     public void onEnable() {
@@ -127,8 +129,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         } catch (IOException ex) {
             sendMessage("&c&lCould not load LogManager. Please contact the developer.");
 
+            LOGGER.log(Level.SEVERE, "Could not load LogManager. Please contact the developer.", ex);
             // Manually print the stacktrace since Log#error only prints errors to non-plugin log sources.
-            ex.printStackTrace();
+
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -240,11 +243,11 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                 lastLoad = loadables.indexOf(loadable);
             } catch (Exception ex) {
                 // Print the stacktrace to help with debugging
-                ex.printStackTrace();
+                LOGGER.log(Level.SEVERE, "Error loading " + name, ex);
 
                 // Handles the case of exceptions from LogManager not being logged in file
                 if (loadable instanceof LogSource) {
-                    ex.printStackTrace();
+                    LOGGER.log(Level.SEVERE, "Error loading ", ex);
                 }
 
                 sendMessage("&c&lThere was an error while loading " + name + "! If you believe this is an issue from the plugin, please contact the developer.");

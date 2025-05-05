@@ -7,7 +7,7 @@
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.36/5a30490a6e14977d97d9c73c924c1f1b5311ea95/lombok-1.18.36.jar" />
         </processorPath>
-        <module name="Duels-Optimised.duels-plugin.main" />
+        <module name="com.meteordevelopments.Duels-Optimised.duels-plugin.main" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="1.8" />
