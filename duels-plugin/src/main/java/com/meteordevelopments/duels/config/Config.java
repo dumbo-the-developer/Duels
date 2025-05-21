@@ -268,6 +268,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private List<String> cdPartyDuelMessages;
     @Getter
     private List<String> cdPartyDuelTitles;
+    @Getter
+    private boolean AXpreventGraves;
 
     private final Multimap<String, MessageSound> messageToSounds = HashMultimap.create();
 
@@ -294,6 +296,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         pmPreventTag = configuration.getBoolean("supported-plugins.PvPManager.prevent-tag-in-duel", true);
         clxPreventDuel = configuration.getBoolean("supported-plugins.CombatLogX.prevent-duel-if-tagged", true);
         clxPreventTag = configuration.getBoolean("supported-plugins.CombatLogX.prevent-tag-in-duel", true);
+        AXpreventGraves = configuration.getBoolean("supported-plugins.AXGraves.prevent-grave-in-duel", true);
         dcPreventDuel = configuration.getBoolean("supported-plugins.DeluxeCombat.prevent-duel-if-tagged", true);
         dcPreventTag = configuration.getBoolean("supported-plugins.DeluxeCombat.prevent-tag-in-duel", true);
         autoUnvanish = configuration.getBoolean("supported-plugins.Essentials.auto-unvanish", true);

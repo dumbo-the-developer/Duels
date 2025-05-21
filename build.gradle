@@ -81,6 +81,11 @@ subprojects {
             url = "https://jitpack.io"
         }
 
+        maven {
+            name = 'axPlugins'
+            url = 'https://repo.artillex-studios.com/releases/'
+        }
+
         flatDir {
             dirs "$rootDir/libs/"
         }
