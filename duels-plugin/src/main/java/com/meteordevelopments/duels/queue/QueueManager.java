@@ -178,6 +178,10 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
                         setting.getCache().put(player.getUniqueId(), current.getInfo());
                         setting.getCache().put(other.getUniqueId(), opponent.getInfo());
 
+                        // Ensure party info is set to avoid NPE in DuelManager
+                        setting.setSenderParty(plugin.getPartyManager().get(player));
+                        setting.setTargetParty(plugin.getPartyManager().get(other));
+
                         final String kit = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("GENERAL.none");
                         lang.sendMessage(player, "QUEUE.found-opponent", "name", other.getName(), "kit", kit, "bet_amount", queue.getBet());
                         lang.sendMessage(other, "QUEUE.found-opponent", "name", player.getName(), "kit", kit, "bet_amount", queue.getBet());
