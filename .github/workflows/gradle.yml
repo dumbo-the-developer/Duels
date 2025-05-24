@@ -71,7 +71,7 @@ jobs:
           curl -H "Content-Type: application/json" \
                -X POST \
                -d "{
-                 \"username\": \"GitHub Actions\",
+                 \"username\": \"GitHub\",
                  \"embeds\": [{
                    \"title\": \"<a:tick:1375852491299618997> Duels Build Succeeded\",
                    \"color\": 65280,
@@ -95,7 +95,7 @@ jobs:
           curl -H "Content-Type: application/json" \
                -X POST \
                -d "{
-                 \"username\": \"GitHub Actions\",
+                 \"username\": \"GitHub\",
                  \"embeds\": [{
                    \"title\": \"<a:cancel:1375852920372859002> Duels Build Failed\",
                    \"color\": 16711680,
