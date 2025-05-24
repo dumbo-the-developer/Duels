@@ -5,6 +5,15 @@ dependencies {
     implementation('space.arim.morepaperlib:morepaperlib:0.4.4')
 }
 
+java {
+    withJavadocJar()
+}
+
+tasks.javadoc {
+    options.encoding = 'UTF-8'
+    failOnError = false // Spigot projects often throw warnings; this prevents build failure
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
@@ -12,6 +21,8 @@ publishing {
             artifactId = project.name.toLowerCase()
             version = project.version
             from components.java
+
+            artifact javadocJar
         }
     }
 }
