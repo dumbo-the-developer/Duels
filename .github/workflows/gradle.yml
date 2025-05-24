@@ -83,7 +83,7 @@ jobs:
                      { \"name\": \"Duration\", \"value\": \"${DURATION}s\", \"inline\": true },
                      { \"name\": \"View Run\", \"value\": \"[Open Workflow](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": true }
                    ],
-                   \"footer\": { \"text\": \"[Click To View Javadocs](javadocs.meteordevelopments.com/duels)\" },
+                   \"footer\": { \"text\": \"[Click To View Javadocs](https://javadocs.meteordevelopments.com/duels)\" },
                    \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
                  }]
                }" \
