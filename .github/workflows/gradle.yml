@@ -73,7 +73,7 @@ jobs:
                -d "{
                  \"username\": \"GitHub Actions\",
                  \"embeds\": [{
-                   \"title\": \"✅ Duels Build Succeeded\",
+                   \"title\": \"<a:tick:1375852491299618997> Duels Build Succeeded\",
                    \"color\": 65280,
                    \"fields\": [
                      { \"name\": \"Author\", \"value\": \"${{ github.actor }}\", \"inline\": true },
@@ -97,7 +97,7 @@ jobs:
                -d "{
                  \"username\": \"GitHub Actions\",
                  \"embeds\": [{
-                   \"title\": \"❌ Duels Build Failed\",
+                   \"title\": \"<a:cancel:1375852920372859002> Duels Build Failed\",
                    \"color\": 16711680,
                    \"fields\": [
                      { \"name\": \"Author\", \"value\": \"${{ github.actor }}\", \"inline\": true },
