@@ -66,6 +66,9 @@ public class TeleportListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onTP(final PlayerTeleportEvent event) {
         final Player player = event.getPlayer();
+        if (!arenaManager.isInMatch(player)) {
+            return;
+        }
         player.closeInventory();
     }
 }
