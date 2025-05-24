@@ -57,7 +57,7 @@ jobs:
         distribution: 'temurin'
 
     - name: Generate Javadoc
-      run: ./gradlew javadoc
+      run: ./gradlew :duels-api:javadoc
 
     - name: Deploy Javadoc to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
