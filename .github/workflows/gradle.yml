@@ -31,25 +31,30 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Needed to push to gh-pages
+      contents: write
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
 
-    - name: Generate Javadoc
-      run: ./gradlew :duels-api:javadoc
+      - name: Generate Javadoc
+        run: ./gradlew :duels-api:javadoc
 
-    - name: List Javadoc files
-      run: ls -la ./duels-api/build/docs/javadoc
+      - name: Move Javadoc into subfolder
+        run: |
+          mkdir -p site/duels
+          cp -r duels-api/build/docs/javadoc/* site/duels/
 
-    - name: Deploy Javadoc to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./duels-api/build/docs/javadoc
+      - name: Set custom domain
+        run: echo "javadocs.meteordevelopments.com" > site/CNAME
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
