@@ -163,6 +163,7 @@ COMMAND:
           - '&6- &7Arena: &e%arena%'
           - '&6- &7Bet: &6$%bet_amount%'
           - '&6- &7Item Betting: &r%item_betting%'
+          - '{LINE}'
         clickable-text:
           info:
             text: '&7Click to '
@@ -173,9 +174,6 @@ COMMAND:
           deny:
             text: '&c&l[DENY]'
             hover-text: '&7Click to &cdeny &7this request.'
-          extra:
-            text: '{LINE}'
-            hover-text: ''
       accept:
         sender: '{PREFIX} &f%name% &7has accepted your duel request.'
         receiver: '{PREFIX} &7Accepted the duel request from &f%name%&7.'
