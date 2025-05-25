@@ -55,7 +55,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
     private static final String FILE_NAME = "queues.json";
 
-    private static final String QUEUES_LOADED = "&aLoaded %s queue(s).";
+    private static final String QUEUES_LOADED = "&2Loaded %s queue(s).";
 
     private final DuelsPlugin plugin;
     private final Config config;

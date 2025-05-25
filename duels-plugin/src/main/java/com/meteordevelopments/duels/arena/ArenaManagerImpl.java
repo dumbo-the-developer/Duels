@@ -46,7 +46,7 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
     private static final String FILE_NAME = "arenas.json";
 
     private static final String ERROR_NOT_ALPHANUMERIC = "&c&lCould not load arena %s: Name is not alphanumeric.";
-    private static final String ARENAS_LOADED = "&aLoaded %s arena(s).";
+    private static final String ARENAS_LOADED = "&2Loaded %s arena(s).";
 
     private final DuelsPlugin plugin;
     private final Config config;

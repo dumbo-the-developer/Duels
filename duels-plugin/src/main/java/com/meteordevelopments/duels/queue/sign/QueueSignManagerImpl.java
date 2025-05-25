@@ -39,7 +39,7 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
 
     private static final String FILE_NAME = "signs.json";
 
-    private static final String SIGNS_LOADED = "&aLoaded %s queue sign(s).";
+    private static final String SIGNS_LOADED = "&2Loaded %s queue sign(s).";
 
     private final DuelsPlugin plugin;
     private final Lang lang;

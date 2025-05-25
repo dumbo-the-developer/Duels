@@ -126,87 +126,13 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
         long start = System.currentTimeMillis();
 
-        try {
-            logManager = new LogManager(this);
-        } catch (IOException ex) {
-            sendMessage("&c&lCould not load LogManager. Please contact the developer.");
-
-            LOGGER.log(Level.SEVERE, "Could not load LogManager. Please contact the developer.", ex);
-            // Manually print the stacktrace since Log#error only prints errors to non-plugin log sources.
-
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
-
-        Log.addSource(logManager);
-        logManager.debug("onEnable start -> " + System.currentTimeMillis() + "\n");
-
-        try {
-            Class.forName("org.spigotmc.SpigotConfig");
-        } catch (ClassNotFoundException ex) {
-            sendMessage("&c&l================= *** DUELS LOAD FAILURE *** =================");
-            sendMessage("&c&lDuels requires a spigot server to run, but this server was not running on spigot!");
-            sendMessage("&c&lTo run your server on spigot, follow this guide: " + SPIGOT_INSTALLATION_URL);
-            sendMessage("&c&lSpigot is compatible with CraftBukkit/Bukkit plugins.");
-            sendMessage("&c&l================= *** DUELS LOAD FAILURE *** =================");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
-
-        loadables.add(configuration = new Config(this));
-        loadables.add(lang = new Lang(this));
-        loadables.add(userManager = new UserManagerImpl(this));
-        loadables.add(guiListener = new GuiListener<>(this));
-        loadables.add(partyManager = new PartyManagerImpl(this));
-        loadables.add(kitManager = new KitManagerImpl(this));
-        loadables.add(arenaManager = new ArenaManagerImpl(this));
-        loadables.add(settingManager = new SettingsManager(this));
-        loadables.add(playerManager = new PlayerInfoManager(this));
-        loadables.add(spectateManager = new SpectateManagerImpl(this));
-        loadables.add(bettingManager = new BettingManager(this));
-        loadables.add(inventoryManager = new InventoryManager(this));
-        loadables.add(duelManager = new DuelManager(this));
-        loadables.add(queueManager = new QueueManager(this));
-        loadables.add(queueSignManager = new QueueSignManagerImpl(this));
-        loadables.add(requestManager = new RequestManager(this));
-        hookManager = new HookManager(this);
-        loadables.add(validatorManager = new ValidatorManager(this));
-        loadables.add(teleport = new Teleport(this));
-        loadables.add(extensionManager = new ExtensionManager(this));
-
-        if (!load()) {
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
-
-        new KitItemListener(this);
-        new DamageListener(this);
-        new PotionListener(this);
-        new TeleportListener(this);
-        new ProjectileHitListener(this);
-        new EnderpearlListener(this);
-        new KitOptionsListener(this);
-        new LingerPotionListener(this);
+        loadLogManager();
+        initLoadables();
+        loadPreListeners();
 
         long end = System.currentTimeMillis();
-        sendMessage("&aSuccessfully enabled Duels in " + CC.getTimeDifferenceAndColor(start, end) + "&a.");
-
-        new Metrics(this, BSTATS_ID);
-
-        if (!configuration.isCheckForUpdates()) {
-            return;
-        }
-
-        this.updateManager = new UpdateManager(this);
-        this.updateManager.checkForUpdate();
-        if (updateManager.updateIsAvailable()){
-            sendMessage("&a===============================================");
-            sendMessage("&aAn update for " + getName() + " is available!");
-            sendMessage("&aDownload " + getName() + " v" + updateManager.getLatestVersion() + " here:");
-            sendMessage("&e" + getDescription().getWebsite());
-            sendMessage("&a===============================================");
-        }
-
+        sendMessage("&2Successfully enabled Duels in " + CC.getTimeDifferenceAndColor(start, end) + "&a.");
+        checkForUpdatesAndMetrics();
     }
 
     @Override
@@ -220,7 +146,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         logManager.debug("Log#clearSources done (took " + Math.abs(last - System.currentTimeMillis()) + "ms)");
         logManager.handleDisable();
         instance = null;
-        sendMessage("&aDisable process took " + (System.currentTimeMillis() - start) + "ms.");
+        sendMessage("&2Disable process took " + (System.currentTimeMillis() - start) + "ms.");
     }
 
     /**
@@ -328,14 +254,14 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     @Override
     public void registerListener(@NotNull final Listener listener) {
-        sendMessage("&eRegistering listeners...");
+        sendMessage("&eRegistering post listeners...");
         long start = System.currentTimeMillis();
 
         Objects.requireNonNull(listener, "listener");
         registeredListeners.add(listener);
         Bukkit.getPluginManager().registerEvents(listener, this);
 
-        sendMessage("&dSuccessfully registered listeners [" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + ChatColor.WHITE + "]");
+        sendMessage("&dSuccessfully registered listeners after plugin startup in [" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + ChatColor.WHITE + "]");
     }
 
     @Override
@@ -463,11 +389,121 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     }
 
     public static String getPrefix() {
-        return ChatColor.translateAlternateColorCodes('&', "&7[&aDuels&bOptimised&7] &f");
+        return ChatColor.translateAlternateColorCodes('&', "&b&lDuels Optimised &7» ");
     }
 
     public static void sendMessage(String message) {
         Bukkit.getConsoleSender().sendMessage(getPrefix() + CC.translate(message));
     }
 
+    private void loadLogManager(){
+        long start = System.currentTimeMillis();
+
+        sendMessage("&eStarting to load log manager");
+        try {
+            logManager = new LogManager(this);
+        } catch (IOException ex) {
+            sendMessage("&c&lCould not load LogManager. Please contact the developer.");
+
+            LOGGER.log(Level.SEVERE, "Could not load LogManager. Please contact the developer.", ex);
+            // Manually print the stacktrace since Log#error only prints errors to non-plugin log sources.
+
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        Log.addSource(logManager);
+        logManager.debug("onEnable start -> " + System.currentTimeMillis() + "\n");
+
+        try {
+            Class.forName("org.spigotmc.SpigotConfig");
+        } catch (ClassNotFoundException ex) {
+            sendMessage("&c&l================= *** DUELS LOAD FAILURE *** =================");
+            sendMessage("&c&lDuels requires a spigot server to run, but this server was not running on spigot!");
+            sendMessage("&c&lTo run your server on spigot, follow this guide: " + SPIGOT_INSTALLATION_URL);
+            sendMessage("&c&lSpigot is compatible with CraftBukkit/Bukkit plugins.");
+            sendMessage("&c&l================= *** DUELS LOAD FAILURE *** =================");
+            getServer().getPluginManager().disablePlugin(this);
+        }
+
+        sendMessage("&dSuccessfully loaded Log Manager in &f[" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
+    }
+
+    private void initLoadables() {
+        long start = System.currentTimeMillis();
+        sendMessage("&eStarting to load loadables");
+
+        loadAndTrack("config", () -> loadables.add(configuration = new Config(this)));
+        loadAndTrack("lang", () -> loadables.add(lang = new Lang(this)));
+        loadAndTrack("user manager", () -> loadables.add(userManager = new UserManagerImpl(this)));
+        loadAndTrack("gui listener", () -> loadables.add(guiListener = new GuiListener<>(this)));
+        loadAndTrack("party manager", () -> loadables.add(partyManager = new PartyManagerImpl(this)));
+        loadAndTrack("kit manager", () -> loadables.add(kitManager = new KitManagerImpl(this)));
+        loadAndTrack("arena manager", () -> loadables.add(arenaManager = new ArenaManagerImpl(this)));
+        loadAndTrack("settings manager", () -> loadables.add(settingManager = new SettingsManager(this)));
+        loadAndTrack("player manager", () -> loadables.add(playerManager = new PlayerInfoManager(this)));
+        loadAndTrack("spectate manager", () -> loadables.add(spectateManager = new SpectateManagerImpl(this)));
+        loadAndTrack("betting manager", () -> loadables.add(bettingManager = new BettingManager(this)));
+        loadAndTrack("inventory manager", () -> loadables.add(inventoryManager = new InventoryManager(this)));
+        loadAndTrack("duel manager", () -> loadables.add(duelManager = new DuelManager(this)));
+        loadAndTrack("queue manager", () -> loadables.add(queueManager = new QueueManager(this)));
+        loadAndTrack("queue signs", () -> loadables.add(queueSignManager = new QueueSignManagerImpl(this)));
+        loadAndTrack("request manager", () -> loadables.add(requestManager = new RequestManager(this)));
+        loadAndTrack("hook manager", () -> hookManager = new HookManager(this));
+        loadAndTrack("validator manager", () -> loadables.add(validatorManager = new ValidatorManager(this)));
+        loadAndTrack("teleport manager", () -> loadables.add(teleport = new Teleport(this)));
+        loadAndTrack("extension manager", () -> loadables.add(extensionManager = new ExtensionManager(this)));
+
+        if (!load()) {
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        sendMessage("&dSuccessfully loaded all loadables in &f[" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
+    }
+
+    private void loadAndTrack(String name, Runnable task) {
+        long start = System.currentTimeMillis();
+        try {
+            task.run();
+            sendMessage("&2Successfully loaded " + name + " in &f[" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
+        } catch (Exception e) {
+            sendMessage("&cFailed to load " + name + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void loadPreListeners(){
+        long start = System.currentTimeMillis();
+
+        sendMessage("&eStarting to load pre-listeners");
+        new KitItemListener(this);
+        new DamageListener(this);
+        new PotionListener(this);
+        new TeleportListener(this);
+        new ProjectileHitListener(this);
+        new EnderpearlListener(this);
+        new KitOptionsListener(this);
+        new LingerPotionListener(this);
+
+        sendMessage("&dSuccessfully loaded pre-listeners in &f[" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
+    }
+
+    private void checkForUpdatesAndMetrics() {
+        new Metrics(this, BSTATS_ID);
+
+        if (!configuration.isCheckForUpdates()) {
+            return;
+        }
+
+        this.updateManager = new UpdateManager(this);
+        this.updateManager.checkForUpdate();
+        if (updateManager.updateIsAvailable()){
+            sendMessage("&a===============================================");
+            sendMessage("&aAn update for " + getName() + " is available!");
+            sendMessage("&aDownload " + getName() + " v" + updateManager.getLatestVersion() + " here:");
+            sendMessage("&e" + getDescription().getWebsite());
+            sendMessage("&a===============================================");
+        }
+    }
 }

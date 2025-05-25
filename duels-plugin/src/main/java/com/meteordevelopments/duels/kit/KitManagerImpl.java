@@ -35,7 +35,7 @@ public class KitManagerImpl implements Loadable, KitManager {
     private static final String FILE_NAME = "kits.json";
 
     private static final String ERROR_NOT_ALPHANUMERIC = "&c&lCould not load kit %s: Name is not alphanumeric.";
-    private static final String KITS_LOADED = "&aLoaded %s kit(s).";
+    private static final String KITS_LOADED = "&2Loaded %s kit(s).";
 
     private final DuelsPlugin plugin;
     private final Config config;
