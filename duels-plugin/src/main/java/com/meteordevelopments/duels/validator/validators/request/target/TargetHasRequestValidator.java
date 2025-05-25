@@ -20,7 +20,7 @@ public class TargetHasRequestValidator extends BaseTriValidator<Pair<Player, Pla
     public boolean validate(Pair<Player, Player> pair, Party party, Collection<Player> players) {
         if (requestManager.has(pair.getKey(), pair.getValue())) {
             lang.sendMessage(pair.getKey(), party != null ? PARTY_MESSAGE_KEY : MESSAGE_KEY, "name", pair.getValue().getName());
-            return true;
+            return false;
         }
 
         return true;
