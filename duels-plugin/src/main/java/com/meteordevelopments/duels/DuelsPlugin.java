@@ -118,11 +118,13 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     @Override
     public void onEnable() {
-        long start = System.currentTimeMillis();
+
         instance = this;
         morePaperLib = new MorePaperLib(this);
         Log.addSource(this);
         JsonUtil.registerDeserializer(ItemData.class, ItemDataDeserializer.class);
+
+        long start = System.currentTimeMillis();
 
         try {
             logManager = new LogManager(this);
@@ -186,6 +188,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         new KitOptionsListener(this);
         new LingerPotionListener(this);
 
+        long end = System.currentTimeMillis();
+        sendMessage("&aSuccessfully enabled Duels in " + CC.getTimeDifferenceAndColor(start, end) + "&a.");
+
         new Metrics(this, BSTATS_ID);
 
         if (!configuration.isCheckForUpdates()) {
@@ -202,8 +207,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             sendMessage("&a===============================================");
         }
 
-        long end = System.currentTimeMillis();
-        sendMessage("&aSuccessfully enabled Duels in " + CC.getTimeDifferenceAndColor(start, end) + "&a.");
     }
 
     @Override
