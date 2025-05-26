@@ -460,6 +460,11 @@ DUEL:
     arena-in-use: '{FAIL_PREFIX} The selected arena is already in use. Please select a different arena.'
     arena-not-applicable: '{FAIL_PREFIX} Kit %kit% cannot be used on the selected arena.'
     not-enough-money: '{FAIL_PREFIX} You or your opponent does not have $%bet_amount%.'
+  rounds:
+    round-end: '{PREFIX} &7Round &e%round% &7finished! &f%winner% &7won the round!'
+    round-status: '{PREFIX} &7Current score: &f%player1% &7(&a%wins1%&7) vs &f%player2% &7(&a%wins2%&7)'
+    round-start: '{PREFIX} &7Round &e%round% &7starting...'
+    match-point: '{PREFIX} &c&lMatch Point &7for &f%player%&7!'
   party-start-failure:
     option-unavailable: '{FAIL_PREFIX} &cItem/Money Betting is currently not available for party duels.'
     party-changed: '{FAIL_PREFIX} Either the request sender or the request accepter has changed their party.'

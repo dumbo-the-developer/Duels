@@ -24,6 +24,7 @@ import lombok.Getter;
 public class DuelMatch implements Match {
     
     protected final PartyManagerImpl partyManager;
+    DuelsPlugin plugin = DuelsPlugin.getInstance();
 
     @Getter
     private final long creation;
@@ -40,6 +41,11 @@ public class DuelMatch implements Match {
 
     @Getter
     private boolean finished;
+
+    // Round tracking for ROUNDS3 characteristic
+    @Getter
+    private int currentRound = 0;
+    private final Map<Player, Integer> roundWins = new HashMap<>();
 
     public HashMap<Location, BlockData> brokenBlocks = new HashMap<>();
     public List<Block> placedBlocks = new ArrayList<>();
@@ -134,5 +140,39 @@ public class DuelMatch implements Match {
     @Override
     public long getStart() {
         return creation;
+    }
+
+    public int getRoundWins(Player player) {
+        return roundWins.getOrDefault(player, 0);
+    }
+
+    public void addRoundWin(Player player) {
+        roundWins.put(player, getRoundWins(player) + 1);
+    }
+
+    public boolean hasWonMatch(Player player) {
+        return getRoundWins(player) >= 2;
+    }
+
+    public void nextRound() {
+        currentRound++;
+        // Reset player death states for next round
+        players.replaceAll((p, v) -> false);
+    }
+
+    public void handleMatchEnd(Player winner, Player loser) {
+        // Mark loser as dead
+        markAsDead(loser);
+
+        // Set winner's health to full
+        winner.setHealth(winner.getMaxHealth());
+
+        // Clear any effects or states that might interfere
+        winner.setFireTicks(0);
+        winner.setFallDistance(0);
+        winner.setVelocity(new org.bukkit.util.Vector(0, 0, 0));
+
+        // Set match as finished
+        setFinished();
     }
 }

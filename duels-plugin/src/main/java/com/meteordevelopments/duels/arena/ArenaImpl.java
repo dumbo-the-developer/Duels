@@ -1,6 +1,5 @@
 package com.meteordevelopments.duels.arena;
 
-import com.google.common.collect.Lists;
 import com.meteordevelopments.duels.countdown.DuelCountdown;
 import com.meteordevelopments.duels.countdown.party.PartyDuelCountdown;
 import com.meteordevelopments.duels.match.DuelMatch;

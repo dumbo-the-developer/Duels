@@ -51,7 +51,8 @@ public class OptionsGui extends SinglePageGui<DuelsPlugin> {
         UHC(Material.GOLDEN_APPLE, Characteristic.UHC, "When enabled, player's health", "will not naturally regenerate."),
         COMBO(Material.IRON_SWORD, Characteristic.COMBO, "When enabled, players will", "have no delay between hits."),
         LOKA(Material.DIAMOND_SWORD, Characteristic.LOKA, "When enabled, player,s damage", "will get increased by 33%"),
-        HUNGER(Material.COOKED_BEEF, Characteristic.HUNGER, "When enabled, players will", "not hungry.");
+        HUNGER(Material.COOKED_BEEF, Characteristic.HUNGER, "When enabled, players will", "not hungry."),
+        ROUNDS3(Material.GOLD_INGOT, Characteristic.ROUNDS3, "When enabled, duels will", "have 3 rounds.");
 /*      PLACE(Material.STONE, Characteristic.PLACE, "When enabled, players can", "be placed blocks in arena."),
         BREAK(Material.STONE, Characteristic.BREAK, "When enabled, players can", "be break blocks in arena.");*/
         @Getter

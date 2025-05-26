@@ -5,6 +5,8 @@ import com.meteordevelopments.duels.api.event.match.MatchEndEvent;
 import com.meteordevelopments.duels.api.event.match.MatchStartEvent;
 import com.meteordevelopments.duels.arena.ArenaImpl;
 import com.meteordevelopments.duels.arena.ArenaManagerImpl;
+import com.meteordevelopments.duels.countdown.DuelCountdown;
+import com.meteordevelopments.duels.duel.DuelManager;
 import com.meteordevelopments.duels.match.DuelMatch;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.kit.KitImpl.Characteristic;
@@ -39,11 +41,13 @@ public class KitOptionsListener implements Listener {
     private final DuelsPlugin plugin;
     private final Config config;
     private final ArenaManagerImpl arenaManager;
+    private final DuelManager duelManager;
 
     public KitOptionsListener(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.arenaManager = plugin.getArenaManager();
+        this.duelManager = plugin.getDuelManager();
 
         Bukkit.getPluginManager().registerEvents(this, plugin);
         Bukkit.getPluginManager().registerEvents(CompatUtil.isPre1_14() ? new ComboPre1_14Listener() : new ComboPost1_14Listener(), plugin);
@@ -63,7 +67,100 @@ public class KitOptionsListener implements Listener {
         final Player player = (Player) event.getEntity();
         final ArenaImpl arena = arenaManager.get(player);
 
-        if (arena == null || !isEnabled(arena, Characteristic.SUMO) && !isEnabled(arena, Characteristic.BOXING)) {
+        if (arena == null) {
+            return;
+        }
+
+        final DuelMatch match = arena.getMatch();
+        if (match == null) {
+            return;
+        }
+
+        // For ROUNDS3, if damage would kill the player, handle round end
+        if (isEnabled(arena, Characteristic.ROUNDS3)) {
+            double finalHealth = player.getHealth() - event.getFinalDamage();
+            if (finalHealth <= 0) {
+                // Cancel the damage event immediately to prevent any delayed damage
+                event.setCancelled(true);
+
+                // Find the winner (the other player)
+                Player winner = match.getAlivePlayers().stream()
+                        .filter(p -> !p.equals(player))
+                        .findFirst()
+                        .orElse(null);
+
+                if (winner != null) {
+                    // Add round win
+                    match.addRoundWin(winner);
+
+                    if (match.hasWonMatch(winner)) {
+                        // On final round, let the damage go through to kill the player
+                        match.markAsDead(player);
+                        // Let DuelManager handle the match end with all effects
+                        // Pass the winner's current health for the death message
+                        double winnerHealth = Math.ceil(winner.getHealth()) * 0.5;
+                        arena.broadcast(plugin.getLang().getMessage("DUEL.on-death.with-killer",
+                                "name", player.getName(),
+                                "killer", winner.getName(),
+                                "health", winnerHealth));
+                        duelManager.handleMatchEnd(match, arena, player, player.getLocation(), winner);
+                        return;
+                    }
+
+                    // Cancel the damage event for non-final rounds
+                    event.setDamage(0);
+                    player.setHealth(player.getMaxHealth());
+
+                    // Start next round
+                    match.nextRound();
+
+                    // Reset both players' health and equipment
+                    for (Player p : match.getAllPlayers()) {
+                        PlayerUtil.reset(p);
+                        p.setHealth(p.getMaxHealth());
+                        p.setNoDamageTicks(40); // Give 2 seconds immunity to prevent damage carry-over
+                        if (match.getKit() != null) {
+                            match.getKit().equip(p);
+                        }
+                    }
+
+                    // Use the plugin's teleport system for both players
+                    Player[] players = match.getAllPlayers().toArray(new Player[0]);
+                    if (players.length >= 2) {
+                        plugin.getTeleport().tryTeleport(players[0], arena.getPosition(1));
+                        plugin.getTeleport().tryTeleport(players[1], arena.getPosition(2));
+                    }
+
+                    // Broadcast round end and status
+                    arena.broadcast(plugin.getLang().getMessage("DUEL.rounds.round-end",
+                            "round", match.getCurrentRound() - 1,
+                            "winner", winner.getName()));
+
+                    arena.broadcast(plugin.getLang().getMessage("DUEL.rounds.round-status",
+                            "player1", players[0].getName(),
+                            "wins1", match.getRoundWins(players[0]),
+                            "player2", players[1].getName(),
+                            "wins2", match.getRoundWins(players[1])));
+
+                    // Check for match point
+                    if (match.getRoundWins(winner) == 1) {
+                        arena.broadcast(plugin.getLang().getMessage("DUEL.rounds.match-point",
+                                "player", winner.getName()));
+                    }
+
+                    // Start countdown and announce new round
+                    arena.broadcast(plugin.getLang().getMessage("DUEL.rounds.round-start",
+                            "round", match.getCurrentRound()));
+
+                    DuelCountdown countdown = new DuelCountdown(plugin, arena, match);
+                    arena.setCountdown(countdown);
+                    countdown.startCountdown(0L, 20L);
+                }
+                return;
+            }
+        }
+
+        if (!isEnabled(arena, Characteristic.SUMO) && !isEnabled(arena, Characteristic.BOXING)) {
             return;
         }
 
