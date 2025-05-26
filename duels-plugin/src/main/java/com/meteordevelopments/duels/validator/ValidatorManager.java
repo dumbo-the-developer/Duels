@@ -52,12 +52,11 @@ public class ValidatorManager implements Loadable {
     public void handleLoad() {
         selfValidators.put(SelfEmptyInventoryValidator.class, new SelfEmptyInventoryValidator(plugin));
         selfValidators.put(SelfPreventCreativeValidator.class, new SelfPreventCreativeValidator(plugin));
-        selfValidators.put(SelfBlacklistedWorldValidator.class, new SelfBlacklistedWorldValidator(plugin));
-        selfValidators.put(SelfCombatTagValidator.class, new SelfCombatTagValidator(plugin));
-        selfValidators.put(SelfDuelZoneValidator.class, new SelfDuelZoneValidator(plugin));
-        selfValidators.put(SelfCheckMatchValidator.class, new SelfCheckMatchValidator(plugin));
-        selfValidators.put(SelfCheckSpectateValidator.class, new SelfCheckSpectateValidator(plugin));
-        selfValidators.put(SelfPartyValidator.class, new SelfPartyValidator(plugin));
+        selfValidators.put(SelfBlacklistedWorldValidator.class, new SelfEmptyInventoryValidator(plugin));
+        selfValidators.put(SelfCombatTagValidator.class, new SelfPreventCreativeValidator(plugin));
+        selfValidators.put(SelfDuelZoneValidator.class, new SelfEmptyInventoryValidator(plugin));
+        selfValidators.put(SelfCheckMatchValidator.class, new SelfPreventCreativeValidator(plugin));
+        selfValidators.put(SelfCheckSpectateValidator.class, new SelfEmptyInventoryValidator(plugin));
 
         targetValidators.put(TargetCheckSelfValidator.class, new TargetCheckSelfValidator(plugin));
         targetValidators.put(TargetCanRequestValidator.class, new TargetCanRequestValidator(plugin));
@@ -74,8 +73,7 @@ public class ValidatorManager implements Loadable {
                 self(SelfCombatTagValidator.class),
                 self(SelfDuelZoneValidator.class),
                 self(SelfCheckMatchValidator.class),
-                self(SelfCheckSpectateValidator.class),
-                self(SelfPartyValidator.class)
+                self(SelfCheckSpectateValidator.class)
         );
         duelTargetValidators = ValidatorUtil.buildList(
                 target(TargetCheckSelfValidator.class),

@@ -56,7 +56,7 @@ dependencies {
 shadowJar {
     getDestinationDirectory().set(file("$rootDir/out/"))
 
-    final String archiveName = parent.name + '-' + project.version + '-AI.jar'
+    final String archiveName = parent.name + '-' + project.version + '.jar'
     getArchiveFileName().set(archiveName)
 
     dependencies {
