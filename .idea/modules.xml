@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Duels-Optimised.iml" filepath="$PROJECT_DIR$/.idea/modules/Duels-Optimised.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/duels-api/Duels-Optimised.duels-api.main.iml" filepath="$PROJECT_DIR$/.idea/modules/duels-api/Duels-Optimised.duels-api.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/duels-api/Duels-Optimised.duels-api.test.iml" filepath="$PROJECT_DIR$/.idea/modules/duels-api/Duels-Optimised.duels-api.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/duels-common/Duels-Optimised.duels-common.main.iml" filepath="$PROJECT_DIR$/.idea/modules/duels-common/Duels-Optimised.duels-common.main.iml" />

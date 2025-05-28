@@ -65,6 +65,7 @@ public class ValidatorManager implements Loadable {
         targetValidators.put(TargetCheckSpectateValidator.class, new TargetCheckSpectateValidator(plugin));
         targetValidators.put(TargetNoRequestValidator.class, new TargetNoRequestValidator(plugin));
         targetValidators.put(TargetHasRequestValidator.class, new TargetHasRequestValidator(plugin));
+        targetValidators.put(TargetPartyOwnerValidator.class, new TargetPartyOwnerValidator(plugin));
 
         duelSelfValidators = ValidatorUtil.buildList(
                 self(SelfEmptyInventoryValidator.class),
@@ -81,7 +82,8 @@ public class ValidatorManager implements Loadable {
                 target(TargetPartyValidator.class),
                 target(TargetCheckMatchValidator.class),
                 target(TargetCheckSpectateValidator.class),
-                target(TargetHasRequestValidator.class)
+                target(TargetHasRequestValidator.class),
+                target(TargetPartyOwnerValidator.class)
         );
 
         duelAcceptSelfValidators = duelSelfValidators;
@@ -90,7 +92,8 @@ public class ValidatorManager implements Loadable {
                 target(TargetPartyValidator.class),
                 target(TargetCheckMatchValidator.class),
                 target(TargetCheckSpectateValidator.class),
-                target(TargetNoRequestValidator.class)
+                target(TargetNoRequestValidator.class),
+                target(TargetPartyOwnerValidator.class)
         );
 
         duelDenyTargetValidators = ValidatorUtil.buildList(

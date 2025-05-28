@@ -112,7 +112,9 @@ public class DuelManager implements Loadable {
             userDataManager.handleMatchEnd(match, winners);
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
             DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(loser).runDelayed(() -> {
-                handleWin(winner, loser, arena, match);
+                for (Player alivePlayer : winners) {
+                    handleWin(alivePlayer, loser, arena, match);
+                }
 
                 if (config.isEndCommandsEnabled() && !(!match.isFromQueue() && config.isEndCommandsQueueOnly())) {
                     try {

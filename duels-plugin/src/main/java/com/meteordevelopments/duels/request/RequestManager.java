@@ -66,13 +66,12 @@ public class RequestManager implements Loadable, Listener {
         final String arena = settings.getArena() != null ? settings.getArena().getName() : lang.getMessage("GENERAL.random");
 
         if (request.isPartyDuel()) {
-            final Collection<Player> senderPartyMembers = request.getSenderParty().getOnlineMembers();
-            final Collection<Player> targetPartyMembers = request.getTargetParty().getOnlineMembers();
-            lang.sendMessage(senderPartyMembers, "COMMAND.duel.party-request.send.sender-party",
+            final Player targetPartyLeader = request.getTargetParty().getOwner().getPlayer();
+            lang.sendMessage(Collections.singleton(sender), "COMMAND.duel.party-request.send.sender-party",
                     "owner", sender.getName(), "name", target.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena);
-            lang.sendMessage(targetPartyMembers, "COMMAND.duel.party-request.send.receiver-party",
+            lang.sendMessage(targetPartyLeader, "COMMAND.duel.party-request.send.receiver-party",
                     "name", sender.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena);
-            sendClickableMessage("COMMAND.duel.party-request.send.clickable-text.", sender, targetPartyMembers);
+            sendClickableMessage("COMMAND.duel.party-request.send.clickable-text.", sender, Collections.singleton(targetPartyLeader));
         } else {
             final int betAmount = settings.getBet();
             final String itemBetting = settings.isItemBetting() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled");

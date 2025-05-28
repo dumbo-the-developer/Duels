@@ -63,11 +63,11 @@ public class AcceptCommand extends BaseCommand {
         final String ownInventory = settings.isOwnInventory() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled");
         final String arena = settings.getArena() != null ? settings.getArena().getName() : lang.getMessage("GENERAL.random");
         if (request.isPartyDuel()) {
-            final Collection<Player> senderPartyMembers = request.getSenderParty().getOnlineMembers();
-            final Collection<Player> targetPartyMembers = request.getTargetParty().getOnlineMembers();
-            lang.sendMessage(senderPartyMembers, "COMMAND.duel.party-request.accept.receiver-party",
+            final Player targetPartyLeader = request.getTargetParty().getOwner().getPlayer();
+            final Player senderPartyLeader = request.getSenderParty().getOwner().getPlayer();
+            lang.sendMessage(Collections.singleton(senderPartyLeader), "COMMAND.duel.party-request.accept.receiver-party",
                     "owner", player.getName(), "name", target.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena);
-            lang.sendMessage(targetPartyMembers, "COMMAND.duel.party-request.accept.sender-party",
+            lang.sendMessage(targetPartyLeader, "COMMAND.duel.party-request.accept.sender-party",
                     "owner", target.getName(), "name", player.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena);
         } else {
             final double bet = settings.getBet();
