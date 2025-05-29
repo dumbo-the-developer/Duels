@@ -560,6 +560,9 @@ public class DuelManager implements Loadable {
                 return;
             }
 
+            player.getInventory().clear();
+            player.updateInventory();
+
             // Find the other player who will be the winner
             Player winner = match.getAlivePlayers().stream()
                     .filter(p -> !p.equals(player))
