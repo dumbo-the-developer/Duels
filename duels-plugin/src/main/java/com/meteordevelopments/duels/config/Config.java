@@ -59,6 +59,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean preventBountyLoss;
     @Getter
+    private boolean preventBountyLossByNotBounties;
+    @Getter
     private boolean preventKDRChange;
     @Getter
     private String lhWinsCmd;
@@ -308,6 +310,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         duelzones = configuration.getStringList("supported-plugins.WorldGuard.duelzone.regions");
         myPetDespawn = configuration.getBoolean("supported-plugins.MyPet.despawn-pet-in-duel", false);
         preventBountyLoss = configuration.getBoolean("supported-plugins.BountyHunters.prevent-bounty-loss-in-duel", true);
+        preventBountyLossByNotBounties = configuration.getBoolean("supported-plugins.NotBounties.prevent-bounty-loss-in-duel", true);
         preventKDRChange = configuration.getBoolean("supported-plugins.SimpleClans.prevent-kdr-change", true);
         lhWinsCmd = configuration.getString("supported-plugins.LeaderHeads.wins.menu.command", "openwins");
         lhWinsTitle = configuration.getString("supported-plugins.LeaderHeads.wins.menu.title", "Duel Wins");
