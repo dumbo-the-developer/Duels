@@ -116,15 +116,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private ValidatorManager validatorManager;
     private static final Logger LOGGER = Logger.getLogger("[Duels-Optimised]");
 
-    String[] banner = {
-            "██████╗ ██╗   ██╗███████╗██╗     ███████╗     ██████╗ ██████╗ ████████╗██╗███╗   ███╗██╗███████╗███████╗██████╗ ",
-            "██╔══██╗██║   ██║██╔════╝██║     ██╔════╝    ██╔═══██╗██╔══██╗╚══██╔══╝██║████╗ ████║██║██╔════╝██╔════╝██╔══██╗",
-            "██║  ██║██║   ██║█████╗  ██║     ███████╗    ██║   ██║██████╔╝   ██║   ██║██╔████╔██║██║███████╗█████╗  ██║  ██║",
-            "██║  ██║██║   ██║██╔══╝  ██║     ╚════██║    ██║   ██║██╔═══╝    ██║   ██║██║╚██╔╝██║██║╚════██║██╔══╝  ██║  ██║",
-            "██████╔╝╚██████╔╝███████╗███████╗███████║    ╚██████╔╝██║        ██║   ██║██║ ╚═╝ ██║██║███████║███████╗██████╔╝",
-            "╚═════╝  ╚═════╝ ╚══════╝╚══════╝╚══════╝     ╚═════╝ ╚═╝        ╚═╝   ╚═╝╚═╝     ╚═╝╚═╝╚══════╝╚══════╝╚═════╝ "
-    };
-
     @Override
     public void onEnable() {
 
@@ -133,9 +124,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         Log.addSource(this);
         JsonUtil.registerDeserializer(ItemData.class, ItemDataDeserializer.class);
 
-        for (String lines : banner){
-            sendMessage("&a"+ lines);
-        }
+        sendBanner();
 
         long start = System.currentTimeMillis();
 
@@ -407,6 +396,24 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     public static void sendMessage(String message) {
         Bukkit.getConsoleSender().sendMessage(getPrefix() + CC.translate(message));
+    }
+
+    private void sendBanner(){
+        String[] banner = {
+                "╔═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗",
+                "║  ██████╗ ██╗   ██╗███████╗██╗     ███████╗     ██████╗ ██████╗ ████████╗██╗███╗   ███╗██╗███████╗███████╗██████╗  ║",
+                "║  ██╔══██╗██║   ██║██╔════╝██║     ██╔════╝    ██╔═══██╗██╔══██╗╚══██╔══╝██║████╗ ████║██║██╔════╝██╔════╝██╔══██╗ ║",
+                "║  ██║  ██║██║   ██║█████╗  ██║     ███████╗    ██║   ██║██████╔╝   ██║   ██║██╔████╔██║██║███████╗█████╗  ██║  ██║ ║",
+                "║  ██║  ██║██║   ██║██╔══╝  ██║     ╚════██║    ██║   ██║██╔═══╝    ██║   ██║██║╚██╔╝██║██║╚════██║██╔══╝  ██║  ██║ ║",
+                "║  ██████╔╝╚██████╔╝███████╗███████╗███████║    ╚██████╔╝██║        ██║   ██║██║ ╚═╝ ██║██║███████║███████╗██████╔╝ ║",
+                "║  ╚═════╝  ╚═════╝ ╚══════╝╚══════╝╚══════╝     ╚═════╝ ╚═╝        ╚═╝   ╚═╝╚═╝     ╚═╝╚═╝╚══════╝╚══════╝╚═════╝  ║",
+                "╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝"
+        };
+
+        for (String lines : banner){
+            CC.translate("&a"+ lines);
+        }
+
     }
 
     private void loadLogManager(){
