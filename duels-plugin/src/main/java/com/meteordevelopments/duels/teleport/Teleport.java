@@ -12,8 +12,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-import static io.papermc.lib.PaperLib.teleportAsync;
-
 /**
  * Handles force teleporting of players.
  */

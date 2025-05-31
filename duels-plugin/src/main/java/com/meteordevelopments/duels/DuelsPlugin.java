@@ -116,6 +116,16 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private ValidatorManager validatorManager;
     private static final Logger LOGGER = Logger.getLogger("[Duels-Optimised]");
 
+    String[] banner = {
+            "#########################################",
+            "#   ____   _   _  _____  _      ____    #",
+            "#  |  _ \\ | | | || ____|| |    / ___|   #",
+            "#  | | | || | | ||  _|  | |    \\___ \\   #",
+            "#  | |_| || |_| || |___ | |___  ___) |  #",
+            "#  |____/  \\___/ |_____||_____||____/   #",
+            "#                                       #",
+            "#########################################"
+    };
     @Override
     public void onEnable() {
 
@@ -123,6 +133,10 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         morePaperLib = new MorePaperLib(this);
         Log.addSource(this);
         JsonUtil.registerDeserializer(ItemData.class, ItemDataDeserializer.class);
+
+        for (String lines : banner){
+            sendMessage("&a"+ lines);
+        }
 
         long start = System.currentTimeMillis();
 
