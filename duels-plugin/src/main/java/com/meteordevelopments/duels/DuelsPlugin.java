@@ -411,7 +411,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         };
 
         for (String lines : banner){
-            CC.translate("&a"+ lines);
+            Bukkit.getConsoleSender().sendMessage(CC.translate("&a"+ lines));
         }
 
     }
