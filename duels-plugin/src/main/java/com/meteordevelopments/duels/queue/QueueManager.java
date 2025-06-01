@@ -2,6 +2,7 @@ package com.meteordevelopments.duels.queue;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Charsets;
+import com.meteordevelopments.duels.hook.hooks.*;
 import lombok.Getter;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.api.event.queue.QueueCreateEvent;
@@ -18,9 +19,6 @@ import com.meteordevelopments.duels.data.QueueData;
 import com.meteordevelopments.duels.data.UserData;
 import com.meteordevelopments.duels.data.UserManagerImpl;
 import com.meteordevelopments.duels.duel.DuelManager;
-import com.meteordevelopments.duels.hook.hooks.CombatTagPlusHook;
-import com.meteordevelopments.duels.hook.hooks.PvPManagerHook;
-import com.meteordevelopments.duels.hook.hooks.VaultHook;
 import com.meteordevelopments.duels.hook.hooks.worldguard.WorldGuardHook;
 import com.meteordevelopments.duels.kit.KitManagerImpl;
 import com.meteordevelopments.duels.setting.Settings;
@@ -48,6 +46,7 @@ import org.jetbrains.annotations.Nullable;
 import space.arim.morepaperlib.scheduling.ScheduledTask;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -71,7 +70,9 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
     private CombatTagPlusHook combatTagPlus;
     private PvPManagerHook pvpManager;
+    private DeluxeCombatHook deluxeCombat;
     private WorldGuardHook worldGuard;
+    private CombatLogXHook combatLogX;
     private VaultHook vault;
     private ScheduledTask queueTask;
 
@@ -118,7 +119,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         plugin.getGuiListener().addGui(gui);
 
         if (FileUtil.checkNonEmpty(file, true)) {
-            try (final Reader reader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8)) {
+            try (final Reader reader = new InputStreamReader(Files.newInputStream(file.toPath()), Charsets.UTF_8)) {
                 final List<QueueData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<List<QueueData>>() {
                 });
 
@@ -139,6 +140,8 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
         this.combatTagPlus = plugin.getHookManager().getHook(CombatTagPlusHook.class);
         this.pvpManager = plugin.getHookManager().getHook(PvPManagerHook.class);
+        this.deluxeCombat = plugin.getHookManager().getHook(DeluxeCombatHook.class);
+        this.combatLogX = plugin.getHookManager().getHook(CombatLogXHook.class);
         this.worldGuard = plugin.getHookManager().getHook(WorldGuardHook.class);
         this.vault = plugin.getHookManager().getHook(VaultHook.class);
         this.queueTask = plugin.doSyncRepeat(() -> {
@@ -219,7 +222,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
             data.add(new QueueData(queue));
         }
 
-        try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
+        try (final Writer writer = new OutputStreamWriter(Files.newOutputStream(file.toPath()), Charsets.UTF_8)) {
             JsonUtil.getObjectWriter().writeValue(writer, data);
             writer.flush();
         } catch (IOException ex) {
@@ -357,7 +360,10 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
             return false;
         }
 
-        if ((combatTagPlus != null && combatTagPlus.isTagged(player)) || (pvpManager != null && pvpManager.isTagged(player))) {
+        if ((combatTagPlus != null && combatTagPlus.isTagged(player))
+                || (pvpManager != null && pvpManager.isTagged(player))
+                || (deluxeCombat != null && deluxeCombat.isTagged(player))
+                || (combatLogX != null && combatLogX.isTagged(player))) {
             lang.sendMessage(player, "ERROR.duel.is-tagged");
             return false;
         }
