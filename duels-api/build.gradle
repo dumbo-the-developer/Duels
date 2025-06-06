@@ -21,8 +21,6 @@ publishing {
             artifactId = project.name.toLowerCase()
             version = project.version
             from components.java
-
-            artifact javadocJar
         }
     }
 }
