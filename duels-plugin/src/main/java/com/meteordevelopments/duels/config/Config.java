@@ -272,6 +272,16 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private List<String> cdPartyDuelTitles;
     @Getter
     private boolean AXpreventGraves;
+    @Getter
+    private String userNotFound;
+    @Getter
+    private String notInMatch;
+    @Getter
+    private String durationFormat;
+    @Getter
+    private String noKit;
+    @Getter
+    private String noOpponent;
 
     private final Multimap<String, MessageSound> messageToSounds = HashMultimap.create();
 
@@ -292,6 +302,11 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         version = configuration.getInt("config-version");
         checkForUpdates = configuration.getBoolean("check-for-updates", true);
 
+        userNotFound = configuration.getString("placeholders.user-not-found", "User not found");
+        notInMatch = configuration.getString("placeholders.not-in-match", "none");
+        durationFormat = configuration.getString("placeholders.duration-format", "mm:ss");
+        noKit = configuration.getString("placeholders.no-kit", "none");
+        noOpponent = configuration.getString("placeholders.no-opponent", "no opponent");
         ctpPreventDuel = configuration.getBoolean("supported-plugins.CombatTagPlus.prevent-duel-if-tagged", true);
         ctpPreventTag = configuration.getBoolean("supported-plugins.CombatTagPlus.prevent-tag-in-duel", true);
         pmPreventDuel = configuration.getBoolean("supported-plugins.PvPManager.prevent-duel-if-tagged", true);

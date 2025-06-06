@@ -685,3 +685,15 @@ firework:
 
 disable-enderpearl-in-endgame: true
 disable-movement-in-endgame: false
+
+# PLACEHOLDERS CONFIG
+# Displayed when player's userdata is not loaded to the memory.
+user-not-found: 'User not found'
+# Displayed when player is not in a duel.
+not-in-match: 'none'
+# Match duration format.
+duration-format: 'mm:ss'
+# Displayed if players are using their own inventory in the duel.
+no-kit: 'none'
+# Displayed when player's opponent in duel is killed.
+no-opponent: 'No opponent'

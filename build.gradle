@@ -10,7 +10,7 @@ buildscript {
 
 allprojects {
     group = 'com.meteordevelopments'
-    version = '3.8'
+    version = '3.9'
 }
 
 subprojects {
@@ -25,20 +25,25 @@ subprojects {
 
     repositories {
         mavenCentral()
-
+        mavenLocal()
         maven {
             name = 'spigot-repo'
             url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
         }
 
         maven {
-            name = 'papermc'
-            url = 'https://repo.papermc.io/repository/maven-public/'
+            name = "papermc-repo"
+            url = "https://repo.papermc.io/repository/maven-public/"
         }
 
         maven {
             name = 'bungeecord-repo'
             url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/groups/public/"
         }
 
         maven {

@@ -18,6 +18,7 @@ public class HookManager extends AbstractHookManager<DuelsPlugin> {
         register(LeaderHeadsHook.NAME, LeaderHeadsHook.class);
         register(McMMOHook.NAME, McMMOHook.class);
         register(MVdWPlaceholderHook.NAME, MVdWPlaceholderHook.class);
+        register(PlaceholderHook.NAME, PlaceholderHook.class);
         register(MyPetHook.NAME, MyPetHook.class);
         register(PvPManagerHook.NAME, PvPManagerHook.class);
         register(SimpleClansHook.NAME, SimpleClansHook.class);

@@ -294,8 +294,8 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
                 return;
             }
 
-            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(sender).run(sender::closeInventory, () -> {});
-            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(target).run(target::closeInventory, () -> {});
+            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(sender).run((Runnable) sender::closeInventory, () -> {});
+            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(target).run((Runnable) target::closeInventory, () -> {});
 
             final Map<UUID, List<ItemStack>> items = new HashMap<>();
             items.put(sender.getUniqueId(), getSection(sender).collect());

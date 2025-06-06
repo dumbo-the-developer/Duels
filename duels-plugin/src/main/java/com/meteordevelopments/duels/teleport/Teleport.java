@@ -6,6 +6,7 @@ import com.meteordevelopments.duels.util.Loadable;
 import com.meteordevelopments.duels.util.Log;
 import com.meteordevelopments.duels.util.metadata.MetadataUtil;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -52,12 +53,15 @@ public final class Teleport implements Loadable, Listener {
             return;
         }
 
+        for (Entity entity : player.getPassengers()) {
+            player.removePassenger(entity);
+        }
+
         if (essentials != null) {
             essentials.setBackLocation(player, location);
         }
 
         MetadataUtil.put(plugin, player, METADATA_KEY, location.clone());
-
         if (!player.teleport(location)) {
             Log.warn(this, "Could not teleport " + player.getName() + "! Player is dead or is vehicle");
         }
