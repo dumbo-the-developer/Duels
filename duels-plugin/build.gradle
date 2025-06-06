@@ -13,6 +13,12 @@ processResources {
     }
 }
 
+java{
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 dependencies {
     compileOnly 'org.jetbrains:annotations-java5:24.1.0'
     compileOnly 'org.projectlombok:lombok:1.18.38'
