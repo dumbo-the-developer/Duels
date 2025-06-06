@@ -10,6 +10,6 @@
         <module name="Duels-Optimised.duels-plugin.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="1.8" />
+    <bytecodeTargetLevel target="21" />
   </component>
 </project>

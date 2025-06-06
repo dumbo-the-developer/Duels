@@ -13,24 +13,6 @@ processResources {
     }
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    javaCompiler = javaToolchains.compilerFor {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
-tasks.withType(Test).configureEach {
-    javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
 dependencies {
     compileOnly 'org.jetbrains:annotations-java5:24.1.0'
     compileOnly 'org.projectlombok:lombok:1.18.38'
