@@ -25,11 +25,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Write gradle.properties with JAVA_HOME
-        run: echo "org.gradle.java.home=${JAVA_HOME}" >> gradle.properties
-
       - name: Build with Gradle
         run: ./gradlew build
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME_21_X64 }}
 
   javadoc-deploy:
     needs: build
