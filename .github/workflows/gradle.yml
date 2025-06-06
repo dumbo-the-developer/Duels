@@ -22,14 +22,13 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Set JAVA_HOME for Gradle
-        run: echo "JAVA_HOME=${{ env.JAVA_HOME_21_X64 }}" >> $GITHUB_ENV
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build with Gradle
         run: ./gradlew build
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME_21_X64 }}
 
   javadoc-deploy:
     needs: build
@@ -47,8 +46,8 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Set JAVA_HOME for Gradle
-        run: echo "JAVA_HOME=${{ env.JAVA_HOME_21_X64 }}" >> $GITHUB_ENV
+      - name: Write gradle.properties with JAVA_HOME
+        run: echo "org.gradle.java.home=${JAVA_HOME}" >> gradle.properties
 
       - name: Generate Javadoc
         run: ./gradlew :duels-api:javadoc
@@ -90,7 +89,7 @@ jobs:
                      { \"name\": \"View Run\", \"value\": \"[Open Workflow](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": true }
                    ],
                    \"footer\": { \"text\": \"Javadocs at https://javadocs.meteordevelopments.com/duels\" },
-                   \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+                   \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\" 
                  }]
                }" \
                ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -112,7 +111,7 @@ jobs:
                      { \"name\": \"View Run\", \"value\": \"[Open Workflow](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": true }
                    ],
                    \"footer\": { \"text\": \"Check logs in GitHub Actions tab.\" },
-                   \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+                   \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\" 
                  }]
                }" \
                ${{ secrets.DISCORD_WEBHOOK_URL }}
