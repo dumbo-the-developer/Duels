@@ -43,8 +43,9 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
+import space.arim.morepaperlib.MorePaperLib;
 import space.arim.morepaperlib.scheduling.ScheduledTask;
-
+import space.arim.morepaperlib.scheduling.FoliaDetection;
 import java.util.*;
 
 public class DuelManager implements Loadable {
@@ -57,6 +58,7 @@ public class DuelManager implements Loadable {
     private final ArenaManagerImpl arenaManager;
     private final PlayerInfoManager playerManager;
     private final InventoryManager inventoryManager;
+    private final MorePaperLib paperLib;
 
     private QueueManager queueManager;
     private Teleport teleport;
@@ -68,6 +70,7 @@ public class DuelManager implements Loadable {
 
     private ScheduledTask durationCheckTask;
 
+
     public DuelManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
@@ -77,6 +80,7 @@ public class DuelManager implements Loadable {
         this.arenaManager = plugin.getArenaManager();
         this.playerManager = plugin.getPlayerManager();
         this.inventoryManager = plugin.getInventoryManager();
+        this.paperLib = new MorePaperLib(plugin);
 
         plugin.doSyncAfter(() -> Bukkit.getPluginManager().registerEvents(new DuelListener(), plugin), 1L);
     }
@@ -92,6 +96,8 @@ public class DuelManager implements Loadable {
                 arena.endMatch(null, null, Reason.TIE);
                 return;
             }
+
+            Bukkit.dispatchCommand(loser, "spawn");
 
             if (config.isSpawnFirework()) {
                 DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(deadLocation).run(() -> {

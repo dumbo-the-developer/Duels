@@ -61,5 +61,30 @@
       <option name="name" value="arim-mvn-lgpl3" />
       <option name="url" value="https://mvn-repo.arim.space/lesser-gpl3/" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="MavenLocal" />
+      <option name="name" value="MavenLocal" />
+      <option name="url" value="file:/C:/Users/Arjav%20Jain/.m2/repository/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="sonatype" />
+      <option name="name" value="sonatype" />
+      <option name="url" value="https://oss.sonatype.org/content/groups/public/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="combatlogx" />
+      <option name="name" value="combatlogx" />
+      <option name="url" value="https://nexus.sirblobman.xyz/public/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="jitpack" />
+      <option name="name" value="jitpack" />
+      <option name="url" value="https://jitpack.io" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="axPlugins" />
+      <option name="name" value="axPlugins" />
+      <option name="url" value="https://repo.artillex-studios.com/releases/" />
+    </remote-repository>
   </component>
 </project>

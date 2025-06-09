@@ -5,6 +5,7 @@ import com.meteordevelopments.duels.hook.hooks.EssentialsHook;
 import com.meteordevelopments.duels.util.Loadable;
 import com.meteordevelopments.duels.util.Log;
 import com.meteordevelopments.duels.util.metadata.MetadataUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -62,10 +63,22 @@ public final class Teleport implements Loadable, Listener {
         }
 
         MetadataUtil.put(plugin, player, METADATA_KEY, location.clone());
-        if (!player.teleport(location)) {
-            Log.warn(this, "Could not teleport " + player.getName() + "! Player is dead or is vehicle");
+
+        boolean isFolia = DuelsPlugin.getMorePaperLib().scheduling().isUsingFolia();
+
+        if (isFolia) {
+            player.teleportAsync(location).thenAccept(success -> {
+                if (!success) {
+                    Log.warn(this, "Could not teleport " + player.getName() + "! TeleportAsync failed.");
+                }
+            });
+        } else {
+            if (!player.teleport(location)) {
+                Log.warn(this, "Could not teleport " + player.getName() + "! Player is dead or is vehicle");
+            }
         }
     }
+
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void on(final PlayerTeleportEvent event) {
