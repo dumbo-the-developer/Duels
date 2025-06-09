@@ -97,7 +97,7 @@ public class DuelManager implements Loadable {
                 return;
             }
 
-            Bukkit.dispatchCommand(loser, "spawn");
+            DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().runDelayed(() -> Bukkit.dispatchCommand(loser, "spawn"), 4L);
 
             if (config.isSpawnFirework()) {
                 DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(deadLocation).run(() -> {
