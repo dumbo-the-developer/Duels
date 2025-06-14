@@ -162,50 +162,50 @@ public class ArenaImpl extends BaseButton implements Arena {
         final Queue source = match.getSource();
         match.setFinished();
 
-        for(Block block : match.placedBlocks) {
-            block.setType(Material.AIR);
-        }
+//      for(Block block : match.placedBlocks) {
+//           block.setType(Material.AIR);
+//       }
 
-        for(Map.Entry<Location, BlockData> map : match.brokenBlocks.entrySet()) {
-            map.getKey().getBlock().setBlockData(map.getValue());
-        }
+//        for(Map.Entry<Location, BlockData> map : match.brokenBlocks.entrySet()) {
+//           map.getKey().getBlock().setBlockData(map.getValue());
+//       }
 
-        for (Entity entity : match.placedEntities){
-            entity.remove();
-        }
+//        for (Entity entity : match.placedEntities){
+//            entity.remove();
+//        }
+//
+//        for (Block block : match.liquids) {
+//            Location loc = block.getLocation();
+//            int radius = 1;
+//
+//            while (true) {
+//                boolean waterFound = false;
+//
+//                for (int x = -radius; x <= radius; x++) {
+//                    for (int y = -radius; y <= radius; y++) {
+//                        for (int z = -radius; z <= radius; z++) {
+//                            Block findBlock = loc.clone().add(x, y, z).getBlock();
+//                            String type = findBlock.getType().name().toLowerCase();
+//
+//                            if (type.contains("water") || type.contains("lava") || type.contains("cobblestone") || type.contains("obsidian")) {
+//                                waterFound = true;
+//                                findBlock.setType(Material.AIR);
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                if (!waterFound) {
+//                    break;
+//                }
+//
+//                radius++;
+//            }
+//        }
 
-        for (Block block : match.liquids) {
-            Location loc = block.getLocation();
-            int radius = 1;
-
-            while (true) {
-                boolean waterFound = false;
-
-                for (int x = -radius; x <= radius; x++) {
-                    for (int y = -radius; y <= radius; y++) {
-                        for (int z = -radius; z <= radius; z++) {
-                            Block findBlock = loc.clone().add(x, y, z).getBlock();
-                            String type = findBlock.getType().name().toLowerCase();
-
-                            if (type.contains("water") || type.contains("lava") || type.contains("cobblestone") || type.contains("obsidian")) {
-                                waterFound = true;
-                                findBlock.setType(Material.AIR);
-                            }
-                        }
-                    }
-                }
-
-                if (!waterFound) {
-                    break;
-                }
-
-                radius++;
-            }
-        }
-
-        if(config.isClearItemsAfterMatch()) {
-            match.droppedItems.forEach(Entity::remove);
-        }
+//        if(config.isClearItemsAfterMatch()) {
+//            match.droppedItems.forEach(Entity::remove);
+//        }
 
         match = null;
 
