@@ -96,9 +96,6 @@ public class DuelManager implements Loadable {
                 arena.endMatch(null, null, Reason.TIE);
                 return;
             }
-
-            DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().runDelayed(() -> Bukkit.dispatchCommand(loser, "spawn"), 4L);
-
             if (config.isSpawnFirework()) {
                 DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(deadLocation).run(() -> {
                     final Firework firework = (Firework) deadLocation.getWorld().spawnEntity(deadLocation, EntityType.FIREWORK);
