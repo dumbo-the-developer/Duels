@@ -10,7 +10,7 @@ buildscript {
 
 allprojects {
     group = 'com.meteordevelopments'
-    version = '3.9'
+    version = '4.0'
 }
 
 subprojects {

@@ -549,38 +549,15 @@ public class DuelManager implements Loadable {
         @EventHandler
         public void on(final PlayerQuitEvent event) {
             final Player player = event.getPlayer();
-            final ArenaImpl arena = arenaManager.get(player);
 
-            if (arena == null) {
+            if (!arenaManager.isInMatch(player)) {
                 return;
             }
 
-            final DuelMatch match = arena.getMatch();
-            if (match == null) {
-                return;
-            }
-
-            if (!config.isOwnInventoryDropInventoryItems()) {
-                player.getInventory().clear();
-                player.updateInventory();
-            }
-
-            // Find the other player who will be the winner
-            Player winner = match.getAlivePlayers().stream()
-                    .filter(p -> !p.equals(player))
-                    .findFirst()
-                    .orElse(null);
-
-            if (winner != null) {
-                // Handle match end with the disconnected player as loser
-                handleMatchEnd(match, arena, player, player.getLocation(), winner);
-            } else {
-                // If no winner found (e.g. both disconnected), end match as a tie
-                arena.endMatch(null, null, Reason.PLUGIN_DISABLE);
-            }
-
-            // Remove player from arena
-            arena.remove(player);
+            player.setHealth(0);
+            player.getInventory().clear();
+            player.getInventory().setArmorContents(null);
+            player.updateInventory();
         }
 
         @EventHandler(ignoreCancelled = true)
