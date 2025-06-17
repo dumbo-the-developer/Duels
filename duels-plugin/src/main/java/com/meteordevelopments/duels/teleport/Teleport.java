@@ -57,11 +57,14 @@ public final class Teleport implements Loadable, Listener {
             player.removePassenger(entity);
         }
 
+        player.closeInventory();
+
         if (essentials != null) {
             essentials.setBackLocation(player, location);
         }
 
         MetadataUtil.put(plugin, player, METADATA_KEY, location.clone());
+
         if (!player.teleport(location)) {
             Log.warn(this, "Could not teleport " + player.getName() + "! Player is dead or is vehicle");
         }
