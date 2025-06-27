@@ -65,8 +65,18 @@ public final class Teleport implements Loadable, Listener {
 
         MetadataUtil.put(plugin, player, METADATA_KEY, location.clone());
 
-        if (!player.teleport(location)) {
-            Log.warn(this, "Could not teleport " + player.getName() + "! Player is dead or is vehicle");
+        boolean isFolia = DuelsPlugin.getMorePaperLib().scheduling().isUsingFolia();
+
+        if (isFolia) {
+            player.teleportAsync(location).thenAccept(success -> {
+                if (!success) {
+                    Log.warn(this, "Could not teleport " + player.getName() + "! TeleportAsync failed.");
+                }
+            });
+        } else {
+            if (!player.teleport(location)) {
+                Log.warn(this, "Could not teleport " + player.getName() + "! Player is dead or is vehicle");
+            }
         }
     }
 
