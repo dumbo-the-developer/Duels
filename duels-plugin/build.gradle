@@ -26,7 +26,7 @@ dependencies {
     implementation 'com.github.sirblobman.combatlogx:api:11.5-SNAPSHOT'
     implementation 'com.artillexstudios:AxGraves:1.7.0'
     implementation 'com.github.No-Not-Jaden:NotBounties:1.22.0'
-    implementation('net.essentialsx:EssentialsX:2.21.1') {
+    implementation('net.essentialsx:EssentialsX:2.21.2') {
         transitive = false
     }
     implementation(name: 'MVdWPlaceholderAPI-3.1.1') {
