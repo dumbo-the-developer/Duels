@@ -6,6 +6,7 @@ import com.meteordevelopments.duels.util.Log;
 import com.meteordevelopments.duels.util.Reloadable;
 import com.meteordevelopments.duels.util.StringUtil;
 import com.meteordevelopments.duels.util.config.AbstractConfiguration;
+import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -127,14 +128,25 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
             return;
         }
 
-        if (receiver instanceof Player) {
-            config.playSound((Player) receiver, message);
-        }
+        String replacedMessage = replace(message, replacers);
 
-        receiver.sendMessage(StringUtil.color(replace(message, replacers)));
+        if (receiver instanceof Player player) {
+            if (plugin.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+                replacedMessage = PlaceholderAPI.setPlaceholders(player, replacedMessage);
+            }
+            replacedMessage = StringUtil.color(replacedMessage);
+            config.playSound(player, replacedMessage);
+            player.sendMessage(replacedMessage);
+
+        } else {
+            // Console or other senders — no PlaceholderAPI parsing
+            replacedMessage = StringUtil.color(replacedMessage);
+            receiver.sendMessage(replacedMessage);
+        }
     }
 
     public void sendMessage(final Collection<Player> players, final String key, final Object... replacers) {
         players.forEach(player -> sendMessage(player, key, replacers));
     }
+
 }
