@@ -1,12 +1,13 @@
 package com.meteordevelopments.duels.util;
 
 import com.meteordevelopments.duels.util.reflect.ReflectionUtil;
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class StringUtil {
@@ -66,7 +67,17 @@ public final class StringUtil {
         return "(" + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ() + ")";
     }
 
-    public static String color(final String input) {
+    public static String color(String input) {
+        if (input == null) return "";
+        if (Pattern.compile("&#[0-9A-f]{6}").matcher(input).find()) {
+            Matcher matcher = Pattern.compile("&(#[0-9A-f]{6})").matcher(input);
+            while (matcher.find()) {
+                input = input.replaceFirst(
+                        matcher.group(),
+                        net.md_5.bungee.api.ChatColor.of(matcher.group(1)).toString()
+                );
+            }
+        }
         return ChatColor.translateAlternateColorCodes('&', input);
     }
 
