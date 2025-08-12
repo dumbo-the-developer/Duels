@@ -1,6 +1,6 @@
 dependencies {
     compileOnly('org.jetbrains:annotations-java5:24.1.0')
-    implementation 'org.spigotmc:spigot-api:1.14.4-R0.1-SNAPSHOT'
+    implementation 'org.spigotmc:spigot-api:1.21.8-R0.1-SNAPSHOT'
     implementation('io.papermc:paperlib:1.0.8')
     implementation('space.arim.morepaperlib:morepaperlib:0.4.4')
 }
