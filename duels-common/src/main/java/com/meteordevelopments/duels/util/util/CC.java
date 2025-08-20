@@ -1,11 +1,26 @@
 package com.meteordevelopments.duels.util.util;
 
-import org.bukkit.ChatColor;
 
+import net.md_5.bungee.api.ChatColor;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+@SuppressWarnings("deprecation")
 public class CC {
 
-    public static String translate(String message){
-        return ChatColor.translateAlternateColorCodes('&', message);
+    public static String translate(String input){
+        if (input == null) return "";
+        if (Pattern.compile("&#[0-9A-f]{6}").matcher(input).find()) {
+            Matcher matcher = Pattern.compile("&(#[0-9A-f]{6})").matcher(input);
+            while (matcher.find()) {
+                input = input.replaceFirst(
+                        matcher.group(),
+                        ChatColor.of(matcher.group(1)).toString()
+                );
+            }
+        }
+        return ChatColor.translateAlternateColorCodes('&', input);
     }
     public static String getTimeDifferenceAndColor(long start, long end) {
         return getColorBasedOnSize((end - start), 20, 5000, 10000) + "" + (end - start) + "ms";
