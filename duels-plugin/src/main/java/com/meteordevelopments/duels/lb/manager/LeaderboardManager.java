@@ -1,7 +1,8 @@
-package com.meteordevelopments.duels.data;
+package com.meteordevelopments.duels.lb.manager;
 
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.api.kit.Kit;
+import com.meteordevelopments.duels.lb.LeaderboardEntry;
 import com.meteordevelopments.duels.util.Loadable;
 import lombok.Getter;
 import space.arim.morepaperlib.scheduling.ScheduledTask;
@@ -36,28 +37,14 @@ public class LeaderboardManager implements Loadable {
         shutdown();
     }
 
-    /**
-     * Gets the leaderboard for total ELO
-     * @return List of top players by total ELO
-     */
     public List<LeaderboardEntry> getTotalEloLeaderboard() {
         return getLeaderboard("total_elo");
     }
 
-    /**
-     * Gets the leaderboard for a specific kit
-     * @param kit The kit to get leaderboard for
-     * @return List of top players by kit ELO
-     */
     public List<LeaderboardEntry> getKitLeaderboard(Kit kit) {
         return getLeaderboard("kit_" + kit.getName());
     }
 
-    /**
-     * Gets a leaderboard entry by position for total ELO
-     * @param position The position (1-10)
-     * @return LeaderboardEntry or null if position doesn't exist
-     */
     public LeaderboardEntry getTotalEloEntry(int position) {
         List<LeaderboardEntry> leaderboard = getTotalEloLeaderboard();
         if (position > 0 && position <= leaderboard.size()) {
@@ -66,12 +53,6 @@ public class LeaderboardManager implements Loadable {
         return null;
     }
 
-    /**
-     * Gets a leaderboard entry by position for a specific kit
-     * @param kit The kit
-     * @param position The position (1-10)
-     * @return LeaderboardEntry or null if position doesn't exist
-     */
     public LeaderboardEntry getKitEntry(Kit kit, int position) {
         List<LeaderboardEntry> leaderboard = getKitLeaderboard(kit);
         if (position > 0 && position <= leaderboard.size()) {
