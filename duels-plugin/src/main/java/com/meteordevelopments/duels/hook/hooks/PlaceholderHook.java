@@ -6,6 +6,7 @@ import com.meteordevelopments.duels.api.kit.Kit;
 import com.meteordevelopments.duels.api.match.Match;
 import com.meteordevelopments.duels.api.spectate.Spectator;
 import com.meteordevelopments.duels.api.user.User;
+import com.meteordevelopments.duels.data.LeaderboardEntry;
 import com.meteordevelopments.duels.util.StringUtil;
 import com.meteordevelopments.duels.util.compat.Ping;
 import com.meteordevelopments.duels.util.hook.PluginHook;
@@ -114,6 +115,47 @@ public class PlaceholderHook extends PluginHook<DuelsPlugin> {
 
                 final Kit kit = plugin.getKitManager().get(identifier);
                 return kit != null ? String.valueOf(user.getRating(kit)) : StringUtil.color(plugin.getConfiguration().getNoKit());
+            }
+
+            // Total ELO placeholder
+            if (identifier.equals("total_elo")) {
+                user = plugin.getUserManager().get(player);
+
+                if (user == null) {
+                    return StringUtil.color(plugin.getConfiguration().getUserNotFound());
+                }
+
+                return String.valueOf(user.getTotalElo());
+            }
+
+            // ELO by kit placeholders: %duels_elo_<kitname>%
+            if (identifier.startsWith("elo_")) {
+                user = plugin.getUserManager().get(player);
+
+                if (user == null) {
+                    return StringUtil.color(plugin.getConfiguration().getUserNotFound());
+                }
+
+                identifier = identifier.replace("elo_", "");
+
+                final Kit kit = plugin.getKitManager().get(identifier);
+                return kit != null ? String.valueOf(user.getRating(kit)) : StringUtil.color(plugin.getConfiguration().getNoKit());
+            }
+
+            // ELO leaderboard placeholders: %duels_elo_leaderboard_<position>%
+            if (identifier.startsWith("elo_leaderboard_")) {
+                String positionStr = identifier.replace("elo_leaderboard_", "");
+                try {
+                    int position = Integer.parseInt(positionStr);
+                    if (position < 1 || position > 10) {
+                        return "Invalid position";
+                    }
+                    
+                    LeaderboardEntry entry = plugin.getLeaderboardManager().getTotalEloEntry(position);
+                    return entry != null ? entry.playerName() : "N/A";
+                } catch (NumberFormatException e) {
+                    return "Invalid position";
+                }
             }
 
             if (identifier.startsWith("getplayersinqueue_")){

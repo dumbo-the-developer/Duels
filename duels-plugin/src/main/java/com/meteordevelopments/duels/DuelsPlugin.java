@@ -20,6 +20,7 @@ import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.config.Lang;
 import com.meteordevelopments.duels.data.ItemData;
 import com.meteordevelopments.duels.data.ItemData.ItemDataDeserializer;
+import com.meteordevelopments.duels.data.LeaderboardManager;
 import com.meteordevelopments.duels.data.UserManagerImpl;
 import com.meteordevelopments.duels.duel.DuelManager;
 import com.meteordevelopments.duels.extension.ExtensionClassLoader;
@@ -114,6 +115,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private PartyManagerImpl partyManager;
     @Getter
     private ValidatorManager validatorManager;
+    @Getter
+    private LeaderboardManager leaderboardManager;
     private static final Logger LOGGER = Logger.getLogger("[Duels-Optimised]");
 
     @Override
@@ -471,6 +474,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadAndTrack("request manager", () -> loadables.add(requestManager = new RequestManager(this)));
         loadAndTrack("hook manager", () -> hookManager = new HookManager(this));
         loadAndTrack("validator manager", () -> loadables.add(validatorManager = new ValidatorManager(this)));
+        loadAndTrack("leaderboard manager", () -> loadables.add(leaderboardManager = new LeaderboardManager(this)));
         loadAndTrack("teleport manager", () -> loadables.add(teleport = new Teleport(this)));
         loadAndTrack("extension manager", () -> loadables.add(extensionManager = new ExtensionManager(this)));
 
