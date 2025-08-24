@@ -109,6 +109,8 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
                         user.defaultRating = defaultRating;
                         user.matchesToDisplay = matchesToDisplay;
                         user.refreshMatches();
+                        // Calculate total ELO for existing users
+                        user.calculateTotalElo();
                         // Player might have logged in while reading the file
                         names.putIfAbsent(user.getName().toLowerCase(), uuid);
                         users.putIfAbsent(uuid, user);
@@ -214,6 +216,11 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
         return topRatings.get(kit);
     }
 
+    @Override
+    public Collection<User> getAllUsers() {
+        return Collections.unmodifiableCollection(users.values());
+    }
+
     public String getNextUpdate(final long creation) {
         return DateUtil.format((creation + config.getTopUpdateInterval() - System.currentTimeMillis()) / 1000L);
     }
@@ -257,6 +264,8 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
             user.defaultRating = defaultRating;
             user.matchesToDisplay = matchesToDisplay;
             user.refreshMatches();
+            // Calculate total ELO for loaded user
+            user.calculateTotalElo();
 
             if (!player.getName().equals(user.getName())) {
                 user.setName(player.getName());

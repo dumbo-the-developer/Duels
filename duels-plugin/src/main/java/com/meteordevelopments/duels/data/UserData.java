@@ -37,6 +37,7 @@ public class UserData implements User {
     private ConcurrentHashMap<String, Integer> rating;
     private List<MatchData> matches = new ArrayList<>();
     private boolean partyRequests = true;
+    private volatile int totalElo;
 
     private UserData() {
     }
@@ -99,6 +100,11 @@ public class UserData implements User {
     }
 
     @Override
+    public int getTotalElo() {
+        return totalElo;
+    }
+
+    @Override
     public void resetRating() {
         setRating(null, defaultRating);
     }
@@ -115,6 +121,7 @@ public class UserData implements User {
         losses = 0;
         matches.clear();
         rating.clear();
+        totalElo = 0;
 
         if (!isOnline()) {
             trySave();
@@ -143,10 +150,42 @@ public class UserData implements User {
         }
 
         this.rating.put(kit == null ? "-" : kit.getName(), rating);
+        
+        // Update total ELO when individual kit rating changes
+        calculateTotalElo();
 
         if (!isOnline()) {
             trySave();
         }
+    }
+    
+    /**
+     * Sets the total ELO for this user
+     * @param totalElo The total ELO value to set
+     */
+    public void setTotalElo(final int totalElo) {
+        this.totalElo = totalElo;
+        
+        if (!isOnline()) {
+            trySave();
+        }
+    }
+    
+    /**
+     * Calculates the total ELO by summing all kit ELOs
+     * This method is called automatically when individual kit ratings change
+     */
+    public void calculateTotalElo() {
+        if (this.rating == null || this.rating.isEmpty()) {
+            this.totalElo = 0;
+            return;
+        }
+        
+        int total = 0;
+        for (Integer kitRating : this.rating.values()) {
+            total += kitRating;
+        }
+        this.totalElo = total;
     }
 
     private boolean isOnline() {

@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -91,6 +92,7 @@ public interface UserManager {
     @Nullable
     TopEntry getTopRatings(@NotNull final Kit kit);
 
+    Collection<User> getAllUsers();
 
     class TopEntry {
 

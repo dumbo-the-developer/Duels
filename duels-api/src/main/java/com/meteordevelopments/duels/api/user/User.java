@@ -104,6 +104,8 @@ public interface User {
     int getRating(@NotNull final Kit kit);
 
 
+    int getTotalElo();
+    
     /**
      * Resets the rating to default for the no kit rating. thread-safe!
      *
