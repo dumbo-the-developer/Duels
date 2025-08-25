@@ -37,7 +37,13 @@ public class RankCommand extends BaseCommand {
         sender.sendMessage(CC.translate("&7Description: " + currentRank.getDescription()));
         
         // Show progress to next rank
-        int currentElo = plugin.getUserManager().get(player).getTotalElo();
+        var userData = plugin.getUserManager().get(player);
+        if (userData == null) {
+            sender.sendMessage(CC.translate("&cUnable to load your user data."));
+            return;
+        }
+        
+        int currentElo = userData.getTotalElo();
         double progress = currentRank.getProgress(currentElo);
         
         if (currentRank.getMaxElo() == Integer.MAX_VALUE) {
