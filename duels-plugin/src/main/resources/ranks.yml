@@ -1,0 +1,338 @@
+ranks:
+  # Enable or disable the ranking system
+  enabled: true
+  
+  # Default rank for new players (0 ELO)
+  default-rank: "rutbesiz"
+  
+  # Rank definitions - 100 ELO per rank system
+  definitions:
+    # 0 ELO - Unranked
+    rutbesiz:
+      name: "&7Rütbesiz"
+      description: "&7Henüz rütbesi olmayan oyuncu"
+      min-elo: 0
+      max-elo: 99
+      color: "&7"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    # BAKIR TIER (100-999 ELO) - 9 ranks
+    bakir_1:
+      name: "&6Bakır I"
+      description: "&7Yeni başlayan savaşçı"
+      min-elo: 100
+      max-elo: 199
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    bakir_2:
+      name: "&6Bakır II"
+      description: "&7Gelişen savaşçı"
+      min-elo: 200
+      max-elo: 299
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    bakir_3:
+      name: "&6Bakır III"
+      description: "&7Deneyimli savaşçı"
+      min-elo: 300
+      max-elo: 399
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    bakir_4:
+      name: "&6Bakır IV"
+      description: "&7Uzman savaşçı"
+      min-elo: 400
+      max-elo: 499
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    bakir_5:
+      name: "&6Bakır V"
+      description: "&7Usta savaşçı"
+      min-elo: 500
+      max-elo: 599
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    bakir_6:
+      name: "&6Bakır VI"
+      description: "&7Efsanevi savaşçı"
+      min-elo: 600
+      max-elo: 699
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    bakir_7:
+      name: "&6Bakır VII"
+      description: "&7Kahraman savaşçı"
+      min-elo: 700
+      max-elo: 799
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    bakir_8:
+      name: "&6Bakır VIII"
+      description: "&7Efsanevi kahraman"
+      min-elo: 800
+      max-elo: 899
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    bakir_9:
+      name: "&6Bakır IX"
+      description: "&7Efsanevi usta"
+      min-elo: 900
+      max-elo: 999
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    # GÜMÜŞ TIER (1000-1999 ELO) - 10 ranks
+    gumus_1:
+      name: "&7Gümüş I"
+      description: "&7Gümüş savaşçı"
+      min-elo: 1000
+      max-elo: 1099
+      color: "&7"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    gumus_2:
+      name: "&7Gümüş II"
+      description: "&7Gümüş uzman"
+      min-elo: 1100
+      max-elo: 1199
+      color: "&7"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    gumus_3:
+      name: "&7Gümüş III"
+      description: "&7Gümüş usta"
+      min-elo: 1200
+      max-elo: 1299
+      color: "&7"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    gumus_4:
+      name: "&7Gümüş IV"
+      description: "&7Gümüş kahraman"
+      min-elo: 1300
+      max-elo: 1399
+      color: "&7"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    gumus_5:
+      name: "&7Gümüş V"
+      description: "&7Gümüş efsane"
+      min-elo: 1400
+      max-elo: 1499
+      color: "&7"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    gumus_6:
+      name: "&7Gümüş VI"
+      description: "&7Gümüş efsanevi"
+      min-elo: 1500
+      max-elo: 1599
+      color: "&7"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    gumus_7:
+      name: "&7Gümüş VII"
+      description: "&7Gümüş efsanevi usta"
+      min-elo: 1600
+      max-elo: 1699
+      color: "&7"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    gumus_8:
+      name: "&7Gümüş VIII"
+      description: "&7Gümüş efsanevi kahraman"
+      min-elo: 1700
+      max-elo: 1799
+      color: "&7"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    gumus_9:
+      name: "&7Gümüş IX"
+      description: "&7Gümüş efsanevi usta"
+      min-elo: 1800
+      max-elo: 1899
+      color: "&7"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    gumus_10:
+      name: "&7Gümüş X"
+      description: "&7Gümüş efsanevi usta"
+      min-elo: 1900
+      max-elo: 1999
+      color: "&7"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    # ALTIN TIER (2000-2999 ELO) - 10 ranks
+    altin_1:
+      name: "&6Altın I"
+      description: "&7Altın savaşçı"
+      min-elo: 2000
+      max-elo: 2099
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    altin_2:
+      name: "&6Altın II"
+      description: "&7Altın uzman"
+      min-elo: 2100
+      max-elo: 2199
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    altin_3:
+      name: "&6Altın III"
+      description: "&7Altın usta"
+      min-elo: 2200
+      max-elo: 2299
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    altin_4:
+      name: "&6Altın IV"
+      description: "&7Altın kahraman"
+      min-elo: 2300
+      max-elo: 2399
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    altin_5:
+      name: "&6Altın V"
+      description: "&7Altın efsane"
+      min-elo: 2400
+      max-elo: 2499
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    altin_6:
+      name: "&6Altın VI"
+      description: "&7Altın efsanevi"
+      min-elo: 2500
+      max-elo: 2599
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    altin_7:
+      name: "&6Altın VII"
+      description: "&7Altın efsanevi usta"
+      min-elo: 2600
+      max-elo: 2699
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    altin_8:
+      name: "&6Altın VIII"
+      description: "&7Altın efsanevi kahraman"
+      min-elo: 2700
+      max-elo: 2799
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    altin_9:
+      name: "&6Altın IX"
+      description: "&7Altın efsanevi usta"
+      min-elo: 2800
+      max-elo: 2899
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    altin_10:
+      name: "&6Altın X"
+      description: "&7Altın efsanevi usta"
+      min-elo: 2900
+      max-elo: 2999
+      color: "&6"
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+    
+    # MINATRAN TIER (3000+ ELO) - Highest rank
+    minatran:
+      name: "&dMinatran"
+      description: "&7Efsanevi güç - En yüksek rütbe"
+      min-elo: 3000
+      max-elo: 999999
+      color: "&d"
+      gradient-colors: ["#e5bff0", "#aec5fa", "#f3bfa2"]
+      gradient-enabled: true
+      promotion-commands: []
+      one-time-commands: []
+      demotion-commands: []
+
+# Promotion/Demotion settings
+promotion:
+  # Enable promotion/demotion commands
+  enabled: true
+  
+  # Delay before executing commands (in ticks, 20 = 1 second)
+  command-delay: 20
+
+# One-time command settings
+one-time-rewards:
+  # Enable one-time promotion/demotion commands (prevents abuse)
+  enabled: true
