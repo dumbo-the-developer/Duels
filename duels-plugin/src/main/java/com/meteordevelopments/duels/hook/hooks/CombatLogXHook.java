@@ -1,3 +1,4 @@
+/*
 package com.meteordevelopments.duels.hook.hooks;
 
 import com.github.sirblobman.combatlogx.api.ICombatLogX;
@@ -54,3 +55,4 @@ public class CombatLogXHook extends PluginHook<DuelsPlugin> {
         }
     }
 }
+*/
