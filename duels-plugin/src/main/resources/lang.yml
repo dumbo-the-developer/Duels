@@ -674,23 +674,23 @@ GUI:
           - '&7Status: &r%state%'
           - ' '
           - '&r&lCLICK TO TOGGLE'
-        bind:
-        title: 'Kit: %kit%'
-        buttons:
-          arena:
-            name: '&e%arena%'
-            lore-bound:
-              - '&7Bound Kits: &3%kits%'
-              - ' '
-              - '&a&lBOUND'
-              - ' '
-              - '&r&lCLICK TO TOGGLE'
-            lore-not-bound:
-              - '&7Bound Kits: &3%kits%'
-              - ' '
-              - '&c&lNOT BOUND'
-              - ' '
-              - '&r&lCLICK TO TOGGLE'
+    bind:
+      title: 'Kit: %kit%'
+      buttons:
+        arena:
+          name: '&e%arena%'
+          lore-bound:
+            - '&7Bound Kits: &3%kits%'
+            - ' '
+            - '&a&lBOUND'
+            - ' '
+            - '&r&lCLICK TO TOGGLE'
+          lore-not-bound:
+            - '&7Bound Kits: &3%kits%'
+            - ' '
+            - '&c&lNOT BOUND'
+            - ' '
+            - '&r&lCLICK TO TOGGLE'
 
 # Rank System Messages
 RANK:
