@@ -38,11 +38,16 @@ public class LeaderboardManager implements Loadable {
     }
 
     public List<LeaderboardEntry> getTotalEloLeaderboard() {
-        return getLeaderboard("total_elo");
-    }
-
-    public List<LeaderboardEntry> getKitLeaderboard(Kit kit) {
-        return getLeaderboard("kit_" + kit.getName());
+        long currentTime = System.currentTimeMillis();
+        Long lastUpdate = lastUpdateTimes.get("total_elo");
+        
+        // Check if we need to update the leaderboard
+        if (lastUpdate == null || currentTime - lastUpdate > UPDATE_INTERVAL) {
+            updateLeaderboard("total_elo");
+            lastUpdateTimes.put("total_elo", currentTime);
+        }
+        
+        return leaderboards.getOrDefault("total_elo", new ArrayList<>());
     }
 
     public LeaderboardEntry getTotalEloEntry(int position) {
@@ -51,27 +56,6 @@ public class LeaderboardManager implements Loadable {
             return leaderboard.get(position - 1);
         }
         return null;
-    }
-
-    public LeaderboardEntry getKitEntry(Kit kit, int position) {
-        List<LeaderboardEntry> leaderboard = getKitLeaderboard(kit);
-        if (position > 0 && position <= leaderboard.size()) {
-            return leaderboard.get(position - 1);
-        }
-        return null;
-    }
-
-    private List<LeaderboardEntry> getLeaderboard(String key) {
-        long currentTime = System.currentTimeMillis();
-        Long lastUpdate = lastUpdateTimes.get(key);
-        
-        // Check if we need to update the leaderboard
-        if (lastUpdate == null || currentTime - lastUpdate > UPDATE_INTERVAL) {
-            updateLeaderboard(key);
-            lastUpdateTimes.put(key, currentTime);
-        }
-        
-        return leaderboards.getOrDefault(key, new ArrayList<>());
     }
 
     private void updateLeaderboard(String key) {

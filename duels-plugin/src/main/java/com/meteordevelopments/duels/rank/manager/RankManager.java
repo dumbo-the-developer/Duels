@@ -146,41 +146,14 @@ public class RankManager implements Loadable {
     }
     
     public boolean checkPromotion(UUID uuid) {
-        if (!enabled || !promotionEnabled) {
-            return false;
-        }
-        
-        UserData userData = plugin.getUserManager().get(uuid);
-        if (userData == null) {
-            return false;
-        }
-        
-        String previousRankId = playerRanks.get(uuid);
-        Rank currentRank = calculateRank(userData.getTotalElo());
-        
-        // If no previous rank or rank changed
-        if (previousRankId == null || !previousRankId.equals(currentRank.getId())) {
-            // Update stored rank
-            playerRanks.put(uuid, currentRank.getId());
-            
-            // Execute promotion commands if rank increased
-            if (previousRankId != null) {
-                Rank previousRank = ranks.get(previousRankId);
-                if (previousRank != null && currentRank.getMinElo() > previousRank.getMinElo()) {
-                    executePromotionCommands(uuid, currentRank);
-                    return true;
-                }
-            } else {
-                // First time checking this player's rank - don't trigger promotion
-                // This prevents promotion messages when players first join
-                return false;
-            }
-        }
-        
-        return false;
+        return checkRankChange(uuid, true);
     }
     
     public boolean checkDemotion(UUID uuid) {
+        return checkRankChange(uuid, false);
+    }
+    
+    private boolean checkRankChange(UUID uuid, boolean isPromotion) {
         if (!enabled || !promotionEnabled) {
             return false;
         }
@@ -198,13 +171,26 @@ public class RankManager implements Loadable {
             // Update stored rank
             playerRanks.put(uuid, currentRank.getId());
             
-            // Execute demotion commands if rank decreased
             if (previousRankId != null) {
                 Rank previousRank = ranks.get(previousRankId);
-                if (previousRank != null && currentRank.getMinElo() < previousRank.getMinElo()) {
-                    executeDemotionCommands(uuid, currentRank);
-                    return true;
+                if (previousRank != null) {
+                    boolean shouldExecute = isPromotion ? 
+                        currentRank.getMinElo() > previousRank.getMinElo() :
+                        currentRank.getMinElo() < previousRank.getMinElo();
+                    
+                    if (shouldExecute) {
+                        if (isPromotion) {
+                            executePromotionCommands(uuid, currentRank);
+                        } else {
+                            executeDemotionCommands(uuid, currentRank);
+                        }
+                        return true;
+                    }
                 }
+            } else if (isPromotion) {
+                // First time checking this player's rank - don't trigger promotion
+                // This prevents promotion messages when players first join
+                return false;
             }
         }
         
@@ -276,7 +262,6 @@ public class RankManager implements Loadable {
 
             }
         }
-
     }
     
     private void executeCommand(Player player, String command) {
