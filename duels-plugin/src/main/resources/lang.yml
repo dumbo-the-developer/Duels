@@ -674,20 +674,30 @@ GUI:
           - '&7Status: &r%state%'
           - ' '
           - '&r&lCLICK TO TOGGLE'
-  bind:
-    title: 'Kit: %kit%'
-    buttons:
-      arena:
-        name: '&e%arena%'
-        lore-bound:
-          - '&7Bound Kits: &3%kits%'
-          - ' '
-          - '&a&lBOUND'
-          - ' '
-          - '&r&lCLICK TO TOGGLE'
-        lore-not-bound:
-          - '&7Bound Kits: &3%kits%'
-          - ' '
-          - '&c&lNOT BOUND'
-          - ' '
-          - '&r&lCLICK TO TOGGLE'
+        bind:
+        title: 'Kit: %kit%'
+        buttons:
+          arena:
+            name: '&e%arena%'
+            lore-bound:
+              - '&7Bound Kits: &3%kits%'
+              - ' '
+              - '&a&lBOUND'
+              - ' '
+              - '&r&lCLICK TO TOGGLE'
+            lore-not-bound:
+              - '&7Bound Kits: &3%kits%'
+              - ' '
+              - '&c&lNOT BOUND'
+              - ' '
+              - '&r&lCLICK TO TOGGLE'
+
+# Rank System Messages
+RANK:
+  promoted: '{PREFIX} &aCongratulations! You have been promoted to &e%rank%&a!'
+  demoted: '{PREFIX} &cYou have been demoted to &e%rank%&c.'
+  current: '{PREFIX} &7Your current rank is &e%rank%&7.'
+  progress: '{PREFIX} &7Progress to next rank: &e%progress%%&7 (&e%current_elo%&7/&e%next_elo%&7 ELO)'
+  max-rank: '{PREFIX} &6You have reached the maximum rank!'
+  not-found: '{PREFIX} &cRank not found.'
+  reloaded: '{PREFIX} &aRank configuration has been reloaded.'

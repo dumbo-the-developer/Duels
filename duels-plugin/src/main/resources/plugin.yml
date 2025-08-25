@@ -26,6 +26,9 @@ commands:
   duels:
     description: Administrative command of Duels.
     aliases: [ ds ]
+  rank:
+    description: View your current rank information.
+    aliases: [ r ]
 
 permissions:
   duels.*:
@@ -47,7 +50,10 @@ permissions:
       duels.stats: true
       duels.toggle: true
       duels.top: true
+      duels.rank: true
   duels.duel:
+    default: true
+  duels.rank:
     default: true
 
 folia-supported: true

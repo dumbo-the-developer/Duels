@@ -368,6 +368,27 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
                     change = NumberUtil.getChange(config.getKFactor(), winnerRating, loserRating);
                     winnerData.setRating(kit, winnerRating = winnerRating + change);
                     loserData.setRating(kit, loserRating = loserRating - change);
+                    
+                    // Check for rank changes after ELO update
+                    if (plugin.getRankManager().isEnabled()) {
+                        plugin.doAsync(() -> {
+                            // Check promotions and demotions
+                            boolean winnerPromoted = plugin.getRankManager().checkPromotion(winner.getUniqueId());
+                            boolean loserDemoted = plugin.getRankManager().checkDemotion(loser.getUniqueId());
+                            
+                            // Check one-time rewards
+                            plugin.getRankManager().checkOneTimeRewards(winner.getUniqueId());
+                            plugin.getRankManager().checkOneTimeRewards(loser.getUniqueId());
+                            
+                            // Send rank change messages if needed
+                            if (winnerPromoted) {
+                                winner.sendMessage(plugin.getLang().getMessage("RANK.promoted", "rank", plugin.getRankManager().getPlayerRank(winner).getName()));
+                            }
+                            if (loserDemoted) {
+                                loser.sendMessage(plugin.getLang().getMessage("RANK.demoted", "rank", plugin.getRankManager().getPlayerRank(loser).getName()));
+                            }
+                        });
+                    }
                 }
 
                 message = lang.getMessage("DUEL.on-end.opponent-defeat",
