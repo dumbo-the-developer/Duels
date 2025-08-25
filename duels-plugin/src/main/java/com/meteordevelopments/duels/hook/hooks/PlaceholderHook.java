@@ -6,7 +6,8 @@ import com.meteordevelopments.duels.api.kit.Kit;
 import com.meteordevelopments.duels.api.match.Match;
 import com.meteordevelopments.duels.api.spectate.Spectator;
 import com.meteordevelopments.duels.api.user.User;
-import com.meteordevelopments.duels.data.LeaderboardEntry;
+import com.meteordevelopments.duels.lb.LeaderboardEntry;
+import com.meteordevelopments.duels.rank.Rank;
 import com.meteordevelopments.duels.util.StringUtil;
 import com.meteordevelopments.duels.util.compat.Ping;
 import com.meteordevelopments.duels.util.hook.PluginHook;
@@ -155,6 +156,52 @@ public class PlaceholderHook extends PluginHook<DuelsPlugin> {
                     return entry != null ? entry.playerName() : "N/A";
                 } catch (NumberFormatException e) {
                     return "Invalid position";
+                }
+            }
+
+            // Rank placeholders
+            switch (identifier) {
+                case "rank_name" -> {
+                    if (!plugin.getRankManager().isEnabled()) {
+                        return "Rank system disabled";
+                    }
+
+                    Rank rank = plugin.getRankManager().getPlayerRank(player);
+                    return rank != null ? rank.getColoredName() : "Unknown";
+                }
+                case "rank_desc" -> {
+                    if (!plugin.getRankManager().isEnabled()) {
+                        return "Rank system disabled";
+                    }
+
+                    Rank rank = plugin.getRankManager().getPlayerRank(player);
+                    return rank != null ? rank.getDescription() : "No description";
+                }
+                case "rank_color" -> {
+                    if (!plugin.getRankManager().isEnabled()) {
+                        return "&7";
+                    }
+
+                    Rank rank = plugin.getRankManager().getPlayerRank(player);
+                    return rank != null ? rank.getColor() : "&7";
+                }
+                case "rank_progress" -> {
+                    if (!plugin.getRankManager().isEnabled()) {
+                        return "0";
+                    }
+
+                    Rank rank = plugin.getRankManager().getPlayerRank(player);
+                    if (rank == null) {
+                        return "0";
+                    }
+
+                    user = plugin.getUserManager().get(player);
+                    if (user == null) {
+                        return "0";
+                    }
+
+                    double progress = rank.getProgress(user.getTotalElo());
+                    return String.format("%.1f", progress);
                 }
             }
 
