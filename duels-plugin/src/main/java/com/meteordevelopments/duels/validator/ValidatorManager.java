@@ -91,6 +91,7 @@ public class ValidatorManager implements Loadable {
                 target(TargetCheckSelfValidator.class),
                 target(TargetPartyValidator.class),
                 target(TargetCheckMatchValidator.class),
+                target(TargetCheckSelfMatchValidator.class),
                 target(TargetCheckSpectateValidator.class),
                 target(TargetNoRequestValidator.class),
                 target(TargetPartyOwnerValidator.class)
