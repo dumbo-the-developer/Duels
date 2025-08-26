@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class BindGui extends MultiPageGui<DuelsPlugin> {
 
     public BindGui(final DuelsPlugin plugin, final KitImpl kit) {
-        super(plugin, plugin.getLang().getMessage("GUI.bind.title", "kit", kit.getName()), plugin.getConfiguration().getArenaSelectorRows(),
+        super(plugin, plugin.getLang().getMessage("GUI.options.bind.title", "kit", kit.getName()), plugin.getConfiguration().getArenaSelectorRows(),
                 plugin.getArenaManager().getArenasImpl().stream().map(arena -> new BindButton(plugin, kit, arena)).collect(Collectors.toList()));
 
         final Config config = plugin.getConfiguration();

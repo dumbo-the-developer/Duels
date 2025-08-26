@@ -92,6 +92,39 @@ public class RankManager implements Loadable {
         }
         
         Log.info("Loaded " + ranks.size() + " ranks from configuration");
+        
+        // Validate configuration after loading
+        validateConfig();
+    }
+    
+    private void validateConfig() {
+        // Check if default rank exists
+        if (!ranks.containsKey(defaultRank)) {
+            Log.warn("Default rank '" + defaultRank + "' is not found in the ranks configuration!");
+        }
+        
+        // Create sorted list of ranks by minElo
+        List<Rank> sortedRanks = new ArrayList<>(ranks.values());
+        sortedRanks.sort(Comparator.comparingInt(Rank::getMinElo));
+        
+        // Check for invalid rank ranges and overlaps
+        for (int i = 0; i < sortedRanks.size(); i++) {
+            Rank current = sortedRanks.get(i);
+            
+            // Check if minElo > maxElo
+            if (current.getMinElo() > current.getMaxElo()) {
+                Log.warn("Rank '" + current.getId() + "' has invalid range: minElo (" + current.getMinElo() + ") > maxElo (" + current.getMaxElo() + ")");
+            }
+            
+            // Check for overlaps with previous rank
+            if (i > 0) {
+                Rank previous = sortedRanks.get(i - 1);
+                if (current.getMinElo() <= previous.getMaxElo()) {
+                    Log.warn("Rank '" + current.getId() + "' overlaps with '" + previous.getId() + "': " + 
+                            current.getMinElo() + " <= " + previous.getMaxElo());
+                }
+            }
+        }
     }
     
     public Rank calculateRank(int elo) {
