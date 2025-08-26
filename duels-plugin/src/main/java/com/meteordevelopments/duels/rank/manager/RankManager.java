@@ -235,15 +235,13 @@ public class RankManager implements Loadable {
             return;
         }
         
-        Player player = Bukkit.getPlayer(uuid);
-        if (player == null) {
-            return;
-        }
-        
         // Execute commands with delay
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            for (String command : rank.getPromotionCommands()) {
-                executeCommand(player, command);
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null) {
+                for (String command : rank.getPromotionCommands()) {
+                    executeCommand(player, command);
+                }
             }
         }, commandDelay);
     }
@@ -253,6 +251,7 @@ public class RankManager implements Loadable {
             return;
         }
         
+        // Retrieve the Player on the calling thread before scheduling
         Player player = Bukkit.getPlayer(uuid);
         if (player == null) {
             return;
@@ -277,22 +276,21 @@ public class RankManager implements Loadable {
         }
         
         Rank currentRank = calculateRank(userData.getTotalElo());
-        Set<String> claimedRewards = oneTimeRewardsClaimed.computeIfAbsent(uuid, k -> new HashSet<>());
+        Set<String> claimedRewards = oneTimeRewardsClaimed.computeIfAbsent(uuid, k -> ConcurrentHashMap.newKeySet());
         
         // Check if one-time rewards for this rank have been claimed
         if (!claimedRewards.contains(currentRank.getId()) && !currentRank.getOneTimeCommands().isEmpty()) {
-            Player player = Bukkit.getPlayer(uuid);
-            if (player != null) {
-                // Mark as claimed
-                claimedRewards.add(currentRank.getId());
-                
+            // Mark as claimed atomically
+            if (claimedRewards.add(currentRank.getId())) {
                 // Execute one-time commands
                 Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                    for (String command : currentRank.getOneTimeCommands()) {
-                        executeCommand(player, command);
+                    Player player = Bukkit.getPlayer(uuid);
+                    if (player != null) {
+                        for (String command : currentRank.getOneTimeCommands()) {
+                            executeCommand(player, command);
+                        }
                     }
                 }, commandDelay);
-
             }
         }
     }

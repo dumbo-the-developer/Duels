@@ -22,9 +22,7 @@ dependencies {
     implementation 'com.mojang:authlib:1.5.25'
     implementation 'me.clip:placeholderapi:2.11.6'
     // These are compileOnly because runtime presence is provided by the server classpath
-    compileOnly 'com.github.sirblobman.api:core:2.9-SNAPSHOT'
     implementation 'com.github.timderspieler:DeluxeCombat-API:1.5.1'
-    compileOnly 'com.github.sirblobman.combatlogx:api:11.5-SNAPSHOT'
     implementation 'com.artillexstudios:AxGraves:1.7.0'
     implementation 'com.github.No-Not-Jaden:NotBounties:1.22.0'
     implementation('net.essentialsx:EssentialsX:2.21.2') {
