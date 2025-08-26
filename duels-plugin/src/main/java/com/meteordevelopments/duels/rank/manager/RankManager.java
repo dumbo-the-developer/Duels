@@ -128,15 +128,39 @@ public class RankManager implements Loadable {
     }
     
     public Rank calculateRank(int elo) {
-        // Find the rank that matches the ELO range
-        for (Rank rank : ranks.values()) {
+        // Create a sorted list of ranks by minElo ascending
+        List<Rank> sortedRanks = new ArrayList<>(ranks.values());
+        sortedRanks.sort(Comparator.comparingInt(Rank::getMinElo));
+        
+        // If no ranks are configured, return null
+        if (sortedRanks.isEmpty()) {
+            return null;
+        }
+        
+        // Find the first rank where elo is in range
+        for (Rank rank : sortedRanks) {
             if (rank.isInRange(elo)) {
                 return rank;
             }
         }
         
-        // Return default rank if no match found
-        return ranks.get(defaultRank);
+        // No rank matches the elo range
+        Rank firstRank = sortedRanks.get(0);
+        Rank lastRank = sortedRanks.get(sortedRanks.size() - 1);
+        
+        // If elo is below the first range, return the first rank (or defaultRank if configured and present)
+        if (elo < firstRank.getMinElo()) {
+            Rank defaultRankObj = ranks.get(defaultRank);
+            return defaultRankObj != null ? defaultRankObj : firstRank;
+        }
+        
+        // If elo is above the last range, return the last rank
+        if (elo > lastRank.getMaxElo()) {
+            return lastRank;
+        }
+        
+        // Fallback: return the first rank (lowest-ranked entry) to avoid NPEs
+        return firstRank;
     }
     
     public Rank getPlayerRank(Player player) {
