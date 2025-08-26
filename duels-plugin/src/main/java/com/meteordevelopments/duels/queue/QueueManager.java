@@ -72,7 +72,6 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
     private PvPManagerHook pvpManager;
     private DeluxeCombatHook deluxeCombat;
     private WorldGuardHook worldGuard;
-    // private CombatLogXHook combatLogX;
     private VaultHook vault;
     private ScheduledTask queueTask;
 
@@ -141,7 +140,6 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         this.combatTagPlus = plugin.getHookManager().getHook(CombatTagPlusHook.class);
         this.pvpManager = plugin.getHookManager().getHook(PvPManagerHook.class);
         this.deluxeCombat = plugin.getHookManager().getHook(DeluxeCombatHook.class);
-        // this.combatLogX = plugin.getHookManager().getHook(CombatLogXHook.class);
         this.worldGuard = plugin.getHookManager().getHook(WorldGuardHook.class);
         this.vault = plugin.getHookManager().getHook(VaultHook.class);
         this.queueTask = plugin.doSyncRepeat(() -> {
@@ -362,9 +360,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
         if ((combatTagPlus != null && combatTagPlus.isTagged(player))
                 || (pvpManager != null && pvpManager.isTagged(player))
-                || (deluxeCombat != null && deluxeCombat.isTagged(player))
-                // || (combatLogX != null && combatLogX.isTagged(player))
-                ) {
+                || (deluxeCombat != null && deluxeCombat.isTagged(player))) {
             lang.sendMessage(player, "ERROR.duel.is-tagged");
             return false;
         }

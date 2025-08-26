@@ -32,10 +32,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean pmPreventDuel;
     @Getter
     private boolean pmPreventTag;
-    @Getter
-    private boolean clxPreventDuel;
-    @Getter
-    private boolean clxPreventTag;
+
     @Getter
     private boolean dcPreventDuel;
     @Getter
@@ -311,8 +308,6 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         ctpPreventTag = configuration.getBoolean("supported-plugins.CombatTagPlus.prevent-tag-in-duel", true);
         pmPreventDuel = configuration.getBoolean("supported-plugins.PvPManager.prevent-duel-if-tagged", true);
         pmPreventTag = configuration.getBoolean("supported-plugins.PvPManager.prevent-tag-in-duel", true);
-        clxPreventDuel = configuration.getBoolean("supported-plugins.CombatLogX.prevent-duel-if-tagged", true);
-        clxPreventTag = configuration.getBoolean("supported-plugins.CombatLogX.prevent-tag-in-duel", true);
         AXpreventGraves = configuration.getBoolean("supported-plugins.AXGraves.prevent-grave-in-duel", true);
         dcPreventDuel = configuration.getBoolean("supported-plugins.DeluxeCombat.prevent-duel-if-tagged", true);
         dcPreventTag = configuration.getBoolean("supported-plugins.DeluxeCombat.prevent-tag-in-duel", true);
