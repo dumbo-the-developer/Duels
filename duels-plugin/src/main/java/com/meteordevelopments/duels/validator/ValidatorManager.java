@@ -62,6 +62,7 @@ public class ValidatorManager implements Loadable {
         targetValidators.put(TargetCanRequestValidator.class, new TargetCanRequestValidator(plugin));
         targetValidators.put(TargetPartyValidator.class, new TargetPartyValidator(plugin));
         targetValidators.put(TargetCheckMatchValidator.class, new TargetCheckMatchValidator(plugin));
+        targetValidators.put(TargetCheckSelfMatchValidator.class, new TargetCheckSelfMatchValidator(plugin));
         targetValidators.put(TargetCheckSpectateValidator.class, new TargetCheckSpectateValidator(plugin));
         targetValidators.put(TargetNoRequestValidator.class, new TargetNoRequestValidator(plugin));
         targetValidators.put(TargetHasRequestValidator.class, new TargetHasRequestValidator(plugin));
@@ -91,6 +92,7 @@ public class ValidatorManager implements Loadable {
                 target(TargetCheckSelfValidator.class),
                 target(TargetPartyValidator.class),
                 target(TargetCheckMatchValidator.class),
+                target(TargetCheckSelfMatchValidator.class),
                 target(TargetCheckSpectateValidator.class),
                 target(TargetNoRequestValidator.class),
                 target(TargetPartyOwnerValidator.class)
