@@ -5,6 +5,7 @@ import com.meteordevelopments.duels.kit.KitImpl;
 import com.meteordevelopments.duels.match.DuelMatch;
 import com.meteordevelopments.duels.match.party.PartyDuelMatch;
 import com.meteordevelopments.duels.party.Party;
+import com.meteordevelopments.duels.rank.Rank;
 import com.meteordevelopments.duels.util.*;
 import lombok.Getter;
 import com.meteordevelopments.duels.DuelsPlugin;
@@ -368,6 +369,40 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
                     change = NumberUtil.getChange(config.getKFactor(), winnerRating, loserRating);
                     winnerData.setRating(kit, winnerRating = winnerRating + change);
                     loserData.setRating(kit, loserRating = loserRating - change);
+                    
+                    // Check for rank changes after ELO update
+                    if (plugin.getRankManager().isEnabled()) {
+                        plugin.doAsync(() -> {
+                            // Check promotions and demotions
+                            boolean winnerPromoted = plugin.getRankManager().checkPromotion(winner.getUniqueId());
+                            boolean loserDemoted = plugin.getRankManager().checkDemotion(loser.getUniqueId());
+                            
+                            // Check one-time rewards
+                            plugin.getRankManager().checkOneTimeRewards(winner.getUniqueId());
+                            plugin.getRankManager().checkOneTimeRewards(loser.getUniqueId());
+                            
+                            // Schedule sync task for Bukkit API calls
+                            plugin.doSync(() -> {
+                                // Verify players are still online
+                                Player onlineWinner = Bukkit.getPlayer(winner.getUniqueId());
+                                Player onlineLoser = Bukkit.getPlayer(loser.getUniqueId());
+                                
+                                // Send rank change messages if needed
+                                if (winnerPromoted && onlineWinner != null) {
+                                    Rank winnerRank = plugin.getRankManager().getPlayerRank(onlineWinner);
+                                    if (winnerRank != null) {
+                                        onlineWinner.sendMessage(plugin.getLang().getMessage("RANK.promoted", "rank", winnerRank.getName()));
+                                    }
+                                }
+                                if (loserDemoted && onlineLoser != null) {
+                                    Rank loserRank = plugin.getRankManager().getPlayerRank(onlineLoser);
+                                    if (loserRank != null) {
+                                        onlineLoser.sendMessage(plugin.getLang().getMessage("RANK.demoted", "rank", loserRank.getName()));
+                                    }
+                                }
+                            });
+                        });
+                    }
                 }
 
                 message = lang.getMessage("DUEL.on-end.opponent-defeat",

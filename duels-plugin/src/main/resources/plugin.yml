@@ -1,7 +1,7 @@
 name: Duels
 main: com.meteordevelopments.duels.DuelsPlugin
 version: @VERSION@
-softdepend: [ AxGraves, BountyHunters, CombatLogX, CombatTagPlus, DeluxeCombat, Essentials, Factions, LeaderHeads, mcMMO, MVdWPlaceholderAPI, MyPet, PlaceholderAPI, NotBounties, PvPManager, SimpleClans, Vault, WorldGuard, Multiverse-Core, My_Worlds, MultiWorld ]
+softdepend: [ AxGraves, BountyHunters, CombatTagPlus, DeluxeCombat, Essentials, Factions, LeaderHeads, mcMMO, MVdWPlaceholderAPI, MyPet, PlaceholderAPI, NotBounties, PvPManager, SimpleClans, Vault, WorldGuard, Multiverse-Core, My_Worlds, MultiWorld ]
 # Multiverse-Core added as soft-depend due to locations being null when Duels is loaded first.
 # Add any world management plugins to softdepend list if arena doesn't load properly in the generated world.
 api-version: 1.13
@@ -26,6 +26,10 @@ commands:
   duels:
     description: Administrative command of Duels.
     aliases: [ ds ]
+  rank:
+    description: View your current rank information.
+    aliases: [ r ]
+    permission: duels.rank
 
 permissions:
   duels.*:
@@ -47,7 +51,10 @@ permissions:
       duels.stats: true
       duels.toggle: true
       duels.top: true
+      duels.rank: true
   duels.duel:
+    default: true
+  duels.rank:
     default: true
 
 folia-supported: true

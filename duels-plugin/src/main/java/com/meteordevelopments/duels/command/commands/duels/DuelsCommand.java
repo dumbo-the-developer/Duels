@@ -37,6 +37,7 @@ public class DuelsCommand extends BaseCommand {
                 new ResetratingCommand(plugin),
                 new PlaysoundCommand(plugin),
                 new ReloadCommand(plugin),
+                new ReloadRanksCommand(plugin),
                 new DisableCommand(plugin),
                 new EnableCommand(plugin)
         );

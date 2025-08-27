@@ -4,7 +4,8 @@ import be.maximvdw.placeholderapi.PlaceholderAPI;
 import be.maximvdw.placeholderapi.PlaceholderReplaceEvent;
 import be.maximvdw.placeholderapi.PlaceholderReplacer;
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.data.LeaderboardEntry;
+import com.meteordevelopments.duels.lb.LeaderboardEntry;
+import com.meteordevelopments.duels.rank.Rank;
 import com.meteordevelopments.duels.data.UserData;
 import com.meteordevelopments.duels.data.UserManagerImpl;
 import com.meteordevelopments.duels.util.hook.PluginHook;
@@ -27,6 +28,10 @@ public class MVdWPlaceholderHook extends PluginHook<DuelsPlugin> {
         PlaceholderAPI.registerPlaceholder(plugin, "duels_losses", placeholders);
         PlaceholderAPI.registerPlaceholder(plugin, "duels_can_request", placeholders);
         PlaceholderAPI.registerPlaceholder(plugin, "duels_total_elo", placeholders);
+        PlaceholderAPI.registerPlaceholder(plugin, "duels_rank_name", placeholders);
+        PlaceholderAPI.registerPlaceholder(plugin, "duels_rank_desc", placeholders);
+        PlaceholderAPI.registerPlaceholder(plugin, "duels_rank_color", placeholders);
+        PlaceholderAPI.registerPlaceholder(plugin, "duels_rank_progress", placeholders);
         
         // Register leaderboard placeholders
         for (int i = 1; i <= 10; i++) {
@@ -59,6 +64,34 @@ public class MVdWPlaceholderHook extends PluginHook<DuelsPlugin> {
                     return String.valueOf(user.canRequest());
                 case "duels_total_elo":
                     return String.valueOf(user.getTotalElo());
+                case "duels_rank_name":
+                    if (!plugin.getRankManager().isEnabled()) {
+                        return "Rank system disabled";
+                    }
+                    Rank rank = plugin.getRankManager().getPlayerRank(player);
+                    return rank != null ? rank.getColoredName() : "Unknown";
+                case "duels_rank_desc":
+                    if (!plugin.getRankManager().isEnabled()) {
+                        return "Rank system disabled";
+                    }
+                    rank = plugin.getRankManager().getPlayerRank(player);
+                    return rank != null ? rank.getDescription() : "No description";
+                case "duels_rank_color":
+                    if (!plugin.getRankManager().isEnabled()) {
+                        return "&7";
+                    }
+                    rank = plugin.getRankManager().getPlayerRank(player);
+                    return rank != null ? rank.getColor() : "&7";
+                case "duels_rank_progress":
+                    if (!plugin.getRankManager().isEnabled()) {
+                        return "0";
+                    }
+                    rank = plugin.getRankManager().getPlayerRank(player);
+                    if (rank == null) {
+                        return "0";
+                    }
+                    double progress = rank.getProgress(user.getTotalElo());
+                    return String.format("%.1f", progress);
             }
 
             // Handle ELO by kit placeholders: duels_elo_<kitname>

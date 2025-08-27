@@ -13,6 +13,7 @@ import com.meteordevelopments.duels.api.command.SubCommand;
 import com.meteordevelopments.duels.arena.ArenaManagerImpl;
 import com.meteordevelopments.duels.betting.BettingManager;
 import com.meteordevelopments.duels.command.commands.SpectateCommand;
+import com.meteordevelopments.duels.command.commands.RankCommand;
 import com.meteordevelopments.duels.command.commands.duel.DuelCommand;
 import com.meteordevelopments.duels.command.commands.duels.DuelsCommand;
 import com.meteordevelopments.duels.command.commands.queue.QueueCommand;
@@ -20,7 +21,8 @@ import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.config.Lang;
 import com.meteordevelopments.duels.data.ItemData;
 import com.meteordevelopments.duels.data.ItemData.ItemDataDeserializer;
-import com.meteordevelopments.duels.data.LeaderboardManager;
+import com.meteordevelopments.duels.lb.manager.LeaderboardManager;
+import com.meteordevelopments.duels.rank.manager.RankManager;
 import com.meteordevelopments.duels.data.UserManagerImpl;
 import com.meteordevelopments.duels.duel.DuelManager;
 import com.meteordevelopments.duels.extension.ExtensionClassLoader;
@@ -117,6 +119,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private ValidatorManager validatorManager;
     @Getter
     private LeaderboardManager leaderboardManager;
+    @Getter
+    private RankManager rankManager;
     private static final Logger LOGGER = Logger.getLogger("[Duels-Optimised]");
 
     @Override
@@ -163,7 +167,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                 new PartyCommand(this),
                 new QueueCommand(this),
                 new SpectateCommand(this),
-                new DuelsCommand(this)
+                new DuelsCommand(this),
+                new RankCommand(this)
         );
 
         for (final Loadable loadable : loadables) {
@@ -475,6 +480,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadAndTrack("hook manager", () -> hookManager = new HookManager(this));
         loadAndTrack("validator manager", () -> loadables.add(validatorManager = new ValidatorManager(this)));
         loadAndTrack("leaderboard manager", () -> loadables.add(leaderboardManager = new LeaderboardManager(this)));
+        loadAndTrack("rank manager", () -> loadables.add(rankManager = new RankManager(this)));
         loadAndTrack("teleport manager", () -> loadables.add(teleport = new Teleport(this)));
         loadAndTrack("extension manager", () -> loadables.add(extensionManager = new ExtensionManager(this)));
 
