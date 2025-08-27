@@ -1,5 +1,6 @@
 package com.meteordevelopments.duels.player;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Charsets;
 import lombok.Getter;
 import com.meteordevelopments.duels.DuelsPlugin;
@@ -22,7 +23,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -37,7 +37,7 @@ import java.util.UUID;
  */
 public class PlayerInfoManager implements Loadable {
 
-    private static final String CACHE_FILE_NAME = "player-cache.yml"; // Changed to YAML
+    private static final String CACHE_FILE_NAME = "player-cache.json";
     private static final String LOBBY_FILE_NAME = "lobby.json"; // Assuming you still want to use JSON for lobby
 
     private static final String ERROR_LOBBY_LOAD = "Could not load lobby location!";
@@ -70,11 +70,9 @@ public class PlayerInfoManager implements Loadable {
         this.teleport = plugin.getTeleport();
         this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
 
-        // Load the player cache from YAML
         if (FileUtil.checkNonEmpty(cacheFile, false)) {
-            try (final Reader reader = new InputStreamReader(Files.newInputStream(cacheFile.toPath()), Charsets.UTF_8)) {
-                Yaml yaml = new Yaml();
-                Map<UUID, PlayerData> data = yaml.load(reader); // Cast the loaded data to Map<UUID, PlayerData>
+            try (final Reader reader = new InputStreamReader(new FileInputStream(cacheFile), Charsets.UTF_8)) {
+                final Map<UUID, PlayerData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<HashMap<UUID, PlayerData>>() {});
 
                 if (data != null) {
                     for (final Map.Entry<UUID, PlayerData> entry : data.entrySet()) {
@@ -119,17 +117,14 @@ public class PlayerInfoManager implements Loadable {
             return;
         }
 
-        // Prepare data for YAML output
-        Map<UUID, PlayerData> data = new HashMap<>();
+        final Map<UUID, PlayerData> data = new HashMap<>();
 
         for (final Map.Entry<UUID, PlayerInfo> entry : cache.entrySet()) {
             data.put(entry.getKey(), PlayerData.fromPlayerInfo(entry.getValue()));
         }
 
-        // Write the player cache to YAML
-        try (final Writer writer = new OutputStreamWriter(Files.newOutputStream(cacheFile.toPath()), Charsets.UTF_8)) {
-            Yaml yaml = new Yaml();
-            yaml.dump(data, writer);
+        try (final Writer writer = new OutputStreamWriter(new FileOutputStream(cacheFile), Charsets.UTF_8)) {
+            JsonUtil.getObjectWriter().writeValue(writer, data);
             writer.flush();
         }
 
