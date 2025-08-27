@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
@@ -112,6 +113,26 @@ public class KitItemListener implements Listener {
 
         event.setCancelled(true);
         item.remove();
+        player.sendMessage(WARNING);
+        Log.warn(String.format(WARNING_CONSOLE, player.getName()));
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void on(final BlockPlaceEvent event) {
+        final Player player = event.getPlayer();
+
+        if (isExcluded(player)) {
+            return;
+        }
+
+        final ItemStack item = event.getItemInHand();
+
+        if (!isKitItem(item)) {
+            return;
+        }
+
+        event.setCancelled(true);
+        player.getInventory().remove(item);
         player.sendMessage(WARNING);
         Log.warn(String.format(WARNING_CONSOLE, player.getName()));
     }
