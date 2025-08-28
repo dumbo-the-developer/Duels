@@ -5,7 +5,7 @@ import com.meteordevelopments.duels.command.BaseCommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import static io.papermc.lib.PaperLib.teleportAsync;
+
 
 public class LobbyCommand extends BaseCommand {
 
@@ -15,7 +15,7 @@ public class LobbyCommand extends BaseCommand {
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
-        teleportAsync((Player) sender, playerManager.getLobby());
+        ((Player) sender).teleportAsync(playerManager.getLobby());
         lang.sendMessage(sender, "COMMAND.duels.lobby");
     }
 }

@@ -158,7 +158,7 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
         spectators.put(player.getUniqueId(), spectator);
         arenas.put(arena, spectator);
 
-        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+        plugin.doSync(() -> {
             if (!config.isSpecUseSpectatorGamemode()) {
                 player.setGameMode(GameMode.ADVENTURE);
                 player.setAllowFlight(true);

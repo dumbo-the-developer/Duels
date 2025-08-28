@@ -51,8 +51,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import space.arim.morepaperlib.MorePaperLib;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
+import org.bukkit.scheduler.BukkitTask;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
@@ -93,8 +92,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import space.arim.morepaperlib.MorePaperLib;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
+import org.bukkit.scheduler.BukkitTask;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
@@ -110,8 +108,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private UpdateManager updateManager;
     @Getter
     private static DuelsPlugin instance;
-    @Getter
-    private static MorePaperLib morePaperLib;
+
     
     // Managers
     private StartupManager startupManager;
@@ -151,7 +148,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Override
     public void onEnable() {
         instance = this;
-        morePaperLib = new MorePaperLib(this);
+
         Log.addSource(this);
         JsonUtil.registerDeserializer(ItemData.class, ItemDataDeserializer.class);
         
@@ -270,49 +267,44 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     }
 
     @Override
-    public ScheduledTask doSync(@NotNull final Runnable task) {
+    public BukkitTask doSync(@NotNull final Runnable task) {
         Objects.requireNonNull(task, "task");
-        return DuelsPlugin.morePaperLib.scheduling().globalRegionalScheduler().run(task);
+        return Bukkit.getScheduler().runTask(this, task);
     }
 
     @Override
-    public ScheduledTask doSyncAfter(@NotNull final Runnable task, final long delay) {
+    public BukkitTask doSyncAfter(@NotNull final Runnable task, final long delay) {
         Objects.requireNonNull(task, "task");
-        return DuelsPlugin.morePaperLib.scheduling().globalRegionalScheduler().runDelayed(task, delay);
+        return Bukkit.getScheduler().runTaskLater(this, task, delay);
     }
 
     @Override
-    public ScheduledTask doSyncRepeat(@NotNull final Runnable task, final long delay, final long period) {
+    public BukkitTask doSyncRepeat(@NotNull final Runnable task, final long delay, final long period) {
         Objects.requireNonNull(task, "task");
-
         long safeDelay = Math.max(1, delay);
-
-        return DuelsPlugin.morePaperLib.scheduling()
-                .globalRegionalScheduler()
-                .runAtFixedRate(task, safeDelay, period);
+        return Bukkit.getScheduler().runTaskTimer(this, task, safeDelay, period);
     }
 
-
     @Override
-    public ScheduledTask doAsync(@NotNull final Runnable task) {
+    public BukkitTask doAsync(@NotNull final Runnable task) {
         Objects.requireNonNull(task, "task");
-        return DuelsPlugin.morePaperLib.scheduling().asyncScheduler().run(task);
+        return Bukkit.getScheduler().runTaskAsynchronously(this, task);
     }
 
     @Override
-    public ScheduledTask doAsyncAfter(@NotNull final Runnable task, final long delay) {
+    public BukkitTask doAsyncAfter(@NotNull final Runnable task, final long delay) {
         Objects.requireNonNull(task, "task");
-        return DuelsPlugin.morePaperLib.scheduling().asyncScheduler().runDelayed(task, Duration.ofMillis(delay * 50));
+        return Bukkit.getScheduler().runTaskLaterAsynchronously(this, task, delay);
     }
 
     @Override
-    public ScheduledTask doAsyncRepeat(@NotNull final Runnable task, final long delay, final long period) {
+    public BukkitTask doAsyncRepeat(@NotNull final Runnable task, final long delay, final long period) {
         Objects.requireNonNull(task, "task");
-        return DuelsPlugin.morePaperLib.scheduling().asyncScheduler().runAtFixedRate(task, Duration.ofMillis(delay * 50), Duration.ofMillis(period * 50));
+        return Bukkit.getScheduler().runTaskTimerAsynchronously(this, task, delay, period);
     }
 
     @Override
-    public void cancelTask(@NotNull final ScheduledTask task) {
+    public void cancelTask(@NotNull final BukkitTask task) {
         Objects.requireNonNull(task, "task");
         task.cancel();
     }

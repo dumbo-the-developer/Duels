@@ -43,7 +43,7 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 
@@ -82,7 +82,7 @@ public class DuelManager implements Loadable {
     }
 
     public void handleMatchEnd(DuelMatch match, ArenaImpl arena, Player loser, Location deadLocation, Player winner) {
-        DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(arena.first().getLocation()).runDelayed(() -> {
+        plugin.doSyncAfter(() -> {
             if (arena.size() == 0) {
                 match.getAllPlayers().forEach(matchPlayer -> {
                     handleTie(matchPlayer, arena, match, false);
@@ -94,7 +94,7 @@ public class DuelManager implements Loadable {
             }
 
             if (config.isSpawnFirework()) {
-                DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(deadLocation).run(() -> {
+                plugin.doSync(() -> {
                     final Firework firework = (Firework) deadLocation.getWorld().spawnEntity(deadLocation, EntityType.FIREWORK);
                     final FireworkMeta meta = firework.getFireworkMeta();
                     String colourName = config.getFireworkColour();
@@ -111,7 +111,7 @@ public class DuelManager implements Loadable {
             winners.forEach(w -> inventoryManager.create(w, false));
             userDataManager.handleMatchEnd(match, winners);
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
-            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(loser).runDelayed(() -> {
+            plugin.doSyncAfter(() -> {
                 for (Player alivePlayer : winners) {
                     handleWin(alivePlayer, loser, arena, match);
                 }

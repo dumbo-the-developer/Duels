@@ -19,7 +19,7 @@ import com.meteordevelopments.duels.util.compat.Titles;
 import com.meteordevelopments.duels.util.function.Pair;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
+import org.bukkit.scheduler.BukkitTask;
 
 public class DuelCountdown extends BukkitRunnable {
 
@@ -108,7 +108,7 @@ public class DuelCountdown extends BukkitRunnable {
     }
 
     public void startCountdown(long delay, long period) {
-        ScheduledTask task = DuelsPlugin.getMorePaperLib()
+        BukkitTask task = plugin.doSyncRepeat(this, 0L, 20L);
                 .scheduling()
                 .asyncScheduler()
                 .runAtFixedRate(
