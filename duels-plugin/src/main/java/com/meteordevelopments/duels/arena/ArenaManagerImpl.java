@@ -80,6 +80,7 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
         try {
             final var mongo = plugin.getMongoService();
             if (mongo != null) {
+                arenas.clear();
                 final var collection = mongo.collection("arenas");
                 for (final org.bson.Document doc : collection.find()) {
                     final String json = doc.toJson();
@@ -133,7 +134,21 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
                     }
                     if (locked) {
                         final java.util.Set<String> names = arenas.stream().map(ArenaImpl::getName).collect(java.util.stream.Collectors.toSet());
-                        collection.deleteMany(new org.bson.Document("_id", new org.bson.Document("$nin", names)));
+                        // Find docs to prune first
+                        final java.util.List<String> toDelete = new java.util.ArrayList<>();
+                        try (com.mongodb.client.MongoCursor<org.bson.Document> cur = collection.find(new org.bson.Document("_id", new org.bson.Document("$nin", names))).projection(new org.bson.Document("_id", 1)).iterator()) {
+                            while (cur.hasNext()) {
+                                final org.bson.Document d = cur.next();
+                                final Object id = d.get("_id");
+                                if (id != null) toDelete.add(id.toString());
+                            }
+                        }
+                        if (!toDelete.isEmpty()) {
+                            collection.deleteMany(new org.bson.Document("_id", new org.bson.Document("$in", toDelete)));
+                            if (redis != null) {
+                                toDelete.forEach(id -> redis.publish(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_ARENA, id));
+                            }
+                        }
                     }
                     if (redis != null) {
                         arenas.forEach(a -> redis.publish(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_ARENA, a.getName()));

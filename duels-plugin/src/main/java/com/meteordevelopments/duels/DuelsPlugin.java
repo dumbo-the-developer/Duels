@@ -588,22 +588,18 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             final var sub = new redis.clients.jedis.JedisPubSub() {
                 @Override
                 public void onMessage(String channel, String message) {
-                    if (channel.equals(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_USER)) {
-                        try {
-                            final java.util.UUID uuid = java.util.UUID.fromString(message);
-                            if (userManager != null) {
-                                userManager.reloadUser(uuid);
-                            }
-                        } catch (Exception ignored) {}
-                    } else if (channel.equals(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_KIT)) {
-                        if (kitManager != null) {
-                            kitManager.reloadKit(message);
+                    doSync(() -> {
+                        if (channel.equals(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_USER)) {
+                            try {
+                                final java.util.UUID uuid = java.util.UUID.fromString(message);
+                                if (userManager != null) userManager.reloadUser(uuid);
+                            } catch (Exception ignored) {}
+                        } else if (channel.equals(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_KIT)) {
+                            if (kitManager != null) kitManager.reloadKit(message);
+                        } else if (channel.equals(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_ARENA)) {
+                            if (arenaManager != null) arenaManager.reloadArena(message);
                         }
-                    } else if (channel.equals(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_ARENA)) {
-                        if (arenaManager != null) {
-                            arenaManager.reloadArena(message);
-                        }
-                    }
+                    });
                 }
             };
             redisService.subscribe(sub,
