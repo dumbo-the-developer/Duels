@@ -178,15 +178,20 @@ public class KitManagerImpl implements Loadable, KitManager {
         kit.setRemoved(true);
         plugin.getArenaManager().clearBinds(kit);
         saveKits();
-        try {
-            final var mongo = plugin.getMongoService();
-            if (mongo != null) {
-                mongo.collection("kits").deleteOne(new org.bson.Document("_id", name));
+        org.bukkit.Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                final var mongo = plugin.getMongoService();
+                if (mongo != null) {
+                    mongo.collection("kits").deleteOne(new org.bson.Document("_id", name));
+                }
+                final var redis = plugin.getRedisService();
+                if (redis != null) {
+                    redis.publish(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_KIT, name);
+                }
+            } catch (Exception ex) {
+                com.meteordevelopments.duels.util.Log.error(this, "Failed to finalize removal for kit: " + name, ex);
             }
-            if (plugin.getRedisService() != null) {
-                plugin.getRedisService().publish(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_KIT, name);
-            }
-        } catch (Exception ignored) {}
+        });
 
         final KitRemoveEvent event = new KitRemoveEvent(source, kit);
         Bukkit.getPluginManager().callEvent(event);
