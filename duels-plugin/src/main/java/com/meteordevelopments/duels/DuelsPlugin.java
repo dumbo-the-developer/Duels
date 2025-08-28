@@ -5,7 +5,7 @@ import com.meteordevelopments.duels.command.commands.party.PartyCommand;
 import com.meteordevelopments.duels.listeners.*;
 import com.meteordevelopments.duels.party.PartyManagerImpl;
 import com.meteordevelopments.duels.util.*;
-import com.meteordevelopments.duels.util.util.CC;
+
 import com.meteordevelopments.duels.validator.ValidatorManager;
 import lombok.Getter;
 import com.meteordevelopments.duels.api.Duels;
@@ -178,7 +178,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadPreListeners();
 
         long end = System.currentTimeMillis();
-        sendMessage("&2Successfully enabled Duels in " + CC.getTimeDifferenceAndColor(start, end) + "&a.");
+        sendMessage("&2Successfully enabled Duels in " + getTimeDifferenceAndColor(start, end) + "&a.");
         checkForUpdatesAndMetrics();
     }
 
@@ -289,7 +289,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             this.commands.put(command.getName().toLowerCase(), command);
             command.register();
         }
-        sendMessage("&dSuccessfully registered commands [" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + ChatColor.WHITE + "]");
+        sendMessage("&dSuccessfully registered commands [" + getTimeDifferenceAndColor(start, System.currentTimeMillis()) + ChatColor.WHITE + "]");
     }
 
     @Override
@@ -321,7 +321,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         registeredListeners.add(listener);
         Bukkit.getPluginManager().registerEvents(listener, this);
 
-        sendMessage("&dSuccessfully registered listeners after plugin startup in [" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + ChatColor.WHITE + "]");
+        sendMessage("&dSuccessfully registered listeners after plugin startup in [" + getTimeDifferenceAndColor(start, System.currentTimeMillis()) + ChatColor.WHITE + "]");
     }
 
     @Override
@@ -453,7 +453,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     }
 
     public static void sendMessage(String message) {
-        Bukkit.getConsoleSender().sendMessage(getPrefix() + CC.translate(message));
+        Bukkit.getConsoleSender().sendMessage(getPrefix() + ChatColor.translateAlternateColorCodes('&', message));
     }
 
     private void sendBanner(){
@@ -469,7 +469,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         };
 
         for (String lines : banner){
-            Bukkit.getConsoleSender().sendMessage(CC.translate("&a"+ lines));
+            Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&a" + lines));
         }
 
     }
@@ -504,7 +504,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             getServer().getPluginManager().disablePlugin(this);
         }
 
-        sendMessage("&dSuccessfully loaded Log Manager in &f[" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
+        sendMessage("&dSuccessfully loaded Log Manager in &f[" + getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
     }
 
     private void initLoadables() {
@@ -539,7 +539,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             return;
         }
 
-        sendMessage("&dSuccessfully loaded all loadables in &f[" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
+        sendMessage("&dSuccessfully loaded all loadables in &f[" + getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
 
         // After managers are available, set up Redis subscriptions
         if (redisService != null) {
@@ -551,7 +551,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         long start = System.currentTimeMillis();
         try {
             task.run();
-            sendMessage("&2Successfully loaded " + name + " in &f[" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
+            sendMessage("&2Successfully loaded " + name + " in &f[" + getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
         } catch (Exception e) {
             sendMessage("&cFailed to load " + name + ": " + e.getMessage());
             e.printStackTrace();
@@ -571,7 +571,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         new KitOptionsListener(this);
         new LingerPotionListener(this);
 
-        sendMessage("&dSuccessfully loaded pre-listeners in &f[" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
+        sendMessage("&dSuccessfully loaded pre-listeners in &f[" + getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
     }
 
     private void checkForUpdatesAndMetrics() {
@@ -648,5 +648,21 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         }
         final int port = getServer().getPort();
         return port > 0 ? String.valueOf(port) : "default";
+    }
+
+    private static String getTimeDifferenceAndColor(long start, long end) {
+        return getColorBasedOnSize((end - start), 20, 5000, 10000) + "" + (end - start) + "ms";
+    }
+
+    private static ChatColor getColorBasedOnSize(long num, int low, int med, int high) {
+        if (num <= low) {
+            return ChatColor.GREEN;
+        } else if (num <= med) {
+            return ChatColor.YELLOW;
+        } else if (num <= high) {
+            return ChatColor.RED;
+        } else {
+            return ChatColor.DARK_RED;
+        }
     }
 }

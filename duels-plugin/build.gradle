@@ -46,7 +46,6 @@ dependencies {
     implementation project(':duels-worldguard')
     implementation project(':duels-worldguard-v6')
     implementation project(':duels-worldguard-v7')
-    implementation project(':duels-common')
     implementation 'io.papermc:paperlib:1.0.8'
     implementation 'space.arim.morepaperlib:morepaperlib:0.4.4'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.19.2'
@@ -67,7 +66,6 @@ shadowJar {
         include(project(':duels-worldguard'))
         include(project(':duels-worldguard-v6'))
         include(project(':duels-worldguard-v7'))
-        include(project(':duels-common'))
         include(dependency('com.fasterxml.jackson.core:.*'))
         include(dependency('io.papermc:.*'))
         include(dependency('org.json:.*'))
