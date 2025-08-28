@@ -63,22 +63,21 @@ public class KitManagerImpl implements Loadable, KitManager {
         gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.empty.name")).build());
         plugin.getGuiListener().addGui(gui);
 
-        if (FileUtil.checkNonEmpty(file, true)) {
-            try (final Reader reader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8)) {
-                final Map<String, KitData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<LinkedHashMap<String, KitData>>() {
-                });
-
-                if (data != null) {
-                    for (final Map.Entry<String, KitData> entry : data.entrySet()) {
-                        if (!StringUtil.isAlphanumeric(entry.getKey())) {
-                            DuelsPlugin.sendMessage(String.format(ERROR_NOT_ALPHANUMERIC, entry.getKey()));
-                            continue;
-                        }
-
-                        kits.put(entry.getKey(), entry.getValue().toKit(plugin));
+        // Load from MongoDB instead of file
+        try {
+            final var mongo = plugin.getMongoService();
+            if (mongo != null) {
+                final var collection = mongo.collection("kits");
+                for (final org.bson.Document doc : collection.find()) {
+                    final String json = doc.toJson();
+                    final KitData data = JsonUtil.getObjectMapper().readValue(json, KitData.class);
+                    if (data != null && StringUtil.isAlphanumeric(data.getName())) {
+                        kits.put(data.getName(), data.toKit(plugin));
                     }
                 }
             }
+        } catch (Exception ex) {
+            Log.error(this, ex.getMessage(), ex);
         }
 
         DuelsPlugin.sendMessage(String.format(KITS_LOADED, kits.size()));
@@ -95,16 +94,21 @@ public class KitManagerImpl implements Loadable, KitManager {
     }
 
     void saveKits() {
-        final Map<String, KitData> data = new LinkedHashMap<>();
-
-        for (final Map.Entry<String, KitImpl> entry : kits.entrySet()) {
-            data.put(entry.getKey(), KitData.fromKit(entry.getValue()));
-        }
-
-        try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
-            JsonUtil.getObjectWriter().writeValue(writer, data);
-            writer.flush();
-        } catch (IOException ex) {
+        try {
+            final var mongo = plugin.getMongoService();
+            if (mongo != null) {
+                final var collection = mongo.collection("kits");
+                // Replace all kits: simplest approach for now
+                collection.deleteMany(new org.bson.Document());
+                for (final Map.Entry<String, KitImpl> entry : kits.entrySet()) {
+                    final KitData kd = KitData.fromKit(entry.getValue());
+                    final String json = JsonUtil.getObjectWriter().writeValueAsString(kd);
+                    final org.bson.Document doc = org.bson.Document.parse(json);
+                    doc.put("_id", kd.getName());
+                    collection.insertOne(doc);
+                }
+            }
+        } catch (Exception ex) {
             Log.error(this, ex.getMessage(), ex);
         }
     }

@@ -63,10 +63,6 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
         this.lang = plugin.getLang();
         this.folder = new File(plugin.getDataFolder(), "users");
 
-        if (!folder.exists()) {
-            folder.mkdir();
-        }
-
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
@@ -80,45 +76,28 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
         }
 
         plugin.doAsync(() -> {
-            final File[] files = folder.listFiles();
-
-            if (files != null && files.length > 0) {
-                for (final File file : files) {
-                    final String fileName = file.getName();
-
-                    if (!fileName.endsWith(".json")) {
-                        continue;
-                    }
-
-                    final String name = fileName.substring(0, fileName.length() - 5);
-
-                    final UUID uuid = UUIDUtil.parseUUID(name);
-
-                    if (uuid == null || users.containsKey(uuid)) {
-                        continue;
-                    }
-
-                    try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
-                        final UserData user = JsonUtil.getObjectMapper().readValue(reader, UserData.class);
-
-                        if (user == null) {
-                            Log.warn(this, "Could not load userdata from file: " + fileName);
+            // Load all users from Mongo
+            try {
+                final var mongo = plugin.getMongoService();
+                if (mongo != null) {
+                    for (final UserData user : mongo.loadAllUsers()) {
+                        if (user.getUuid() == null) {
                             continue;
                         }
-
+                        final UUID uuid = user.getUuid();
                         user.folder = folder;
                         user.defaultRating = defaultRating;
                         user.matchesToDisplay = matchesToDisplay;
                         user.refreshMatches();
-                        // Calculate total ELO for existing users
                         user.calculateTotalElo();
-                        // Player might have logged in while reading the file
-                        names.putIfAbsent(user.getName().toLowerCase(), uuid);
+                        if (user.getName() != null) {
+                            names.putIfAbsent(user.getName().toLowerCase(), uuid);
+                        }
                         users.putIfAbsent(uuid, user);
-                    } catch (IOException ex) {
-                        Log.error(this, "Could not load userdata from file: " + fileName, ex);
                     }
                 }
+            } catch (Exception ex) {
+                Log.error(this, "Could not load user data from Mongo", ex);
             }
 
             loaded = true;
@@ -246,37 +225,29 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
     }
 
     private UserData tryLoad(final Player player) {
-        final File file = new File(folder, player.getUniqueId() + ".json");
-
-        if (!file.exists()) {
-            final UserData user = new UserData(folder, defaultRating, matchesToDisplay, player);
-            plugin.doSync(() -> Bukkit.getPluginManager().callEvent(new UserCreateEvent(user)));
-            return user;
+        final var mongo = plugin.getMongoService();
+        UserData user = null;
+        if (mongo != null) {
+            user = mongo.loadUser(player.getUniqueId());
         }
 
-        try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
-            final UserData user = JsonUtil.getObjectMapper().readValue(reader, UserData.class);
-
-            if (user == null) {
-                return null;
-            }
-
-            user.folder = folder;
-            user.defaultRating = defaultRating;
-            user.matchesToDisplay = matchesToDisplay;
-            user.refreshMatches();
-            // Calculate total ELO for loaded user
-            user.calculateTotalElo();
-
-            if (!player.getName().equals(user.getName())) {
-                user.setName(player.getName());
-            }
-
-            return user;
-        } catch (IOException ex) {
-            Log.error(this, "An error occured while loading userdata of " + player.getName() + "!", ex);
-            return null;
+        if (user == null) {
+            final UserData created = new UserData(folder, defaultRating, matchesToDisplay, player);
+            plugin.doSync(() -> Bukkit.getPluginManager().callEvent(new UserCreateEvent(created)));
+            return created;
         }
+
+        user.folder = folder;
+        user.defaultRating = defaultRating;
+        user.matchesToDisplay = matchesToDisplay;
+        user.refreshMatches();
+        user.calculateTotalElo();
+
+        if (!player.getName().equals(user.getName())) {
+            user.setName(player.getName());
+        }
+
+        return user;
     }
 
     private void saveUsers(final Collection<? extends Player> players) {

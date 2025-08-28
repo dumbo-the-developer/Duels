@@ -61,21 +61,24 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
 
     @Override
     public void handleLoad() throws IOException {
-        if (FileUtil.checkNonEmpty(file, true)) {
-            try (final Reader reader = new InputStreamReader(Files.newInputStream(file.toPath()), Charsets.UTF_8)) {
-                final List<QueueSignData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<List<QueueSignData>>() {
-                });
-
-                if (data != null) {
-                    data.forEach(queueSignData -> {
-                        final QueueSignImpl queueSign = queueSignData.toQueueSign(plugin);
-
+        // Load signs from MongoDB instead of file
+        try {
+            final var mongo = plugin.getMongoService();
+            if (mongo != null) {
+                final var collection = mongo.collection("signs");
+                for (final org.bson.Document doc : collection.find()) {
+                    final String json = doc.toJson();
+                    final QueueSignData data = JsonUtil.getObjectMapper().readValue(json, QueueSignData.class);
+                    if (data != null) {
+                        final QueueSignImpl queueSign = data.toQueueSign(plugin);
                         if (queueSign != null) {
                             signs.put(queueSign.getLocation(), queueSign);
                         }
-                    });
+                    }
                 }
             }
+        } catch (Exception ex) {
+            Log.error(this, ex.getMessage(), ex);
         }
 
         DuelsPlugin.sendMessage(String.format(SIGNS_LOADED, signs.size()));
@@ -93,20 +96,25 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
     }
 
     private void saveQueueSigns() {
-        final List<QueueSignData> data = new ArrayList<>();
-
-        for (final QueueSignImpl sign : signs.values()) {
-            if (sign.getQueue().isRemoved()) {
-                continue;
+        try {
+            final var mongo = plugin.getMongoService();
+            if (mongo != null) {
+                final var collection = mongo.collection("signs");
+                collection.deleteMany(new org.bson.Document());
+                for (final QueueSignImpl sign : signs.values()) {
+                    if (sign.getQueue().isRemoved()) {
+                        continue;
+                    }
+                    final QueueSignData data = new QueueSignData(sign);
+                    final String json = JsonUtil.getObjectWriter().writeValueAsString(data);
+                    final org.bson.Document doc = org.bson.Document.parse(json);
+                    // build an id from location to ensure uniqueness
+                    final String id = sign.getLocation().getWorld().getName() + ":" + sign.getLocation().getBlockX() + ":" + sign.getLocation().getBlockY() + ":" + sign.getLocation().getBlockZ();
+                    doc.put("_id", id);
+                    collection.insertOne(doc);
+                }
             }
-
-            data.add(new QueueSignData(sign));
-        }
-
-        try (final Writer writer = new OutputStreamWriter(Files.newOutputStream(file.toPath()), Charsets.UTF_8)) {
-            JsonUtil.getObjectWriter().writeValue(writer, data);
-            writer.flush();
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             Log.error(this, ex.getMessage(), ex);
         }
     }

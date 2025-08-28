@@ -45,6 +45,10 @@ public class KitData {
         return new KitData(kit);
     }
 
+    public String getName() {
+        return name;
+    }
+
     public KitImpl toKit(final DuelsPlugin plugin) {
         ItemStack displayed;
 

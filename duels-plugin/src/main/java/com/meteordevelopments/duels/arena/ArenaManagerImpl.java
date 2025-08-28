@@ -76,22 +76,25 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
         gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.empty.name")).build());
         plugin.getGuiListener().addGui(gui);
 
-        if (FileUtil.checkNonEmpty(file, true)) {
-            try (final Reader reader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8)) {
-                final List<ArenaData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<List<ArenaData>>() {
-                });
-
-                if (data != null) {
-                    for (final ArenaData arenaData : data) {
+        // Load arenas from MongoDB instead of file
+        try {
+            final var mongo = plugin.getMongoService();
+            if (mongo != null) {
+                final var collection = mongo.collection("arenas");
+                for (final org.bson.Document doc : collection.find()) {
+                    final String json = doc.toJson();
+                    final ArenaData arenaData = JsonUtil.getObjectMapper().readValue(json, com.meteordevelopments.duels.data.ArenaData.class);
+                    if (arenaData != null) {
                         if (!StringUtil.isAlphanumeric(arenaData.getName())) {
                             DuelsPlugin.sendMessage(String.format(ERROR_NOT_ALPHANUMERIC, arenaData.getName()));
                             continue;
                         }
-
                         arenas.add(arenaData.toArena(plugin));
                     }
                 }
             }
+        } catch (Exception ex) {
+            Log.error(this, ex.getMessage(), ex);
         }
 
         DuelsPlugin.sendMessage(String.format(ARENAS_LOADED, arenas.size()));
@@ -108,16 +111,20 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
     }
 
     void saveArenas() {
-        final List<ArenaData> data = new ArrayList<>();
-
-        for (final ArenaImpl arena : arenas) {
-            data.add(new ArenaData(arena));
-        }
-
-        try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
-            JsonUtil.getObjectWriter().writeValue(writer, data);
-            writer.flush();
-        } catch (IOException ex) {
+        try {
+            final var mongo = plugin.getMongoService();
+            if (mongo != null) {
+                final var collection = mongo.collection("arenas");
+                collection.deleteMany(new org.bson.Document());
+                for (final ArenaImpl arena : arenas) {
+                    final ArenaData data = new ArenaData(arena);
+                    final String json = JsonUtil.getObjectWriter().writeValueAsString(data);
+                    final org.bson.Document doc = org.bson.Document.parse(json);
+                    doc.put("_id", data.getName());
+                    collection.insertOne(doc);
+                }
+            }
+        } catch (Exception ex) {
             Log.error(this, ex.getMessage(), ex);
         }
     }
