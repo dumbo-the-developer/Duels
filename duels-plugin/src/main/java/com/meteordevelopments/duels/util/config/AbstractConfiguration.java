@@ -27,8 +27,8 @@ public abstract class AbstractConfiguration<P extends JavaPlugin> implements Loa
     private static final String CONVERT_SAVE = "[!] Your old configuration was stored as %s.";
     private static final String CONVERT_DONE = "[!] Conversion complete!";
 
-    private static final Pattern KEY_PATTERN = Pattern.compile("^([ ]*)([^ \"]+)[:].*$");
-    private static final Pattern COMMENT_PATTERN = Pattern.compile("^([ ]*[#].*)|[ ]*$");
+    private static final Pattern KEY_PATTERN = Pattern.compile("^( *)([^ \"]+):.*$");
+    private static final Pattern COMMENT_PATTERN = Pattern.compile("^( *#.*)| *$");
 
     protected final P plugin;
 
@@ -155,18 +155,16 @@ public abstract class AbstractConfiguration<P extends JavaPlugin> implements Loa
                         final String key = matcher.group(2);
                         final Collection<List<String>> result = comments.get(key);
 
-                        if (result != null) {
-                            final List<List<String>> commentData = Lists.newArrayList(result);
+                        final List<List<String>> commentData = Lists.newArrayList(result);
 
-                            if (!commentData.isEmpty()) {
-                                for (final String comment : commentData.get(0)) {
-                                    writer.write(comment);
-                                    writer.newLine();
-                                }
-
-                                commentData.remove(0);
-                                comments.replaceValues(key, commentData);
+                        if (!commentData.isEmpty()) {
+                            for (final String comment : commentData.getFirst()) {
+                                writer.write(comment);
+                                writer.newLine();
                             }
+
+                            commentData.removeFirst();
+                            comments.replaceValues(key, commentData);
                         }
                     }
 

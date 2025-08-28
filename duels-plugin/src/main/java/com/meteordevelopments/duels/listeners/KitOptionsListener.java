@@ -60,11 +60,10 @@ public class KitOptionsListener implements Listener {
 
     @EventHandler
     public void on(final EntityDamageEvent event) {
-        if (!(event.getEntity() instanceof Player)) {
+        if (!(event.getEntity() instanceof Player player)) {
             return;
         }
 
-        final Player player = (Player) event.getEntity();
         final ArenaImpl arena = arenaManager.get(player);
 
         if (arena == null) {
@@ -169,11 +168,10 @@ public class KitOptionsListener implements Listener {
 
     @EventHandler
     public void on(final EntityDamageByEntityEvent event) {
-        if (!(event.getEntity() instanceof Player)) {
+        if (!(event.getEntity() instanceof Player player)) {
             return;
         }
 
-        final Player player = (Player) event.getEntity();
         final ArenaImpl arena = arenaManager.get(player);
 
         if (arena == null || !isEnabled(arena, Characteristic.LOKA)) {
@@ -186,11 +184,10 @@ public class KitOptionsListener implements Listener {
 
     @EventHandler
     public void on(final FoodLevelChangeEvent event) {
-        if (!(event.getEntity() instanceof Player)) {
+        if (!(event.getEntity() instanceof Player player)) {
             return;
         }
 
-        final Player player = (Player) event.getEntity();
         final ArenaImpl arena = arenaManager.get(player);
 
         if (arena == null || !isEnabled(arena, Characteristic.HUNGER)) {
@@ -369,11 +366,10 @@ public class KitOptionsListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void on(final EntityRegainHealthEvent event) {
-        if (!(event.getEntity() instanceof Player) || !(event.getRegainReason() == RegainReason.SATIATED || event.getRegainReason() == RegainReason.REGEN)) {
+        if (!(event.getEntity() instanceof Player player) || !(event.getRegainReason() == RegainReason.SATIATED || event.getRegainReason() == RegainReason.REGEN)) {
             return;
         }
 
-        final Player player = (Player) event.getEntity();
         final ArenaImpl arena = arenaManager.get(player);
 
         if (arena == null || !isEnabled(arena, Characteristic.UHC)) {
@@ -429,11 +425,10 @@ public class KitOptionsListener implements Listener {
 
         @EventHandler
         public void on(final EntityDamageByEntityEvent event) {
-            if (!(event.getEntity() instanceof Player)) {
+            if (!(event.getEntity() instanceof Player player)) {
                 return;
             }
 
-            final Player player = (Player) event.getEntity();
             final ArenaImpl arena = arenaManager.get(player);
 
             if (arena == null || !isEnabled(arena, Characteristic.COMBO)) {

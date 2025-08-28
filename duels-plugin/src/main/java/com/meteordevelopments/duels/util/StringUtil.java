@@ -1,13 +1,11 @@
 package com.meteordevelopments.duels.util;
 
 import com.meteordevelopments.duels.util.reflect.ReflectionUtil;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class StringUtil {
@@ -72,7 +70,7 @@ public final class StringUtil {
     }
 
     public static List<String> color(final List<String> input) {
-        input.replaceAll(s -> s = color(s));
+        input.replaceAll(StringUtil::color);
         return input;
     }
 

@@ -21,7 +21,7 @@ public class DatabaseConfig extends AbstractConfiguration<DuelsPlugin> {
     }
 
     @Override
-    protected void loadValues(FileConfiguration configuration) throws Exception {
+    protected void loadValues(FileConfiguration configuration) {
         mongoUri = configuration.getString("mongo.uri", "mongodb://localhost:27017");
         mongoDatabase = configuration.getString("mongo.database", "duels");
 

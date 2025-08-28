@@ -16,7 +16,6 @@ import com.meteordevelopments.duels.api.user.User;
 import com.meteordevelopments.duels.api.user.UserManager;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.config.Lang;
-import com.meteordevelopments.duels.util.json.JsonUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -81,18 +80,13 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
                 final var mongo = plugin.getMongoService();
                 if (mongo != null) {
                     for (final UserData user : mongo.loadAllUsers()) {
-                        if (user.getUuid() == null) {
-                            continue;
-                        }
                         final UUID uuid = user.getUuid();
                         user.folder = folder;
                         user.defaultRating = defaultRating;
                         user.matchesToDisplay = matchesToDisplay;
                         user.refreshMatches();
                         user.calculateTotalElo();
-                        if (user.getName() != null) {
-                            names.putIfAbsent(user.getName().toLowerCase(), uuid);
-                        }
+                        names.putIfAbsent(user.getName().toLowerCase(), uuid);
                         users.putIfAbsent(uuid, user);
                     }
                 }
@@ -219,9 +213,7 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
                 user.refreshMatches();
                 user.calculateTotalElo();
                 users.put(uuid, user);
-                if (user.getName() != null) {
-                    names.put(user.getName().toLowerCase(), uuid);
-                }
+                names.put(user.getName().toLowerCase(), uuid);
             } catch (Exception ignored) {}
         });
     }
@@ -307,11 +299,6 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
         plugin.doAsync(() -> {
             final UserData data = tryLoad(player);
 
-            if (data == null) {
-                lang.sendMessage(player, "ERROR.data.load-failure");
-                return;
-            }
-
             names.put(player.getName().toLowerCase(), player.getUniqueId());
             users.put(player.getUniqueId(), data);
         });
@@ -337,11 +324,12 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
         final String kitName = match.getKit() != null ? match.getKit().getName() : lang.getMessage("GENERAL.none");
         final String message;
 
-        if (!(match instanceof PartyDuelMatch)) {
+        if (!(match instanceof PartyDuelMatch partyMatch)) {
             final long duration = System.currentTimeMillis() - match.getStart();
             final long time = GREGORIAN_CALENDAR.getTimeInMillis();
             final Player loser = match.getArena().getOpponent(winner);
             final double health = Math.ceil(winner.getHealth()) * 0.5;
+            assert loser != null;
             final MatchData matchData = new MatchData(winner.getName(), loser.getName(), kitName, time, duration, health);
             final UserData winnerData = get(winner);
             final UserData loserData = get(loser);
@@ -416,7 +404,6 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
                 message = null;
             }
         } else {
-            final PartyDuelMatch partyMatch = (PartyDuelMatch) match;
             final Party winnerParty = partyMatch.getPlayerToParty().get(winner);
             final Party loserParty = match.getArena().getOpponent(winnerParty);
             message = lang.getMessage("DUEL.on-end.party-opponent-defeat",

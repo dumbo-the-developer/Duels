@@ -43,7 +43,7 @@ public final class InventoryUtil {
                 continue;
             }
 
-            armorContents.put(4 - i, inventory.getArmorContents()[i].clone());
+            armorContents.put(4 - i, Objects.requireNonNull(inventory.getArmorContents()[i]).clone());
         }
 
         items.put(ARMOR_IDENTIFIER, armorContents);

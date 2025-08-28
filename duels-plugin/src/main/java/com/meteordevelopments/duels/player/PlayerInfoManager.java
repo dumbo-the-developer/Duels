@@ -101,7 +101,7 @@ public class PlayerInfoManager implements Loadable {
 
         // If lobby is not found or invalid, use the default world's spawn location for lobby.
         if (lobby == null || lobby.getWorld() == null) {
-            final World world = Bukkit.getWorlds().get(0);
+            final World world = Bukkit.getWorlds().getFirst();
             this.lobby = world.getSpawnLocation();
             Log.warn(this, String.format(ERROR_LOBBY_DEFAULT, world.getName()));
         }

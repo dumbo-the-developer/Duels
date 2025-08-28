@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.meteordevelopments.duels.DuelsPlugin;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -64,8 +65,14 @@ public class Metrics {
     private final int pluginId;
     // A list with all custom charts
     private final List<CustomChart> charts = new ArrayList<>();
+    /**
+     * -- GETTER --
+     *  Checks if bStats is enabled.
+     *
+     */
     // Is bStats enabled on this server?
-    private boolean enabled;
+    @Getter
+    private final boolean enabled;
 
     /**
      * Class constructor.
@@ -102,10 +109,11 @@ public class Metrics {
 
             // Inform the server owners about bStats
             config.options().header(
-                    "bStats collects some data for plugin authors like how many servers are using their plugins.\n" +
-                            "To honor their work, you should not disable it.\n" +
-                            "This has nearly no effect on the server performance!\n" +
-                            "Check out https://bStats.org/ to learn more :)"
+                    """
+                            bStats collects some data for plugin authors like how many servers are using their plugins.
+                            To honor their work, you should not disable it.
+                            This has nearly no effect on the server performance!
+                            Check out https://bStats.org/ to learn more :)"""
             ).copyDefaults(true);
             try {
                 config.save(configFile);
@@ -206,15 +214,6 @@ public class Metrics {
             gzip.write(str.getBytes(StandardCharsets.UTF_8));
         }
         return outputStream.toByteArray();
-    }
-
-    /**
-     * Checks if bStats is enabled.
-     *
-     * @return Whether bStats is enabled or not.
-     */
-    public boolean isEnabled() {
-        return enabled;
     }
 
     /**

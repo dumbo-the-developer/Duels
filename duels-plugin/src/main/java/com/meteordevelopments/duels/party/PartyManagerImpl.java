@@ -191,11 +191,10 @@ public class PartyManagerImpl implements Loadable, Listener {
 
     @EventHandler
     public void on(final EntityDamageByEntityEvent event) {
-        if (!(event.getEntity() instanceof Player)) {
+        if (!(event.getEntity() instanceof Player damaged)) {
             return;
         }
 
-        final Player damaged = (Player) event.getEntity();
         final Player damager = EventUtil.getDamager(event);
 
         if (damager == null || canDamage(damager, damaged)) {

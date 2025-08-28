@@ -443,6 +443,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         if (sounds != null) {
             for (final String name : sounds.getKeys(false)) {
                 final ConfigurationSection sound = sounds.getConfigurationSection(name);
+                assert sound != null;
                 final Sound type = EnumUtil.getByName(sound.getString("type"), Sound.class);
 
                 if (type == null) {
@@ -472,7 +473,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         return sounds.keySet();
     }
 
-    public class MessageSound {
+    public static class MessageSound {
 
         @Getter
         private final Sound type;

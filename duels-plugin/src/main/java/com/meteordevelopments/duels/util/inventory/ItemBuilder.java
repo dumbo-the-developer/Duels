@@ -2,9 +2,7 @@ package com.meteordevelopments.duels.util.inventory;
 
 import com.meteordevelopments.duels.util.EnumUtil;
 import com.meteordevelopments.duels.util.StringUtil;
-import com.meteordevelopments.duels.util.compat.CompatUtil;
 import com.meteordevelopments.duels.util.compat.Items;
-import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -24,21 +22,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public final class ItemBuilder {
-
-    private final ItemStack result;
+public record ItemBuilder(ItemStack result) {
 
     private ItemBuilder(final Material type, final int amount, final short durability) {
-        this.result = new ItemStack(type, amount);
+        this(new ItemStack(type, amount));
         Items.setDurability(result, durability);
     }
 
     private ItemBuilder(final String type, final int amount, final short durability) {
         this(Material.matchMaterial(type), amount, durability);
-    }
-
-    private ItemBuilder(final ItemStack item) {
-        this.result = item;
     }
 
     public static ItemBuilder of(final Material type) {
@@ -80,23 +72,16 @@ public final class ItemBuilder {
         return lore(Arrays.asList(lore));
     }
 
-    public ItemBuilder enchant(final Enchantment enchantment, final int level) {
+    public void enchant(final Enchantment enchantment, final int level) {
         result.addUnsafeEnchantment(enchantment, level);
-        return this;
     }
 
-    public ItemBuilder unbreakable() {
-        return editMeta(meta -> {
-            if (CompatUtil.isPre1_12()) {
-                meta.setUnbreakable(true);
-            } else {
-                meta.setUnbreakable(true);
-            }
-        });
+    public void unbreakable() {
+        editMeta(meta -> meta.setUnbreakable(true));
     }
 
-    public ItemBuilder head(final String owner) {
-        return editMeta(meta -> {
+    public void head(final String owner) {
+        editMeta(meta -> {
             if (owner != null && Items.equals(Items.HEAD, result)) {
                 final SkullMeta skullMeta = (SkullMeta) meta;
                 skullMeta.setOwner(owner);
@@ -104,8 +89,8 @@ public final class ItemBuilder {
         });
     }
 
-    public ItemBuilder leatherArmorColor(final String color) {
-        return editMeta(meta -> {
+    public void leatherArmorColor(final String color) {
+        editMeta(meta -> {
             final LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) meta;
 
             if (color != null) {
@@ -121,8 +106,8 @@ public final class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder attribute(final String name, final int operation, final double amount, final String slotName) {
-        return editMeta(meta -> {
+    public void attribute(final String name, final int operation, final double amount, final String slotName) {
+        editMeta(meta -> {
             final Attribute attribute = EnumUtil.getByName(attributeNameToEnum(name), Attribute.class);
 
             if (attribute == null) {

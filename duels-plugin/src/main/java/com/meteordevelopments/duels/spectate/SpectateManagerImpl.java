@@ -28,7 +28,6 @@ import com.meteordevelopments.duels.util.compat.CompatUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockCanBuildEvent;
@@ -175,6 +174,7 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
 
             // Broadcast to the arena that player has begun spectating if player does not have the SPEC_ANON permission.
             if (!player.hasPermission(Permissions.SPEC_ANON)) {
+                assert arena.getMatch() != null;
                 arena.getMatch().getAllPlayers().forEach(matchPlayer -> lang.sendMessage(matchPlayer, "SPECTATE.arena-broadcast", "name", player.getName()));
             }
         }, null);

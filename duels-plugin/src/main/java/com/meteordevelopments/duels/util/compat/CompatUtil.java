@@ -1,7 +1,6 @@
 package com.meteordevelopments.duels.util.compat;
 
 import com.meteordevelopments.duels.util.reflect.ReflectionUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockCanBuildEvent;

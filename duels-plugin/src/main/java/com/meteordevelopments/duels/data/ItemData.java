@@ -190,7 +190,7 @@ public class ItemData {
 
                 if (node.has("itemData") && !CompatUtil.isPre1_9()) {
                     final List<String> args = Arrays.asList(node.get("itemData").textValue().split("-"));
-                    final PotionType potionType = EnumUtil.getByName(args.get(0), PotionType.class);
+                    final PotionType potionType = EnumUtil.getByName(args.getFirst(), PotionType.class);
 
                     if (potionType != null) {
                         builder.potion(potionType, args.contains("extended"), args.contains("strong"));

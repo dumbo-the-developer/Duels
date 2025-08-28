@@ -1,6 +1,5 @@
 package com.meteordevelopments.duels.data;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +8,6 @@ import com.meteordevelopments.duels.api.user.MatchInfo;
 import com.meteordevelopments.duels.api.user.User;
 import com.meteordevelopments.duels.util.Log;
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.util.json.JsonUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class UserData implements User {
 
-    private static transient final String ERROR_USER_SAVE = "An error occured while saving userdata of %s!";
+    private static final String ERROR_USER_SAVE = "An error occured while saving userdata of %s!";
     transient File folder;
     transient int defaultRating;
     transient int matchesToDisplay;
@@ -36,7 +34,7 @@ public class UserData implements User {
     private volatile int losses;
     private boolean requests = true;
     private ConcurrentHashMap<String, Integer> rating;
-    private List<MatchData> matches = new ArrayList<>();
+    private final List<MatchData> matches = new ArrayList<>();
     private boolean partyRequests = true;
     private volatile int totalElo;
 
@@ -205,7 +203,7 @@ public class UserData implements User {
 
     public void addMatch(final MatchData matchData) {
         if (!matches.isEmpty() && matches.size() >= matchesToDisplay) {
-            matches.remove(0);
+            matches.removeFirst();
         }
 
         matches.add(matchData);

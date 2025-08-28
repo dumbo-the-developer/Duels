@@ -63,14 +63,12 @@ public final class ReflectionUtil {
 
     public static Class<?> getCBClass(final String path, final boolean logError) {
         try {
-            Class<?> clazz = Class.forName("org.bukkit.craftbukkit." + PACKAGE_VERSION + "." + path);
-            return clazz;
+            return Class.forName("org.bukkit.craftbukkit." + PACKAGE_VERSION + "." + path);
         } catch (ClassNotFoundException ignored) {
         }
 
         try {
-            Class<?> clazz = Class.forName("org.bukkit.craftbukkit." + path);
-            return clazz;
+            return Class.forName("org.bukkit.craftbukkit." + path);
         } catch (ClassNotFoundException ex) {
             if (logError) {
                 Log.error("Failed to find CraftBukkit class: " + path + " in both versioned and unversioned paths", ex);

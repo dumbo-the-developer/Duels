@@ -12,7 +12,6 @@ import com.meteordevelopments.duels.data.ItemData;
 import com.meteordevelopments.duels.data.ItemData.ItemDataDeserializer;
 import com.meteordevelopments.duels.shaded.bstats.Metrics;
 import com.meteordevelopments.duels.util.Loadable;
-import com.meteordevelopments.duels.util.Reloadable;
 import com.meteordevelopments.duels.config.DatabaseConfig;
 import com.meteordevelopments.duels.mongo.MongoService;
 import com.meteordevelopments.duels.redis.RedisService;
@@ -41,12 +40,6 @@ import com.meteordevelopments.duels.api.Duels;
 import com.meteordevelopments.duels.api.command.SubCommand;
 import com.meteordevelopments.duels.arena.ArenaManagerImpl;
 import com.meteordevelopments.duels.betting.BettingManager;
-import com.meteordevelopments.duels.command.commands.SpectateCommand;
-import com.meteordevelopments.duels.command.commands.RankCommand;
-import com.meteordevelopments.duels.command.commands.duel.DuelCommand;
-import com.meteordevelopments.duels.command.commands.duels.DuelsCommand;
-import com.meteordevelopments.duels.command.commands.queue.QueueCommand;
-import com.meteordevelopments.duels.command.commands.party.PartyCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -58,50 +51,8 @@ import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import com.meteordevelopments.duels.config.Config;
-import com.meteordevelopments.duels.config.Lang;
-import com.meteordevelopments.duels.config.DatabaseConfig;
-import com.meteordevelopments.duels.data.ItemData;
-import com.meteordevelopments.duels.data.ItemData.ItemDataDeserializer;
-import com.meteordevelopments.duels.lb.manager.LeaderboardManager;
-import com.meteordevelopments.duels.rank.manager.RankManager;
-import com.meteordevelopments.duels.data.UserManagerImpl;
-import com.meteordevelopments.duels.duel.DuelManager;
-import com.meteordevelopments.duels.extension.ExtensionClassLoader;
-import com.meteordevelopments.duels.extension.ExtensionManager;
-import com.meteordevelopments.duels.hook.HookManager;
-import com.meteordevelopments.duels.inventories.InventoryManager;
-import com.meteordevelopments.duels.kit.KitManagerImpl;
-import com.meteordevelopments.duels.logging.LogManager;
-import com.meteordevelopments.duels.player.PlayerInfoManager;
-import com.meteordevelopments.duels.queue.QueueManager;
-import com.meteordevelopments.duels.queue.sign.QueueSignManagerImpl;
-import com.meteordevelopments.duels.request.RequestManager;
-import com.meteordevelopments.duels.setting.SettingsManager;
-import com.meteordevelopments.duels.shaded.bstats.Metrics;
-import com.meteordevelopments.duels.spectate.SpectateManagerImpl;
-import com.meteordevelopments.duels.teleport.Teleport;
-import com.meteordevelopments.duels.util.Log.LogSource;
-import com.meteordevelopments.duels.util.command.AbstractCommand;
-import com.meteordevelopments.duels.util.gui.GuiListener;
-import com.meteordevelopments.duels.util.json.JsonUtil;
-import com.meteordevelopments.duels.mongo.MongoService;
-import com.meteordevelopments.duels.redis.RedisService;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import space.arim.morepaperlib.MorePaperLib;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
-import java.io.IOException;
-import java.time.Duration;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
+
 
 public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
@@ -423,15 +374,20 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                                 payload = message.substring(idx + 1);
                             }
                         } catch (Exception ignored) {}
-                        if (channel.equals(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_USER)) {
-                            try {
-                                final java.util.UUID uuid = java.util.UUID.fromString(payload);
-                                if (userManager != null) userManager.reloadUser(uuid);
-                            } catch (Exception ignored) {}
-                        } else if (channel.equals(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_KIT)) {
-                            if (kitManager != null) kitManager.reloadKit(payload);
-                        } else if (channel.equals(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_ARENA)) {
-                            if (arenaManager != null) arenaManager.reloadArena(payload);
+                        switch (channel) {
+                            case RedisService.CHANNEL_INVALIDATE_USER -> {
+                                try {
+                                    final UUID uuid = UUID.fromString(payload);
+                                    if (userManager != null) userManager.reloadUser(uuid);
+                                } catch (Exception ignored) {
+                                }
+                            }
+                            case RedisService.CHANNEL_INVALIDATE_KIT -> {
+                                if (kitManager != null) kitManager.reloadKit(payload);
+                            }
+                            case RedisService.CHANNEL_INVALIDATE_ARENA -> {
+                                if (arenaManager != null) arenaManager.reloadArena(payload);
+                            }
                         }
                     });
                 }

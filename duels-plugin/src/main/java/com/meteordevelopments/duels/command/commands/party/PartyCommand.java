@@ -12,6 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 public class PartyCommand extends BaseCommand {
     
@@ -98,7 +99,7 @@ public class PartyCommand extends BaseCommand {
 
     // Disables default TabCompleter
     @Override
-    public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
+    public List<String> onTabComplete(@NotNull final CommandSender sender, final Command command, final String alias, final String[] args) {
         return null;
     }
 }

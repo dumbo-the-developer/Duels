@@ -6,6 +6,7 @@ import com.meteordevelopments.duels.command.BaseCommand;
 import com.meteordevelopments.duels.util.StringUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -34,7 +35,7 @@ public class EnableCommand extends BaseCommand {
         lang.sendMessage(sender, "COMMAND.duels.enable", "name", name);
     }
 
-    public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
+    public List<String> onTabComplete(@NotNull final CommandSender sender, final Command command, final String alias, final String[] args) {
         if (args.length == 2) {
             return handleTabCompletion(args[1], arenaManager.getNames());
         }

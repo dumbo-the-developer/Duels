@@ -17,7 +17,7 @@ public class SelfCheckSpectateValidator extends BaseTriValidator<Player, Party, 
 
     @Override
     public boolean validate(final Player sender, final Party party, final Collection<Player> players) {
-        if (players.stream().anyMatch(player -> spectateManager.isSpectating(player))) {
+        if (players.stream().anyMatch(spectateManager::isSpectating)) {
             lang.sendMessage(sender, party != null ? PARTY_MESSAGE_KEY : MESSAGE_KEY);
             return false;
         }

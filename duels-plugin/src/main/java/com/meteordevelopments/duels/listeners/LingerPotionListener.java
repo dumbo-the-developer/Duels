@@ -34,11 +34,9 @@ public class LingerPotionListener implements Listener {
 
         @EventHandler
         public void on(final AreaEffectCloudApplyEvent event) {
-            if (!(event.getEntity().getSource() instanceof Player)) {
+            if (!(event.getEntity().getSource() instanceof Player player)) {
                 return;
             }
-
-            final Player player = (Player) event.getEntity().getSource();
 
             if (!arenaManager.isInMatch(player)) {
                 return;

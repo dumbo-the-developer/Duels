@@ -47,8 +47,8 @@ public class KitItemListener implements Listener {
         return player.isOp() || player.hasPermission(Permissions.ADMIN) || arenaManager.isInMatch(player);
     }
 
-    private boolean isKitItem(final ItemStack item) {
-        return item != null && item.getType() != Material.AIR && Identifiers.hasIdentifier(item);
+    private boolean isNotKitItem(final ItemStack item) {
+        return item == null || item.getType() == Material.AIR || !Identifiers.hasIdentifier(item);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -67,7 +67,7 @@ public class KitItemListener implements Listener {
 
         final ItemStack item = event.getCurrentItem();
 
-        if (!isKitItem(item)) {
+        if (isNotKitItem(item)) {
             return;
         }
 
@@ -86,7 +86,7 @@ public class KitItemListener implements Listener {
 
         final ItemStack item = event.getItem();
 
-        if (!isKitItem(item)) {
+        if (isNotKitItem(item)) {
             return;
         }
 
@@ -106,7 +106,7 @@ public class KitItemListener implements Listener {
 
         final Item item = event.getItem();
 
-        if (!isKitItem(item.getItemStack())) {
+        if (isNotKitItem(item.getItemStack())) {
             return;
         }
 

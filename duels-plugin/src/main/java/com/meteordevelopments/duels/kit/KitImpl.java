@@ -152,6 +152,6 @@ public class KitImpl extends BaseButton implements Kit {
         HUNGER,
         LOKA,
         BOXING,
-        ROUNDS3;
+        ROUNDS3
     }
 }

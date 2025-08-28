@@ -11,8 +11,8 @@ public class ArenaData {
     @Getter
     private String name;
     private boolean disabled;
-    private Set<String> kits = new HashSet<>();
-    private Map<Integer, LocationData> positions = new HashMap<>();
+    private final Set<String> kits = new HashSet<>();
+    private final Map<Integer, LocationData> positions = new HashMap<>();
 
     private ArenaData() {
     }

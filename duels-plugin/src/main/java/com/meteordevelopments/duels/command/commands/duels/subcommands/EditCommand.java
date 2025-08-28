@@ -8,6 +8,7 @@ import com.meteordevelopments.duels.util.NumberUtil;
 import com.meteordevelopments.duels.util.function.TriFunction;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -65,7 +66,7 @@ public class EditCommand extends BaseCommand {
     }
 
     @Override
-    public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
+    public List<String> onTabComplete(@NotNull final CommandSender sender, final Command command, final String alias, final String[] args) {
         if (args.length == 3) {
             return actions.keySet().stream()
                     .filter(type -> type.toLowerCase().startsWith(args[2].toLowerCase()))

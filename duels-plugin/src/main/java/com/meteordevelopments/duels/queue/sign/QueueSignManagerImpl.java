@@ -1,7 +1,5 @@
 package com.meteordevelopments.duels.queue.sign;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.Permissions;
@@ -15,7 +13,6 @@ import com.meteordevelopments.duels.queue.Queue;
 import com.meteordevelopments.duels.queue.QueueManager;
 import com.meteordevelopments.duels.util.Loadable;
 import com.meteordevelopments.duels.util.Log;
-import com.meteordevelopments.duels.util.io.FileUtil;
 import com.meteordevelopments.duels.util.json.JsonUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -32,19 +29,15 @@ import org.jetbrains.annotations.Nullable;
 import space.arim.morepaperlib.scheduling.ScheduledTask;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.util.*;
 
 public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listener {
-
-    private static final String FILE_NAME = "signs.json";
 
     private static final String SIGNS_LOADED = "&2Loaded %s queue sign(s).";
 
     private final DuelsPlugin plugin;
     private final Lang lang;
     private final QueueManager queueManager;
-    private final File file;
 
     private final Map<Location, QueueSignImpl> signs = new HashMap<>();
 
@@ -54,7 +47,6 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
         this.plugin = plugin;
         this.lang = plugin.getLang();
         this.queueManager = plugin.getQueueManager();
-        this.file = new File(plugin.getDataFolder(), FILE_NAME);
 
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }

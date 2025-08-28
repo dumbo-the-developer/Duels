@@ -145,8 +145,8 @@ public class RankManager implements Loadable {
         }
         
         // No rank matches the elo range
-        Rank firstRank = sortedRanks.get(0);
-        Rank lastRank = sortedRanks.get(sortedRanks.size() - 1);
+        Rank firstRank = sortedRanks.getFirst();
+        Rank lastRank = sortedRanks.getLast();
         
         // If elo is below the first range, return the first rank (or defaultRank if configured and present)
         if (elo < firstRank.getMinElo()) {

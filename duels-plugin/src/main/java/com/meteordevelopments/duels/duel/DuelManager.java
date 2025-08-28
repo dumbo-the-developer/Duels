@@ -386,7 +386,7 @@ public class DuelManager implements Loadable {
             arena.startCountdown();
         }
 
-            final MatchStartEvent event = new MatchStartEvent(match, players.toArray(new Player[players.size()]));
+            final MatchStartEvent event = new MatchStartEvent(match, players.toArray(new Player[0]));
             Bukkit.getPluginManager().callEvent(event);
             return true;
         } finally {
@@ -396,22 +396,21 @@ public class DuelManager implements Loadable {
         }
     }
 
-    public boolean startMatch(final Player sender, final Player target, final Settings settings, final Map<UUID, List<ItemStack>> items, final Queue source) {
+    public void startMatch(final Player sender, final Player target, final Settings settings, final Map<UUID, List<ItemStack>> items, final Queue source) {
         final Party senderParty = partyManager.get(sender);
         final Party targetParty = partyManager.get(target);
 
         if (senderParty != null && targetParty != null) {
             if (!settings.getSenderParty().equals(senderParty) || !settings.getTargetParty().equals(targetParty)) {
                 lang.sendMessage(Arrays.asList(sender, target), "DUEL.party-start-failure.party-changed");
-                return false;
+                return;
             }
 
-            return startMatch(settings.getSenderParty().getOnlineMembers(), settings.getTargetParty().getOnlineMembers(), settings, items, source);
+            startMatch(settings.getSenderParty().getOnlineMembers(), settings.getTargetParty().getOnlineMembers(), settings, items, source);
         } else if (senderParty != null || targetParty != null) {
             lang.sendMessage(Arrays.asList(sender, target), "DUEL.party-start-failure.party-changed");
-            return false;
         } else {
-            return startMatch(Collections.singleton(sender), Collections.singleton(target), settings, items, source);
+            startMatch(Collections.singleton(sender), Collections.singleton(target), settings, items, source);
         }
     }
 
@@ -531,11 +530,10 @@ public class DuelManager implements Loadable {
 
         @EventHandler(ignoreCancelled = true)
         public void on(final EntityDamageEvent event) {
-            if (!(event.getEntity() instanceof Player)) {
+            if (!(event.getEntity() instanceof Player player)) {
                 return;
             }
 
-            final Player player = (Player) event.getEntity();
             final ArenaImpl arena = arenaManager.get(player);
 
             if (arena == null || !arena.isEndGame()) {
@@ -601,7 +599,7 @@ public class DuelManager implements Loadable {
                 event.setCancelled(true);
                 lang.sendMessage(event.getPlayer(), "DUEL.prevent.item-drop");
             }else if(config.isClearItemsAfterMatch()) {
-                arenaManager.get(player).getMatch().droppedItems.add(event.getItemDrop());
+                Objects.requireNonNull(Objects.requireNonNull(arenaManager.get(player)).getMatch()).droppedItems.add(event.getItemDrop());
             }
 
         }

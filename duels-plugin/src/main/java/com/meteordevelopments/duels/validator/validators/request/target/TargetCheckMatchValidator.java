@@ -19,7 +19,7 @@ public class TargetCheckMatchValidator extends BaseTriValidator<Pair<Player, Pla
 
     @Override
     public boolean validate(final Pair<Player, Player> pair, final Party party, final Collection<Player> players) {
-        if (players.stream().anyMatch(player -> arenaManager.isInMatch(player))) {
+        if (players.stream().anyMatch(arenaManager::isInMatch)) {
             lang.sendMessage(pair.getKey(), party != null ? PARTY_MESSAGE_KEY : MESSAGE_KEY, "name", pair.getValue().getName());
             return false;
         }

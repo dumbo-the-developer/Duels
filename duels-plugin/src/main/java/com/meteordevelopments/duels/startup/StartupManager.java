@@ -12,44 +12,40 @@ import java.util.logging.Logger;
 /**
  * Manages the startup process of the Duels plugin
  */
-public class StartupManager {
-    
+public record StartupManager(DuelsPlugin plugin) {
+
     private static final String SPIGOT_INSTALLATION_URL = "https://www.spigotmc.org/wiki/spigot-installation/";
     private static final Logger LOGGER = Logger.getLogger("[Duels-Optimised]");
-    
-    private final DuelsPlugin plugin;
-    
-    public StartupManager(DuelsPlugin plugin) {
-        this.plugin = plugin;
-    }
-    
+
     /**
      * Handles the complete startup process
+     *
      * @return true if startup was successful, false otherwise
      */
     public boolean startup() {
         long start = System.currentTimeMillis();
-        
+
         if (!initializeDatabase()) {
             return false;
         }
-        
+
         if (!loadLogManager()) {
             return false;
         }
-        
+
         if (!checkBukkitCompatibility()) {
             return false;
         }
-        
+
         long end = System.currentTimeMillis();
         DuelsPlugin.sendMessage("&2Successfully completed startup in " + CC.getTimeDifferenceAndColor(start, end) + "&a.");
-        
+
         return true;
     }
-    
+
     /**
      * Initializes database connections (MongoDB and Redis)
+     *
      * @return true if successful, false otherwise
      */
     private boolean initializeDatabase() {
@@ -75,15 +71,13 @@ public class StartupManager {
             DuelsPlugin.sendMessage("&cFailed to connect to MongoDB. Disabling plugin.");
             // Clean up any partially initialized MongoDB resources
             try {
-                if (mongoService != null) {
-                    mongoService.close();
-                }
+                mongoService.close();
             } catch (Exception closeEx) {
                 LOGGER.log(Level.WARNING, "Failed to clean up MongoDB service during initialization failure", closeEx);
             }
             return false;
         }
-        
+
         // Initialize Redis (optional)
         RedisService redisService = new RedisService(plugin);
         try {
@@ -94,25 +88,24 @@ public class StartupManager {
             LOGGER.log(Level.WARNING, "Redis connection failed; continuing without Redis.", ex);
             // Clean up any partially initialized Redis resources
             try {
-                if (redisService != null) {
-                    redisService.close();
-                }
+                redisService.close();
             } catch (Exception closeEx) {
                 LOGGER.log(Level.WARNING, "Failed to clean up Redis service during initialization failure", closeEx);
             }
             plugin.setRedisService(null);
         }
-        
+
         return true;
     }
-    
+
     /**
      * Loads the log manager
+     *
      * @return true if successful, false otherwise
      */
     private boolean loadLogManager() {
         long start = System.currentTimeMillis();
-        
+
         DuelsPlugin.sendMessage("&eLoading log manager...");
         try {
             plugin.initializeLogManager();
@@ -124,9 +117,10 @@ public class StartupManager {
             return false;
         }
     }
-    
+
     /**
      * Checks if the server is running on a Bukkit-compatible platform
+     *
      * @return true if compatible, false otherwise
      */
     private boolean checkBukkitCompatibility() {
@@ -142,6 +136,6 @@ public class StartupManager {
             return false;
         }
     }
-    
+
 
 }

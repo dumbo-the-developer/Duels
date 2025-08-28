@@ -17,7 +17,7 @@ public class SelfCheckMatchValidator extends BaseTriValidator<Player, Party, Col
 
     @Override
     public boolean validate(final Player sender, final Party party, final Collection<Player> players) {
-        if (players.stream().anyMatch(player -> arenaManager.isInMatch(player))) {
+        if (players.stream().anyMatch(arenaManager::isInMatch)) {
             lang.sendMessage(sender, party != null ? PARTY_MESSAGE_KEY : MESSAGE_KEY);
             return false;
         }

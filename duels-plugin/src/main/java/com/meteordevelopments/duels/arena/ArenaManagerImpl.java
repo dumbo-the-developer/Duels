@@ -1,7 +1,5 @@
 package com.meteordevelopments.duels.arena;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.google.common.base.Charsets;
 import lombok.Getter;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.api.arena.Arena;
@@ -19,7 +17,6 @@ import com.meteordevelopments.duels.util.StringUtil;
 import com.meteordevelopments.duels.util.compat.Items;
 import com.meteordevelopments.duels.util.gui.MultiPageGui;
 import com.meteordevelopments.duels.util.inventory.ItemBuilder;
-import com.meteordevelopments.duels.util.io.FileUtil;
 import com.meteordevelopments.duels.util.json.JsonUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -43,15 +40,12 @@ import java.util.stream.Collectors;
 
 public class ArenaManagerImpl implements Loadable, ArenaManager {
 
-    private static final String FILE_NAME = "arenas.json";
-
     private static final String ERROR_NOT_ALPHANUMERIC = "&c&lCould not load arena %s: Name is not alphanumeric.";
     private static final String ARENAS_LOADED = "&2Loaded %s arena(s).";
 
     private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
-    private final File file;
 
     private final List<ArenaImpl> arenas = new ArrayList<>();
 
@@ -62,7 +56,6 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
-        this.file = new File(plugin.getDataFolder(), FILE_NAME);
 
         Bukkit.getPluginManager().registerEvents(new ArenaListener(), plugin);
     }
@@ -145,16 +138,14 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
                         }
                         if (!toDelete.isEmpty()) {
                             collection.deleteMany(new org.bson.Document("_id", new org.bson.Document("$in", toDelete)));
-                            if (redis != null) {
-                                toDelete.forEach(id -> redis.publish(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_ARENA, id));
-                            }
+                            toDelete.forEach(id -> redis.publish(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_ARENA, id));
                         }
                     }
                     if (redis != null) {
                         arenas.forEach(a -> redis.publish(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_ARENA, a.getName()));
                     }
                 } finally {
-                    if (locked && redis != null) {
+                    if (locked) {
                         redis.releaseLock(lockKey, lockValue);
                     }
                 }
@@ -255,7 +246,11 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
     }
 
     public long getPlayersInMatch(final Queue queue) {
-        return arenas.stream().filter(arena -> arena.isUsed() && arena.getMatch().isFromQueue() && arena.getMatch().getSource().equals(queue)).count() * 2;
+        return arenas.stream().filter(arena -> {
+            if (!arena.isUsed()) return false;
+            assert arena.getMatch() != null;
+            return arena.getMatch().isFromQueue() && arena.getMatch().getSource().equals(queue);
+        }).count() * 2;
     }
 
     public boolean isSelectable(@Nullable final KitImpl kit, @NotNull final ArenaImpl arena) {
@@ -275,7 +270,7 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
     }
 
     public ArenaImpl randomArena(final KitImpl kit) {
-        final List<ArenaImpl> available = arenas.stream().filter(arena -> isSelectable(kit, arena)).collect(Collectors.toList());
+        final List<ArenaImpl> available = arenas.stream().filter(arena -> isSelectable(kit, arena)).toList();
         return !available.isEmpty() ? available.get(ThreadLocalRandom.current().nextInt(available.size())) : null;
     }
 

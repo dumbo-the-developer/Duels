@@ -43,11 +43,9 @@ public class QueueSignImpl implements QueueSign {
 
         final Block block = location.getBlock();
 
-        if (!(block.getState() instanceof Sign)) {
+        if (!(block.getState() instanceof Sign sign)) {
             return;
         }
-
-        final Sign sign = (Sign) block.getState();
 
         sign.setLine(0, replace(lines[0], 0, 0));
         sign.setLine(1, replace(lines[1], 0, 0));
@@ -63,11 +61,9 @@ public class QueueSignImpl implements QueueSign {
     public void update() {
         final Block block = location.getBlock();
 
-        if (!(block.getState() instanceof Sign)) {
+        if (!(block.getState() instanceof Sign sign)) {
             return;
         }
-
-        final Sign sign = (Sign) block.getState();
 
         if (queue.isRemoved()) {
             sign.setType(Material.AIR);

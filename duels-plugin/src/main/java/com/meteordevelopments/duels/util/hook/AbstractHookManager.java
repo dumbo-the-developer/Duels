@@ -32,11 +32,12 @@ public abstract class AbstractHookManager<P extends JavaPlugin> {
 
             DuelsPlugin.sendMessage("&aSuccessfully hooked into '" + name + "'!");
         } catch (Throwable throwable) {
-            if (throwable.getCause() != null) {
-                throwable = throwable.getCause();
+            Throwable throwable1 = throwable;
+            if (throwable1.getCause() != null) {
+                throwable1 = throwable1.getCause();
             }
 
-            DuelsPlugin.sendMessage("&b&lFailed to hook into " + name + ": " + throwable.getMessage());
+            DuelsPlugin.sendMessage("&b&lFailed to hook into " + name + ": " + throwable1.getMessage());
         }
     }
 

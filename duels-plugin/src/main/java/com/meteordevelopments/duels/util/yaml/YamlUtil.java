@@ -9,8 +9,8 @@ import org.yaml.snakeyaml.representer.Representer;
 
 public final class YamlUtil {
 
-    private static transient final Yaml BUKKIT_YAML;
-    private static transient final Yaml YAML;
+    private static final Yaml BUKKIT_YAML;
+    private static final Yaml YAML;
 
     static {
         final DumperOptions options = new DumperOptions();

@@ -96,16 +96,7 @@ public class Rank {
         int progress = elo - minElo;
         return Math.min(100.0, Math.max(0.0, (double) progress / range * 100.0));
     }
-    
-    public int getEloNeededForNextRank(int elo) {
-        if (maxElo == Integer.MAX_VALUE) {
-            return -1; // Already at max rank
-        }
-        
-        int needed = maxElo - elo;
-        return Math.max(0, needed);
-    }
-    
+
     public String getColoredName() {
         // TODO: Implement gradient animation
         return color + name;

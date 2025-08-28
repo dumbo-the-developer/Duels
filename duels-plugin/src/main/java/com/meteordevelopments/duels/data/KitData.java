@@ -5,6 +5,7 @@ import com.meteordevelopments.duels.kit.KitImpl;
 import com.meteordevelopments.duels.kit.KitImpl.Characteristic;
 import com.meteordevelopments.duels.util.Log;
 import com.meteordevelopments.duels.util.inventory.ItemBuilder;
+import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -12,14 +13,15 @@ import java.util.*;
 
 public class KitData {
 
-    private static transient final String SLOT_LOAD_FAILURE = "Could not load slot %s for kit %s!";
-    private static transient final String ITEM_LOAD_FAILURE = "Could not load item %s for kit %s!";
+    private static final String SLOT_LOAD_FAILURE = "Could not load slot %s for kit %s!";
+    private static final String ITEM_LOAD_FAILURE = "Could not load item %s for kit %s!";
+    @Getter
     private String name;
     private ItemData displayed;
     private boolean usePermission;
     private boolean arenaSpecific;
-    private Set<Characteristic> characteristics = new HashSet<>();
-    private Map<String, Map<Integer, ItemData>> items = new HashMap<>();
+    private final Set<Characteristic> characteristics = new HashSet<>();
+    private final Map<String, Map<Integer, ItemData>> items = new HashMap<>();
     // for Gson deserializer
     private KitData() {
     }
@@ -43,10 +45,6 @@ public class KitData {
 
     public static KitData fromKit(final KitImpl kit) {
         return new KitData(kit);
-    }
-
-    public String getName() {
-        return name;
     }
 
     public KitImpl toKit(final DuelsPlugin plugin) {

@@ -10,11 +10,8 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/duels-api" />
-            <option value="$PROJECT_DIR$/duels-common" />
             <option value="$PROJECT_DIR$/duels-plugin" />
             <option value="$PROJECT_DIR$/duels-worldguard" />
-            <option value="$PROJECT_DIR$/duels-worldguard-v6" />
-            <option value="$PROJECT_DIR$/duels-worldguard-v7" />
           </set>
         </option>
       </GradleProjectSettings>

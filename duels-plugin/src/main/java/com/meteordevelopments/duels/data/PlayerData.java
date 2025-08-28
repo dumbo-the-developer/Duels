@@ -9,15 +9,15 @@ import java.util.stream.Collectors;
 
 public class PlayerData {
 
-    private static transient final String ITEM_LOAD_FAILURE = "Could not load item %s!";
-    private Map<String, Map<Integer, ItemData>> items = new HashMap<>();
-    private Collection<PotionEffectData> effects = new ArrayList<>();
+    private static final String ITEM_LOAD_FAILURE = "Could not load item %s!";
+    private final Map<String, Map<Integer, ItemData>> items = new HashMap<>();
+    private final Collection<PotionEffectData> effects = new ArrayList<>();
     private double health;
     private float experience;
     private int level;
     private int hunger;
     private LocationData location;
-    private List<ItemData> extra = new ArrayList<>();
+    private final List<ItemData> extra = new ArrayList<>();
     private PlayerData() {
     }
 
@@ -60,7 +60,7 @@ public class PlayerData {
                 final ItemStack item = itemData.toItemStack(false);
 
                 if (item == null) {
-                    Log.warn(String.format(ITEM_LOAD_FAILURE, itemData.toString()));
+                    Log.warn(String.format(ITEM_LOAD_FAILURE, itemData));
                     return;
                 }
 
@@ -69,7 +69,7 @@ public class PlayerData {
             info.getItems().put(entry.getKey(), data);
         }
 
-        info.getExtra().addAll(extra.stream().map(data -> data.toItemStack(false)).filter(Objects::nonNull).collect(Collectors.toList()));
+        info.getExtra().addAll(extra.stream().map(data -> data.toItemStack(false)).filter(Objects::nonNull).toList());
         return info;
     }
 }
