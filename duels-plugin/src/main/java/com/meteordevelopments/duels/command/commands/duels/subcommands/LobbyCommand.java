@@ -15,7 +15,13 @@ public class LobbyCommand extends BaseCommand {
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
-        ((Player) sender).teleportAsync(playerManager.getLobby());
+        // Try Paper's async teleport, fallback to sync teleport for Spigot compatibility
+        try {
+            ((Player) sender).teleportAsync(playerManager.getLobby());
+        } catch (NoSuchMethodError e) {
+            // Fallback to synchronous teleport on Spigot
+            ((Player) sender).teleport(playerManager.getLobby());
+        }
         lang.sendMessage(sender, "COMMAND.duels.lobby");
     }
 }

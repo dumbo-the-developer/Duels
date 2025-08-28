@@ -20,7 +20,6 @@ import com.meteordevelopments.duels.util.function.Pair;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import space.arim.morepaperlib.scheduling.ScheduledTask;
-import java.time.Duration;
 
 public class DuelCountdown extends BukkitRunnable {
 

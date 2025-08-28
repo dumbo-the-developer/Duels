@@ -32,7 +32,9 @@ import com.meteordevelopments.duels.validator.ValidatorManager;
 import org.bukkit.event.HandlerList;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -61,28 +63,120 @@ public class LoadableManager {
         DuelsPlugin.sendMessage("&eInitializing components...");
         
         // Initialize all loadables
-        addLoadable("config", () -> plugin.setConfiguration(new Config(plugin)));
-        addLoadable("lang", () -> plugin.setLang(new Lang(plugin)));
-        addLoadable("user manager", () -> plugin.setUserManager(new UserManagerImpl(plugin)));
-        addLoadable("gui listener", () -> plugin.setGuiListener(new GuiListener<>(plugin)));
-        addLoadable("party manager", () -> plugin.setPartyManager(new PartyManagerImpl(plugin)));
-        addLoadable("kit manager", () -> plugin.setKitManager(new KitManagerImpl(plugin)));
-        addLoadable("arena manager", () -> plugin.setArenaManager(new ArenaManagerImpl(plugin)));
-        addLoadable("settings manager", () -> plugin.setSettingManager(new SettingsManager(plugin)));
-        addLoadable("player manager", () -> plugin.setPlayerManager(new PlayerInfoManager(plugin)));
-        addLoadable("spectate manager", () -> plugin.setSpectateManager(new SpectateManagerImpl(plugin)));
-        addLoadable("betting manager", () -> plugin.setBettingManager(new BettingManager(plugin)));
-        addLoadable("inventory manager", () -> plugin.setInventoryManager(new InventoryManager(plugin)));
-        addLoadable("duel manager", () -> plugin.setDuelManager(new DuelManager(plugin)));
-        addLoadable("queue manager", () -> plugin.setQueueManager(new QueueManager(plugin)));
-        addLoadable("queue signs", () -> plugin.setQueueSignManager(new QueueSignManagerImpl(plugin)));
-        addLoadable("request manager", () -> plugin.setRequestManager(new RequestManager(plugin)));
-        addLoadable("hook manager", () -> plugin.setHookManager(new HookManager(plugin)));
-        addLoadable("validator manager", () -> plugin.setValidatorManager(new ValidatorManager(plugin)));
-        addLoadable("leaderboard manager", () -> plugin.setLeaderboardManager(new LeaderboardManager(plugin)));
-        addLoadable("rank manager", () -> plugin.setRankManager(new RankManager(plugin)));
-        addLoadable("teleport manager", () -> plugin.setTeleport(new Teleport(plugin)));
-        addLoadable("extension manager", () -> plugin.setExtensionManager(new ExtensionManager(plugin)));
+        addLoadable("config", () -> {
+            Config config = new Config(plugin);
+            plugin.setConfiguration(config);
+            return config;
+        });
+        addLoadable("lang", () -> {
+            Lang lang = new Lang(plugin);
+            plugin.setLang(lang);
+            return lang;
+        });
+        addLoadable("user manager", () -> {
+            UserManagerImpl userManager = new UserManagerImpl(plugin);
+            plugin.setUserManager(userManager);
+            return userManager;
+        });
+        addLoadable("gui listener", () -> {
+            GuiListener<DuelsPlugin> guiListener = new GuiListener<>(plugin);
+            plugin.setGuiListener(guiListener);
+            return guiListener;
+        });
+        addLoadable("party manager", () -> {
+            PartyManagerImpl partyManager = new PartyManagerImpl(plugin);
+            plugin.setPartyManager(partyManager);
+            return partyManager;
+        });
+        addLoadable("kit manager", () -> {
+            KitManagerImpl kitManager = new KitManagerImpl(plugin);
+            plugin.setKitManager(kitManager);
+            return kitManager;
+        });
+        addLoadable("arena manager", () -> {
+            ArenaManagerImpl arenaManager = new ArenaManagerImpl(plugin);
+            plugin.setArenaManager(arenaManager);
+            return arenaManager;
+        });
+        addLoadable("settings manager", () -> {
+            SettingsManager settingsManager = new SettingsManager(plugin);
+            plugin.setSettingManager(settingsManager);
+            return settingsManager;
+        });
+        addLoadable("player manager", () -> {
+            PlayerInfoManager playerManager = new PlayerInfoManager(plugin);
+            plugin.setPlayerManager(playerManager);
+            return playerManager;
+        });
+        addLoadable("spectate manager", () -> {
+            SpectateManagerImpl spectateManager = new SpectateManagerImpl(plugin);
+            plugin.setSpectateManager(spectateManager);
+            return spectateManager;
+        });
+        addLoadable("betting manager", () -> {
+            BettingManager bettingManager = new BettingManager(plugin);
+            plugin.setBettingManager(bettingManager);
+            return bettingManager;
+        });
+        addLoadable("inventory manager", () -> {
+            InventoryManager inventoryManager = new InventoryManager(plugin);
+            plugin.setInventoryManager(inventoryManager);
+            return inventoryManager;
+        });
+        addLoadable("duel manager", () -> {
+            DuelManager duelManager = new DuelManager(plugin);
+            plugin.setDuelManager(duelManager);
+            return duelManager;
+        });
+        addLoadable("queue manager", () -> {
+            QueueManager queueManager = new QueueManager(plugin);
+            plugin.setQueueManager(queueManager);
+            return queueManager;
+        });
+        addLoadable("queue signs", () -> {
+            QueueSignManagerImpl queueSignManager = new QueueSignManagerImpl(plugin);
+            plugin.setQueueSignManager(queueSignManager);
+            return queueSignManager;
+        });
+        addLoadable("request manager", () -> {
+            RequestManager requestManager = new RequestManager(plugin);
+            plugin.setRequestManager(requestManager);
+            return requestManager;
+        });
+        addLoadable("validator manager", () -> {
+            ValidatorManager validatorManager = new ValidatorManager(plugin);
+            plugin.setValidatorManager(validatorManager);
+            return validatorManager;
+        });
+        addLoadable("leaderboard manager", () -> {
+            LeaderboardManager leaderboardManager = new LeaderboardManager(plugin);
+            plugin.setLeaderboardManager(leaderboardManager);
+            return leaderboardManager;
+        });
+        addLoadable("rank manager", () -> {
+            RankManager rankManager = new RankManager(plugin);
+            plugin.setRankManager(rankManager);
+            return rankManager;
+        });
+        addLoadable("teleport manager", () -> {
+            Teleport teleport = new Teleport(plugin);
+            plugin.setTeleport(teleport);
+            return teleport;
+        });
+        addLoadable("extension manager", () -> {
+            ExtensionManager extensionManager = new ExtensionManager(plugin);
+            plugin.setExtensionManager(extensionManager);
+            return extensionManager;
+        });
+        
+        // Hook manager is not a Loadable, so handle it separately
+        try {
+            HookManager hookManager = new HookManager(plugin);
+            plugin.setHookManager(hookManager);
+        } catch (Exception e) {
+            DuelsPlugin.sendMessage("&cFailed to initialize hook manager: " + e.getMessage());
+            throw new RuntimeException("Failed to initialize hook manager", e);
+        }
 
         if (!loadAll()) {
             return false;
@@ -192,15 +286,15 @@ public class LoadableManager {
      * Cleans up extension listeners
      */
     public void cleanupExtensionListeners() {
-        HandlerList.getRegisteredListeners(plugin)
-                .stream()
-                .filter(listener -> listener.getListener().getClass().getClassLoader().getClass().isAssignableFrom(ExtensionClassLoader.class))
+        HandlerList.getRegisteredListeners(plugin).stream()
+                .filter(listener -> ExtensionClassLoader.class.isInstance(listener.getListener().getClass().getClassLoader()))
                 .forEach(listener -> HandlerList.unregisterAll(listener.getListener()));
     }
     
-    private void addLoadable(String name, Runnable initializer) {
+    private void addLoadable(String name, Supplier<Loadable> supplier) {
         try {
-            initializer.run();
+            Loadable loadable = supplier.get();
+            loadables.add(loadable);
         } catch (Exception e) {
             DuelsPlugin.sendMessage("&cFailed to initialize " + name + ": " + e.getMessage());
             throw new RuntimeException("Failed to initialize " + name, e);

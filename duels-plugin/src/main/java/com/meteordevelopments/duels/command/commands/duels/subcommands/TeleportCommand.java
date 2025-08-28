@@ -43,7 +43,13 @@ public class TeleportCommand extends BaseCommand {
             return;
         }
 
-        ((Player) sender).teleportAsync(location);
+        // Try Paper's async teleport, fallback to sync teleport for Spigot compatibility
+        try {
+            ((Player) sender).teleportAsync(location);
+        } catch (NoSuchMethodError e) {
+            // Fallback to synchronous teleport on Spigot
+            ((Player) sender).teleport(location);
+        }
         lang.sendMessage(sender, "COMMAND.duels.teleport", "name", name, "position", pos);
     }
 

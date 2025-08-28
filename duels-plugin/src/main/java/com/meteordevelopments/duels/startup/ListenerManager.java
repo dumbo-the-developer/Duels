@@ -67,10 +67,16 @@ public class ListenerManager {
     }
     
     /**
-     * Unregisters all managed listeners
+     * Unregisters all managed listeners and any listeners registered directly against the plugin
      */
     public void unregisterAllListeners() {
+        // Unregister managed listeners
         registeredListeners.forEach(HandlerList::unregisterAll);
         registeredListeners.clear();
+        
+        // Also unregister any listeners registered directly against the plugin
+        if (plugin != null) {
+            HandlerList.unregisterAll(plugin);
+        }
     }
 }

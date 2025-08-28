@@ -38,7 +38,7 @@ public class StartupManager {
             return false;
         }
         
-        if (!checkSpigotCompatibility()) {
+        if (!checkBukkitCompatibility()) {
             return false;
         }
         
@@ -59,7 +59,9 @@ public class StartupManager {
             databaseConfig.handleLoad();
             plugin.setDatabaseConfig(databaseConfig);
         } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Failed to load database configuration (DB.yml)", ex);
             DuelsPlugin.sendMessage("&cFailed to load DB.yml. Disabling plugin.");
+            plugin.setDatabaseConfig(null); // Clear any stale config
             return false;
         }
 
@@ -69,7 +71,16 @@ public class StartupManager {
             mongoService.connect();
             plugin.setMongoService(mongoService);
         } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Failed to connect to MongoDB", ex);
             DuelsPlugin.sendMessage("&cFailed to connect to MongoDB. Disabling plugin.");
+            // Clean up any partially initialized MongoDB resources
+            try {
+                if (mongoService != null) {
+                    mongoService.close();
+                }
+            } catch (Exception closeEx) {
+                LOGGER.log(Level.WARNING, "Failed to clean up MongoDB service during initialization failure", closeEx);
+            }
             return false;
         }
         
@@ -81,6 +92,14 @@ public class StartupManager {
         } catch (Exception ex) {
             DuelsPlugin.sendMessage("&eRedis connection failed, continuing without cross-server sync cache.");
             LOGGER.log(Level.WARNING, "Redis connection failed; continuing without Redis.", ex);
+            // Clean up any partially initialized Redis resources
+            try {
+                if (redisService != null) {
+                    redisService.close();
+                }
+            } catch (Exception closeEx) {
+                LOGGER.log(Level.WARNING, "Failed to clean up Redis service during initialization failure", closeEx);
+            }
             plugin.setRedisService(null);
         }
         
@@ -107,18 +126,18 @@ public class StartupManager {
     }
     
     /**
-     * Checks if the server is running on Spigot
+     * Checks if the server is running on a Bukkit-compatible platform
      * @return true if compatible, false otherwise
      */
-    private boolean checkSpigotCompatibility() {
+    private boolean checkBukkitCompatibility() {
         try {
-            Class.forName("org.spigotmc.SpigotConfig");
+            Class.forName("org.bukkit.Bukkit");
             return true;
         } catch (ClassNotFoundException ex) {
             DuelsPlugin.sendMessage("&c&l================= *** DUELS LOAD FAILURE *** =================");
-            DuelsPlugin.sendMessage("&c&lDuels requires a spigot server to run, but this server was not running on spigot!");
-            DuelsPlugin.sendMessage("&c&lTo run your server on spigot, follow this guide: " + SPIGOT_INSTALLATION_URL);
-            DuelsPlugin.sendMessage("&c&lSpigot is compatible with CraftBukkit/Bukkit plugins.");
+            DuelsPlugin.sendMessage("&c&lDuels requires a Bukkit-compatible server (Spigot, Paper, etc.)!");
+            DuelsPlugin.sendMessage("&c&lFor Spigot installation, follow this guide: " + SPIGOT_INSTALLATION_URL);
+            DuelsPlugin.sendMessage("&c&lOther compatible servers include Paper, Purpur, and other Bukkit forks.");
             DuelsPlugin.sendMessage("&c&l================= *** DUELS LOAD FAILURE *** =================");
             return false;
         }
