@@ -43,43 +43,19 @@ public class TeleportCommand extends BaseCommand {
             return;
         }
 
-        // Detect Paper API availability and handle teleport properly
+        // Use Paper's async teleport with proper completion handling
         final Player player = (Player) sender;
         
-        if (hasPaperTeleportAsync()) {
-            // Use Paper's async teleport with proper completion handling
-            player.teleportAsync(location).thenAccept(success -> {
-                if (success) {
-                    lang.sendMessage(sender, "COMMAND.duels.teleport", "name", name, "position", pos);
-                } else {
-                    lang.sendMessage(sender, "ERROR.teleport.failed", "name", name, "position", pos);
-                }
-            }).exceptionally(throwable -> {
-                lang.sendMessage(sender, "ERROR.teleport.failed", "name", name, "position", pos);
-                return null;
-            });
-        } else {
-            // Fallback to synchronous teleport on Spigot
-            boolean success = player.teleport(location);
+        player.teleportAsync(location).thenAccept(success -> {
             if (success) {
                 lang.sendMessage(sender, "COMMAND.duels.teleport", "name", name, "position", pos);
             } else {
                 lang.sendMessage(sender, "ERROR.teleport.failed", "name", name, "position", pos);
             }
-        }
-    }
-    
-    /**
-     * Checks if Paper's teleportAsync method is available
-     * @return true if Paper API is available, false if running on Spigot
-     */
-    private boolean hasPaperTeleportAsync() {
-        try {
-            Player.class.getMethod("teleportAsync", Location.class);
-            return true;
-        } catch (NoSuchMethodException e) {
-            return false;
-        }
+        }).exceptionally(throwable -> {
+            lang.sendMessage(sender, "ERROR.teleport.failed", "name", name, "position", pos);
+            return null;
+        });
     }
 
     @Override
