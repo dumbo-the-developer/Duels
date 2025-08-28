@@ -594,6 +594,13 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     private void setupRedisSubscriptions() {
         try {
+            // Ensure we don't stack multiple subscribers across reloads
+            if (this.redisSubscriber != null) {
+                try {
+                    this.redisSubscriber.unsubscribe();
+                } catch (Exception ignored) {}
+                this.redisSubscriber = null;
+            }
             final var sub = new redis.clients.jedis.JedisPubSub() {
                 @Override
                 public void onMessage(String channel, String message) {
