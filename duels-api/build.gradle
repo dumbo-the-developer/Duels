@@ -1,5 +1,6 @@
 dependencies {
     compileOnly('org.jetbrains:annotations-java5:24.1.0')
+    implementation('space.arim.morepaperlib:morepaperlib:0.4.4')
 }
 
 java {

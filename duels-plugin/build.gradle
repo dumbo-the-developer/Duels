@@ -43,6 +43,7 @@ dependencies {
 
     implementation project(':duels-api')
     implementation project(':duels-worldguard')
+    implementation 'space.arim.morepaperlib:morepaperlib:0.4.4'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.19.2'
     implementation 'org.json:json:20250517'
     implementation 'org.mongodb:mongodb-driver-sync:5.1.2'
@@ -61,6 +62,7 @@ shadowJar {
         include(project(':duels-worldguard'))
         include(dependency('com.fasterxml.jackson.core:.*'))
         include(dependency('org.json:.*'))
+        include(dependency('space.arim.morepaperlib:.*'))
         include(dependency('org.mongodb:.*'))
         include(dependency('redis.clients:.*'))
         include(dependency('org.apache.commons:commons-pool2:.*'))
@@ -68,6 +70,7 @@ shadowJar {
 
     final String group = project.group.toString() + "." + parent.name.toLowerCase() + ".shaded."
     relocate 'com.fasterxml.jackson', 'com.meteordevelopments.duels.shaded.jackson'
+    relocate 'space.arim.morepaperlib', group + 'morepaperlib'
     relocate 'com.mongodb', group + 'mongodb'
     relocate 'org.bson', group + 'bson'
     relocate 'redis.clients', group + 'redis'
