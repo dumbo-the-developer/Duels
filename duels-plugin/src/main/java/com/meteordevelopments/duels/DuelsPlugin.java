@@ -449,7 +449,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     }
 
     public static String getPrefix() {
-        return ChatColor.translateAlternateColorCodes('&', "&b&lDuels Optimised &7» ");
+        return CC.translate("&b&lDuels Optimised &7» ");
     }
 
     public static void sendMessage(String message) {
