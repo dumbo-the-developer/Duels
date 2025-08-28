@@ -3,7 +3,6 @@ package com.meteordevelopments.duels.hook.hooks.worldguard;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.util.hook.PluginHook;
-import com.meteordevelopments.duels.util.reflect.ReflectionUtil;
 import org.bukkit.entity.Player;
 
 import java.util.Collection;
@@ -18,7 +17,11 @@ public class WorldGuardHook extends PluginHook<DuelsPlugin> {
     public WorldGuardHook(final DuelsPlugin plugin) {
         super(plugin, NAME);
         this.config = plugin.getConfiguration();
-        this.handler = ReflectionUtil.getClassUnsafe("com.sk89q.worldguard.WorldGuard") != null ? new WorldGuard7Handler() : new WorldGuard6Handler();
+        try {
+            this.handler = new UnifiedWorldGuardHandler();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize WorldGuard integration", e);
+        }
     }
 
     public String findDuelZone(final Player player) {

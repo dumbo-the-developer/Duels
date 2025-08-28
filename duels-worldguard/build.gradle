@@ -1,3 +1,13 @@
 dependencies {
     api 'org.spigotmc:spigot-api:1.14.4-R0.1-SNAPSHOT'
+    
+    // WorldGuard v6 (optional - will be available at runtime if present)
+    compileOnly('com.sk89q:worldguard:6.1.1-SNAPSHOT') {
+        exclude group: 'org.bukkit', module: 'bukkit'
+    }
+    
+    // WorldGuard v7 (optional - will be available at runtime if present)
+    compileOnly('com.sk89q.worldguard:worldguard-bukkit:7.0.0') {
+        exclude group: 'org.bukkit', module: 'bukkit'
+    }
 }
