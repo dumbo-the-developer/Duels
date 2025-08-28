@@ -101,7 +101,7 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
             if (mongo != null) {
                 final var collection = mongo.collection("signs");
                 final java.util.List<com.mongodb.client.model.WriteModel<org.bson.Document>> ops = new java.util.ArrayList<>();
-                final String serverId = plugin.getServer().getPort() > 0 ? String.valueOf(plugin.getServer().getPort()) : "default";
+                final String serverId = resolveServerId();
                 for (final QueueSignImpl sign : signs.values()) {
                     if (sign.getQueue().isRemoved()) {
                         continue;
@@ -117,12 +117,28 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
                     ops.add(new com.mongodb.client.model.ReplaceOneModel<>(filter, doc, new com.mongodb.client.model.ReplaceOptions().upsert(true)));
                 }
                 if (!ops.isEmpty()) {
-                    collection.bulkWrite(ops);
+                    // run unordered bulk upsert off-thread
+                    plugin.doAsync(() -> {
+                        try {
+                            collection.bulkWrite(ops, new com.mongodb.client.model.BulkWriteOptions().ordered(false));
+                        } catch (Exception ex) {
+                            Log.error(this, "Failed to persist queue signs asynchronously", ex);
+                        }
+                    });
                 }
             }
         } catch (Exception ex) {
             Log.error(this, ex.getMessage(), ex);
         }
+    }
+
+    private String resolveServerId() {
+        final String configured = plugin.getDatabaseConfig() != null ? plugin.getDatabaseConfig().getServerId() : null;
+        if (configured != null && !configured.trim().isEmpty()) {
+            return configured.trim();
+        }
+        final int port = plugin.getServer().getPort();
+        return port > 0 ? String.valueOf(port) : "default";
     }
 
     @Nullable

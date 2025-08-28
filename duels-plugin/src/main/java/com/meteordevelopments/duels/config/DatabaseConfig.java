@@ -14,6 +14,7 @@ public class DatabaseConfig extends AbstractConfiguration<DuelsPlugin> {
     @Getter private int redisPort;
     @Getter private String redisPassword;
     @Getter private int redisDb;
+    @Getter private String serverId;
 
     public DatabaseConfig(final DuelsPlugin plugin) {
         super(plugin, "DB");
@@ -28,6 +29,7 @@ public class DatabaseConfig extends AbstractConfiguration<DuelsPlugin> {
         redisPort = configuration.getInt("redis.port", 6379);
         redisPassword = configuration.getString("redis.password", null);
         redisDb = configuration.getInt("redis.db", 0);
+        serverId = configuration.getString("serverId", "");
     }
 }
 

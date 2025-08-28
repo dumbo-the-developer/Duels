@@ -10,3 +10,6 @@ redis:
   password: ""
   db: 0
 
+# Optional stable identifier for this server to scope cross-server data (e.g., signs)
+serverId: ""
+
