@@ -2,7 +2,7 @@ package com.meteordevelopments.duels.command.commands.duels.subcommands;
 
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.command.BaseCommand;
-import com.meteordevelopments.duels.util.util.CC;
+import com.meteordevelopments.duels.util.CC;
 import org.bukkit.command.CommandSender;
 
 public class ReloadRanksCommand extends BaseCommand {

@@ -3,7 +3,7 @@ package com.meteordevelopments.duels.command.commands;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.command.BaseCommand;
 import com.meteordevelopments.duels.rank.Rank;
-import com.meteordevelopments.duels.util.util.CC;
+import com.meteordevelopments.duels.util.CC;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 

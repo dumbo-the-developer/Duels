@@ -68,17 +68,7 @@ public final class StringUtil {
     }
 
     public static String color(String input) {
-        if (input == null) return "";
-        if (Pattern.compile("&#[0-9A-f]{6}").matcher(input).find()) {
-            Matcher matcher = Pattern.compile("&(#[0-9A-f]{6})").matcher(input);
-            while (matcher.find()) {
-                input = input.replaceFirst(
-                        matcher.group(),
-                        net.md_5.bungee.api.ChatColor.of(matcher.group(1)).toString()
-                );
-            }
-        }
-        return ChatColor.translateAlternateColorCodes('&', input);
+        return CC.translate(input);
     }
 
     public static List<String> color(final List<String> input) {

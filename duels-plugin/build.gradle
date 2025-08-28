@@ -14,10 +14,9 @@ processResources {
 }
 
 dependencies {
-    compileOnly 'org.jetbrains:annotations-java5:24.1.0'
+    compileOnly 'org.jetbrains:annotations:24.1.0'
     compileOnly 'org.projectlombok:lombok:1.18.38'
     annotationProcessor 'org.projectlombok:lombok:1.18.38'
-    implementation 'io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT'
     implementation 'commons-lang:commons-lang:2.6'
     implementation 'com.mojang:authlib:1.5.25'
     implementation 'me.clip:placeholderapi:2.11.6'
@@ -44,10 +43,6 @@ dependencies {
 
     implementation project(':duels-api')
     implementation project(':duels-worldguard')
-    implementation project(':duels-worldguard-v6')
-    implementation project(':duels-worldguard-v7')
-    implementation project(':duels-common')
-    implementation 'io.papermc:paperlib:1.0.8'
     implementation 'space.arim.morepaperlib:morepaperlib:0.4.4'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.19.2'
     implementation 'org.json:json:20250517'
@@ -65,11 +60,7 @@ shadowJar {
     dependencies {
         include(project(':duels-api'))
         include(project(':duels-worldguard'))
-        include(project(':duels-worldguard-v6'))
-        include(project(':duels-worldguard-v7'))
-        include(project(':duels-common'))
         include(dependency('com.fasterxml.jackson.core:.*'))
-        include(dependency('io.papermc:.*'))
         include(dependency('org.json:.*'))
         include(dependency('space.arim.morepaperlib:.*'))
         include(dependency('org.mongodb:.*'))
@@ -79,7 +70,6 @@ shadowJar {
 
     final String group = project.group.toString() + "." + parent.name.toLowerCase() + ".shaded."
     relocate 'com.fasterxml.jackson', 'com.meteordevelopments.duels.shaded.jackson'
-    relocate 'io.papermc.lib', group + 'paperlib'
     relocate 'space.arim.morepaperlib', group + 'morepaperlib'
     relocate 'com.mongodb', group + 'mongodb'
     relocate 'org.bson', group + 'bson'

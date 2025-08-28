@@ -112,7 +112,7 @@ public interface Duels extends Plugin {
      *
      * @param task  Task to run.
      * @param delay time to delay. 20L = 1s
-     * @return BukkitTask executed.
+     * @return ScheduledTask executed.
      * @since 3.1.0
      */
     ScheduledTask doSyncAfter(@NotNull final Runnable task, long delay);
@@ -124,7 +124,7 @@ public interface Duels extends Plugin {
      * @param task     Task to run.
      * @param delay    time to delay the start of repeat. 20L = 1s
      * @param interval interval of this task. 20L = 1s
-     * @return BukkitTask executed.
+     * @return ScheduledTask executed.
      * @since 3.1.0
      */
     ScheduledTask doSyncRepeat(@NotNull final Runnable task, long delay, long interval);
@@ -134,7 +134,7 @@ public interface Duels extends Plugin {
      * Runs the task asynchronously.
      *
      * @param task Task to run asynchronously.
-     * @return BukkitTask executed.
+     * @return ScheduledTask executed.
      * @since 3.1.0
      */
     ScheduledTask doAsync(@NotNull final Runnable task);
@@ -145,7 +145,7 @@ public interface Duels extends Plugin {
      *
      * @param task  Task to run asynchronously.
      * @param delay time to delay. 20L = 1s
-     * @return BukkitTask executed.
+     * @return ScheduledTask executed.
      * @since 3.1.0
      */
     ScheduledTask doAsyncAfter(@NotNull final Runnable task, long delay);
@@ -157,7 +157,7 @@ public interface Duels extends Plugin {
      * @param task     Task to run asynchronously.
      * @param delay    time to delay the start of repeat. 20L = 1s
      * @param interval interval of this task. 20L = 1s
-     * @return BukkitTask executed.
+     * @return ScheduledTask executed.
      * @since 3.1.0
      */
     ScheduledTask doAsyncRepeat(@NotNull final Runnable task, long delay, long interval);

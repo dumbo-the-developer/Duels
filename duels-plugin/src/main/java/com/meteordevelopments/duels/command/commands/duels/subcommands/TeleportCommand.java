@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-import static io.papermc.lib.PaperLib.teleportAsync;
+
 
 public class TeleportCommand extends BaseCommand {
 
@@ -43,8 +43,19 @@ public class TeleportCommand extends BaseCommand {
             return;
         }
 
-        teleportAsync((Player) sender, location);
-        lang.sendMessage(sender, "COMMAND.duels.teleport", "name", name, "position", pos);
+        // Use Paper's async teleport with proper completion handling
+        final Player player = (Player) sender;
+        
+        player.teleportAsync(location).thenAccept(success -> {
+            if (success) {
+                lang.sendMessage(sender, "COMMAND.duels.teleport", "name", name, "position", pos);
+            } else {
+                lang.sendMessage(sender, "ERROR.teleport.failed", "name", name, "position", pos);
+            }
+        }).exceptionally(throwable -> {
+            lang.sendMessage(sender, "ERROR.teleport.failed", "name", name, "position", pos);
+            return null;
+        });
     }
 
     @Override

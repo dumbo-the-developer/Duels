@@ -2,10 +2,11 @@ package com.meteordevelopments.duels.command.commands.duels.subcommands;
 
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.command.BaseCommand;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import static io.papermc.lib.PaperLib.teleportAsync;
+
 
 public class LobbyCommand extends BaseCommand {
 
@@ -15,7 +16,19 @@ public class LobbyCommand extends BaseCommand {
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
-        teleportAsync((Player) sender, playerManager.getLobby());
-        lang.sendMessage(sender, "COMMAND.duels.lobby");
+        // Use Paper's async teleport with proper completion handling
+        final Player player = (Player) sender;
+        final Location lobbyLocation = playerManager.getLobby();
+        
+        player.teleportAsync(lobbyLocation).thenAccept(success -> {
+            if (success) {
+                lang.sendMessage(sender, "COMMAND.duels.lobby");
+            } else {
+                lang.sendMessage(sender, "ERROR.teleport.failed");
+            }
+        }).exceptionally(throwable -> {
+            lang.sendMessage(sender, "ERROR.teleport.failed");
+            return null;
+        });
     }
 }

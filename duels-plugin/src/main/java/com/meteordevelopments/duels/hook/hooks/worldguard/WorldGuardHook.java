@@ -3,26 +3,31 @@ package com.meteordevelopments.duels.hook.hooks.worldguard;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.util.hook.PluginHook;
-import com.meteordevelopments.duels.util.reflect.ReflectionUtil;
 import org.bukkit.entity.Player;
 
 import java.util.Collection;
+import java.util.logging.Level;
 
 public class WorldGuardHook extends PluginHook<DuelsPlugin> {
 
     public static final String NAME = "WorldGuard";
 
     private final Config config;
-    private final WorldGuardHandler handler;
+    private WorldGuardHandler handler;
 
     public WorldGuardHook(final DuelsPlugin plugin) {
         super(plugin, NAME);
         this.config = plugin.getConfiguration();
-        this.handler = ReflectionUtil.getClassUnsafe("com.sk89q.worldguard.WorldGuard") != null ? new WorldGuard7Handler() : new WorldGuard6Handler();
+        try {
+            this.handler = new WorldGuard7Handler();
+        } catch (Exception e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to initialize WorldGuard integration. WorldGuard features will be disabled.", e);
+            this.handler = null;
+        }
     }
 
     public String findDuelZone(final Player player) {
-        if (!config.isDuelzoneEnabled()) {
+        if (!config.isDuelzoneEnabled() || handler == null) {
             return null;
         }
 
