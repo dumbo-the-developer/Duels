@@ -605,15 +605,27 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                 @Override
                 public void onMessage(String channel, String message) {
                     doSync(() -> {
+                        // Expect messages formatted as "serverId:payload"; ignore self-originated
+                        String payload = message;
+                        try {
+                            final int idx = message.indexOf(':');
+                            if (idx > 0) {
+                                final String origin = message.substring(0, idx);
+                                if (origin.equals(getSelfServerId())) {
+                                    return;
+                                }
+                                payload = message.substring(idx + 1);
+                            }
+                        } catch (Exception ignored) {}
                         if (channel.equals(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_USER)) {
                             try {
-                                final java.util.UUID uuid = java.util.UUID.fromString(message);
+                                final java.util.UUID uuid = java.util.UUID.fromString(payload);
                                 if (userManager != null) userManager.reloadUser(uuid);
                             } catch (Exception ignored) {}
                         } else if (channel.equals(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_KIT)) {
-                            if (kitManager != null) kitManager.reloadKit(message);
+                            if (kitManager != null) kitManager.reloadKit(payload);
                         } else if (channel.equals(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_ARENA)) {
-                            if (arenaManager != null) arenaManager.reloadArena(message);
+                            if (arenaManager != null) arenaManager.reloadArena(payload);
                         }
                     });
                 }
@@ -627,5 +639,14 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         } catch (Exception ex) {
             sendMessage("&eFailed to subscribe to Redis channels; continuing without cross-server sync.");
         }
+    }
+
+    private String getSelfServerId() {
+        final String configured = databaseConfig != null ? databaseConfig.getServerId() : null;
+        if (configured != null && !configured.trim().isEmpty()) {
+            return configured.trim();
+        }
+        final int port = getServer().getPort();
+        return port > 0 ? String.valueOf(port) : "default";
     }
 }

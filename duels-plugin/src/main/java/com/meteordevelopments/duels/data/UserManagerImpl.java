@@ -347,6 +347,7 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
             final UserData loserData = get(loser);
 
             if (winnerData != null && loserData != null) {
+                // Update in-memory for immediate placeholders/UX
                 winnerData.addWin();
                 loserData.addLoss();
                 winnerData.addMatch(matchData);
@@ -359,27 +360,31 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
 
                 if (config.isRatingEnabled() && !(!match.isFromQueue() && config.isRatingQueueOnly())) {
                     change = NumberUtil.getChange(config.getKFactor(), winnerRating, loserRating);
-                    winnerData.setRating(kit, winnerRating = winnerRating + change);
-                    loserData.setRating(kit, loserRating = loserRating - change);
-                    
+                    winnerRating = winnerRating + change;
+                    loserRating = loserRating - change;
+
+                    // Update in-memory ratings and totals
+                    winnerData.setRating(kit, winnerRating);
+                    loserData.setRating(kit, loserRating);
+
+                    // Atomically persist updates (wins/losses/ratings/totalElo) in Mongo
+                    final var mongo = plugin.getMongoService();
+                    if (mongo != null) {
+                        final String kitKey = kit != null ? kit.getName() : "-";
+                        mongo.updateUserStats(winner.getUniqueId(), winnerData.getWins(), null, kitKey, winnerRating, winnerData.getTotalElo());
+                        mongo.updateUserStats(loser.getUniqueId(), null, loserData.getLosses(), kitKey, loserRating, loserData.getTotalElo());
+                    }
+
                     // Check for rank changes after ELO update
                     if (plugin.getRankManager().isEnabled()) {
                         plugin.doAsync(() -> {
-                            // Check promotions and demotions
                             boolean winnerPromoted = plugin.getRankManager().checkPromotion(winner.getUniqueId());
                             boolean loserDemoted = plugin.getRankManager().checkDemotion(loser.getUniqueId());
-                            
-                            // Check one-time rewards
                             plugin.getRankManager().checkOneTimeRewards(winner.getUniqueId());
                             plugin.getRankManager().checkOneTimeRewards(loser.getUniqueId());
-                            
-                            // Schedule sync task for Bukkit API calls
                             plugin.doSync(() -> {
-                                // Verify players are still online
                                 Player onlineWinner = Bukkit.getPlayer(winner.getUniqueId());
                                 Player onlineLoser = Bukkit.getPlayer(loser.getUniqueId());
-                                
-                                // Send rank change messages if needed
                                 if (winnerPromoted && onlineWinner != null) {
                                     Rank winnerRank = plugin.getRankManager().getPlayerRank(onlineWinner);
                                     if (winnerRank != null) {

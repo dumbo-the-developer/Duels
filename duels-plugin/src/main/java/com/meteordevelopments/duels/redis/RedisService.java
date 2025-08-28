@@ -68,7 +68,11 @@ public class RedisService {
 
     public void publish(final String channel, final String message) {
         try {
-            client.publish(channel, message);
+            // Prefix with serverId to allow receivers to ignore self-originated events
+            final String serverId = plugin.getDatabaseConfig() != null && plugin.getDatabaseConfig().getServerId() != null && !plugin.getDatabaseConfig().getServerId().trim().isEmpty()
+                    ? plugin.getDatabaseConfig().getServerId().trim()
+                    : String.valueOf(plugin.getServer().getPort());
+            client.publish(channel, serverId + ":" + message);
         } catch (Exception ex) {
             Log.error("Redis publish failed on channel: " + channel, ex);
         }
