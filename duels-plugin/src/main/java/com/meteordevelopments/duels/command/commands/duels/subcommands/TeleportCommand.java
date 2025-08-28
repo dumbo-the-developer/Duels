@@ -43,14 +43,43 @@ public class TeleportCommand extends BaseCommand {
             return;
         }
 
-        // Try Paper's async teleport, fallback to sync teleport for Spigot compatibility
-        try {
-            ((Player) sender).teleportAsync(location);
-        } catch (NoSuchMethodError e) {
+        // Detect Paper API availability and handle teleport properly
+        final Player player = (Player) sender;
+        
+        if (hasPaperTeleportAsync()) {
+            // Use Paper's async teleport with proper completion handling
+            player.teleportAsync(location).thenAccept(success -> {
+                if (success) {
+                    lang.sendMessage(sender, "COMMAND.duels.teleport", "name", name, "position", pos);
+                } else {
+                    lang.sendMessage(sender, "ERROR.teleport.failed", "name", name, "position", pos);
+                }
+            }).exceptionally(throwable -> {
+                lang.sendMessage(sender, "ERROR.teleport.failed", "name", name, "position", pos);
+                return null;
+            });
+        } else {
             // Fallback to synchronous teleport on Spigot
-            ((Player) sender).teleport(location);
+            boolean success = player.teleport(location);
+            if (success) {
+                lang.sendMessage(sender, "COMMAND.duels.teleport", "name", name, "position", pos);
+            } else {
+                lang.sendMessage(sender, "ERROR.teleport.failed", "name", name, "position", pos);
+            }
         }
-        lang.sendMessage(sender, "COMMAND.duels.teleport", "name", name, "position", pos);
+    }
+    
+    /**
+     * Checks if Paper's teleportAsync method is available
+     * @return true if Paper API is available, false if running on Spigot
+     */
+    private boolean hasPaperTeleportAsync() {
+        try {
+            Player.class.getMethod("teleportAsync", Location.class);
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
     }
 
     @Override
