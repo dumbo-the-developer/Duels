@@ -115,32 +115,33 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
             final var mongo = plugin.getMongoService();
             if (mongo != null) {
                 final var collection = mongo.collection("arenas");
-                for (final ArenaImpl arena : arenas) {
-                    final ArenaData data = new ArenaData(arena);
-                    final String json = JsonUtil.getObjectWriter().writeValueAsString(data);
-                    final org.bson.Document doc = org.bson.Document.parse(json);
-                    doc.put("_id", data.getName());
-                    collection.replaceOne(
-                        new org.bson.Document("_id", data.getName()),
-                        doc,
-                        new com.mongodb.client.model.ReplaceOptions().upsert(true)
-                    );
-                }
-                // Prune documents that no longer exist in memory
-                final java.util.Set<String> names =
-                    arenas.stream()
-                          .map(ArenaImpl::getName)
-                          .collect(java.util.stream.Collectors.toSet());
-                collection.deleteMany(
-                    new org.bson.Document("_id", new org.bson.Document("$nin", names))
-                );
-                if (plugin.getRedisService() != null) {
-                    arenas.forEach(a ->
-                        plugin.getRedisService().publish(
-                            com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_ARENA,
-                            a.getName()
-                        )
-                    );
+                final var redis = plugin.getRedisService();
+                final String lockKey = "duels:lock:arenas";
+                final String lockValue = java.util.UUID.randomUUID().toString();
+                final boolean locked = (redis != null) && redis.tryAcquireLock(lockKey, 15, lockValue);
+                try {
+                    for (final ArenaImpl arena : arenas) {
+                        final ArenaData data = new ArenaData(arena);
+                        final String json = JsonUtil.getObjectWriter().writeValueAsString(data);
+                        final org.bson.Document doc = org.bson.Document.parse(json);
+                        doc.put("_id", data.getName());
+                        collection.replaceOne(
+                            new org.bson.Document("_id", data.getName()),
+                            doc,
+                            new com.mongodb.client.model.ReplaceOptions().upsert(true)
+                        );
+                    }
+                    if (locked) {
+                        final java.util.Set<String> names = arenas.stream().map(ArenaImpl::getName).collect(java.util.stream.Collectors.toSet());
+                        collection.deleteMany(new org.bson.Document("_id", new org.bson.Document("$nin", names)));
+                    }
+                    if (redis != null) {
+                        arenas.forEach(a -> redis.publish(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_ARENA, a.getName()));
+                    }
+                } finally {
+                    if (locked && redis != null) {
+                        redis.releaseLock(lockKey, lockValue);
+                    }
                 }
             }
         } catch (Exception ex) {
