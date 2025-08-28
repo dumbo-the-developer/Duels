@@ -130,6 +130,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private RedisService redisService;
     @Getter
     private DatabaseConfig databaseConfig;
+    private redis.clients.jedis.JedisPubSub redisSubscriber;
     private static final Logger LOGGER = Logger.getLogger("[Duels-Optimised]");
 
     @Override
@@ -164,6 +165,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             this.redisService.connect();
         } catch (Exception ex) {
             sendMessage("&eRedis connection failed, continuing without cross-server sync cache.");
+            LOGGER.log(Level.WARNING, "Redis connection failed; continuing without Redis.", ex);
+            this.redisService = null;
         }
 
         sendBanner();
@@ -193,7 +196,13 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             mongoService.close();
         }
         if (redisService != null) {
+            try {
+                if (redisSubscriber != null) {
+                    redisSubscriber.unsubscribe();
+                }
+            } catch (Exception ignored) {}
             redisService.close();
+            redisSubscriber = null;
         }
         instance = null;
         sendMessage("&2Disable process took " + (System.currentTimeMillis() - start) + "ms.");
@@ -602,6 +611,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                     });
                 }
             };
+            this.redisSubscriber = sub;
             redisService.subscribe(sub,
                     com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_USER,
                     com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_KIT,
