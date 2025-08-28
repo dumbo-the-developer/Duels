@@ -43,6 +43,7 @@ import com.meteordevelopments.duels.util.Log.LogSource;
 import com.meteordevelopments.duels.util.command.AbstractCommand;
 import com.meteordevelopments.duels.util.gui.GuiListener;
 import com.meteordevelopments.duels.util.json.JsonUtil;
+import com.meteordevelopments.duels.mongo.MongoService;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -121,6 +122,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private LeaderboardManager leaderboardManager;
     @Getter
     private RankManager rankManager;
+    @Getter
+    private MongoService mongoService;
     private static final Logger LOGGER = Logger.getLogger("[Duels-Optimised]");
 
     @Override
@@ -130,6 +133,15 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         morePaperLib = new MorePaperLib(this);
         Log.addSource(this);
         JsonUtil.registerDeserializer(ItemData.class, ItemDataDeserializer.class);
+        // Initialize Mongo early so managers can use it
+        this.mongoService = new MongoService(this);
+        try {
+            this.mongoService.connect();
+        } catch (Exception ex) {
+            sendMessage("&cFailed to connect to MongoDB. Disabling plugin.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
         sendBanner();
 
@@ -154,6 +166,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         Log.clearSources();
         logManager.debug("Log#clearSources done (took " + Math.abs(last - System.currentTimeMillis()) + "ms)");
         logManager.handleDisable();
+        if (mongoService != null) {
+            mongoService.close();
+        }
         instance = null;
         sendMessage("&2Disable process took " + (System.currentTimeMillis() - start) + "ms.");
     }
