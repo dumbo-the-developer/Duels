@@ -10,6 +10,7 @@ import redis.clients.jedis.UnifiedJedis;
 import redis.clients.jedis.UnifiedJedis;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPubSub;
+import redis.clients.jedis.params.SetParams;
 
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -86,5 +87,24 @@ public class RedisService {
     }
 
     private String getEnvOrDefault(final String key, final String def) { return def; }
+
+    public boolean tryAcquireLock(final String key, final int ttlSeconds, final String value) {
+        try {
+            final String result = client.set(key, value, SetParams.setParams().nx().ex(ttlSeconds));
+            return "OK".equalsIgnoreCase(result);
+        } catch (Exception ex) {
+            Log.error("Redis lock failed: " + key, ex);
+            return false;
+        }
+    }
+
+    public void releaseLock(final String key, final String value) {
+        final String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
+        try {
+            client.eval(script, java.util.Collections.singletonList(key), java.util.Collections.singletonList(value));
+        } catch (Exception ex) {
+            Log.error("Redis unlock failed: " + key, ex);
+        }
+    }
 }
 

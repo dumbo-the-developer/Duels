@@ -11,6 +11,8 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,6 +44,16 @@ public class MongoService {
         client = MongoClients.create(settings);
         database = client.getDatabase(dbName);
         DuelsPlugin.sendMessage("&aConnected to MongoDB database '&f" + dbName + "&a'.");
+
+        // Ensure indexes
+        try {
+            database.getCollection("kits").createIndex(Indexes.ascending("_id"), new IndexOptions().unique(true));
+            database.getCollection("arenas").createIndex(Indexes.ascending("_id"), new IndexOptions().unique(true));
+            database.getCollection("queues").createIndex(Indexes.ascending("_id"), new IndexOptions().unique(true));
+            database.getCollection("signs").createIndex(Indexes.ascending("_id"), new IndexOptions().unique(true));
+            database.getCollection("users").createIndex(Indexes.ascending("_id"), new IndexOptions().unique(true));
+        } catch (Exception ignored) {
+        }
     }
 
     public void close() {
@@ -99,6 +111,22 @@ public class MongoService {
             Log.error("Failed to load users from Mongo", ex);
         }
         return users;
+    }
+
+    public void updateUserStats(@NotNull final UUID uuid, final Integer wins, final Integer losses, final String kitKey, final Integer kitRating, final Integer totalElo) {
+        try {
+            final Document filter = new Document("_id", uuid.toString());
+            final Document set = new Document();
+            if (wins != null) set.put("wins", wins);
+            if (losses != null) set.put("losses", losses);
+            if (kitKey != null && kitRating != null) set.put("rating." + kitKey, kitRating);
+            if (totalElo != null) set.put("totalElo", totalElo);
+            if (!set.isEmpty()) {
+                collection("users").updateOne(filter, new Document("$set", set));
+            }
+        } catch (Exception ex) {
+            Log.error("Failed to update user stats atomically", ex);
+        }
     }
 }
 

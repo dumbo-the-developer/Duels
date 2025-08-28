@@ -352,17 +352,35 @@ public class DuelManager implements Loadable {
             vault.remove(bet, players);
         }
 
-        final DuelMatch match = arena.startMatch(kit, items, settings, source);
-        addPlayers(first, match, arena, kit, arena.getPosition(1));
-        addPlayers(second, match, arena, kit, arena.getPosition(2));
+        // Acquire a short Redis lock on arena to avoid cross-server double assignment
+        String lockKey = null;
+        String lockVal = java.util.UUID.randomUUID().toString();
+        try {
+            if (plugin.getRedisService() != null) {
+                lockKey = "duels:arena:lock:" + arena.getName();
+                if (!plugin.getRedisService().tryAcquireLock(lockKey, 10, lockVal)) {
+                    lang.sendMessage(players, "DUEL.start-failure.arena-in-use");
+                    refundItems(players, items);
+                    return false;
+                }
+            }
+
+            final DuelMatch match = arena.startMatch(kit, items, settings, source);
+            addPlayers(first, match, arena, kit, arena.getPosition(1));
+            addPlayers(second, match, arena, kit, arena.getPosition(2));
 
         if (config.isCdEnabled()) {
             arena.startCountdown();
         }
 
-        final MatchStartEvent event = new MatchStartEvent(match, players.toArray(new Player[players.size()]));
-        Bukkit.getPluginManager().callEvent(event);
-        return true;
+            final MatchStartEvent event = new MatchStartEvent(match, players.toArray(new Player[players.size()]));
+            Bukkit.getPluginManager().callEvent(event);
+            return true;
+        } finally {
+            if (lockKey != null && plugin.getRedisService() != null) {
+                plugin.getRedisService().releaseLock(lockKey, lockVal);
+            }
+        }
     }
 
     public boolean startMatch(final Player sender, final Player target, final Settings settings, final Map<UUID, List<ItemStack>> items, final Queue source) {
