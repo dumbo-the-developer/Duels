@@ -19,7 +19,7 @@ public class WorldGuardHook extends PluginHook<DuelsPlugin> {
         super(plugin, NAME);
         this.config = plugin.getConfiguration();
         try {
-            this.handler = new UnifiedWorldGuardHandler();
+            this.handler = new WorldGuard7Handler();
         } catch (Exception e) {
             plugin.getLogger().log(Level.WARNING, "Failed to initialize WorldGuard integration. WorldGuard features will be disabled.", e);
             this.handler = null;
