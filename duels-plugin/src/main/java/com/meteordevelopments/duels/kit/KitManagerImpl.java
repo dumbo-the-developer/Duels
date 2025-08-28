@@ -128,16 +128,33 @@ public class KitManagerImpl implements Loadable, KitManager {
     // Called by Redis subscriber
     public void reloadKit(@NotNull final String name) {
         final var mongo = plugin.getMongoService();
-        if (mongo == null) { return; }
+        if (mongo == null) return;
         try {
-            final var doc = mongo.collection("kits").find(new org.bson.Document("_id", name)).first();
-            if (doc == null) { return; }
-            final String json = doc.toJson();
-            final com.meteordevelopments.duels.data.KitData data = com.meteordevelopments.duels.util.json.JsonUtil.getObjectMapper().readValue(json, com.meteordevelopments.duels.data.KitData.class);
-            if (data == null) { return; }
-            kits.put(name, data.toKit(plugin));
-            if (gui != null) { gui.calculatePages(); }
-        } catch (Exception ignored) {}
+            final var doc = mongo.collection("kits")
+                                 .find(new org.bson.Document("_id", name))
+                                 .first();
+            if (doc == null) return;
+
+            // Bind directly from BSON document into our KitData POJO
+            final com.meteordevelopments.duels.data.KitData data =
+                    com.meteordevelopments.duels.util.json.JsonUtil
+                        .getObjectMapper()
+                        .convertValue(doc, com.meteordevelopments.duels.data.KitData.class);
+            if (data == null
+                || data.getName() == null
+                || !com.meteordevelopments.duels.util.StringUtil.isAlphanumeric(data.getName())) {
+                return;
+            }
+
+            // Schedule the mutation and GUI update on the main server thread
+            org.bukkit.Bukkit.getScheduler().runTask(plugin, () -> {
+                kits.put(data.getName(), data.toKit(plugin));
+                if (gui != null) gui.calculatePages();
+            });
+        } catch (Exception ex) {
+            com.meteordevelopments.duels.util.Log.error(this,
+                "Failed to reload kit: " + name, ex);
+        }
     }
 
     public KitImpl create(@NotNull final Player creator, @NotNull final String name, final boolean override) {
