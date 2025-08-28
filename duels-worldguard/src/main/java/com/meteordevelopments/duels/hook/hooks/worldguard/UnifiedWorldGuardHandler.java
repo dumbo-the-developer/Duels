@@ -8,7 +8,7 @@ import java.util.Collection;
 public class UnifiedWorldGuardHandler implements WorldGuardHandler {
     
     private final boolean isVersion7;
-    private final Method getApplicableRegionsMethod;
+    private final Method getRegionManagerMethod;
     private final Object worldGuardInstance;
     private final Class<?> protectedRegionClass;
     private final Method getIdMethod;
@@ -27,7 +27,7 @@ public class UnifiedWorldGuardHandler implements WorldGuardHandler {
             getIdMethod = protectedRegionClass.getMethod("getId");
             
             // We'll set this in the findRegion method since it's more complex for v7
-            getApplicableRegionsMethod = null;
+            getRegionManagerMethod = null;
         } else {
             // Initialize WorldGuard v6 components
             Class<?> worldGuardPluginClass = Class.forName("com.sk89q.worldguard.bukkit.WorldGuardPlugin");
@@ -38,7 +38,7 @@ public class UnifiedWorldGuardHandler implements WorldGuardHandler {
             getIdMethod = protectedRegionClass.getMethod("getId");
             
             // Get the getRegionManager method for v6
-            getApplicableRegionsMethod = worldGuardPluginClass.getMethod("getRegionManager", 
+            getRegionManagerMethod = worldGuardPluginClass.getMethod("getRegionManager", 
                 Class.forName("org.bukkit.World"));
         }
     }
@@ -78,7 +78,7 @@ public class UnifiedWorldGuardHandler implements WorldGuardHandler {
         
         // Convert location to BlockVector3
         Class<?> blockVector3Class = Class.forName("com.sk89q.worldedit.math.BlockVector3");
-        Method atMethod = blockVector3Class.getMethod("at", double.class, double.class, double.class);
+        Method atMethod = blockVector3Class.getMethod("at", int.class, int.class, int.class);
         Object vector = atMethod.invoke(null, player.getLocation().getBlockX(), 
                                              player.getLocation().getBlockY(), 
                                              player.getLocation().getBlockZ());
@@ -101,7 +101,12 @@ public class UnifiedWorldGuardHandler implements WorldGuardHandler {
     
     private String findRegionV6(Player player, Collection<String> regions) throws Exception {
         // Get region manager for the world
-        Object regionManager = getApplicableRegionsMethod.invoke(worldGuardInstance, player.getWorld());
+        Object regionManager = getRegionManagerMethod.invoke(worldGuardInstance, player.getWorld());
+        
+        // Handle unloaded worlds - region manager can be null
+        if (regionManager == null) {
+            return null;
+        }
         
         // Get applicable regions
         Method getApplicableRegionsMethod = regionManager.getClass().getMethod("getApplicableRegions", 

@@ -6,13 +6,14 @@ import com.meteordevelopments.duels.util.hook.PluginHook;
 import org.bukkit.entity.Player;
 
 import java.util.Collection;
+import java.util.logging.Level;
 
 public class WorldGuardHook extends PluginHook<DuelsPlugin> {
 
     public static final String NAME = "WorldGuard";
 
     private final Config config;
-    private final WorldGuardHandler handler;
+    private WorldGuardHandler handler;
 
     public WorldGuardHook(final DuelsPlugin plugin) {
         super(plugin, NAME);
@@ -20,12 +21,13 @@ public class WorldGuardHook extends PluginHook<DuelsPlugin> {
         try {
             this.handler = new UnifiedWorldGuardHandler();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize WorldGuard integration", e);
+            plugin.getLogger().log(Level.WARNING, "Failed to initialize WorldGuard integration. WorldGuard features will be disabled.", e);
+            this.handler = null;
         }
     }
 
     public String findDuelZone(final Player player) {
-        if (!config.isDuelzoneEnabled()) {
+        if (!config.isDuelzoneEnabled() || handler == null) {
             return null;
         }
 
