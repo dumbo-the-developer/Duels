@@ -1,6 +1,4 @@
 dependencies {
-    api 'io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT'
-    
     // WorldGuard v7 (will be available at runtime)
     compileOnly('com.sk89q.worldguard:worldguard-bukkit:7.0.9') {
         exclude group: 'org.bukkit', module: 'bukkit'
