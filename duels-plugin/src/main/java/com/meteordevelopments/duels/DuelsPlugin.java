@@ -44,6 +44,7 @@ import com.meteordevelopments.duels.util.command.AbstractCommand;
 import com.meteordevelopments.duels.util.gui.GuiListener;
 import com.meteordevelopments.duels.util.json.JsonUtil;
 import com.meteordevelopments.duels.mongo.MongoService;
+import com.meteordevelopments.duels.redis.RedisService;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -124,6 +125,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private RankManager rankManager;
     @Getter
     private MongoService mongoService;
+    @Getter
+    private RedisService redisService;
     private static final Logger LOGGER = Logger.getLogger("[Duels-Optimised]");
 
     @Override
@@ -141,6 +144,13 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             sendMessage("&cFailed to connect to MongoDB. Disabling plugin.");
             getServer().getPluginManager().disablePlugin(this);
             return;
+        }
+        // Initialize Redis (optional but recommended). If fails, plugin continues without Redis.
+        this.redisService = new RedisService(this);
+        try {
+            this.redisService.connect();
+        } catch (Exception ex) {
+            sendMessage("&eRedis connection failed, continuing without cross-server sync cache.");
         }
 
         sendBanner();
@@ -168,6 +178,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         logManager.handleDisable();
         if (mongoService != null) {
             mongoService.close();
+        }
+        if (redisService != null) {
+            redisService.close();
         }
         instance = null;
         sendMessage("&2Disable process took " + (System.currentTimeMillis() - start) + "ms.");
@@ -505,6 +518,11 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         }
 
         sendMessage("&dSuccessfully loaded all loadables in &f[" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
+
+        // After managers are available, set up Redis subscriptions
+        if (redisService != null) {
+            setupRedisSubscriptions();
+        }
     }
 
     private void loadAndTrack(String name, Runnable task) {
@@ -549,6 +567,39 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             sendMessage("&aDownload " + getName() + " v" + updateManager.getLatestVersion() + " here:");
             sendMessage("&e" + getDescription().getWebsite());
             sendMessage("&a===============================================");
+        }
+    }
+
+    private void setupRedisSubscriptions() {
+        try {
+            final var sub = new redis.clients.jedis.JedisPubSub() {
+                @Override
+                public void onMessage(String channel, String message) {
+                    if (channel.equals(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_USER)) {
+                        try {
+                            final java.util.UUID uuid = java.util.UUID.fromString(message);
+                            if (userManager != null) {
+                                userManager.reloadUser(uuid);
+                            }
+                        } catch (Exception ignored) {}
+                    } else if (channel.equals(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_KIT)) {
+                        if (kitManager != null) {
+                            kitManager.reloadKit(message);
+                        }
+                    } else if (channel.equals(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_ARENA)) {
+                        if (arenaManager != null) {
+                            arenaManager.reloadArena(message);
+                        }
+                    }
+                }
+            };
+            redisService.subscribe(sub,
+                    com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_USER,
+                    com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_KIT,
+                    com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_ARENA
+            );
+        } catch (Exception ex) {
+            sendMessage("&eFailed to subscribe to Redis channels; continuing without cross-server sync.");
         }
     }
 }

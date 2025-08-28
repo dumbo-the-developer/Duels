@@ -123,6 +123,9 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
                     doc.put("_id", data.getName());
                     collection.insertOne(doc);
                 }
+                if (plugin.getRedisService() != null) {
+                    arenas.forEach(a -> plugin.getRedisService().publish(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_ARENA, a.getName()));
+                }
             }
         } catch (Exception ex) {
             Log.error(this, ex.getMessage(), ex);
@@ -134,6 +137,24 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
     public ArenaImpl get(@NotNull final String name) {
         Objects.requireNonNull(name, "name");
         return arenas.stream().filter(arena -> arena.getName().equals(name)).findFirst().orElse(null);
+    }
+
+    // Called by Redis subscriber
+    public void reloadArena(@NotNull final String name) {
+        final var mongo = plugin.getMongoService();
+        if (mongo == null) { return; }
+        try {
+            final var doc = mongo.collection("arenas").find(new org.bson.Document("_id", name)).first();
+            if (doc == null) { return; }
+            final String json = doc.toJson();
+            final com.meteordevelopments.duels.data.ArenaData data = com.meteordevelopments.duels.util.json.JsonUtil.getObjectMapper().readValue(json, com.meteordevelopments.duels.data.ArenaData.class);
+            if (data == null) { return; }
+            final ArenaImpl arena = data.toArena(plugin);
+            // Replace existing
+            arenas.removeIf(a -> a.getName().equals(name));
+            arenas.add(arena);
+            if (gui != null) { gui.calculatePages(); }
+        } catch (Exception ignored) {}
     }
 
     @Nullable

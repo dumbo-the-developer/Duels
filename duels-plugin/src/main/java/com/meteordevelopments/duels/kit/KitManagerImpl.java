@@ -107,6 +107,10 @@ public class KitManagerImpl implements Loadable, KitManager {
                     doc.put("_id", kd.getName());
                     collection.insertOne(doc);
                 }
+                if (plugin.getRedisService() != null) {
+                    // notify cross-server to refresh kits
+                    kits.keySet().forEach(name -> plugin.getRedisService().publish(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_KIT, name));
+                }
             }
         } catch (Exception ex) {
             Log.error(this, ex.getMessage(), ex);
@@ -118,6 +122,21 @@ public class KitManagerImpl implements Loadable, KitManager {
     public KitImpl get(@NotNull final String name) {
         Objects.requireNonNull(name, "name");
         return kits.get(name);
+    }
+
+    // Called by Redis subscriber
+    public void reloadKit(@NotNull final String name) {
+        final var mongo = plugin.getMongoService();
+        if (mongo == null) { return; }
+        try {
+            final var doc = mongo.collection("kits").find(new org.bson.Document("_id", name)).first();
+            if (doc == null) { return; }
+            final String json = doc.toJson();
+            final com.meteordevelopments.duels.data.KitData data = com.meteordevelopments.duels.util.json.JsonUtil.getObjectMapper().readValue(json, com.meteordevelopments.duels.data.KitData.class);
+            if (data == null) { return; }
+            kits.put(name, data.toKit(plugin));
+            if (gui != null) { gui.calculatePages(); }
+        } catch (Exception ignored) {}
     }
 
     public KitImpl create(@NotNull final Player creator, @NotNull final String name, final boolean override) {

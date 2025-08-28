@@ -205,6 +205,27 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
         return DateUtil.format((creation + config.getTopUpdateInterval() - System.currentTimeMillis()) / 1000L);
     }
 
+    // Called by Redis subscriber to refresh a single user from Mongo
+    public void reloadUser(@NotNull final UUID uuid) {
+        plugin.doAsync(() -> {
+            try {
+                final var mongo = plugin.getMongoService();
+                if (mongo == null) { return; }
+                final UserData user = mongo.loadUser(uuid);
+                if (user == null) { return; }
+                user.folder = folder;
+                user.defaultRating = defaultRating;
+                user.matchesToDisplay = matchesToDisplay;
+                user.refreshMatches();
+                user.calculateTotalElo();
+                users.put(uuid, user);
+                if (user.getName() != null) {
+                    names.put(user.getName().toLowerCase(), uuid);
+                }
+            } catch (Exception ignored) {}
+        });
+    }
+
     private TopEntry get(final long interval, final TopEntry previous, final Function<User, Integer> function, final String type, final String identifier) {
         if (previous == null || System.currentTimeMillis() - previous.getCreation() >= interval) {
             return new TopEntry(type, identifier, subList(sorted(function)));

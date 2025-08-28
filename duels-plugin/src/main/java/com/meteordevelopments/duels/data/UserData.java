@@ -226,6 +226,10 @@ public class UserData implements User {
             final DuelsPlugin plugin = DuelsPlugin.getInstance();
             if (plugin != null && plugin.getMongoService() != null) {
                 plugin.getMongoService().saveUser(this);
+                // publish invalidation for cross-server cache
+                if (plugin.getRedisService() != null) {
+                    plugin.getRedisService().publish(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_USER, this.getUuid().toString());
+                }
             }
         } catch (Exception ex) {
             Log.error(String.format(ERROR_USER_SAVE, name), ex);
