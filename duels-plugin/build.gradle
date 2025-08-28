@@ -14,7 +14,7 @@ processResources {
 }
 
 dependencies {
-    compileOnly 'org.jetbrains:annotations-java5:24.1.0'
+    compileOnly 'org.jetbrains:annotations:24.1.0'
     compileOnly 'org.projectlombok:lombok:1.18.38'
     annotationProcessor 'org.projectlombok:lombok:1.18.38'
     implementation 'commons-lang:commons-lang:2.6'
