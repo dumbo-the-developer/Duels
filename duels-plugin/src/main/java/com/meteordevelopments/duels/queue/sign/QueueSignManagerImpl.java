@@ -100,7 +100,8 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
             final var mongo = plugin.getMongoService();
             if (mongo != null) {
                 final var collection = mongo.collection("signs");
-                collection.deleteMany(new org.bson.Document());
+                final java.util.List<com.mongodb.client.model.WriteModel<org.bson.Document>> ops = new java.util.ArrayList<>();
+                final String serverId = plugin.getServer().getPort() > 0 ? String.valueOf(plugin.getServer().getPort()) : "default";
                 for (final QueueSignImpl sign : signs.values()) {
                     if (sign.getQueue().isRemoved()) {
                         continue;
@@ -108,10 +109,15 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
                     final QueueSignData data = new QueueSignData(sign);
                     final String json = JsonUtil.getObjectWriter().writeValueAsString(data);
                     final org.bson.Document doc = org.bson.Document.parse(json);
-                    // build an id from location to ensure uniqueness
-                    final String id = sign.getLocation().getWorld().getName() + ":" + sign.getLocation().getBlockX() + ":" + sign.getLocation().getBlockY() + ":" + sign.getLocation().getBlockZ();
+                    // scope by server
+                    doc.put("serverId", serverId);
+                    final String id = sign.getLocation().getWorld().getName() + ":" + sign.getLocation().getBlockX() + ":" + sign.getLocation().getBlockY() + ":" + sign.getLocation().getBlockZ() + ":" + serverId;
                     doc.put("_id", id);
-                    collection.insertOne(doc);
+                    final org.bson.Document filter = new org.bson.Document("_id", id);
+                    ops.add(new com.mongodb.client.model.ReplaceOneModel<>(filter, doc, new com.mongodb.client.model.ReplaceOptions().upsert(true)));
+                }
+                if (!ops.isEmpty()) {
+                    collection.bulkWrite(ops);
                 }
             }
         } catch (Exception ex) {

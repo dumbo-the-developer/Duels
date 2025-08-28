@@ -45,14 +45,12 @@ public class MongoService {
         database = client.getDatabase(dbName);
         DuelsPlugin.sendMessage("&aConnected to MongoDB database '&f" + dbName + "&a'.");
 
-        // Ensure indexes
+        // Ensure any additional indexes (avoid redundant _id index creation)
         try {
-            database.getCollection("kits").createIndex(Indexes.ascending("_id"), new IndexOptions().unique(true));
-            database.getCollection("arenas").createIndex(Indexes.ascending("_id"), new IndexOptions().unique(true));
-            database.getCollection("queues").createIndex(Indexes.ascending("_id"), new IndexOptions().unique(true));
-            database.getCollection("signs").createIndex(Indexes.ascending("_id"), new IndexOptions().unique(true));
-            database.getCollection("users").createIndex(Indexes.ascending("_id"), new IndexOptions().unique(true));
-        } catch (Exception ignored) {
+            // Example: index by user name if later used for lookups
+            // database.getCollection("users").createIndex(Indexes.ascending("name"));
+        } catch (Exception ex) {
+            Log.error("Failed creating Mongo indexes", ex);
         }
     }
 
@@ -63,6 +61,9 @@ public class MongoService {
     }
 
     public MongoCollection<Document> collection(@NotNull final String name) {
+        if (database == null) {
+            throw new IllegalStateException("MongoService not connected; call connect() before using collection()");
+        }
         return database.getCollection(name);
     }
 
@@ -89,7 +90,9 @@ public class MongoService {
             if (doc == null) {
                 return null;
             }
-            final String json = doc.toJson();
+            final Document copy = new Document(doc);
+            copy.remove("_id");
+            final String json = copy.toJson();
             return JsonUtil.getObjectMapper().readValue(json, UserData.class);
         } catch (Exception ex) {
             Log.error("Failed to load user from Mongo", ex);
@@ -99,9 +102,12 @@ public class MongoService {
 
     public List<UserData> loadAllUsers() {
         final List<UserData> users = new ArrayList<>();
-        try {
-            for (final Document doc : collection("users").find()) {
-                final String json = doc.toJson();
+        try (com.mongodb.client.MongoCursor<Document> cursor = collection("users").find().iterator()) {
+            while (cursor.hasNext()) {
+                final Document doc = cursor.next();
+                final Document copy = new Document(doc);
+                copy.remove("_id");
+                final String json = copy.toJson();
                 final UserData user = JsonUtil.getObjectMapper().readValue(json, UserData.class);
                 if (user != null) {
                     users.add(user);
@@ -119,7 +125,10 @@ public class MongoService {
             final Document set = new Document();
             if (wins != null) set.put("wins", wins);
             if (losses != null) set.put("losses", losses);
-            if (kitKey != null && kitRating != null) set.put("rating." + kitKey, kitRating);
+            if (kitKey != null && kitRating != null) {
+                String safeKey = kitKey.replace('.', '_').replace('$', '_');
+                set.put("rating." + safeKey, kitRating);
+            }
             if (totalElo != null) set.put("totalElo", totalElo);
             if (!set.isEmpty()) {
                 collection("users").updateOne(filter, new Document("$set", set));

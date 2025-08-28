@@ -71,8 +71,11 @@ public class KitManagerImpl implements Loadable, KitManager {
                 for (final org.bson.Document doc : collection.find()) {
                     final String json = doc.toJson();
                     final KitData data = JsonUtil.getObjectMapper().readValue(json, KitData.class);
-                    if (data != null && StringUtil.isAlphanumeric(data.getName())) {
-                        kits.put(data.getName(), data.toKit(plugin));
+                    final String kitName = data != null ? data.getName() : null;
+                    if (kitName != null && !kitName.isEmpty() && StringUtil.isAlphanumeric(kitName)) {
+                        kits.put(kitName, data.toKit(plugin));
+                    } else {
+                        Log.warn(this, "Skipping invalid kit document (missing/invalid name)");
                     }
                 }
             }
@@ -98,14 +101,12 @@ public class KitManagerImpl implements Loadable, KitManager {
             final var mongo = plugin.getMongoService();
             if (mongo != null) {
                 final var collection = mongo.collection("kits");
-                // Replace all kits: simplest approach for now
-                collection.deleteMany(new org.bson.Document());
                 for (final Map.Entry<String, KitImpl> entry : kits.entrySet()) {
                     final KitData kd = KitData.fromKit(entry.getValue());
                     final String json = JsonUtil.getObjectWriter().writeValueAsString(kd);
                     final org.bson.Document doc = org.bson.Document.parse(json);
                     doc.put("_id", kd.getName());
-                    collection.insertOne(doc);
+                    collection.replaceOne(new org.bson.Document("_id", kd.getName()), doc, new com.mongodb.client.model.ReplaceOptions().upsert(true));
                 }
                 if (plugin.getRedisService() != null) {
                     // notify cross-server to refresh kits
@@ -177,6 +178,15 @@ public class KitManagerImpl implements Loadable, KitManager {
         kit.setRemoved(true);
         plugin.getArenaManager().clearBinds(kit);
         saveKits();
+        try {
+            final var mongo = plugin.getMongoService();
+            if (mongo != null) {
+                mongo.collection("kits").deleteOne(new org.bson.Document("_id", name));
+            }
+            if (plugin.getRedisService() != null) {
+                plugin.getRedisService().publish(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_KIT, name);
+            }
+        } catch (Exception ignored) {}
 
         final KitRemoveEvent event = new KitRemoveEvent(source, kit);
         Bukkit.getPluginManager().callEvent(event);

@@ -67,8 +67,8 @@ public class RedisService {
     public UnifiedJedis client() { return client; }
 
     public void publish(final String channel, final String message) {
-        try (UnifiedJedis j = client()) {
-            j.publish(channel, message);
+        try {
+            client.publish(channel, message);
         } catch (Exception ex) {
             Log.error("Redis publish failed on channel: " + channel, ex);
         }

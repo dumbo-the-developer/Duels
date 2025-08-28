@@ -115,13 +115,12 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
             final var mongo = plugin.getMongoService();
             if (mongo != null) {
                 final var collection = mongo.collection("arenas");
-                collection.deleteMany(new org.bson.Document());
                 for (final ArenaImpl arena : arenas) {
                     final ArenaData data = new ArenaData(arena);
                     final String json = JsonUtil.getObjectWriter().writeValueAsString(data);
                     final org.bson.Document doc = org.bson.Document.parse(json);
                     doc.put("_id", data.getName());
-                    collection.insertOne(doc);
+                    collection.replaceOne(new org.bson.Document("_id", data.getName()), doc, new com.mongodb.client.model.ReplaceOptions().upsert(true));
                 }
                 if (plugin.getRedisService() != null) {
                     arenas.forEach(a -> plugin.getRedisService().publish(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_ARENA, a.getName()));
@@ -145,7 +144,11 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
         if (mongo == null) { return; }
         try {
             final var doc = mongo.collection("arenas").find(new org.bson.Document("_id", name)).first();
-            if (doc == null) { return; }
+            if (doc == null) {
+                arenas.removeIf(a -> a.getName().equals(name));
+                if (gui != null) { gui.calculatePages(); }
+                return;
+            }
             final String json = doc.toJson();
             final com.meteordevelopments.duels.data.ArenaData data = com.meteordevelopments.duels.util.json.JsonUtil.getObjectMapper().readValue(json, com.meteordevelopments.duels.data.ArenaData.class);
             if (data == null) { return; }
@@ -195,6 +198,11 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
         if (arenas.remove(arena)) {
             arena.setRemoved(true);
             saveArenas();
+            try {
+                if (plugin.getRedisService() != null) {
+                    plugin.getRedisService().publish(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_ARENA, arena.getName());
+                }
+            } catch (Exception ignored) {}
 
             final ArenaRemoveEvent event = new ArenaRemoveEvent(source, arena);
             Bukkit.getPluginManager().callEvent(event);

@@ -53,6 +53,7 @@ dependencies {
     implementation 'org.json:json:20250517'
     implementation 'org.mongodb:mongodb-driver-sync:5.1.2'
     implementation 'redis.clients:jedis:5.1.5'
+    implementation 'org.apache.commons:commons-pool2:2.12.0'
 }
 
 shadowJar {
@@ -73,6 +74,7 @@ shadowJar {
         include(dependency('space.arim.morepaperlib:.*'))
         include(dependency('org.mongodb:.*'))
         include(dependency('redis.clients:.*'))
+        include(dependency('org.apache.commons:commons-pool2:.*'))
     }
 
     final String group = project.group.toString() + "." + parent.name.toLowerCase() + ".shaded."
@@ -82,6 +84,7 @@ shadowJar {
     relocate 'com.mongodb', group + 'mongodb'
     relocate 'org.bson', group + 'bson'
     relocate 'redis.clients', group + 'redis'
+    relocate 'org.apache.commons.pool2', group + 'commons.pool2'
 }
 
 // To build Duels plugin jar, run './gradlew clean build'.

@@ -361,13 +361,26 @@ public class DuelManager implements Loadable {
                 if (!plugin.getRedisService().tryAcquireLock(lockKey, 10, lockVal)) {
                     lang.sendMessage(players, "DUEL.start-failure.arena-in-use");
                     refundItems(players, items);
+                    if (bet > 0 && vault != null) {
+                        vault.add(bet, players);
+                    }
                     return false;
                 }
             }
 
-            final DuelMatch match = arena.startMatch(kit, items, settings, source);
-            addPlayers(first, match, arena, kit, arena.getPosition(1));
-            addPlayers(second, match, arena, kit, arena.getPosition(2));
+            final DuelMatch match;
+            try {
+                match = arena.startMatch(kit, items, settings, source);
+                addPlayers(first, match, arena, kit, arena.getPosition(1));
+                addPlayers(second, match, arena, kit, arena.getPosition(2));
+            } catch (Exception ex) {
+                refundItems(players, items);
+                if (bet > 0 && vault != null) {
+                    vault.add(bet, players);
+                }
+                lang.sendMessage(players, "DUEL.start-failure.arena-in-use");
+                return false;
+            }
 
         if (config.isCdEnabled()) {
             arena.startCountdown();
