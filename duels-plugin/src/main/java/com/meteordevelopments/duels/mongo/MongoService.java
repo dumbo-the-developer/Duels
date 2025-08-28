@@ -32,8 +32,8 @@ public class MongoService {
     }
 
     public void connect() {
-        final String uri = getEnvOrDefault("MONGO_URI", "mongodb://localhost:27017");
-        final String dbName = getEnvOrDefault("MONGO_DB", "duels");
+        final String uri = plugin.getDatabaseConfig().getMongoUri();
+        final String dbName = plugin.getDatabaseConfig().getMongoDatabase();
 
         final MongoClientSettings settings = MongoClientSettings.builder()
                 .applyConnectionString(new ConnectionString(uri))
@@ -54,10 +54,7 @@ public class MongoService {
         return database.getCollection(name);
     }
 
-    private String getEnvOrDefault(final String key, final String def) {
-        final String value = System.getenv(key);
-        return value != null && !value.isEmpty() ? value : def;
-    }
+    private String getEnvOrDefault(final String key, final String def) { return def; }
 
     // ===== Convenience methods for common data types =====
 

@@ -19,6 +19,7 @@ import com.meteordevelopments.duels.command.commands.duels.DuelsCommand;
 import com.meteordevelopments.duels.command.commands.queue.QueueCommand;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.config.Lang;
+import com.meteordevelopments.duels.config.DatabaseConfig;
 import com.meteordevelopments.duels.data.ItemData;
 import com.meteordevelopments.duels.data.ItemData.ItemDataDeserializer;
 import com.meteordevelopments.duels.lb.manager.LeaderboardManager;
@@ -127,6 +128,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private MongoService mongoService;
     @Getter
     private RedisService redisService;
+    @Getter
+    private DatabaseConfig databaseConfig;
     private static final Logger LOGGER = Logger.getLogger("[Duels-Optimised]");
 
     @Override
@@ -136,6 +139,16 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         morePaperLib = new MorePaperLib(this);
         Log.addSource(this);
         JsonUtil.registerDeserializer(ItemData.class, ItemDataDeserializer.class);
+        // Load DB.yml
+        try {
+            databaseConfig = new DatabaseConfig(this);
+            databaseConfig.handleLoad();
+        } catch (Exception ex) {
+            sendMessage("&cFailed to load DB.yml. Disabling plugin.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
         // Initialize Mongo early so managers can use it
         this.mongoService = new MongoService(this);
         try {

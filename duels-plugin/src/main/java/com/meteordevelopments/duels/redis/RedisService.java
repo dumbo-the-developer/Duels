@@ -34,10 +34,10 @@ public class RedisService {
     }
 
     public void connect() {
-        this.host = getEnvOrDefault("REDIS_HOST", "localhost");
-        this.port = Integer.parseInt(getEnvOrDefault("REDIS_PORT", "6379"));
-        this.password = System.getenv("REDIS_PASSWORD");
-        this.database = Integer.parseInt(getEnvOrDefault("REDIS_DB", "0"));
+        this.host = plugin.getDatabaseConfig().getRedisHost();
+        this.port = plugin.getDatabaseConfig().getRedisPort();
+        this.password = plugin.getDatabaseConfig().getRedisPassword();
+        this.database = plugin.getDatabaseConfig().getRedisDb();
 
         final var clientConfig = DefaultJedisClientConfig.builder()
                 .password(password != null && !password.isEmpty() ? password : null)
@@ -85,9 +85,6 @@ public class RedisService {
         });
     }
 
-    private String getEnvOrDefault(final String key, final String def) {
-        final String value = System.getenv(key);
-        return value != null && !value.isEmpty() ? value : def;
-    }
+    private String getEnvOrDefault(final String key, final String def) { return def; }
 }
 
