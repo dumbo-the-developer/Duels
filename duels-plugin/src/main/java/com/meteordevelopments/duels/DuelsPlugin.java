@@ -19,6 +19,7 @@ import com.meteordevelopments.duels.command.commands.duels.DuelsCommand;
 import com.meteordevelopments.duels.command.commands.queue.QueueCommand;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.config.Lang;
+import com.meteordevelopments.duels.config.DatabaseConfig;
 import com.meteordevelopments.duels.data.ItemData;
 import com.meteordevelopments.duels.data.ItemData.ItemDataDeserializer;
 import com.meteordevelopments.duels.lb.manager.LeaderboardManager;
@@ -43,6 +44,8 @@ import com.meteordevelopments.duels.util.Log.LogSource;
 import com.meteordevelopments.duels.util.command.AbstractCommand;
 import com.meteordevelopments.duels.util.gui.GuiListener;
 import com.meteordevelopments.duels.util.json.JsonUtil;
+import com.meteordevelopments.duels.mongo.MongoService;
+import com.meteordevelopments.duels.redis.RedisService;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -121,6 +124,13 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private LeaderboardManager leaderboardManager;
     @Getter
     private RankManager rankManager;
+    @Getter
+    private MongoService mongoService;
+    @Getter
+    private RedisService redisService;
+    @Getter
+    private DatabaseConfig databaseConfig;
+    private redis.clients.jedis.JedisPubSub redisSubscriber;
     private static final Logger LOGGER = Logger.getLogger("[Duels-Optimised]");
 
     @Override
@@ -130,6 +140,34 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         morePaperLib = new MorePaperLib(this);
         Log.addSource(this);
         JsonUtil.registerDeserializer(ItemData.class, ItemDataDeserializer.class);
+        // Load DB.yml
+        try {
+            databaseConfig = new DatabaseConfig(this);
+            databaseConfig.handleLoad();
+        } catch (Exception ex) {
+            sendMessage("&cFailed to load DB.yml. Disabling plugin.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        // Initialize Mongo early so managers can use it
+        this.mongoService = new MongoService(this);
+        try {
+            this.mongoService.connect();
+        } catch (Exception ex) {
+            sendMessage("&cFailed to connect to MongoDB. Disabling plugin.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        // Initialize Redis (optional but recommended). If fails, plugin continues without Redis.
+        this.redisService = new RedisService(this);
+        try {
+            this.redisService.connect();
+        } catch (Exception ex) {
+            sendMessage("&eRedis connection failed, continuing without cross-server sync cache.");
+            LOGGER.log(Level.WARNING, "Redis connection failed; continuing without Redis.", ex);
+            this.redisService = null;
+        }
 
         sendBanner();
 
@@ -154,6 +192,18 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         Log.clearSources();
         logManager.debug("Log#clearSources done (took " + Math.abs(last - System.currentTimeMillis()) + "ms)");
         logManager.handleDisable();
+        if (mongoService != null) {
+            mongoService.close();
+        }
+        if (redisService != null) {
+            try {
+                if (redisSubscriber != null) {
+                    redisSubscriber.unsubscribe();
+                }
+            } catch (Exception ignored) {}
+            redisService.close();
+            redisSubscriber = null;
+        }
         instance = null;
         sendMessage("&2Disable process took " + (System.currentTimeMillis() - start) + "ms.");
     }
@@ -490,6 +540,11 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         }
 
         sendMessage("&dSuccessfully loaded all loadables in &f[" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
+
+        // After managers are available, set up Redis subscriptions
+        if (redisService != null) {
+            setupRedisSubscriptions();
+        }
     }
 
     private void loadAndTrack(String name, Runnable task) {
@@ -535,5 +590,63 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             sendMessage("&e" + getDescription().getWebsite());
             sendMessage("&a===============================================");
         }
+    }
+
+    private void setupRedisSubscriptions() {
+        try {
+            // Ensure we don't stack multiple subscribers across reloads
+            if (this.redisSubscriber != null) {
+                try {
+                    this.redisSubscriber.unsubscribe();
+                } catch (Exception ignored) {}
+                this.redisSubscriber = null;
+            }
+            final var sub = new redis.clients.jedis.JedisPubSub() {
+                @Override
+                public void onMessage(String channel, String message) {
+                    doSync(() -> {
+                        // Expect messages formatted as "serverId:payload"; ignore self-originated
+                        String payload = message;
+                        try {
+                            final int idx = message.indexOf(':');
+                            if (idx > 0) {
+                                final String origin = message.substring(0, idx);
+                                if (origin.equals(getSelfServerId())) {
+                                    return;
+                                }
+                                payload = message.substring(idx + 1);
+                            }
+                        } catch (Exception ignored) {}
+                        if (channel.equals(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_USER)) {
+                            try {
+                                final java.util.UUID uuid = java.util.UUID.fromString(payload);
+                                if (userManager != null) userManager.reloadUser(uuid);
+                            } catch (Exception ignored) {}
+                        } else if (channel.equals(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_KIT)) {
+                            if (kitManager != null) kitManager.reloadKit(payload);
+                        } else if (channel.equals(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_ARENA)) {
+                            if (arenaManager != null) arenaManager.reloadArena(payload);
+                        }
+                    });
+                }
+            };
+            this.redisSubscriber = sub;
+            redisService.subscribe(sub,
+                    com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_USER,
+                    com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_KIT,
+                    com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_ARENA
+            );
+        } catch (Exception ex) {
+            sendMessage("&eFailed to subscribe to Redis channels; continuing without cross-server sync.");
+        }
+    }
+
+    private String getSelfServerId() {
+        final String configured = databaseConfig != null ? databaseConfig.getServerId() : null;
+        if (configured != null && !configured.trim().isEmpty()) {
+            return configured.trim();
+        }
+        final int port = getServer().getPort();
+        return port > 0 ? String.valueOf(port) : "default";
     }
 }

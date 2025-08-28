@@ -86,12 +86,17 @@ public class PlayerInfoManager implements Loadable {
             cacheFile.delete();
         }
 
-        if (FileUtil.checkNonEmpty(lobbyFile, false)) {
-            try (final Reader reader = new InputStreamReader(Files.newInputStream(lobbyFile.toPath()), Charsets.UTF_8)) {
-                this.lobby = JsonUtil.getObjectMapper().readValue(reader, LocationData.class).toLocation();
-            } catch (IOException ex) {
-                Log.error(this, ERROR_LOBBY_LOAD, ex);
+        try {
+            final var mongo = plugin.getMongoService();
+            if (mongo != null) {
+                final var doc = mongo.collection("meta").find(new org.bson.Document("_id", "lobby")).first();
+                if (doc != null) {
+                    final String json = doc.toJson();
+                    this.lobby = JsonUtil.getObjectMapper().readValue(json, LocationData.class).toLocation();
+                }
             }
+        } catch (Exception ex) {
+            Log.error(this, ERROR_LOBBY_LOAD, ex);
         }
 
         // If lobby is not found or invalid, use the default world's spawn location for lobby.
@@ -145,15 +150,21 @@ public class PlayerInfoManager implements Loadable {
     public boolean setLobby(final Player player) {
         final Location lobby = player.getLocation().clone();
 
-        try (final Writer writer = new OutputStreamWriter(Files.newOutputStream(lobbyFile.toPath()), Charsets.UTF_8)) {
-            JsonUtil.getObjectWriter().writeValue(writer, LocationData.fromLocation(lobby));
-            writer.flush();
-            this.lobby = lobby;
-            return true;
-        } catch (IOException ex) {
+        try {
+            final var mongo = plugin.getMongoService();
+            if (mongo != null) {
+                final var collection = mongo.collection("meta");
+                final String json = JsonUtil.getObjectWriter().writeValueAsString(LocationData.fromLocation(lobby));
+                final org.bson.Document doc = org.bson.Document.parse(json);
+                doc.put("_id", "lobby");
+                collection.replaceOne(new org.bson.Document("_id", "lobby"), doc, new com.mongodb.client.model.ReplaceOptions().upsert(true));
+                this.lobby = lobby;
+                return true;
+            }
+        } catch (Exception ex) {
             Log.error(this, ERROR_LOBBY_SAVE, ex);
-            return false;
         }
+        return false;
     }
 
     /**

@@ -117,21 +117,24 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.empty.name")).build());
         plugin.getGuiListener().addGui(gui);
 
-        if (FileUtil.checkNonEmpty(file, true)) {
-            try (final Reader reader = new InputStreamReader(Files.newInputStream(file.toPath()), Charsets.UTF_8)) {
-                final List<QueueData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<List<QueueData>>() {
-                });
-
-                if (data != null) {
-                    data.forEach(queueData -> {
-                        final Queue queue = queueData.toQueue(plugin);
-
+        // Load queues from MongoDB instead of file
+        try {
+            final var mongo = plugin.getMongoService();
+            if (mongo != null) {
+                final var collection = mongo.collection("queues");
+                for (final org.bson.Document doc : collection.find()) {
+                    final String json = doc.toJson();
+                    final QueueData data = JsonUtil.getObjectMapper().readValue(json, QueueData.class);
+                    if (data != null) {
+                        final Queue queue = data.toQueue(plugin);
                         if (queue != null && !queues.contains(queue)) {
                             queues.add(queue);
                         }
-                    });
+                    }
                 }
             }
+        } catch (Exception ex) {
+            Log.error(this, ex.getMessage(), ex);
         }
 
         DuelsPlugin.sendMessage(String.format(QUEUES_LOADED, queues.size()));
@@ -214,16 +217,21 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
     }
 
     private void saveQueues() {
-        final List<QueueData> data = new ArrayList<>();
-
-        for (final Queue queue : queues) {
-            data.add(new QueueData(queue));
-        }
-
-        try (final Writer writer = new OutputStreamWriter(Files.newOutputStream(file.toPath()), Charsets.UTF_8)) {
-            JsonUtil.getObjectWriter().writeValue(writer, data);
-            writer.flush();
-        } catch (IOException ex) {
+        try {
+            final var mongo = plugin.getMongoService();
+            if (mongo != null) {
+                final var collection = mongo.collection("queues");
+                collection.deleteMany(new org.bson.Document());
+                for (final Queue queue : queues) {
+                    final QueueData qd = new QueueData(queue);
+                    final String json = JsonUtil.getObjectWriter().writeValueAsString(qd);
+                    final org.bson.Document doc = org.bson.Document.parse(json);
+                    final String id = (queue.getKit() != null ? queue.getKit().getName() : "-") + ":" + queue.getBet();
+                    doc.put("_id", id);
+                    collection.insertOne(doc);
+                }
+            }
+        } catch (Exception ex) {
             Log.error(this, ex.getMessage(), ex);
         }
     }

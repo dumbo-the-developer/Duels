@@ -70,3 +70,32 @@ public void onEnable() {
   Duels api = (Duels) Bukkit.getServer().getPluginManager().getPlugin("Duels");
 }
 ```
+
+### MongoDB Setup
+
+- The plugin now uses MongoDB for persistence. Configure via environment variables on the server process:
+  - `MONGO_URI` (default: `mongodb://localhost:27017`)
+  - `MONGO_DB` (default: `duels`)
+
+Collections used:
+- `users` — player userdata
+- `kits` — kit definitions
+- `arenas` — arena definitions
+- `queues` — queue configurations
+- `signs` — queue signs
+- `meta` — miscellaneous (e.g., `_id = lobby`)
+
+No migration is performed; existing files are ignored.
+
+### Redis Setup (optional)
+
+- Configure env vars:
+  - `REDIS_HOST` (default: `localhost`)
+  - `REDIS_PORT` (default: `6379`)
+  - `REDIS_PASSWORD` (optional)
+  - `REDIS_DB` (default: `0`)
+
+Cross-server channels:
+- `duels:invalidate:user`
+- `duels:invalidate:kit`
+- `duels:invalidate:arena`

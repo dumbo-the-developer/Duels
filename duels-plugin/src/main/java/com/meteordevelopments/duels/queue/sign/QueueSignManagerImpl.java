@@ -61,21 +61,24 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
 
     @Override
     public void handleLoad() throws IOException {
-        if (FileUtil.checkNonEmpty(file, true)) {
-            try (final Reader reader = new InputStreamReader(Files.newInputStream(file.toPath()), Charsets.UTF_8)) {
-                final List<QueueSignData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<List<QueueSignData>>() {
-                });
-
-                if (data != null) {
-                    data.forEach(queueSignData -> {
-                        final QueueSignImpl queueSign = queueSignData.toQueueSign(plugin);
-
+        // Load signs from MongoDB instead of file
+        try {
+            final var mongo = plugin.getMongoService();
+            if (mongo != null) {
+                final var collection = mongo.collection("signs");
+                for (final org.bson.Document doc : collection.find()) {
+                    final String json = doc.toJson();
+                    final QueueSignData data = JsonUtil.getObjectMapper().readValue(json, QueueSignData.class);
+                    if (data != null) {
+                        final QueueSignImpl queueSign = data.toQueueSign(plugin);
                         if (queueSign != null) {
                             signs.put(queueSign.getLocation(), queueSign);
                         }
-                    });
+                    }
                 }
             }
+        } catch (Exception ex) {
+            Log.error(this, ex.getMessage(), ex);
         }
 
         DuelsPlugin.sendMessage(String.format(SIGNS_LOADED, signs.size()));
@@ -93,22 +96,49 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
     }
 
     private void saveQueueSigns() {
-        final List<QueueSignData> data = new ArrayList<>();
-
-        for (final QueueSignImpl sign : signs.values()) {
-            if (sign.getQueue().isRemoved()) {
-                continue;
+        try {
+            final var mongo = plugin.getMongoService();
+            if (mongo != null) {
+                final var collection = mongo.collection("signs");
+                final java.util.List<com.mongodb.client.model.WriteModel<org.bson.Document>> ops = new java.util.ArrayList<>();
+                final String serverId = resolveServerId();
+                for (final QueueSignImpl sign : signs.values()) {
+                    if (sign.getQueue().isRemoved()) {
+                        continue;
+                    }
+                    final QueueSignData data = new QueueSignData(sign);
+                    final String json = JsonUtil.getObjectWriter().writeValueAsString(data);
+                    final org.bson.Document doc = org.bson.Document.parse(json);
+                    // scope by server
+                    doc.put("serverId", serverId);
+                    final String id = sign.getLocation().getWorld().getName() + ":" + sign.getLocation().getBlockX() + ":" + sign.getLocation().getBlockY() + ":" + sign.getLocation().getBlockZ() + ":" + serverId;
+                    doc.put("_id", id);
+                    final org.bson.Document filter = new org.bson.Document("_id", id);
+                    ops.add(new com.mongodb.client.model.ReplaceOneModel<>(filter, doc, new com.mongodb.client.model.ReplaceOptions().upsert(true)));
+                }
+                if (!ops.isEmpty()) {
+                    // run unordered bulk upsert off-thread
+                    plugin.doAsync(() -> {
+                        try {
+                            collection.bulkWrite(ops, new com.mongodb.client.model.BulkWriteOptions().ordered(false));
+                        } catch (Exception ex) {
+                            Log.error(this, "Failed to persist queue signs asynchronously", ex);
+                        }
+                    });
+                }
             }
-
-            data.add(new QueueSignData(sign));
-        }
-
-        try (final Writer writer = new OutputStreamWriter(Files.newOutputStream(file.toPath()), Charsets.UTF_8)) {
-            JsonUtil.getObjectWriter().writeValue(writer, data);
-            writer.flush();
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             Log.error(this, ex.getMessage(), ex);
         }
+    }
+
+    private String resolveServerId() {
+        final String configured = plugin.getDatabaseConfig() != null ? plugin.getDatabaseConfig().getServerId() : null;
+        if (configured != null && !configured.trim().isEmpty()) {
+            return configured.trim();
+        }
+        final int port = plugin.getServer().getPort();
+        return port > 0 ? String.valueOf(port) : "default";
     }
 
     @Nullable

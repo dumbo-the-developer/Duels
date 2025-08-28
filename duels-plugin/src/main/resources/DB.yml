@@ -1,0 +1,15 @@
+config-version: 1
+
+mongo:
+  uri: "mongodb://localhost:27017"
+  database: "duels"
+
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""
+  db: 0
+
+# Optional stable identifier for this server to scope cross-server data (e.g., signs)
+serverId: ""
+

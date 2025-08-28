@@ -63,22 +63,24 @@ public class KitManagerImpl implements Loadable, KitManager {
         gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.empty.name")).build());
         plugin.getGuiListener().addGui(gui);
 
-        if (FileUtil.checkNonEmpty(file, true)) {
-            try (final Reader reader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8)) {
-                final Map<String, KitData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<LinkedHashMap<String, KitData>>() {
-                });
-
-                if (data != null) {
-                    for (final Map.Entry<String, KitData> entry : data.entrySet()) {
-                        if (!StringUtil.isAlphanumeric(entry.getKey())) {
-                            DuelsPlugin.sendMessage(String.format(ERROR_NOT_ALPHANUMERIC, entry.getKey()));
-                            continue;
-                        }
-
-                        kits.put(entry.getKey(), entry.getValue().toKit(plugin));
+        // Load from MongoDB instead of file
+        try {
+            final var mongo = plugin.getMongoService();
+            if (mongo != null) {
+                final var collection = mongo.collection("kits");
+                for (final org.bson.Document doc : collection.find()) {
+                    final String json = doc.toJson();
+                    final KitData data = JsonUtil.getObjectMapper().readValue(json, KitData.class);
+                    final String kitName = data != null ? data.getName() : null;
+                    if (kitName != null && !kitName.isEmpty() && StringUtil.isAlphanumeric(kitName)) {
+                        kits.put(kitName, data.toKit(plugin));
+                    } else {
+                        Log.warn(this, "Skipping invalid kit document (missing/invalid name)");
                     }
                 }
             }
+        } catch (Exception ex) {
+            Log.error(this, ex.getMessage(), ex);
         }
 
         DuelsPlugin.sendMessage(String.format(KITS_LOADED, kits.size()));
@@ -95,16 +97,23 @@ public class KitManagerImpl implements Loadable, KitManager {
     }
 
     void saveKits() {
-        final Map<String, KitData> data = new LinkedHashMap<>();
-
-        for (final Map.Entry<String, KitImpl> entry : kits.entrySet()) {
-            data.put(entry.getKey(), KitData.fromKit(entry.getValue()));
-        }
-
-        try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
-            JsonUtil.getObjectWriter().writeValue(writer, data);
-            writer.flush();
-        } catch (IOException ex) {
+        try {
+            final var mongo = plugin.getMongoService();
+            if (mongo != null) {
+                final var collection = mongo.collection("kits");
+                for (final Map.Entry<String, KitImpl> entry : kits.entrySet()) {
+                    final KitData kd = KitData.fromKit(entry.getValue());
+                    final String json = JsonUtil.getObjectWriter().writeValueAsString(kd);
+                    final org.bson.Document doc = org.bson.Document.parse(json);
+                    doc.put("_id", kd.getName());
+                    collection.replaceOne(new org.bson.Document("_id", kd.getName()), doc, new com.mongodb.client.model.ReplaceOptions().upsert(true));
+                }
+                if (plugin.getRedisService() != null) {
+                    // notify cross-server to refresh kits
+                    kits.keySet().forEach(name -> plugin.getRedisService().publish(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_KIT, name));
+                }
+            }
+        } catch (Exception ex) {
             Log.error(this, ex.getMessage(), ex);
         }
     }
@@ -114,6 +123,38 @@ public class KitManagerImpl implements Loadable, KitManager {
     public KitImpl get(@NotNull final String name) {
         Objects.requireNonNull(name, "name");
         return kits.get(name);
+    }
+
+    // Called by Redis subscriber
+    public void reloadKit(@NotNull final String name) {
+        final var mongo = plugin.getMongoService();
+        if (mongo == null) return;
+        try {
+            final var doc = mongo.collection("kits")
+                                 .find(new org.bson.Document("_id", name))
+                                 .first();
+            if (doc == null) return;
+
+            // Bind directly from BSON document into our KitData POJO
+            final com.meteordevelopments.duels.data.KitData data =
+                    com.meteordevelopments.duels.util.json.JsonUtil
+                        .getObjectMapper()
+                        .convertValue(doc, com.meteordevelopments.duels.data.KitData.class);
+            if (data == null
+                || data.getName() == null
+                || !com.meteordevelopments.duels.util.StringUtil.isAlphanumeric(data.getName())) {
+                return;
+            }
+
+            // Schedule the mutation and GUI update on the main server thread
+            org.bukkit.Bukkit.getScheduler().runTask(plugin, () -> {
+                kits.put(data.getName(), data.toKit(plugin));
+                if (gui != null) gui.calculatePages();
+            });
+        } catch (Exception ex) {
+            com.meteordevelopments.duels.util.Log.error(this,
+                "Failed to reload kit: " + name, ex);
+        }
     }
 
     public KitImpl create(@NotNull final Player creator, @NotNull final String name, final boolean override) {
@@ -154,6 +195,20 @@ public class KitManagerImpl implements Loadable, KitManager {
         kit.setRemoved(true);
         plugin.getArenaManager().clearBinds(kit);
         saveKits();
+        org.bukkit.Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                final var mongo = plugin.getMongoService();
+                if (mongo != null) {
+                    mongo.collection("kits").deleteOne(new org.bson.Document("_id", name));
+                }
+                final var redis = plugin.getRedisService();
+                if (redis != null) {
+                    redis.publish(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_KIT, name);
+                }
+            } catch (Exception ex) {
+                com.meteordevelopments.duels.util.Log.error(this, "Failed to finalize removal for kit: " + name, ex);
+            }
+        });
 
         final KitRemoveEvent event = new KitRemoveEvent(source, kit);
         Bukkit.getPluginManager().callEvent(event);

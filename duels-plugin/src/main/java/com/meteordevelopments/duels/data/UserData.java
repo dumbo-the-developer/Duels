@@ -8,6 +8,7 @@ import com.meteordevelopments.duels.api.kit.Kit;
 import com.meteordevelopments.duels.api.user.MatchInfo;
 import com.meteordevelopments.duels.api.user.User;
 import com.meteordevelopments.duels.util.Log;
+import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.util.json.JsonUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -221,18 +222,16 @@ public class UserData implements User {
     }
 
     public void trySave() {
-        final File file = new File(folder, uuid + ".json");
-
         try {
-            if (!file.exists()) {
-                file.createNewFile();
+            final DuelsPlugin plugin = DuelsPlugin.getInstance();
+            if (plugin != null && plugin.getMongoService() != null) {
+                plugin.getMongoService().saveUser(this);
+                // publish invalidation for cross-server cache
+                if (plugin.getRedisService() != null) {
+                    plugin.getRedisService().publish(com.meteordevelopments.duels.redis.RedisService.CHANNEL_INVALIDATE_USER, this.getUuid().toString());
+                }
             }
-
-            try (final Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
-                JsonUtil.getObjectWriter().writeValue(writer, this);
-                writer.flush();
-            }
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             Log.error(String.format(ERROR_USER_SAVE, name), ex);
         }
     }

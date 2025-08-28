@@ -63,10 +63,6 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
         this.lang = plugin.getLang();
         this.folder = new File(plugin.getDataFolder(), "users");
 
-        if (!folder.exists()) {
-            folder.mkdir();
-        }
-
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
@@ -80,45 +76,28 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
         }
 
         plugin.doAsync(() -> {
-            final File[] files = folder.listFiles();
-
-            if (files != null && files.length > 0) {
-                for (final File file : files) {
-                    final String fileName = file.getName();
-
-                    if (!fileName.endsWith(".json")) {
-                        continue;
-                    }
-
-                    final String name = fileName.substring(0, fileName.length() - 5);
-
-                    final UUID uuid = UUIDUtil.parseUUID(name);
-
-                    if (uuid == null || users.containsKey(uuid)) {
-                        continue;
-                    }
-
-                    try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
-                        final UserData user = JsonUtil.getObjectMapper().readValue(reader, UserData.class);
-
-                        if (user == null) {
-                            Log.warn(this, "Could not load userdata from file: " + fileName);
+            // Load all users from Mongo
+            try {
+                final var mongo = plugin.getMongoService();
+                if (mongo != null) {
+                    for (final UserData user : mongo.loadAllUsers()) {
+                        if (user.getUuid() == null) {
                             continue;
                         }
-
+                        final UUID uuid = user.getUuid();
                         user.folder = folder;
                         user.defaultRating = defaultRating;
                         user.matchesToDisplay = matchesToDisplay;
                         user.refreshMatches();
-                        // Calculate total ELO for existing users
                         user.calculateTotalElo();
-                        // Player might have logged in while reading the file
-                        names.putIfAbsent(user.getName().toLowerCase(), uuid);
+                        if (user.getName() != null) {
+                            names.putIfAbsent(user.getName().toLowerCase(), uuid);
+                        }
                         users.putIfAbsent(uuid, user);
-                    } catch (IOException ex) {
-                        Log.error(this, "Could not load userdata from file: " + fileName, ex);
                     }
                 }
+            } catch (Exception ex) {
+                Log.error(this, "Could not load user data from Mongo", ex);
             }
 
             loaded = true;
@@ -226,6 +205,27 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
         return DateUtil.format((creation + config.getTopUpdateInterval() - System.currentTimeMillis()) / 1000L);
     }
 
+    // Called by Redis subscriber to refresh a single user from Mongo
+    public void reloadUser(@NotNull final UUID uuid) {
+        plugin.doAsync(() -> {
+            try {
+                final var mongo = plugin.getMongoService();
+                if (mongo == null) { return; }
+                final UserData user = mongo.loadUser(uuid);
+                if (user == null) { return; }
+                user.folder = folder;
+                user.defaultRating = defaultRating;
+                user.matchesToDisplay = matchesToDisplay;
+                user.refreshMatches();
+                user.calculateTotalElo();
+                users.put(uuid, user);
+                if (user.getName() != null) {
+                    names.put(user.getName().toLowerCase(), uuid);
+                }
+            } catch (Exception ignored) {}
+        });
+    }
+
     private TopEntry get(final long interval, final TopEntry previous, final Function<User, Integer> function, final String type, final String identifier) {
         if (previous == null || System.currentTimeMillis() - previous.getCreation() >= interval) {
             return new TopEntry(type, identifier, subList(sorted(function)));
@@ -246,37 +246,29 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
     }
 
     private UserData tryLoad(final Player player) {
-        final File file = new File(folder, player.getUniqueId() + ".json");
-
-        if (!file.exists()) {
-            final UserData user = new UserData(folder, defaultRating, matchesToDisplay, player);
-            plugin.doSync(() -> Bukkit.getPluginManager().callEvent(new UserCreateEvent(user)));
-            return user;
+        final var mongo = plugin.getMongoService();
+        UserData user = null;
+        if (mongo != null) {
+            user = mongo.loadUser(player.getUniqueId());
         }
 
-        try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
-            final UserData user = JsonUtil.getObjectMapper().readValue(reader, UserData.class);
-
-            if (user == null) {
-                return null;
-            }
-
-            user.folder = folder;
-            user.defaultRating = defaultRating;
-            user.matchesToDisplay = matchesToDisplay;
-            user.refreshMatches();
-            // Calculate total ELO for loaded user
-            user.calculateTotalElo();
-
-            if (!player.getName().equals(user.getName())) {
-                user.setName(player.getName());
-            }
-
-            return user;
-        } catch (IOException ex) {
-            Log.error(this, "An error occured while loading userdata of " + player.getName() + "!", ex);
-            return null;
+        if (user == null) {
+            final UserData created = new UserData(folder, defaultRating, matchesToDisplay, player);
+            plugin.doSync(() -> Bukkit.getPluginManager().callEvent(new UserCreateEvent(created)));
+            return created;
         }
+
+        user.folder = folder;
+        user.defaultRating = defaultRating;
+        user.matchesToDisplay = matchesToDisplay;
+        user.refreshMatches();
+        user.calculateTotalElo();
+
+        if (!player.getName().equals(user.getName())) {
+            user.setName(player.getName());
+        }
+
+        return user;
     }
 
     private void saveUsers(final Collection<? extends Player> players) {
@@ -355,6 +347,7 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
             final UserData loserData = get(loser);
 
             if (winnerData != null && loserData != null) {
+                // Update in-memory for immediate placeholders/UX
                 winnerData.addWin();
                 loserData.addLoss();
                 winnerData.addMatch(matchData);
@@ -367,27 +360,31 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
 
                 if (config.isRatingEnabled() && !(!match.isFromQueue() && config.isRatingQueueOnly())) {
                     change = NumberUtil.getChange(config.getKFactor(), winnerRating, loserRating);
-                    winnerData.setRating(kit, winnerRating = winnerRating + change);
-                    loserData.setRating(kit, loserRating = loserRating - change);
-                    
+                    winnerRating = winnerRating + change;
+                    loserRating = loserRating - change;
+
+                    // Update in-memory ratings and totals
+                    winnerData.setRating(kit, winnerRating);
+                    loserData.setRating(kit, loserRating);
+
+                    // Atomically persist updates (wins/losses/ratings/totalElo) in Mongo
+                    final var mongo = plugin.getMongoService();
+                    if (mongo != null) {
+                        final String kitKey = kit != null ? kit.getName() : "-";
+                        mongo.updateUserStats(winner.getUniqueId(), winnerData.getWins(), null, kitKey, winnerRating, winnerData.getTotalElo());
+                        mongo.updateUserStats(loser.getUniqueId(), null, loserData.getLosses(), kitKey, loserRating, loserData.getTotalElo());
+                    }
+
                     // Check for rank changes after ELO update
                     if (plugin.getRankManager().isEnabled()) {
                         plugin.doAsync(() -> {
-                            // Check promotions and demotions
                             boolean winnerPromoted = plugin.getRankManager().checkPromotion(winner.getUniqueId());
                             boolean loserDemoted = plugin.getRankManager().checkDemotion(loser.getUniqueId());
-                            
-                            // Check one-time rewards
                             plugin.getRankManager().checkOneTimeRewards(winner.getUniqueId());
                             plugin.getRankManager().checkOneTimeRewards(loser.getUniqueId());
-                            
-                            // Schedule sync task for Bukkit API calls
                             plugin.doSync(() -> {
-                                // Verify players are still online
                                 Player onlineWinner = Bukkit.getPlayer(winner.getUniqueId());
                                 Player onlineLoser = Bukkit.getPlayer(loser.getUniqueId());
-                                
-                                // Send rank change messages if needed
                                 if (winnerPromoted && onlineWinner != null) {
                                     Rank winnerRank = plugin.getRankManager().getPlayerRank(onlineWinner);
                                     if (winnerRank != null) {
