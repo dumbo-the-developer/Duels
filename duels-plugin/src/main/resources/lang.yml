@@ -64,6 +64,7 @@ ERROR:
       sender: '{PREFIX} &cYou cannot do this while in spectator mode.'
       target: '{PREFIX} &c%name% is in spectator mode.'
     not-in-match: '{PREFIX} &c%name% is not in a duel.'
+    prevent-teleportation: '{PREFIX} &cYou cannot teleport to this player because he is in a duel.'
   party-duel:
     inventory-not-empty: '{PREFIX} &cYou and your party members must have a cleared inventory to use this command.'
     in-creative-mode: '{PREFIX} &cYou or your party member is in creative mode.'
