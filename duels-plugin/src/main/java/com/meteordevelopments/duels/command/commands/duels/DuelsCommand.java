@@ -44,6 +44,21 @@ public class DuelsCommand extends BaseCommand {
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
+        // Block placeholder-like arguments
+        if (containsPlaceholder(args)) {
+            lang.sendMessage(sender, "ERROR.command.invalid-argument", "arg", String.join(" ", args));
+            return;
+        }
+
         lang.sendMessage(sender, "COMMAND.duels.usage", "command", label);
+    }
+
+    private boolean containsPlaceholder(String[] args) {
+        for (String arg : args) {
+            if (arg.contains("%") || arg.contains("<") || arg.contains(">")) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -46,6 +46,11 @@ public class DuelCommand extends BaseCommand {
     protected boolean executeFirst(final CommandSender sender, final String label, final String[] args) {
         final Player player = (Player) sender;
 
+        if (containsPlaceholder(args)) {
+            lang.sendMessage(sender, "ERROR.command.invalid-argument", "arg", String.join(" ", args));
+            return true;
+        }
+
         if (userManager.get(player) == null) {
             lang.sendMessage(sender, "ERROR.data.load-failure");
             return true;
@@ -198,5 +203,13 @@ public class DuelCommand extends BaseCommand {
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         return null;
+    }
+    private boolean containsPlaceholder(String[] args) {
+        for (String arg : args) {
+            if (arg.contains("%") || arg.contains("<") || arg.contains(">")) {
+                return true;
+            }
+        }
+        return false;
     }
 }

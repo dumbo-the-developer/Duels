@@ -23,6 +23,10 @@ public class SpectateCommand extends BaseCommand {
         final Player player = (Player) sender;
         final SpectatorImpl spectator = spectateManager.get(player);
 
+        if (containsPlaceholder(args)) {
+            lang.sendMessage(sender, "ERROR.command.invalid-argument", "arg", String.join(" ", args));
+            return;
+        }
         // If player is already spectating, using /spectate will put them out of spectator mode.
         if (spectator != null) {
             spectateManager.stopSpectating(player);
@@ -81,5 +85,14 @@ public class SpectateCommand extends BaseCommand {
                         "bet_amount", match.getBet()
                 );
         }
+    }
+
+    private boolean containsPlaceholder(String[] args) {
+        for (String arg : args) {
+            if (arg.contains("%") || arg.contains("<") || arg.contains(">")) {
+                return true;
+            }
+        }
+        return false;
     }
 }

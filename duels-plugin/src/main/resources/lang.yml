@@ -132,6 +132,7 @@ ERROR:
     not-enough-money: '{PREFIX} &cYou do not have enough money to bet!'
     lobby-save-failure: '{PREFIX} &cCould not save lobby location. Please check the console for more information.'
     name-not-alphanumeric: '{PREFIX} &c''%name%'' is not alphanumeric.'
+    invalid-argument: "{PREFIX} &cInvalid argument: {arg}. Placeholders are not allowed in commands."
 
 
 COMMAND:
