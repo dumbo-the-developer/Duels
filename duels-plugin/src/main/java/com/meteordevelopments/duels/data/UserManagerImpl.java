@@ -393,7 +393,9 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
         if (config.isArenaOnlyEndMessage()) {
             match.getArena().broadcast(message);
         } else {
-            Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(message));
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                player.sendMessage(message);
+            }
         }
     }
 
