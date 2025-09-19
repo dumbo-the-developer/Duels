@@ -35,6 +35,7 @@ import org.bukkit.event.block.BlockCanBuildEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
@@ -348,6 +349,15 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
             final Player damager = EventUtil.getDamager(event);
 
             if (damager == null || !isSpectating(damager)) {
+                return;
+            }
+
+            event.setCancelled(true);
+        }
+
+        @EventHandler(ignoreCancelled = true)
+        public void on(final VehicleDamageEvent event) {
+            if (!(event.getAttacker() instanceof Player) || !isSpectating((Player) event.getAttacker())) {
                 return;
             }
 
