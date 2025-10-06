@@ -1,3 +1,3 @@
 dependencies {
-    implementation 'io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT'
+    implementation 'io.papermc.paper:paper-api:1.21.9-R0.1-SNAPSHOT'
 }
