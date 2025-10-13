@@ -154,11 +154,13 @@ public class DuelManager implements Loadable {
                         continue;
                     }
 
-                    Set<Player> members = match.getAllPlayers();
+                    // Iterate over a snapshot to avoid modifying the underlying set while processing
+                    final List<Player> members = new ArrayList<>(match.getAllPlayers());
 
                     for (final Player player : members) {
-
-                        handleTie(player, arena, match, true);
+                        // Determine alive state from match to restore items correctly if a player had died
+                        final boolean alive = !match.isDead(player);
+                        handleTie(player, arena, match, alive);
                         lang.sendMessage(player, "DUEL.on-end.tie");
                     }
 
@@ -396,7 +398,10 @@ public class DuelManager implements Loadable {
             }
 
             player.closeInventory();
-            playerManager.create(player, match.isOwnInventory() && config.isOwnInventoryDropInventoryItems());
+            final boolean dropOwnInv = match.isOwnInventory() && config.isOwnInventoryDropInventoryItems();
+            // If using own inventory (regardless of drop setting), do not restore experience to preserve XP changes
+            final boolean restoreExperience = !match.isOwnInventory();
+            playerManager.create(player, dropOwnInv, restoreExperience);
             teleport.tryTeleport(player, location);
 
             if (kit != null) {

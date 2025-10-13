@@ -21,21 +21,32 @@ public class PlayerInfo {
     private final float experience;
     private final int level;
     private final int hunger;
+    private final boolean restoreExperience;
     private final List<ItemStack> extra = new ArrayList<>();
     @Setter
     private Location location;
 
-    public PlayerInfo(final List<PotionEffect> effects, final double health, final float experience, final int level, final int hunger, final Location location) {
+    public PlayerInfo(final List<PotionEffect> effects, final double health, final float experience, final int level, final int hunger, final Location location, final boolean restoreExperience) {
         this.effects = effects;
         this.health = health;
         this.experience = experience;
         this.level = level;
         this.hunger = hunger;
         this.location = location;
+        this.restoreExperience = restoreExperience;
     }
 
     public PlayerInfo(final Player player, final boolean excludeInventory) {
-        this(Lists.newArrayList(player.getActivePotionEffects()), player.getHealth(), player.getExp(), player.getLevel(), player.getFoodLevel(), player.getLocation().clone());
+        this(Lists.newArrayList(player.getActivePotionEffects()), player.getHealth(), player.getExp(), player.getLevel(), player.getFoodLevel(), player.getLocation().clone(), true);
+        if (excludeInventory) {
+            return;
+        }
+
+        InventoryUtil.addToMap(player.getInventory(), items);
+    }
+
+    public PlayerInfo(final Player player, final boolean excludeInventory, final boolean restoreExperience) {
+        this(Lists.newArrayList(player.getActivePotionEffects()), player.getHealth(), player.getExp(), player.getLevel(), player.getFoodLevel(), player.getLocation().clone(), restoreExperience);
         if (excludeInventory) {
             return;
         }
@@ -47,8 +58,10 @@ public class PlayerInfo {
         final double maxHealth = PlayerUtil.getMaxHealth(player);
         player.addPotionEffects(effects);
         player.setHealth(Math.min(health, maxHealth));
-        player.setExp(experience);
-        player.setLevel(level);
+        if (restoreExperience) {
+            player.setExp(experience);
+            player.setLevel(level);
+        }
         player.setFoodLevel(hunger);
         InventoryUtil.fillFromMap(player.getInventory(), items);
         InventoryUtil.addOrDrop(player, extra);
