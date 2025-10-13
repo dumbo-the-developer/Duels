@@ -56,6 +56,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("deprecation")
 public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     private static final int BSTATS_ID = 20778;
@@ -224,7 +225,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     }
 
     @SafeVarargs
-    private final void registerCommands(final AbstractCommand<DuelsPlugin>... commands) {
+    private void registerCommands(final AbstractCommand<DuelsPlugin>... commands) {
         sendMessage("&eRegistering commands...");
         long start = System.currentTimeMillis();
         for (final AbstractCommand<DuelsPlugin> command : commands) {
@@ -245,7 +246,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             return false;
         }
 
-        result.child(new AbstractCommand<DuelsPlugin>(this, subCommand) {
+        result.child(new AbstractCommand<>(this, subCommand) {
             @Override
             protected void execute(final CommandSender sender, final String label, final String[] args) {
                 subCommand.execute(sender, label, args);

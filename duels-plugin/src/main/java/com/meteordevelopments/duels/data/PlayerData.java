@@ -17,6 +17,7 @@ public class PlayerData {
     private int level;
     private int hunger;
     private LocationData location;
+    private boolean restoreExperience;
     private List<ItemData> extra = new ArrayList<>();
     private PlayerData() {
     }
@@ -27,6 +28,7 @@ public class PlayerData {
         this.level = info.getLevel();
         this.hunger = info.getHunger();
         this.location = LocationData.fromLocation(info.getLocation());
+        this.restoreExperience = info.isRestoreExperience();
 
         for (final Map.Entry<String, Map<Integer, ItemStack>> entry : info.getItems().entrySet()) {
             final Map<Integer, ItemData> data = new HashMap<>();
@@ -51,7 +53,8 @@ public class PlayerData {
                 experience,
                 level,
                 hunger,
-                location.toLocation()
+                location.toLocation(),
+                restoreExperience
         );
 
         for (final Map.Entry<String, Map<Integer, ItemData>> entry : items.entrySet()) {

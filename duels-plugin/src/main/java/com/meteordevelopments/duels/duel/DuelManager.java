@@ -396,7 +396,10 @@ public class DuelManager implements Loadable {
             }
 
             player.closeInventory();
-            playerManager.create(player, match.isOwnInventory() && config.isOwnInventoryDropInventoryItems());
+            final boolean dropOwnInv = match.isOwnInventory() && config.isOwnInventoryDropInventoryItems();
+            // If using own inventory (regardless of drop setting), do not restore experience to preserve XP changes
+            final boolean restoreExperience = !match.isOwnInventory();
+            playerManager.create(player, dropOwnInv, restoreExperience);
             teleport.tryTeleport(player, location);
 
             if (kit != null) {

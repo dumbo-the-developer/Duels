@@ -178,6 +178,23 @@ public class PlayerInfoManager implements Loadable {
     }
 
     /**
+     * Creates a cached PlayerInfo instance for given player with explicit experience restore control.
+     *
+     * @param player Player to create a cached PlayerInfo instance
+     * @param excludeInventory true to exclude inventory contents from being stored in PlayerInfo, false otherwise
+     * @param restoreExperience true to restore experience/level on return, false to keep any changes made during duel
+     */
+    public void create(final Player player, final boolean excludeInventory, final boolean restoreExperience) {
+        final PlayerInfo info = new PlayerInfo(player, excludeInventory, restoreExperience);
+
+        if (!config.isTeleportToLastLocation()) {
+            info.setLocation(lobby.clone());
+        }
+
+        cache.put(player.getUniqueId(), info);
+    }
+
+    /**
      * Calls {@link #create(Player, boolean)} with excludeInventory defaulting to false.
      *
      * @see {@link #create(Player, boolean)}
