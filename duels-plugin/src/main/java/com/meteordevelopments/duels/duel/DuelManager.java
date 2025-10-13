@@ -154,11 +154,13 @@ public class DuelManager implements Loadable {
                         continue;
                     }
 
-                    Set<Player> members = match.getAllPlayers();
+                    // Iterate over a snapshot to avoid modifying the underlying set while processing
+                    final List<Player> members = new ArrayList<>(match.getAllPlayers());
 
                     for (final Player player : members) {
-
-                        handleTie(player, arena, match, true);
+                        // Determine alive state from match to restore items correctly if a player had died
+                        final boolean alive = !match.isDead(player);
+                        handleTie(player, arena, match, alive);
                         lang.sendMessage(player, "DUEL.on-end.tie");
                     }
 
