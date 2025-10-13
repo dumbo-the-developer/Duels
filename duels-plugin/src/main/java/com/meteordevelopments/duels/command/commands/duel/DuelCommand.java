@@ -72,12 +72,13 @@ public class DuelCommand extends BaseCommand {
             return true;
         }
 
-        final Player target = Bukkit.getPlayerExact(args[0]);
+		final Player target = Bukkit.getPlayerExact(args[0]);
 
-        if (target == null) {
-            lang.sendMessage(sender, "ERROR.player.not-found", "name", args[0]);
-            return true;
-        }
+		// Treat vanished players as not found for players who cannot see them
+		if (target == null || !player.canSee(target)) {
+			lang.sendMessage(sender, "ERROR.player.not-found", "name", args[0]);
+			return true;
+		}
 
         final Party targetParty = partyManager.get(target);
         final Collection<Player> targetPlayers = targetParty == null ? Collections.singleton(target) : targetParty.getOnlineMembers();
