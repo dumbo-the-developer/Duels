@@ -12,6 +12,7 @@ import org.bukkit.command.CommandSender;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("deprecation")
 public class ReloadCommand extends BaseCommand {
 
     public ReloadCommand(final DuelsPlugin plugin) {

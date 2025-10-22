@@ -1,10 +1,7 @@
 package com.meteordevelopments.duels.countdown;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.meteordevelopments.duels.DuelsPlugin;
@@ -51,7 +48,7 @@ public class DuelCountdown extends BukkitRunnable {
         this(plugin, arena, match, plugin.getConfiguration().getCdDuelMessages(), plugin.getConfiguration().getCdDuelTitles());
         match.getAllPlayers().forEach(player -> {
             final Player opponent = arena.getOpponent(player);
-            final UserData user = userManager.get(opponent);
+            final UserData user = userManager.get(Objects.requireNonNull(opponent));
 
             if (user == null) {
                 return;

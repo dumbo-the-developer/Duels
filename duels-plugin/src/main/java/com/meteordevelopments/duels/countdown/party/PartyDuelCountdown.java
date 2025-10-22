@@ -10,7 +10,6 @@ import com.meteordevelopments.duels.match.party.PartyDuelMatch;
 import com.meteordevelopments.duels.party.Party;
 import com.meteordevelopments.duels.util.StringUtil;
 import com.meteordevelopments.duels.util.compat.Titles;
-import org.bukkit.entity.Player;
 
 public class PartyDuelCountdown extends DuelCountdown {
 
@@ -27,15 +26,14 @@ public class PartyDuelCountdown extends DuelCountdown {
     @Override
     protected void sendMessage(final String rawMessage, final String message, final String title) {
         final String kitName = match.getKit() != null ? match.getKit().getName() : lang.getMessage("GENERAL.none");
-        match.getPlayerToParty().entrySet().forEach(entry -> {
-            final Player player = entry.getKey();
+        match.getPlayerToParty().forEach((player, value) -> {
             config.playSound(player, rawMessage);
             player.sendMessage(message
-                .replace("%opponents%", info.get(arena.getOpponent(entry.getValue())))
-                .replace("%kit%", kitName)
-                .replace("%arena%", arena.getName())
+                    .replace("%opponents%", info.get(arena.getOpponent(value)))
+                    .replace("%kit%", kitName)
+                    .replace("%arena%", arena.getName())
             );
-            
+
             if (title != null) {
                 Titles.send(player, title, null, 0, 20, 50);
             }

@@ -20,7 +20,6 @@ import com.meteordevelopments.duels.kit.KitImpl;
 import com.meteordevelopments.duels.queue.Queue;
 import com.meteordevelopments.duels.setting.Settings;
 import com.meteordevelopments.duels.util.compat.Items;
-import com.meteordevelopments.duels.util.function.Pair;
 import com.meteordevelopments.duels.util.inventory.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -222,8 +221,8 @@ public class ArenaImpl extends BaseButton implements Arena {
         countdown.startCountdown(0L, 20L);
     }
 
-    boolean isCounting() {
-        return countdown != null;
+    boolean isCountingComplete() {
+        return countdown == null;
     }
 
     @Override

@@ -10,7 +10,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.Collection;
 import java.util.Collections;
 
 public class DenyCommand extends BaseCommand {

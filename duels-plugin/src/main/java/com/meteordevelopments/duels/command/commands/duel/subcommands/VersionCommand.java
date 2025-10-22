@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
 
+@SuppressWarnings("deprecation")
 public class VersionCommand extends BaseCommand {
 
     public VersionCommand(final DuelsPlugin plugin) {
@@ -20,7 +21,7 @@ public class VersionCommand extends BaseCommand {
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final PluginDescriptionFile info = plugin.getDescription();
         TextBuilder
-                .of(StringUtil.color("&b" + info.getFullName() + " by " + info.getAuthors().get(0) + " &l[Click]"))
+                .of(StringUtil.color("&b" + info.getFullName() + " by " + info.getAuthors().getFirst() + " &l[Click]"))
                 .setClickEvent(Action.OPEN_URL, info.getWebsite())
                 .send((Player) sender);
     }

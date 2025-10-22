@@ -81,7 +81,7 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
         plugin.doAsync(() -> {
             final File[] files = folder.listFiles();
 
-            if (files != null && files.length > 0) {
+            if (files != null) {
                 for (final File file : files) {
                     final String fileName = file.getName();
 
@@ -335,7 +335,7 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
         final String kitName = match.getKit() != null ? match.getKit().getName() : lang.getMessage("GENERAL.none");
         final String message;
 
-        if (!(match instanceof PartyDuelMatch)) {
+        if (!(match instanceof PartyDuelMatch partyMatch)) {
             final long duration = System.currentTimeMillis() - match.getStart();
             final long time = GREGORIAN_CALENDAR.getTimeInMillis();
             final Player loser = match.getArena().getOpponent(winner);
@@ -375,7 +375,6 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
                 message = null;
             }
         } else {
-            final PartyDuelMatch partyMatch = (PartyDuelMatch) match;
             final Party winnerParty = partyMatch.getPlayerToParty().get(winner);
             final Party loserParty = match.getArena().getOpponent(winnerParty);
             message = lang.getMessage("DUEL.on-end.party-opponent-defeat",

@@ -77,7 +77,8 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
 
         if (FileUtil.checkNonEmpty(file, true)) {
             try (final Reader reader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8)) {
-                final List<ArenaData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<List<ArenaData>>() {});
+                final List<ArenaData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<>() {
+                });
                 if (data != null) {
                     for (ArenaData arenaData : data) {
                         if (!StringUtil.isAlphanumeric(arenaData.getName())) {
@@ -189,7 +190,7 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
     public long getPlayersInMatch(final Queue queue) {
         int count = 0;
         for (ArenaImpl arena : arenas) {
-            if (arena.isUsed() && arena.getMatch().isFromQueue() && arena.getMatch().getSource().equals(queue)) {
+            if (arena.isUsed() && Objects.requireNonNull(arena.getMatch()).isFromQueue() && arena.getMatch().getSource().equals(queue)) {
                 count++;
             }
         }
@@ -241,7 +242,7 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
             if (!event.hasBlock() || !config.isPreventInteract()) return;
 
             ArenaImpl arena = get(event.getPlayer());
-            if (arena == null || !arena.isCounting()) return;
+            if (arena == null || arena.isCountingComplete()) return;
 
             event.setCancelled(true);
         }
@@ -251,7 +252,7 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
             if (!config.isPreventPvp() || !(event.getEntity() instanceof Player)) return;
 
             ArenaImpl arena = get((Player) event.getEntity());
-            if (arena == null || !arena.isCounting()) return;
+            if (arena == null || arena.isCountingComplete()) return;
 
             event.setCancelled(true);
         }
@@ -264,7 +265,7 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
             if (!(shooter instanceof Player)) return;
 
             ArenaImpl arena = get((Player) shooter);
-            if (arena == null || !arena.isCounting()) return;
+            if (arena == null || arena.isCountingComplete()) return;
 
             event.setCancelled(true);
         }
@@ -279,7 +280,7 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
             if (from.getBlockX() == to.getBlockX() && from.getBlockY() == to.getBlockY() && from.getBlockZ() == to.getBlockZ()) return;
 
             ArenaImpl arena = get(event.getPlayer());
-            if (arena == null || !arena.isCounting()) return;
+            if (arena == null || arena.isCountingComplete()) return;
 
             event.setTo(from);
         }

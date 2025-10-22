@@ -12,10 +12,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Config extends AbstractConfiguration<DuelsPlugin> {
 
@@ -448,7 +445,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         if (sounds != null) {
             for (final String name : sounds.getKeys(false)) {
                 final ConfigurationSection sound = sounds.getConfigurationSection(name);
-                final Sound type = EnumUtil.getByName(sound.getString("type"), Sound.class);
+                final Sound type = EnumUtil.getByName(Objects.requireNonNull(sound).getString("type"), Sound.class);
 
                 if (type == null) {
                     continue;

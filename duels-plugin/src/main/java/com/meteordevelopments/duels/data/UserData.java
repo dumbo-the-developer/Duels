@@ -53,7 +53,7 @@ public class UserData implements User {
     public void setWins(final int wins) {
         this.wins = wins;
 
-        if (!isOnline()) {
+        if (isOffline()) {
             trySave();
         }
     }
@@ -62,7 +62,7 @@ public class UserData implements User {
     public void setLosses(final int losses) {
         this.losses = losses;
 
-        if (!isOnline()) {
+        if (isOffline()) {
             trySave();
         }
     }
@@ -76,7 +76,7 @@ public class UserData implements User {
     public void setRequests(final boolean requests) {
         this.requests = requests;
 
-        if (!isOnline()) {
+        if (isOffline()) {
             trySave();
         }
     }
@@ -116,7 +116,7 @@ public class UserData implements User {
         matches.clear();
         rating.clear();
 
-        if (!isOnline()) {
+        if (isOffline()) {
             trySave();
         }
     }
@@ -128,7 +128,7 @@ public class UserData implements User {
     public void setPartyRequests(final boolean partyRequests) {
         this.partyRequests = partyRequests;
 
-        if (!isOnline()) {
+        if (isOffline()) {
             trySave();
         }
     }
@@ -144,13 +144,13 @@ public class UserData implements User {
 
         this.rating.put(kit == null ? "-" : kit.getName(), rating);
 
-        if (!isOnline()) {
+        if (isOffline()) {
             trySave();
         }
     }
 
-    private boolean isOnline() {
-        return Bukkit.getPlayer(uuid) != null;
+    private boolean isOffline() {
+        return Bukkit.getPlayer(uuid) == null;
     }
 
     public void addWin() {
@@ -165,7 +165,7 @@ public class UserData implements User {
 
     public void addMatch(final MatchData matchData) {
         if (!matches.isEmpty() && matches.size() >= matchesToDisplay) {
-            matches.remove(0);
+            matches.removeFirst();
         }
 
         matches.add(matchData);
