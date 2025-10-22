@@ -14,7 +14,6 @@ import com.meteordevelopments.duels.hook.hooks.*;
 import com.meteordevelopments.duels.party.Party;
 import com.meteordevelopments.duels.party.PartyManagerImpl;
 import com.meteordevelopments.duels.util.*;
-import com.meteordevelopments.duels.hook.hooks.worldguard.WorldGuardHook;
 import com.meteordevelopments.duels.inventories.InventoryManager;
 import com.meteordevelopments.duels.kit.KitImpl;
 import com.meteordevelopments.duels.player.PlayerInfo;
@@ -63,7 +62,6 @@ public class DuelManager implements Loadable {
     private VaultHook vault;
     private EssentialsHook essentials;
     private McMMOHook mcMMO;
-    private WorldGuardHook worldGuard;
     private MyPetHook myPet;
 
     private ScheduledTask durationCheckTask;
@@ -505,11 +503,10 @@ public class DuelManager implements Loadable {
 
         @EventHandler(ignoreCancelled = true)
         public void on(final EntityDamageEvent event) {
-            if (!(event.getEntity() instanceof Player)) {
+            if (!(event.getEntity() instanceof Player player)) {
                 return;
             }
 
-            final Player player = (Player) event.getEntity();
             final ArenaImpl arena = arenaManager.get(player);
 
             if (arena == null || !arena.isEndGame()) {
