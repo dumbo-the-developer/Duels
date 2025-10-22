@@ -398,4 +398,92 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
         }
     }
 
+    public void handleTeamMatchEnd(final DuelMatch match, final Set<Player> winners, final Set<Player> losers) {
+        final String kitName = match.getKit() != null ? match.getKit().getName() : lang.getMessage("GENERAL.none");
+        
+        // Update wins and losses for all players
+        for (final Player winner : winners) {
+            final UserData winnerData = get(winner);
+            if (winnerData != null) {
+                winnerData.addWin();
+            }
+        }
+        
+        for (final Player loser : losers) {
+            final UserData loserData = get(loser);
+            if (loserData != null) {
+                loserData.addLoss();
+            }
+        }
+        
+        // Handle rating updates for team matches
+        if (config.isRatingEnabled() && !(!match.isFromQueue() && config.isRatingQueueOnly())) {
+            final KitImpl kit = match.getKit();
+            
+            // Calculate average rating for each team
+            int winnerTeamRating = 0;
+            int loserTeamRating = 0;
+            int winnerCount = 0;
+            int loserCount = 0;
+            
+            for (final Player winner : winners) {
+                final UserData winnerData = get(winner);
+                if (winnerData != null) {
+                    winnerTeamRating += winnerData.getRatingUnsafe(kit);
+                    winnerCount++;
+                }
+            }
+            
+            for (final Player loser : losers) {
+                final UserData loserData = get(loser);
+                if (loserData != null) {
+                    loserTeamRating += loserData.getRatingUnsafe(kit);
+                    loserCount++;
+                }
+            }
+            
+            if (winnerCount > 0 && loserCount > 0) {
+                winnerTeamRating /= winnerCount;
+                loserTeamRating /= loserCount;
+                
+                final int change = NumberUtil.getChange(config.getKFactor(), winnerTeamRating, loserTeamRating);
+                
+                // Apply rating changes to all players
+                for (final Player winner : winners) {
+                    final UserData winnerData = get(winner);
+                    if (winnerData != null) {
+                        final int currentRating = winnerData.getRatingUnsafe(kit);
+                        winnerData.setRating(kit, currentRating + change);
+                    }
+                }
+                
+                for (final Player loser : losers) {
+                    final UserData loserData = get(loser);
+                    if (loserData != null) {
+                        final int currentRating = loserData.getRatingUnsafe(kit);
+                        loserData.setRating(kit, currentRating - change);
+                    }
+                }
+            }
+        }
+        
+        final String winnerNames = winners.stream().map(Player::getName).collect(Collectors.joining(", "));
+        final String loserNames = losers.stream().map(Player::getName).collect(Collectors.joining(", "));
+        
+        final String message = lang.getMessage("DUEL.on-end.team-opponent-defeat",
+                "winners", winnerNames,
+                "losers", loserNames,
+                "kit", kitName,
+                "arena", match.getArena().getName()
+        );
+        
+        if (config.isArenaOnlyEndMessage()) {
+            match.getArena().broadcast(message);
+        } else {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                player.sendMessage(message);
+            }
+        }
+    }
+
 }

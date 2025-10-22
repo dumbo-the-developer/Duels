@@ -4,6 +4,7 @@ import com.meteordevelopments.duels.countdown.DuelCountdown;
 import com.meteordevelopments.duels.countdown.party.PartyDuelCountdown;
 import com.meteordevelopments.duels.match.DuelMatch;
 import com.meteordevelopments.duels.match.party.PartyDuelMatch;
+import com.meteordevelopments.duels.match.team.TeamDuelMatch;
 import com.meteordevelopments.duels.party.Party;
 import com.meteordevelopments.duels.spectate.SpectatorImpl;
 import lombok.AccessLevel;
@@ -147,7 +148,13 @@ public class ArenaImpl extends BaseButton implements Arena {
     }
 
     public DuelMatch startMatch(final KitImpl kit, final Map<UUID, List<ItemStack>> items, final Settings settings, final Queue source) {
-        this.match = settings.isPartyDuel() ? new PartyDuelMatch(plugin, this, kit, items, settings.getBet(), source) : new DuelMatch(plugin, this, kit, items, settings.getBet(), source);
+        if (settings.isPartyDuel()) {
+            this.match = new PartyDuelMatch(plugin, this, kit, items, settings.getBet(), source);
+        } else if (source != null && source.getTeamSize() > 1) {
+            this.match = new TeamDuelMatch(plugin, this, kit, items, settings.getBet(), source);
+        } else {
+            this.match = new DuelMatch(plugin, this, kit, items, settings.getBet(), source);
+        }
         refreshGui(false);
         return match;
     }

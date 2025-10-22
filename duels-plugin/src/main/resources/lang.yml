@@ -491,6 +491,7 @@ DUEL:
     tie: '{PREFIX} &7Tie Game!'
     plugin-disable: '{PREFIX} &cPlugin is disabling! Ending match automatically.'
     opponent-defeat: '{PREFIX} &f%winner% &a(%winner_rating%) (+%change%) &7defeated &f%loser% &c(%loser_rating%) (-%change%) &7with kit &3%kit% &7on arena &e%arena%&7.'
+    team-opponent-defeat: '{PREFIX} &f%winners% &7defeated &f%losers% &7with kit &3%kit% &7on arena &e%arena%&7.'
     party-opponent-defeat: '{PREFIX} &f%winners% &7defeated &f%losers% &7with kit &3%kit% &7on arena &e%arena%&7.'
   inventories:
     message: '&7Inventories (click on the name to view): '
@@ -521,7 +522,7 @@ QUEUE:
 SIGN:
   format:
     - '&a[Click to Join]'
-    - '&3%kit%&f:&e$%bet_amount%'
+    - '&3%name%&f:&e$%bet_amount%'
     - '&f&l%in_queue% IN QUEUE'
     - '&f&l%in_match% IN MATCH'
 
@@ -620,7 +621,7 @@ GUI:
     title: 'Available Queues'
     buttons:
       queue:
-        name: '&3%kit%'
+        name: '&3%name%'
         lore:
           - '&7Bet: &6$%bet_amount%'
           - '&7In Queue: &f%in_queue%'
