@@ -557,7 +557,9 @@ public class DuelManager implements Loadable {
             }
 
             player.setHealth(0);
-            player.spigot().respawn();
+            player.getInventory().clear();
+            player.getInventory().setArmorContents(null);
+            player.updateInventory();
         }
 
         @EventHandler(ignoreCancelled = true)
