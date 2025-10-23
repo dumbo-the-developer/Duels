@@ -1,0 +1,722 @@
+# DO NOT EDIT THIS VALUE!
+config-version: 11
+
+# Define placeholders usable in any message below.
+# Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
+STRINGS:
+  PREFIX: '<blue>[Duels]'
+  LINE: '<blue><strikethrough>------------------------------------<reset>'
+  HALF_LINE: '<blue><strikethrough>----------------<reset>'
+  FAIL_PREFIX: '<red>Failed to start the match:'
+
+
+GENERAL:
+  true: '<green>true'
+  false: '<red>false'
+  enabled: '<green>enabled'
+  disabled: '<red>disabled'
+  not-selected: 'Not Selected'
+  random: 'Random'
+  none: 'none'
+  kit-selector: 'Kit Selector'
+  arena-selector: 'Arena Selector'
+  item-betting: 'Item Betting'
+  betting: 'Betting'
+
+
+ERROR:
+  no-permission: '{PREFIX} <red>Nope! You are lacking the following permission: ''%permission%'''
+  data:
+    load-failure: '{PREFIX} <red>Could not load your duel stats. Please try re-logging.'
+    not-loaded: '{PREFIX} <red>Users are still under load, please try again later.'
+    not-found: '{PREFIX} <red>%name% has no duel stats available.'
+  top:
+    no-data-available: '{PREFIX} <red>There were no data available.'
+  player:
+    not-found: '{PREFIX} <red>%name% is not online.'
+    no-longer-online: '{PREFIX} <red>That player is no longer online.'
+  arena:
+    not-found: '{PREFIX} <red>No arena exists with the name ''%name%''.'
+    already-exists: '{PREFIX} <red>An arena named ''%name%'' already exists.'
+    delete-failure: '{PREFIX} <red>Cannot delete an arena that is currently in use. Please disable it first using the command ''/duels toggle %name%'''
+    invalid-position: '{PREFIX} <red>Position must be 1 or 2.'
+    no-position-set: '{PREFIX} <red>Arena ''%name%'' have no positions set.'
+  kit:
+    not-found: '{PREFIX} <red>No kit exists with the name ''%name%''.'
+    already-exists: '{PREFIX} <red>A kit named ''%name%'' already exists.'
+    empty-hand: '{PREFIX} <red>You must be holding an item to use this command.'
+  player-only: '{PREFIX} <red>This command can only be used by players.'
+  duel:
+    is-self: '{PREFIX} <red>You cannot duel yourself.'
+    inventory-not-empty: '{PREFIX} <red>You must have a cleared inventory to use this command.'
+    in-creative-mode: '{PREFIX} <red>You cannot duel in creative mode.'
+    in-blacklisted-world: '{PREFIX} <red>You cannot duel in this world.'
+    is-tagged: '{PREFIX} <red>You cannot duel while combat tagged.'
+    not-in-duelzone: '{PREFIX} <red>You can only duel in the following regions: %regions%'
+    requests-disabled: '{PREFIX} <red>%name% is currently not accepting duel requests.'
+    already-has-request: '{PREFIX} <red>You already have a request sent to %name%.'
+    no-request: '{PREFIX} <red>You do not have a request from %name%.'
+    already-in-match:
+      sender: '{PREFIX} <red>You cannot do this while in a duel.'
+      target: '{PREFIX} <red>%name% is already in a duel.'
+    mode-unselected: '{PREFIX} <red>You must either choose a kit or enable own inventory mode.'
+    mode-fixed: '{PREFIX} <red>You are not allowed to disable own inventory mode.'
+    already-spectating:
+      sender: '{PREFIX} <red>You cannot do this while in spectator mode.'
+      target: '{PREFIX} <red>%name% is in spectator mode.'
+    not-in-match: '{PREFIX} <red>%name% is not in a duel.'
+    prevent-teleportation: '{PREFIX} <red>You cannot teleport to this player because he is in a duel.'
+  party-duel:
+    inventory-not-empty: '{PREFIX} <red>You and your party members must have a cleared inventory to use this command.'
+    in-creative-mode: '{PREFIX} <red>You or your party member is in creative mode.'
+    in-blacklisted-world: '{PREFIX} <red>You or your party member is in a blacklisted world.'
+    is-tagged: '{PREFIX} <red>You or your party member is currently combat tagged.'
+    not-in-duelzone: '{PREFIX} <red>You or your party member is currently not in one of the following regions: %regions%'
+    already-has-request: '{PREFIX} <red>You already have a request sent to %name%''s party.'
+    no-request: '{PREFIX} <red>You do not have a request from %name%''s party.'
+    already-in-match:
+      sender: '{PREFIX} <red>You cannot do this while your party in a duel.'
+      target: '{PREFIX} <red>%name%''s party is already in a duel.'
+    already-spectating:
+      sender: '{PREFIX} <red>You cannot do this while you or your party member is in spectator mode.'
+      target: '{PREFIX} <red>A member of %name%''s party is in spectator mode.'
+    option-unavailable: '{PREFIX} <red>Item/Money Betting is currently not available for party duels.'
+  party:
+    is-self: '{PREFIX} <red>You cannot create a party with yourself.'
+    is-not-owner: '{PREFIX} <red>You must be the owner of this party to do this.'
+    is-owner: '{PREFIX} <red>You cannot leave this party as you are the owner. You must either transfer the ownership of the party using ''/party transfer'' or disband the party using ''/party disband''.'
+    requests-disabled: '{PREFIX} <red>%name% is currently not accepting party requests.'
+    already-has-invite: '{PREFIX} <red>You already have a invite sent to %name%.'
+    no-invite: '{PREFIX} <red>You do not have an invite from %name%.'
+    not-found: '{PREFIX} <red>That party no longer exists.'
+    already-in-party:
+      sender: '{PREFIX} <red>You cannot do this while in a party.'
+      target: '{PREFIX} <red>%name% is already in a party.'
+    not-in-party:
+      sender: '{PREFIX} <red>You must be in a party to do this.'
+      target: '{PREFIX} <red>%name% is not in a party.'
+    not-a-member: '{PREFIX} <red>%name% is not a member of your party.'
+    in-same-party: '{PREFIX} <red>%name% is in your party.'
+    kick-self: '{PREFIX} <red>You cannot kick yourself from the party.'
+    is-not-same-size: '{PREFIX} <red>Party sizes must match to do this.'
+    is-not-online:
+      sender: '{PREFIX} <red>All members of your party must be online!'
+      target: '{PREFIX} <red>All members of %name%''s party must be online!'
+    max-size-reached:
+      sender: '{PREFIX} <red>Your party has reached the maximum number of members!'
+      target: '{PREFIX} <red>%name%''s Party has reached the maximum number of members!'
+    cannot-friendly-fire: '{PREFIX} <red>Friendly fire is not allowed.'
+  setting:
+    disabled-option: '{PREFIX} <red>%option% is currently disabled.'
+    arena-not-applicable: '{PREFIX} <red>You cannot use kit %kit% on arena %arena%.'
+  inventory-view:
+    not-a-uuid: '{PREFIX} <red>%input% is not a valid UUID.'
+    not-found: '{PREFIX} <red>No inventory exists with the UUID ''%uuid%''.'
+  queue:
+    not-found: '{PREFIX} <red>No queue exists with kit %kit% and bet $%bet_amount%.'
+    already-exists: '{PREFIX} <red>A queue with kit ''%kit%'' and bet $%bet_amount% already exists.'
+    already-in: '{PREFIX} <red>You are already in a queue!'
+    not-in-queue: '{PREFIX} <red>You are not in a queue.'
+    not-enough-money: '{PREFIX} <red>You need $%bet_amount% to join that queue.'
+    no-queues-available: '{PREFIX} <red>No queues are available.'
+  sign:
+    not-a-sign: '{PREFIX} <red>The block you are looking at is not a sign!'
+    not-found: '{PREFIX} <red>That sign is not a queue sign!'
+    already-exists: '{PREFIX} <red>That sign is already a queue sign! To remove, use the command ''/duels delsign'''
+    cancel-break: '{PREFIX} <red>You cannot break a queue sign manually! Please use the command ''/duels delsign'''
+  sound:
+    not-found: '{PREFIX} <red>No sound exists with the name ''%name%''.'
+  command:
+    invalid-sub-command: '{PREFIX} <red>''%argument%'' is not a valid sub command. Please type ''/%command%'' for help.'
+    invalid-option: '{PREFIX} <red>''%option%'' is not a valid option. Available options are: %available_options%'
+    invalid-action: '{PREFIX} <red>''%action%'' is not a valid action. Available actions are: %available_actions%'
+    not-enough-money: '{PREFIX} <red>You do not have enough money to bet!'
+    lobby-save-failure: '{PREFIX} <red>Could not save lobby location. Please check the console for more information.'
+    name-not-alphanumeric: '{PREFIX} <red>''%name%'' is not alphanumeric.'
+    invalid-argument: "{PREFIX} <red>Invalid argument: {arg}. Placeholders are not allowed in commands."
+
+
+COMMAND:
+  kit:
+    usage: '{PREFIX} <red>Usage: /kit [edit|save] [kitname]'
+    edit:
+      usage: '{PREFIX} <red>Usage: /kit edit <kitname>'
+    unknown-subcommand: '{PREFIX} <red>Unknown subcommand: %subcommand%'
+  duel:
+    usage:
+      - '{LINE}'
+      - '<white>/%command% [player] <yellow>- <gray>Sends a duel request to player.'
+      - '<white>/%command% [player] <amount> <yellow>- <gray>Sends a duel request with a bet.'
+      - '<white>/%command% [accept | deny] [player] <yellow>- <gray>Accepts or denies a duel request.'
+      - '<white>/%command% stats <name> <yellow>- <gray>Displays your duel stats.'
+      - '<white>/%command% toggle <yellow>- <gray>Enable or disable receiving duel requests.'
+      - '<white>/%command% top [-|wins|losses|kit] <yellow>- <gray>Displays top wins, losses, or rating for the kit.'
+      - '{LINE}'
+    request:
+      send:
+        sender:
+          - '{LINE}'
+          - '<gray>Duel request sent to <white>%name%<gray>.'
+          - '<gold>- <gray>Kit: <dark_aqua>%kit%'
+          - '<gold>- <gray>Own Inventory: <reset>%own_inventory%'
+          - '<gold>- <gray>Arena: <yellow>%arena%'
+          - '<gold>- <gray>Bet: <gold>$%bet_amount%'
+          - '<gold>- <gray>Item Betting: <reset>%item_betting%'
+          - '{LINE}'
+        receiver:
+          - '{LINE}'
+          - '<gray>Duel request received from <white>%name%<gray>.'
+          - '<gold>- <gray>Kit: <dark_aqua>%kit%'
+          - '<gold>- <gray>Own Inventory: <reset>%own_inventory%'
+          - '<gold>- <gray>Arena: <yellow>%arena%'
+          - '<gold>- <gray>Bet: <gold>$%bet_amount%'
+          - '<gold>- <gray>Item Betting: <reset>%item_betting%'
+          - '{LINE}'
+        clickable-text:
+          info:
+            text: '<gray>Click to '
+            hover-text: ''
+          accept:
+            text: '<green><bold>[ACCEPT] '
+            hover-text: '<gray>Click to <green>accept <gray>this request.'
+          deny:
+            text: '<red><bold>[DENY]'
+            hover-text: '<gray>Click to <red>deny <gray>this request.'
+      accept:
+        sender: '{PREFIX} <white>%name% <gray>has accepted your duel request.'
+        receiver: '{PREFIX} <gray>Accepted the duel request from <white>%name%<gray>.'
+      deny:
+        sender: '{PREFIX} <gray>Your duel request to <white>%name% <gray>was denied.'
+        receiver: '{PREFIX} <gray>Denied the duel request from <white>%name%<gray>.'
+    party-request:
+      send:
+        sender-party:
+          - '{LINE}'
+          - '<white>%owner% <gray>has sent a duel request sent to <white>%name%''s Party<gray>.'
+          - '<gold>- <gray>Kit: <dark_aqua>%kit%'
+          - '<gold>- <gray>Own Inventory: <reset>%own_inventory%'
+          - '<gold>- <gray>Arena: <yellow>%arena%'
+          - '{LINE}'
+        receiver-party:
+          - '{LINE}'
+          - '<gray>Duel request received from <white>%name%''s Party<gray>.'
+          - '<gold>- <gray>Kit: <dark_aqua>%kit%'
+          - '<gold>- <gray>Own Inventory: <reset>%own_inventory%'
+          - '<gold>- <gray>Arena: <yellow>%arena%'
+        clickable-text:
+          info:
+            text: '<gray>Click to '
+            hover-text: ''
+          accept:
+            text: '<green><bold>[ACCEPT] '
+            hover-text: '<gray>Click to <green>accept <gray>this request.'
+          deny:
+            text: '<red><bold>[DENY]'
+            hover-text: '<gray>Click to <red>deny <gray>this request.'
+          extra:
+            text: '{LINE}'
+            hover-text: ''
+      accept:
+        sender-party:
+          - '{LINE}'
+          - '{PREFIX} <white>%name%''s Party <gray>has accepted <white>%owner%<gray>''s duel request.'
+          - '{LINE}'
+        receiver-party:
+          - '{LINE}'
+          - '{PREFIX} <white>%owner% <gray>has accepted the duel request from <white>%name%''s Party<gray>.'
+          - '{LINE}'
+      deny:
+        sender-party:
+          - '{LINE}'
+          - '{PREFIX} <white>%name%''s Party <gray>has declined <white>%owner%<gray>''s duel request.'
+          - '{LINE}'
+        receiver-party:
+          - '{LINE}'
+          - '{PREFIX} <gray><white>%owner%<gray>''s has declined the duel request from <white>%name%''s Party<gray>.'
+          - '{LINE}'
+    stats:
+      displayed:
+        - '{LINE}'
+        - '<gray>Stats of <white>%name% <yellow>-'
+        - '<gray>Wins: <green>%wins%'
+        - '<gray>Losses: <red>%losses%'
+        - '<gray>W/L Ratio: <aqua>%wl_ratio%'
+        - '<gray>Requests: <reset>%requests_enabled%'
+      # NOTE: Ratings will only display if either 'display-kit-ratings' or 'display-nokit-rating' is enabled in the configuration.
+      rating:
+        header: '<gray>Ratings <yellow>-'
+        format: '<white>%type%<gray>: <aqua>%rating%'
+        footer: ''
+      # NOTE: Past matches will only display if 'display-past-matches' is enabled in the configuration.
+      match:
+        header: '<gray>Recent Matches <yellow>-'
+        format: '<green>%winner% <white>vs <red>%loser% <gold>[Hover Me!]'
+        hover-text:
+          - '<gray>Kit: <dark_aqua>%kit%'
+          - '<gray>Duration: <green>%duration%'
+          - '<gray>Time: <white>%time% ago'
+          - '<gray>Health: <light_purple>%health%❤'
+        footer: '{LINE}'
+    toggle:
+      enabled: '{PREFIX} <green>You are now receiving duel requests.'
+      disabled: '{PREFIX} <red>You are no longer accepting duel requests.'
+    top:
+      next-update: '{PREFIX} <gray>Next update: <white>%remaining%'
+      header: '{HALF_LINE} <gray>Top <white>10 <gray>%type% {HALF_LINE}'
+      display-format: '<yellow>%rank%. <white>%name% <yellow>- <white>%score% <gray>%identifier%'
+      footer: '{HALF_LINE} <gray>Top <white>10 <gray>%type% {HALF_LINE}'
+
+  duels:
+    usage:
+      - '{LINE}'
+      - '<white>/%command% help <yellow>- <gray>Displays this page.'
+      - '<white>/%command% help arena <yellow>- <gray>Displays a list of arena commands.'
+      - '<white>/%command% help kit <yellow>- <gray>Displays a list of kit commands.'
+      - '<white>/%command% help queue <yellow>- <gray>Displays a list of queue commands.'
+      - '<white>/%command% help sign <yellow>- <gray>Displays a list of sign commands.'
+      - '<white>/%command% help user <yellow>- <gray>Displays a list of user edit commands.'
+      - '<white>/%command% help extra <yellow>- <gray>Displays a list of extra commands.'
+      - '{LINE}'
+    help:
+      arena:
+        - '{HALF_LINE} <white>Arena Commands {HALF_LINE}'
+        - '<white>/%command% create [name] <yellow>- <gray>Creates an arena with given name.'
+        - '<white>/%command% set [name] [1|2] <yellow>- <gray>Sets the teleport position of an arena.'
+        - '<white>/%command% delete [name] <yellow>- <gray>Deletes an arena.'
+        - '<white>/%command% info [name] <yellow>- <gray>Displays a list of information about the selected arena.'
+        - '<white>/%command% toggle [name] <yellow>- <gray>Enables or disables an arena.'
+        - '<white>/%command% tp [name] <1|2> <yellow>- <gray>Teleports to an arena.'
+        - '<white>/%command% list <yellow>- <gray>Displays the list of all arenas.'
+        - '{HALF_LINE} <white>Arena Commands {HALF_LINE}'
+      kit:
+        - '{HALF_LINE} <white>Kit Commands {HALF_LINE}'
+        - '<white>/%command% savekit <-o> [name] <yellow>- <gray>Saves a kit with given name.'
+        - '<white>/%command% loadkit [name] <yellow>- <gray>Loads the selected kit to your inventory.'
+        - '<white>/%command% deletekit [name] <yellow>- <gray>Deletes a kit.'
+        - '<white>/%command% setitem [name] <yellow>- <gray>Sets the displayed item for selected kit.'
+        - '<white>/%command% options [kit] <yellow>- <gray>Opens the options gui for selected kit.'
+        - '<white>/%command% bind [kit] <yellow>- <gray>Opens the arena bind gui for selected kit.'
+        - '<white>/%command% list <yellow>- <gray>Displays the list of all kits.'
+        - '{HALF_LINE} <white>Kit Commands {HALF_LINE}'
+      queue:
+        - '{HALF_LINE} <white>Queue Sign Commands {HALF_LINE}'
+        - '<white>/%command% createqueue [bet] [-|kit] <yellow>- <gray>Creates a queue with bet and kit.'
+        - '<white>/%command% deletequeue <yellow>- <gray>Deletes the queue with bet and kit.'
+        - '<white>/%command% list <yellow>- <gray>Displays a list of available queues.'
+        - '{HALF_LINE} <white>Queue Sign Commands {HALF_LINE}'
+      sign:
+        - '{HALF_LINE} <white>Queue Sign Commands {HALF_LINE}'
+        - '<white>/%command% addsign [bet] [-|kit] <yellow>- <gray>Creates a queue sign with bet and kit.'
+        - '<white>/%command% delsign <yellow>- <gray>Deletes the queue sign you are looking at.'
+        - '<white>/%command% list <yellow>- <gray>Displays a list of queue signs.'
+        - '{HALF_LINE} <white>Queue Sign Commands {HALF_LINE}'
+      user:
+        - '{HALF_LINE} <white>User Edit Commands {HALF_LINE}'
+        - '<white>/%command% setrating [name] [-|kit] [amount] <yellow>- <gray>Sets player''s rating for kit.'
+        - '<white>/%command% edit [name] [add|remove|set] [wins|losses] [amount] <yellow>- <gray>Edits player''s stats.'
+        - '<white>/%command% resetrating [name] [-|kit|all] <yellow>- <gray>Resets all or specified kit''s rating for player.'
+        - '<white>/%command% reset [name] <yellow>- <gray>Resets player''s stats.'
+        - '{HALF_LINE} <white>User Edit Commands {HALF_LINE}'
+      extra:
+        - '{HALF_LINE} <white>Extra Commands {HALF_LINE}'
+        - '<white>/%command% setlobby <yellow>- <gray>Sets duel lobby location.'
+        - '<white>/%command% lobby <yellow>- <gray>Teleports to duel lobby.'
+        - '<white>/%command% playsound [name] <yellow>- <gray>Plays the selected sound if defined in config.'
+        - '<white>/%command% reload <module> <yellow>- <gray>Reloads the plugin or the specified module.'
+        - '{HALF_LINE} <white>Extra Commands {HALF_LINE}'
+    create: '{PREFIX} <gray>Arena <yellow>%name% <gray>was successfully created. To set spawnpoints for this arena, use the command <white>/duels set %name% 1'
+    delete: '{PREFIX} <gray>Arena <yellow>%name% <gray>was successfully removed.'
+    set: '{PREFIX} <gray>Set position <white>%position% <gray>for arena <yellow>%name% <gray>at <white>%location%<gray>.'
+    toggle: '{PREFIX} <gray>Arena <yellow>%name% <gray>is now <reset>%state%<gray>.'
+    disable: '{PREFIX} <gray>Arena <yellow>%name% <gray>is now disabled.'
+    enable: '{PREFIX} <gray>Arena <yellow>%name% <gray>is now enabled.'
+    already-disabled: '{PREFIX} <red>%name% is already disabled.'
+    already-enabled: '{PREFIX} <red>%name% is already enabled.'
+    teleport: '{PREFIX} <gray>You have been teleported to arena <yellow>%name%<gray>''s position <white>%position%<gray>.'
+    save-kit: '{PREFIX} <gray>Kit <dark_aqua>%name% <gray>was successfully saved.'
+    delete-kit: '{PREFIX} <gray>Kit <dark_aqua>%name% <gray>was successfully removed.'
+    load-kit: '{PREFIX} <gray>Kit <dark_aqua>%name% <gray>was loaded in your inventory.'
+    set-item: '{PREFIX} <gray>Kit <dark_aqua>%name%<gray>''s displayed item was changed to your held item.'
+    create-queue: '{PREFIX} <gray>Created a queue with kit <dark_aqua>%kit% <gray>and bet <gold>$%bet_amount%<gray>.'
+    delete-queue: '{PREFIX} <gray>Deleted a queue with kit <dark_aqua>%kit% <gray>and bet <gold>$%bet_amount%<gray>.'
+    add-sign: '{PREFIX} <gray>Created queue sign at <white>%location% <gray>with kit <dark_aqua>%kit% <gray>and bet <gold>$%bet_amount%<gray>.'
+    del-sign: '{PREFIX} <gray>Deleted queue sign at <white>%location% <gray>with kit <dark_aqua>%kit% <gray>and bet <gold>$%bet_amount%<gray>.'
+    set-lobby: '{PREFIX} <gray>Duel lobby set at your current location.'
+    lobby: '{PREFIX} <gray>You have been teleported to lobby!'
+    edit: '{PREFIX} <gray>Following action has been executed for <white>%name%<gray>: <white>%action% %amount% %type%'
+    set-rating: '{PREFIX} <white>%name%<gray>''s rating for kit <dark_aqua>%kit% <gray>was set to <green>%rating%<gray>.'
+    reset-rating: '{PREFIX} <gray>Reset <white>%name%<gray>''s rating for kit <dark_aqua>%kit%<gray>.'
+    reset: '{PREFIX} <gray>Reset <white>%name%<gray>''s stats.'
+    info:
+      - '{HALF_LINE} <gray>Arena <yellow>%name% {HALF_LINE}'
+      - '<gray>In Use: <reset>%in_use%'
+      - '<gray>Disabled: <reset>%disabled%'
+      - '<gray>Bound Kits: <dark_aqua>%kits%'
+      - '<gray>Positions: <white>%positions%'
+      - '<gray>Players: <white>%players%'
+      - '{HALF_LINE} <gray>Arena <yellow>%name% {HALF_LINE}'
+    list:
+      - '{LINE}'
+      - '<dark_red>DARK RED<gray>: Disabled arena'
+      - '<blue>BLUE<gray>: Arena without spawn positions set'
+      - '<green>GREEN<gray>: Available arena'
+      - '<red>RED<gray>: Arena in use'
+      - '<gray>Arenas: <reset>%arenas%'
+      - '<gray>Kits: <white>%kits%'
+      - '<gray>Queues: <aqua>%queues%'
+      - '<gray>Queue Signs: <white>%queue_signs%'
+      - '<gray>Duel lobby is located at <white>%lobby%<gray>.'
+      - '{LINE}'
+
+  spectate:
+    usage:
+      - '{LINE}'
+      - '<white>/spectate [player] <yellow>- <gray>Spectates the a player in duel.'
+      - '{LINE}'
+    start-spectate: '{PREFIX} <gray>Now spectating <white>%name%<gray> vs <white>%opponent%<gray> in arena <yellow>%arena%<gray>. Type <white>/spectate <gray>to stop spectating.'
+    stop-spectate: '{PREFIX} <gray>You are no longer spectating <white>%name%<gray>.'
+  party:
+    usage:
+      - '{LINE}'
+      - '<white>/%command% toggle <yellow>- <gray>Enable or disable receiving party invites.'
+      - '<white>/%command% [player] <yellow>- <gray>Sends a party invite to a player.'
+      - '<white>/%command% list <yellow>- <gray>Lists the current party''s members.'
+      - '<white>/%command% accept [player] <yellow>- <gray>Accepts a party invite.'
+      - '<white>/%command% leave <yellow>- <gray>Leaves the current party.'
+      - '<white>/%command% kick [player] <yellow>- <gray>Kicks a player from your party.'
+      - '<white>/%command% friendlyfire <yellow>- <gray>Enable or disable friendly fire for your party.'
+      - '<white>/%command% transfer [player] <yellow>- <gray>Transfers the ownership of your party to player.'
+      - '<white>/%command% disband <yellow>- <gray>Disbands the current party.'
+      - '{LINE}'
+    toggle:
+      enabled: '{PREFIX} <green>You are now receiving party requests.'
+      disabled: '{PREFIX} <red>You are no longer accepting party requests.'
+    list:
+      - '{LINE}'
+      - '<gray>Leader: <white>%owner%'
+      - '<gray>Members (<reset>%members_count%<gray>): <reset>%members%'
+      - '<gray>Online (<reset>%online_count%<gray>): <reset>%online_members%'
+      - '{LINE}'
+    invite:
+      send:
+        receiver:
+          - '{LINE}'
+          - '{PREFIX} <gray>Party invite received from <white>%name%<gray>. Type <white>/party accept %name% <gray>to join the party.'
+          - '{LINE}'
+        members:
+          - '{LINE}'
+          - '{PREFIX} <white>%owner% <gray>has invited <white>%name% <gray>to the party!'
+          - '{LINE}'
+      accept:
+        receiver:
+          - '{LINE}'
+          - '{PREFIX} <gray>Accepted the party invite from <white>%name%<gray>.'
+          - '{LINE}'
+        members:
+          - '{LINE}'
+          - '{PREFIX} <white>%name% <gray>has joined the party!'
+          - '{LINE}'
+    leave:
+      sender:
+        - '{LINE}'
+        - '{PREFIX} <gray>You have left <white>%name%''s Party<gray>.'
+        - '{LINE}'
+      members:
+        - '{LINE}'
+        - '{PREFIX} <white>%name% <gray>has left the party!'
+        - '{LINE}'
+    kick:
+      receiver:
+        - '{LINE}'
+        - '{PREFIX} <white>%owner% <gray>has kicked you from the party!'
+        - '{LINE}'
+      members:
+        - '{LINE}'
+        - '{PREFIX} <white>%owner% <gray>has kicked <white>%name% <gray>from the party!'
+        - '{LINE}'
+    friendly-fire:
+      enabled:
+        - '{LINE}'
+        - '{PREFIX} <red>Friendly fire <gray>is now <green>enabled<gray>!'
+        - '{LINE}'
+      disabled:
+        - '{LINE}'
+        - '{PREFIX} <red>Friendly fire <gray>is now <red>disabled<gray>!'
+        - '{LINE}'
+    transfer:
+      - '{LINE}'
+      - '{PREFIX} <white>%owner% <gray>has transferred the party to <white>%name%<gray>.'
+      - '{LINE}'
+    disband:
+      - '{LINE}'
+      - '{PREFIX} <white>%owner% <gray>has disbanded the party.'
+      - '{LINE}'
+
+  sub-command-usage: '{PREFIX} <white>/%command% %usage% <yellow>- <gray>%description%'
+
+
+DUEL:
+  start-failure:
+    mode-unselected: '{FAIL_PREFIX} <red>Either a kit or own inventory must be selected to start a duel.'
+    player-is-dead: '{FAIL_PREFIX} You or your opponent is currently dead!'
+    in-blacklisted-world: '{FAIL_PREFIX} You or your opponent is in a blacklisted world!'
+    is-tagged: '{FAIL_PREFIX} You or your opponent is in combat!'
+    player-moved: '{FAIL_PREFIX} You or your opponent moved after sending/accepting the request!'
+    not-in-duelzone: '{FAIL_PREFIX} You or your opponent moved out of the duelzone sending/accepting the request!'
+    in-creative-mode: '{FAIL_PREFIX} You or your opponent is in creative mode!'
+    no-arena-available: '{FAIL_PREFIX} No arenas are currently available. Please try again later.'
+    arena-in-use: '{FAIL_PREFIX} The selected arena is already in use. Please select a different arena.'
+    arena-not-applicable: '{FAIL_PREFIX} Kit %kit% cannot be used on the selected arena.'
+    not-enough-money: '{FAIL_PREFIX} You or your opponent does not have $%bet_amount%.'
+  rounds:
+    round-end: '{PREFIX} <gray>Round <yellow>%round% <gray>finished! <white>%winner% <gray>won the round!'
+    round-status: '{PREFIX} <gray>Current score: <white>%player1% <gray>(<green>%wins1%<gray>) vs <white>%player2% <gray>(<green>%wins2%<gray>)'
+    round-start: '{PREFIX} <gray>Round <yellow>%round% <gray>starting...'
+    match-point: '{PREFIX} <red><bold>Match Point <gray>for <white>%player%<gray>!'
+  party-start-failure:
+    option-unavailable: '{FAIL_PREFIX} <red>Item/Money Betting is currently not available for party duels.'
+    party-changed: '{FAIL_PREFIX} Either the request sender or the request accepter has changed their party.'
+    player-is-dead: '{FAIL_PREFIX} One or more player is currently dead!'
+    in-blacklisted-world: '{FAIL_PREFIX} One or more player is in a blacklisted world!'
+    is-tagged: '{FAIL_PREFIX} One or more player is in combat!'
+    player-moved: '{FAIL_PREFIX} One or more player moved after sending/accepting the request!'
+    not-in-duelzone: '{FAIL_PREFIX} One or more player moved out of the duelzone after sending/accepting the request!'
+    in-creative-mode: '{FAIL_PREFIX} One or more player is in creative mode!'
+    is-not-same-size: '{PREFIX} <red>Party sizes must match to do this.'
+    is-not-all-online: '{FAIL_PREFIX} Members of all parties must be online!'
+  prevent:
+    item-drop: '<red>You cannot drop items while in a duel.'
+    command: '<red>You cannot use ''%command%'' while in a duel.'
+    teleportation: '<red>You cannot teleport while in a duel.'
+    inventory-open: '<red>You cannot open inventories while in a duel.'
+  projectile-hit-message: '{PREFIX} <white>%name% <gray>is now at <light_purple>%health%❤<gray>!'
+  on-death:
+    with-killer: '{PREFIX} <green>%killer% <gray>has slain <red>%name% <gray>with <light_purple>%health%❤<gray>.'
+    no-killer: '{PREFIX} <red>%name% <gray>died.'
+  on-end:
+    tie: '{PREFIX} <gray>Tie Game!'
+    plugin-disable: '{PREFIX} <red>Plugin is disabling! Ending match automatically.'
+    opponent-defeat: '{PREFIX} <white>%winner% <green>(%winner_rating%) (+%change%) <gray>defeated <white>%loser% <red>(%loser_rating%) (-%change%) <gray>with kit <dark_aqua>%kit% <gray>on arena <yellow>%arena%<gray>.'
+    team-opponent-defeat: '{PREFIX} <white>%winners% <gray>defeated <white>%losers% <gray>with kit <dark_aqua>%kit% <gray>on arena <yellow>%arena%<gray>.'
+    party-opponent-defeat: '{PREFIX} <white>%winners% <gray>defeated <white>%losers% <gray>with kit <dark_aqua>%kit% <gray>on arena <yellow>%arena%<gray>.'
+  inventories:
+    message: '<gray>Inventories (click on the name to view): '
+    name-color: '<aqua>'
+  reward:
+    money:
+      message: '{PREFIX} <gray>You have received <gold>$%money% <gray>for winning against <white>%name%<gray>!'
+      title: '<yellow>YOU WON <gold>$%money%<yellow>!'
+    items:
+      message: '{PREFIX} <gray>You have received <white>%name%<gray>''s items for winning!'
+
+
+PARTY:
+  auto-disband:
+    - '{LINE}'
+    - '{PREFIX} <gray>The party has been automatically disbanded due to inactivity.'
+    - '{LINE}'
+
+
+QUEUE:
+  prevent:
+    command: '<red>You cannot use ''%command%'' while in a queue.'
+  add: '{PREFIX} <gray>You have been added to the queue for kit <dark_aqua>%kit% <gray>and bet <gold>$%bet_amount%<gray>. Click the sign again or type <white>/queue leave <gray>to leave the queue.'
+  remove: '{PREFIX} <gray>You have been removed from the queue.'
+  found-opponent: '{PREFIX} <gray>Opponent found: <white>%name%<gray>! Starting match with kit <dark_aqua>%kit% <gray>and a bet of <gold>$%bet_amount%<gray>...'
+
+
+SIGN:
+  format:
+    - '<green>[Click to Join]'
+    - '<dark_aqua>%name%<white>:<yellow>$%bet_amount%'
+    - '<white><bold>%in_queue% IN QUEUE'
+    - '<white><bold>%in_match% IN MATCH'
+
+
+SPECTATE:
+  arena-broadcast: '{PREFIX} <white>%name% <gray>is now spectating the match!'
+  match-end: '{PREFIX} <gray>The match you were spectating has ended.'
+  prevent:
+    command: '<red>You cannot use ''%command%'' while in spectator mode.'
+    teleportation: '<red>You cannot teleport while in spectator mode.'
+
+
+GUI:
+  settings:
+    title: 'Request Settings'
+    buttons:
+      details:
+        name: '<blue>Request Details'
+        lore:
+          - '<gray>Opponent: <white>%opponent%'
+          - '<gray>Kit: <dark_aqua>%kit%'
+          - '<gray>Own Inventory: <reset>%own_inventory%'
+          - '<gray>Arena: <yellow>%arena%'
+          - '<gray>Bet Items: <reset>%item_betting%'
+          - '<gray>Bet: <gold>$%bet_amount%'
+          - ' '
+          - '<gray>To change the bet'
+          - '<gray>amount, please type'
+          - '<aqua>/duel %opponent% [amount]'
+      kit-selector:
+        name: '<blue>Kit Selection'
+        lore:
+          - '<gray>Selected Kit: <dark_aqua>%kit%'
+          - ' '
+          - '<green>Click to Change Kit!'
+        lore-no-permission:
+          - '<red>You do not have permission to'
+          - '<red>use this option.'
+      use-own-inventory:
+        name: '<blue>Use Own Inventory'
+        material: CHEST
+        lore:
+          - '<gray>Own Inventory: <reset>%own_inventory%'
+          - ' '
+          - '<green>Click to Toggle Own Inventory!'
+        lore-no-permission:
+          - '<red>You do not have permission to'
+          - '<red>use this option.'
+      arena-selector:
+        name: '<blue>Arena Selection'
+        lore:
+          - '<gray>Selected Arena: <yellow>%arena%'
+          - ' '
+          - '<green>Click to Change Arena!'
+        lore-no-permission:
+          - '<red>You do not have permission to'
+          - '<red>use this option.'
+      item-betting:
+        name: '<blue>Allow Betting Items'
+        lore:
+          - '<gray>Item Betting: <reset>%item_betting%'
+          - ' '
+          - '<green>Click to Toggle Item Betting!'
+        lore-no-permission:
+          - '<red>You do not have permission to'
+          - '<red>use this option.'
+      send:
+        name: '<green><bold>SEND REQUEST'
+      cancel:
+        name: '<red><bold>CANCEL'
+  kit-selector:
+    title: 'Kit Selection'
+    buttons:
+      previous-page:
+        name: '<green>Previous Page'
+      next-page:
+        name: '<green>Next Page'
+      empty:
+        name: '<red>This page is empty.'
+  arena-selector:
+    title: 'Arena Selection'
+    buttons:
+      arena:
+        name: '<yellow>%name%'
+        lore-available:
+          - '<green>Available'
+        lore-unavailable:
+          - '<red>Unavailable'
+      previous-page:
+        name: '<green>Previous Page'
+      next-page:
+        name: '<green>Next Page'
+      empty:
+        name: '<red>This page is empty.'
+  queues:
+    title: 'Available Queues'
+    buttons:
+      queue:
+        name: '<dark_aqua>%name%'
+        lore:
+          - '<gray>Bet: <gold>$%bet_amount%'
+          - '<gray>In Queue: <white>%in_queue%'
+          - '<gray>In Match: <white>%in_match%'
+          - ' '
+          - '<green><bold>Click to Queue!'
+      previous-page:
+        name: '<green>Previous Page'
+      next-page:
+        name: '<green>Next Page'
+      empty:
+        name: '<red>This page is empty.'
+  item-betting:
+    title: 'Winner Takes All!'
+    buttons:
+      head:
+        name: '<yellow>%name%'
+      state:
+        name-ready: '<green><bold>READY'
+        name-not-ready: '<gray><bold>NOT READY'
+      details:
+        name: '<blue>Match Details'
+        lore:
+          - '<gray>Kit: <dark_aqua>%kit%'
+          - '<gray>Arena: <yellow>%arena%'
+          - '<gray>Bet: <gold>$%bet_amount%'
+      cancel:
+        name: '<red><bold>CLICK TO CANCEL'
+        lore:
+          - '<gray>Click or close inventory'
+          - '<gray>to cancel the match.'
+  inventory-view:
+    title: '<yellow>%name%'
+    buttons:
+      head:
+        name: '<yellow>%name%'
+      potion-counter:
+        name: '<light_purple>%potions% Health Potions'
+      effects:
+        name: '<aqua>Potion Effects'
+        lore-format: '<gray>%type% %amplifier% (%duration%s)'
+      hunger:
+        name: '<gold>%hunger% bars'
+      health:
+        name: '<red>%health% ❤'
+  options:
+    title: 'Kit: %kit%'
+    buttons:
+      option:
+        name: '<aqua>%name%'
+        lore:
+          - ' '
+          - '<gray>Status: <reset>%state%'
+          - ' '
+          - '<reset><bold>CLICK TO TOGGLE'
+  bind:
+    title: 'Kit: %kit%'
+    buttons:
+      arena:
+        name: '<yellow>%arena%'
+        lore-bound:
+          - '<gray>Bound Kits: <dark_aqua>%kits%'
+          - ' '
+          - '<green><bold>BOUND'
+          - ' '
+          - '<reset><bold>CLICK TO TOGGLE'
+        lore-not-bound:
+          - '<gray>Bound Kits: <dark_aqua>%kits%'
+          - ' '
+          - '<red><bold>NOT BOUND'
+          - ' '
+          - '<reset><bold>CLICK TO TOGGLE'
+
+
+KIT:
+  EDIT:
+    started: '{PREFIX} <green>You are now editing kit <yellow>%kit%<green>. Use <yellow>/kitsave <green>when done.'
+    saved: '{PREFIX} <green>Your kit <yellow>%kit% <green>has been saved and your inventory restored.'
+    already-editing: '{PREFIX} <red>You are already editing a kit. Use <yellow>/kitsave <red>to save first.'
+    not-editing: '{PREFIX} <red>You are not currently editing a kit.'
+    start-failed: '{PREFIX} <red>Failed to start kit editing session.'
+    save-failed: '{PREFIX} <red>Failed to save kit. Please try again.'
+    in-queue: '{PREFIX} <red>You cannot edit kits while in a queue. Leave the queue first.'
+    in-match: '{PREFIX} <red>You cannot edit kits while in a match. Wait for the match to end.'
+    session-aborted: '{PREFIX} <red>Your kit editing session has been aborted because you joined a queue or match.'
+    invalid-items: '{PREFIX} <red>Kit editing session aborted! You can only modify items from the default kit. External items are not allowed.'
+    command-blocked: '{PREFIX} <red>You cannot use other commands while editing a kit. Use <yellow>/kitsave <red>to save.'
+    drop-blocked: '{PREFIX} <red>You cannot drop items while editing a kit.'
+    inventory-blocked: '{PREFIX} <red>You cannot access external inventories while editing a kit.'
+    block-break-blocked: '{PREFIX} <red>You cannot break blocks while editing a kit.'
+    block-place-blocked: '{PREFIX} <red>You cannot place blocks while editing a kit.'
+    interact-blocked: '{PREFIX} <red>You cannot interact with blocks while editing a kit.'

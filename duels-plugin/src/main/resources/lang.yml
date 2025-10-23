@@ -704,9 +704,9 @@ GUI:
 
 KIT:
     EDIT:
-      started: '{PREFIX} &aYou are now editing kit &e%kit%&a. Use &e/kitsave &awhen done.'
+      started: '{PREFIX} &aYou are now editing kit &e%kit%&a. Use &e/kit save &awhen done.'
       saved: '{PREFIX} &aYour kit &e%kit% &ahas been saved and your inventory restored.'
-      already-editing: '{PREFIX} &cYou are already editing a kit. Use &e/kitsave &cto save first.'
+      already-editing: '{PREFIX} &cYou are already editing a kit. Use &e/kit save &cto save first.'
       not-editing: '{PREFIX} &cYou are not currently editing a kit.'
       start-failed: '{PREFIX} &cFailed to start kit editing session.'
       save-failed: '{PREFIX} &cFailed to save kit. Please try again.'
@@ -714,7 +714,7 @@ KIT:
       in-match: '{PREFIX} &cYou cannot edit kits while in a match. Wait for the match to end.'
       session-aborted: '{PREFIX} &cYour kit editing session has been aborted because you joined a queue or match.'
       invalid-items: '{PREFIX} &cKit editing session aborted! You can only modify items from the default kit. External items are not allowed.'
-      command-blocked: '{PREFIX} &cYou cannot use other commands while editing a kit. Use &e/kitsave &cto save.'
+      command-blocked: '{PREFIX} &cYou cannot use other commands while editing a kit. Use &e/kit save &cto save.'
       drop-blocked: '{PREFIX} &cYou cannot drop items while editing a kit.'
       inventory-blocked: '{PREFIX} &cYou cannot access external inventories while editing a kit.'
       block-break-blocked: '{PREFIX} &cYou cannot break blocks while editing a kit.'

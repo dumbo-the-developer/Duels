@@ -279,6 +279,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private String noKit;
     @Getter
     private String noOpponent;
+    @Getter
+    private boolean useMinimessage;
 
     private final Multimap<String, MessageSound> messageToSounds = HashMultimap.create();
 
@@ -439,6 +441,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         cdDuelTitles = configuration.getStringList("countdown.duel.titles");
         cdPartyDuelMessages = configuration.getStringList("countdown.party-duel.messages");
         cdPartyDuelTitles = configuration.getStringList("countdown.party-duel.titles");
+        useMinimessage = configuration.getBoolean("use-minimessages");
 
         final ConfigurationSection sounds = configuration.getConfigurationSection("sounds");
 

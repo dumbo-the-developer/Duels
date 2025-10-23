@@ -52,6 +52,12 @@ dependencies {
     implementation 'space.arim.morepaperlib:morepaperlib:0.4.4'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.20.0'
     implementation 'org.json:json:20250517'
+    implementation 'net.kyori:adventure-text-minimessage:4.25.0'
+    implementation 'net.kyori:adventure-text-serializer-legacy:4.25.0'
+    implementation 'net.kyori:adventure-api:4.25.0'
+    implementation 'net.kyori:examination-api:1.3.0'
+    implementation 'net.kyori:adventure-key:4.25.0'
+    implementation 'net.kyori:adventure-nbt:4.25.0'
 }
 
 shadowJar {
@@ -70,6 +76,12 @@ shadowJar {
         include(dependency('io.papermc:.*'))
         include(dependency('org.json:.*'))
         include(dependency('space.arim.morepaperlib:.*'))
+        include(dependency('net.kyori:adventure-text-minimessage:.*'))
+        include(dependency('net.kyori:adventure-text-serializer-legacy:.*'))
+        include(dependency('net.kyori:adventure-api:.*'))
+        include(dependency('net.kyori:examination-api:.*'))
+        include(dependency('net.kyori:adventure-key:.*'))
+        include(dependency('net.kyori:adventure-nbt:.*'))
     }
 
     final String group = project.group.toString() + "." + parent.name.toLowerCase() + ".shaded."
