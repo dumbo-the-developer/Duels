@@ -492,6 +492,12 @@ public class DuelManager implements Loadable {
             if (match.getSource() == null) {
                 queueManager.remove(player);
             }
+            
+            // Abort any kit editing session
+            com.meteordevelopments.duels.kit.edit.KitEditManager kitEditManagerInstance = com.meteordevelopments.duels.kit.edit.KitEditManager.getInstance();
+            if (kitEditManagerInstance != null) {
+                kitEditManagerInstance.checkAndAbortIfInQueueOrMatch(player);
+            }
 
             if (player.getAllowFlight()) {
                 player.setFlying(false);
@@ -507,7 +513,16 @@ public class DuelManager implements Loadable {
 
             if (kit != null) {
                 PlayerUtil.reset(player);
-                kit.equip(player);
+                
+                // Check for player-specific kit first
+                com.meteordevelopments.duels.kit.edit.KitEditManager kitEditManager = com.meteordevelopments.duels.kit.edit.KitEditManager.getInstance();
+                if (kitEditManager != null && kitEditManager.hasPlayerKit(player, kit.getName())) {
+                    // Load player's custom kit
+                    kitEditManager.loadPlayerKit(player, kit.getName());
+                } else {
+                    // Load default kit
+                    kit.equip(player);
+                }
             }
 
             if (config.isStartCommandsEnabled() && !(match.getSource() == null && config.isStartCommandsQueueOnly())) {

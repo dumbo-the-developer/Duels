@@ -26,6 +26,7 @@ commands:
   duels:
     description: Administrative command of Duels.
     aliases: [ ds ]
+  kit:
 
 permissions:
   duels.*:

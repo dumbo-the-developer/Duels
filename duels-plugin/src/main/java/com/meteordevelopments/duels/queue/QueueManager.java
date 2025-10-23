@@ -443,6 +443,12 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
         queue.addPlayer(new QueueEntry(player, player.getLocation().clone(), duelzone));
 
+        // Abort any kit editing session
+        com.meteordevelopments.duels.kit.edit.KitEditManager kitEditManager = com.meteordevelopments.duels.kit.edit.KitEditManager.getInstance();
+        if (kitEditManager != null) {
+            kitEditManager.checkAndAbortIfInQueueOrMatch(player);
+        }
+
         final String kit = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("GENERAL.none");
         lang.sendMessage(player, "QUEUE.add", "name", queue.getName(), "kit", kit, "bet_amount", queue.getBet());
         return true;
