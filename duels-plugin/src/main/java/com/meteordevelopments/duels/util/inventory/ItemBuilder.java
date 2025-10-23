@@ -20,6 +20,7 @@ import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 import org.bukkit.util.Consumer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -78,6 +79,36 @@ public final class ItemBuilder {
 
     public ItemBuilder lore(final String... lore) {
         return lore(Arrays.asList(lore));
+    }
+
+    /**
+     * Sets the display name with MiniMessage support.
+     * Requires a Lang instance to check MiniMessage configuration.
+     */
+    public ItemBuilder name(final String name, final com.meteordevelopments.duels.config.Lang lang) {
+        return editMeta(meta -> meta.setDisplayName(lang.toLegacyString(name)));
+    }
+
+    /**
+     * Sets the lore with MiniMessage support.
+     * Requires a Lang instance to check MiniMessage configuration.
+     */
+    public ItemBuilder lore(final List<String> lore, final com.meteordevelopments.duels.config.Lang lang) {
+        return editMeta(meta -> {
+            List<String> convertedLore = new ArrayList<>();
+            for (String line : lore) {
+                convertedLore.add(lang.toLegacyString(line));
+            }
+            meta.setLore(convertedLore);
+        });
+    }
+
+    /**
+     * Sets the lore with MiniMessage support.
+     * Requires a Lang instance to check MiniMessage configuration.
+     */
+    public ItemBuilder lore(final com.meteordevelopments.duels.config.Lang lang, final String... lore) {
+        return lore(Arrays.asList(lore), lang);
     }
 
     public ItemBuilder enchant(final Enchantment enchantment, final int level) {

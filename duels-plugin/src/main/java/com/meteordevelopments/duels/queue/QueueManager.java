@@ -114,9 +114,9 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
     public void handleLoad() throws IOException {
         this.gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.queues.title"), config.getQueuesRows(), queues);
         gui.setSpaceFiller(Items.from(config.getQueuesFillerType(), config.getQueuesFillerData()));
-        gui.setPrevButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.previous-page.name")).build());
-        gui.setNextButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.next-page.name")).build());
-        gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.empty.name")).build());
+        gui.setPrevButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.previous-page.name"), lang).build());
+        gui.setNextButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.next-page.name"), lang).build());
+        gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.empty.name"), lang).build());
         plugin.getGuiListener().addGui(gui);
 
         if (FileUtil.checkNonEmpty(file, true)) {

@@ -28,10 +28,16 @@ public class QueueSignImpl implements QueueSign {
 
     private int lastInQueue;
     private long lastInMatch;
+    private com.meteordevelopments.duels.config.Lang lang;
 
     public QueueSignImpl(final Location location, final String format, final Queue queue) {
+        this(location, format, queue, null);
+    }
+
+    public QueueSignImpl(final Location location, final String format, final Queue queue, final com.meteordevelopments.duels.config.Lang lang) {
         this.location = location;
         this.queue = queue;
+        this.lang = lang;
 
         final String[] data = {"", "", "", ""};
 
@@ -56,7 +62,13 @@ public class QueueSignImpl implements QueueSign {
     }
 
     private String replace(final String line, final int inQueue, final long inMatch) {
-        return StringUtil.color(line.replace("%in_queue%", String.valueOf(inQueue)).replace("%in_match%", String.valueOf(inMatch)));
+        String replacedLine = line.replace("%in_queue%", String.valueOf(inQueue)).replace("%in_match%", String.valueOf(inMatch));
+        
+        if (lang != null) {
+            return lang.toLegacyString(replacedLine);
+        } else {
+            return StringUtil.color(replacedLine);
+        }
     }
 
     public void update() {

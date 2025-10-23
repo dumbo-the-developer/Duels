@@ -163,4 +163,39 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
         players.forEach(player -> sendMessage(player, key, replacers));
     }
 
+    /**
+     * Converts a MiniMessage string to legacy format for GUI items and signs.
+     * If MiniMessage is disabled, returns the original string with legacy color codes.
+     */
+    public String toLegacyString(final String message) {
+        if (message == null) {
+            return null;
+        }
+
+        if (config.isUseMinimessage()) {
+            try {
+                Component component = miniMessage.deserialize(message);
+                return LegacyComponentSerializer.legacySection().serialize(component);
+            } catch (Exception e) {
+                // Fallback to legacy formatting if MiniMessage fails
+                return StringUtil.color(message);
+            }
+        } else {
+            return StringUtil.color(message);
+        }
+    }
+
+    /**
+     * Converts a MiniMessage string to legacy format for GUI items and signs with replacements.
+     */
+    public String toLegacyString(final String key, final Object... replacers) {
+        final String message = getRawMessage(key);
+        if (message == null) {
+            return null;
+        }
+
+        String replacedMessage = replace(message, replacers);
+        return toLegacyString(replacedMessage);
+    }
+
 }

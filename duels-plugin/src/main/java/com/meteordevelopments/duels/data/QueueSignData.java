@@ -57,6 +57,6 @@ public class QueueSignData {
             }
         }
 
-        return new QueueSignImpl(location, plugin.getLang().getMessage("SIGN.format", "name", queueName != null ? queueName : "Unnamed", "kit", this.kit != null ? this.kit : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet), queue);
+        return new QueueSignImpl(location, plugin.getLang().getMessage("SIGN.format", "name", queueName != null ? queueName : "Unnamed", "kit", this.kit != null ? this.kit : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet), queue, plugin.getLang());
     }
 }

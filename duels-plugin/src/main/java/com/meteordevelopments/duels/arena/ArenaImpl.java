@@ -52,8 +52,8 @@ public class ArenaImpl extends BaseButton implements Arena {
     public ArenaImpl(final DuelsPlugin plugin, final String name, final boolean disabled) {
         super(plugin, ItemBuilder
                 .of(Items.EMPTY_MAP)
-                .name(plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.name", "name", name))
-                .lore(plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.lore-unavailable").split("\n"))
+                .name(plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.name", "name", name), plugin.getLang())
+                .lore(plugin.getLang(), plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.lore-unavailable").split("\n"))
                 .build()
         );
         this.name = name;
@@ -65,7 +65,7 @@ public class ArenaImpl extends BaseButton implements Arena {
     }
 
     public void refreshGui(final boolean available) {
-        setLore(lang.getMessage("GUI.arena-selector.buttons.arena.lore-" + (available ? "available" : "unavailable")).split("\n"));
+        setLore(lang, lang.getMessage("GUI.arena-selector.buttons.arena.lore-" + (available ? "available" : "unavailable")).split("\n"));
         arenaManager.getGui().calculatePages();
     }
 

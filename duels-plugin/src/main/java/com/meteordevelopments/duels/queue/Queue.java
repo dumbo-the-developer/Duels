@@ -46,8 +46,8 @@ public class Queue extends BaseButton implements DQueue {
         super(plugin, ItemBuilder
                 .of((plugin.getConfiguration().isInheritKitItemType() && kit != null) ? kit.getDisplayed().clone() : ItemBuilder.of(Material.DIAMOND_SWORD).build())
                 .name(plugin.getLang().getMessage("GUI.queues.buttons.queue.name",
-                        "name", name, "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", 0, "in_match", 0))
-                .lore(plugin.getLang().getMessage("GUI.queues.buttons.queue.lore",
+                        "name", name, "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", 0, "in_match", 0), plugin.getLang())
+                .lore(plugin.getLang(), plugin.getLang().getMessage("GUI.queues.buttons.queue.lore",
                         "name", name, "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", 0, "in_match", 0).split("\n"))
                 .build());
         this.name = name;
@@ -101,8 +101,8 @@ public class Queue extends BaseButton implements DQueue {
         int inQueue = players.size();
         long inMatch = getPlayersInMatch();
         setDisplayName(lang.getMessage("GUI.queues.buttons.queue.name",
-                "name", name, "kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch));
-        setLore(lang.getMessage("GUI.queues.buttons.queue.lore",
+                "name", name, "kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch), lang);
+        setLore(lang, lang.getMessage("GUI.queues.buttons.queue.lore",
                 "name", name, "kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch).split("\n"));
     }
 
