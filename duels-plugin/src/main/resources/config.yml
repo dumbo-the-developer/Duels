@@ -697,3 +697,8 @@ duration-format: 'mm:ss'
 no-kit: 'none'
 # Displayed when player's opponent in duel is killed.
 no-opponent: 'No opponent'
+
+# If set to 'true', MiniMessage formatting will be used instead of legacy color codes.
+# MiniMessage supports modern formatting like <red>text</red>, <bold>text</bold>, gradients, etc.
+# default: false
+use-minimessages: false

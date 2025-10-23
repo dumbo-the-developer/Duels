@@ -12,6 +12,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Objects;
+
 public class SpectateCommand extends BaseCommand {
 
     public SpectateCommand(final DuelsPlugin plugin) {
@@ -79,7 +81,7 @@ public class SpectateCommand extends BaseCommand {
                 final String kit = match.getKit() != null ? match.getKit().getName() : lang.getMessage("GENERAL.none");
                 lang.sendMessage(player, "COMMAND.spectate.start-spectate",
                         "name", target.getName(),
-                        "opponent", arena.getOpponent(target).getName(),
+                        "opponent", Objects.requireNonNull(arena.getOpponent(target)).getName(),
                         "kit", kit,
                         "arena", arena.getName(),
                         "bet_amount", match.getBet()

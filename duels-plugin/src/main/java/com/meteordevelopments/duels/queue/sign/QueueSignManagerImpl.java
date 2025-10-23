@@ -63,7 +63,7 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
     public void handleLoad() throws IOException {
         if (FileUtil.checkNonEmpty(file, true)) {
             try (final Reader reader = new InputStreamReader(Files.newInputStream(file.toPath()), Charsets.UTF_8)) {
-                final List<QueueSignData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<List<QueueSignData>>() {
+                final List<QueueSignData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<>() {
                 });
 
                 if (data != null) {
@@ -129,7 +129,7 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
 
         final QueueSignImpl created;
         final String kitName = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("GENERAL.none");
-        signs.put(location, created = new QueueSignImpl(location, lang.getMessage("SIGN.format", "kit", kitName, "bet_amount", queue.getBet()), queue));
+        signs.put(location, created = new QueueSignImpl(location, lang.getMessage("SIGN.format", "name", queue.getName(), "kit", kitName, "bet_amount", queue.getBet()), queue, lang));
         signs.values().stream().filter(sign -> sign.equals(created)).forEach(QueueSignImpl::update);
         saveQueueSigns();
 

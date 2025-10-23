@@ -13,14 +13,17 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Queue extends BaseButton implements DQueue {
 
     @Getter
+    private final String name;
+    @Getter
     private final Kit kit;
     @Getter
     private final int bet;
+    @Getter
+    private final int teamSize;
     @Getter
     private final List<QueueEntry> players = new LinkedList<>();
     @Getter
@@ -28,15 +31,29 @@ public class Queue extends BaseButton implements DQueue {
     private boolean removed;
 
     public Queue(final DuelsPlugin plugin, final Kit kit, final int bet) {
+        this(plugin, "Unnamed", kit, bet, 1);
+    }
+
+    public Queue(final DuelsPlugin plugin, final String name, final Kit kit, final int bet) {
+        this(plugin, name, kit, bet, 1);
+    }
+
+    public Queue(final DuelsPlugin plugin, final Kit kit, final int bet, final int teamSize) {
+        this(plugin, "Unnamed", kit, bet, teamSize);
+    }
+
+    public Queue(final DuelsPlugin plugin, final String name, final Kit kit, final int bet, final int teamSize) {
         super(plugin, ItemBuilder
                 .of((plugin.getConfiguration().isInheritKitItemType() && kit != null) ? kit.getDisplayed().clone() : ItemBuilder.of(Material.DIAMOND_SWORD).build())
                 .name(plugin.getLang().getMessage("GUI.queues.buttons.queue.name",
-                        "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", 0, "in_match", 0))
-                .lore(plugin.getLang().getMessage("GUI.queues.buttons.queue.lore",
-                        "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", 0, "in_match", 0).split("\n"))
+                        "name", name, "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", 0, "in_match", 0), plugin.getLang())
+                .lore(plugin.getLang(), plugin.getLang().getMessage("GUI.queues.buttons.queue.lore",
+                        "name", name, "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", 0, "in_match", 0).split("\n"))
                 .build());
+        this.name = name;
         this.kit = kit;
         this.bet = bet;
+        this.teamSize = Math.max(1, teamSize);
     }
 
     @Override
@@ -47,7 +64,7 @@ public class Queue extends BaseButton implements DQueue {
     @NotNull
     @Override
     public List<Player> getQueuedPlayers() {
-        return Collections.unmodifiableList(players.stream().sequential().map(QueueEntry::getPlayer).collect(Collectors.toList()));
+        return players.stream().map(QueueEntry::getPlayer).toList();
     }
 
     void addPlayer(final QueueEntry entry) {
@@ -84,9 +101,9 @@ public class Queue extends BaseButton implements DQueue {
         int inQueue = players.size();
         long inMatch = getPlayersInMatch();
         setDisplayName(lang.getMessage("GUI.queues.buttons.queue.name",
-                "kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch));
-        setLore(lang.getMessage("GUI.queues.buttons.queue.lore",
-                "kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch).split("\n"));
+                "name", name, "kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch), lang);
+        setLore(lang, lang.getMessage("GUI.queues.buttons.queue.lore",
+                "name", name, "kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch).split("\n"));
     }
 
     @Override
@@ -96,7 +113,7 @@ public class Queue extends BaseButton implements DQueue {
 
     @Override
     public String toString() {
-        return (kit != null ? kit.getName() : "none") + " ($" + bet + ")";
+        return name + " (" + (kit != null ? kit.getName() : "none") + " $" + bet + ")";
     }
 
     @Override
@@ -110,11 +127,11 @@ public class Queue extends BaseButton implements DQueue {
         }
 
         final Queue queue = (Queue) other;
-        return bet == queue.bet && Objects.equals(kit, queue.kit);
+        return bet == queue.bet && teamSize == queue.teamSize && Objects.equals(name, queue.name) && Objects.equals(kit, queue.kit);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(kit, bet);
+        return Objects.hash(name, kit, bet, teamSize);
     }
 }

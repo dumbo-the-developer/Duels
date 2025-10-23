@@ -17,7 +17,7 @@ public class StateButton extends BaseButton {
     public StateButton(final DuelsPlugin plugin, final BettingGui gui, final Player owner) {
         super(plugin, ItemBuilder
                 .of(Items.OFF.clone())
-                .name(plugin.getLang().getMessage("GUI.item-betting.buttons.state.name-not-ready"))
+                .name(plugin.getLang().getMessage("GUI.item-betting.buttons.state.name-not-ready"), plugin.getLang())
                 .build()
         );
         this.gui = gui;
@@ -28,7 +28,7 @@ public class StateButton extends BaseButton {
     public void onClick(final Player player) {
         if (!gui.isReady(player) && player.getUniqueId().equals(owner)) {
             setDisplayed(Items.ON.clone());
-            setDisplayName(lang.getMessage("GUI.item-betting.buttons.state.name-ready"));
+            setDisplayName(lang.getMessage("GUI.item-betting.buttons.state.name-ready"), lang);
             gui.update(player, this);
             gui.setReady(player);
         }

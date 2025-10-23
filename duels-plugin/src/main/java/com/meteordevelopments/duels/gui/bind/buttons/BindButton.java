@@ -24,7 +24,7 @@ public class BindButton extends BaseButton {
         super(plugin, ItemBuilder.of(Items.EMPTY_MAP).build());
         this.kit = kit;
         this.arena = arena;
-        setDisplayName(plugin.getLang().getMessage("GUI.bind.buttons.arena.name", "arena", arena.getName()));
+        setDisplayName(plugin.getLang().getMessage("GUI.bind.buttons.arena.name", "arena", arena.getName()), plugin.getLang());
         update();
     }
 
@@ -34,7 +34,7 @@ public class BindButton extends BaseButton {
 
         String kits = StringUtil.join(arena.getKits().stream().map(KitImpl::getName).collect(Collectors.toList()), ", ");
         kits = kits.isEmpty() ? lang.getMessage("GENERAL.none") : kits;
-        setLore(lang.getMessage("GUI.bind.buttons.arena.lore-" + (state ? "bound" : "not-bound"), "kits", kits).split("\n"));
+        setLore(lang, lang.getMessage("GUI.bind.buttons.arena.lore-" + (state ? "bound" : "not-bound"), "kits", kits).split("\n"));
     }
 
     @Override

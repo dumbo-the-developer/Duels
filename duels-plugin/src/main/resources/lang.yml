@@ -45,6 +45,7 @@ ERROR:
     not-found: '{PREFIX} &cNo kit exists with the name ''%name%''.'
     already-exists: '{PREFIX} &cA kit named ''%name%'' already exists.'
     empty-hand: '{PREFIX} &cYou must be holding an item to use this command.'
+  player-only: '{PREFIX} &cThis command can only be used by players.'
   duel:
     is-self: '{PREFIX} &cYou cannot duel yourself.'
     inventory-not-empty: '{PREFIX} &cYou must have a cleared inventory to use this command.'
@@ -136,6 +137,11 @@ ERROR:
 
 
 COMMAND:
+  kit:
+    usage: '{PREFIX} &cUsage: /kit [edit|save] [kitname]'
+    edit:
+      usage: '{PREFIX} &cUsage: /kit edit <kitname>'
+    unknown-subcommand: '{PREFIX} &cUnknown subcommand: %subcommand%'
   duel:
     usage:
       - '{LINE}'
@@ -491,6 +497,7 @@ DUEL:
     tie: '{PREFIX} &7Tie Game!'
     plugin-disable: '{PREFIX} &cPlugin is disabling! Ending match automatically.'
     opponent-defeat: '{PREFIX} &f%winner% &a(%winner_rating%) (+%change%) &7defeated &f%loser% &c(%loser_rating%) (-%change%) &7with kit &3%kit% &7on arena &e%arena%&7.'
+    team-opponent-defeat: '{PREFIX} &f%winners% &7defeated &f%losers% &7with kit &3%kit% &7on arena &e%arena%&7.'
     party-opponent-defeat: '{PREFIX} &f%winners% &7defeated &f%losers% &7with kit &3%kit% &7on arena &e%arena%&7.'
   inventories:
     message: '&7Inventories (click on the name to view): '
@@ -521,7 +528,7 @@ QUEUE:
 SIGN:
   format:
     - '&a[Click to Join]'
-    - '&3%kit%&f:&e$%bet_amount%'
+    - '&3%name%&f:&e$%bet_amount%'
     - '&f&l%in_queue% IN QUEUE'
     - '&f&l%in_match% IN MATCH'
 
@@ -620,7 +627,7 @@ GUI:
     title: 'Available Queues'
     buttons:
       queue:
-        name: '&3%kit%'
+        name: '&3%name%'
         lore:
           - '&7Bet: &6$%bet_amount%'
           - '&7In Queue: &f%in_queue%'
@@ -693,3 +700,23 @@ GUI:
           - '&c&lNOT BOUND'
           - ' '
           - '&r&lCLICK TO TOGGLE'
+
+
+KIT:
+    EDIT:
+      started: '{PREFIX} &aYou are now editing kit &e%kit%&a. Use &e/kit save &awhen done.'
+      saved: '{PREFIX} &aYour kit &e%kit% &ahas been saved and your inventory restored.'
+      already-editing: '{PREFIX} &cYou are already editing a kit. Use &e/kit save &cto save first.'
+      not-editing: '{PREFIX} &cYou are not currently editing a kit.'
+      start-failed: '{PREFIX} &cFailed to start kit editing session.'
+      save-failed: '{PREFIX} &cFailed to save kit. Please try again.'
+      in-queue: '{PREFIX} &cYou cannot edit kits while in a queue. Leave the queue first.'
+      in-match: '{PREFIX} &cYou cannot edit kits while in a match. Wait for the match to end.'
+      session-aborted: '{PREFIX} &cYour kit editing session has been aborted because you joined a queue or match.'
+      invalid-items: '{PREFIX} &cKit editing session aborted! You can only modify items from the default kit. External items are not allowed.'
+      command-blocked: '{PREFIX} &cYou cannot use other commands while editing a kit. Use &e/kit save &cto save.'
+      drop-blocked: '{PREFIX} &cYou cannot drop items while editing a kit.'
+      inventory-blocked: '{PREFIX} &cYou cannot access external inventories while editing a kit.'
+      block-break-blocked: '{PREFIX} &cYou cannot break blocks while editing a kit.'
+      block-place-blocked: '{PREFIX} &cYou cannot place blocks while editing a kit.'
+      interact-blocked: '{PREFIX} &cYou cannot interact with blocks while editing a kit.'

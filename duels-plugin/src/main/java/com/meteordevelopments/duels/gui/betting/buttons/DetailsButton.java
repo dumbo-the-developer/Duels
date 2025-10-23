@@ -14,7 +14,7 @@ public class DetailsButton extends BaseButton {
     public DetailsButton(final DuelsPlugin plugin, final Settings settings) {
         super(plugin, ItemBuilder
                 .of(Items.SIGN)
-                .name(plugin.getLang().getMessage("GUI.item-betting.buttons.details.name"))
+                .name(plugin.getLang().getMessage("GUI.item-betting.buttons.details.name"), plugin.getLang())
                 .build()
         );
         this.settings = settings;
@@ -27,6 +27,6 @@ public class DetailsButton extends BaseButton {
                 "arena", settings.getArena() != null ? settings.getArena().getName() : lang.getMessage("GENERAL.random"),
                 "bet_amount", settings.getBet()
         );
-        setLore(lore.split("\n"));
+        setLore(lang, lore.split("\n"));
     }
 }

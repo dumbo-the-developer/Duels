@@ -17,30 +17,18 @@ import java.util.List;
 public class JoinCommand extends BaseCommand {
 
     public JoinCommand(final DuelsPlugin plugin) {
-        super(plugin, "join", "join [-:kit] [bet]", "Joins a queue.", Permissions.QUEUE, 2, true, "j");
+        super(plugin, "join", "join [queueName]", "Joins a queue by name.", Permissions.QUEUE, 2, true, "j");
     }
 
     @Override
     protected void execute(final CommandSender sender, final String label, final String[] args) {
         final Player player = (Player) sender;
-        KitImpl kit = null;
+        final String queueName = StringUtil.join(args, " ", 1, args.length);
 
-        if (!args[1].startsWith("-")) {
-            String name = StringUtil.join(args, " ", 1, args.length - (args.length > 2 ? 1 : 0)).replace("-", " ");
-            kit = kitManager.get(name);
-
-            if (kit == null) {
-                lang.sendMessage(sender, "ERROR.kit.not-found", "name", name);
-                return;
-            }
-        }
-
-        final String kitName = kit != null ? kit.getName() : lang.getMessage("GENERAL.none");
-        final int bet = args.length > 2 ? NumberUtil.parseInt(args[args.length - 1]).orElse(0) : 0;
-        final Queue queue = args[1].equals("-r") ? queueManager.randomQueue() : queueManager.get(kit, bet);
+        final Queue queue = queueManager.getByName(queueName);
 
         if (queue == null) {
-            lang.sendMessage(sender, "ERROR.queue.not-found", "bet_amount", bet, "kit", kitName);
+            lang.sendMessage(sender, "ERROR.queue.not-found", "name", queueName);
             return;
         }
 
@@ -50,11 +38,7 @@ public class JoinCommand extends BaseCommand {
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         if (args.length == 2) {
-            return handleTabCompletion(args[1], kitManager.getNames(true));
-        }
-
-        if (args.length > 2) {
-            return Arrays.asList("0", "10", "50", "100", "500", "1000");
+            return queueManager.getQueueNames();
         }
 
         return null;

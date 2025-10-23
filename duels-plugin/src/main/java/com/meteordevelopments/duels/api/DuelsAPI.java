@@ -22,7 +22,7 @@ public class DuelsAPI {
      * @deprecated As of v3.0.0, use {@link UserManager#get(UUID)} instead.
      */
     @Deprecated
-    public static UserData getUser(final UUID uuid, boolean force) {
+    public static UserData getUser(final UUID uuid) {
         return DuelsPlugin.getInstance().getUserManager().get(uuid);
     }
 
@@ -31,7 +31,7 @@ public class DuelsAPI {
      * @deprecated As of v3.0.0, use {@link UserManager#get(Player)} instead.
      */
     @Deprecated
-    public static UserData getUser(final Player player, boolean force) {
+    public static UserData getUser(final Player player) {
         return DuelsPlugin.getInstance().getUserManager().get(player);
     }
 

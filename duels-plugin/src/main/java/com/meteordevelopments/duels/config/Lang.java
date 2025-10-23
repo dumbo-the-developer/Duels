@@ -7,6 +7,9 @@ import com.meteordevelopments.duels.util.Reloadable;
 import com.meteordevelopments.duels.util.StringUtil;
 import com.meteordevelopments.duels.util.config.AbstractConfiguration;
 import me.clip.placeholderapi.PlaceholderAPI;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -19,6 +22,7 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
 
     private final Config config;
     private final Map<String, String> messages = new HashMap<>();
+    private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public Lang(final DuelsPlugin plugin) {
         super(plugin, "lang");
@@ -136,17 +140,62 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
             }
             replacedMessage = StringUtil.color(replacedMessage);
             config.playSound(player, replacedMessage);
-            player.sendMessage(replacedMessage);
+            if (config.isUseMinimessage()) {
+                Component parsed = miniMessage.deserialize(replacedMessage);
+                player.sendMessage(parsed);
+            }else{
+                player.sendMessage(replacedMessage);
+            }
 
         } else {
             // Console or other senders — no PlaceholderAPI parsing
             replacedMessage = StringUtil.color(replacedMessage);
-            receiver.sendMessage(replacedMessage);
+            if (config.isUseMinimessage()) {
+                Component parsed = miniMessage.deserialize(replacedMessage);
+                receiver.sendMessage(parsed);
+            }else {
+                receiver.sendMessage(replacedMessage);
+            }
         }
     }
 
     public void sendMessage(final Collection<Player> players, final String key, final Object... replacers) {
         players.forEach(player -> sendMessage(player, key, replacers));
+    }
+
+    /**
+     * Converts a MiniMessage string to legacy format for GUI items and signs.
+     * If MiniMessage is disabled, returns the original string with legacy color codes.
+     */
+    public String toLegacyString(final String message) {
+        if (message == null) {
+            return null;
+        }
+
+        if (config.isUseMinimessage()) {
+            try {
+                Component component = miniMessage.deserialize(message);
+                return LegacyComponentSerializer.legacySection().serialize(component);
+            } catch (Exception e) {
+                // Fallback to legacy formatting if MiniMessage fails
+                return StringUtil.color(message);
+            }
+        } else {
+            return StringUtil.color(message);
+        }
+    }
+
+    /**
+     * Converts a MiniMessage string to legacy format for GUI items and signs with replacements.
+     */
+    public String toLegacyString(final String key, final Object... replacers) {
+        final String message = getRawMessage(key);
+        if (message == null) {
+            return null;
+        }
+
+        String replacedMessage = replace(message, replacers);
+        return toLegacyString(replacedMessage);
     }
 
 }

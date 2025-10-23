@@ -14,9 +14,9 @@ public class QueueEntry {
     @Getter
     private final CachedInfo info;
 
-    QueueEntry(final Player player, final Location location, final String duelzone) {
+    QueueEntry(final Player player, final Location location, final String duelZone) {
         this.player = player;
-        this.info = new CachedInfo(location, duelzone);
+        this.info = new CachedInfo(location, duelZone);
     }
 
     @Override

@@ -11,20 +11,20 @@ import org.bukkit.entity.Player;
 public class OwnInventoryButton extends BaseButton {
 
     public OwnInventoryButton(final DuelsPlugin plugin) {
-        super(plugin, ItemBuilder.of(Material.getMaterial(plugin.getLang().getMessage("GUI.settings.buttons.use-own-inventory.material").toUpperCase())).name(plugin.getLang().getMessage("GUI.settings.buttons.use-own-inventory.name")).build());
+        super(plugin, ItemBuilder.of(Material.getMaterial(plugin.getLang().getMessage("GUI.settings.buttons.use-own-inventory.material").toUpperCase())).name(plugin.getLang().getMessage("GUI.settings.buttons.use-own-inventory.name"), plugin.getLang()).build());
     }
 
     @Override
     public void update(final Player player) {
         if (config.isOwnInventoryUsePermission() && !player.hasPermission(Permissions.OWN_INVENTORY) && !player.hasPermission(Permissions.SETTING_ALL)) {
-            setLore(lang.getMessage("GUI.settings.buttons.use-own-inventory.lore-no-permission").split("\n"));
+            setLore(lang, lang.getMessage("GUI.settings.buttons.use-own-inventory.lore-no-permission").split("\n"));
             return;
         }
 
         final Settings settings = settingManager.getSafely(player);
         final String ownInventory = settings.isOwnInventory() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled");
         final String lore = plugin.getLang().getMessage("GUI.settings.buttons.use-own-inventory.lore", "own_inventory", ownInventory);
-        setLore(lore.split("\n"));
+        setLore(lang, lore.split("\n"));
     }
 
     @Override

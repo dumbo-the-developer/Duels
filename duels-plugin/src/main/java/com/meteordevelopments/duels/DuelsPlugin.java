@@ -13,6 +13,7 @@ import com.meteordevelopments.duels.api.command.SubCommand;
 import com.meteordevelopments.duels.arena.ArenaManagerImpl;
 import com.meteordevelopments.duels.betting.BettingManager;
 import com.meteordevelopments.duels.command.commands.SpectateCommand;
+import com.meteordevelopments.duels.command.commands.KitCommand;
 import com.meteordevelopments.duels.command.commands.duel.DuelCommand;
 import com.meteordevelopments.duels.command.commands.duels.DuelsCommand;
 import com.meteordevelopments.duels.command.commands.queue.QueueCommand;
@@ -161,7 +162,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                 new PartyCommand(this),
                 new QueueCommand(this),
                 new SpectateCommand(this),
-                new DuelsCommand(this)
+                new DuelsCommand(this),
+                new KitCommand(this)
         );
 
         for (final Loadable loadable : loadables) {
@@ -506,6 +508,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         new EnderpearlListener(this);
         new KitOptionsListener(this);
         new LingerPotionListener(this);
+        new com.meteordevelopments.duels.kit.edit.KitEditManager(this);
+        registerListener(new com.meteordevelopments.duels.kit.edit.KitEditListener(this));
 
         sendMessage("&dSuccessfully loaded pre-listeners in &f[" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
     }

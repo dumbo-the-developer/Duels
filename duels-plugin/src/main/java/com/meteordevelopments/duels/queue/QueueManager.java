@@ -49,6 +49,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 public class QueueManager implements Loadable, DQueueManager, Listener {
 
@@ -113,14 +114,14 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
     public void handleLoad() throws IOException {
         this.gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.queues.title"), config.getQueuesRows(), queues);
         gui.setSpaceFiller(Items.from(config.getQueuesFillerType(), config.getQueuesFillerData()));
-        gui.setPrevButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.previous-page.name")).build());
-        gui.setNextButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.next-page.name")).build());
-        gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.empty.name")).build());
+        gui.setPrevButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.previous-page.name"), lang).build());
+        gui.setNextButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.next-page.name"), lang).build());
+        gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.empty.name"), lang).build());
         plugin.getGuiListener().addGui(gui);
 
         if (FileUtil.checkNonEmpty(file, true)) {
             try (final Reader reader = new InputStreamReader(Files.newInputStream(file.toPath()), Charsets.UTF_8)) {
-                final List<QueueData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<List<QueueData>>() {
+                final List<QueueData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<>() {
                 });
 
                 if (data != null) {
@@ -150,45 +151,81 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
             for (final Queue queue : queues) {
                 final Set<QueueEntry> remove = new HashSet<>();
 
-                for (final QueueEntry current : queue.getPlayers()) {
-                    // player is already in a match
-                    if (remove.contains(current)) {
-                        continue;
+                // Group-based matching for x vs x
+                final int size = Math.max(1, queue.getTeamSize());
+                final List<QueueEntry> entries = new ArrayList<>(queue.getPlayers());
+
+                // Attempt to find two disjoint groups of 'size' each that can fight
+                // Simple greedy approach: iterate windows
+                for (int i = 0; i <= entries.size() - size; i++) {
+                    if (update) { break; }
+                    final List<QueueEntry> firstGroup = new ArrayList<>();
+                    boolean skipI = false;
+                    for (int k = 0; k < size; k++) {
+                        final QueueEntry e = entries.get(i + k);
+                        if (remove.contains(e)) { skipI = true; break; }
+                        firstGroup.add(e);
                     }
+                    if (skipI) { continue; }
 
-                    final Player player = current.getPlayer();
-
-                    for (final QueueEntry opponent : queue.getPlayers()) {
-                        final Player other = opponent.getPlayer();
-
-                        // opponent is already in a match or the rating difference is too high
-                        if (current.equals(opponent) || remove.contains(opponent) || !canFight(queue.getKit(), userManager.get(player), userManager.get(other))) {
-                            continue;
+                    for (int j = i + size; j <= entries.size() - size; j++) {
+                        final List<QueueEntry> secondGroup = new ArrayList<>();
+                        boolean ok = true;
+                        for (int k = 0; k < size; k++) {
+                            final QueueEntry e = entries.get(j + k);
+                            if (remove.contains(e)) { ok = false; break; }
+                            secondGroup.add(e);
                         }
+                        if (!ok) { continue; }
 
-                        remove.add(current);
-                        remove.add(opponent);
+                        // Rating compatibility check: all-vs-all pairs should be allowed
+                        boolean compatible = true;
+                        for (final QueueEntry a : firstGroup) {
+                            for (final QueueEntry b : secondGroup) {
+                                if (!canFight(queue.getKit(), userManager.get(a.getPlayer()), userManager.get(b.getPlayer()))) {
+                                    compatible = false;
+                                    break;
+                                }
+                            }
+                            if (!compatible) break;
+                        }
+                        if (!compatible) { continue; }
 
+                        // Build Settings and start match using party or individuals
                         final Settings setting = new Settings(plugin);
-
                         if (queue.getKit() != null) {
                             setting.setKit(kitManager.get(queue.getKit().getName()));
                         } else {
                             setting.setOwnInventory(true);
                         }
-
                         setting.setBet(queue.getBet());
-                        setting.getCache().put(player.getUniqueId(), current.getInfo());
-                        setting.getCache().put(other.getUniqueId(), opponent.getInfo());
 
-                        // Ensure party info is set to avoid NPE in DuelManager
-                        setting.setSenderParty(plugin.getPartyManager().get(player));
-                        setting.setTargetParty(plugin.getPartyManager().get(other));
+                        final List<Player> firstPlayers = new ArrayList<>();
+                        final List<Player> secondPlayers = new ArrayList<>();
+                        for (final QueueEntry e : firstGroup) {
+                            final Player p = e.getPlayer();
+                            firstPlayers.add(p);
+                            setting.getCache().put(p.getUniqueId(), e.getInfo());
+                        }
+                        for (final QueueEntry e : secondGroup) {
+                            final Player p = e.getPlayer();
+                            secondPlayers.add(p);
+                            setting.getCache().put(p.getUniqueId(), e.getInfo());
+                        }
+
+                        // Clear parties to avoid mismatch unless both sides are proper parties
+                        setting.setSenderParty(null);
+                        setting.setTargetParty(null);
 
                         final String kit = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("GENERAL.none");
-                        lang.sendMessage(player, "QUEUE.found-opponent", "name", other.getName(), "kit", kit, "bet_amount", queue.getBet());
-                        lang.sendMessage(other, "QUEUE.found-opponent", "name", player.getName(), "kit", kit, "bet_amount", queue.getBet());
-                        duelManager.startMatch(player, other, setting, null, queue);
+                        firstPlayers.forEach(p -> lang.sendMessage(p, "QUEUE.found-opponent", "name", secondPlayers.get(0).getName(), "kit", kit, "bet_amount", queue.getBet()));
+                        secondPlayers.forEach(p -> lang.sendMessage(p, "QUEUE.found-opponent", "name", firstPlayers.get(0).getName(), "kit", kit, "bet_amount", queue.getBet()));
+
+                        duelManager.startMatch(firstPlayers, secondPlayers, setting, null, queue);
+
+                        remove.addAll(firstGroup);
+                        remove.addAll(secondGroup);
+                        update = true;
                         break;
                     }
                 }
@@ -249,9 +286,26 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
     }
 
     @Nullable
+    public Queue getByName(final String name) {
+        return queues.stream().filter(queue -> queue.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+    }
+
+    public List<String> getQueueNames() {
+        return queues.stream().map(Queue::getName).collect(Collectors.toList());
+    }
+
+    @Nullable
     @Override
     public Queue create(@Nullable final CommandSender source, @Nullable final Kit kit, final int bet) {
-        final Queue queue = new Queue(plugin, kit, bet);
+        return create(source, "Unnamed", kit, bet, 1);
+    }
+
+    public Queue create(@Nullable final CommandSender source, @Nullable final Kit kit, final int bet, final int teamSize) {
+        return create(source, "Unnamed", kit, bet, teamSize);
+    }
+
+    public Queue create(@Nullable final CommandSender source, final String name, @Nullable final Kit kit, final int bet, final int teamSize) {
+        final Queue queue = new Queue(plugin, name, kit, bet, Math.max(1, teamSize));
 
         if (queues.contains(queue)) {
             return null;
@@ -269,7 +323,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
     @Nullable
     @Override
     public Queue create(@Nullable final Kit kit, final int bet) {
-        return create(null, kit, bet);
+        return create(null, "Unnamed", kit, bet, 1);
     }
 
     @Nullable
@@ -389,8 +443,14 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
         queue.addPlayer(new QueueEntry(player, player.getLocation().clone(), duelzone));
 
+        // Abort any kit editing session
+        com.meteordevelopments.duels.kit.edit.KitEditManager kitEditManager = com.meteordevelopments.duels.kit.edit.KitEditManager.getInstance();
+        if (kitEditManager != null) {
+            kitEditManager.checkAndAbortIfInQueueOrMatch(player);
+        }
+
         final String kit = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("GENERAL.none");
-        lang.sendMessage(player, "QUEUE.add", "kit", kit, "bet_amount", queue.getBet());
+        lang.sendMessage(player, "QUEUE.add", "name", queue.getName(), "kit", kit, "bet_amount", queue.getBet());
         return true;
     }
 

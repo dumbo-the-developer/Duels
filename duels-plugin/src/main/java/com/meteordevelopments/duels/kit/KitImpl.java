@@ -40,8 +40,8 @@ public class KitImpl extends BaseButton implements Kit {
                    final boolean arenaSpecific, final Set<Characteristic> characteristics) {
         super(plugin, displayed != null ? displayed : ItemBuilder
                 .of(Material.DIAMOND_SWORD)
-                .name("&7&l" + name)
-                .lore("&aClick to send", "&aa duel request", "&awith this kit!")
+                .name("&7&l" + name, plugin.getLang())
+                .lore(plugin.getLang(), "&aClick to send", "&aa duel request", "&awith this kit!")
                 .build());
         this.name = name;
         this.usePermission = usePermission;

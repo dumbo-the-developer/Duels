@@ -16,6 +16,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
@@ -42,12 +43,42 @@ public class Button<P extends JavaPlugin> {
         editMeta(meta -> meta.setDisplayName(StringUtil.color(name)));
     }
 
+    /**
+     * Sets the display name with MiniMessage support.
+     * Requires a Lang instance to check MiniMessage configuration.
+     */
+    protected void setDisplayName(final String name, final com.meteordevelopments.duels.config.Lang lang) {
+        editMeta(meta -> meta.setDisplayName(lang.toLegacyString(name)));
+    }
+
     protected void setLore(final List<String> lore) {
         editMeta(meta -> meta.setLore(StringUtil.color(lore)));
     }
 
     protected void setLore(final String... lore) {
         setLore(Arrays.asList(lore));
+    }
+
+    /**
+     * Sets the lore with MiniMessage support.
+     * Requires a Lang instance to check MiniMessage configuration.
+     */
+    protected void setLore(final com.meteordevelopments.duels.config.Lang lang, final List<String> lore) {
+        editMeta(meta -> {
+            List<String> convertedLore = new ArrayList<>();
+            for (String line : lore) {
+                convertedLore.add(lang.toLegacyString(line));
+            }
+            meta.setLore(convertedLore);
+        });
+    }
+
+    /**
+     * Sets the lore with MiniMessage support.
+     * Requires a Lang instance to check MiniMessage configuration.
+     */
+    protected void setLore(final com.meteordevelopments.duels.config.Lang lang, final String... lore) {
+        setLore(lang, Arrays.asList(lore));
     }
 
     protected void setOwner(final Player player) {

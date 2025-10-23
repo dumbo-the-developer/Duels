@@ -70,14 +70,15 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
     public void handleLoad() throws IOException {
         gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.arena-selector.title"), config.getArenaSelectorRows(), arenas);
         gui.setSpaceFiller(Items.from(config.getArenaSelectorFillerType(), config.getArenaSelectorFillerData()));
-        gui.setPrevButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.previous-page.name")).build());
-        gui.setNextButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.next-page.name")).build());
-        gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.empty.name")).build());
+        gui.setPrevButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.previous-page.name"), lang).build());
+        gui.setNextButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.next-page.name"), lang).build());
+        gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.empty.name"), lang).build());
         plugin.getGuiListener().addGui(gui);
 
         if (FileUtil.checkNonEmpty(file, true)) {
             try (final Reader reader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8)) {
-                final List<ArenaData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<List<ArenaData>>() {});
+                final List<ArenaData> data = JsonUtil.getObjectMapper().readValue(reader, new TypeReference<>() {
+                });
                 if (data != null) {
                     for (ArenaData arenaData : data) {
                         if (!StringUtil.isAlphanumeric(arenaData.getName())) {
@@ -189,7 +190,7 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
     public long getPlayersInMatch(final Queue queue) {
         int count = 0;
         for (ArenaImpl arena : arenas) {
-            if (arena.isUsed() && arena.getMatch().isFromQueue() && arena.getMatch().getSource().equals(queue)) {
+            if (arena.isUsed() && Objects.requireNonNull(arena.getMatch()).isFromQueue() && arena.getMatch().getSource().equals(queue)) {
                 count++;
             }
         }
@@ -241,7 +242,7 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
             if (!event.hasBlock() || !config.isPreventInteract()) return;
 
             ArenaImpl arena = get(event.getPlayer());
-            if (arena == null || !arena.isCounting()) return;
+            if (arena == null || arena.isCountingComplete()) return;
 
             event.setCancelled(true);
         }
@@ -251,7 +252,7 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
             if (!config.isPreventPvp() || !(event.getEntity() instanceof Player)) return;
 
             ArenaImpl arena = get((Player) event.getEntity());
-            if (arena == null || !arena.isCounting()) return;
+            if (arena == null || arena.isCountingComplete()) return;
 
             event.setCancelled(true);
         }
@@ -264,7 +265,7 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
             if (!(shooter instanceof Player)) return;
 
             ArenaImpl arena = get((Player) shooter);
-            if (arena == null || !arena.isCounting()) return;
+            if (arena == null || arena.isCountingComplete()) return;
 
             event.setCancelled(true);
         }
@@ -279,7 +280,7 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
             if (from.getBlockX() == to.getBlockX() && from.getBlockY() == to.getBlockY() && from.getBlockZ() == to.getBlockZ()) return;
 
             ArenaImpl arena = get(event.getPlayer());
-            if (arena == null || !arena.isCounting()) return;
+            if (arena == null || arena.isCountingComplete()) return;
 
             event.setTo(from);
         }

@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+@SuppressWarnings("deprecation")
 public class StatsCommand extends BaseCommand {
 
     public StatsCommand(final DuelsPlugin plugin) {

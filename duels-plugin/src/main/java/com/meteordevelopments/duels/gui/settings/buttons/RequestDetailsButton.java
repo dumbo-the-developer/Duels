@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 public class RequestDetailsButton extends BaseButton {
 
     public RequestDetailsButton(final DuelsPlugin plugin) {
-        super(plugin, ItemBuilder.of(Items.SIGN).name(plugin.getLang().getMessage("GUI.settings.buttons.details.name")).build());
+        super(plugin, ItemBuilder.of(Items.SIGN).name(plugin.getLang().getMessage("GUI.settings.buttons.details.name"), plugin.getLang()).build());
     }
 
     @Override
@@ -34,6 +34,6 @@ public class RequestDetailsButton extends BaseButton {
                 "item_betting", settings.isItemBetting() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled"),
                 "bet_amount", settings.getBet()
         );
-        setLore(lore.split("\n"));
+        setLore(lang, lore.split("\n"));
     }
 }

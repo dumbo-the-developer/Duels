@@ -4,6 +4,7 @@ import com.meteordevelopments.duels.countdown.DuelCountdown;
 import com.meteordevelopments.duels.countdown.party.PartyDuelCountdown;
 import com.meteordevelopments.duels.match.DuelMatch;
 import com.meteordevelopments.duels.match.party.PartyDuelMatch;
+import com.meteordevelopments.duels.match.team.TeamDuelMatch;
 import com.meteordevelopments.duels.party.Party;
 import com.meteordevelopments.duels.spectate.SpectatorImpl;
 import lombok.AccessLevel;
@@ -20,7 +21,6 @@ import com.meteordevelopments.duels.kit.KitImpl;
 import com.meteordevelopments.duels.queue.Queue;
 import com.meteordevelopments.duels.setting.Settings;
 import com.meteordevelopments.duels.util.compat.Items;
-import com.meteordevelopments.duels.util.function.Pair;
 import com.meteordevelopments.duels.util.inventory.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -52,8 +52,8 @@ public class ArenaImpl extends BaseButton implements Arena {
     public ArenaImpl(final DuelsPlugin plugin, final String name, final boolean disabled) {
         super(plugin, ItemBuilder
                 .of(Items.EMPTY_MAP)
-                .name(plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.name", "name", name))
-                .lore(plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.lore-unavailable").split("\n"))
+                .name(plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.name", "name", name), plugin.getLang())
+                .lore(plugin.getLang(), plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.lore-unavailable").split("\n"))
                 .build()
         );
         this.name = name;
@@ -65,7 +65,7 @@ public class ArenaImpl extends BaseButton implements Arena {
     }
 
     public void refreshGui(final boolean available) {
-        setLore(lang.getMessage("GUI.arena-selector.buttons.arena.lore-" + (available ? "available" : "unavailable")).split("\n"));
+        setLore(lang, lang.getMessage("GUI.arena-selector.buttons.arena.lore-" + (available ? "available" : "unavailable")).split("\n"));
         arenaManager.getGui().calculatePages();
     }
 
@@ -148,7 +148,13 @@ public class ArenaImpl extends BaseButton implements Arena {
     }
 
     public DuelMatch startMatch(final KitImpl kit, final Map<UUID, List<ItemStack>> items, final Settings settings, final Queue source) {
-        this.match = settings.isPartyDuel() ? new PartyDuelMatch(plugin, this, kit, items, settings.getBet(), source) : new DuelMatch(plugin, this, kit, items, settings.getBet(), source);
+        if (settings.isPartyDuel()) {
+            this.match = new PartyDuelMatch(plugin, this, kit, items, settings.getBet(), source);
+        } else if (source != null && source.getTeamSize() > 1) {
+            this.match = new TeamDuelMatch(plugin, this, kit, items, settings.getBet(), source);
+        } else {
+            this.match = new DuelMatch(plugin, this, kit, items, settings.getBet(), source);
+        }
         refreshGui(false);
         return match;
     }
@@ -222,8 +228,8 @@ public class ArenaImpl extends BaseButton implements Arena {
         countdown.startCountdown(0L, 20L);
     }
 
-    boolean isCounting() {
-        return countdown != null;
+    boolean isCountingComplete() {
+        return countdown == null;
     }
 
     @Override

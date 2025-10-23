@@ -4,10 +4,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Charsets;
 import lombok.Getter;
 import com.meteordevelopments.duels.DuelsPlugin;
+import com.meteordevelopments.duels.arena.ArenaImpl;
+import com.meteordevelopments.duels.arena.ArenaManagerImpl;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.data.LocationData;
 import com.meteordevelopments.duels.data.PlayerData;
 import com.meteordevelopments.duels.hook.hooks.EssentialsHook;
+import com.meteordevelopments.duels.match.team.TeamDuelMatch;
 import com.meteordevelopments.duels.teleport.Teleport;
 import com.meteordevelopments.duels.util.Loadable;
 import com.meteordevelopments.duels.util.Log;
@@ -53,6 +56,7 @@ public class PlayerInfoManager implements Loadable {
 
     private Teleport teleport;
     private EssentialsHook essentials;
+    private ArenaManagerImpl arenaManager;
 
     @Getter
     private Location lobby;
@@ -69,6 +73,7 @@ public class PlayerInfoManager implements Loadable {
     public void handleLoad() throws IOException {
         this.teleport = plugin.getTeleport();
         this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
+        this.arenaManager = plugin.getArenaManager();
 
         if (FileUtil.checkNonEmpty(cacheFile, false)) {
             try (final Reader reader = new InputStreamReader(new FileInputStream(cacheFile), Charsets.UTF_8)) {
@@ -241,6 +246,18 @@ public class PlayerInfoManager implements Loadable {
 
             if (info == null) {
                 return;
+            }
+
+            // Check if player is in a team match and is dead (spectator)
+            final ArenaImpl arena = arenaManager.get(player);
+            if (arena != null && arena.getMatch() instanceof TeamDuelMatch) {
+                TeamDuelMatch teamMatch = (TeamDuelMatch) arena.getMatch();
+                if (teamMatch.isDead(player)) {
+                    // Player is dead in team match, keep them in arena as spectator
+                    // Use the arena's first position as respawn location
+                    event.setRespawnLocation(arena.getPosition(1));
+                    return;
+                }
             }
 
             event.setRespawnLocation(info.getLocation());
