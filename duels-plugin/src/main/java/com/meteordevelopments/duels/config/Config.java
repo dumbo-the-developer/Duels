@@ -294,6 +294,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
 
         if (prevVersion < 10) {
             configuration = convert(new ConfigConverter9_10());
+        } else if (prevVersion < 11) {
+            configuration = convert(null);
         } else if (prevVersion < getLatestVersion()) {
             configuration = convert(null);
         }
