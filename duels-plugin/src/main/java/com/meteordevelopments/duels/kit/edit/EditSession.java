@@ -1,12 +1,13 @@
 package com.meteordevelopments.duels.kit.edit;
 
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import java.util.Arrays;
 import java.util.UUID;
-
+import static io.papermc.lib.PaperLib.teleportAsync;
 /**
  * Represents a kit editing session for a player.
  * Stores the original inventory snapshot and kit being edited.
@@ -20,6 +21,7 @@ public class EditSession {
     private final ItemStack[] originalArmor;
     private final ItemStack originalOffhand;
     private final long sessionStartTime;
+    private final Location playerLoc;
     
     public EditSession(Player player, String kitName) {
         this.playerId = player.getUniqueId();
@@ -36,6 +38,7 @@ public class EditSession {
                 .map(item -> item != null ? item.clone() : null)
                 .toArray(ItemStack[]::new);
         this.originalOffhand = inv.getItemInOffHand() != null ? inv.getItemInOffHand().clone() : null;
+        this.playerLoc = player.getLocation();
     }
     
     public UUID getPlayerId() {
@@ -69,6 +72,9 @@ public class EditSession {
     public ItemStack getOriginalOffhand() {
         return originalOffhand != null ? originalOffhand.clone() : null;
     }
+    public Location getPlayerOriginalLoc(){
+        return playerLoc;
+    }
     
     /**
      * Restores the player's original inventory from this session.
@@ -93,5 +99,9 @@ public class EditSession {
         
         // Update player
         player.updateInventory();
+    }
+
+    public void returnToOldLocation(Player player){
+        teleportAsync(player, getPlayerOriginalLoc());
     }
 }

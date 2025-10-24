@@ -42,6 +42,7 @@ public class PlayerInfoManager implements Loadable {
 
     private static final String CACHE_FILE_NAME = "player-cache.json";
     private static final String LOBBY_FILE_NAME = "lobby.json"; // Assuming you still want to use JSON for lobby
+    private static final String KIT_LOBBY_FILE_NAME = "kit_lobby.json";
 
     private static final String ERROR_LOBBY_LOAD = "Could not load lobby location!";
     private static final String ERROR_LOBBY_SAVE = "Could not save lobby location!";
@@ -51,6 +52,7 @@ public class PlayerInfoManager implements Loadable {
     private final Config config;
     private final File cacheFile;
     private final File lobbyFile;
+    private final File kitlobbyFile;
 
     private final Map<UUID, PlayerInfo> cache = new HashMap<>();
 
@@ -60,12 +62,15 @@ public class PlayerInfoManager implements Loadable {
 
     @Getter
     private Location lobby;
+    @Getter
+    private Location kitLobby;
 
     public PlayerInfoManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.cacheFile = new File(plugin.getDataFolder(), CACHE_FILE_NAME);
         this.lobbyFile = new File(plugin.getDataFolder(), LOBBY_FILE_NAME);
+        this.kitlobbyFile = new File(plugin.getDataFolder(), KIT_LOBBY_FILE_NAME);
         plugin.doSyncAfter(() -> Bukkit.getPluginManager().registerEvents(new PlayerInfoListener(), plugin), 1L);
     }
 
@@ -97,10 +102,24 @@ public class PlayerInfoManager implements Loadable {
             }
         }
 
+        if (FileUtil.checkNonEmpty(kitlobbyFile, false)) {
+            try (final Reader reader = new InputStreamReader(Files.newInputStream(kitlobbyFile.toPath()), Charsets.UTF_8)) {
+                this.kitLobby = JsonUtil.getObjectMapper().readValue(reader, LocationData.class).toLocation();
+            } catch (IOException ex) {
+                Log.error(this, ERROR_LOBBY_LOAD, ex);
+            }
+        }
+
         // If lobby is not found or invalid, use the default world's spawn location for lobby.
         if (lobby == null || lobby.getWorld() == null) {
-            final World world = Bukkit.getWorlds().get(0);
+            final World world = Bukkit.getWorlds().getFirst();
             this.lobby = world.getSpawnLocation();
+            Log.warn(this, String.format(ERROR_LOBBY_DEFAULT, world.getName()));
+        }
+
+        if (kitLobby == null || kitLobby.getWorld() == null) {
+            final World world = Bukkit.getWorlds().getFirst();
+            this.kitLobby = world.getSpawnLocation();
             Log.warn(this, String.format(ERROR_LOBBY_DEFAULT, world.getName()));
         }
     }
@@ -149,6 +168,20 @@ public class PlayerInfoManager implements Loadable {
             JsonUtil.getObjectWriter().writeValue(writer, LocationData.fromLocation(lobby));
             writer.flush();
             this.lobby = lobby;
+            return true;
+        } catch (IOException ex) {
+            Log.error(this, ERROR_LOBBY_SAVE, ex);
+            return false;
+        }
+    }
+
+    public boolean setKitLobby(final Player player) {
+        final Location lobby = player.getLocation().clone();
+
+        try (final Writer writer = new OutputStreamWriter(Files.newOutputStream(kitlobbyFile.toPath()), Charsets.UTF_8)) {
+            JsonUtil.getObjectWriter().writeValue(writer, LocationData.fromLocation(lobby));
+            writer.flush();
+            this.kitLobby = lobby;
             return true;
         } catch (IOException ex) {
             Log.error(this, ERROR_LOBBY_SAVE, ex);
