@@ -13,6 +13,7 @@ public final class Permissions {
     public static final String TP_BYPASS = "duels.teleport.bypass";
     public static final String KIT = "duels.kits.%s";
     public static final String KIT_ALL = "duels.kits.*";
+    public static final String KIT_EDIT = "duels.kiteditor";
     public static final String KIT_SELECTING = "duels.use.kit-select";
     public static final String OWN_INVENTORY = "duels.use.own-inventory";
     public static final String ARENA_SELECTING = "duels.use.arena-select";

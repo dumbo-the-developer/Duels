@@ -28,6 +28,7 @@ public class DuelsCommand extends BaseCommand {
                 new AddsignCommand(plugin),
                 new DeletesignCommand(plugin),
                 new SetlobbyCommand(plugin),
+                new SetKitLobbyCommand(plugin),
                 new LobbyCommand(plugin),
                 new InfoCommand(plugin),
                 new ListCommand(plugin),

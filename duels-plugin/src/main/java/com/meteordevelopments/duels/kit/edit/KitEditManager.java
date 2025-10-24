@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import static io.papermc.lib.PaperLib.teleportAsync;
+
 /**
  * Manages kit editing sessions for players.
  * Handles inventory snapshots, kit loading, and per-player kit storage.
@@ -75,9 +77,15 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
         // Create edit session
         EditSession session = new EditSession(player, kitName);
         activeSessions.put(playerId, session);
-        
+
+        // Teleport player to Kit Lobby
+        teleportAsync(player, plugin.getPlayerManager().getKitLobby());
+
         // Clear player inventory
         player.getInventory().clear();
+
+        // Hide Player
+        player.hidePlayer(plugin, player);
         
         // Load kit into player inventory - check for custom kit first
         if (hasPlayerKit(player, kitName)) {
@@ -115,6 +123,12 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
             
             // Restore original inventory
             session.restoreInventory(player);
+
+            // Restore original Location
+            session.returnToOldLocation(player);
+
+            // Unhide player
+            player.showPlayer(plugin, player);
             
             // Remove from active sessions
             activeSessions.remove(playerId);
@@ -139,6 +153,12 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
         
         // Restore original inventory
         session.restoreInventory(player);
+
+        // Restore original Location
+        session.returnToOldLocation(player);
+
+        // Unhide player
+        player.showPlayer(plugin, player);
         
         // Remove from active sessions
         activeSessions.remove(playerId);
@@ -185,6 +205,12 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
             
             // Restore original inventory
             session.restoreInventory(player);
+
+            // Restore original Location
+            session.returnToOldLocation(player);
+
+            // Unhide player
+            player.showPlayer(plugin, player);
             
             // Remove from active sessions
             activeSessions.remove(playerId);
