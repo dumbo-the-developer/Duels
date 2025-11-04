@@ -302,6 +302,8 @@ public class DuelManager implements Loadable {
                 final boolean ongoing = size > 1;
 
                 for (final Player player : match.getAllPlayers()) {
+                    if (match.isDead(player)) continue;
+
                     lang.sendMessage(player, "DUEL.on-end.plugin-disable");
                     handleTie(player, arena, match, ongoing);
                 }
@@ -708,6 +710,9 @@ public class DuelManager implements Loadable {
             player.getInventory().clear();
             player.getInventory().setArmorContents(null);
             player.updateInventory();
+
+            final PlayerInfo info = playerManager.get(player);
+            info.restore(player);
         }
 
         @EventHandler(ignoreCancelled = true)
