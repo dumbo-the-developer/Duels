@@ -83,9 +83,6 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
 
         // Clear player inventory
         player.getInventory().clear();
-
-        // Hide Player
-        player.hidePlayer(plugin, player);
         
         // Load kit into player inventory - check for custom kit first
         if (hasPlayerKit(player, kitName)) {
@@ -126,9 +123,6 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
 
             // Restore original Location
             session.returnToOldLocation(player);
-
-            // Unhide player
-            player.showPlayer(plugin, player);
             
             // Remove from active sessions
             activeSessions.remove(playerId);
@@ -156,9 +150,6 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
 
         // Restore original Location
         session.returnToOldLocation(player);
-
-        // Unhide player
-        player.showPlayer(plugin, player);
         
         // Remove from active sessions
         activeSessions.remove(playerId);
@@ -202,15 +193,12 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
         
         if (session != null) {
             plugin.getLogger().info("Player " + player.getName() + " left during kit editing session. Restoring inventory.");
-            
-            // Restore original inventory
-            session.restoreInventory(player);
 
             // Restore original Location
             session.returnToOldLocation(player);
 
-            // Unhide player
-            player.showPlayer(plugin, player);
+            // Restore original inventory
+            session.restoreInventory(player);
             
             // Remove from active sessions
             activeSessions.remove(playerId);

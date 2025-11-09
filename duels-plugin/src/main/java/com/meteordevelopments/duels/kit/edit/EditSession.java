@@ -1,5 +1,6 @@
 package com.meteordevelopments.duels.kit.edit;
 
+import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -14,12 +15,16 @@ import static io.papermc.lib.PaperLib.teleportAsync;
  */
 public class EditSession {
     
+    @Getter
     private final UUID playerId;
+    @Getter
     private final String playerName;
+    @Getter
     private final String kitName;
     private final ItemStack[] originalInventory;
     private final ItemStack[] originalArmor;
     private final ItemStack originalOffhand;
+    @Getter
     private final long sessionStartTime;
     private final Location playerLoc;
     
@@ -40,23 +45,7 @@ public class EditSession {
         this.originalOffhand = inv.getItemInOffHand() != null ? inv.getItemInOffHand().clone() : null;
         this.playerLoc = player.getLocation();
     }
-    
-    public UUID getPlayerId() {
-        return playerId;
-    }
-    
-    public String getPlayerName() {
-        return playerName;
-    }
-    
-    public String getKitName() {
-        return kitName;
-    }
-    
-    public long getSessionStartTime() {
-        return sessionStartTime;
-    }
-    
+
     public ItemStack[] getOriginalInventory() {
         return Arrays.stream(originalInventory)
                 .map(item -> item != null ? item.clone() : null)

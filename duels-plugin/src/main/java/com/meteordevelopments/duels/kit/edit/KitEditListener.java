@@ -2,13 +2,17 @@ package com.meteordevelopments.duels.kit.edit;
 
 import com.meteordevelopments.duels.DuelsPlugin;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.*;
 
@@ -92,6 +96,10 @@ public class KitEditListener implements Listener {
                 event.getInventory().getType() != org.bukkit.event.inventory.InventoryType.CRAFTING) {
                 event.setCancelled(true);
                 plugin.getLang().sendMessage(player, "KIT.EDIT.inventory-blocked");
+            }
+            if (event.getClick() == ClickType.DROP || event.getClick() == ClickType.CONTROL_DROP){
+                event.setCancelled(true);
+                plugin.getLang().sendMessage(player, "KIT.EDIT.drop-blocked");
             }
         }
     }
@@ -239,4 +247,37 @@ public class KitEditListener implements Listener {
             KitEditManager.getInstance().handlePlayerQuit(player);
         }
     }
+
+    @EventHandler
+    public void onProjectileLaunch(ProjectileLaunchEvent event){
+        Projectile projectile = event.getEntity();
+        if (projectile.getShooter() instanceof Player player) {
+            if (KitEditManager.getInstance().isEditing(player)) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onConsume(PlayerItemConsumeEvent event){
+        Player player = event.getPlayer();
+        if (KitEditManager.getInstance().isEditing(player)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onEntityDamage(EntityDamageByEntityEvent event){
+        if (event.getDamager() instanceof Player player){
+            if (KitEditManager.getInstance().isEditing(player)) {
+                event.setCancelled(true);
+            }
+        }
+        if (event.getEntity() instanceof Player player){
+            if (KitEditManager.getInstance().isEditing(player)) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
 }
