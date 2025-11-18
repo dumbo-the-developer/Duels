@@ -98,6 +98,11 @@ public final class Items {
         }
 
         final PotionMeta meta = (PotionMeta) item.getItemMeta();
-        return meta != null && meta.getBasePotionData().getType() == PotionType.INSTANT_HEAL;
+        if (meta == null) {
+            return false;
+        }
+        
+        final org.bukkit.potion.PotionData basePotionData = meta.getBasePotionData();
+        return basePotionData != null && basePotionData.getType() == PotionType.INSTANT_HEAL;
     }
 }
