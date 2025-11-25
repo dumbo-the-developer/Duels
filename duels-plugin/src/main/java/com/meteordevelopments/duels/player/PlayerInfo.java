@@ -67,4 +67,18 @@ public class PlayerInfo {
         InventoryUtil.addOrDrop(player, extra);
         player.updateInventory();
     }
+
+    /**
+     * Restore player state but DO NOT restore experience/level. This preserves any XP
+     * changes that occurred during the match (for example, if the player picked up XP orbs).
+     */
+    public void restoreWithoutExperience(final Player player) {
+        final double maxHealth = PlayerUtil.getMaxHealth(player);
+        player.addPotionEffects(effects);
+        player.setHealth(Math.min(health, maxHealth));
+        player.setFoodLevel(hunger);
+        InventoryUtil.fillFromMap(player.getInventory(), items);
+        InventoryUtil.addOrDrop(player, extra);
+        player.updateInventory();
+    }
 }

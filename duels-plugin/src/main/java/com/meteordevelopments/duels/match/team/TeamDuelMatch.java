@@ -6,7 +6,6 @@ import com.meteordevelopments.duels.kit.KitImpl;
 import com.meteordevelopments.duels.match.DuelMatch;
 import com.meteordevelopments.duels.queue.Queue;
 import lombok.Getter;
-import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -25,18 +24,6 @@ public class TeamDuelMatch extends DuelMatch {
         super(plugin, arena, kit, items, bet, source);
     }
 
-    public Set<Team> getAllTeams() {
-        return teamToPlayers.keySet();
-    }
-
-    public List<String> getTeamNames(final Team team) {
-        final Set<Player> members = teamToPlayers.get(team);
-        if (members == null) {
-            return Collections.emptyList();
-        }
-        return members.stream().map(Player::getName).collect(Collectors.toList());
-    }
-
     @Override
     public void addPlayer(final Player player) {
         super.addPlayer(player);
@@ -45,7 +32,7 @@ public class TeamDuelMatch extends DuelMatch {
         Team team = getOrCreateTeam(player);
         playerToTeam.put(player, team);
         teamToPlayers.computeIfAbsent(team, k -> new HashSet<>()).add(player);
-        
+
         final Integer count = alivePlayers.get(team);
         alivePlayers.put(team, count == null ? 1 : count + 1);
     }
@@ -66,12 +53,6 @@ public class TeamDuelMatch extends DuelMatch {
             return;
         }
         
-        // Set player to spectator mode instead of removing them
-        player.setGameMode(GameMode.SPECTATOR);
-        
-        // Keep player in arena for spectating instead of teleporting to lobby
-        // The player will be teleported to lobby when the match actually ends
-        
         final Integer count = alivePlayers.get(team);
         if (count == null) {
             return;
@@ -83,17 +64,6 @@ public class TeamDuelMatch extends DuelMatch {
     @Override
     public int size() {
         return (int) alivePlayers.entrySet().stream().filter(entry -> entry.getValue() > 0).count();
-    }
-
-    public boolean isTeamEliminated(final Team team) {
-        return alivePlayers.getOrDefault(team, 0) <= 0;
-    }
-
-    public Set<Player> getAlivePlayersInTeam(final Team team) {
-        return teamToPlayers.getOrDefault(team, Collections.emptySet())
-                .stream()
-                .filter(player -> !isDead(player))
-                .collect(Collectors.toSet());
     }
 
     public Team getWinningTeam() {
@@ -129,10 +99,6 @@ public class TeamDuelMatch extends DuelMatch {
         
         public Team(final int teamNumber) {
             this.teamNumber = teamNumber;
-        }
-        
-        public int getTeamNumber() {
-            return teamNumber;
         }
         
         @Override

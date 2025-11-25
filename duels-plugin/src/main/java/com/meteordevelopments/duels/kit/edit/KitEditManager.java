@@ -2,15 +2,17 @@ package com.meteordevelopments.duels.kit.edit;
 
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.kit.KitImpl;
+import com.meteordevelopments.duels.data.KitData;
 import com.meteordevelopments.duels.util.hook.PluginHook;
+import com.meteordevelopments.duels.util.inventory.InventoryUtil;
+import com.meteordevelopments.duels.util.json.JsonUtil;
+import com.google.common.base.Charsets;
+import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,11 +29,11 @@ import static io.papermc.lib.PaperLib.teleportAsync;
  * Handles inventory snapshots, kit loading, and per-player kit storage.
  */
 public class KitEditManager extends PluginHook<DuelsPlugin> {
-    
+
+    @Getter
     private static KitEditManager instance;
     private final Map<UUID, EditSession> activeSessions = new HashMap<>();
     private final File playerKitsDirectory;
-    private final Yaml yaml;
     
     public KitEditManager(DuelsPlugin plugin) {
         super(plugin, "KitEditManager");
@@ -43,20 +45,9 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
             playerKitsDirectory.mkdirs();
         }
         
-        // Configure YAML
-        DumperOptions options = new DumperOptions();
-        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        options.setPrettyFlow(true);
-        this.yaml = new Yaml(options);
+        // Player kits directory (per-player kit files will use JSON format similar to default kits)
     }
-    
-    /**
-     * Gets the singleton instance of KitEditManager.
-     */
-    public static KitEditManager getInstance() {
-        return instance;
-    }
-    
+
     /**
      * Starts a kit editing session for a player.
      */
@@ -83,9 +74,6 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
 
         // Clear player inventory
         player.getInventory().clear();
-
-        // Hide Player
-        player.hidePlayer(plugin, player);
         
         // Load kit into player inventory - check for custom kit first
         if (hasPlayerKit(player, kitName)) {
@@ -126,9 +114,6 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
 
             // Restore original Location
             session.returnToOldLocation(player);
-
-            // Unhide player
-            player.showPlayer(plugin, player);
             
             // Remove from active sessions
             activeSessions.remove(playerId);
@@ -156,9 +141,6 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
 
         // Restore original Location
         session.returnToOldLocation(player);
-
-        // Unhide player
-        player.showPlayer(plugin, player);
         
         // Remove from active sessions
         activeSessions.remove(playerId);
@@ -202,15 +184,12 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
         
         if (session != null) {
             plugin.getLogger().info("Player " + player.getName() + " left during kit editing session. Restoring inventory.");
-            
-            // Restore original inventory
-            session.restoreInventory(player);
 
             // Restore original Location
             session.returnToOldLocation(player);
 
-            // Unhide player
-            player.showPlayer(plugin, player);
+            // Restore original inventory
+            session.restoreInventory(player);
             
             // Remove from active sessions
             activeSessions.remove(playerId);
@@ -221,30 +200,9 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
      * Loads a kit into the player's inventory.
      */
     private void loadKitToPlayer(Player player, KitImpl kit) {
-        // Clear inventory first
+        // Use the same fill logic as default kit equip to ensure armor/offhand are applied correctly
         player.getInventory().clear();
-        
-        // Get all items from the kit and load them individually (preserve item data)
-        Map<String, Map<Integer, ItemStack>> kitItems = kit.getItems();
-        int slot = 0;
-        
-        for (Map.Entry<String, Map<Integer, ItemStack>> entry : kitItems.entrySet()) {
-            Map<Integer, ItemStack> slotItems = entry.getValue();
-            for (ItemStack item : slotItems.values()) {
-                if (item != null && item.getType() != org.bukkit.Material.AIR) {
-                    try {
-                        // Clone the item to preserve all data (enchantments, potion effects, etc.)
-                        ItemStack clonedItem = item.clone();
-                        player.getInventory().setItem(slot, clonedItem);
-                        slot++;
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        // Suppress the error - kit has too many items
-                        break;
-                    }
-                }
-            }
-        }
-        
+        InventoryUtil.fillFromMap(player.getInventory(), kit.getItems());
         player.updateInventory();
     }
     
@@ -253,54 +211,23 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
      */
     private void savePlayerKit(Player player, String kitName) throws IOException {
         UUID playerId = player.getUniqueId();
-        
+
         // Create player-specific directory
         File playerDir = new File(playerKitsDirectory, playerId.toString());
         if (!playerDir.exists()) {
             playerDir.mkdirs();
         }
-        
-        // Create kit file
-        File kitFile = new File(playerDir, kitName + ".yml");
-        
-        // Prepare kit data
-        Map<String, Object> kitData = new HashMap<>();
-        PlayerInventory inv = player.getInventory();
-        
-        // Save inventory contents
-        ItemStack[] contents = inv.getContents();
-        Map<String, Object> inventoryData = new HashMap<>();
-        for (int i = 0; i < contents.length; i++) {
-            if (contents[i] != null) {
-                inventoryData.put(String.valueOf(i), contents[i].serialize());
-            }
-        }
-        kitData.put("inventory", inventoryData);
-        
-        // Save armor
-        ItemStack[] armor = inv.getArmorContents();
-        Map<String, Object> armorData = new HashMap<>();
-        for (int i = 0; i < armor.length; i++) {
-            if (armor[i] != null) {
-                armorData.put(String.valueOf(i), armor[i].serialize());
-            }
-        }
-        kitData.put("armor", armorData);
-        
-        // Save offhand
-        ItemStack offhand = inv.getItemInOffHand();
-        if (offhand != null && !offhand.getType().isAir()) {
-            kitData.put("offhand", offhand.serialize());
-        }
-        
-        // Save metadata
-        kitData.put("name", kitName);
-        kitData.put("player", player.getName());
-        kitData.put("saved_at", System.currentTimeMillis());
-        
-        // Write to file
-        try (FileWriter writer = new FileWriter(kitFile)) {
-            yaml.dump(kitData, writer);
+
+        // Create kit file (use JSON like default kits)
+        File kitFile = new File(playerDir, kitName + ".json");
+
+        // Create a KitImpl from the player's inventory and serialize via KitData (same as default kits)
+        KitImpl kit = new KitImpl(plugin, kitName, player.getInventory());
+        KitData data = KitData.fromKit(kit);
+
+        try (final java.io.Writer writer = new java.io.OutputStreamWriter(new java.io.FileOutputStream(kitFile), Charsets.UTF_8)) {
+            JsonUtil.getObjectWriter().writeValue(writer, data);
+            writer.flush();
         }
     }
     
@@ -317,7 +244,7 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
     public boolean hasPlayerKit(Player player, String kitName) {
         UUID playerId = player.getUniqueId();
         File playerDir = new File(playerKitsDirectory, playerId.toString());
-        File kitFile = new File(playerDir, kitName + ".yml");
+        File kitFile = new File(playerDir, kitName + ".json");
         return kitFile.exists();
     }
     
@@ -414,7 +341,7 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
         
         // Add offhand (filter out AIR items)
         ItemStack offhand = inv.getItemInOffHand();
-        if (offhand != null && offhand.getType() != org.bukkit.Material.AIR) {
+        if (offhand.getType() != org.bukkit.Material.AIR) {
             items.add(offhand);
         }
         
@@ -475,51 +402,22 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
         try {
             UUID playerId = player.getUniqueId();
             File playerDir = new File(playerKitsDirectory, playerId.toString());
-            File kitFile = new File(playerDir, kitName + ".yml");
+            File kitFile = new File(playerDir, kitName + ".json");
             
             if (!kitFile.exists()) {
                 return false;
             }
-            
-            // Load kit data from YAML
-            Map<String, Object> kitData = yaml.load(new java.io.FileReader(kitFile));
-            
-            PlayerInventory inv = player.getInventory();
-            inv.clear();
-            
-            // Load inventory
-            if (kitData.containsKey("inventory")) {
-                Map<String, Object> inventoryData = (Map<String, Object>) kitData.get("inventory");
-                for (Map.Entry<String, Object> entry : inventoryData.entrySet()) {
-                    int slot = Integer.parseInt(entry.getKey());
-                    Map<String, Object> itemData = (Map<String, Object>) entry.getValue();
-                    ItemStack item = ItemStack.deserialize(itemData);
-                    inv.setItem(slot, item);
-                }
+            // Read KitData (JSON format) and apply to player using InventoryUtil (same logic as default kits)
+            try (final java.io.Reader reader = new java.io.InputStreamReader(new java.io.FileInputStream(kitFile), Charsets.UTF_8)) {
+                KitData data = JsonUtil.getObjectMapper().readValue(reader, KitData.class);
+                KitImpl kit = data.toKit(plugin);
+
+                // Clear and fill
+                player.getInventory().clear();
+                InventoryUtil.fillFromMap(player.getInventory(), kit.getItems());
+                player.updateInventory();
+                return true;
             }
-            
-            // Load armor
-            if (kitData.containsKey("armor")) {
-                Map<String, Object> armorData = (Map<String, Object>) kitData.get("armor");
-                ItemStack[] armor = new ItemStack[4];
-                for (Map.Entry<String, Object> entry : armorData.entrySet()) {
-                    int slot = Integer.parseInt(entry.getKey());
-                    Map<String, Object> itemData = (Map<String, Object>) entry.getValue();
-                    ItemStack item = ItemStack.deserialize(itemData);
-                    armor[slot] = item;
-                }
-                inv.setArmorContents(armor);
-            }
-            
-            // Load offhand
-            if (kitData.containsKey("offhand")) {
-                Map<String, Object> offhandData = (Map<String, Object>) kitData.get("offhand");
-                ItemStack offhand = ItemStack.deserialize(offhandData);
-                inv.setItemInOffHand(offhand);
-            }
-            
-            player.updateInventory();
-            return true;
             
         } catch (Exception e) {
             plugin.getLogger().severe("Failed to load player kit " + kitName + " for " + player.getName() + ": " + e.getMessage());

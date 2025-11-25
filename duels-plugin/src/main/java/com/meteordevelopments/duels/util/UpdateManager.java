@@ -34,7 +34,7 @@ public class UpdateManager {
         // Check for the latest version from Spigot
         if (this.spigotUrl == null) {
             try {
-                this.spigotUrl = new URL("https://meteordevelopments.com/legacy/update.php");
+                this.spigotUrl = new URL("https://version.itzadarsh-kushwaha.workers.dev/legacy/update.php");
             } catch (Exception e) {
                 e.printStackTrace();
             }

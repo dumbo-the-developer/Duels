@@ -22,12 +22,16 @@ import com.meteordevelopments.duels.queue.Queue;
 import com.meteordevelopments.duels.setting.Settings;
 import com.meteordevelopments.duels.util.compat.Items;
 import com.meteordevelopments.duels.util.inventory.ItemBuilder;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
+import org.bukkit.Bukkit;import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -65,8 +69,50 @@ public class ArenaImpl extends BaseButton implements Arena {
     }
 
     public void refreshGui(final boolean available) {
-        setLore(lang, lang.getMessage("GUI.arena-selector.buttons.arena.lore-" + (available ? "available" : "unavailable")).split("\n"));
+        // Get current lore from the display item
+        final List<String> currentLore = new ArrayList<>();
+        editMeta(meta -> {
+            if (meta.hasLore()) {
+                currentLore.addAll(meta.getLore());
+            }
+        });
+        
+        // Get the availability status message
+        final String[] statusLines = lang.getMessage("GUI.arena-selector.buttons.arena.lore-" + (available ? "available" : "unavailable")).split("\n");
+        
+        // Remove old status lines if they exist (check last few lines)
+        final String availableMsg = lang.toLegacyString(lang.getMessage("GUI.arena-selector.buttons.arena.lore-available").split("\n")[0]);
+        final String unavailableMsg = lang.toLegacyString(lang.getMessage("GUI.arena-selector.buttons.arena.lore-unavailable").split("\n")[0]);
+        
+        // Remove existing status lines from the end
+        while (!currentLore.isEmpty()) {
+            final String lastLine = currentLore.get(currentLore.size() - 1);
+            if (lastLine.equals(availableMsg) || lastLine.equals(unavailableMsg)) {
+                currentLore.remove(currentLore.size() - 1);
+            } else {
+                break;
+            }
+        }
+        
+        // Add new status lines
+        for (final String line : statusLines) {
+            currentLore.add(lang.toLegacyString(line));
+        }
+        
+        // Update the lore
+        editMeta(itemMeta -> itemMeta.setLore(currentLore));
         arenaManager.getGui().calculatePages();
+    }
+
+    @Override
+    public void setDisplayed(final ItemStack displayed) {
+        super.setDisplayed(displayed);
+        arenaManager.saveArenas();
+    }
+
+    // Public method to set display item without triggering save (used during loading)
+    public void setDisplayedWithoutSave(final ItemStack displayed) {
+        super.setDisplayed(displayed);
     }
 
     @Nullable

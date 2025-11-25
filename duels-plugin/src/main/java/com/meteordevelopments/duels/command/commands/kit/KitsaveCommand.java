@@ -20,13 +20,11 @@ public class KitsaveCommand extends BaseCommand {
     }
     
     public void executeCommand(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             lang.sendMessage(sender, "ERROR.player-only");
             return;
         }
-        
-        Player player = (Player) sender;
-        
+
         // Check if player is editing
         if (!KitEditManager.getInstance().isEditing(player)) {
             lang.sendMessage(player, "KIT.EDIT.not-editing");
@@ -47,13 +45,11 @@ public class KitsaveCommand extends BaseCommand {
     
     @Override
     protected void execute(CommandSender sender, String label, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             lang.sendMessage(sender, "ERROR.player-only");
             return;
         }
-        
-        Player player = (Player) sender;
-        
+
         // Check if player is editing
         if (!KitEditManager.getInstance().isEditing(player)) {
             lang.sendMessage(player, "KIT.EDIT.not-editing");
