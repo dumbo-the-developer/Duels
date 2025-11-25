@@ -25,7 +25,7 @@ dependencies {
     implementation 'com.github.timderspieler:DeluxeCombat-API:1.5.1'
     implementation 'com.github.sirblobman.combatlogx:api:11.5-SNAPSHOT'
     implementation 'com.artillexstudios:AxGraves:1.7.0'
-    implementation 'com.github.No-Not-Jaden:NotBounties:1.22.0'
+    implementation 'com.github.No-Not-Jaden:NotBounties:1.22.17R5'
     implementation('net.essentialsx:EssentialsX:2.21.2') {
         transitive = false
     }
@@ -50,7 +50,7 @@ dependencies {
     implementation project(':duels-common')
     implementation 'io.papermc:paperlib:1.0.8'
     implementation 'space.arim.morepaperlib:morepaperlib:0.4.4'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.20.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.20.1'
     implementation 'org.json:json:20250517'
     implementation 'net.kyori:adventure-text-minimessage:4.25.0'
     implementation 'net.kyori:adventure-text-serializer-legacy:4.25.0'
