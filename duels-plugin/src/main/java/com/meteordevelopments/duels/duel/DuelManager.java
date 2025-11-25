@@ -225,7 +225,13 @@ public class DuelManager implements Loadable {
 
             if (info != null) {
                 teleport.tryTeleport(winner, info.getLocation());
-                info.restore(winner);
+                if (match.isOwnInventory()) {
+                    // Preserve any XP gained during the duel when using own inventory
+                    info.restoreWithoutExperience(winner);
+                } else {
+                    // Restore saved experience for non-own-inventory matches
+                    info.restore(winner);
+                }
             }
 
             if (InventoryUtil.addOrDrop(winner, items)) {
@@ -401,7 +407,13 @@ public class DuelManager implements Loadable {
 
             if (info != null) {
                 teleport.tryTeleport(winner, info.getLocation());
-                info.restore(winner);
+                if (match.isOwnInventory()) {
+                    // Preserve any XP gained during the duel when using own inventory
+                    info.restoreWithoutExperience(winner);
+                } else {
+                    // Restore saved experience for non-own-inventory matches
+                    info.restore(winner);
+                }
             }
 
             if (InventoryUtil.addOrDrop(winner, items)) {

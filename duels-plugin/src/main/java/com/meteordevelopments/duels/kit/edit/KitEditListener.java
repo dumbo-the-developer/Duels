@@ -41,8 +41,8 @@ public class KitEditListener implements Listener {
         
         String command = event.getMessage().toLowerCase().trim();
 
-        if (!command.equals("/kit save") &&
-            !command.startsWith("/kit save ")) {
+        // Allow plugin kit commands while editing (e.g. /kit save, /kit edit cancel)
+        if (!command.equals("/kit") && !command.startsWith("/kit ")) {
             event.setCancelled(true);
             plugin.getLang().sendMessage(player, "KIT.EDIT.command-blocked");
         }

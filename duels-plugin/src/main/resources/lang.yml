@@ -720,3 +720,4 @@ KIT:
       block-break-blocked: '{PREFIX} &cYou cannot break blocks while editing a kit.'
       block-place-blocked: '{PREFIX} &cYou cannot place blocks while editing a kit.'
       interact-blocked: '{PREFIX} &cYou cannot interact with blocks while editing a kit.'
+      cancelled: '{PREFIX} &aKit editing session cancelled. Your inventory has been restored.'

@@ -33,6 +33,18 @@ public class KiteditCommand extends BaseCommand {
         
         Player player = (Player) sender;
         String kitName = args[1];
+
+        // Handle cancel subcommand: /kit edit cancel
+        if (kitName.equalsIgnoreCase("cancel")) {
+            if (!KitEditManager.getInstance().isEditing(player)) {
+                lang.sendMessage(player, "KIT.EDIT.not-editing");
+                return;
+            }
+
+            KitEditManager.getInstance().abortEditSession(player);
+            lang.sendMessage(player, "KIT.EDIT.cancelled");
+            return;
+        }
         
         // Check if player is already editing
         if (KitEditManager.getInstance().isEditing(player)) {
@@ -76,6 +88,18 @@ public class KiteditCommand extends BaseCommand {
         
         Player player = (Player) sender;
         String kitName = args[1];
+
+        // Handle cancel subcommand: /kit edit cancel
+        if (kitName.equalsIgnoreCase("cancel")) {
+            if (!KitEditManager.getInstance().isEditing(player)) {
+                lang.sendMessage(player, "KIT.EDIT.not-editing");
+                return;
+            }
+
+            KitEditManager.getInstance().abortEditSession(player);
+            lang.sendMessage(player, "KIT.EDIT.cancelled");
+            return;
+        }
         
         // Check if player is already editing
         if (KitEditManager.getInstance().isEditing(player)) {
