@@ -608,6 +608,15 @@ GUI:
         name: '<green>Next Page'
       empty:
         name: '<red>This page is empty.'
+  kit-edit-selector:
+    title: 'Select Kit to Edit'
+    buttons:
+      previous-page:
+        name: '<green>Previous Page'
+      next-page:
+        name: '<green>Next Page'
+      empty:
+        name: '<red>No kits available to edit.'
   arena-selector:
     title: 'Arena Selection'
     buttons:

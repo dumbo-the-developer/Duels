@@ -7,6 +7,7 @@ import com.meteordevelopments.duels.util.hook.PluginHook;
 import com.meteordevelopments.duels.util.inventory.InventoryUtil;
 import com.meteordevelopments.duels.util.json.JsonUtil;
 import com.google.common.base.Charsets;
+import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -28,7 +29,8 @@ import static io.papermc.lib.PaperLib.teleportAsync;
  * Handles inventory snapshots, kit loading, and per-player kit storage.
  */
 public class KitEditManager extends PluginHook<DuelsPlugin> {
-    
+
+    @Getter
     private static KitEditManager instance;
     private final Map<UUID, EditSession> activeSessions = new HashMap<>();
     private final File playerKitsDirectory;
@@ -45,14 +47,7 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
         
         // Player kits directory (per-player kit files will use JSON format similar to default kits)
     }
-    
-    /**
-     * Gets the singleton instance of KitEditManager.
-     */
-    public static KitEditManager getInstance() {
-        return instance;
-    }
-    
+
     /**
      * Starts a kit editing session for a player.
      */
@@ -346,7 +341,7 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
         
         // Add offhand (filter out AIR items)
         ItemStack offhand = inv.getItemInOffHand();
-        if (offhand != null && offhand.getType() != org.bukkit.Material.AIR) {
+        if (offhand.getType() != org.bukkit.Material.AIR) {
             items.add(offhand);
         }
         
