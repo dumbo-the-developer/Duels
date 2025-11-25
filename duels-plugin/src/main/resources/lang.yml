@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 11
+config-version: 12
 
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
@@ -41,10 +41,12 @@ ERROR:
     delete-failure: '{PREFIX} &cCannot delete an arena that is currently in use. Please disable it first using the command ''/duels toggle %name%'''
     invalid-position: '{PREFIX} &cPosition must be 1 or 2.'
     no-position-set: '{PREFIX} &cArena ''%name%'' have no positions set.'
+    empty-hand: '{PREFIX} &cYou must be holding an item to use this command.'
   kit:
     not-found: '{PREFIX} &cNo kit exists with the name ''%name%''.'
     already-exists: '{PREFIX} &cA kit named ''%name%'' already exists.'
     empty-hand: '{PREFIX} &cYou must be holding an item to use this command.'
+
   player-only: '{PREFIX} &cThis command can only be used by players.'
   duel:
     is-self: '{PREFIX} &cYou cannot duel yourself.'
@@ -283,6 +285,7 @@ COMMAND:
         - '&f/%command% create [name] &e- &7Creates an arena with given name.'
         - '&f/%command% set [name] [1|2] &e- &7Sets the teleport position of an arena.'
         - '&f/%command% delete [name] &e- &7Deletes an arena.'
+        - '&f/%command% setarenaitem [name] &e- &7Sets the displayed item for selected arena.'
         - '&f/%command% info [name] &e- &7Displays a list of information about the selected arena.'
         - '&f/%command% toggle [name] &e- &7Enables or disables an arena.'
         - '&f/%command% tp [name] <1|2> &e- &7Teleports to an arena.'
@@ -337,6 +340,7 @@ COMMAND:
     delete-kit: '{PREFIX} &7Kit &3%name% &7was successfully removed.'
     load-kit: '{PREFIX} &7Kit &3%name% &7was loaded in your inventory.'
     set-item: '{PREFIX} &7Kit &3%name%&7''s displayed item was changed to your held item.'
+    set-arena-item: '{PREFIX} &7Arena &e%name%&7''s displayed item was changed to your held item.'
     create-queue: '{PREFIX} &7Created a queue with kit &3%kit% &7and bet &6$%bet_amount%&7.'
     delete-queue: '{PREFIX} &7Deleted a queue with kit &3%kit% &7and bet &6$%bet_amount%&7.'
     add-sign: '{PREFIX} &7Created queue sign at &f%location% &7with kit &3%kit% &7and bet &6$%bet_amount%&7.'

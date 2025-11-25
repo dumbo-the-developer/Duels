@@ -16,6 +16,7 @@ public class DuelsCommand extends BaseCommand {
                 new DeletekitCommand(plugin),
                 new LoadkitCommand(plugin),
                 new SetitemCommand(plugin),
+                new SetarenaitemCommand(plugin),
                 new OptionsCommand(plugin),
                 new BindCommand(plugin),
                 new CreateCommand(plugin),
