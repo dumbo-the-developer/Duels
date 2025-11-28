@@ -64,3 +64,6 @@ public void onEnable() {
   Duels api = (Duels) Bukkit.getServer().getPluginManager().getPlugin("Duels");
 }
 ```
+
+### Javadocs
+* **[Javadocs](https://javadocs.meteordevelopments.com/duels)**
