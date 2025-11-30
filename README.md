@@ -4,14 +4,8 @@
 
 ---
 
-* **[Wiki](https://github.com/Realizedd/Duels/wiki)**
-* **[Commands](https://github.com/Realizedd/Duels/wiki/commands)**
-* **[Permissions](https://github.com/Realizedd/Duels/wiki/permissions)**
-* **[Placeholders](https://github.com/Realizedd/Duels/wiki/placeholders)**
-* **[Extensions](https://github.com/Realizedd/Duels/wiki/extensions)**
-* **[config.yml](https://github.com/Realizedd/Duels/blob/master/duels-plugin/src/main/resources/config.yml)**
-* **[lang.yml](https://github.com/Realizedd/Duels/blob/master/duels-plugin/src/main/resources/lang.yml)**
-* **[Support Discord](https://discord.gg/RNy45sg)**
+* **[Wiki](https://docs.meteordevelopments.com)**
+* **[Support Discord](https://discord.meteordevelopments.com)**
 
 ### Getting the dependency
 
@@ -70,3 +64,6 @@ public void onEnable() {
   Duels api = (Duels) Bukkit.getServer().getPluginManager().getPlugin("Duels");
 }
 ```
+
+### Javadocs
+* **[Javadocs](https://javadocs.meteordevelopments.com/duels)**
