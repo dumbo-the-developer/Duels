@@ -72,15 +72,15 @@ public class AddsignCommand extends BaseCommand {
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         if (args.length == 2) {
-            return Arrays.asList("Ranked", "Casual", "Practice", "Tournament");
+            return Arrays.asList("Kit_name", "Example_2v2", "Test_3v3", "Any_name_without_spaces");
         }
 
         if (args.length == 3) {
-            return Arrays.asList("0", "10", "50", "100", "500", "1000");
+            return Arrays.asList("0", "10", "50", "100", "500", "1000", "bet_amount");
         }
 
         if (args.length == 4) {
-            return Arrays.asList("1", "2", "3", "4", "5");
+            return Arrays.asList("1", "2", "3", "4", "5", "upto_infinity_(number_only)");
         }
 
         if (args.length > 4) {

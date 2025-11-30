@@ -12,6 +12,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.vehicle.VehicleCreateEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -83,6 +84,17 @@ public class ExplosionOwnershipListener implements Listener {
         Player owner = findRecentUser(crystal.getWorld(), recentCrystalUse);
         if (owner != null) {
             crystal.setMetadata(OWNER_META, new FixedMetadataValue(plugin, owner.getUniqueId().toString()));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onVehicleCreate(final VehicleCreateEvent event) {
+        // Some servers fire VehicleCreateEvent for minecart placement; tag owner here too
+        if (event.getVehicle() instanceof ExplosiveMinecart minecart) {
+            Player owner = findRecentUser(minecart.getWorld(), recentTntMinecartUse);
+            if (owner != null) {
+                minecart.setMetadata(OWNER_META, new FixedMetadataValue(plugin, owner.getUniqueId().toString()));
+            }
         }
     }
 
