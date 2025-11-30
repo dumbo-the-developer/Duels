@@ -137,7 +137,7 @@ public class DuelManager implements Loadable {
     }
 
     public void handleTeamMatchEnd(TeamDuelMatch match, ArenaImpl arena, Location deadLocation, TeamDuelMatch.Team winningTeam) {
-        DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(arena.first().getLocation()).runDelayed(() -> {
+        DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(deadLocation).runDelayed(() -> {
             if (config.isSpawnFirework()) {
                 DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(deadLocation).run(() -> {
                     final Firework firework = (Firework) deadLocation.getWorld().spawnEntity(deadLocation, EntityType.FIREWORK);
@@ -155,17 +155,43 @@ public class DuelManager implements Loadable {
             final Set<Player> winners = match.getWinningTeamPlayers();
             final Set<Player> losers = match.getLosingTeamPlayers();
             
-            // Restore gamemode for all players (both winners and losers)
+            // Restore gamemode for all players immediately using individual schedulers
             final Set<Player> allPlayers = match.getAllPlayers();
-            allPlayers.forEach(player -> {
-                player.setGameMode(GameMode.SURVIVAL);
-            });
+            for (Player player : allPlayers) {
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    player.setGameMode(GameMode.SURVIVAL);
+                    player.setAllowFlight(false);
+                    player.setFlying(false);
+                }, null);
+            }
             
-            winners.forEach(w -> inventoryManager.create(w, false));
+            // Create inventory snapshots for display
+            allPlayers.forEach(p -> inventoryManager.create(p, false));
             userDataManager.handleTeamMatchEnd(match, winners, losers);
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
             
-            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(arena.first()).runDelayed(() -> {
+            // Schedule teleportation and restoration for all players after delay
+            DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(deadLocation).runDelayed(() -> {
+                // Handle losers (including dead spectators)
+                for (Player loser : losers) {
+                    if (mcMMO != null) {
+                        mcMMO.enableSkills(loser);
+                    }
+                    
+                    final PlayerInfo loserInfo = playerManager.get(loser);
+                    if (loserInfo != null && !loser.isDead()) {
+                        playerManager.remove(loser);
+                        
+                        if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {
+                            PlayerUtil.reset(loser);
+                        }
+                        
+                        teleport.tryTeleport(loser, loserInfo.getLocation());
+                        loserInfo.restore(loser);
+                    }
+                }
+                
+                // Handle winners
                 for (Player winner : winners) {
                     handleTeamWin(winner, losers, arena, match);
                 }
@@ -187,7 +213,7 @@ public class DuelManager implements Loadable {
                 }
 
                 arena.endMatch(winners.iterator().next().getUniqueId(), losers.iterator().next().getUniqueId(), Reason.OPPONENT_DEFEAT);
-            }, null, config.getTeleportDelay() * 20L);
+            }, config.getTeleportDelay() * 20L);
         }, 1L);
     }
 
@@ -623,11 +649,13 @@ public class DuelManager implements Loadable {
             }
 
             final int prevSize = match.size();
-            arena.remove(player);
-
+            
             // Handle team-based elimination
             if (match instanceof TeamDuelMatch) {
                 TeamDuelMatch teamMatch = (TeamDuelMatch) match;
+                
+                // Mark player as dead in the match (this updates team alive count)
+                arena.remove(player);
                 
                 // Prevent death screen and respawn for team matches
                 event.setKeepInventory(true);
@@ -646,9 +674,11 @@ public class DuelManager implements Loadable {
                     return;
                 }
                 
-                // If not all teams eliminated, continue the match
+                // If not all teams eliminated, continue the match with player spectating in arena
                 return;
             }
+            
+            arena.remove(player);
 
             if (prevSize < 2 || match.size() >= prevSize) {
                 return;
