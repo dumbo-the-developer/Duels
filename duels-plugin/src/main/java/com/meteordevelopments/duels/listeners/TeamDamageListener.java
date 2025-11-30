@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
 /**
@@ -65,6 +66,84 @@ public class TeamDamageListener implements Listener {
         if (damagerTeam != null && damagerTeam.equals(damagedTeam)) {
             event.setCancelled(true);
             lang.sendMessage(damager, "ERROR.party.cannot-friendly-fire", "name", damaged.getName());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onTeamBlockExplosion(final EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+
+        if (event.getCause() != EntityDamageEvent.DamageCause.BLOCK_EXPLOSION) {
+            return;
+        }
+
+        final ArenaImpl arena = arenaManager.get(player);
+        if (arena == null) {
+            return;
+        }
+
+        // Check recent trigger in this world (beds/anchors)
+        if (!com.meteordevelopments.duels.listeners.ExplosionOwnershipListener.isRecentBlockExplosionInWorld(player.getWorld(), 1500)) {
+            return;
+        }
+
+        final java.util.UUID trigger = com.meteordevelopments.duels.listeners.ExplosionOwnershipListener.getRecentBlockExplosionTrigger(player.getWorld());
+        if (trigger == null) {
+            return;
+        }
+
+        final Player damager = player.getServer().getPlayer(trigger);
+        if (damager == null || !arenaManager.isInMatch(damager)) {
+            return;
+        }
+
+        if (!(arena.getMatch() instanceof TeamDuelMatch teamMatch)) {
+            return;
+        }
+
+        final TeamDuelMatch.Team damagerTeam = teamMatch.getPlayerToTeam().get(damager);
+        final TeamDuelMatch.Team damagedTeam = teamMatch.getPlayerToTeam().get(player);
+
+        if (damagerTeam != null && damagerTeam.equals(damagedTeam)) {
+            event.setCancelled(true);
+            lang.sendMessage(damager, "ERROR.party.cannot-friendly-fire", "name", player.getName());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onTeamEntityExplosion(final EntityDamageEvent event) {
+        if (event.getCause() != EntityDamageEvent.DamageCause.ENTITY_EXPLOSION) {
+            return;
+        }
+        if (!(event.getEntity() instanceof Player damaged)) {
+            return;
+        }
+        final ArenaImpl arena = arenaManager.get(damaged);
+        if (arena == null || !(arena.getMatch() instanceof TeamDuelMatch teamMatch)) {
+            return;
+        }
+
+        // This handler covers TNT minecart explosions that don't trigger EntityDamageByEntityEvent
+        // or where the minecart entity is removed before damage is applied
+        if (!com.meteordevelopments.duels.listeners.ExplosionOwnershipListener.isRecentMinecartExplosionInWorld(damaged.getWorld(), 2000)) {
+            return;
+        }
+        final java.util.UUID ownerUuid = com.meteordevelopments.duels.listeners.ExplosionOwnershipListener.getRecentMinecartExplosionOwner(damaged.getWorld());
+        if (ownerUuid == null) {
+            return;
+        }
+        final Player owner = damaged.getServer().getPlayer(ownerUuid);
+        if (owner == null || !arenaManager.isInMatch(owner)) {
+            return;
+        }
+
+        final TeamDuelMatch.Team damagerTeam = teamMatch.getPlayerToTeam().get(owner);
+        final TeamDuelMatch.Team damagedTeam = teamMatch.getPlayerToTeam().get(damaged);
+        if (damagerTeam != null && damagerTeam.equals(damagedTeam)) {
+            event.setCancelled(true);
+            lang.sendMessage(owner, "ERROR.party.cannot-friendly-fire", "name", damaged.getName());
         }
     }
 }
