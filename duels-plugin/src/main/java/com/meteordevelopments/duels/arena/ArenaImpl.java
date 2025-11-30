@@ -281,6 +281,10 @@ public class ArenaImpl extends BaseButton implements Arena {
     @Override
     public boolean has(@NotNull final Player player) {
         Objects.requireNonNull(player, "player");
+        // For team matches, include dead players as they remain in the arena as spectators
+        if (isUsed() && match instanceof TeamDuelMatch) {
+            return match.getAllPlayers().contains(player);
+        }
         return isUsed() && !match.isDead(player);
     }
 

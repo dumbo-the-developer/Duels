@@ -41,11 +41,10 @@ ERROR:
     delete-failure: '{PREFIX} <red>Cannot delete an arena that is currently in use. Please disable it first using the command ''/duels toggle %name%'''
     invalid-position: '{PREFIX} <red>Position must be 1 or 2.'
     no-position-set: '{PREFIX} <red>Arena ''%name%'' have no positions set.'
+    empty-hand: '{PREFIX} <red>You must be holding an item to use this command.'
   kit:
     not-found: '{PREFIX} <red>No kit exists with the name ''%name%''.'
     already-exists: '{PREFIX} <red>A kit named ''%name%'' already exists.'
-    empty-hand: '{PREFIX} <red>You must be holding an item to use this command.'
-  arena:
     empty-hand: '{PREFIX} <red>You must be holding an item to use this command.'
   player-only: '{PREFIX} <red>This command can only be used by players.'
   duel:

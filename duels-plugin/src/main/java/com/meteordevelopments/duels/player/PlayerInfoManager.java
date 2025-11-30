@@ -18,6 +18,7 @@ import com.meteordevelopments.duels.util.PlayerUtil;
 import com.meteordevelopments.duels.util.io.FileUtil;
 import com.meteordevelopments.duels.util.json.JsonUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -287,8 +288,17 @@ public class PlayerInfoManager implements Loadable {
                 TeamDuelMatch teamMatch = (TeamDuelMatch) arena.getMatch();
                 if (teamMatch.isDead(player)) {
                     // Player is dead in team match, keep them in arena as spectator
-                    // Use the arena's first position as respawn location
+                    // Use the arena's center position for spectating
                     event.setRespawnLocation(arena.getPosition(1));
+                    
+                    // Schedule to set spectator mode after respawn
+                    plugin.doSyncAfter(() -> {
+                        if (player.isOnline() && arenaManager.get(player) == arena) {
+                            player.setGameMode(GameMode.SPECTATOR);
+                            player.setAllowFlight(true);
+                            player.setFlying(true);
+                        }
+                    }, 1L);
                     return;
                 }
             }
@@ -303,6 +313,16 @@ public class PlayerInfoManager implements Loadable {
                 // Do not remove cached data if player left while respawning.
                 if (!player.isOnline()) {
                     return;
+                }
+                
+                // Double-check: Don't remove PlayerInfo if player is dead in team match
+                final ArenaImpl stillInArena = arenaManager.get(player);
+                if (stillInArena != null && stillInArena.getMatch() instanceof TeamDuelMatch) {
+                    TeamDuelMatch stillTeamMatch = (TeamDuelMatch) stillInArena.getMatch();
+                    if (stillTeamMatch.isDead(player)) {
+                        // Player is still dead in team match, don't restore them
+                        return;
+                    }
                 }
 
                 remove(player);

@@ -502,6 +502,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         sendMessage("&eStarting to load pre-listeners");
         new KitItemListener(this);
         new DamageListener(this);
+        new ExplosionOwnershipListener(this);
+        new TeamDamageListener(this);
         new PotionListener(this);
         new TeleportListener(this);
         new ProjectileHitListener(this);

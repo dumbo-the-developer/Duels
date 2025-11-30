@@ -1,7 +1,9 @@
 package com.meteordevelopments.duels.listeners;
 
 import com.meteordevelopments.duels.DuelsPlugin;
+import com.meteordevelopments.duels.arena.ArenaImpl;
 import com.meteordevelopments.duels.arena.ArenaManagerImpl;
+import com.meteordevelopments.duels.match.team.TeamDuelMatch;
 import com.meteordevelopments.duels.spectate.SpectateManagerImpl;
 import com.meteordevelopments.duels.util.compat.CompatUtil;
 import org.bukkit.Bukkit;
@@ -38,13 +40,62 @@ public class LingerPotionListener {
                 return;
             }
 
-            final Player player = (Player) event.getEntity().getSource();
+            final Player source = (Player) event.getEntity().getSource();
 
-            if (!arenaManager.isInMatch(player)) {
+            final ArenaImpl arena = arenaManager.get(source);
+            if (arena == null || !(arena.getMatch() instanceof TeamDuelMatch teamMatch)) {
+                // Still remove spectators regardless
+                event.getAffectedEntities().removeIf(entity -> entity instanceof Player && spectateManager.isSpectating((Player) entity));
                 return;
             }
 
-            event.getAffectedEntities().removeIf(entity -> entity instanceof Player && spectateManager.isSpectating((Player) entity));
+            final TeamDuelMatch.Team sourceTeam = teamMatch.getPlayerToTeam().get(source);
+
+            // Remove spectators and teammates from harmful lingering clouds
+            event.getAffectedEntities().removeIf(entity -> {
+                if (entity instanceof Player p) {
+                    if (spectateManager.isSpectating(p)) {
+                        return true;
+                    }
+                    final TeamDuelMatch.Team affectedTeam = teamMatch.getPlayerToTeam().get(p);
+                    if (affectedTeam != null && affectedTeam.equals(sourceTeam)) {
+                        // Only filter for harmful clouds; check effects on cloud
+                        boolean harmful = false;
+                        // Check custom effects
+                        for (org.bukkit.potion.PotionEffect eff : event.getEntity().getCustomEffects()) {
+                            final org.bukkit.potion.PotionEffectType t = eff.getType();
+                            if (t.equals(org.bukkit.potion.PotionEffectType.POISON) ||
+                                t.equals(org.bukkit.potion.PotionEffectType.HARM) ||
+                                t.equals(org.bukkit.potion.PotionEffectType.WITHER) ||
+                                t.equals(org.bukkit.potion.PotionEffectType.WEAKNESS) ||
+                                t.equals(org.bukkit.potion.PotionEffectType.SLOW) ||
+                                t.equals(org.bukkit.potion.PotionEffectType.SLOW_DIGGING) ||
+                                t.equals(org.bukkit.potion.PotionEffectType.BLINDNESS) ||
+                                t.equals(org.bukkit.potion.PotionEffectType.CONFUSION) ||
+                                t.equals(org.bukkit.potion.PotionEffectType.HUNGER) ||
+                                t.equals(org.bukkit.potion.PotionEffectType.LEVITATION) ||
+                                t.equals(org.bukkit.potion.PotionEffectType.UNLUCK) ||
+                                t.equals(org.bukkit.potion.PotionEffectType.BAD_OMEN) ||
+                                t.equals(org.bukkit.potion.PotionEffectType.DARKNESS)) {
+                                harmful = true;
+                                break;
+                            }
+                        }
+                        // Also check base potion type
+                        if (!harmful) {
+                            final org.bukkit.potion.PotionType base = event.getEntity().getBasePotionData().getType();
+                            if (base == org.bukkit.potion.PotionType.POISON ||
+                                base == org.bukkit.potion.PotionType.INSTANT_DAMAGE ||
+                                base == org.bukkit.potion.PotionType.SLOWNESS ||
+                                base == org.bukkit.potion.PotionType.WEAKNESS) {
+                                harmful = true;
+                            }
+                        }
+                        return harmful;
+                    }
+                }
+                return false;
+            });
         }
     }
 }
