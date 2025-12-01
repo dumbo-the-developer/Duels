@@ -83,12 +83,15 @@ public class LingerPotionListener {
                         }
                         // Also check base potion type
                         if (!harmful) {
-                            final org.bukkit.potion.PotionType base = event.getEntity().getBasePotionData().getType();
-                            if (base == org.bukkit.potion.PotionType.POISON ||
-                                base == org.bukkit.potion.PotionType.INSTANT_DAMAGE ||
-                                base == org.bukkit.potion.PotionType.SLOWNESS ||
-                                base == org.bukkit.potion.PotionType.WEAKNESS) {
-                                harmful = true;
+                            final org.bukkit.potion.PotionData potionData = event.getEntity().getBasePotionData();
+                            if (potionData != null) {
+                                final org.bukkit.potion.PotionType base = potionData.getType();
+                                if (base == org.bukkit.potion.PotionType.POISON ||
+                                    base == org.bukkit.potion.PotionType.INSTANT_DAMAGE ||
+                                    base == org.bukkit.potion.PotionType.SLOWNESS ||
+                                    base == org.bukkit.potion.PotionType.WEAKNESS) {
+                                    harmful = true;
+                                }
                             }
                         }
                         return harmful;
