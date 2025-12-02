@@ -103,6 +103,9 @@ public final class Items {
             return false;
         }
         final PotionData potionData = meta.getBasePotionData();
-        return potionData != null && potionData.getType() == PotionType.INSTANT_HEAL;
+        if (potionData != null) {
+            return potionData.getType() == PotionType.INSTANT_HEAL;
+        }
+        return false;
     }
 }

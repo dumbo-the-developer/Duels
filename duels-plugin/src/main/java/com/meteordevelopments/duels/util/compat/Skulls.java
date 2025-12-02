@@ -27,8 +27,9 @@ public final class Skulls {
             .maximumSize(1000)
             .weakKeys()
             .expireAfterAccess(1, TimeUnit.HOURS)
-            .build(new CacheLoader<Player, GameProfile>() {
+            .build(new CacheLoader<>() {
 
+                       @NotNull
                        @Override
                        public GameProfile load(@NotNull final Player player) throws InvocationTargetException, IllegalAccessException {
                            return getProfile(player);
