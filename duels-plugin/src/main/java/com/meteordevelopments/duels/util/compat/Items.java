@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 
 public final class Items {
@@ -98,6 +99,13 @@ public final class Items {
         }
 
         final PotionMeta meta = (PotionMeta) item.getItemMeta();
-        return meta != null && meta.getBasePotionData().getType() == PotionType.INSTANT_HEAL;
+        if (meta == null) {
+            return false;
+        }
+        final PotionData potionData = meta.getBasePotionData();
+        if (potionData != null) {
+            return potionData.getType() == PotionType.INSTANT_HEAL;
+        }
+        return false;
     }
 }
