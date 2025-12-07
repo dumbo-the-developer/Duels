@@ -1,13 +1,13 @@
 package com.meteordevelopments.duels.util.compat;
 
 import com.meteordevelopments.duels.util.reflect.ReflectionUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockCanBuildEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
+@SuppressWarnings("unused")
 public final class CompatUtil {
 
     private static final boolean ATTRIBUTES, ITEM_FLAGS, SEND_TITLE, HIDE_PLAYER, SET_COLLIDABLE, GET_PLAYER;

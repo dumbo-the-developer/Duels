@@ -15,21 +15,29 @@ public final class EventUtil {
     }
 
     public static Player getDamager(final EntityDamageByEntityEvent event) {
-        if (event.getDamager() instanceof Player) {
-            return (Player) event.getDamager();
-        } else if (event.getDamager() instanceof Projectile && ((Projectile) event.getDamager()).getShooter() instanceof Player) {
-            return (Player) ((Projectile) event.getDamager()).getShooter();
-        } else if (event.getDamager() instanceof TNTPrimed tnt && tnt.getSource() instanceof Player) {
-            return (Player) tnt.getSource();
-        } else if (event.getDamager() instanceof EnderCrystal crystal) {
-            final java.util.UUID owner = ExplosionOwnershipListener.getCrystalOwner(crystal);
-            if (owner != null) {
-                return Bukkit.getPlayer(owner);
+        switch (event.getDamager()) {
+            case Player player -> {
+                return player;
             }
-        } else if (event.getDamager() instanceof ExplosiveMinecart minecart) {
-            final java.util.UUID owner = ExplosionOwnershipListener.getTntMinecartOwner(minecart);
-            if (owner != null) {
-                return Bukkit.getPlayer(owner);
+            case Projectile projectile when projectile.getShooter() instanceof Player -> {
+                return (Player) projectile.getShooter();
+            }
+            case TNTPrimed tnt when tnt.getSource() instanceof Player -> {
+                return (Player) tnt.getSource();
+            }
+            case EnderCrystal crystal -> {
+                final java.util.UUID owner = ExplosionOwnershipListener.getCrystalOwner(crystal);
+                if (owner != null) {
+                    return Bukkit.getPlayer(owner);
+                }
+            }
+            case ExplosiveMinecart minecart -> {
+                final java.util.UUID owner = ExplosionOwnershipListener.getTntMinecartOwner(minecart);
+                if (owner != null) {
+                    return Bukkit.getPlayer(owner);
+                }
+            }
+            default -> {
             }
         }
 

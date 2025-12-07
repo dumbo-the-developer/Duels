@@ -17,6 +17,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.*;
 
+@SuppressWarnings("deprecation")
 public class RequestManager implements Loadable, Listener {
 
     private final Config config;

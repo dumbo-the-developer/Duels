@@ -113,6 +113,12 @@ public class DuelManager implements Loadable {
             userDataManager.handleMatchEnd(match, winners);
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
             DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(loser).runDelayed(() -> {
+                // Handle the loser (remove from arena and restore state)
+                // This is especially important for ROUNDS3 where the loser never actually dies
+                if (match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3)) {
+                    handleLoss(loser, arena, match);
+                }
+                
                 for (Player alivePlayer : winners) {
                     handleWin(alivePlayer, loser, arena, match);
                 }
@@ -448,6 +454,49 @@ public class DuelManager implements Loadable {
                 lang.sendMessage(winner, "DUEL.reward.items.message", "name", opponentName);
             }
         } else if (info != null) {
+            info.getExtra().addAll(items);
+        }
+    }
+
+    /**
+     * Handles the loser of a match, removing them from the arena and restoring their state.
+     * This is primarily used for ROUNDS3 matches where the loser never actually dies.
+     *
+     * @param loser The player who lost the match
+     * @param arena Arena the match is taking place
+     * @param match Match the player is in
+     */
+    private void handleLoss(final Player loser, final ArenaImpl arena, final DuelMatch match) {
+        arena.remove(loser);
+
+        if (mcMMO != null) {
+            mcMMO.enableSkills(loser);
+        }
+
+        final PlayerInfo info = playerManager.get(loser);
+
+        if (!loser.isDead()) {
+            playerManager.remove(loser);
+
+            if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {
+                PlayerUtil.reset(loser);
+            }
+
+            if (info != null) {
+                teleport.tryTeleport(loser, info.getLocation());
+                if (match.isOwnInventory()) {
+                    // Preserve any XP gained during the duel when using own inventory
+                    info.restoreWithoutExperience(loser);
+                } else {
+                    // Restore saved experience for non-own-inventory matches
+                    info.restore(loser);
+                }
+            } else {
+                teleport.tryTeleport(loser, playerManager.getLobby());
+            }
+        } else if (info != null) {
+            // If player is dead, their items will be handled when they respawn
+            final List<ItemStack> items = match.getItems(loser);
             info.getExtra().addAll(items);
         }
     }

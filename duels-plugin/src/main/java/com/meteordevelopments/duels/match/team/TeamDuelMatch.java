@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")
 public class TeamDuelMatch extends DuelMatch {
 
     @Getter
@@ -33,8 +34,7 @@ public class TeamDuelMatch extends DuelMatch {
         playerToTeam.put(player, team);
         teamToPlayers.computeIfAbsent(team, k -> new HashSet<>()).add(player);
 
-        final Integer count = alivePlayers.get(team);
-        alivePlayers.put(team, count == null ? 1 : count + 1);
+        alivePlayers.compute(team, (k, count) -> count == null ? 1 : count + 1);
     }
 
     private Team getOrCreateTeam(final Player player) {

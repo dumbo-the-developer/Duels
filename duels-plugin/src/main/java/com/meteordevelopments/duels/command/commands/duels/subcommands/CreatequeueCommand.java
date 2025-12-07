@@ -47,15 +47,15 @@ public class CreatequeueCommand extends BaseCommand {
     @Override
     public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         if (args.length == 2) {
-            return Arrays.asList("Ranked", "Casual", "Practice", "Tournament");
+            return Arrays.asList("Name", "Example", "Example_2", "ANY_NAME");
         }
 
         if (args.length == 3) {
-            return Arrays.asList("0", "10", "50", "100", "500", "1000");
+            return Arrays.asList("0", "10", "50", "100", "500", "1000", "bet_amount");
         }
 
         if (args.length == 4) {
-            return Arrays.asList("1", "2", "3", "4", "5");
+            return Arrays.asList("1", "2", "3", "4", "5", "any_size");
         }
 
         if (args.length > 4) {

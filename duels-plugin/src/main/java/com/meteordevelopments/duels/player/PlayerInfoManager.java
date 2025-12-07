@@ -32,6 +32,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -284,12 +285,11 @@ public class PlayerInfoManager implements Loadable {
 
             // Check if player is in a team match and is dead (spectator)
             final ArenaImpl arena = arenaManager.get(player);
-            if (arena != null && arena.getMatch() instanceof TeamDuelMatch) {
-                TeamDuelMatch teamMatch = (TeamDuelMatch) arena.getMatch();
+            if (arena != null && arena.getMatch() instanceof TeamDuelMatch teamMatch) {
                 if (teamMatch.isDead(player)) {
                     // Player is dead in team match, keep them in arena as spectator
                     // Use the arena's center position for spectating
-                    event.setRespawnLocation(arena.getPosition(1));
+                    event.setRespawnLocation(Objects.requireNonNull(arena.getPosition(1)));
                     
                     // Schedule to set spectator mode after respawn
                     plugin.doSyncAfter(() -> {
@@ -317,8 +317,7 @@ public class PlayerInfoManager implements Loadable {
                 
                 // Double-check: Don't remove PlayerInfo if player is dead in team match
                 final ArenaImpl stillInArena = arenaManager.get(player);
-                if (stillInArena != null && stillInArena.getMatch() instanceof TeamDuelMatch) {
-                    TeamDuelMatch stillTeamMatch = (TeamDuelMatch) stillInArena.getMatch();
+                if (stillInArena != null && stillInArena.getMatch() instanceof TeamDuelMatch stillTeamMatch) {
                     if (stillTeamMatch.isDead(player)) {
                         // Player is still dead in team match, don't restore them
                         return;

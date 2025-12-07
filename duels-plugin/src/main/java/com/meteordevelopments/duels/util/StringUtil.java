@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("deprecation")
 public final class StringUtil {
 
     private static final Pattern ALPHANUMERIC = Pattern.compile("^[a-zA-Z0-9_]+$");

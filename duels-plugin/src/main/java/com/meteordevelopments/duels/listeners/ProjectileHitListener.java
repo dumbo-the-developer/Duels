@@ -36,7 +36,7 @@ public class ProjectileHitListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void on(final EntityDamageByEntityEvent event) {
-        if (!(event.getEntity() instanceof LivingEntity)) {
+        if (!(event.getEntity() instanceof LivingEntity entity)) {
             return;
         }
 
@@ -48,17 +48,14 @@ public class ProjectileHitListener implements Listener {
 
         final ProjectileSource source = ((Projectile) damager).getShooter();
 
-        if (!(source instanceof Player)) {
+        if (!(source instanceof Player player)) {
             return;
         }
-
-        final Player player = (Player) source;
 
         if (!arenaManager.isInMatch(player)) {
             return;
         }
 
-        final LivingEntity entity = (LivingEntity) event.getEntity();
         final double health = Math.max(Math.ceil(entity.getHealth() - event.getFinalDamage()) * 0.5, 0);
         lang.sendMessage(player, "DUEL.projectile-hit-message", "name", entity.getName(), "health", health);
     }

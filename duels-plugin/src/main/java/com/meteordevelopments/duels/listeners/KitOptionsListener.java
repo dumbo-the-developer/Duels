@@ -29,11 +29,10 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Objects;
-
 /**
  * Applies kit characteristics (options) to duels.
  */
+@SuppressWarnings("deprecation")
 public class KitOptionsListener implements Listener {
 
     private static final String METADATA_KEY = "Duels-MaxNoDamageTicks";
@@ -60,11 +59,10 @@ public class KitOptionsListener implements Listener {
 
     @EventHandler
     public void on(final EntityDamageEvent event) {
-        if (!(event.getEntity() instanceof Player)) {
+        if (!(event.getEntity() instanceof Player player)) {
             return;
         }
 
-        final Player player = (Player) event.getEntity();
         final ArenaImpl arena = arenaManager.get(player);
 
         if (arena == null) {
@@ -169,11 +167,10 @@ public class KitOptionsListener implements Listener {
 
     @EventHandler
     public void on(final EntityDamageByEntityEvent event) {
-        if (!(event.getEntity() instanceof Player)) {
+        if (!(event.getEntity() instanceof Player player)) {
             return;
         }
 
-        final Player player = (Player) event.getEntity();
         final ArenaImpl arena = arenaManager.get(player);
 
         if (arena == null || !isEnabled(arena, Characteristic.LOKA)) {
@@ -186,11 +183,10 @@ public class KitOptionsListener implements Listener {
 
     @EventHandler
     public void on(final FoodLevelChangeEvent event) {
-        if (!(event.getEntity() instanceof Player)) {
+        if (!(event.getEntity() instanceof Player player)) {
             return;
         }
 
-        final Player player = (Player) event.getEntity();
         final ArenaImpl arena = arenaManager.get(player);
 
         if (arena == null || !isEnabled(arena, Characteristic.HUNGER)) {
@@ -226,23 +222,7 @@ public class KitOptionsListener implements Listener {
 //        }
 //    }
 
-    private Player findClosestPlayer(Location location) {
-        double radius = 10;
-        Player closestPlayer = null;
-        double closestDistance = radius;
-
-        for (Player player : Objects.requireNonNull(location.getWorld()).getPlayers()) {
-            double distance = player.getLocation().distance(location);
-            if (distance < closestDistance) {
-                closestPlayer = player;
-                closestDistance = distance;
-            }
-        }
-
-        return closestPlayer;
-    }
-
-/*    @EventHandler
+    /*    @EventHandler
     public void onPlayerPlace(PlayerInteractEvent event) {
         final Player player = event.getPlayer();
         final ArenaImpl arena = arenaManager.get(player);
@@ -369,11 +349,10 @@ public class KitOptionsListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void on(final EntityRegainHealthEvent event) {
-        if (!(event.getEntity() instanceof Player) || !(event.getRegainReason() == RegainReason.SATIATED || event.getRegainReason() == RegainReason.REGEN)) {
+        if (!(event.getEntity() instanceof Player player) || !(event.getRegainReason() == RegainReason.SATIATED || event.getRegainReason() == RegainReason.REGEN)) {
             return;
         }
 
-        final Player player = (Player) event.getEntity();
         final ArenaImpl arena = arenaManager.get(player);
 
         if (arena == null || !isEnabled(arena, Characteristic.UHC)) {
@@ -429,11 +408,10 @@ public class KitOptionsListener implements Listener {
 
         @EventHandler
         public void on(final EntityDamageByEntityEvent event) {
-            if (!(event.getEntity() instanceof Player)) {
+            if (!(event.getEntity() instanceof Player player)) {
                 return;
             }
 
-            final Player player = (Player) event.getEntity();
             final ArenaImpl arena = arenaManager.get(player);
 
             if (arena == null || !isEnabled(arena, Characteristic.COMBO)) {

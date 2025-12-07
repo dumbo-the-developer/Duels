@@ -13,6 +13,7 @@ import org.bukkit.potion.PotionEffect;
 import java.util.*;
 
 @Getter
+@SuppressWarnings("unused")
 public class PlayerInfo {
 
     private final Map<String, Map<Integer, ItemStack>> items = new HashMap<>();
