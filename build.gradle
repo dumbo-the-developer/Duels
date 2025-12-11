@@ -4,8 +4,7 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath("com.gradleup.shadow:shadow-gradle-plugin:8.3.8")
-        classpath("dev.skidfuscator:skidfuscator-gradle-plugin:0.1.4")
+        classpath("com.gradleup.shadow:shadow-gradle-plugin:9.3.0")
     }
 }
 
