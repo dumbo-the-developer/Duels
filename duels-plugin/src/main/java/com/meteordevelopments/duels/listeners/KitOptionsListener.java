@@ -26,6 +26,8 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import java.util.HashSet;
+import java.util.UUID;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
@@ -41,6 +43,9 @@ public class KitOptionsListener implements Listener {
     private final Config config;
     private final ArenaManagerImpl arenaManager;
     private final DuelManager duelManager;
+    
+    // Track players who just used a totem to prevent them from losing the round
+    private final HashSet<UUID> recentTotemUsers = new HashSet<>();
 
     public KitOptionsListener(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -55,6 +60,31 @@ public class KitOptionsListener implements Listener {
     private boolean isEnabled(final ArenaImpl arena, final Characteristic characteristic) {
         final DuelMatch match = arena.getMatch();
         return match != null && match.getKit() != null && match.getKit().hasCharacteristic(characteristic);
+    }
+
+    @EventHandler
+    public void on(final EntityResurrectEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+
+        final ArenaImpl arena = arenaManager.get(player);
+
+        if (arena == null) {
+            return;
+        }
+
+        final DuelMatch match = arena.getMatch();
+        if (match == null) {
+            return;
+        }
+
+        // For ROUNDS3, track totem usage to prevent round loss
+        if (isEnabled(arena, Characteristic.ROUNDS3)) {
+            recentTotemUsers.add(player.getUniqueId());
+            // Remove after a short delay to prevent exploitation
+            plugin.doSyncAfter(() -> recentTotemUsers.remove(player.getUniqueId()), 2L);
+        }
     }
 
     @EventHandler
@@ -77,7 +107,8 @@ public class KitOptionsListener implements Listener {
         // For ROUNDS3, if damage would kill the player, handle round end
         if (isEnabled(arena, Characteristic.ROUNDS3)) {
             double finalHealth = player.getHealth() - event.getFinalDamage();
-            if (finalHealth <= 0) {
+            // Check if player just used a totem - if so, don't end the round
+            if (finalHealth <= 0 && !recentTotemUsers.contains(player.getUniqueId())) {
                 // Cancel the damage event immediately to prevent any delayed damage
                 event.setCancelled(true);
 
