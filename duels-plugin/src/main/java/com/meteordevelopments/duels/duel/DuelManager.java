@@ -46,10 +46,14 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import space.arim.morepaperlib.scheduling.ScheduledTask;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("deprecation")
 public class DuelManager implements Loadable {
+    
+    private static final Pattern DELAY_PATTERN = Pattern.compile("\\{delay:(\\d+)\\}");
 
     private final DuelsPlugin plugin;
     private final Config config;
@@ -113,6 +117,12 @@ public class DuelManager implements Loadable {
             userDataManager.handleMatchEnd(match, winners);
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
             DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(loser).runDelayed(() -> {
+                // Handle the loser (remove from arena and restore state)
+                // This is especially important for ROUNDS3 where the loser never actually dies
+                if (match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3)) {
+                    handleLoss(loser, arena, match);
+                }
+                
                 for (Player alivePlayer : winners) {
                     handleWin(alivePlayer, loser, arena, match);
                 }
@@ -120,11 +130,12 @@ public class DuelManager implements Loadable {
                 if (config.isEndCommandsEnabled() && !(!match.isFromQueue() && config.isEndCommandsQueueOnly())) {
                     try {
                         for (final String command : config.getEndCommands()) {
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command
+                            String processedCommand = command
                                     .replace("%winner%", winner.getName()).replace("%loser%", loser.getName())
                                     .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "").replace("%arena%", arena.getName())
-                                    .replace("%bet_amount%", String.valueOf(match.getBet()))
-                            );
+                                    .replace("%bet_amount%", String.valueOf(match.getBet()));
+                            
+                            executeCommandWithDelay(processedCommand);
                         }
                     } catch (Exception ex) {
                         Log.warn(DuelManager.this, "Error while running match end commands: " + ex.getMessage());
@@ -201,11 +212,12 @@ public class DuelManager implements Loadable {
                         for (final String command : config.getEndCommands()) {
                             String winnerNames = winners.stream().map(Player::getName).collect(Collectors.joining(", "));
                             String loserNames = losers.stream().map(Player::getName).collect(Collectors.joining(", "));
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command
+                            String processedCommand = command
                                     .replace("%winner%", winnerNames).replace("%loser%", loserNames)
                                     .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "").replace("%arena%", arena.getName())
-                                    .replace("%bet_amount%", String.valueOf(match.getBet()))
-                            );
+                                    .replace("%bet_amount%", String.valueOf(match.getBet()));
+                            
+                            executeCommandWithDelay(processedCommand);
                         }
                     } catch (Exception ex) {
                         Log.warn(DuelManager.this, "Error while running match end commands: " + ex.getMessage());
@@ -452,6 +464,49 @@ public class DuelManager implements Loadable {
         }
     }
 
+    /**
+     * Handles the loser of a match, removing them from the arena and restoring their state.
+     * This is primarily used for ROUNDS3 matches where the loser never actually dies.
+     *
+     * @param loser The player who lost the match
+     * @param arena Arena the match is taking place
+     * @param match Match the player is in
+     */
+    private void handleLoss(final Player loser, final ArenaImpl arena, final DuelMatch match) {
+        arena.remove(loser);
+
+        if (mcMMO != null) {
+            mcMMO.enableSkills(loser);
+        }
+
+        final PlayerInfo info = playerManager.get(loser);
+
+        if (!loser.isDead()) {
+            playerManager.remove(loser);
+
+            if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {
+                PlayerUtil.reset(loser);
+            }
+
+            if (info != null) {
+                teleport.tryTeleport(loser, info.getLocation());
+                if (match.isOwnInventory()) {
+                    // Preserve any XP gained during the duel when using own inventory
+                    info.restoreWithoutExperience(loser);
+                } else {
+                    // Restore saved experience for non-own-inventory matches
+                    info.restore(loser);
+                }
+            } else {
+                teleport.tryTeleport(loser, playerManager.getLobby());
+            }
+        } else if (info != null) {
+            // If player is dead, their items will be handled when they respawn
+            final List<ItemStack> items = match.getItems(loser);
+            info.getExtra().addAll(items);
+        }
+    }
+
     private void refundItems(final Collection<Player> players, final Map<UUID, List<ItemStack>> items) {
         if (items != null) {
             players.forEach(player -> InventoryUtil.addOrDrop(player, items.getOrDefault(player.getUniqueId(), Collections.emptyList())));
@@ -568,7 +623,8 @@ public class DuelManager implements Loadable {
             if (config.isStartCommandsEnabled() && !(match.getSource() == null && config.isStartCommandsQueueOnly())) {
                 try {
                     for (final String command : config.getStartCommands()) {
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", player.getName()));
+                        String processedCommand = command.replace("%player%", player.getName());
+                        executeCommandWithDelay(processedCommand);
                     }
                 } catch (Exception ex) {
                     Log.warn(this, "Error while running match start commands: " + ex.getMessage());
@@ -612,13 +668,43 @@ public class DuelManager implements Loadable {
                 return;
             }
 
-            // Skip death handling for ROUNDS3 as it's handled in EntityDamageEvent
+            // Handle ROUNDS3 deaths that bypass EntityDamageEvent (like /kill command)
             if (match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3)) {
                 event.setDeathMessage(null);
                 event.getDrops().clear();
                 event.setKeepLevel(true);
                 event.setDroppedExp(0);
                 event.setKeepInventory(true);
+                
+                // Check if this is a direct death (like /kill) by checking if there was no recent damage event
+                // In this case, we need to properly end the match
+                final EntityDamageEvent lastDamage = player.getLastDamageCause();
+                final boolean directDeath = lastDamage == null || 
+                        (System.currentTimeMillis() - lastDamage.getEntity().getTicksLived() * 50L > 1000);
+                
+                if (directDeath) {
+                    // Player died through /kill or similar - award round win to opponent
+                    Player winner = match.getAlivePlayers().stream()
+                            .filter(p -> !p.equals(player))
+                            .findFirst()
+                            .orElse(null);
+                    
+                    if (winner != null) {
+                        // Mark as match-ending win for the opponent
+                        match.addRoundWin(winner);
+                        match.addRoundWin(winner); // Add twice to immediately win
+                        match.markAsDead(player);
+                        
+                        arena.broadcast(plugin.getLang().getMessage("DUEL.on-death.no-killer", 
+                                "name", player.getName()));
+                        
+                        // Use delayed task to allow death to process
+                        final Location deadLocation = player.getLocation().clone();
+                        plugin.doSyncAfter(() -> {
+                            handleMatchEnd(match, arena, player, deadLocation, winner);
+                        }, 1L);
+                    }
+                }
                 return;
             }
 
@@ -837,5 +923,37 @@ public class DuelManager implements Loadable {
             lang.sendMessage(player, "DUEL.prevent.inventory-open");
         }
 
+    }
+    
+    /**
+     * Executes a command with optional delay support.
+     * Parses {delay:x} placeholder where x is delay in milliseconds.
+     * 
+     * @param command The command string to execute, potentially containing {delay:x}
+     */
+    private void executeCommandWithDelay(String command) {
+        Matcher matcher = DELAY_PATTERN.matcher(command);
+        
+        if (matcher.find()) {
+            // Extract delay value in milliseconds
+            long delayMs = Long.parseLong(matcher.group(1));
+            // Remove the {delay:x} placeholder from the command
+            String cleanCommand = matcher.replaceAll("").trim();
+            
+            // Convert milliseconds to ticks (1 tick = 50ms)
+            long delayTicks = delayMs / 50;
+            
+            // Schedule the command execution with delay
+            plugin.doSyncAfter(() -> {
+                try {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cleanCommand);
+                } catch (Exception ex) {
+                    Log.warn(this, "Error executing delayed command: " + ex.getMessage());
+                }
+            }, delayTicks);
+        } else {
+            // No delay, execute immediately
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+        }
     }
 }

@@ -15,12 +15,9 @@ import org.bukkit.inventory.ItemStack;
  * Removes empty potion bottle after consumption if enabled.
  */
 public class PotionListener implements Listener {
-
-    private final DuelsPlugin plugin;
     private final ArenaManagerImpl arenaManager;
 
     public PotionListener(final DuelsPlugin plugin) {
-        this.plugin = plugin;
         this.arenaManager = plugin.getArenaManager();
 
         if (plugin.getConfiguration().isRemoveEmptyBottle()) {

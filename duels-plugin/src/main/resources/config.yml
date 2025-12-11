@@ -192,6 +192,7 @@ duel:
 
       # Available placeholders:
       # %player% - Name of the player entering the match
+      # {delay:x} - Used to give x ms of delay before running any command
       commands:
         - 'broadcast %player% is entering a duel!'
 

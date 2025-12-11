@@ -28,6 +28,7 @@ import static io.papermc.lib.PaperLib.teleportAsync;
  * Manages kit editing sessions for players.
  * Handles inventory snapshots, kit loading, and per-player kit storage.
  */
+@SuppressWarnings({"unused", "ResultOfMethodCallIgnored"})
 public class KitEditManager extends PluginHook<DuelsPlugin> {
 
     @Getter
@@ -64,26 +65,26 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
         if (kit == null) {
             return false;
         }
-        
-        // Create edit session
+
         EditSession session = new EditSession(player, kitName);
         activeSessions.put(playerId, session);
 
-        // Teleport player to Kit Lobby
-        teleportAsync(player, plugin.getPlayerManager().getKitLobby());
+        if (player.teleport(plugin.getPlayerManager().getKitLobby())){
+            // Clear player inventory
+            player.getInventory().clear();
 
-        // Clear player inventory
-        player.getInventory().clear();
-        
-        // Load kit into player inventory - check for custom kit first
-        if (hasPlayerKit(player, kitName)) {
-            // Load player's custom kit
-            loadPlayerKit(player, kitName);
-        } else {
-            // Load default kit
-            loadKitToPlayer(player, kit);
+            // Load kit into player inventory - check for custom kit first
+            if (hasPlayerKit(player, kitName)) {
+                // Load player's custom kit
+                loadPlayerKit(player, kitName);
+            } else {
+                // Load default kit
+                loadKitToPlayer(player, kit);
+            }
+        }else {
+            plugin.getLogger().severe("Unable to teleport to player " + player.getName());
+            abortEditSession(player);
         }
-        
         return true;
     }
     

@@ -21,10 +21,10 @@ import org.jetbrains.annotations.NotNull;
 
 import lombok.Getter;
 
+@SuppressWarnings({"deprecation", "unused"})
 public class DuelMatch implements Match {
     
     protected final PartyManagerImpl partyManager;
-    DuelsPlugin plugin = DuelsPlugin.getInstance();
 
     @Getter
     private final long creation;

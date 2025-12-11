@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
+@SuppressWarnings("deprecation")
 public class Button<P extends JavaPlugin> {
 
     protected final P plugin;

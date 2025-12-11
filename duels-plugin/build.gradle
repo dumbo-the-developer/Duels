@@ -26,6 +26,7 @@ dependencies {
     implementation 'com.github.sirblobman.combatlogx:api:11.5-SNAPSHOT'
     implementation 'com.artillexstudios:AxGraves:1.7.0'
     implementation 'com.github.No-Not-Jaden:NotBounties:1.22.17R5'
+    implementation 'me.chancesd.pvpmanager:pvpmanager:4.0.8'
     implementation('net.essentialsx:EssentialsX:2.21.2') {
         transitive = false
     }
@@ -34,7 +35,6 @@ dependencies {
     }
     implementation name: 'Vault-1.6.7'
     implementation name: 'CombatTagPlus'
-    implementation name: 'PvPManager-3.7.16'
     implementation name: 'Factions-1.6.9.5-U0.1.14'
     implementation name: 'MassiveCore'
     implementation name: 'Factions'

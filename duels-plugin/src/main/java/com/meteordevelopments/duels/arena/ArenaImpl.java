@@ -77,25 +77,49 @@ public class ArenaImpl extends BaseButton implements Arena {
             }
         });
         
-        // Get the availability status message
-        final String[] statusLines = lang.getMessage("GUI.arena-selector.buttons.arena.lore-" + (available ? "available" : "unavailable")).split("\n");
+        // Get both status message variations for comparison
+        final String[] availableLines = lang.getMessage("GUI.arena-selector.buttons.arena.lore-available").split("\n");
+        final String[] unavailableLines = lang.getMessage("GUI.arena-selector.buttons.arena.lore-unavailable").split("\n");
         
-        // Remove old status lines if they exist (check last few lines)
-        final String availableMsg = lang.toLegacyString(lang.getMessage("GUI.arena-selector.buttons.arena.lore-available").split("\n")[0]);
-        final String unavailableMsg = lang.toLegacyString(lang.getMessage("GUI.arena-selector.buttons.arena.lore-unavailable").split("\n")[0]);
+        // Convert all possible status messages to legacy format for comparison
+        final List<String> statusMessagesToRemove = new ArrayList<>();
+        for (final String line : availableLines) {
+            statusMessagesToRemove.add(lang.toLegacyString(line));
+        }
+        for (final String line : unavailableLines) {
+            statusMessagesToRemove.add(lang.toLegacyString(line));
+        }
         
-        // Remove existing status lines from the end
-        while (!currentLore.isEmpty()) {
-            final String lastLine = currentLore.get(currentLore.size() - 1);
-            if (lastLine.equals(availableMsg) || lastLine.equals(unavailableMsg)) {
-                currentLore.remove(currentLore.size() - 1);
+        // Remove all existing status lines from the end (work backwards to avoid index issues)
+        int removeCount = 0;
+        for (int i = currentLore.size() - 1; i >= 0; i--) {
+            final String line = currentLore.get(i);
+            boolean isStatusLine = false;
+            
+            // Check if this line matches any status message
+            for (final String statusMsg : statusMessagesToRemove) {
+                if (line.equals(statusMsg)) {
+                    isStatusLine = true;
+                    break;
+                }
+            }
+            
+            if (isStatusLine) {
+                removeCount++;
             } else {
+                // Stop at first non-status line
                 break;
             }
         }
         
+        // Remove the status lines
+        for (int i = 0; i < removeCount; i++) {
+            currentLore.remove(currentLore.size() - 1);
+        }
+        
         // Add new status lines
-        for (final String line : statusLines) {
+        final String[] newStatusLines = lang.getMessage("GUI.arena-selector.buttons.arena.lore-" + (available ? "available" : "unavailable")).split("\n");
+        for (final String line : newStatusLines) {
             currentLore.add(lang.toLegacyString(line));
         }
         

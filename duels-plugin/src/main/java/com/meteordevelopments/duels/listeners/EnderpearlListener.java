@@ -57,11 +57,9 @@ public class EnderpearlListener implements Listener {
 
         final EnderPearl enderPearl = (EnderPearl) event.getEntity();
 
-        if (!(enderPearl.getShooter() instanceof Player)) {
+        if (!(enderPearl.getShooter() instanceof Player player)) {
             return;
         }
-
-        final Player player = (Player) enderPearl.getShooter();
 
         // Ignore pearls thrown in match
         if (arenaManager.isInMatch(player)) {
@@ -74,11 +72,9 @@ public class EnderpearlListener implements Listener {
 
     @EventHandler
     public void on(final ProjectileHitEvent event) {
-        if (!(event.getEntity() instanceof EnderPearl)) {
+        if (!(event.getEntity() instanceof EnderPearl enderPearl)) {
             return;
         }
-
-        final EnderPearl enderPearl = (EnderPearl) event.getEntity();
 
         if (!(enderPearl.getShooter() instanceof Player)) {
             return;

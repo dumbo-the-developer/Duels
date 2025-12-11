@@ -15,6 +15,7 @@ import space.arim.morepaperlib.scheduling.ScheduledTask;
 
 import java.util.*;
 
+@SuppressWarnings("deprecation")
 public class InventoryManager implements Loadable {
 
     private final DuelsPlugin plugin;

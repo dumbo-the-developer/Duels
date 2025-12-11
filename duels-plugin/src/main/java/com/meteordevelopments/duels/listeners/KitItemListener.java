@@ -14,15 +14,15 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 /**
- * Prevents players from using kit items outside of a duel by checking
+ * Prevents players from using kit items outside a duel by checking
  * for an NBT tag stored in the item by Duels.
  */
 public class KitItemListener implements Listener {
@@ -98,14 +98,16 @@ public class KitItemListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void on(final PlayerPickupItemEvent event) {
-        final Player player = event.getPlayer();
+    public void on(final EntityPickupItemEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
 
         if (isExcluded(player)) {
             return;
         }
 
-        final Item item = event.getItem();
+        Item item = event.getItem();
 
         if (!isKitItem(item.getItemStack())) {
             return;
@@ -116,6 +118,7 @@ public class KitItemListener implements Listener {
         player.sendMessage(WARNING);
         Log.warn(String.format(WARNING_CONSOLE, player.getName()));
     }
+
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void on(final BlockPlaceEvent event) {

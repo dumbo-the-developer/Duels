@@ -218,8 +218,8 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
                         setting.setTargetParty(null);
 
                         final String kit = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("GENERAL.none");
-                        firstPlayers.forEach(p -> lang.sendMessage(p, "QUEUE.found-opponent", "name", secondPlayers.get(0).getName(), "kit", kit, "bet_amount", queue.getBet()));
-                        secondPlayers.forEach(p -> lang.sendMessage(p, "QUEUE.found-opponent", "name", firstPlayers.get(0).getName(), "kit", kit, "bet_amount", queue.getBet()));
+                        firstPlayers.forEach(p -> lang.sendMessage(p, "QUEUE.found-opponent", "name", secondPlayers.getFirst().getName(), "kit", kit, "bet_amount", queue.getBet()));
+                        secondPlayers.forEach(p -> lang.sendMessage(p, "QUEUE.found-opponent", "name", firstPlayers.getFirst().getName(), "kit", kit, "bet_amount", queue.getBet()));
 
                         duelManager.startMatch(firstPlayers, secondPlayers, setting, null, queue);
 

@@ -159,12 +159,12 @@ public abstract class AbstractConfiguration<P extends JavaPlugin> implements Loa
                             final List<List<String>> commentData = Lists.newArrayList(result);
 
                             if (!commentData.isEmpty()) {
-                                for (final String comment : commentData.get(0)) {
+                                for (final String comment : commentData.getFirst()) {
                                     writer.write(comment);
                                     writer.newLine();
                                 }
 
-                                commentData.remove(0);
+                                commentData.removeFirst();
                                 comments.replaceValues(key, commentData);
                             }
                         }
