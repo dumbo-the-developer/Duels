@@ -5,13 +5,12 @@ buildscript {
     }
     dependencies {
         classpath("com.gradleup.shadow:shadow-gradle-plugin:8.3.8")
-        classpath("dev.skidfuscator:skidfuscator-gradle-plugin:0.1.4")
     }
 }
 
 allprojects {
     group = 'com.meteordevelopments'
-    version = '5.49'
+    version = '5.4'
 }
 
 subprojects {
@@ -19,7 +18,6 @@ subprojects {
     apply plugin: 'java-library'
     apply plugin: 'com.gradleup.shadow'
     apply plugin: 'maven-publish'
-    apply plugin: 'dev.skidfuscator'
 
     repositories {
         mavenCentral()
@@ -93,8 +91,4 @@ subprojects {
             dirs "$rootDir/libs/"
         }
     }
-}
-tasks.register('copyDeps', Copy) {
-    from subprojects.collect { it.configurations.compileClasspath }
-    into "$rootDir/libs2"
 }
