@@ -4,6 +4,7 @@ import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.Permissions;
 import com.meteordevelopments.duels.command.BaseCommand;
 import com.meteordevelopments.duels.command.commands.duel.subcommands.*;
+import com.meteordevelopments.duels.config.CommandsConfig.CommandSettings;
 import com.meteordevelopments.duels.hook.hooks.VaultHook;
 import com.meteordevelopments.duels.hook.hooks.worldguard.WorldGuardHook;
 import com.meteordevelopments.duels.kit.KitImpl;
@@ -21,14 +22,15 @@ import org.bukkit.entity.Player;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class DuelCommand extends BaseCommand {
 
     private final WorldGuardHook worldGuard;
     private final VaultHook vault;
 
-    public DuelCommand(final DuelsPlugin plugin) {
-        super(plugin, "duel", Permissions.DUEL, true);
+    public DuelCommand(final DuelsPlugin plugin, final CommandSettings settings) {
+        super(plugin, Objects.requireNonNull(settings, "settings").getName(), Permissions.DUEL, true, settings.getAliasArray());
         child(
                 new AcceptCommand(plugin),
                 new DenyCommand(plugin),

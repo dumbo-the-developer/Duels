@@ -86,19 +86,10 @@ public abstract class AbstractCommand<P extends JavaPlugin> implements TabComple
         return children != null && children.get(name.toLowerCase()) != null;
     }
 
-    private PluginCommand getCommand() {
-        final PluginCommand pluginCommand = plugin.getCommand(name);
-
+    public final void register(final PluginCommand pluginCommand) {
         if (pluginCommand == null) {
-            throw new IllegalArgumentException("Command is not registered in plugin.yml");
+            throw new IllegalArgumentException("PluginCommand cannot be null");
         }
-
-        return pluginCommand;
-    }
-
-    public final void register() {
-        final PluginCommand pluginCommand = getCommand();
-
         pluginCommand.setExecutor((sender, command, label, args) -> {
             if (isPlayerOnly() && !(sender instanceof Player)) {
                 handleMessage(sender, MessageType.PLAYER_ONLY);

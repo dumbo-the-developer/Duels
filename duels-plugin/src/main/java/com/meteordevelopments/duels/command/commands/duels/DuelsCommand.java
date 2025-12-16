@@ -4,12 +4,14 @@ import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.Permissions;
 import com.meteordevelopments.duels.command.BaseCommand;
 import com.meteordevelopments.duels.command.commands.duels.subcommands.*;
+import com.meteordevelopments.duels.config.CommandsConfig.CommandSettings;
 import org.bukkit.command.CommandSender;
+import java.util.Objects;
 
 public class DuelsCommand extends BaseCommand {
 
-    public DuelsCommand(final DuelsPlugin plugin) {
-        super(plugin, "duels", Permissions.ADMIN, false);
+    public DuelsCommand(final DuelsPlugin plugin, final CommandSettings settings) {
+        super(plugin, Objects.requireNonNull(settings, "settings").getName(), Permissions.ADMIN, false, settings.getAliasArray());
         child(
                 new HelpCommand(plugin),
                 new SavekitCommand(plugin),

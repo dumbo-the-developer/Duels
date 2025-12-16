@@ -7,6 +7,7 @@ import com.meteordevelopments.duels.arena.ArenaImpl;
 import com.meteordevelopments.duels.match.DuelMatch;
 import com.meteordevelopments.duels.command.BaseCommand;
 import com.meteordevelopments.duels.spectate.SpectatorImpl;
+import com.meteordevelopments.duels.config.CommandsConfig.CommandSettings;
 import com.meteordevelopments.duels.util.inventory.InventoryUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -16,8 +17,8 @@ import java.util.Objects;
 
 public class SpectateCommand extends BaseCommand {
 
-    public SpectateCommand(final DuelsPlugin plugin) {
-        super(plugin, "spectate", Permissions.SPECTATE, true);
+    public SpectateCommand(final DuelsPlugin plugin, final CommandSettings settings) {
+        super(plugin, Objects.requireNonNull(settings, "settings").getName(), Permissions.SPECTATE, true, settings.getAliasArray());
     }
 
     @Override

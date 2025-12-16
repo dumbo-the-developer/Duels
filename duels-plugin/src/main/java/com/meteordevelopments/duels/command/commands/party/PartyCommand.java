@@ -6,17 +6,19 @@ import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.Permissions;
 import com.meteordevelopments.duels.command.BaseCommand;
 import com.meteordevelopments.duels.command.commands.party.subcommands.*;
+import com.meteordevelopments.duels.config.CommandsConfig.CommandSettings;
 import com.meteordevelopments.duels.data.UserData;
 import com.meteordevelopments.duels.party.Party;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import java.util.Objects;
 
 public class PartyCommand extends BaseCommand {
     
-    public PartyCommand(final DuelsPlugin plugin) {
-        super(plugin, "party", Permissions.PARTY, true);
+    public PartyCommand(final DuelsPlugin plugin, final CommandSettings settings) {
+        super(plugin, Objects.requireNonNull(settings, "settings").getName(), Permissions.PARTY, true, settings.getAliasArray());
         child(
             new ToggleCommand(plugin),
             new AcceptCommand(plugin),
