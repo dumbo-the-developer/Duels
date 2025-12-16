@@ -22,19 +22,16 @@ import com.meteordevelopments.duels.queue.Queue;
 import com.meteordevelopments.duels.setting.Settings;
 import com.meteordevelopments.duels.util.compat.Items;
 import com.meteordevelopments.duels.util.inventory.ItemBuilder;
-import org.bukkit.Bukkit;import org.bukkit.Location;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import java.util.ArrayList;
-import java.util.List;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,6 +45,7 @@ public class ArenaImpl extends BaseButton implements Arena {
     private final Set<KitImpl> kits = new HashSet<>();
     private final Map<Integer, Location> positions = new HashMap<>();
     private DuelMatch match;
+    private ItemStack originalDisplayed; // Stores the display item with {status} placeholder
     @Setter(value = AccessLevel.PACKAGE)
     private boolean removed;
     @Setter
@@ -57,11 +55,13 @@ public class ArenaImpl extends BaseButton implements Arena {
         super(plugin, ItemBuilder
                 .of(Items.EMPTY_MAP)
                 .name(plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.name", "name", name), plugin.getLang())
-                .lore(plugin.getLang(), plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.lore-unavailable").split("\n"))
+                .lore(plugin.getLang(), plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.lore-default").split("\n"))
                 .build()
         );
         this.name = name;
         this.disabled = disabled;
+        // Store the original display item with {status} placeholder
+        this.originalDisplayed = getDisplayed().clone();
     }
 
     public ArenaImpl(final DuelsPlugin plugin, final String name) {
@@ -69,74 +69,63 @@ public class ArenaImpl extends BaseButton implements Arena {
     }
 
     public void refreshGui(final boolean available) {
-        // Get current lore from the display item
-        final List<String> currentLore = new ArrayList<>();
-        editMeta(meta -> {
-            if (meta.hasLore()) {
-                currentLore.addAll(meta.getLore());
+        // Always refresh from the original display item with {status} placeholder
+        if (originalDisplayed == null) {
+            return;
+        }
+        
+        // Get the status text to replace {status} placeholder with
+        final String statusText = available 
+            ? lang.getMessage("GUI.arena-selector.buttons.arena.lore-available")
+            : lang.getMessage("GUI.arena-selector.buttons.arena.lore-unavailable");
+        
+        // Clone the original and replace {status} in the clone
+        final ItemStack refreshed = originalDisplayed.clone();
+        final ItemMeta meta = refreshed.getItemMeta();
+        if (meta != null && meta.hasLore()) {
+            final List<String> updatedLore = new ArrayList<>();
+            for (final String line : meta.getLore()) {
+                // Replace {status} placeholder with the status text
+                updatedLore.add(line.replace("{status}", statusText));
             }
-        });
-        
-        // Get both status message variations for comparison
-        final String[] availableLines = lang.getMessage("GUI.arena-selector.buttons.arena.lore-available").split("\n");
-        final String[] unavailableLines = lang.getMessage("GUI.arena-selector.buttons.arena.lore-unavailable").split("\n");
-        
-        // Convert all possible status messages to legacy format for comparison
-        final List<String> statusMessagesToRemove = new ArrayList<>();
-        for (final String line : availableLines) {
-            statusMessagesToRemove.add(lang.toLegacyString(line));
-        }
-        for (final String line : unavailableLines) {
-            statusMessagesToRemove.add(lang.toLegacyString(line));
+            meta.setLore(updatedLore);
+            refreshed.setItemMeta(meta);
         }
         
-        // Remove all existing status lines from the end (work backwards to avoid index issues)
-        int removeCount = 0;
-        for (int i = currentLore.size() - 1; i >= 0; i--) {
-            final String line = currentLore.get(i);
-            boolean isStatusLine = false;
-            
-            // Check if this line matches any status message
-            for (final String statusMsg : statusMessagesToRemove) {
-                if (line.equals(statusMsg)) {
-                    isStatusLine = true;
-                    break;
-                }
-            }
-            
-            if (isStatusLine) {
-                removeCount++;
-            } else {
-                // Stop at first non-status line
-                break;
-            }
-        }
-        
-        // Remove the status lines
-        for (int i = 0; i < removeCount; i++) {
-            currentLore.remove(currentLore.size() - 1);
-        }
-        
-        // Add new status lines
-        final String[] newStatusLines = lang.getMessage("GUI.arena-selector.buttons.arena.lore-" + (available ? "available" : "unavailable")).split("\n");
-        for (final String line : newStatusLines) {
-            currentLore.add(lang.toLegacyString(line));
-        }
-        
-        // Update the lore
-        editMeta(itemMeta -> itemMeta.setLore(currentLore));
-        arenaManager.getGui().calculatePages();
+        // Set the refreshed item as the new displayed item
+        super.setDisplayed(refreshed);
     }
 
     @Override
     public void setDisplayed(final ItemStack displayed) {
-        super.setDisplayed(displayed);
+        // Store the original with {status} placeholder
+        this.originalDisplayed = displayed != null ? displayed.clone() : null;
+        // Clone again for the displayed version that will be modified by refreshGui
+        super.setDisplayed(displayed != null ? displayed.clone() : null);
+        // Immediately refresh GUI to show status
+        refreshGui(isAvailable());
         arenaManager.saveArenas();
     }
 
     // Public method to set display item without triggering save (used during loading)
     public void setDisplayedWithoutSave(final ItemStack displayed) {
-        super.setDisplayed(displayed);
+        // Store the original with {status} placeholder
+        this.originalDisplayed = displayed != null ? displayed.clone() : null;
+        // Clone again for the displayed version that will be modified by refreshGui
+        super.setDisplayed(displayed != null ? displayed.clone() : null);
+        // Immediately refresh GUI to show status
+        refreshGui(isAvailable());
+    }
+    
+    // Get the original display item with {status} placeholder (used for serialization)
+    public ItemStack getDisplayedOriginal() {
+        return originalDisplayed != null ? originalDisplayed : getDisplayed();
+    }
+
+    @Override
+    public void update(final Player player) {
+        // Refresh the GUI with current availability status whenever the button is updated
+        refreshGui(isAvailable());
     }
 
     @Nullable

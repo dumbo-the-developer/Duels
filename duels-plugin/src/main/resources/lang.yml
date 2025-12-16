@@ -626,6 +626,8 @@ GUI:
     buttons:
       arena:
         name: '&e%name%'
+        lore-default:
+          - '&eStatus: &r{status}'
         lore-available:
           - '&aAvailable'
         lore-unavailable:

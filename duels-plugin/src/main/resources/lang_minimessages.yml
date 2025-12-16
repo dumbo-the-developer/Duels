@@ -625,6 +625,8 @@ GUI:
     buttons:
       arena:
         name: '<yellow>%name%'
+        lore-default:
+          - '<yellow>Status: <reset>{status}'
         lore-available:
           - '<green>Available'
         lore-unavailable:
