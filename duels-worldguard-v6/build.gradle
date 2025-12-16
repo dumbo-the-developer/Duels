@@ -1,6 +1,0 @@
-dependencies {
-    implementation('com.sk89q:worldguard:6.1.1-SNAPSHOT') {
-        exclude group: 'org.bukkit', module: 'bukkit'
-    }
-    implementation project(':duels-worldguard')
-}
