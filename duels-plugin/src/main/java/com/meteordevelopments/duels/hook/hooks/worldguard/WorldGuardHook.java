@@ -18,7 +18,7 @@ public class WorldGuardHook extends PluginHook<DuelsPlugin> {
     public WorldGuardHook(final DuelsPlugin plugin) {
         super(plugin, NAME);
         this.config = plugin.getConfiguration();
-        this.handler = ReflectionUtil.getClassUnsafe("com.sk89q.worldguard.WorldGuard") != null ? new WorldGuard7Handler() : new WorldGuard6Handler();
+        this.handler = new WorldGuard7Handler();
     }
 
     public String findDuelZone(final Player player) {

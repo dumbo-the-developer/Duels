@@ -6,7 +6,7 @@ import com.meteordevelopments.duels.config.CommandsConfig;
 import com.meteordevelopments.duels.listeners.*;
 import com.meteordevelopments.duels.party.PartyManagerImpl;
 import com.meteordevelopments.duels.util.*;
-import com.meteordevelopments.duels.util.util.CC;
+import com.meteordevelopments.duels.util.CC;
 import com.meteordevelopments.duels.validator.ValidatorManager;
 import lombok.Getter;
 import com.meteordevelopments.duels.api.Duels;

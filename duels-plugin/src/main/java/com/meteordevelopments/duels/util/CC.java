@@ -1,4 +1,4 @@
-package com.meteordevelopments.duels.util.util;
+package com.meteordevelopments.duels.util;
 
 
 import net.md_5.bungee.api.ChatColor;
