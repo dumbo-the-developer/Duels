@@ -83,8 +83,8 @@ public abstract class BaseCommand extends AbstractCommand<DuelsPlugin> {
     /**
      * Constructor for a parent command
      */
-    protected BaseCommand(final DuelsPlugin plugin, final String name, final String permission, final boolean playerOnly) {
-        this(plugin, name, null, null, permission, -1, playerOnly);
+    protected BaseCommand(final DuelsPlugin plugin, final String name, final String permission, final boolean playerOnly, final String... aliases) {
+        this(plugin, name, null, null, permission, -1, playerOnly, aliases);
     }
 
     @Override

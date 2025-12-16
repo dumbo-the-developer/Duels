@@ -5,6 +5,7 @@ import com.meteordevelopments.duels.Permissions;
 import com.meteordevelopments.duels.command.BaseCommand;
 import com.meteordevelopments.duels.command.commands.kit.KiteditCommand;
 import com.meteordevelopments.duels.command.commands.kit.KitsaveCommand;
+import com.meteordevelopments.duels.config.CommandsConfig.CommandSettings;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -16,8 +17,8 @@ import java.util.List;
  */
 public class KitCommand extends BaseCommand {
 
-    public KitCommand(DuelsPlugin plugin) {
-        super(plugin, "kit", "kit [edit|save] [kitname]", "Kit editing commands.", Permissions.KIT_EDIT, 1, true);
+    public KitCommand(final DuelsPlugin plugin, final CommandSettings settings) {
+        super(plugin, settings.getName(), "kit [edit|save] [kitname]", "Kit editing commands.", Permissions.KIT_EDIT, 1, true, settings.getAliasArray());
     }
 
     @Override

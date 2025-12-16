@@ -7,7 +7,7 @@
 #                                       #
 #########################################
 # DO NOT EDIT THIS VALUE!
-config-version: 12
+config-version: 13
 
 # If set to 'true', a notification and a download link will be printed on both console and in-game when a new update is available.
 # default: true

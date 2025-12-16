@@ -137,6 +137,7 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
     @Override
     public void open(final Player... players) {
         for (final Player player : players) {
+            update(player);
             player.openInventory(first.inventory);
         }
     }

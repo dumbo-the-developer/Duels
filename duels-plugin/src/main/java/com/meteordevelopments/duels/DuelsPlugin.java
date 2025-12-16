@@ -2,6 +2,7 @@ package com.meteordevelopments.duels;
 
 import com.google.common.collect.Lists;
 import com.meteordevelopments.duels.command.commands.party.PartyCommand;
+import com.meteordevelopments.duels.config.CommandsConfig;
 import com.meteordevelopments.duels.listeners.*;
 import com.meteordevelopments.duels.party.PartyManagerImpl;
 import com.meteordevelopments.duels.util.*;
@@ -43,6 +44,8 @@ import com.meteordevelopments.duels.util.gui.GuiListener;
 import com.meteordevelopments.duels.util.json.JsonUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandMap;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -116,6 +119,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private PartyManagerImpl partyManager;
     @Getter
     private ValidatorManager validatorManager;
+    private CommandsConfig commandsConfig;
     private static final Logger LOGGER = Logger.getLogger("[Duels-Optimised]");
 
     @Override
@@ -132,6 +136,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
         loadLogManager();
         initLoadables();
+        registerAllCommands();
         loadPreListeners();
 
         long end = System.currentTimeMillis();
@@ -157,15 +162,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
      * @return true if load was successful, otherwise false
      */
     private boolean load() {
-        registerCommands(
-                new DuelCommand(this),
-                new PartyCommand(this),
-                new QueueCommand(this),
-                new SpectateCommand(this),
-                new DuelsCommand(this),
-                new KitCommand(this)
-        );
-
         for (final Loadable loadable : loadables) {
             final String name = loadable.getClass().getSimpleName();
 
@@ -226,15 +222,139 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         return true;
     }
 
-    @SafeVarargs
-    private void registerCommands(final AbstractCommand<DuelsPlugin>... commands) {
+    private void registerAllCommands() {
         sendMessage("&eRegistering commands...");
         long start = System.currentTimeMillis();
+
+        // Build commands based on commands.yml
+        final CommandsConfig.CommandSettings duel = commandsConfig.get(CommandsConfig.CommandKey.DUEL);
+        final CommandsConfig.CommandSettings party = commandsConfig.get(CommandsConfig.CommandKey.PARTY);
+        final CommandsConfig.CommandSettings queue = commandsConfig.get(CommandsConfig.CommandKey.QUEUE);
+        final CommandsConfig.CommandSettings spectate = commandsConfig.get(CommandsConfig.CommandKey.SPECTATE);
+        final CommandsConfig.CommandSettings duels = commandsConfig.get(CommandsConfig.CommandKey.DUELS);
+        final CommandsConfig.CommandSettings kit = commandsConfig.get(CommandsConfig.CommandKey.KIT);
+
+        registerCommands(
+            new DuelCommand(this, duel),
+            new PartyCommand(this, party),
+            new QueueCommand(this, queue),
+            new SpectateCommand(this, spectate),
+            new DuelsCommand(this, duels),
+            new KitCommand(this, kit)
+        );
+
+        sendMessage("&dSuccessfully registered commands [" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + ChatColor.WHITE + "]");
+    }
+
+    @SafeVarargs
+    private void registerCommands(final AbstractCommand<DuelsPlugin>... commands) {
+        final CommandMap commandMap = getCommandMap();
+        if (commandMap == null) {
+            getLogger().severe("Could not access Bukkit CommandMap for dynamic registration.");
+            return;
+        }
+
+        // Get knownCommands map for direct registration
+        final Map<String, org.bukkit.command.Command> knownCommands = getKnownCommands(commandMap);
+
         for (final AbstractCommand<DuelsPlugin> command : commands) {
             this.commands.put(command.getName().toLowerCase(), command);
-            command.register();
+            final PluginCommand pc = createPluginCommand(command.getName());
+            if (pc == null) {
+                getLogger().warning("Failed to create PluginCommand for '" + command.getName() + "'. Skipping.");
+                continue;
+            }
+            pc.setAliases(command.getAliases());
+            pc.setDescription("Duels Optimised command: " + command.getName());
+            command.register(pc);
+
+            // Register with CommandMap
+            final String prefix = getDescription().getName().toLowerCase();
+            commandMap.register(prefix, pc);
+
+            // Also register in knownCommands directly (primary name + aliases)
+            if (knownCommands != null) {
+                final String primaryName = command.getName().toLowerCase();
+                knownCommands.put(primaryName, pc);
+                knownCommands.put(prefix + ":" + primaryName, pc);
+
+                for (final String alias : command.getAliases()) {
+                    final String aliasLower = alias.toLowerCase();
+                    knownCommands.put(aliasLower, pc);
+                    knownCommands.put(prefix + ":" + aliasLower, pc);
+                }
+            }
+
+            getLogger().info("Registered command: /" + command.getName() + 
+                           (command.getAliases().isEmpty() ? "" : " (aliases: " + String.join(", ", command.getAliases()) + ")"));
         }
-        sendMessage("&dSuccessfully registered commands [" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + ChatColor.WHITE + "]");
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, org.bukkit.command.Command> getKnownCommands(final CommandMap commandMap) {
+        // Try multiple possible field names across different Paper/Spigot versions
+        final String[] fieldNames = {"knownCommands", "commands"};
+        
+        for (final String fieldName : fieldNames) {
+            Class<?> clazz = commandMap.getClass();
+            while (clazz != null) {
+                try {
+                    final java.lang.reflect.Field f = clazz.getDeclaredField(fieldName);
+                    f.setAccessible(true);
+                    return (Map<String, org.bukkit.command.Command>) f.get(commandMap);
+                } catch (NoSuchFieldException ignored) {
+                    clazz = clazz.getSuperclass();
+                } catch (Throwable t) {
+                    // Log only severe issues, not field not found
+                    if (!(t instanceof NoSuchFieldException)) {
+                        logManager.debug("Failed to access field '" + fieldName + "': " + t.getMessage());
+                    }
+                }
+            }
+        }
+        
+        // Commands should still work via CommandMap.register(), so just debug log this
+        logManager.debug("Could not access knownCommands map - commands will still work via CommandMap.register()");
+        return null;
+    }
+
+    private CommandMap getCommandMap() {
+        // Try CraftServer#getCommandMap()
+        try {
+            final java.lang.reflect.Method m = Bukkit.getServer().getClass().getMethod("getCommandMap");
+            final Object map = m.invoke(Bukkit.getServer());
+            return (CommandMap) map;
+        } catch (Throwable ignored) {
+        }
+
+        // Fallback: reflect field from PluginManager class hierarchy
+        try {
+            final org.bukkit.plugin.PluginManager pm = Bukkit.getPluginManager();
+            Class<?> c = pm.getClass();
+            while (c != null) {
+                try {
+                    final java.lang.reflect.Field f = c.getDeclaredField("commandMap");
+                    f.setAccessible(true);
+                    return (CommandMap) f.get(pm);
+                } catch (NoSuchFieldException ex) {
+                    c = c.getSuperclass();
+                }
+            }
+        } catch (Throwable t) {
+            getLogger().log(Level.SEVERE, "Failed to access CommandMap", t);
+        }
+        return null;
+    }
+
+    private PluginCommand createPluginCommand(final String name) {
+        try {
+            final java.lang.reflect.Constructor<PluginCommand> ctor = PluginCommand.class.getDeclaredConstructor(String.class, org.bukkit.plugin.Plugin.class);
+            ctor.setAccessible(true);
+            return ctor.newInstance(name, this);
+        } catch (Throwable t) {
+            getLogger().log(Level.SEVERE, "Failed to construct PluginCommand for '" + name + "'", t);
+            return null;
+        }
     }
 
     @Override
@@ -457,6 +577,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         sendMessage("&eStarting to load loadables");
 
         loadAndTrack("config", () -> loadables.add(configuration = new Config(this)));
+        loadAndTrack("commands config", () -> loadables.add(commandsConfig = new CommandsConfig(this)));
         loadAndTrack("lang", () -> loadables.add(lang = new Lang(this)));
         loadAndTrack("user manager", () -> loadables.add(userManager = new UserManagerImpl(this)));
         loadAndTrack("gui listener", () -> loadables.add(guiListener = new GuiListener<>(this)));

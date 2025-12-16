@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 12
+config-version: 13
 
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
@@ -626,6 +626,8 @@ GUI:
     buttons:
       arena:
         name: '&e%name%'
+        lore-default:
+          - '&eStatus: &r{status}'
         lore-available:
           - '&aAvailable'
         lore-unavailable:
