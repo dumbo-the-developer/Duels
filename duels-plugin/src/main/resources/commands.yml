@@ -20,4 +20,5 @@ commands:
     aliases: [ds]
   kit:
     name: kit
-    aliases: []
+    aliases: [dkit]
+
