@@ -6,7 +6,6 @@ import com.meteordevelopments.duels.config.CommandsConfig;
 import com.meteordevelopments.duels.listeners.*;
 import com.meteordevelopments.duels.party.PartyManagerImpl;
 import com.meteordevelopments.duels.util.*;
-import com.meteordevelopments.duels.util.CC;
 import com.meteordevelopments.duels.validator.ValidatorManager;
 import lombok.Getter;
 import com.meteordevelopments.duels.api.Duels;
@@ -75,6 +74,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     private final List<Loadable> loadables = new ArrayList<>();
     private final Map<String, AbstractCommand<DuelsPlugin>> commands = new HashMap<>();
+    private final Map<String, String> commandKeyMap = new HashMap<>();
     private final List<Listener> registeredListeners = new ArrayList<>();
     private int lastLoad;
     @Getter
@@ -137,6 +137,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadLogManager();
         initLoadables();
         registerAllCommands();
+        loadExtensions();
         loadPreListeners();
 
         long end = System.currentTimeMillis();
@@ -233,6 +234,14 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         final CommandsConfig.CommandSettings spectate = commandsConfig.get(CommandsConfig.CommandKey.SPECTATE);
         final CommandsConfig.CommandSettings duels = commandsConfig.get(CommandsConfig.CommandKey.DUELS);
         final CommandsConfig.CommandSettings kit = commandsConfig.get(CommandsConfig.CommandKey.KIT);
+
+        // Store mappings from original keys to actual names for API compatibility
+        commandKeyMap.put("duel", duel.getName().toLowerCase());
+        commandKeyMap.put("party", party.getName().toLowerCase());
+        commandKeyMap.put("queue", queue.getName().toLowerCase());
+        commandKeyMap.put("spectate", spectate.getName().toLowerCase());
+        commandKeyMap.put("duels", duels.getName().toLowerCase());
+        commandKeyMap.put("kit", kit.getName().toLowerCase());
 
         registerCommands(
             new DuelCommand(this, duel),
@@ -362,9 +371,30 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         Objects.requireNonNull(command, "command");
         Objects.requireNonNull(subCommand, "subCommand");
 
-        final AbstractCommand<DuelsPlugin> result = commands.get(command.toLowerCase());
+        final String commandLower = command.toLowerCase();
+        
+        // Debug logging
+        getLogger().info("Attempting to register subcommand '" + subCommand.getName() + "' to parent command '" + commandLower + "'");
+        getLogger().info("Available commands: " + commands.keySet());
+        getLogger().info("Command key mappings: " + commandKeyMap);
+        
+        // Try direct lookup first, then check if it's an original key that maps to a different name
+        AbstractCommand<DuelsPlugin> result = commands.get(commandLower);
+        if (result == null) {
+            final String mappedName = commandKeyMap.get(commandLower);
+            getLogger().info("Direct lookup failed, trying mapped name: " + mappedName);
+            if (mappedName != null) {
+                result = commands.get(mappedName);
+            }
+        }
 
-        if (result == null || result.isChild(subCommand.getName().toLowerCase())) {
+        if (result == null) {
+            getLogger().warning("Could not find parent command '" + commandLower + "' for subcommand '" + subCommand.getName() + "'");
+            return false;
+        }
+        
+        if (result.isChild(subCommand.getName().toLowerCase())) {
+            getLogger().warning("Subcommand '" + subCommand.getName() + "' is already registered to '" + commandLower + "'");
             return false;
         }
 
@@ -374,6 +404,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
                 subCommand.execute(sender, label, args);
             }
         });
+        
+        getLogger().info("Successfully registered subcommand '" + subCommand.getName() + "' to '" + commandLower + "'");
         return true;
     }
 
@@ -596,7 +628,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadAndTrack("hook manager", () -> hookManager = new HookManager(this));
         loadAndTrack("validator manager", () -> loadables.add(validatorManager = new ValidatorManager(this)));
         loadAndTrack("teleport manager", () -> loadables.add(teleport = new Teleport(this)));
-        loadAndTrack("extension manager", () -> loadables.add(extensionManager = new ExtensionManager(this)));
 
         if (!load()) {
             getServer().getPluginManager().disablePlugin(this);
@@ -613,6 +644,19 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             sendMessage("&2Successfully loaded " + name + " in &f[" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
         } catch (Exception e) {
             sendMessage("&cFailed to load " + name + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void loadExtensions() {
+        long start = System.currentTimeMillis();
+        sendMessage("&eLoading extensions...");
+        try {
+            loadables.add(extensionManager = new ExtensionManager(this));
+            extensionManager.handleLoad();
+            sendMessage("&dSuccessfully loaded extensions in &f[" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
+        } catch (Exception e) {
+            sendMessage("&cFailed to load extensions: " + e.getMessage());
             e.printStackTrace();
         }
     }
