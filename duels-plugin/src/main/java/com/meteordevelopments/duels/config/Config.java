@@ -4,7 +4,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import lombok.Getter;
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.config.converters.ConfigConverter9_10;
 import com.meteordevelopments.duels.util.EnumUtil;
 import com.meteordevelopments.duels.util.config.AbstractConfiguration;
 import org.bukkit.Sound;
@@ -292,12 +291,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     protected void loadValues(FileConfiguration configuration) throws Exception {
         final int prevVersion = configuration.getInt("config-version", 0);
 
-        if (prevVersion < 10) {
-            configuration = convert(new ConfigConverter9_10());
-        } else if (prevVersion < 11) {
-            configuration = convert(null);
-        } else if (prevVersion < getLatestVersion()) {
-            configuration = convert(null);
+        if (prevVersion < getLatestVersion()) {
+            configuration = convert();
         }
 
         version = configuration.getInt("config-version");

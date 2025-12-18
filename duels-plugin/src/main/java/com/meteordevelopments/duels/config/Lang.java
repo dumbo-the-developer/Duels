@@ -32,7 +32,7 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
     @Override
     protected void loadValues(FileConfiguration configuration) throws Exception {
         if (configuration.getInt("config-version", 0) < getLatestVersion()) {
-            configuration = convert(null);
+            configuration = convert();
         }
 
         final Map<String, String> strings = new HashMap<>();

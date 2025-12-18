@@ -737,9 +737,8 @@ public class DuelManager implements Loadable {
             final int prevSize = match.size();
             
             // Handle team-based elimination
-            if (match instanceof TeamDuelMatch) {
-                TeamDuelMatch teamMatch = (TeamDuelMatch) match;
-                
+            if (match instanceof TeamDuelMatch teamMatch) {
+
                 // Mark player as dead in the match (this updates team alive count)
                 arena.remove(player);
                 

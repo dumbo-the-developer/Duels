@@ -70,7 +70,7 @@ public abstract class AbstractConfiguration<P extends JavaPlugin> implements Loa
         }
     }
 
-    protected FileConfiguration convert(final Converter converter) throws IOException {
+    protected FileConfiguration convert() throws IOException {
         plugin.getLogger().info(String.format(CONVERT_START, name));
 
         final Map<String, Object> oldValues = new HashMap<>();
@@ -87,17 +87,6 @@ public abstract class AbstractConfiguration<P extends JavaPlugin> implements Loa
             }
 
             oldValues.put(key, value);
-        }
-
-        if (converter != null) {
-            converter.renamedKeys().forEach((old, changed) -> {
-                final Object previous = oldValues.get(old);
-
-                if (previous != null) {
-                    oldValues.remove(old);
-                    oldValues.put(changed, previous);
-                }
-            });
         }
 
         final String newName = name.replace(".yml", "") + "-" + System.currentTimeMillis() + ".yml";

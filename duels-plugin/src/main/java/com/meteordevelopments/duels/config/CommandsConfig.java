@@ -2,6 +2,7 @@ package com.meteordevelopments.duels.config;
 
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.util.config.AbstractConfiguration;
+import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ public class CommandsConfig extends AbstractConfiguration<DuelsPlugin> {
     private static final int DEFAULT_VERSION = 1;
 
     private final Map<CommandKey, CommandSettings> commands = new EnumMap<>(CommandKey.class);
+    @Getter
     private int version;
 
     public CommandsConfig(final DuelsPlugin plugin) {
@@ -25,15 +27,11 @@ public class CommandsConfig extends AbstractConfiguration<DuelsPlugin> {
     }
 
     @Override
-    protected void loadValues(final FileConfiguration configuration) throws Exception {
+    protected void loadValues(final FileConfiguration configuration) {
         version = configuration.getInt("config-version", DEFAULT_VERSION);
         for (final CommandKey key : CommandKey.values()) {
             commands.put(key, readSettings(configuration, key));
         }
-    }
-
-    public int getVersion() {
-        return version;
     }
 
     public CommandSettings get(final CommandKey key) {
@@ -76,6 +74,7 @@ public class CommandsConfig extends AbstractConfiguration<DuelsPlugin> {
         return Collections.unmodifiableList(new ArrayList<>(cleaned));
     }
 
+    @Getter
     public enum CommandKey {
         DUEL("duel", List.of("1v1")),
         PARTY("party", List.of("p", "duelparty", "dp")),
@@ -94,23 +93,12 @@ public class CommandsConfig extends AbstractConfiguration<DuelsPlugin> {
             this.defaultAliases = defaultAliases;
         }
 
-        public String getPath() {
-            return path;
-        }
-
-        public String getDefaultName() {
-            return defaultName;
-        }
-
-        public List<String> getDefaultAliases() {
-            return defaultAliases;
-        }
-
         public CommandSettings getDefaults() {
             return new CommandSettings(defaultName, defaultAliases);
         }
     }
 
+    @Getter
     public static final class CommandSettings {
         private final String name;
         private final List<String> aliases;
@@ -118,14 +106,6 @@ public class CommandsConfig extends AbstractConfiguration<DuelsPlugin> {
         public CommandSettings(final String name, final List<String> aliases) {
             this.name = Objects.requireNonNull(name, "name");
             this.aliases = Collections.unmodifiableList(new ArrayList<>(aliases == null ? Collections.emptyList() : aliases));
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public List<String> getAliases() {
-            return aliases;
         }
 
         public String[] getAliasArray() {
