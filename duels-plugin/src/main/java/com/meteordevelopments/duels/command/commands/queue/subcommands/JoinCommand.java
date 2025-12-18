@@ -3,15 +3,12 @@ package com.meteordevelopments.duels.command.commands.queue.subcommands;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.Permissions;
 import com.meteordevelopments.duels.command.BaseCommand;
-import com.meteordevelopments.duels.kit.KitImpl;
 import com.meteordevelopments.duels.queue.Queue;
-import com.meteordevelopments.duels.util.NumberUtil;
 import com.meteordevelopments.duels.util.StringUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class JoinCommand extends BaseCommand {

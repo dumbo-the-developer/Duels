@@ -38,6 +38,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 @Getter
+@SuppressWarnings("deprecation")
 public class ArenaImpl extends BaseButton implements Arena {
 
     private final String name;
