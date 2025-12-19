@@ -382,7 +382,7 @@ COMMAND:
     start-spectate: '{PREFIX} &7Now spectating &f%name%&7 vs &f%opponent%&7 in arena &e%arena%&7. Type &f/spectate &7to stop spectating.'
     stop-spectate: '{PREFIX} &7You are no longer spectating &f%name%&7.'
   leave:
-    success: '{PREFIX} &7You have forfeited the match and left the arena.'
+    success: '{PREFIX} &7Forfeiting match...'
   party:
     usage:
       - '{LINE}'

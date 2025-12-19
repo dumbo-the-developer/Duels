@@ -28,8 +28,11 @@ public class LeaveCommand extends BaseCommand {
             return;
         }
 
-        // Make the player lose the match by setting their health to 0
-        player.setHealth(0);
+        // Notify player before forfeiting
         lang.sendMessage(sender, "COMMAND.leave.success");
+        
+        // Make the player lose the match by setting their health to 0
+        // The match end logic will handle all cleanup and opponent notifications
+        player.setHealth(0);
     }
 }
