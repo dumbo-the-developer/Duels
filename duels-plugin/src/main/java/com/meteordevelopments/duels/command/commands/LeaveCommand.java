@@ -67,12 +67,17 @@ public class LeaveCommand extends BaseCommand {
         
         // Handle team/party matches
         if (match instanceof TeamDuelMatch teamMatch) {
+            // Check if removing this player will eliminate their team BEFORE marking as dead
+            final int prevSize = teamMatch.size();
+            
             // Mark player as dead in the team match
             arena.remove(player);
             
             // Check if this caused a team to be completely eliminated
+            final int newSize = teamMatch.size();
             TeamDuelMatch.Team winningTeam = teamMatch.getWinningTeam();
-            if (winningTeam != null && teamMatch.size() == 1) {
+            
+            if (winningTeam != null && newSize < prevSize && teamMatch.size() == 1) {
                 // Match is over, trigger team match end
                 plugin.doSyncAfter(() -> {
                     duelManager.handleTeamMatchEnd(teamMatch, arena, player.getLocation(), winningTeam);
@@ -83,8 +88,8 @@ public class LeaveCommand extends BaseCommand {
                 player.setAllowFlight(true);
                 player.setFlying(true);
                 
-                // Clear inventory since they're spectating
-                if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {
+                // Clear inventory since they're spectating (unless it was dropped)
+                if (!match.isOwnInventory() || !config.isOwnInventoryDropInventoryItems()) {
                     PlayerUtil.reset(player);
                 }
             }
@@ -95,10 +100,10 @@ public class LeaveCommand extends BaseCommand {
                     .findFirst()
                     .orElse(null);
             
+            // Mark player as dead
+            arena.remove(player);
+            
             if (opponent != null) {
-                // Mark player as dead
-                arena.remove(player);
-                
                 // Broadcast forfeit message
                 if (config.isSendDeathMessages()) {
                     arena.broadcast(lang.getMessage("DUEL.on-death.no-killer", "name", player.getName()));
@@ -108,6 +113,17 @@ public class LeaveCommand extends BaseCommand {
                 plugin.doSyncAfter(() -> {
                     duelManager.handleMatchEnd(match, arena, player, player.getLocation(), opponent);
                 }, 1L);
+            } else {
+                // No opponent found (shouldn't happen), just teleport player back
+                final PlayerInfo info = playerManager.get(player);
+                if (info != null) {
+                    playerManager.remove(player);
+                    PlayerUtil.reset(player);
+                    teleport.tryTeleport(player, info.getLocation());
+                    info.restore(player);
+                } else {
+                    teleport.tryTeleport(player, playerManager.getLobby());
+                }
             }
         }
     }
