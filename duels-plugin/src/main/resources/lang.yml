@@ -68,6 +68,8 @@ ERROR:
       target: '{PREFIX} &c%name% is in spectator mode.'
     not-in-match: '{PREFIX} &c%name% is not in a duel.'
     prevent-teleportation: '{PREFIX} &cYou cannot teleport to this player because he is in a duel.'
+  leave:
+    not-in-match: '{PREFIX} &cYou are not currently in a match.'
   party-duel:
     inventory-not-empty: '{PREFIX} &cYou and your party members must have a cleared inventory to use this command.'
     in-creative-mode: '{PREFIX} &cYou or your party member is in creative mode.'
@@ -379,6 +381,8 @@ COMMAND:
       - '{LINE}'
     start-spectate: '{PREFIX} &7Now spectating &f%name%&7 vs &f%opponent%&7 in arena &e%arena%&7. Type &f/spectate &7to stop spectating.'
     stop-spectate: '{PREFIX} &7You are no longer spectating &f%name%&7.'
+  leave:
+    success: '{PREFIX} &7You have forfeited the match and left the arena.'
   party:
     usage:
       - '{LINE}'

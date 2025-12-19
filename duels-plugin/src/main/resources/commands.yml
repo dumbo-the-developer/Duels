@@ -21,4 +21,7 @@ commands:
   kit:
     name: kit
     aliases: [dkit]
+  leave:
+    name: leave
+    aliases: [l]
 

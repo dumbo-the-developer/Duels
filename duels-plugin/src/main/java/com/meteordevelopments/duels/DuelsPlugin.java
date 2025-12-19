@@ -13,6 +13,7 @@ import com.meteordevelopments.duels.api.command.SubCommand;
 import com.meteordevelopments.duels.arena.ArenaManagerImpl;
 import com.meteordevelopments.duels.betting.BettingManager;
 import com.meteordevelopments.duels.command.commands.SpectateCommand;
+import com.meteordevelopments.duels.command.commands.LeaveCommand;
 import com.meteordevelopments.duels.command.commands.KitCommand;
 import com.meteordevelopments.duels.command.commands.duel.DuelCommand;
 import com.meteordevelopments.duels.command.commands.duels.DuelsCommand;
@@ -234,6 +235,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         final CommandsConfig.CommandSettings spectate = commandsConfig.get(CommandsConfig.CommandKey.SPECTATE);
         final CommandsConfig.CommandSettings duels = commandsConfig.get(CommandsConfig.CommandKey.DUELS);
         final CommandsConfig.CommandSettings kit = commandsConfig.get(CommandsConfig.CommandKey.KIT);
+        final CommandsConfig.CommandSettings leave = commandsConfig.get(CommandsConfig.CommandKey.LEAVE);
 
         // Store mappings from original keys to actual names for API compatibility
         commandKeyMap.put("duel", duel.getName().toLowerCase());
@@ -242,6 +244,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         commandKeyMap.put("spectate", spectate.getName().toLowerCase());
         commandKeyMap.put("duels", duels.getName().toLowerCase());
         commandKeyMap.put("kit", kit.getName().toLowerCase());
+        commandKeyMap.put("leave", leave.getName().toLowerCase());
 
         registerCommands(
             new DuelCommand(this, duel),
@@ -249,7 +252,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             new QueueCommand(this, queue),
             new SpectateCommand(this, spectate),
             new DuelsCommand(this, duels),
-            new KitCommand(this, kit)
+            new KitCommand(this, kit),
+            new LeaveCommand(this, leave)
         );
 
         sendMessage("&dSuccessfully registered commands [" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + ChatColor.WHITE + "]");
