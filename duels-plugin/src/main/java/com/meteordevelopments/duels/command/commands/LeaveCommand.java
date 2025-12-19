@@ -5,9 +5,18 @@ import com.meteordevelopments.duels.Permissions;
 import com.meteordevelopments.duels.arena.ArenaImpl;
 import com.meteordevelopments.duels.command.BaseCommand;
 import com.meteordevelopments.duels.config.CommandsConfig.CommandSettings;
+import com.meteordevelopments.duels.inventories.InventoryManager;
+import com.meteordevelopments.duels.match.DuelMatch;
+import com.meteordevelopments.duels.match.team.TeamDuelMatch;
+import com.meteordevelopments.duels.player.PlayerInfo;
+import com.meteordevelopments.duels.util.PlayerUtil;
+import com.meteordevelopments.duels.util.inventory.InventoryUtil;
+import org.bukkit.GameMode;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
+import java.util.List;
 import java.util.Objects;
 
 public class LeaveCommand extends BaseCommand {
@@ -28,11 +37,78 @@ public class LeaveCommand extends BaseCommand {
             return;
         }
 
+        final DuelMatch match = arena.getMatch();
+        
+        if (match == null) {
+            lang.sendMessage(sender, "ERROR.leave.not-in-match");
+            return;
+        }
+
         // Notify player before forfeiting
         lang.sendMessage(sender, "COMMAND.leave.success");
         
-        // Make the player lose the match by setting their health to 0
-        // The match end logic will handle all cleanup and opponent notifications
-        player.setHealth(0);
+        // Handle inventory drops if own inventory mode with dropping enabled
+        if (match.isOwnInventory() && config.isOwnInventoryDropInventoryItems()) {
+            // Drop inventory items at player's location
+            for (ItemStack item : player.getInventory().getContents()) {
+                if (item != null) {
+                    player.getWorld().dropItemNaturally(player.getLocation(), item);
+                }
+            }
+            for (ItemStack item : player.getInventory().getArmorContents()) {
+                if (item != null) {
+                    player.getWorld().dropItemNaturally(player.getLocation(), item);
+                }
+            }
+        }
+        
+        // Create inventory snapshot before changes
+        inventoryManager.create(player, false);
+        
+        // Handle team/party matches
+        if (match instanceof TeamDuelMatch teamMatch) {
+            // Mark player as dead in the team match
+            arena.remove(player);
+            
+            // Check if this caused a team to be completely eliminated
+            TeamDuelMatch.Team winningTeam = teamMatch.getWinningTeam();
+            if (winningTeam != null && teamMatch.size() == 1) {
+                // Match is over, trigger team match end
+                plugin.doSyncAfter(() -> {
+                    duelManager.handleTeamMatchEnd(teamMatch, arena, player.getLocation(), winningTeam);
+                }, 1L);
+            } else {
+                // Match continues, player becomes spectator
+                player.setGameMode(GameMode.SPECTATOR);
+                player.setAllowFlight(true);
+                player.setFlying(true);
+                
+                // Clear inventory since they're spectating
+                if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {
+                    PlayerUtil.reset(player);
+                }
+            }
+        } else {
+            // Regular 1v1 or party match
+            final Player opponent = match.getAlivePlayers().stream()
+                    .filter(p -> !p.equals(player))
+                    .findFirst()
+                    .orElse(null);
+            
+            if (opponent != null) {
+                // Mark player as dead
+                arena.remove(player);
+                
+                // Broadcast forfeit message
+                if (config.isSendDeathMessages()) {
+                    arena.broadcast(lang.getMessage("DUEL.on-death.no-killer", "name", player.getName()));
+                }
+                
+                // Trigger match end with opponent as winner
+                plugin.doSyncAfter(() -> {
+                    duelManager.handleMatchEnd(match, arena, player, player.getLocation(), opponent);
+                }, 1L);
+            }
+        }
     }
 }
