@@ -589,6 +589,7 @@ guis:
         data: 0
       # Slots where the send button appears (left side of GUI)
       slots: [0, 1, 2, 9, 10, 11, 18, 19, 20]
+      glowing-slots: [10]
 
     # Cancel button configuration
     cancel-button:
@@ -597,6 +598,7 @@ guis:
         data: 0
       # Slots where the cancel button appears (right side of GUI)
       slots: [6, 7, 8, 15, 16, 17, 24, 25, 26]
+      glowing-slots: [16]
 
     # Kit Selector button item
     kit-selector-button:

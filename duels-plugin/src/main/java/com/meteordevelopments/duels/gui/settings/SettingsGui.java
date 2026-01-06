@@ -4,10 +4,14 @@ import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.gui.BaseButton;
 import com.meteordevelopments.duels.gui.settings.buttons.*;
+import com.meteordevelopments.duels.util.compat.CompatUtil;
 import com.meteordevelopments.duels.util.compat.Items;
 import com.meteordevelopments.duels.util.gui.SinglePageGui;
 import com.meteordevelopments.duels.util.inventory.Slots;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,13 +62,45 @@ public class SettingsGui extends SinglePageGui<DuelsPlugin> {
 
         // Use configurable button slots from config
         final RequestSendButton sendButton = new RequestSendButton(plugin);
+        final RequestSendButton sendButtonGlowing = new RequestSendButton(plugin);
+        addGlowEffect(sendButtonGlowing);
+        
         for (final int slot : config.getSendButtonSlots()) {
-            set(slot, sendButton);
+            if (config.getSendButtonGlowingSlots().contains(slot)) {
+                set(slot, sendButtonGlowing);
+            } else {
+                set(slot, sendButton);
+            }
         }
 
         final CancelButton cancelButton = new CancelButton(plugin);
+        final CancelButton cancelButtonGlowing = new CancelButton(plugin);
+        addGlowEffect(cancelButtonGlowing);
+        
         for (final int slot : config.getCancelButtonSlots()) {
-            set(slot, cancelButton);
+            if (config.getCancelButtonGlowingSlots().contains(slot)) {
+                set(slot, cancelButtonGlowing);
+            } else {
+                set(slot, cancelButton);
+            }
+        }
+    }
+    
+    /**
+     * Adds enchantment glow effect to a button without showing enchantment text
+     */
+    private void addGlowEffect(final BaseButton button) {
+        final ItemStack displayed = button.getDisplayed();
+        final ItemMeta meta = displayed.getItemMeta();
+        
+        if (meta != null) {
+            meta.addEnchant(Enchantment.DURABILITY, 1, false);
+            
+            if (CompatUtil.hasItemFlag()) {
+                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            }
+            
+            displayed.setItemMeta(meta);
         }
     }
 }

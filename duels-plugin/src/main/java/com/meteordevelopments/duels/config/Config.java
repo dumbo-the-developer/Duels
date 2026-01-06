@@ -229,11 +229,15 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private List<Integer> sendButtonSlots;
     @Getter
+    private List<Integer> sendButtonGlowingSlots;
+    @Getter
     private String cancelButtonType;
     @Getter
     private short cancelButtonData;
     @Getter
     private List<Integer> cancelButtonSlots;
+    @Getter
+    private List<Integer> cancelButtonGlowingSlots;
     @Getter
     private String kitSelectorButtonType;
     @Getter
@@ -453,12 +457,14 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         if (sendButtonSlots.isEmpty()) {
             sendButtonSlots = Arrays.asList(0, 1, 2, 9, 10, 11, 18, 19, 20);
         }
+        sendButtonGlowingSlots = configuration.getIntegerList("guis.settings.send-button.glowing-slots");
         cancelButtonType = configuration.getString("guis.settings.cancel-button.item.type", "RED_STAINED_GLASS_PANE");
         cancelButtonData = (short) configuration.getInt("guis.settings.cancel-button.item.data", 0);
         cancelButtonSlots = configuration.getIntegerList("guis.settings.cancel-button.slots");
         if (cancelButtonSlots.isEmpty()) {
             cancelButtonSlots = Arrays.asList(6, 7, 8, 15, 16, 17, 24, 25, 26);
         }
+        cancelButtonGlowingSlots = configuration.getIntegerList("guis.settings.cancel-button.glowing-slots");
         kitSelectorButtonType = configuration.getString("guis.settings.kit-selector-button.item.type", "DIAMOND_SWORD");
         kitSelectorButtonData = (short) configuration.getInt("guis.settings.kit-selector-button.item.data", 0);
         arenaSelectorButtonType = configuration.getString("guis.settings.arena-selector-button.item.type", "GRASS_BLOCK");
