@@ -575,6 +575,60 @@ top:
 
 
 guis:
+  # Main gui opens up when player uses "/duel <playername>"
+  settings:
+    # Item used to fill empty spaces in the settings GUI.
+    space-filler-item:
+      type: WHITE_STAINED_GLASS_PANE
+      data: 0
+
+    # Send Request button configuration
+    send-button:
+      item:
+        type: LIME_STAINED_GLASS_PANE
+        data: 0
+      # Slots where the send button appears (left side of GUI)
+      slots: [0, 1, 2, 9, 10, 11, 18, 19, 20]
+      glowing-slots: [10]
+
+    # Cancel button configuration
+    cancel-button:
+      item:
+        type: RED_STAINED_GLASS_PANE
+        data: 0
+      # Slots where the cancel button appears (right side of GUI)
+      slots: [6, 7, 8, 15, 16, 17, 24, 25, 26]
+      glowing-slots: [16]
+
+    # Kit Selector button item
+    kit-selector-button:
+      item:
+        type: DIAMOND_SWORD
+        data: 0
+
+    # Arena Selector button item
+    arena-selector-button:
+      item:
+        type: GRASS_BLOCK
+        data: 0
+
+    # Own Inventory button item
+    own-inventory-button:
+      item:
+        type: CHEST
+        data: 0
+
+    # Item Betting button item
+    item-betting-button:
+      item:
+        type: GOLD_INGOT
+        data: 0
+
+    # Request Details button item
+    details-button:
+      item:
+        type: OAK_SIGN
+        data: 0
   kit-selector:
     # Amount of rows to display in one page of the kit selector GUI.
     # NOTE: Must be between 1 - 5!
@@ -592,11 +646,6 @@ guis:
     rows: 3
 
     # Item used to fill empty spaces in the arena selector GUI.
-    space-filler-item:
-      type: WHITE_STAINED_GLASS_PANE
-      data: 0
-  settings:
-    # Item used to fill empty spaces in the settings GUI.
     space-filler-item:
       type: WHITE_STAINED_GLASS_PANE
       data: 0

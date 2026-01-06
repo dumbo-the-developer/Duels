@@ -270,8 +270,14 @@ public class PlayerInfoManager implements Loadable {
                 return;
             }
 
-            teleport.tryTeleport(player, info.getLocation());
-            info.restore(player);
+            // FIXED: Delay teleport and restoration to allow player to fully join in Folia
+            // Async teleport during join conflicts with player loading process
+            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).runDelayed(() -> {
+                if (player.isOnline() && !player.isDead()) {
+                    teleport.tryTeleport(player, info.getLocation());
+                    info.restore(player);
+                }
+            }, null, 5L); // 5 tick delay to ensure player is fully loaded
         }
 
         @EventHandler(priority = EventPriority.HIGHEST)

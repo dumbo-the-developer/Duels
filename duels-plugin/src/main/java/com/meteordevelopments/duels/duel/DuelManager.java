@@ -116,34 +116,68 @@ public class DuelManager implements Loadable {
             winners.forEach(w -> inventoryManager.create(w, false));
             userDataManager.handleMatchEnd(match, winners);
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
-            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(loser).runDelayed(() -> {
-                // Handle the loser (remove from arena and restore state)
-                // This is especially important for ROUNDS3 where the loser never actually dies
-                if (match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3)) {
-                    handleLoss(loser, arena, match);
-                }
-                
-                for (Player alivePlayer : winners) {
-                    handleWin(alivePlayer, loser, arena, match);
-                }
-
-                if (config.isEndCommandsEnabled() && !(!match.isFromQueue() && config.isEndCommandsQueueOnly())) {
-                    try {
-                        for (final String command : config.getEndCommands()) {
-                            String processedCommand = command
-                                    .replace("%winner%", winner.getName()).replace("%loser%", loser.getName())
-                                    .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "").replace("%arena%", arena.getName())
-                                    .replace("%bet_amount%", String.valueOf(match.getBet()));
-                            
-                            executeCommandWithDelay(processedCommand);
-                        }
-                    } catch (Exception ex) {
-                        Log.warn(DuelManager.this, "Error while running match end commands: " + ex.getMessage());
+            
+            // FIXED: Check if loser is online to use appropriate scheduler for Folia compatibility
+            final boolean loserIsOnline = loser.isOnline();
+            if (loserIsOnline) {
+                // Normal flow: loser is still online (normal death)
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(loser).runDelayed(() -> {
+                    // Handle the loser (remove from arena and restore state)
+                    // This is especially important for ROUNDS3 where the loser never actually dies
+                    if (match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3)) {
+                        handleLoss(loser, arena, match);
                     }
-                }
+                    
+                    for (Player alivePlayer : winners) {
+                        handleWin(alivePlayer, loser, arena, match);
+                    }
 
-                arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
-            }, null, config.getTeleportDelay() * 20L);
+                    if (config.isEndCommandsEnabled() && !(!match.isFromQueue() && config.isEndCommandsQueueOnly())) {
+                        try {
+                            for (final String command : config.getEndCommands()) {
+                                String processedCommand = command
+                                        .replace("%winner%", winner.getName()).replace("%loser%", loser.getName())
+                                        .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "").replace("%arena%", arena.getName())
+                                        .replace("%bet_amount%", String.valueOf(match.getBet()));
+                                
+                                executeCommandWithDelay(processedCommand);
+                            }
+                        } catch (Exception ex) {
+                            Log.warn(DuelManager.this, "Error while running match end commands: " + ex.getMessage());
+                        }
+                    }
+
+                    arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
+                }, null, config.getTeleportDelay() * 20L);
+            } else {
+                // FIXED: Loser has quit - use global scheduler instead to prevent winners from getting stuck
+                DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().runDelayed(() -> {
+                    // Don't need to handle the loser since they're offline
+                    
+                    for (Player alivePlayer : winners) {
+                        if (alivePlayer.isOnline()) {  // Safety check
+                            handleWin(alivePlayer, loser, arena, match);
+                        }
+                    }
+
+                    if (config.isEndCommandsEnabled() && !(!match.isFromQueue() && config.isEndCommandsQueueOnly())) {
+                        try {
+                            for (final String command : config.getEndCommands()) {
+                                String processedCommand = command
+                                        .replace("%winner%", winner.getName()).replace("%loser%", loser.getName())
+                                        .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "").replace("%arena%", arena.getName())
+                                        .replace("%bet_amount%", String.valueOf(match.getBet()));
+                                
+                                executeCommandWithDelay(processedCommand);
+                            }
+                        } catch (Exception ex) {
+                            Log.warn(DuelManager.this, "Error while running match end commands: " + ex.getMessage());
+                        }
+                    }
+
+                    arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
+                }, config.getTeleportDelay() * 20L);
+            }
         }, 1L);
     }
 
@@ -851,7 +885,9 @@ public class DuelManager implements Loadable {
             player.updateInventory();
 
             final PlayerInfo info = playerManager.get(player);
-            info.restore(player);
+            // DON'T restore here - let them stay dead and respawn normally
+            // The PlayerInfo is kept in the manager for when they respawn
+            // Removed: info.restore(player);
         }
 
         @EventHandler(ignoreCancelled = true)

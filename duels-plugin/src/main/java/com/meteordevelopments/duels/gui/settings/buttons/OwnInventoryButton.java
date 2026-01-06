@@ -4,6 +4,7 @@ import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.Permissions;
 import com.meteordevelopments.duels.gui.BaseButton;
 import com.meteordevelopments.duels.setting.Settings;
+import com.meteordevelopments.duels.util.compat.Items;
 import com.meteordevelopments.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -11,7 +12,8 @@ import org.bukkit.entity.Player;
 public class OwnInventoryButton extends BaseButton {
 
     public OwnInventoryButton(final DuelsPlugin plugin) {
-        super(plugin, ItemBuilder.of(Material.getMaterial(plugin.getLang().getMessage("GUI.settings.buttons.use-own-inventory.material").toUpperCase())).name(plugin.getLang().getMessage("GUI.settings.buttons.use-own-inventory.name"), plugin.getLang()).build());
+        super(plugin, ItemBuilder.of(Items.from(plugin.getConfiguration().getOwnInventoryButtonType(), plugin.getConfiguration().getOwnInventoryButtonData()))
+                .name(plugin.getLang().getMessage("GUI.settings.buttons.use-own-inventory.name"), plugin.getLang()).build());
     }
 
     @Override

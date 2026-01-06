@@ -11,7 +11,8 @@ import org.bukkit.entity.Player;
 public class ArenaSelectButton extends BaseButton {
 
     public ArenaSelectButton(final DuelsPlugin plugin) {
-        super(plugin, ItemBuilder.of(Items.EMPTY_MAP).name(plugin.getLang().getMessage("GUI.settings.buttons.arena-selector.name"), plugin.getLang()).build());
+        super(plugin, ItemBuilder.of(Items.from(plugin.getConfiguration().getArenaSelectorButtonType(), plugin.getConfiguration().getArenaSelectorButtonData()))
+                .name(plugin.getLang().getMessage("GUI.settings.buttons.arena-selector.name"), plugin.getLang()).build());
     }
 
     @Override
