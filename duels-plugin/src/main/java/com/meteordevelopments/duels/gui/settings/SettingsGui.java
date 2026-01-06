@@ -56,7 +56,15 @@ public class SettingsGui extends SinglePageGui<DuelsPlugin> {
             }
         }
 
-        set(0, 2, 3, new RequestSendButton(plugin));
-        set(7, 9, 3, new CancelButton(plugin));
+        // Use configurable button slots from config
+        final RequestSendButton sendButton = new RequestSendButton(plugin);
+        for (final int slot : config.getSendButtonSlots()) {
+            set(slot, sendButton);
+        }
+
+        final CancelButton cancelButton = new CancelButton(plugin);
+        for (final int slot : config.getCancelButtonSlots()) {
+            set(slot, cancelButton);
+        }
     }
 }

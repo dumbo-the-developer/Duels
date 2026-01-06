@@ -223,6 +223,38 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private short settingsFillerData;
     @Getter
+    private String sendButtonType;
+    @Getter
+    private short sendButtonData;
+    @Getter
+    private List<Integer> sendButtonSlots;
+    @Getter
+    private String cancelButtonType;
+    @Getter
+    private short cancelButtonData;
+    @Getter
+    private List<Integer> cancelButtonSlots;
+    @Getter
+    private String kitSelectorButtonType;
+    @Getter
+    private short kitSelectorButtonData;
+    @Getter
+    private String arenaSelectorButtonType;
+    @Getter
+    private short arenaSelectorButtonData;
+    @Getter
+    private String ownInventoryButtonType;
+    @Getter
+    private short ownInventoryButtonData;
+    @Getter
+    private String itemBettingButtonType;
+    @Getter
+    private short itemBettingButtonData;
+    @Getter
+    private String detailsButtonType;
+    @Getter
+    private short detailsButtonData;
+    @Getter
     private int queuesRows;
     @Getter
     private String queuesFillerType;
@@ -415,6 +447,28 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         arenaSelectorFillerData = (short) configuration.getInt("guis.arena-selector.space-filler-item.data", 0);
         settingsFillerType = configuration.getString("guis.settings.space-filler-item.type", "STAINED_GLASS_PANE");
         settingsFillerData = (short) configuration.getInt("guis.settings.space-filler-item.data", 0);
+        sendButtonType = configuration.getString("guis.settings.send-button.item.type", "LIME_STAINED_GLASS_PANE");
+        sendButtonData = (short) configuration.getInt("guis.settings.send-button.item.data", 0);
+        sendButtonSlots = configuration.getIntegerList("guis.settings.send-button.slots");
+        if (sendButtonSlots.isEmpty()) {
+            sendButtonSlots = Arrays.asList(0, 1, 2, 9, 10, 11, 18, 19, 20);
+        }
+        cancelButtonType = configuration.getString("guis.settings.cancel-button.item.type", "RED_STAINED_GLASS_PANE");
+        cancelButtonData = (short) configuration.getInt("guis.settings.cancel-button.item.data", 0);
+        cancelButtonSlots = configuration.getIntegerList("guis.settings.cancel-button.slots");
+        if (cancelButtonSlots.isEmpty()) {
+            cancelButtonSlots = Arrays.asList(6, 7, 8, 15, 16, 17, 24, 25, 26);
+        }
+        kitSelectorButtonType = configuration.getString("guis.settings.kit-selector-button.item.type", "DIAMOND_SWORD");
+        kitSelectorButtonData = (short) configuration.getInt("guis.settings.kit-selector-button.item.data", 0);
+        arenaSelectorButtonType = configuration.getString("guis.settings.arena-selector-button.item.type", "GRASS_BLOCK");
+        arenaSelectorButtonData = (short) configuration.getInt("guis.settings.arena-selector-button.item.data", 0);
+        ownInventoryButtonType = configuration.getString("guis.settings.own-inventory-button.item.type", "CHEST");
+        ownInventoryButtonData = (short) configuration.getInt("guis.settings.own-inventory-button.item.data", 0);
+        itemBettingButtonType = configuration.getString("guis.settings.item-betting-button.item.type", "GOLD_INGOT");
+        itemBettingButtonData = (short) configuration.getInt("guis.settings.item-betting-button.item.data", 0);
+        detailsButtonType = configuration.getString("guis.settings.details-button.item.type", "OAK_SIGN");
+        detailsButtonData = (short) configuration.getInt("guis.settings.details-button.item.data", 0);
         queuesRows = Math.min(Math.max(configuration.getInt("guis.queues.rows", 3), 1), 5);
         queuesFillerType = configuration.getString("guis.queues.space-filler-item.type", "STAINED_GLASS_PANE");
         queuesFillerData = (short) configuration.getInt("guis.queues.space-filler-item.data", 0);
