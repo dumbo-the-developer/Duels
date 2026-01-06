@@ -954,8 +954,8 @@ public class DuelManager implements Loadable {
             // Convert milliseconds to ticks (1 tick = 50ms)
             long delayTicks = delayMs / 50;
             
-            // Schedule the command execution with delay
-            plugin.doSyncAfter(() -> {
+            // FIXED: Use global region scheduler for command dispatch in Folia
+            DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().runDelayed(() -> {
                 try {
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cleanCommand);
                 } catch (Exception ex) {
@@ -963,8 +963,14 @@ public class DuelManager implements Loadable {
                 }
             }, delayTicks);
         } else {
-            // No delay, execute immediately
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+            // FIXED: Execute immediately on global region scheduler for Folia compatibility
+            DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().run(() -> {
+                try {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+                } catch (Exception ex) {
+                    Log.warn(this, "Error executing command: " + ex.getMessage());
+                }
+            });
         }
     }
 }
