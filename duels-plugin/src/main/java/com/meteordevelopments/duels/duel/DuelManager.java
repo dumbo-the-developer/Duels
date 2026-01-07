@@ -231,12 +231,15 @@ public class DuelManager implements Loadable {
                     if (loserInfo != null && !loser.isDead()) {
                         playerManager.remove(loser);
                         
-                        if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {
-                            PlayerUtil.reset(loser);
-                        }
-                        
-                        teleport.tryTeleport(loser, loserInfo.getLocation());
-                        loserInfo.restore(loser);
+                        // Schedule player operations on entity-specific scheduler for Folia compatibility
+                        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(loser).run(() -> {
+                            if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {
+                                PlayerUtil.reset(loser);
+                            }
+                            
+                            teleport.tryTeleport(loser, loserInfo.getLocation());
+                            loserInfo.restore(loser);
+                        }, null);
                     }
                 }
                 
@@ -1029,10 +1032,13 @@ public class DuelManager implements Loadable {
                 return;
             }
 
-            player.setHealth(0);
-            player.getInventory().clear();
-            player.getInventory().setArmorContents(null);
-            player.updateInventory();
+            // Schedule player operations on entity-specific scheduler for Folia compatibility
+            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                player.setHealth(0);
+                player.getInventory().clear();
+                player.getInventory().setArmorContents(null);
+                player.updateInventory();
+            }, null);
 
             final PlayerInfo info = playerManager.get(player);
             // DON'T restore here - let them stay dead and respawn normally
