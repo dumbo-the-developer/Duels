@@ -496,6 +496,9 @@ DUEL:
     command: '&cYou cannot use ''%command%'' while in a duel.'
     teleportation: '&cYou cannot teleport while in a duel.'
     inventory-open: '&cYou cannot open inventories while in a duel.'
+  giveup:
+    countdown-active: '{PREFIX} &cYou cannot give up during countdown.'
+    endgame-phase: '{PREFIX} &cMatch is already ending.'
   projectile-hit-message: '{PREFIX} &f%name% &7is now at &d%health%❤&7!'
   on-death:
     with-killer: '{PREFIX} &a%killer% &7has slain &c%name% &7with &d%health%❤&7.'
