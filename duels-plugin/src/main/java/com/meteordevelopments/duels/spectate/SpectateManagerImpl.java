@@ -191,21 +191,24 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
     public void stopSpectating(final Player player, final SpectatorImpl spectator) {
         spectators.remove(player.getUniqueId());
         arenas.remove(spectator.getArena(), spectator);
-        player.setGameMode(GameMode.SURVIVAL);
-        player.setFlying(false);
-        player.setAllowFlight(false);
-        PlayerUtil.reset(player);
-
-        player.setCollidable(true);
-
+        
         final PlayerInfo info = playerManager.remove(player);
 
-        if (info != null) {
-            teleport.tryTeleport(player, info.getLocation());
-            info.restore(player);
-        } else {
-            teleport.tryTeleport(player, playerManager.getLobby());
-        }
+        // Schedule all player entity operations on entity-specific scheduler for Folia compatibility
+        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+            player.setGameMode(GameMode.SURVIVAL);
+            player.setFlying(false);
+            player.setAllowFlight(false);
+            PlayerUtil.reset(player);
+            player.setCollidable(true);
+
+            if (info != null) {
+                teleport.tryTeleport(player, info.getLocation());
+                info.restore(player);
+            } else {
+                teleport.tryTeleport(player, playerManager.getLobby());
+            }
+        }, null);
 
         final DuelMatch match = spectator.getArena().getMatch();
 
