@@ -147,7 +147,11 @@ public class DuelManager implements Loadable {
                         }
                     }
 
-                    arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
+                    // FIXED: Use global scheduler for arena.endMatch() to avoid Folia region conflicts
+                    // This prevents errors when entities are in different regions or already removed by other plugins
+                    DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().run(() -> {
+                        arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
+                    });
                 }, null, config.getTeleportDelay() * 20L);
             } else {
                 // FIXED: Loser has quit - use global scheduler instead to prevent winners from getting stuck
@@ -258,7 +262,11 @@ public class DuelManager implements Loadable {
                     }
                 }
 
-                arena.endMatch(winners.iterator().next().getUniqueId(), losers.iterator().next().getUniqueId(), Reason.OPPONENT_DEFEAT);
+                // FIXED: Use global scheduler for arena.endMatch() to avoid Folia region conflicts
+                // This prevents errors when entities are in different regions or already removed by other plugins
+                DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().run(() -> {
+                    arena.endMatch(winners.iterator().next().getUniqueId(), losers.iterator().next().getUniqueId(), Reason.OPPONENT_DEFEAT);
+                });
             }, config.getTeleportDelay() * 20L);
         }, 1L);
     }

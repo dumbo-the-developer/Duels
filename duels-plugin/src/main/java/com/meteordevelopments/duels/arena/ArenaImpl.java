@@ -236,8 +236,18 @@ public class ArenaImpl extends BaseButton implements Arena {
             map.getKey().getBlock().setBlockData(map.getValue());
         }
 
-        for (Entity entity : match.placedEntities){
-            entity.remove();
+        // FIXED: Use region-specific schedulers for entity removal to prevent Folia threading errors
+        // Also check if entities are still valid (may have been removed by other plugins like Gaia)
+        for (Entity entity : match.placedEntities) {
+            if (entity != null && entity.isValid() && !entity.isDead() && entity.getLocation() != null) {
+                DuelsPlugin.getMorePaperLib().scheduling()
+                    .regionSpecificScheduler(entity.getLocation())
+                    .run(() -> {
+                        if (entity.isValid() && !entity.isDead()) {
+                            entity.remove();
+                        }
+                    });
+            }
         }
 
         for (Block block : match.liquids) {
@@ -269,8 +279,20 @@ public class ArenaImpl extends BaseButton implements Arena {
             }
         }
 
+        // FIXED: Use region-specific schedulers for item removal to prevent Folia threading errors
+        // Also check if items are still valid (may have been removed by other plugins like Gaia)
         if(config.isClearItemsAfterMatch()) {
-            match.droppedItems.forEach(Entity::remove);
+            for (Entity item : match.droppedItems) {
+                if (item != null && item.isValid() && !item.isDead() && item.getLocation() != null) {
+                    DuelsPlugin.getMorePaperLib().scheduling()
+                        .regionSpecificScheduler(item.getLocation())
+                        .run(() -> {
+                            if (item.isValid() && !item.isDead()) {
+                                item.remove();
+                            }
+                        });
+                }
+            }
         }
 
         match = null;
