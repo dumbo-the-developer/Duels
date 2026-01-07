@@ -347,15 +347,67 @@ public class DuelManager implements Loadable {
 
                     // Iterate over a snapshot to avoid modifying the underlying set while processing
                     final List<Player> members = new ArrayList<>(match.getAllPlayers());
-
+                    
+                    // FIXED: Handle each player safely with proper scheduler and online checks
                     for (final Player player : members) {
-                        // Determine alive state from match to restore items correctly if a player had died
+                        // CRITICAL: Check online status first to prevent entity scheduler errors
+                        if (!player.isOnline()) {
+                            // Offline player: Do minimal cleanup on global scheduler (no entity operations)
+                            try {
+                                arena.remove(player);
+                                
+                                // Store items for when they rejoin
+                                final PlayerInfo offlineInfo = playerManager.get(player);
+                                final List<ItemStack> offlineItems = match.getItems(player);
+                                if (offlineInfo != null && offlineItems != null) {
+                                    offlineInfo.getExtra().addAll(offlineItems);
+                                }
+                                
+                                // Clean up manager
+                                playerManager.remove(player);
+                            } catch (Exception ex) {
+                                Log.warn(this, "Error handling offline player " + player.getName() + " in max duration timeout: " + ex.getMessage());
+                            }
+                            continue;
+                        }
+                        
+                        // Online player: Use entity scheduler for all entity operations
                         final boolean alive = !match.isDead(player);
-                        handleTie(player, arena, match, alive);
-                        lang.sendMessage(player, "DUEL.on-end.tie");
+                        
+                        try {
+                            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                                try {
+                                    // Double-check player is still online inside scheduler
+                                    if (!player.isOnline()) {
+                                        return;
+                                    }
+                                    
+                                    handleTie(player, arena, match, alive);
+                                    lang.sendMessage(player, "DUEL.on-end.tie");
+                                } catch (Exception ex) {
+                                    Log.warn(this, "Error handling tie for player " + player.getName() + ": " + ex.getMessage());
+                                }
+                            }, null);
+                        } catch (Exception ex) {
+                            // Fallback: If entity scheduler fails, try on global scheduler with minimal operations
+                            Log.warn(this, "Failed to schedule entity task for " + player.getName() + ", using fallback: " + ex.getMessage());
+                            try {
+                                arena.remove(player);
+                                playerManager.remove(player);
+                            } catch (Exception ex2) {
+                                Log.warn(this, "Fallback cleanup failed for " + player.getName() + ": " + ex2.getMessage());
+                            }
+                        }
                     }
 
-                    arena.endMatch(null, null, Reason.MAX_TIME_REACHED);
+                    // FIXED: Always end match on global scheduler after processing all players
+                    DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().runDelayed(() -> {
+                        try {
+                            arena.endMatch(null, null, Reason.MAX_TIME_REACHED);
+                        } catch (Exception ex) {
+                            Log.warn(this, "Error ending match in arena " + arena.getName() + ": " + ex.getMessage());
+                        }
+                    }, 3L); // 3 tick delay to ensure all entity scheduler tasks have started
                 }
             }, 1L, 20L);
         }
@@ -436,7 +488,14 @@ public class DuelManager implements Loadable {
 
             if (info != null) {
                 teleport.tryTeleport(player, info.getLocation());
-                info.restore(player);
+                
+                // FIXED: Wrap potion effect restoration in player's entity scheduler for Folia compatibility
+                // This is needed because teleportation may move player to different region/dimension
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    if (player.isOnline()) {
+                        info.restore(player);
+                    }
+                }, null);
             } else {
                 // If somehow PlayerInfo is not found...
                 teleport.tryTeleport(player, playerManager.getLobby());
