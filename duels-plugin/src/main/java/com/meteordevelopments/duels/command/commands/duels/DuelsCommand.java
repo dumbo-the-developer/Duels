@@ -42,7 +42,8 @@ public class DuelsCommand extends BaseCommand {
                 new PlaysoundCommand(plugin),
                 new ReloadCommand(plugin),
                 new DisableCommand(plugin),
-                new EnableCommand(plugin)
+                new EnableCommand(plugin),
+                new HardstopCommand(plugin)
         );
     }
 

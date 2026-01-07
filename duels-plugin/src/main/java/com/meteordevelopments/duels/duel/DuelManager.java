@@ -512,6 +512,89 @@ public class DuelManager implements Loadable {
     }
 
     /**
+     * Emergency hard reset for a stuck arena. Resets all players and ends match as tie.
+     * This method safely handles both online and offline players using proper Folia schedulers.
+     * 
+     * @param arena Arena to reset
+     * @return True if reset was successful, false if arena has no active match
+     */
+    public boolean hardResetArena(final ArenaImpl arena) {
+        final DuelMatch match = arena.getMatch();
+        if (match == null || !arena.isUsed()) {
+            return false;
+        }
+        
+        // Get all players in the match
+        final List<Player> members = new ArrayList<>(match.getAllPlayers());
+        
+        if (members.isEmpty()) {
+            return false;
+        }
+        
+        // Handle each player safely with proper schedulers
+        for (final Player player : members) {
+            if (!player.isOnline()) {
+                // Offline player: Do minimal cleanup on global scheduler
+                try {
+                    arena.remove(player);
+                    
+                    // Store items for when they rejoin
+                    final PlayerInfo offlineInfo = playerManager.get(player);
+                    final List<ItemStack> offlineItems = match.getItems(player);
+                    if (offlineInfo != null && offlineItems != null) {
+                        offlineInfo.getExtra().addAll(offlineItems);
+                    }
+                    
+                    // Clean up manager
+                    playerManager.remove(player);
+                } catch (Exception ex) {
+                    Log.warn(this, "Error handling offline player " + player.getName() + " in hardreset: " + ex.getMessage());
+                }
+                continue;
+            }
+            
+            // Online player: Use entity scheduler for all entity operations
+            final boolean alive = !match.isDead(player);
+            
+            try {
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    try {
+                        // Double-check player is still online inside scheduler
+                        if (!player.isOnline()) {
+                            return;
+                        }
+                        
+                        handleTie(player, arena, match, alive);
+                        lang.sendMessage(player, "DUEL.on-end.tie");
+                    } catch (Exception ex) {
+                        Log.warn(this, "Error handling tie for player " + player.getName() + " in hardreset: " + ex.getMessage());
+                    }
+                }, null);
+            } catch (Exception ex) {
+                // Fallback: If entity scheduler fails, try on global scheduler with minimal operations
+                Log.warn(this, "Failed to schedule entity task for " + player.getName() + ", using fallback: " + ex.getMessage());
+                try {
+                    arena.remove(player);
+                    playerManager.remove(player);
+                } catch (Exception ex2) {
+                    Log.warn(this, "Fallback cleanup failed for " + player.getName() + ": " + ex2.getMessage());
+                }
+            }
+        }
+        
+        // Always end match on global scheduler after processing all players
+        DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().runDelayed(() -> {
+            try {
+                arena.endMatch(null, null, Reason.TIE);
+            } catch (Exception ex) {
+                Log.warn(this, "Error ending match in arena " + arena.getName() + " during hardreset: " + ex.getMessage());
+            }
+        }, 3L); // 3 tick delay to ensure all entity scheduler tasks have started
+        
+        return true;
+    }
+
+    /**
      * Rewards the duel winner with money and items bet on the match.
      *
      * @param winner   Player determined to be the winner
