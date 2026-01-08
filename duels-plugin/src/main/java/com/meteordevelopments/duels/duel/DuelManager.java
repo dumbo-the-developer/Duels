@@ -793,12 +793,14 @@ public class DuelManager implements Loadable {
                 kitEditManagerInstance.checkAndAbortIfInQueueOrMatch(player);
             }
 
-            if (player.getAllowFlight()) {
-                player.setFlying(false);
-                player.setAllowFlight(false);
-            }
-
-            player.closeInventory();
+            // Schedule player operations on entity-specific scheduler for Folia compatibility
+            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                if (player.getAllowFlight()) {
+                    player.setFlying(false);
+                    player.setAllowFlight(false);
+                }
+                // Note: closeInventory() is handled by teleport.tryTeleport() to prevent world mismatch
+            }, null);
             final boolean dropOwnInv = match.isOwnInventory() && config.isOwnInventoryDropInventoryItems();
             // If using own inventory (regardless of drop setting), do not restore experience to preserve XP changes
             final boolean restoreExperience = !match.isOwnInventory();
@@ -947,8 +949,10 @@ public class DuelManager implements Loadable {
                 event.getDrops().clear();
                 event.setDeathMessage(null);
                 
-                // Immediately set to spectator mode to prevent death screen
-                player.setGameMode(GameMode.SPECTATOR);
+                // Immediately set to spectator mode to prevent death screen - schedule on entity-specific scheduler for Folia compatibility
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    player.setGameMode(GameMode.SPECTATOR);
+                }, null);
                 
                 // Check if any team is completely eliminated
                 TeamDuelMatch.Team winningTeam = teamMatch.getWinningTeam();

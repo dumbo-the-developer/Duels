@@ -297,12 +297,14 @@ public class PlayerInfoManager implements Loadable {
                     // Use the arena's center position for spectating
                     event.setRespawnLocation(Objects.requireNonNull(arena.getPosition(1)));
                     
-                    // Schedule to set spectator mode after respawn
+                    // Schedule to set spectator mode after respawn - use entity-specific scheduler for Folia compatibility
                     plugin.doSyncAfter(() -> {
                         if (player.isOnline() && arenaManager.get(player) == arena) {
-                            player.setGameMode(GameMode.SPECTATOR);
-                            player.setAllowFlight(true);
-                            player.setFlying(true);
+                            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                                player.setGameMode(GameMode.SPECTATOR);
+                                player.setAllowFlight(true);
+                                player.setFlying(true);
+                            }, null);
                         }
                     }, 1L);
                     return;

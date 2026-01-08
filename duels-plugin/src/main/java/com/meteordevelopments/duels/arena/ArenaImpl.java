@@ -228,12 +228,29 @@ public class ArenaImpl extends BaseButton implements Arena {
         final Queue source = match.getSource();
         match.setFinished();
 
+        // Schedule block operations on region-specific schedulers for Folia compatibility
         for(Block block : match.placedBlocks) {
-            block.setType(Material.AIR);
+            final org.bukkit.Location blockLocation = block.getLocation();
+            if (blockLocation != null) {
+                DuelsPlugin.getMorePaperLib().scheduling()
+                    .regionSpecificScheduler(blockLocation)
+                    .run(() -> {
+                        block.setType(Material.AIR);
+                    });
+            }
         }
 
         for(Map.Entry<Location, BlockData> map : match.brokenBlocks.entrySet()) {
-            map.getKey().getBlock().setBlockData(map.getValue());
+            final org.bukkit.Location blockLocation = map.getKey();
+            if (blockLocation != null) {
+                final BlockData blockData = map.getValue();
+                final Location locationCopy = blockLocation.clone();
+                DuelsPlugin.getMorePaperLib().scheduling()
+                    .regionSpecificScheduler(blockLocation)
+                    .run(() -> {
+                        locationCopy.getBlock().setBlockData(blockData);
+                    });
+            }
         }
 
         // FIXED: Use region-specific schedulers for entity removal to prevent Folia threading errors
@@ -265,7 +282,15 @@ public class ArenaImpl extends BaseButton implements Arena {
 
                             if (type.contains("water") || type.contains("lava") || type.contains("cobblestone") || type.contains("obsidian")) {
                                 waterFound = true;
-                                findBlock.setType(Material.AIR);
+                                // Schedule block operation on region-specific scheduler for Folia compatibility
+                                final org.bukkit.Location findBlockLocation = findBlock.getLocation();
+                                if (findBlockLocation != null) {
+                                    DuelsPlugin.getMorePaperLib().scheduling()
+                                        .regionSpecificScheduler(findBlockLocation)
+                                        .run(() -> {
+                                            findBlock.setType(Material.AIR);
+                                        });
+                                }
                             }
                         }
                     }
