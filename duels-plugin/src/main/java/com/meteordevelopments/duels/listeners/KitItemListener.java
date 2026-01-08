@@ -118,7 +118,28 @@ public class KitItemListener implements Listener {
         }
 
         event.setCancelled(true);
-        item.remove();
+        
+        // Schedule item removal on region-specific scheduler for Folia compatibility
+        final org.bukkit.Location itemLocation = item.getLocation();
+        if (itemLocation != null && item.isValid() && !item.isDead()) {
+            DuelsPlugin.getMorePaperLib().scheduling()
+                .regionSpecificScheduler(itemLocation)
+                .run(() -> {
+                    if (item.isValid() && !item.isDead()) {
+                        item.remove();
+                    }
+                });
+        } else {
+            // Fallback: if location is null or item is invalid, try global scheduler
+            DuelsPlugin.getMorePaperLib().scheduling()
+                .globalRegionalScheduler()
+                .run(() -> {
+                    if (item.isValid() && !item.isDead()) {
+                        item.remove();
+                    }
+                });
+        }
+        
         player.sendMessage(WARNING);
         Log.warn(String.format(WARNING_CONSOLE, player.getName()));
     }

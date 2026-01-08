@@ -138,19 +138,25 @@ public class KitOptionsListener implements Listener {
 
                     // Cancel the damage event for non-final rounds
                     event.setDamage(0);
-                    player.setHealth(player.getMaxHealth());
+                    // Schedule health modification on entity-specific scheduler for Folia compatibility
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                        player.setHealth(player.getMaxHealth());
+                    }, null);
 
                     // Start next round
                     match.nextRound();
 
                     // Reset both players' health and equipment
                     for (Player p : match.getAllPlayers()) {
-                        PlayerUtil.reset(p);
-                        p.setHealth(p.getMaxHealth());
-                        p.setNoDamageTicks(40); // Give 2 seconds immunity to prevent damage carry-over
-                        if (match.getKit() != null) {
-                            match.getKit().equip(p);
-                        }
+                        // Schedule player operations on entity-specific scheduler for Folia compatibility
+                        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(p).run(() -> {
+                            PlayerUtil.reset(p);
+                            p.setHealth(p.getMaxHealth());
+                            p.setNoDamageTicks(40); // Give 2 seconds immunity to prevent damage carry-over
+                            if (match.getKit() != null) {
+                                match.getKit().equip(p);
+                            }
+                        }, null);
                     }
 
                     // Use the plugin's teleport system for both players
@@ -332,7 +338,10 @@ public class KitOptionsListener implements Listener {
             return;
         }
 
-        player.setHealth(0);
+        // Schedule health modification on entity-specific scheduler for Folia compatibility
+        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+            player.setHealth(0);
+        }, null);
     }
 
     @EventHandler
@@ -375,7 +384,10 @@ public class KitOptionsListener implements Listener {
         final double regen = config.getSoupHeartsToRegen() * 2.0;
         final double oldHealth = player.getHealth();
         final double maxHealth = PlayerUtil.getMaxHealth(player);
-        player.setHealth(Math.min(oldHealth + regen, maxHealth));
+        // Schedule health modification on entity-specific scheduler for Folia compatibility
+        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+            player.setHealth(Math.min(oldHealth + regen, maxHealth));
+        }, null);
     }
 
     @EventHandler(ignoreCancelled = true)

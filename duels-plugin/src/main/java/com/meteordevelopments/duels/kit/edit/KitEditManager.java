@@ -69,21 +69,46 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
         EditSession session = new EditSession(player, kitName);
         activeSessions.put(playerId, session);
 
-        if (player.teleport(plugin.getPlayerManager().getKitLobby())){
-            // Clear player inventory
-            player.getInventory().clear();
+        // Use teleportAsync for Folia compatibility
+        boolean isFolia = DuelsPlugin.getMorePaperLib().scheduling().isUsingFolia();
+        final org.bukkit.Location kitLobby = plugin.getPlayerManager().getKitLobby();
+        
+        if (isFolia) {
+            player.teleportAsync(kitLobby).thenAccept(success -> {
+                if (success) {
+                    // Clear player inventory
+                    player.getInventory().clear();
+                    
+                    // Load kit into player inventory - check for custom kit first
+                    if (hasPlayerKit(player, kitName)) {
+                        // Load player's custom kit
+                        loadPlayerKit(player, kitName);
+                    } else {
+                        // Load default kit
+                        loadKitToPlayer(player, kit);
+                    }
+                } else {
+                    plugin.getLogger().severe("Unable to teleport " + player.getName() + " to kit lobby");
+                    abortEditSession(player);
+                }
+            });
+        } else {
+            if (player.teleport(kitLobby)) {
+                // Clear player inventory
+                player.getInventory().clear();
 
-            // Load kit into player inventory - check for custom kit first
-            if (hasPlayerKit(player, kitName)) {
-                // Load player's custom kit
-                loadPlayerKit(player, kitName);
+                // Load kit into player inventory - check for custom kit first
+                if (hasPlayerKit(player, kitName)) {
+                    // Load player's custom kit
+                    loadPlayerKit(player, kitName);
+                } else {
+                    // Load default kit
+                    loadKitToPlayer(player, kit);
+                }
             } else {
-                // Load default kit
-                loadKitToPlayer(player, kit);
+                plugin.getLogger().severe("Unable to teleport " + player.getName() + " to kit lobby");
+                abortEditSession(player);
             }
-        }else {
-            plugin.getLogger().severe("Unable to teleport to player " + player.getName());
-            abortEditSession(player);
         }
         return true;
     }
