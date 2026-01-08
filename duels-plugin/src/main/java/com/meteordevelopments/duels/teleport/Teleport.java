@@ -57,7 +57,8 @@ public final class Teleport implements Loadable, Listener {
             player.removePassenger(entity);
         }
 
-        player.closeInventory();
+        // Don't close inventory here for Folia - schedule it after teleport completes to prevent world mismatch
+        boolean isFolia = DuelsPlugin.getMorePaperLib().scheduling().isUsingFolia();
 
         if (essentials != null) {
             essentials.setBackLocation(player, location);
@@ -65,15 +66,21 @@ public final class Teleport implements Loadable, Listener {
 
         MetadataUtil.put(plugin, player, METADATA_KEY, location.clone());
 
-        boolean isFolia = DuelsPlugin.getMorePaperLib().scheduling().isUsingFolia();
-
         if (isFolia) {
+            // Schedule closeInventory after teleport completes to prevent world mismatch and threading errors
             player.teleportAsync(location).thenAccept(success -> {
                 if (!success) {
                     Log.warn(this, "Could not teleport " + player.getName() + "! TeleportAsync failed.");
+                } else {
+                    // Close inventory after teleport completes, on the correct thread and in the correct world
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                        player.closeInventory();
+                    }, null);
                 }
             });
         } else {
+            // For non-Folia, close inventory before synchronous teleport (original behavior)
+            player.closeInventory();
             if (!player.teleport(location)) {
                 Log.warn(this, "Could not teleport " + player.getName() + "! Player is dead or is vehicle");
             }
