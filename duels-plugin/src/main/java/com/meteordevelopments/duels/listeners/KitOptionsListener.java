@@ -281,8 +281,14 @@ public class KitOptionsListener implements Listener {
                 EntityType entityType = getEntityType(item.getType());
 
                 if (entityType != null) {
-                    Entity entity = location.getWorld().spawnEntity(location, entityType);
-                    arena.getMatch().placedEntities.add(entity);
+                    // Schedule entity spawning on region-specific scheduler for Folia compatibility
+                    final org.bukkit.Location spawnLocation = location.clone();
+                    DuelsPlugin.getMorePaperLib().scheduling()
+                        .regionSpecificScheduler(spawnLocation)
+                        .run(() -> {
+                            Entity entity = spawnLocation.getWorld().spawnEntity(spawnLocation, entityType);
+                            arena.getMatch().placedEntities.add(entity);
+                        });
                 }
             }
         }else {
@@ -469,7 +475,13 @@ public class KitOptionsListener implements Listener {
                 event.setDamage(event.getDamage() / 1.5); // Critical hits are 150%, reverse it
             }
 
-            plugin.doSyncAfter(() -> player.setNoDamageTicks(0), 1);
+            // Schedule player entity operation on entity-specific scheduler for Folia compatibility
+            // Use doSyncAfter wrapper with entity-specific scheduler inside to handle delay
+            plugin.doSyncAfter(() -> {
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    player.setNoDamageTicks(0);
+                }, null);
+            }, 1L);
         }
     }
 }
