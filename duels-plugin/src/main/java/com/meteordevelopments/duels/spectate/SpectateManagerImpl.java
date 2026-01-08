@@ -203,8 +203,14 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
             player.setCollidable(true);
 
             if (info != null) {
-                teleport.tryTeleport(player, info.getLocation());
-                info.restore(player);
+                // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
+                teleport.tryTeleport(player, info.getLocation(), () -> {
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                        if (player.isOnline()) {
+                            info.restore(player);
+                        }
+                    }, null);
+                });
             } else {
                 teleport.tryTeleport(player, playerManager.getLobby());
             }

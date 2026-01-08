@@ -133,9 +133,15 @@ public class PlayerInfoManager implements Loadable {
 
             if (info != null) {
                 player.spigot().respawn();
-                teleport.tryTeleport(player, info.getLocation());
-                PlayerUtil.reset(player);
-                info.restore(player);
+                // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
+                teleport.tryTeleport(player, info.getLocation(), () -> {
+                    PlayerUtil.reset(player);
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                        if (player.isOnline()) {
+                            info.restore(player);
+                        }
+                    }, null);
+                });
             }
         });
 
@@ -272,10 +278,19 @@ public class PlayerInfoManager implements Loadable {
 
             // FIXED: Delay teleport and restoration to allow player to fully join in Folia
             // Async teleport during join conflicts with player loading process
+            // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
             DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).runDelayed(() -> {
                 if (player.isOnline() && !player.isDead()) {
-                    teleport.tryTeleport(player, info.getLocation());
-                    info.restore(player);
+                    teleport.tryTeleport(player, info.getLocation(), () -> {
+                        // Restore player state after teleport completes
+                        if (player.isOnline() && !player.isDead()) {
+                            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                                if (player.isOnline() && !player.isDead()) {
+                                    info.restore(player);
+                                }
+                            }, null);
+                        }
+                    });
                 }
             }, null, 5L); // 5 tick delay to ensure player is fully loaded
         }
@@ -332,8 +347,17 @@ public class PlayerInfoManager implements Loadable {
                     }
                 }
 
-                remove(player);
-                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> info.restore(player), null);
+                final PlayerInfo infoToRestore = remove(player);
+                if (infoToRestore != null) {
+                    // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
+                    teleport.tryTeleport(player, infoToRestore.getLocation(), () -> {
+                        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                            if (player.isOnline()) {
+                                infoToRestore.restore(player);
+                            }
+                        }, null);
+                    });
+                }
             }, 1L);
         }
     }

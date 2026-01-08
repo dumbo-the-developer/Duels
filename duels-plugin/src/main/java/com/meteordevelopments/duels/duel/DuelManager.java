@@ -307,18 +307,20 @@ public class DuelManager implements Loadable {
             }
 
             if (info != null) {
-                teleport.tryTeleport(winner, info.getLocation());
-                
-                // FIXED: Wrap potion effect restoration in winner's entity scheduler for Folia compatibility
-                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(winner).run(() -> {
-                    if (match.isOwnInventory()) {
-                        // Preserve any XP gained during the duel when using own inventory
-                        info.restoreWithoutExperience(winner);
-                    } else {
-                        // Restore saved experience for non-own-inventory matches
-                        info.restore(winner);
-                    }
-                }, null);
+                // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
+                teleport.tryTeleport(winner, info.getLocation(), () -> {
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(winner).run(() -> {
+                        if (winner.isOnline()) {
+                            if (match.isOwnInventory()) {
+                                // Preserve any XP gained during the duel when using own inventory
+                                info.restoreWithoutExperience(winner);
+                            } else {
+                                // Restore saved experience for non-own-inventory matches
+                                info.restore(winner);
+                            }
+                        }
+                    }, null);
+                });
             }
 
             if (InventoryUtil.addOrDrop(winner, items)) {
@@ -490,15 +492,14 @@ public class DuelManager implements Loadable {
             }
 
             if (info != null) {
-                teleport.tryTeleport(player, info.getLocation());
-                
-                // FIXED: Wrap potion effect restoration in player's entity scheduler for Folia compatibility
-                // This is needed because teleportation may move player to different region/dimension
-                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
-                    if (player.isOnline()) {
-                        info.restore(player);
-                    }
-                }, null);
+                // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
+                teleport.tryTeleport(player, info.getLocation(), () -> {
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                        if (player.isOnline()) {
+                            info.restore(player);
+                        }
+                    }, null);
+                });
             } else {
                 // If somehow PlayerInfo is not found...
                 teleport.tryTeleport(player, playerManager.getLobby());
@@ -637,18 +638,20 @@ public class DuelManager implements Loadable {
             }
 
             if (info != null) {
-                teleport.tryTeleport(winner, info.getLocation());
-                
-                // FIXED: Wrap potion effect restoration in winner's entity scheduler for Folia compatibility
-                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(winner).run(() -> {
-                    if (match.isOwnInventory()) {
-                        // Preserve any XP gained during the duel when using own inventory
-                        info.restoreWithoutExperience(winner);
-                    } else {
-                        // Restore saved experience for non-own-inventory matches
-                        info.restore(winner);
-                    }
-                }, null);
+                // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
+                teleport.tryTeleport(winner, info.getLocation(), () -> {
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(winner).run(() -> {
+                        if (winner.isOnline()) {
+                            if (match.isOwnInventory()) {
+                                // Preserve any XP gained during the duel when using own inventory
+                                info.restoreWithoutExperience(winner);
+                            } else {
+                                // Restore saved experience for non-own-inventory matches
+                                info.restore(winner);
+                            }
+                        }
+                    }, null);
+                });
             }
 
             if (InventoryUtil.addOrDrop(winner, items)) {
@@ -684,18 +687,20 @@ public class DuelManager implements Loadable {
             }
 
             if (info != null) {
-                teleport.tryTeleport(loser, info.getLocation());
-                
-                // FIXED: Wrap potion effect restoration in loser's entity scheduler for Folia compatibility
-                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(loser).run(() -> {
-                    if (match.isOwnInventory()) {
-                        // Preserve any XP gained during the duel when using own inventory
-                        info.restoreWithoutExperience(loser);
-                    } else {
-                        // Restore saved experience for non-own-inventory matches
-                        info.restore(loser);
-                    }
-                }, null);
+                // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
+                teleport.tryTeleport(loser, info.getLocation(), () -> {
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(loser).run(() -> {
+                        if (loser.isOnline()) {
+                            if (match.isOwnInventory()) {
+                                // Preserve any XP gained during the duel when using own inventory
+                                info.restoreWithoutExperience(loser);
+                            } else {
+                                // Restore saved experience for non-own-inventory matches
+                                info.restore(loser);
+                            }
+                        }
+                    }, null);
+                });
             } else {
                 teleport.tryTeleport(loser, playerManager.getLobby());
             }

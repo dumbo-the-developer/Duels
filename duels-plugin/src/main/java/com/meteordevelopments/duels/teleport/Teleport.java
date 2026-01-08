@@ -48,6 +48,18 @@ public final class Teleport implements Loadable, Listener {
      * @param location Location to force-teleport the player
      */
     public void tryTeleport(final Player player, final Location location) {
+        tryTeleport(player, location, null);
+    }
+
+    /**
+     * Attempts to force-teleport a player by storing a metadata value in the player before teleportation
+     * and uncancelling the teleport by the player in a MONITOR-priority listener if cancelled by other plugins.
+     *
+     * @param player   Player to force-teleport to a location
+     * @param location Location to force-teleport the player
+     * @param onComplete Optional callback to run after teleport completes (or immediately for sync teleport)
+     */
+    public void tryTeleport(final Player player, final Location location, final Runnable onComplete) {
         if (location == null || location.getWorld() == null) {
             Log.warn(this, "Could not teleport " + player.getName() + "! Location is null");
             return;
@@ -78,6 +90,15 @@ public final class Teleport implements Loadable, Listener {
                     // Close inventory after teleport completes, on the correct thread and in the correct world
                     DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
                         player.closeInventory();
+                        // Execute callback after teleport completes and inventory is closed
+                        if (onComplete != null) {
+                            // Schedule callback on entity-specific scheduler to ensure correct thread
+                            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                                if (player.isOnline()) {
+                                    onComplete.run();
+                                }
+                            }, null);
+                        }
                     }, null);
                 }
             });
@@ -86,6 +107,9 @@ public final class Teleport implements Loadable, Listener {
             player.closeInventory();
             if (!player.teleport(location)) {
                 Log.warn(this, "Could not teleport " + player.getName() + "! Player is dead or is vehicle");
+            } else if (onComplete != null) {
+                // For sync teleport, run callback immediately
+                onComplete.run();
             }
         }
     }
