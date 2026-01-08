@@ -55,11 +55,36 @@ public class QueueSignImpl implements QueueSign {
             return;
         }
 
-        sign.setLine(0, replace(lines[0], 0, 0));
-        sign.setLine(1, replace(lines[1], 0, 0));
-        sign.setLine(2, replace(lines[2], 0, 0));
-        sign.setLine(3, replace(lines[3], 0, 0));
-        sign.update();
+        // FIXED: Schedule sign operations on region-specific scheduler for Folia compatibility
+        final org.bukkit.Location signLocation = sign.getLocation();
+        if (signLocation != null) {
+            DuelsPlugin.getMorePaperLib().scheduling()
+                .regionSpecificScheduler(signLocation)
+                .run(() -> {
+                    final Block blockAtLocation = signLocation.getBlock();
+                    if (blockAtLocation.getState() instanceof Sign signState) {
+                        signState.setLine(0, replace(lines[0], 0, 0));
+                        signState.setLine(1, replace(lines[1], 0, 0));
+                        signState.setLine(2, replace(lines[2], 0, 0));
+                        signState.setLine(3, replace(lines[3], 0, 0));
+                        signState.update();
+                    }
+                });
+        } else {
+            // Fallback: use global scheduler if location is null
+            DuelsPlugin.getMorePaperLib().scheduling()
+                .globalRegionalScheduler()
+                .run(() -> {
+                    final Block blockAtLocation = location.getBlock();
+                    if (blockAtLocation.getState() instanceof Sign signState) {
+                        signState.setLine(0, replace(lines[0], 0, 0));
+                        signState.setLine(1, replace(lines[1], 0, 0));
+                        signState.setLine(2, replace(lines[2], 0, 0));
+                        signState.setLine(3, replace(lines[3], 0, 0));
+                        signState.update();
+                    }
+                });
+        }
     }
 
     private String replace(final String line, final int inQueue, final long inMatch) {
@@ -101,11 +126,36 @@ public class QueueSignImpl implements QueueSign {
         this.lastInQueue = inQueue;
         this.lastInMatch = inMatch;
 
-        sign.setLine(0, replace(lines[0], inQueue, inMatch));
-        sign.setLine(1, replace(lines[1], inQueue, inMatch));
-        sign.setLine(2, replace(lines[2], inQueue, inMatch));
-        sign.setLine(3, replace(lines[3], inQueue, inMatch));
-        sign.update();
+        // FIXED: Schedule sign operations on region-specific scheduler for Folia compatibility
+        final org.bukkit.Location signLocation = sign.getLocation();
+        if (signLocation != null) {
+            DuelsPlugin.getMorePaperLib().scheduling()
+                .regionSpecificScheduler(signLocation)
+                .run(() -> {
+                    final Block blockAtLocation = signLocation.getBlock();
+                    if (blockAtLocation.getState() instanceof Sign signState) {
+                        signState.setLine(0, replace(lines[0], inQueue, inMatch));
+                        signState.setLine(1, replace(lines[1], inQueue, inMatch));
+                        signState.setLine(2, replace(lines[2], inQueue, inMatch));
+                        signState.setLine(3, replace(lines[3], inQueue, inMatch));
+                        signState.update();
+                    }
+                });
+        } else {
+            // Fallback: use global scheduler if location is null
+            DuelsPlugin.getMorePaperLib().scheduling()
+                .globalRegionalScheduler()
+                .run(() -> {
+                    final Block blockAtLocation = location.getBlock();
+                    if (blockAtLocation.getState() instanceof Sign signState) {
+                        signState.setLine(0, replace(lines[0], inQueue, inMatch));
+                        signState.setLine(1, replace(lines[1], inQueue, inMatch));
+                        signState.setLine(2, replace(lines[2], inQueue, inMatch));
+                        signState.setLine(3, replace(lines[3], inQueue, inMatch));
+                        signState.update();
+                    }
+                });
+        }
     }
 
     @Override

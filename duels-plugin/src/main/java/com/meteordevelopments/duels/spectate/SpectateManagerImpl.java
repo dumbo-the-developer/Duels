@@ -152,7 +152,11 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
 
         // Cache current player state to return to after spectating is over
         playerManager.create(player);
-        PlayerUtil.reset(player);
+        
+        // FIXED: Schedule PlayerUtil.reset on entity-specific scheduler for Folia compatibility
+        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+            PlayerUtil.reset(player);
+        }, null);
 
         // Teleport before putting in map to prevent teleport being cancelled
         teleport.tryTeleport(player, target.getLocation().clone().add(0, 2, 0));

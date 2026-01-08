@@ -69,6 +69,11 @@ public class TeleportListener implements Listener {
         if (!arenaManager.isInMatch(player)) {
             return;
         }
-        player.closeInventory();
+        // FIXED: Schedule inventory operations on entity-specific scheduler for Folia compatibility
+        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+            if (player.isOnline()) {
+                player.closeInventory();
+            }
+        }, null);
     }
 }

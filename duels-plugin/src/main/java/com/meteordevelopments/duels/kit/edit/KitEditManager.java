@@ -76,20 +76,31 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
         if (isFolia) {
             player.teleportAsync(kitLobby).thenAccept(success -> {
                 if (success) {
-                    // Clear player inventory
-                    player.getInventory().clear();
-                    
-                    // Load kit into player inventory - check for custom kit first
-                    if (hasPlayerKit(player, kitName)) {
-                        // Load player's custom kit
-                        loadPlayerKit(player, kitName);
-                    } else {
-                        // Load default kit
-                        loadKitToPlayer(player, kit);
-                    }
+                    // FIXED: Schedule inventory operations on entity-specific scheduler for Folia compatibility
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                        if (!player.isOnline()) {
+                            return;
+                        }
+                        // Clear player inventory
+                        player.getInventory().clear();
+                        
+                        // Load kit into player inventory - check for custom kit first
+                        if (hasPlayerKit(player, kitName)) {
+                            // Load player's custom kit
+                            loadPlayerKit(player, kitName);
+                        } else {
+                            // Load default kit
+                            loadKitToPlayer(player, kit);
+                        }
+                    }, null);
                 } else {
                     plugin.getLogger().severe("Unable to teleport " + player.getName() + " to kit lobby");
-                    abortEditSession(player);
+                    // FIXED: Schedule abortEditSession on entity-specific scheduler since we're in async callback
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                        if (player.isOnline()) {
+                            abortEditSession(player);
+                        }
+                    }, null);
                 }
             });
         } else {
@@ -107,6 +118,7 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
                 }
             } else {
                 plugin.getLogger().severe("Unable to teleport " + player.getName() + " to kit lobby");
+                // For non-Folia, abortEditSession is safe to call directly from command handler
                 abortEditSession(player);
             }
         }

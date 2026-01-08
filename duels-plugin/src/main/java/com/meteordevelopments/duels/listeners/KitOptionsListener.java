@@ -377,15 +377,21 @@ public class KitOptionsListener implements Listener {
 
         final ItemStack bowl = config.isSoupRemoveEmptyBowl() ? null : new ItemStack(Material.BOWL);
 
-        if (CompatUtil.isPre1_10()) {
-            player.getInventory().setItem(player.getInventory().getHeldItemSlot(), bowl);
-        } else {
-            if (event.getHand() == EquipmentSlot.OFF_HAND) {
-                player.getInventory().setItemInOffHand(bowl);
-            } else {
-                player.getInventory().setItemInMainHand(bowl);
+        // FIXED: Schedule inventory operations on entity-specific scheduler for Folia compatibility
+        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+            if (!player.isOnline()) {
+                return;
             }
-        }
+            if (CompatUtil.isPre1_10()) {
+                player.getInventory().setItem(player.getInventory().getHeldItemSlot(), bowl);
+            } else {
+                if (event.getHand() == EquipmentSlot.OFF_HAND) {
+                    player.getInventory().setItemInOffHand(bowl);
+                } else {
+                    player.getInventory().setItemInMainHand(bowl);
+                }
+            }
+        }, null);
 
         final double regen = config.getSoupHeartsToRegen() * 2.0;
         final double oldHealth = player.getHealth();
@@ -423,7 +429,12 @@ public class KitOptionsListener implements Listener {
 
             for (final Player player : event.getPlayers()) {
                 MetadataUtil.put(plugin, player, METADATA_KEY, player.getMaximumNoDamageTicks());
-                player.setMaximumNoDamageTicks(0);
+                // FIXED: Schedule entity state modification on entity-specific scheduler for Folia compatibility
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    if (player.isOnline()) {
+                        player.setMaximumNoDamageTicks(0);
+                    }
+                }, null);
             }
         }
 
@@ -448,7 +459,12 @@ public class KitOptionsListener implements Listener {
                     return;
                 }
 
-                player.setMaximumNoDamageTicks((Integer) value);
+                // FIXED: Schedule entity state modification on entity-specific scheduler for Folia compatibility
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    if (player.isOnline()) {
+                        player.setMaximumNoDamageTicks((Integer) value);
+                    }
+                }, null);
             });
         }
     }

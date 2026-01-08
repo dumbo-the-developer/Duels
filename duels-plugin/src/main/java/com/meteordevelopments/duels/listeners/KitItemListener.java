@@ -96,9 +96,15 @@ public class KitItemListener implements Listener {
         }
 
         event.setCancelled(true);
-        player.getInventory().remove(item);
-        player.sendMessage(WARNING);
-        Log.warn(String.format(WARNING_CONSOLE, player.getName()));
+        // FIXED: Schedule inventory operations on entity-specific scheduler for Folia compatibility
+        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+            if (!player.isOnline()) {
+                return;
+            }
+            player.getInventory().remove(item);
+            player.sendMessage(WARNING);
+            Log.warn(String.format(WARNING_CONSOLE, player.getName()));
+        }, null);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -160,8 +166,14 @@ public class KitItemListener implements Listener {
         }
 
         event.setCancelled(true);
-        player.getInventory().remove(item);
-        player.sendMessage(WARNING);
-        Log.warn(String.format(WARNING_CONSOLE, player.getName()));
+        // FIXED: Schedule inventory operations on entity-specific scheduler for Folia compatibility
+        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+            if (!player.isOnline()) {
+                return;
+            }
+            player.getInventory().remove(item);
+            player.sendMessage(WARNING);
+            Log.warn(String.format(WARNING_CONSOLE, player.getName()));
+        }, null);
     }
 }

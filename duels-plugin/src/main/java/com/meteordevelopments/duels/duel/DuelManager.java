@@ -237,8 +237,14 @@ public class DuelManager implements Loadable {
                                 PlayerUtil.reset(loser);
                             }
                             
-                            teleport.tryTeleport(loser, loserInfo.getLocation());
-                            loserInfo.restore(loser);
+                            // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
+                            teleport.tryTeleport(loser, loserInfo.getLocation(), () -> {
+                                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(loser).run(() -> {
+                                    if (loser.isOnline()) {
+                                        loserInfo.restore(loser);
+                                    }
+                                }, null);
+                            });
                         }, null);
                     }
                 }
@@ -810,20 +816,29 @@ public class DuelManager implements Loadable {
             // If using own inventory (regardless of drop setting), do not restore experience to preserve XP changes
             final boolean restoreExperience = !match.isOwnInventory();
             playerManager.create(player, dropOwnInv, restoreExperience);
-            teleport.tryTeleport(player, location);
-
+            
+            // FIXED: Schedule kit loading on entity-specific scheduler after teleport completes for Folia compatibility
             if (kit != null) {
-                PlayerUtil.reset(player);
-                
-                // Check for player-specific kit first
-                com.meteordevelopments.duels.kit.edit.KitEditManager kitEditManager = com.meteordevelopments.duels.kit.edit.KitEditManager.getInstance();
-                if (kitEditManager != null && kitEditManager.hasPlayerKit(player, kit.getName())) {
-                    // Load player's custom kit
-                    kitEditManager.loadPlayerKit(player, kit.getName());
-                } else {
-                    // Load default kit
-                    kit.equip(player);
-                }
+                teleport.tryTeleport(player, location, () -> {
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                        if (!player.isOnline()) {
+                            return;
+                        }
+                        PlayerUtil.reset(player);
+                        
+                        // Check for player-specific kit first
+                        com.meteordevelopments.duels.kit.edit.KitEditManager kitEditManager = com.meteordevelopments.duels.kit.edit.KitEditManager.getInstance();
+                        if (kitEditManager != null && kitEditManager.hasPlayerKit(player, kit.getName())) {
+                            // Load player's custom kit
+                            kitEditManager.loadPlayerKit(player, kit.getName());
+                        } else {
+                            // Load default kit
+                            kit.equip(player);
+                        }
+                    }, null);
+                });
+            } else {
+                teleport.tryTeleport(player, location);
             }
 
             if (config.isStartCommandsEnabled() && !(match.getSource() == null && config.isStartCommandsQueueOnly())) {
