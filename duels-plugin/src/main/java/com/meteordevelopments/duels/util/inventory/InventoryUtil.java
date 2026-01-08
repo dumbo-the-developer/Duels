@@ -1,6 +1,7 @@
 package com.meteordevelopments.duels.util.inventory;
 
 import com.google.common.collect.ObjectArrays;
+import com.meteordevelopments.duels.DuelsPlugin;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -87,7 +88,15 @@ public final class InventoryUtil {
         final Map<Integer, ItemStack> result = player.getInventory().addItem(items.stream().filter(Objects::nonNull).toArray(ItemStack[]::new));
 
         if (!result.isEmpty()) {
-            result.values().forEach(item -> player.getWorld().dropItemNaturally(player.getLocation(), item));
+            // Schedule item drops on region-specific scheduler for Folia compatibility
+            final org.bukkit.Location dropLocation = player.getLocation();
+            result.values().forEach(item -> {
+                DuelsPlugin.getMorePaperLib().scheduling()
+                    .regionSpecificScheduler(dropLocation)
+                    .run(() -> {
+                        player.getWorld().dropItemNaturally(dropLocation, item);
+                    });
+            });
         }
 
         return true;

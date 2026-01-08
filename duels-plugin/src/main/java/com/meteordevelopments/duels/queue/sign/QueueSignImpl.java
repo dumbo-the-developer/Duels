@@ -3,6 +3,7 @@ package com.meteordevelopments.duels.queue.sign;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.api.queue.sign.QueueSign;
 import com.meteordevelopments.duels.queue.Queue;
 import com.meteordevelopments.duels.util.StringUtil;
@@ -79,8 +80,14 @@ public class QueueSignImpl implements QueueSign {
         }
 
         if (queue.isRemoved()) {
-            sign.setType(Material.AIR);
-            sign.update();
+            // Schedule block operation on region-specific scheduler for Folia compatibility
+            final org.bukkit.Location signLocation = sign.getLocation();
+            DuelsPlugin.getMorePaperLib().scheduling()
+                .regionSpecificScheduler(signLocation)
+                .run(() -> {
+                    sign.setType(Material.AIR);
+                    sign.update();
+                });
             return;
         }
 

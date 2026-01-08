@@ -53,9 +53,12 @@ public final class Teleport implements Loadable, Listener {
             return;
         }
 
-        for (Entity entity : player.getPassengers()) {
-            player.removePassenger(entity);
-        }
+        // Schedule passenger removal on entity-specific scheduler for Folia compatibility
+        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+            for (Entity entity : player.getPassengers()) {
+                player.removePassenger(entity);
+            }
+        }, null);
 
         // Don't close inventory here for Folia - schedule it after teleport completes to prevent world mismatch
         boolean isFolia = DuelsPlugin.getMorePaperLib().scheduling().isUsingFolia();
