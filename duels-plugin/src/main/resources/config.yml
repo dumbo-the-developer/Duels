@@ -196,6 +196,25 @@ duel:
       commands:
         - 'broadcast %player% is entering a duel!'
 
+    pre-end-commands:
+      # If set to 'true', the commands listed below will run when a winner is announced (before match end processing).
+      # default: false
+      enabled: false
+
+      # If set to 'true', pre-end commands will run only for matches started through the queue system.
+      # default: false
+      queue-matches-only: false
+
+      # Available placeholders:
+      # %winner% - Name of the winner(s) of the match (comma-separated for team matches)
+      # %loser% - Name of the loser(s) of the match (comma-separated for team matches)
+      # %kit% - Name of the kit used in the match
+      # %arena% - Name of the arena where the match took place
+      # %bet_amount% - Amount of money bet in the match
+      # {delay:x} - Used to give x ms of delay before running any command
+      commands:
+        - 'title %winner% title "Victory!"'
+
     end-commands:
       # If set to 'true', the commands listed below will run at the end of a match.
       # default: false

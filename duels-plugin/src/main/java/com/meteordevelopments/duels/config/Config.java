@@ -103,6 +103,12 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private List<String> startCommands;
     @Getter
+    private boolean preEndCommandsEnabled;
+    @Getter
+    private boolean preEndCommandsQueueOnly;
+    @Getter
+    private List<String> preEndCommands;
+    @Getter
     private boolean endCommandsEnabled;
     @Getter
     private boolean endCommandsQueueOnly;
@@ -383,6 +389,9 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         startCommandsEnabled = configuration.getBoolean("duel.match.start-commands.enabled", false);
         startCommandsQueueOnly = configuration.getBoolean("duel.match.start-commands.queue-matches-only", false);
         startCommands = configuration.getStringList("duel.match.start-commands.commands");
+        preEndCommandsEnabled = configuration.getBoolean("duel.match.pre-end-commands.enabled", false);
+        preEndCommandsQueueOnly = configuration.getBoolean("duel.match.pre-end-commands.queue-matches-only", false);
+        preEndCommands = configuration.getStringList("duel.match.pre-end-commands.commands");
         endCommandsEnabled = configuration.getBoolean("duel.match.end-commands.enabled", false);
         endCommandsQueueOnly = configuration.getBoolean("duel.match.end-commands.queue-matches-only", false);
         endCommands = configuration.getStringList("duel.match.end-commands.commands");

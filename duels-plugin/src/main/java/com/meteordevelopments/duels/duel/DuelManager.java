@@ -115,6 +115,23 @@ public class DuelManager implements Loadable {
             final Set<Player> winners = match.getAlivePlayers();
             winners.forEach(w -> inventoryManager.create(w, false));
             userDataManager.handleMatchEnd(match, winners);
+            
+            // Execute pre-end commands (run when winner is announced, before handleWin)
+            if (config.isPreEndCommandsEnabled() && !(!match.isFromQueue() && config.isPreEndCommandsQueueOnly())) {
+                try {
+                    for (final String command : config.getPreEndCommands()) {
+                        String processedCommand = command
+                                .replace("%winner%", winner.getName()).replace("%loser%", loser.getName())
+                                .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "").replace("%arena%", arena.getName())
+                                .replace("%bet_amount%", String.valueOf(match.getBet()));
+                        
+                        executeCommandWithDelay(processedCommand);
+                    }
+                } catch (Exception ex) {
+                    Log.warn(DuelManager.this, "Error while running pre-end commands: " + ex.getMessage());
+                }
+            }
+            
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
             
             // FIXED: Check if loser is online to use appropriate scheduler for Folia compatibility
@@ -217,6 +234,25 @@ public class DuelManager implements Loadable {
             // Create inventory snapshots for display
             allPlayers.forEach(p -> inventoryManager.create(p, false));
             userDataManager.handleTeamMatchEnd(match, winners, losers);
+            
+            // Execute pre-end commands (run when winners are announced, before handleTeamWin)
+            if (config.isPreEndCommandsEnabled() && !(!match.isFromQueue() && config.isPreEndCommandsQueueOnly())) {
+                try {
+                    for (final String command : config.getPreEndCommands()) {
+                        String winnerNames = winners.stream().map(Player::getName).collect(Collectors.joining(", "));
+                        String loserNames = losers.stream().map(Player::getName).collect(Collectors.joining(", "));
+                        String processedCommand = command
+                                .replace("%winner%", winnerNames).replace("%loser%", loserNames)
+                                .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "").replace("%arena%", arena.getName())
+                                .replace("%bet_amount%", String.valueOf(match.getBet()));
+                        
+                        executeCommandWithDelay(processedCommand);
+                    }
+                } catch (Exception ex) {
+                    Log.warn(DuelManager.this, "Error while running pre-end commands: " + ex.getMessage());
+                }
+            }
+            
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
             
             // Schedule teleportation and restoration for all players after delay
