@@ -1130,14 +1130,12 @@ public class DuelManager implements Loadable {
                 // Countdown is active - cancel countdown and end match with quitting player as loser
                 final Player quittingPlayer = player;
                 
-                // Kill the player directly - let server handle respawn
+                // Kill the player directly BEFORE they disconnect - use entity scheduler for Folia compatibility
                 DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(quittingPlayer).run(() -> {
-                    if (quittingPlayer.isOnline()) {
-                        quittingPlayer.setHealth(0);
-                        quittingPlayer.getInventory().clear();
-                        quittingPlayer.getInventory().setArmorContents(null);
-                        quittingPlayer.updateInventory();
-                    }
+                    quittingPlayer.setHealth(0);
+                    quittingPlayer.getInventory().clear();
+                    quittingPlayer.getInventory().setArmorContents(null);
+                    quittingPlayer.updateInventory();
                 }, null);
                 
                 // Cancel countdown
@@ -1182,16 +1180,22 @@ public class DuelManager implements Loadable {
             }
 
             // Normal quit handling (countdown complete, match in progress)
-            // Kill the player directly - let server handle respawn
+            // Kill the player directly - PlayerDeathEvent will handle match ending automatically
             DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
                 player.setHealth(0);
                 player.getInventory().clear();
                 player.getInventory().setArmorContents(null);
                 player.updateInventory();
             }, null);
-
+            
+            // Mark player as dead in match (so PlayerDeathEvent knows they're dead)
+            match.markAsDead(player);
+            
             // Remove PlayerInfo completely - don't restore anything, let server handle respawn
             playerManager.remove(player);
+            
+            // DON'T remove from arena or end match here - let PlayerDeathEvent handle it automatically
+            // PlayerDeathEvent will call arena.remove() and check match.size() to end the match
         }
 
         @EventHandler(ignoreCancelled = true)
