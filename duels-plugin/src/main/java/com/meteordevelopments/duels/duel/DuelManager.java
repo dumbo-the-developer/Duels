@@ -1292,8 +1292,102 @@ public class DuelManager implements Loadable {
             lang.sendMessage(player, "DUEL.prevent.inventory-open");
         }
 
+        @EventHandler(priority = EventPriority.NORMAL) // After PlayerInfoManager (HIGHEST)
+        public void on(final PlayerJoinEvent event) {
+            // Skip if feature is disabled
+            if (!config.isDuelWorldsEnabled()) {
+                return;
+            }
+            
+            final Player player = event.getPlayer();
+            
+            // Skip if player is dead (let respawn handle it)
+            if (player.isDead()) {
+                return;
+            }
+            
+            // Check if player is in an arena world
+            if (!isArenaWorld(player.getWorld())) {
+                return; // Not an arena world, nothing to do
+            }
+            
+            // Check if player is in a match
+            if (arenaManager.isInMatch(player)) {
+                return; // Player is in match, they're supposed to be here
+            }
+            
+            // Player is in arena world but NOT in match - teleport to lobby
+            // This handles both:
+            // - Normal case: No PlayerInfo, player shouldn't be here
+            // - Edge case: PlayerInfo exists (from crash/reload), but player restored to arena world
+            
+            // Get lobby location and teleport
+            final Location lobbyLocation = playerManager.getLobby();
+            if (lobbyLocation == null || lobbyLocation.getWorld() == null) {
+                Log.warn(DuelManager.this, String.format(
+                    "Cannot teleport player %s to lobby - lobby location is not set!",
+                    player.getName()
+                ));
+                return;
+            }
+            
+            // Use entity-specific scheduler for Folia compatibility
+            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).runDelayed(() -> {
+                if (!player.isOnline() || player.isDead()) {
+                    return;
+                }
+                
+                // Set gamemode if enabled in config
+                if (config.isForceGamemodeOnJoin()) {
+                    player.setGameMode(config.getForceGamemodeOnJoinMode());
+                }
+                
+                // Teleport to lobby
+                teleport.tryTeleport(player, lobbyLocation, null);
+            }, null, 5L); // 5 tick delay to ensure player is fully loaded
+        }
+
     }
     
+    /**
+     * Checks if a world is in the arena worlds list.
+     * Handles different world name formats (minecraft:overworld, worlds:world, etc.)
+     * 
+     * @param world The world to check
+     * @return true if world is in the arena worlds list, false otherwise
+     */
+    private boolean isArenaWorld(final World world) {
+        if (world == null || config.getDuelWorlds().isEmpty()) {
+            return false;
+        }
+        
+        final String worldName = world.getName();
+        
+        // Check exact match first
+        if (config.getDuelWorlds().contains(worldName)) {
+            return true;
+        }
+        
+        // Check namespaced formats (minecraft:world, worlds:world, multiverse:world, etc.)
+        for (final String configWorld : config.getDuelWorlds()) {
+            // Check if world name matches after removing namespace prefix
+            // Example: "minecraft:world1" matches config "world1"
+            if (worldName.endsWith(":" + configWorld) || worldName.equals(configWorld)) {
+                return true;
+            }
+            // Check if config world matches after removing namespace prefix
+            // Example: config "world1" matches "minecraft:world1"
+            if (configWorld.contains(":")) {
+                final String configWorldName = configWorld.substring(configWorld.lastIndexOf(':') + 1);
+                if (worldName.equals(configWorldName)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+
     /**
      * Executes a command with optional delay support.
      * Parses {delay:x} placeholder where x is delay in milliseconds.

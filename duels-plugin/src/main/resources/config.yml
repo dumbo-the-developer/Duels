@@ -793,3 +793,17 @@ no-opponent: 'No opponent'
 # MiniMessage supports modern formatting like <red>text</red>, <bold>text</bold>, gradients, etc.
 # default: false
 use-minimessages: false
+
+# Duel world settings
+# This is an edge-case safety feature that prevents players from logging into arena worlds
+# when they shouldn't be there. If a player logs out in an arena world (due to server crash,
+# plugin reload, or other edge cases) and logs back in, they will be automatically teleported
+# to spawn if they are not currently in a match. This prevents players from being stuck in
+# arena worlds after unexpected disconnections.
+duel-worlds-settings:
+  enabled: false
+  worlds:
+    - 'world1'
+    - 'world2'
+  force-gamemode-on-join: true
+  force-gamemode-on-join-mode: SURVIVAL
