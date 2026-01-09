@@ -1130,6 +1130,16 @@ public class DuelManager implements Loadable {
                 // Countdown is active - cancel countdown and end match with quitting player as loser
                 final Player quittingPlayer = player;
                 
+                // Kill the player directly - let server handle respawn
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(quittingPlayer).run(() -> {
+                    if (quittingPlayer.isOnline()) {
+                        quittingPlayer.setHealth(0);
+                        quittingPlayer.getInventory().clear();
+                        quittingPlayer.getInventory().setArmorContents(null);
+                        quittingPlayer.updateInventory();
+                    }
+                }, null);
+                
                 // Cancel countdown
                 arena.setCountdown(null);
                 
@@ -1139,12 +1149,8 @@ public class DuelManager implements Loadable {
                 // Remove quitting player from arena
                 arena.remove(quittingPlayer);
                 
-                // Remove PlayerInfo for quitting player and store items (prevents restore on rejoin)
-                final PlayerInfo quitPlayerInfo = playerManager.remove(quittingPlayer);
-                final List<ItemStack> quitPlayerItems = match.getItems(quittingPlayer);
-                if (quitPlayerInfo != null && quitPlayerItems != null) {
-                    quitPlayerInfo.getExtra().addAll(quitPlayerItems);
-                }
+                // Remove PlayerInfo completely - don't restore anything, let server handle respawn
+                playerManager.remove(quittingPlayer);
                 
                 // Get the remaining player (winner)
                 final Set<Player> alivePlayers = match.getAlivePlayers();
@@ -1176,7 +1182,7 @@ public class DuelManager implements Loadable {
             }
 
             // Normal quit handling (countdown complete, match in progress)
-            // Schedule player operations on entity-specific scheduler for Folia compatibility
+            // Kill the player directly - let server handle respawn
             DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
                 player.setHealth(0);
                 player.getInventory().clear();
@@ -1184,10 +1190,8 @@ public class DuelManager implements Loadable {
                 player.updateInventory();
             }, null);
 
-            final PlayerInfo info = playerManager.get(player);
-            // DON'T restore here - let them stay dead and respawn normally
-            // The PlayerInfo is kept in the manager for when they respawn
-            // Removed: info.restore(player);
+            // Remove PlayerInfo completely - don't restore anything, let server handle respawn
+            playerManager.remove(player);
         }
 
         @EventHandler(ignoreCancelled = true)
