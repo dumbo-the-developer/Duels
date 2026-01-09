@@ -198,7 +198,10 @@ public class DuelManager implements Loadable {
                         }
                     }
 
-                    arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
+                    // CRITICAL: Check if match still exists before ending (might have been cleared already)
+                    if (arena.getMatch() != null && arena.getMatch() == match) {
+                        arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
+                    }
                 }, config.getTeleportDelay() * 20L);
             }
         }, 1L);
@@ -1041,6 +1044,13 @@ public class DuelManager implements Loadable {
                 return;
             }
 
+            // CRITICAL: Check if match still exists before handling match end (might have been cleared)
+            final DuelMatch currentMatch = arena.getMatch();
+            if (currentMatch == null || currentMatch != match) {
+                // Match was already ended or cleared
+                return;
+            }
+
             final Location deadLocation = player.getEyeLocation().clone();
             handleMatchEnd(match, arena, player, deadLocation, match.getAlivePlayers().iterator().next());
         }
@@ -1132,6 +1142,7 @@ public class DuelManager implements Loadable {
                 
                 // CRITICAL: Kill the player IMMEDIATELY - PlayerQuitEvent runs on correct thread, player still online
                 // Event handlers on Folia run on the correct thread for the entity, so we can call directly
+                // This will trigger PlayerDeathEvent which will handle match ending automatically
                 try {
                     quittingPlayer.setHealth(0);
                     quittingPlayer.getInventory().clear();
@@ -1152,42 +1163,15 @@ public class DuelManager implements Loadable {
                 // Cancel countdown
                 arena.setCountdown(null);
                 
-                // Mark quitting player as dead in match
+                // Mark quitting player as dead in match (PlayerDeathEvent will handle the rest)
                 match.markAsDead(quittingPlayer);
-                
-                // Remove quitting player from arena
-                arena.remove(quittingPlayer);
                 
                 // Remove PlayerInfo completely - don't restore anything, let server handle respawn
                 playerManager.remove(quittingPlayer);
                 
-                // Get the remaining player (winner)
-                final Set<Player> alivePlayers = match.getAlivePlayers();
-                if (alivePlayers.isEmpty()) {
-                    // No alive players - shouldn't happen but handle it
-                    DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().runDelayed(() -> {
-                        try {
-                            arena.endMatch(null, null, Reason.TIE);
-                        } catch (Exception ex) {
-                            Log.warn(DuelManager.this, "Error ending match in arena " + arena.getName() + " after countdown quit: " + ex.getMessage());
-                        }
-                    }, 3L);
-                    return;
-                }
-                
-                final Player winner = alivePlayers.iterator().next();
-                final Location deadLocation = quittingPlayer.getLocation() != null ? quittingPlayer.getLocation() : (winner.getLocation() != null ? winner.getLocation() : arena.getPosition(1));
-                
-                // End match with winner and loser (quitting player is offline, so handleMatchEnd will handle it correctly)
-                DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().runDelayed(() -> {
-                    try {
-                        handleMatchEnd(match, arena, quittingPlayer, deadLocation, winner);
-                    } catch (Exception ex) {
-                        Log.warn(DuelManager.this, "Error handling match end after countdown quit: " + ex.getMessage());
-                    }
-                }, 1L);
-                
-                return; // Exit early - countdown quit handled
+                // DON'T call handleMatchEnd here - let PlayerDeathEvent handle it automatically
+                // This prevents duplicate execution of pre-end commands and match ending
+                return; // Exit early - countdown quit handled, PlayerDeathEvent will handle match end
             }
 
             // Normal quit handling (countdown complete, match in progress)
