@@ -91,7 +91,9 @@ public class DuelManager implements Loadable {
             if (arena.size() == 0) {
                 match.getAllPlayers().forEach(matchPlayer -> {
                     handleTie(matchPlayer, arena, match, false);
-                    lang.sendMessage(matchPlayer, "DUEL.on-end.tie");
+                    if (config.isMessageOnEndTie()) {
+                        lang.sendMessage(matchPlayer, "DUEL.on-end.tie");
+                    }
                 });
                 plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
                 arena.endMatch(null, null, Reason.TIE);
@@ -430,7 +432,9 @@ public class DuelManager implements Loadable {
                                     }
                                     
                                     handleTie(player, arena, match, alive);
-                                    lang.sendMessage(player, "DUEL.on-end.tie");
+                                    if (config.isMessageOnEndTie()) {
+                                        lang.sendMessage(player, "DUEL.on-end.tie");
+                                    }
                                 } catch (Exception ex) {
                                     Log.warn(this, "Error handling tie for player " + player.getName() + ": " + ex.getMessage());
                                 }
@@ -484,7 +488,9 @@ public class DuelManager implements Loadable {
 
             if (winnerDecided) {
                 for (final Player winner : match.getAlivePlayers()) {
-                    lang.sendMessage(winner, "DUEL.on-end.plugin-disable");
+                    if (config.isMessageOnEndPluginDisable()) {
+                        lang.sendMessage(winner, "DUEL.on-end.plugin-disable");
+                    }
                     handleWin(winner, arena.getOpponent(winner), arena, match);
                 }
             } else {
@@ -493,7 +499,9 @@ public class DuelManager implements Loadable {
                 for (final Player player : match.getAllPlayers()) {
                     if (match.isDead(player)) continue;
 
-                    lang.sendMessage(player, "DUEL.on-end.plugin-disable");
+                    if (config.isMessageOnEndPluginDisable()) {
+                        lang.sendMessage(player, "DUEL.on-end.plugin-disable");
+                    }
                     handleTie(player, arena, match, ongoing);
                 }
             }
@@ -611,7 +619,9 @@ public class DuelManager implements Loadable {
                         }
                         
                         handleTie(player, arena, match, alive);
-                        lang.sendMessage(player, "DUEL.on-end.tie");
+                        if (config.isMessageOnEndTie()) {
+                            lang.sendMessage(player, "DUEL.on-end.tie");
+                        }
                     } catch (Exception ex) {
                         Log.warn(this, "Error handling tie for player " + player.getName() + " in hardreset: " + ex.getMessage());
                     }
@@ -952,8 +962,10 @@ public class DuelManager implements Loadable {
                         match.addRoundWin(winner); // Add twice to immediately win
                         match.markAsDead(player);
                         
-                        arena.broadcast(plugin.getLang().getMessage("DUEL.on-death.no-killer", 
-                                "name", player.getName()));
+                        if (config.isMessageOnDeathNoKiller()) {
+                            arena.broadcast(plugin.getLang().getMessage("DUEL.on-death.no-killer", 
+                                    "name", player.getName()));
+                        }
                         
                         // Use delayed task to allow death to process
                         final Location deadLocation = player.getLocation().clone();
@@ -980,13 +992,14 @@ public class DuelManager implements Loadable {
 
             inventoryManager.create(player, true);
 
-            if (config.isSendDeathMessages()) {
-                final Player killer = player.getKiller();
-
-                if (killer != null) {
+            final Player killer = player.getKiller();
+            if (killer != null) {
+                if (config.isMessageOnDeathWithKiller()) {
                     final double health = Math.ceil(killer.getHealth()) * 0.5;
                     arena.broadcast(lang.getMessage("DUEL.on-death.with-killer", "name", player.getName(), "killer", killer.getName(), "health", health));
-                } else {
+                }
+            } else {
+                if (config.isMessageOnDeathNoKiller()) {
                     arena.broadcast(lang.getMessage("DUEL.on-death.no-killer", "name", player.getName()));
                 }
             }

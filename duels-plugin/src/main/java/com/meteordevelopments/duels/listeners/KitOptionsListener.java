@@ -127,11 +127,13 @@ public class KitOptionsListener implements Listener {
                         match.markAsDead(player);
                         // Let DuelManager handle the match end with all effects
                         // Pass the winner's current health for the death message
-                        double winnerHealth = Math.ceil(winner.getHealth()) * 0.5;
-                        arena.broadcast(plugin.getLang().getMessage("DUEL.on-death.with-killer",
-                                "name", player.getName(),
-                                "killer", winner.getName(),
-                                "health", winnerHealth));
+                        if (config.isMessageOnDeathWithKiller()) {
+                            double winnerHealth = Math.ceil(winner.getHealth()) * 0.5;
+                            arena.broadcast(plugin.getLang().getMessage("DUEL.on-death.with-killer",
+                                    "name", player.getName(),
+                                    "killer", winner.getName(),
+                                    "health", winnerHealth));
+                        }
                         duelManager.handleMatchEnd(match, arena, player, player.getLocation(), winner);
                         return;
                     }

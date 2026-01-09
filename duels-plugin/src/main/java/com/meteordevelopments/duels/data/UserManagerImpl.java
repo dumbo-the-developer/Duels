@@ -361,28 +361,36 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
                     loserData.setRating(kit, loserRating = loserRating - change);
                 }
 
-                message = lang.getMessage("DUEL.on-end.opponent-defeat",
-                        "winner", winner.getName(),
-                        "loser", loser.getName(),
-                        "health", matchData.getHealth(),
-                        "kit", kitName,
-                        "arena", match.getArena().getName(),
-                        "winner_rating", winnerRating,
-                        "loser_rating", loserRating,
-                        "change", change
-                );
+                if (config.isMessageOnEndOpponentDefeat()) {
+                    message = lang.getMessage("DUEL.on-end.opponent-defeat",
+                            "winner", winner.getName(),
+                            "loser", loser.getName(),
+                            "health", matchData.getHealth(),
+                            "kit", kitName,
+                            "arena", match.getArena().getName(),
+                            "winner_rating", winnerRating,
+                            "loser_rating", loserRating,
+                            "change", change
+                    );
+                } else {
+                    message = null;
+                }
             } else {
                 message = null;
             }
         } else {
             final Party winnerParty = partyMatch.getPlayerToParty().get(winner);
             final Party loserParty = match.getArena().getOpponent(winnerParty);
-            message = lang.getMessage("DUEL.on-end.party-opponent-defeat",
-                    "winners", StringUtil.join(partyMatch.getNames(winnerParty), ", "),
-                    "losers", StringUtil.join(partyMatch.getNames(loserParty), ", "),
-                    "kit", kitName,
-                    "arena", match.getArena().getName()
-            );
+            if (config.isMessageOnEndPartyOpponentDefeat()) {
+                message = lang.getMessage("DUEL.on-end.party-opponent-defeat",
+                        "winners", StringUtil.join(partyMatch.getNames(winnerParty), ", "),
+                        "losers", StringUtil.join(partyMatch.getNames(loserParty), ", "),
+                        "kit", kitName,
+                        "arena", match.getArena().getName()
+                );
+            } else {
+                message = null;
+            }
         }
 
         if (message == null) {
@@ -465,6 +473,10 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
                     }
                 }
             }
+        }
+        
+        if (!config.isMessageOnEndTeamOpponentDefeat()) {
+            return;
         }
         
         final String winnerNames = winners.stream().map(Player::getName).collect(Collectors.joining(", "));

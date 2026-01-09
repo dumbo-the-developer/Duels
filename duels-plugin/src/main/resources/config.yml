@@ -275,9 +275,31 @@ duel:
   blacklisted-worlds:
     - 'world_name_here'
 
-  # If set to 'true', death messages will be sent to players in match & spectators of the arena.
-  # default: true
-  send-death-messages: true
+  # Control which messages are sent during duels
+  messages:
+    on-death:
+      # If set to 'true', death messages with killer information will be sent.
+      # default: true
+      with-killer: true
+      # If set to 'true', death messages without killer information will be sent.
+      # default: true
+      no-killer: true
+    on-end:
+      # If set to 'true', tie messages will be sent.
+      # default: true
+      tie: true
+      # If set to 'true', plugin disable messages will be sent.
+      # default: true
+      plugin-disable: true
+      # If set to 'true', opponent defeat messages will be sent for 1v1 matches.
+      # default: true
+      opponent-defeat: true
+      # If set to 'true', team opponent defeat messages will be sent for team matches.
+      # default: true
+      team-opponent-defeat: true
+      # If set to 'true', party opponent defeat messages will be sent for party matches.
+      # default: true
+      party-opponent-defeat: true
 
   # If set to 'true', players will be teleported to the location where they were before the duel instead of duel lobby.
   # default: false
