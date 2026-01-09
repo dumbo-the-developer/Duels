@@ -1130,13 +1130,24 @@ public class DuelManager implements Loadable {
                 // Countdown is active - cancel countdown and end match with quitting player as loser
                 final Player quittingPlayer = player;
                 
-                // Kill the player directly BEFORE they disconnect - use entity scheduler for Folia compatibility
-                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(quittingPlayer).run(() -> {
+                // CRITICAL: Kill the player IMMEDIATELY - PlayerQuitEvent runs on correct thread, player still online
+                // Event handlers on Folia run on the correct thread for the entity, so we can call directly
+                try {
                     quittingPlayer.setHealth(0);
                     quittingPlayer.getInventory().clear();
                     quittingPlayer.getInventory().setArmorContents(null);
                     quittingPlayer.updateInventory();
-                }, null);
+                } catch (Exception ex) {
+                    // Fallback: If direct call fails, schedule it immediately (shouldn't happen but safety net)
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(quittingPlayer).run(() -> {
+                        if (quittingPlayer.isOnline()) {
+                            quittingPlayer.setHealth(0);
+                            quittingPlayer.getInventory().clear();
+                            quittingPlayer.getInventory().setArmorContents(null);
+                            quittingPlayer.updateInventory();
+                        }
+                    }, null);
+                }
                 
                 // Cancel countdown
                 arena.setCountdown(null);
@@ -1180,13 +1191,24 @@ public class DuelManager implements Loadable {
             }
 
             // Normal quit handling (countdown complete, match in progress)
-            // Kill the player directly - PlayerDeathEvent will handle match ending automatically
-            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+            // CRITICAL: Kill the player IMMEDIATELY - PlayerQuitEvent runs on correct thread, player still online
+            // Event handlers on Folia run on the correct thread for the entity, so we can call directly
+            try {
                 player.setHealth(0);
                 player.getInventory().clear();
                 player.getInventory().setArmorContents(null);
                 player.updateInventory();
-            }, null);
+            } catch (Exception ex) {
+                // Fallback: If direct call fails, schedule it immediately (shouldn't happen but safety net)
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    if (player.isOnline()) {
+                        player.setHealth(0);
+                        player.getInventory().clear();
+                        player.getInventory().setArmorContents(null);
+                        player.updateInventory();
+                    }
+                }, null);
+            }
             
             // Mark player as dead in match (so PlayerDeathEvent knows they're dead)
             match.markAsDead(player);
