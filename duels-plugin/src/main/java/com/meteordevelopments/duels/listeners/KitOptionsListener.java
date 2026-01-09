@@ -127,30 +127,38 @@ public class KitOptionsListener implements Listener {
                         match.markAsDead(player);
                         // Let DuelManager handle the match end with all effects
                         // Pass the winner's current health for the death message
-                        double winnerHealth = Math.ceil(winner.getHealth()) * 0.5;
-                        arena.broadcast(plugin.getLang().getMessage("DUEL.on-death.with-killer",
-                                "name", player.getName(),
-                                "killer", winner.getName(),
-                                "health", winnerHealth));
+                        if (config.isMessageOnDeathWithKiller()) {
+                            double winnerHealth = Math.ceil(winner.getHealth()) * 0.5;
+                            arena.broadcast(plugin.getLang().getMessage("DUEL.on-death.with-killer",
+                                    "name", player.getName(),
+                                    "killer", winner.getName(),
+                                    "health", winnerHealth));
+                        }
                         duelManager.handleMatchEnd(match, arena, player, player.getLocation(), winner);
                         return;
                     }
 
                     // Cancel the damage event for non-final rounds
                     event.setDamage(0);
-                    player.setHealth(player.getMaxHealth());
+                    // Schedule health modification on entity-specific scheduler for Folia compatibility
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                        player.setHealth(player.getMaxHealth());
+                    }, null);
 
                     // Start next round
                     match.nextRound();
 
                     // Reset both players' health and equipment
                     for (Player p : match.getAllPlayers()) {
-                        PlayerUtil.reset(p);
-                        p.setHealth(p.getMaxHealth());
-                        p.setNoDamageTicks(40); // Give 2 seconds immunity to prevent damage carry-over
-                        if (match.getKit() != null) {
-                            match.getKit().equip(p);
-                        }
+                        // Schedule player operations on entity-specific scheduler for Folia compatibility
+                        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(p).run(() -> {
+                            PlayerUtil.reset(p);
+                            p.setHealth(p.getMaxHealth());
+                            p.setNoDamageTicks(40); // Give 2 seconds immunity to prevent damage carry-over
+                            if (match.getKit() != null) {
+                                match.getKit().equip(p);
+                            }
+                        }, null);
                     }
 
                     // Use the plugin's teleport system for both players
@@ -275,8 +283,14 @@ public class KitOptionsListener implements Listener {
                 EntityType entityType = getEntityType(item.getType());
 
                 if (entityType != null) {
-                    Entity entity = location.getWorld().spawnEntity(location, entityType);
-                    arena.getMatch().placedEntities.add(entity);
+                    // Schedule entity spawning on region-specific scheduler for Folia compatibility
+                    final org.bukkit.Location spawnLocation = location.clone();
+                    DuelsPlugin.getMorePaperLib().scheduling()
+                        .regionSpecificScheduler(spawnLocation)
+                        .run(() -> {
+                            Entity entity = spawnLocation.getWorld().spawnEntity(spawnLocation, entityType);
+                            arena.getMatch().placedEntities.add(entity);
+                        });
                 }
             }
         }else {
@@ -332,7 +346,10 @@ public class KitOptionsListener implements Listener {
             return;
         }
 
-        player.setHealth(0);
+        // Schedule health modification on entity-specific scheduler for Folia compatibility
+        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+            player.setHealth(0);
+        }, null);
     }
 
     @EventHandler
@@ -362,20 +379,29 @@ public class KitOptionsListener implements Listener {
 
         final ItemStack bowl = config.isSoupRemoveEmptyBowl() ? null : new ItemStack(Material.BOWL);
 
-        if (CompatUtil.isPre1_10()) {
-            player.getInventory().setItem(player.getInventory().getHeldItemSlot(), bowl);
-        } else {
-            if (event.getHand() == EquipmentSlot.OFF_HAND) {
-                player.getInventory().setItemInOffHand(bowl);
-            } else {
-                player.getInventory().setItemInMainHand(bowl);
+        // FIXED: Schedule inventory operations on entity-specific scheduler for Folia compatibility
+        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+            if (!player.isOnline()) {
+                return;
             }
-        }
+            if (CompatUtil.isPre1_10()) {
+                player.getInventory().setItem(player.getInventory().getHeldItemSlot(), bowl);
+            } else {
+                if (event.getHand() == EquipmentSlot.OFF_HAND) {
+                    player.getInventory().setItemInOffHand(bowl);
+                } else {
+                    player.getInventory().setItemInMainHand(bowl);
+                }
+            }
+        }, null);
 
         final double regen = config.getSoupHeartsToRegen() * 2.0;
         final double oldHealth = player.getHealth();
         final double maxHealth = PlayerUtil.getMaxHealth(player);
-        player.setHealth(Math.min(oldHealth + regen, maxHealth));
+        // Schedule health modification on entity-specific scheduler for Folia compatibility
+        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+            player.setHealth(Math.min(oldHealth + regen, maxHealth));
+        }, null);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -405,7 +431,12 @@ public class KitOptionsListener implements Listener {
 
             for (final Player player : event.getPlayers()) {
                 MetadataUtil.put(plugin, player, METADATA_KEY, player.getMaximumNoDamageTicks());
-                player.setMaximumNoDamageTicks(0);
+                // FIXED: Schedule entity state modification on entity-specific scheduler for Folia compatibility
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    if (player.isOnline()) {
+                        player.setMaximumNoDamageTicks(0);
+                    }
+                }, null);
             }
         }
 
@@ -430,7 +461,12 @@ public class KitOptionsListener implements Listener {
                     return;
                 }
 
-                player.setMaximumNoDamageTicks((Integer) value);
+                // FIXED: Schedule entity state modification on entity-specific scheduler for Folia compatibility
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    if (player.isOnline()) {
+                        player.setMaximumNoDamageTicks((Integer) value);
+                    }
+                }, null);
             });
         }
     }
@@ -457,7 +493,13 @@ public class KitOptionsListener implements Listener {
                 event.setDamage(event.getDamage() / 1.5); // Critical hits are 150%, reverse it
             }
 
-            plugin.doSyncAfter(() -> player.setNoDamageTicks(0), 1);
+            // Schedule player entity operation on entity-specific scheduler for Folia compatibility
+            // Use doSyncAfter wrapper with entity-specific scheduler inside to handle delay
+            plugin.doSyncAfter(() -> {
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    player.setNoDamageTicks(0);
+                }, null);
+            }, 1L);
         }
     }
 }

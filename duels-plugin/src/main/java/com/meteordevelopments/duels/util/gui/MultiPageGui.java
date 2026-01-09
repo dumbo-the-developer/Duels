@@ -144,6 +144,10 @@ public class MultiPageGui<P extends JavaPlugin> extends AbstractGui<P> {
 
     @Override
     public boolean isPart(final Inventory inventory) {
+        // FIXED: Handle case where GUI was cleared during plugin reload
+        if (first == null) {
+            return false;
+        }
         return first.isPart(inventory);
     }
 

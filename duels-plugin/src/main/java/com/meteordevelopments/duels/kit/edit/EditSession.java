@@ -1,5 +1,6 @@
 package com.meteordevelopments.duels.kit.edit;
 
+import com.meteordevelopments.duels.DuelsPlugin;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -67,30 +68,56 @@ public class EditSession {
     
     /**
      * Restores the player's original inventory from this session.
+     * FIXED: Always schedules on entity-specific scheduler for Folia compatibility.
      */
     public void restoreInventory(Player player) {
-        PlayerInventory inv = player.getInventory();
-        
-        // Clear current inventory
-        inv.clear();
-        
-        // Restore original inventory
-        ItemStack[] restoredInventory = getOriginalInventory();
-        for (int i = 0; i < restoredInventory.length; i++) {
-            inv.setItem(i, restoredInventory[i]);
-        }
-        
-        // Restore armor
-        inv.setArmorContents(getOriginalArmor());
-        
-        // Restore offhand
-        inv.setItemInOffHand(getOriginalOffhand());
-        
-        // Update player
-        player.updateInventory();
+        // FIXED: Schedule inventory operations on entity-specific scheduler for Folia compatibility
+        // This ensures safety even when called from async callbacks
+        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+            if (!player.isOnline()) {
+                return;
+            }
+            PlayerInventory inv = player.getInventory();
+            
+            // Clear current inventory
+            inv.clear();
+            
+            // Restore original inventory
+            ItemStack[] restoredInventory = getOriginalInventory();
+            for (int i = 0; i < restoredInventory.length; i++) {
+                inv.setItem(i, restoredInventory[i]);
+            }
+            
+            // Restore armor
+            inv.setArmorContents(getOriginalArmor());
+            
+            // Restore offhand
+            inv.setItemInOffHand(getOriginalOffhand());
+            
+            // Update player
+            player.updateInventory();
+        }, null);
     }
 
+    /**
+     * Returns player to their original location.
+     * FIXED: Uses teleportAsync with proper callback handling for Folia compatibility.
+     */
     public void returnToOldLocation(Player player){
-        teleportAsync(player, getPlayerOriginalLoc());
+        final Location oldLoc = getPlayerOriginalLoc();
+        if (oldLoc == null || oldLoc.getWorld() == null) {
+            return;
+        }
+        
+        // FIXED: Use teleportAsync with callback to ensure proper thread handling
+        boolean isFolia = DuelsPlugin.getMorePaperLib().scheduling().isUsingFolia();
+        if (isFolia) {
+            player.teleportAsync(oldLoc).thenAccept(success -> {
+                // Teleport completed, no additional operations needed here
+                // Inventory restoration is handled separately in restoreInventory()
+            });
+        } else {
+            player.teleport(oldLoc);
+        }
     }
 }

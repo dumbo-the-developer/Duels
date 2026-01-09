@@ -164,13 +164,14 @@ public class DuelMatch implements Match {
         // Mark loser as dead
         markAsDead(loser);
 
-        // Set winner's health to full
-        winner.setHealth(winner.getMaxHealth());
-
-        // Clear any effects or states that might interfere
-        winner.setFireTicks(0);
-        winner.setFallDistance(0);
-        winner.setVelocity(new org.bukkit.util.Vector(0, 0, 0));
+        // Set winner's health to full - schedule on entity-specific scheduler for Folia compatibility
+        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(winner).run(() -> {
+            winner.setHealth(winner.getMaxHealth());
+            // Clear any effects or states that might interfere
+            winner.setFireTicks(0);
+            winner.setFallDistance(0);
+            winner.setVelocity(new org.bukkit.util.Vector(0, 0, 0));
+        }, null);
 
         // Set match as finished
         setFinished();

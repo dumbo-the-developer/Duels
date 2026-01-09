@@ -351,6 +351,9 @@ COMMAND:
     set-rating: '{PREFIX} &f%name%&7''s rating for kit &3%kit% &7was set to &a%rating%&7.'
     reset-rating: '{PREFIX} &7Reset &f%name%&7''s rating for kit &3%kit%&7.'
     reset: '{PREFIX} &7Reset &f%name%&7''s stats.'
+    hardstop:
+      success: '{PREFIX} &aSuccessfully hard stopped arena &e%arena%&a. All players have been released.'
+      no-match: '{PREFIX} &cArena &e%arena% &chas no active match.'
     info:
       - '{HALF_LINE} &7Arena &e%name% {HALF_LINE}'
       - '&7In Use: &r%in_use%'
@@ -493,6 +496,9 @@ DUEL:
     command: '&cYou cannot use ''%command%'' while in a duel.'
     teleportation: '&cYou cannot teleport while in a duel.'
     inventory-open: '&cYou cannot open inventories while in a duel.'
+  giveup:
+    countdown-active: '{PREFIX} &cYou cannot give up during countdown.'
+    endgame-phase: '{PREFIX} &cMatch is already ending.'
   projectile-hit-message: '{PREFIX} &f%name% &7is now at &d%health%❤&7!'
   on-death:
     with-killer: '{PREFIX} &a%killer% &7has slain &c%name% &7with &d%health%❤&7.'

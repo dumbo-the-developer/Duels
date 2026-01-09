@@ -91,7 +91,9 @@ public class DuelManager implements Loadable {
             if (arena.size() == 0) {
                 match.getAllPlayers().forEach(matchPlayer -> {
                     handleTie(matchPlayer, arena, match, false);
-                    lang.sendMessage(matchPlayer, "DUEL.on-end.tie");
+                    if (config.isMessageOnEndTie()) {
+                        lang.sendMessage(matchPlayer, "DUEL.on-end.tie");
+                    }
                 });
                 plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
                 arena.endMatch(null, null, Reason.TIE);
@@ -115,6 +117,23 @@ public class DuelManager implements Loadable {
             final Set<Player> winners = match.getAlivePlayers();
             winners.forEach(w -> inventoryManager.create(w, false));
             userDataManager.handleMatchEnd(match, winners);
+            
+            // Execute pre-end commands (run when winner is announced, before handleWin)
+            if (config.isPreEndCommandsEnabled() && !(!match.isFromQueue() && config.isPreEndCommandsQueueOnly())) {
+                try {
+                    for (final String command : config.getPreEndCommands()) {
+                        String processedCommand = command
+                                .replace("%winner%", winner.getName()).replace("%loser%", loser.getName())
+                                .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "").replace("%arena%", arena.getName())
+                                .replace("%bet_amount%", String.valueOf(match.getBet()));
+                        
+                        executeCommandWithDelay(processedCommand);
+                    }
+                } catch (Exception ex) {
+                    Log.warn(DuelManager.this, "Error while running pre-end commands: " + ex.getMessage());
+                }
+            }
+            
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
             
             // FIXED: Check if loser is online to use appropriate scheduler for Folia compatibility
@@ -147,7 +166,11 @@ public class DuelManager implements Loadable {
                         }
                     }
 
-                    arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
+                    // FIXED: Use global scheduler for arena.endMatch() to avoid Folia region conflicts
+                    // This prevents errors when entities are in different regions or already removed by other plugins
+                    DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().run(() -> {
+                        arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
+                    });
                 }, null, config.getTeleportDelay() * 20L);
             } else {
                 // FIXED: Loser has quit - use global scheduler instead to prevent winners from getting stuck
@@ -175,7 +198,10 @@ public class DuelManager implements Loadable {
                         }
                     }
 
-                    arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
+                    // CRITICAL: Check if match still exists before ending (might have been cleared already)
+                    if (arena.getMatch() != null && arena.getMatch() == match) {
+                        arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
+                    }
                 }, config.getTeleportDelay() * 20L);
             }
         }, 1L);
@@ -213,6 +239,25 @@ public class DuelManager implements Loadable {
             // Create inventory snapshots for display
             allPlayers.forEach(p -> inventoryManager.create(p, false));
             userDataManager.handleTeamMatchEnd(match, winners, losers);
+            
+            // Execute pre-end commands (run when winners are announced, before handleTeamWin)
+            if (config.isPreEndCommandsEnabled() && !(!match.isFromQueue() && config.isPreEndCommandsQueueOnly())) {
+                try {
+                    for (final String command : config.getPreEndCommands()) {
+                        String winnerNames = winners.stream().map(Player::getName).collect(Collectors.joining(", "));
+                        String loserNames = losers.stream().map(Player::getName).collect(Collectors.joining(", "));
+                        String processedCommand = command
+                                .replace("%winner%", winnerNames).replace("%loser%", loserNames)
+                                .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "").replace("%arena%", arena.getName())
+                                .replace("%bet_amount%", String.valueOf(match.getBet()));
+                        
+                        executeCommandWithDelay(processedCommand);
+                    }
+                } catch (Exception ex) {
+                    Log.warn(DuelManager.this, "Error while running pre-end commands: " + ex.getMessage());
+                }
+            }
+            
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
             
             // Schedule teleportation and restoration for all players after delay
@@ -227,12 +272,21 @@ public class DuelManager implements Loadable {
                     if (loserInfo != null && !loser.isDead()) {
                         playerManager.remove(loser);
                         
-                        if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {
-                            PlayerUtil.reset(loser);
-                        }
-                        
-                        teleport.tryTeleport(loser, loserInfo.getLocation());
-                        loserInfo.restore(loser);
+                        // Schedule player operations on entity-specific scheduler for Folia compatibility
+                        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(loser).run(() -> {
+                            if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {
+                                PlayerUtil.reset(loser);
+                            }
+                            
+                            // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
+                            teleport.tryTeleport(loser, loserInfo.getLocation(), () -> {
+                                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(loser).run(() -> {
+                                    if (loser.isOnline()) {
+                                        loserInfo.restore(loser);
+                                    }
+                                }, null);
+                            });
+                        }, null);
                     }
                 }
                 
@@ -258,7 +312,11 @@ public class DuelManager implements Loadable {
                     }
                 }
 
-                arena.endMatch(winners.iterator().next().getUniqueId(), losers.iterator().next().getUniqueId(), Reason.OPPONENT_DEFEAT);
+                // FIXED: Use global scheduler for arena.endMatch() to avoid Folia region conflicts
+                // This prevents errors when entities are in different regions or already removed by other plugins
+                DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().run(() -> {
+                    arena.endMatch(winners.iterator().next().getUniqueId(), losers.iterator().next().getUniqueId(), Reason.OPPONENT_DEFEAT);
+                });
             }, config.getTeleportDelay() * 20L);
         }, 1L);
     }
@@ -296,18 +354,20 @@ public class DuelManager implements Loadable {
             }
 
             if (info != null) {
-                teleport.tryTeleport(winner, info.getLocation());
-                
-                // FIXED: Wrap potion effect restoration in winner's entity scheduler for Folia compatibility
-                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(winner).run(() -> {
-                    if (match.isOwnInventory()) {
-                        // Preserve any XP gained during the duel when using own inventory
-                        info.restoreWithoutExperience(winner);
-                    } else {
-                        // Restore saved experience for non-own-inventory matches
-                        info.restore(winner);
-                    }
-                }, null);
+                // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
+                teleport.tryTeleport(winner, info.getLocation(), () -> {
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(winner).run(() -> {
+                        if (winner.isOnline()) {
+                            if (match.isOwnInventory()) {
+                                // Preserve any XP gained during the duel when using own inventory
+                                info.restoreWithoutExperience(winner);
+                            } else {
+                                // Restore saved experience for non-own-inventory matches
+                                info.restore(winner);
+                            }
+                        }
+                    }, null);
+                });
             }
 
             if (InventoryUtil.addOrDrop(winner, items)) {
@@ -339,15 +399,69 @@ public class DuelManager implements Loadable {
 
                     // Iterate over a snapshot to avoid modifying the underlying set while processing
                     final List<Player> members = new ArrayList<>(match.getAllPlayers());
-
+                    
+                    // FIXED: Handle each player safely with proper scheduler and online checks
                     for (final Player player : members) {
-                        // Determine alive state from match to restore items correctly if a player had died
+                        // CRITICAL: Check online status first to prevent entity scheduler errors
+                        if (!player.isOnline()) {
+                            // Offline player: Do minimal cleanup on global scheduler (no entity operations)
+                            try {
+                                arena.remove(player);
+                                
+                                // Store items for when they rejoin
+                                final PlayerInfo offlineInfo = playerManager.get(player);
+                                final List<ItemStack> offlineItems = match.getItems(player);
+                                if (offlineInfo != null && offlineItems != null) {
+                                    offlineInfo.getExtra().addAll(offlineItems);
+                                }
+                                
+                                // Clean up manager
+                                playerManager.remove(player);
+                            } catch (Exception ex) {
+                                Log.warn(this, "Error handling offline player " + player.getName() + " in max duration timeout: " + ex.getMessage());
+                            }
+                            continue;
+                        }
+                        
+                        // Online player: Use entity scheduler for all entity operations
                         final boolean alive = !match.isDead(player);
-                        handleTie(player, arena, match, alive);
-                        lang.sendMessage(player, "DUEL.on-end.tie");
+                        
+                        try {
+                            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                                try {
+                                    // Double-check player is still online inside scheduler
+                                    if (!player.isOnline()) {
+                                        return;
+                                    }
+                                    
+                                    handleTie(player, arena, match, alive);
+                                    if (config.isMessageOnEndTie()) {
+                                        lang.sendMessage(player, "DUEL.on-end.tie");
+                                    }
+                                } catch (Exception ex) {
+                                    Log.warn(this, "Error handling tie for player " + player.getName() + ": " + ex.getMessage());
+                                }
+                            }, null);
+                        } catch (Exception ex) {
+                            // Fallback: If entity scheduler fails, try on global scheduler with minimal operations
+                            Log.warn(this, "Failed to schedule entity task for " + player.getName() + ", using fallback: " + ex.getMessage());
+                            try {
+                                arena.remove(player);
+                                playerManager.remove(player);
+                            } catch (Exception ex2) {
+                                Log.warn(this, "Fallback cleanup failed for " + player.getName() + ": " + ex2.getMessage());
+                            }
+                        }
                     }
 
-                    arena.endMatch(null, null, Reason.MAX_TIME_REACHED);
+                    // FIXED: Always end match on global scheduler after processing all players
+                    DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().runDelayed(() -> {
+                        try {
+                            arena.endMatch(null, null, Reason.MAX_TIME_REACHED);
+                        } catch (Exception ex) {
+                            Log.warn(this, "Error ending match in arena " + arena.getName() + ": " + ex.getMessage());
+                        }
+                    }, 3L); // 3 tick delay to ensure all entity scheduler tasks have started
                 }
             }, 1L, 20L);
         }
@@ -377,7 +491,9 @@ public class DuelManager implements Loadable {
 
             if (winnerDecided) {
                 for (final Player winner : match.getAlivePlayers()) {
-                    lang.sendMessage(winner, "DUEL.on-end.plugin-disable");
+                    if (config.isMessageOnEndPluginDisable()) {
+                        lang.sendMessage(winner, "DUEL.on-end.plugin-disable");
+                    }
                     handleWin(winner, arena.getOpponent(winner), arena, match);
                 }
             } else {
@@ -386,7 +502,9 @@ public class DuelManager implements Loadable {
                 for (final Player player : match.getAllPlayers()) {
                     if (match.isDead(player)) continue;
 
-                    lang.sendMessage(player, "DUEL.on-end.plugin-disable");
+                    if (config.isMessageOnEndPluginDisable()) {
+                        lang.sendMessage(player, "DUEL.on-end.plugin-disable");
+                    }
                     handleTie(player, arena, match, ongoing);
                 }
             }
@@ -427,8 +545,14 @@ public class DuelManager implements Loadable {
             }
 
             if (info != null) {
-                teleport.tryTeleport(player, info.getLocation());
-                info.restore(player);
+                // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
+                teleport.tryTeleport(player, info.getLocation(), () -> {
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                        if (player.isOnline()) {
+                            info.restore(player);
+                        }
+                    }, null);
+                });
             } else {
                 // If somehow PlayerInfo is not found...
                 teleport.tryTeleport(player, playerManager.getLobby());
@@ -442,6 +566,91 @@ public class DuelManager implements Loadable {
         } else {
             InventoryUtil.addOrDrop(player, items);
         }
+    }
+
+    /**
+     * Emergency hard reset for a stuck arena. Resets all players and ends match as tie.
+     * This method safely handles both online and offline players using proper Folia schedulers.
+     * 
+     * @param arena Arena to reset
+     * @return True if reset was successful, false if arena has no active match
+     */
+    public boolean hardResetArena(final ArenaImpl arena) {
+        final DuelMatch match = arena.getMatch();
+        if (match == null || !arena.isUsed()) {
+            return false;
+        }
+        
+        // Get all players in the match
+        final List<Player> members = new ArrayList<>(match.getAllPlayers());
+        
+        if (members.isEmpty()) {
+            return false;
+        }
+        
+        // Handle each player safely with proper schedulers
+        for (final Player player : members) {
+            if (!player.isOnline()) {
+                // Offline player: Do minimal cleanup on global scheduler
+                try {
+                    arena.remove(player);
+                    
+                    // Store items for when they rejoin
+                    final PlayerInfo offlineInfo = playerManager.get(player);
+                    final List<ItemStack> offlineItems = match.getItems(player);
+                    if (offlineInfo != null && offlineItems != null) {
+                        offlineInfo.getExtra().addAll(offlineItems);
+                    }
+                    
+                    // Clean up manager
+                    playerManager.remove(player);
+                } catch (Exception ex) {
+                    Log.warn(this, "Error handling offline player " + player.getName() + " in hardreset: " + ex.getMessage());
+                }
+                continue;
+            }
+            
+            // Online player: Use entity scheduler for all entity operations
+            final boolean alive = !match.isDead(player);
+            
+            try {
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    try {
+                        // Double-check player is still online inside scheduler
+                        if (!player.isOnline()) {
+                            return;
+                        }
+                        
+                        handleTie(player, arena, match, alive);
+                        if (config.isMessageOnEndTie()) {
+                            lang.sendMessage(player, "DUEL.on-end.tie");
+                        }
+                    } catch (Exception ex) {
+                        Log.warn(this, "Error handling tie for player " + player.getName() + " in hardreset: " + ex.getMessage());
+                    }
+                }, null);
+            } catch (Exception ex) {
+                // Fallback: If entity scheduler fails, try on global scheduler with minimal operations
+                Log.warn(this, "Failed to schedule entity task for " + player.getName() + ", using fallback: " + ex.getMessage());
+                try {
+                    arena.remove(player);
+                    playerManager.remove(player);
+                } catch (Exception ex2) {
+                    Log.warn(this, "Fallback cleanup failed for " + player.getName() + ": " + ex2.getMessage());
+                }
+            }
+        }
+        
+        // Always end match on global scheduler after processing all players
+        DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().runDelayed(() -> {
+            try {
+                arena.endMatch(null, null, Reason.TIE);
+            } catch (Exception ex) {
+                Log.warn(this, "Error ending match in arena " + arena.getName() + " during hardreset: " + ex.getMessage());
+            }
+        }, 3L); // 3 tick delay to ensure all entity scheduler tasks have started
+        
+        return true;
     }
 
     /**
@@ -484,18 +693,20 @@ public class DuelManager implements Loadable {
             }
 
             if (info != null) {
-                teleport.tryTeleport(winner, info.getLocation());
-                
-                // FIXED: Wrap potion effect restoration in winner's entity scheduler for Folia compatibility
-                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(winner).run(() -> {
-                    if (match.isOwnInventory()) {
-                        // Preserve any XP gained during the duel when using own inventory
-                        info.restoreWithoutExperience(winner);
-                    } else {
-                        // Restore saved experience for non-own-inventory matches
-                        info.restore(winner);
-                    }
-                }, null);
+                // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
+                teleport.tryTeleport(winner, info.getLocation(), () -> {
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(winner).run(() -> {
+                        if (winner.isOnline()) {
+                            if (match.isOwnInventory()) {
+                                // Preserve any XP gained during the duel when using own inventory
+                                info.restoreWithoutExperience(winner);
+                            } else {
+                                // Restore saved experience for non-own-inventory matches
+                                info.restore(winner);
+                            }
+                        }
+                    }, null);
+                });
             }
 
             if (InventoryUtil.addOrDrop(winner, items)) {
@@ -531,18 +742,20 @@ public class DuelManager implements Loadable {
             }
 
             if (info != null) {
-                teleport.tryTeleport(loser, info.getLocation());
-                
-                // FIXED: Wrap potion effect restoration in loser's entity scheduler for Folia compatibility
-                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(loser).run(() -> {
-                    if (match.isOwnInventory()) {
-                        // Preserve any XP gained during the duel when using own inventory
-                        info.restoreWithoutExperience(loser);
-                    } else {
-                        // Restore saved experience for non-own-inventory matches
-                        info.restore(loser);
-                    }
-                }, null);
+                // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
+                teleport.tryTeleport(loser, info.getLocation(), () -> {
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(loser).run(() -> {
+                        if (loser.isOnline()) {
+                            if (match.isOwnInventory()) {
+                                // Preserve any XP gained during the duel when using own inventory
+                                info.restoreWithoutExperience(loser);
+                            } else {
+                                // Restore saved experience for non-own-inventory matches
+                                info.restore(loser);
+                            }
+                        }
+                    }, null);
+                });
             } else {
                 teleport.tryTeleport(loser, playerManager.getLobby());
             }
@@ -640,30 +853,41 @@ public class DuelManager implements Loadable {
                 kitEditManagerInstance.checkAndAbortIfInQueueOrMatch(player);
             }
 
-            if (player.getAllowFlight()) {
-                player.setFlying(false);
-                player.setAllowFlight(false);
-            }
-
-            player.closeInventory();
+            // Schedule player operations on entity-specific scheduler for Folia compatibility
+            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                if (player.getAllowFlight()) {
+                    player.setFlying(false);
+                    player.setAllowFlight(false);
+                }
+                // Note: closeInventory() is handled by teleport.tryTeleport() to prevent world mismatch
+            }, null);
             final boolean dropOwnInv = match.isOwnInventory() && config.isOwnInventoryDropInventoryItems();
             // If using own inventory (regardless of drop setting), do not restore experience to preserve XP changes
             final boolean restoreExperience = !match.isOwnInventory();
             playerManager.create(player, dropOwnInv, restoreExperience);
-            teleport.tryTeleport(player, location);
-
+            
+            // FIXED: Schedule kit loading on entity-specific scheduler after teleport completes for Folia compatibility
             if (kit != null) {
-                PlayerUtil.reset(player);
-                
-                // Check for player-specific kit first
-                com.meteordevelopments.duels.kit.edit.KitEditManager kitEditManager = com.meteordevelopments.duels.kit.edit.KitEditManager.getInstance();
-                if (kitEditManager != null && kitEditManager.hasPlayerKit(player, kit.getName())) {
-                    // Load player's custom kit
-                    kitEditManager.loadPlayerKit(player, kit.getName());
-                } else {
-                    // Load default kit
-                    kit.equip(player);
-                }
+                teleport.tryTeleport(player, location, () -> {
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                        if (!player.isOnline()) {
+                            return;
+                        }
+                        PlayerUtil.reset(player);
+                        
+                        // Check for player-specific kit first
+                        com.meteordevelopments.duels.kit.edit.KitEditManager kitEditManager = com.meteordevelopments.duels.kit.edit.KitEditManager.getInstance();
+                        if (kitEditManager != null && kitEditManager.hasPlayerKit(player, kit.getName())) {
+                            // Load player's custom kit
+                            kitEditManager.loadPlayerKit(player, kit.getName());
+                        } else {
+                            // Load default kit
+                            kit.equip(player);
+                        }
+                    }, null);
+                });
+            } else {
+                teleport.tryTeleport(player, location);
             }
 
             if (config.isStartCommandsEnabled() && !(match.getSource() == null && config.isStartCommandsQueueOnly())) {
@@ -741,8 +965,10 @@ public class DuelManager implements Loadable {
                         match.addRoundWin(winner); // Add twice to immediately win
                         match.markAsDead(player);
                         
-                        arena.broadcast(plugin.getLang().getMessage("DUEL.on-death.no-killer", 
-                                "name", player.getName()));
+                        if (config.isMessageOnDeathNoKiller()) {
+                            arena.broadcast(plugin.getLang().getMessage("DUEL.on-death.no-killer", 
+                                    "name", player.getName()));
+                        }
                         
                         // Use delayed task to allow death to process
                         final Location deadLocation = player.getLocation().clone();
@@ -769,13 +995,14 @@ public class DuelManager implements Loadable {
 
             inventoryManager.create(player, true);
 
-            if (config.isSendDeathMessages()) {
-                final Player killer = player.getKiller();
-
-                if (killer != null) {
+            final Player killer = player.getKiller();
+            if (killer != null) {
+                if (config.isMessageOnDeathWithKiller()) {
                     final double health = Math.ceil(killer.getHealth()) * 0.5;
                     arena.broadcast(lang.getMessage("DUEL.on-death.with-killer", "name", player.getName(), "killer", killer.getName(), "health", health));
-                } else {
+                }
+            } else {
+                if (config.isMessageOnDeathNoKiller()) {
                     arena.broadcast(lang.getMessage("DUEL.on-death.no-killer", "name", player.getName()));
                 }
             }
@@ -794,8 +1021,10 @@ public class DuelManager implements Loadable {
                 event.getDrops().clear();
                 event.setDeathMessage(null);
                 
-                // Immediately set to spectator mode to prevent death screen
-                player.setGameMode(GameMode.SPECTATOR);
+                // Immediately set to spectator mode to prevent death screen - schedule on entity-specific scheduler for Folia compatibility
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    player.setGameMode(GameMode.SPECTATOR);
+                }, null);
                 
                 // Check if any team is completely eliminated
                 TeamDuelMatch.Team winningTeam = teamMatch.getWinningTeam();
@@ -812,6 +1041,13 @@ public class DuelManager implements Loadable {
             arena.remove(player);
 
             if (prevSize < 2 || match.size() >= prevSize) {
+                return;
+            }
+
+            // CRITICAL: Check if match still exists before handling match end (might have been cleared)
+            final DuelMatch currentMatch = arena.getMatch();
+            if (currentMatch == null || currentMatch != match) {
+                // Match was already ended or cleared
                 return;
             }
 
@@ -879,15 +1115,93 @@ public class DuelManager implements Loadable {
                 return;
             }
 
-            player.setHealth(0);
-            player.getInventory().clear();
-            player.getInventory().setArmorContents(null);
-            player.updateInventory();
+            final ArenaImpl arena = arenaManager.get(player);
+            final DuelMatch match = arena != null ? arena.getMatch() : null;
+            
+            if (match == null) {
+                return;
+            }
 
-            final PlayerInfo info = playerManager.get(player);
-            // DON'T restore here - let them stay dead and respawn normally
-            // The PlayerInfo is kept in the manager for when they respawn
-            // Removed: info.restore(player);
+            // CRITICAL FIX: Handle player quit during countdown - treat as loss for quitting player, win for remaining player
+            // Check if countdown is still active (same logic as GiveupCommand)
+            boolean countdownActive = false;
+            if (config.isCdEnabled()) {
+                // Countdown messages are shown every second (20 ticks)
+                // Countdown duration = (number of messages - 1) * 1000ms
+                // The last message ("Now in a match") is shown AFTER countdown completes
+                // Add 500ms buffer to account for timing differences
+                final int countdownDuration = (config.getCdDuelMessages().size() - 1) * 1000 + 500;
+                if (match.getDurationInMillis() < countdownDuration) {
+                    countdownActive = true;
+                }
+            }
+            
+            if (countdownActive) {
+                // Countdown is active - cancel countdown and end match with quitting player as loser
+                final Player quittingPlayer = player;
+                
+                // CRITICAL: Kill the player IMMEDIATELY - PlayerQuitEvent runs on correct thread, player still online
+                // Event handlers on Folia run on the correct thread for the entity, so we can call directly
+                // This will trigger PlayerDeathEvent which will handle match ending automatically
+                try {
+                    quittingPlayer.setHealth(0);
+                    quittingPlayer.getInventory().clear();
+                    quittingPlayer.getInventory().setArmorContents(null);
+                    quittingPlayer.updateInventory();
+                } catch (Exception ex) {
+                    // Fallback: If direct call fails, schedule it immediately (shouldn't happen but safety net)
+                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(quittingPlayer).run(() -> {
+                        if (quittingPlayer.isOnline()) {
+                            quittingPlayer.setHealth(0);
+                            quittingPlayer.getInventory().clear();
+                            quittingPlayer.getInventory().setArmorContents(null);
+                            quittingPlayer.updateInventory();
+                        }
+                    }, null);
+                }
+                
+                // Cancel countdown
+                arena.setCountdown(null);
+                
+                // Mark quitting player as dead in match (PlayerDeathEvent will handle the rest)
+                match.markAsDead(quittingPlayer);
+                
+                // Remove PlayerInfo completely - don't restore anything, let server handle respawn
+                playerManager.remove(quittingPlayer);
+                
+                // DON'T call handleMatchEnd here - let PlayerDeathEvent handle it automatically
+                // This prevents duplicate execution of pre-end commands and match ending
+                return; // Exit early - countdown quit handled, PlayerDeathEvent will handle match end
+            }
+
+            // Normal quit handling (countdown complete, match in progress)
+            // CRITICAL: Kill the player IMMEDIATELY - PlayerQuitEvent runs on correct thread, player still online
+            // Event handlers on Folia run on the correct thread for the entity, so we can call directly
+            try {
+                player.setHealth(0);
+                player.getInventory().clear();
+                player.getInventory().setArmorContents(null);
+                player.updateInventory();
+            } catch (Exception ex) {
+                // Fallback: If direct call fails, schedule it immediately (shouldn't happen but safety net)
+                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    if (player.isOnline()) {
+                        player.setHealth(0);
+                        player.getInventory().clear();
+                        player.getInventory().setArmorContents(null);
+                        player.updateInventory();
+                    }
+                }, null);
+            }
+            
+            // Mark player as dead in match (so PlayerDeathEvent knows they're dead)
+            match.markAsDead(player);
+            
+            // Remove PlayerInfo completely - don't restore anything, let server handle respawn
+            playerManager.remove(player);
+            
+            // DON'T remove from arena or end match here - let PlayerDeathEvent handle it automatically
+            // PlayerDeathEvent will call arena.remove() and check match.size() to end the match
         }
 
         @EventHandler(ignoreCancelled = true)

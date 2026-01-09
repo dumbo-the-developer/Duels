@@ -103,6 +103,12 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private List<String> startCommands;
     @Getter
+    private boolean preEndCommandsEnabled;
+    @Getter
+    private boolean preEndCommandsQueueOnly;
+    @Getter
+    private List<String> preEndCommands;
+    @Getter
     private boolean endCommandsEnabled;
     @Getter
     private boolean endCommandsQueueOnly;
@@ -285,7 +291,19 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean disableMovementInEndgame;
     @Getter
-    private boolean sendDeathMessages;
+    private boolean messageOnDeathWithKiller;
+    @Getter
+    private boolean messageOnDeathNoKiller;
+    @Getter
+    private boolean messageOnEndTie;
+    @Getter
+    private boolean messageOnEndPluginDisable;
+    @Getter
+    private boolean messageOnEndOpponentDefeat;
+    @Getter
+    private boolean messageOnEndTeamOpponentDefeat;
+    @Getter
+    private boolean messageOnEndPartyOpponentDefeat;
     @Getter
     private int partyInviteExpiration;
     @Getter
@@ -383,6 +401,9 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         startCommandsEnabled = configuration.getBoolean("duel.match.start-commands.enabled", false);
         startCommandsQueueOnly = configuration.getBoolean("duel.match.start-commands.queue-matches-only", false);
         startCommands = configuration.getStringList("duel.match.start-commands.commands");
+        preEndCommandsEnabled = configuration.getBoolean("duel.match.pre-end-commands.enabled", false);
+        preEndCommandsQueueOnly = configuration.getBoolean("duel.match.pre-end-commands.queue-matches-only", false);
+        preEndCommands = configuration.getStringList("duel.match.pre-end-commands.commands");
         endCommandsEnabled = configuration.getBoolean("duel.match.end-commands.enabled", false);
         endCommandsQueueOnly = configuration.getBoolean("duel.match.end-commands.queue-matches-only", false);
         endCommands = configuration.getStringList("duel.match.end-commands.commands");
@@ -489,7 +510,13 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         disableEnderpearlInEndgame = configuration.getBoolean("disable-enderpearl-in-endgame", true);
         disableMovementInEndgame = configuration.getBoolean("disable-movement-in-endgame", false);
 
-        sendDeathMessages = configuration.getBoolean("duel.send-death-messages", true);
+        messageOnDeathWithKiller = configuration.getBoolean("duel.messages.on-death.with-killer", true);
+        messageOnDeathNoKiller = configuration.getBoolean("duel.messages.on-death.no-killer", true);
+        messageOnEndTie = configuration.getBoolean("duel.messages.on-end.tie", true);
+        messageOnEndPluginDisable = configuration.getBoolean("duel.messages.on-end.plugin-disable", true);
+        messageOnEndOpponentDefeat = configuration.getBoolean("duel.messages.on-end.opponent-defeat", true);
+        messageOnEndTeamOpponentDefeat = configuration.getBoolean("duel.messages.on-end.team-opponent-defeat", true);
+        messageOnEndPartyOpponentDefeat = configuration.getBoolean("duel.messages.on-end.party-opponent-defeat", true);
         partyInviteExpiration = configuration.getInt("party.invite-expiration", 30);
         partyAutoDisbandAfter = configuration.getInt("party.auto-disband-after", 10);
         partyMaxSize = configuration.getInt("party.max-size", 10);
