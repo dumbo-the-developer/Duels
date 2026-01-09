@@ -145,15 +145,12 @@ public class DuelManager implements Loadable {
                 DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(arena.first().getLocation()).runDelayed(() -> {
                     // Handle the loser (remove from arena and restore state)
                     // This is especially important for ROUNDS3 where the loser never actually dies
-                    // Check if loser is still online before handling
-                    if (loser.isOnline() && match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3)) {
+                    if (match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3)) {
                         handleLoss(loser, arena, match);
                     }
                     
                     for (Player alivePlayer : winners) {
-                        if (alivePlayer.isOnline()) {  // Safety check
-                            handleWin(alivePlayer, loser, arena, match);
-                        }
+                        handleWin(alivePlayer, loser, arena, match);
                     }
 
                     if (config.isEndCommandsEnabled() && !(!match.isFromQueue() && config.isEndCommandsQueueOnly())) {
@@ -185,9 +182,7 @@ public class DuelManager implements Loadable {
                     // Don't need to handle the loser since they're offline
                     
                     for (Player alivePlayer : winners) {
-                        if (alivePlayer.isOnline()) {  // Safety check
-                            handleWin(alivePlayer, loser, arena, match);
-                        }
+                        handleWin(alivePlayer, loser, arena, match);
                     }
 
                     if (config.isEndCommandsEnabled() && !(!match.isFromQueue() && config.isEndCommandsQueueOnly())) {
