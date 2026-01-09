@@ -1056,6 +1056,77 @@ public class DuelManager implements Loadable {
                 return;
             }
 
+            final ArenaImpl arena = arenaManager.get(player);
+            final DuelMatch match = arena != null ? arena.getMatch() : null;
+            
+            if (match == null) {
+                return;
+            }
+
+            // CRITICAL FIX: Handle player quit during countdown - treat as loss for quitting player, win for remaining player
+            // Check if countdown is still active (same logic as GiveupCommand)
+            boolean countdownActive = false;
+            if (config.isCdEnabled()) {
+                // Countdown messages are shown every second (20 ticks)
+                // Countdown duration = (number of messages - 1) * 1000ms
+                // The last message ("Now in a match") is shown AFTER countdown completes
+                // Add 500ms buffer to account for timing differences
+                final int countdownDuration = (config.getCdDuelMessages().size() - 1) * 1000 + 500;
+                if (match.getDurationInMillis() < countdownDuration) {
+                    countdownActive = true;
+                }
+            }
+            
+            if (countdownActive) {
+                // Countdown is active - cancel countdown and end match with quitting player as loser
+                final Player quittingPlayer = player;
+                
+                // Cancel countdown
+                arena.setCountdown(null);
+                
+                // Mark quitting player as dead in match
+                match.markAsDead(quittingPlayer);
+                
+                // Remove quitting player from arena
+                arena.remove(quittingPlayer);
+                
+                // Remove PlayerInfo for quitting player and store items (prevents restore on rejoin)
+                final PlayerInfo quitPlayerInfo = playerManager.remove(quittingPlayer);
+                final List<ItemStack> quitPlayerItems = match.getItems(quittingPlayer);
+                if (quitPlayerInfo != null && quitPlayerItems != null) {
+                    quitPlayerInfo.getExtra().addAll(quitPlayerItems);
+                }
+                
+                // Get the remaining player (winner)
+                final Set<Player> alivePlayers = match.getAlivePlayers();
+                if (alivePlayers.isEmpty()) {
+                    // No alive players - shouldn't happen but handle it
+                    DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().runDelayed(() -> {
+                        try {
+                            arena.endMatch(null, null, Reason.TIE);
+                        } catch (Exception ex) {
+                            Log.warn(DuelManager.this, "Error ending match in arena " + arena.getName() + " after countdown quit: " + ex.getMessage());
+                        }
+                    }, 3L);
+                    return;
+                }
+                
+                final Player winner = alivePlayers.iterator().next();
+                final Location deadLocation = quittingPlayer.getLocation() != null ? quittingPlayer.getLocation() : (winner.getLocation() != null ? winner.getLocation() : arena.getPosition(1));
+                
+                // End match with winner and loser (quitting player is offline, so handleMatchEnd will handle it correctly)
+                DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().runDelayed(() -> {
+                    try {
+                        handleMatchEnd(match, arena, quittingPlayer, deadLocation, winner);
+                    } catch (Exception ex) {
+                        Log.warn(DuelManager.this, "Error handling match end after countdown quit: " + ex.getMessage());
+                    }
+                }, 1L);
+                
+                return; // Exit early - countdown quit handled
+            }
+
+            // Normal quit handling (countdown complete, match in progress)
             // Schedule player operations on entity-specific scheduler for Folia compatibility
             DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
                 player.setHealth(0);
