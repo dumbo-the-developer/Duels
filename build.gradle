@@ -10,7 +10,7 @@ buildscript {
 
 allprojects {
     group = 'com.meteordevelopments'
-    version = '5.6'
+    version = '5.6-dev'
 }
 
 subprojects {
@@ -85,6 +85,11 @@ subprojects {
         maven {
             name = 'axPlugins'
             url = 'https://repo.artillex-studios.com/releases/'
+        }
+
+        maven {
+            name = 'alessiodp'
+            url = 'https://repo.alessiodp.com/releases/'
         }
 
         flatDir {

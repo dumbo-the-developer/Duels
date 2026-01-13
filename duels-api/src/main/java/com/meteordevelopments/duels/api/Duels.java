@@ -10,7 +10,6 @@ import com.meteordevelopments.duels.api.user.UserManager;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
 
 
 public interface Duels extends Plugin {
@@ -101,10 +100,10 @@ public interface Duels extends Plugin {
      * Runs the task on server thread.
      *
      * @param task Task to run.
-     * @return BukkitTask executed.
+     * @return Task handle executed.
      * @since 3.1.0
      */
-    ScheduledTask doSync(@NotNull final Runnable task);
+    Object doSync(@NotNull final Runnable task);
 
 
     /**
@@ -112,10 +111,10 @@ public interface Duels extends Plugin {
      *
      * @param task  Task to run.
      * @param delay time to delay. 20L = 1s
-     * @return BukkitTask executed.
+     * @return Task handle executed.
      * @since 3.1.0
      */
-    ScheduledTask doSyncAfter(@NotNull final Runnable task, long delay);
+    Object doSyncAfter(@NotNull final Runnable task, long delay);
 
 
     /**
@@ -124,20 +123,20 @@ public interface Duels extends Plugin {
      * @param task     Task to run.
      * @param delay    time to delay the start of repeat. 20L = 1s
      * @param interval interval of this task. 20L = 1s
-     * @return BukkitTask executed.
+     * @return Task handle executed.
      * @since 3.1.0
      */
-    ScheduledTask doSyncRepeat(@NotNull final Runnable task, long delay, long interval);
+    Object doSyncRepeat(@NotNull final Runnable task, long delay, long interval);
 
 
     /**
      * Runs the task asynchronously.
      *
      * @param task Task to run asynchronously.
-     * @return BukkitTask executed.
+     * @return Task handle executed.
      * @since 3.1.0
      */
-    ScheduledTask doAsync(@NotNull final Runnable task);
+    Object doAsync(@NotNull final Runnable task);
 
 
     /**
@@ -145,10 +144,10 @@ public interface Duels extends Plugin {
      *
      * @param task  Task to run asynchronously.
      * @param delay time to delay. 20L = 1s
-     * @return BukkitTask executed.
+     * @return Task handle executed.
      * @since 3.1.0
      */
-    ScheduledTask doAsyncAfter(@NotNull final Runnable task, long delay);
+    Object doAsyncAfter(@NotNull final Runnable task, long delay);
 
 
     /**
@@ -157,10 +156,10 @@ public interface Duels extends Plugin {
      * @param task     Task to run asynchronously.
      * @param delay    time to delay the start of repeat. 20L = 1s
      * @param interval interval of this task. 20L = 1s
-     * @return BukkitTask executed.
+     * @return Task handle executed.
      * @since 3.1.0
      */
-    ScheduledTask doAsyncRepeat(@NotNull final Runnable task, long delay, long interval);
+    Object doAsyncRepeat(@NotNull final Runnable task, long delay, long interval);
 
 
     /**
@@ -169,7 +168,7 @@ public interface Duels extends Plugin {
      * @param task Task to cancel if not already cancelled.
      * @since 3.2.0
      */
-    void cancelTask(@NotNull final ScheduledTask task);
+    void cancelTask(@NotNull final Object task);
 
     /**
      * Logs a message with {@link java.util.logging.Level#INFO}.

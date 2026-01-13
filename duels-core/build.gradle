@@ -1,0 +1,11 @@
+dependencies {
+    compileOnly 'org.jetbrains:annotations-java5:24.1.0'
+    compileOnly 'org.projectlombok:lombok:1.18.42'
+    annotationProcessor 'org.projectlombok:lombok:1.18.42'
+    compileOnly 'commons-lang:commons-lang:2.6'
+    compileOnly 'com.google.guava:guava:33.2.1-jre'
+    compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.20.1'
+    compileOnly 'org.json:json:20251224'
+
+    implementation project(':duels-api')
+}
