@@ -903,6 +903,16 @@ public class DuelManager implements Loadable {
                 }
             }
 
+            if (config.isPlayerExecuteCommandsOnArenaPreStartEnabled() && !(match.getSource() == null && config.isPlayerExecuteCommandsOnArenaPreStartQueueOnly())) {
+                try {
+                    for (final String command : config.getPlayerExecuteCommandsOnArenaPreStart()) {
+                        executePlayerCommandWithDelay(player, command);
+                    }
+                } catch (Exception ex) {
+                    Log.warn(this, "Error while running player execute commands on arena pre-start: " + ex.getMessage());
+                }
+            }
+
             if (myPet != null) {
                 myPet.removePet(player);
             }
@@ -1419,6 +1429,42 @@ public class DuelManager implements Loadable {
                     Log.warn(this, "Error executing command: " + ex.getMessage());
                 }
             });
+        }
+    }
+
+    private void executePlayerCommandWithDelay(Player player, String command) {
+        Matcher matcher = DELAY_PATTERN.matcher(command);
+        
+        if (matcher.find()) {
+            // Extract delay value in milliseconds
+            long delayMs = Long.parseLong(matcher.group(1));
+            // Remove the {delay:x} placeholder from the command
+            String cleanCommand = matcher.replaceAll("").trim();
+            
+            // Convert milliseconds to ticks (1 tick = 50ms)
+            long delayTicks = delayMs / 50;
+            
+            // Use entity-specific scheduler for player command execution in Folia
+            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).runDelayed(() -> {
+                try {
+                    if (player.isOnline()) {
+                        player.performCommand(cleanCommand);
+                    }
+                } catch (Exception ex) {
+                    Log.warn(this, "Error executing delayed player command: " + ex.getMessage());
+                }
+            }, null, delayTicks);
+        } else {
+            // Execute immediately on entity-specific scheduler for Folia compatibility
+            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                try {
+                    if (player.isOnline()) {
+                        player.performCommand(command);
+                    }
+                } catch (Exception ex) {
+                    Log.warn(this, "Error executing player command: " + ex.getMessage());
+                }
+            }, null);
         }
     }
 }

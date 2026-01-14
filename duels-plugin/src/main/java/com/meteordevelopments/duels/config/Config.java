@@ -125,6 +125,12 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private List<String> endCommands;
     @Getter
+    private boolean playerExecuteCommandsOnArenaPreStartEnabled;
+    @Getter
+    private boolean playerExecuteCommandsOnArenaPreStartQueueOnly;
+    @Getter
+    private List<String> playerExecuteCommandsOnArenaPreStart;
+    @Getter
     private boolean projectileHitMessageEnabled;
     @Getter
     private List<String> projectileHitMessageTypes;
@@ -417,6 +423,9 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         endCommandsEnabled = configuration.getBoolean("duel.match.end-commands.enabled", false);
         endCommandsQueueOnly = configuration.getBoolean("duel.match.end-commands.queue-matches-only", false);
         endCommands = configuration.getStringList("duel.match.end-commands.commands");
+        playerExecuteCommandsOnArenaPreStartEnabled = configuration.getBoolean("duel.match.player-execute-commands-on-arena-pre-start.enabled", false);
+        playerExecuteCommandsOnArenaPreStartQueueOnly = configuration.getBoolean("duel.match.player-execute-commands-on-arena-pre-start.queue-matches-only", false);
+        playerExecuteCommandsOnArenaPreStart = configuration.getStringList("duel.match.player-execute-commands-on-arena-pre-start.commands");
         projectileHitMessageEnabled = configuration.getBoolean("duel.projectile-hit-message.enabled", true);
         projectileHitMessageTypes = configuration.getStringList("duel.projectile-hit-message.types");
         preventInventoryOpen = configuration.getBoolean("duel.prevent-inventory-open", true);

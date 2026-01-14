@@ -235,6 +235,20 @@ duel:
         - 'give %loser% dirt 1{delay:50}'
         - 'say Congratulations %winner%!{delay:100}'
 
+    player-execute-commands-on-arena-pre-start:
+      # If set to 'true', the commands listed below will be executed as players when they are teleported to the arena (before match starts).
+      # Commands are executed as the player, not as console.
+      # default: false
+      enabled: false
+
+      # If set to 'true', player-execute-commands-on-arena-pre-start will run only for matches started through the queue system.
+      # default: false
+      queue-matches-only: false
+
+      # Commands to execute as each player. Supports {delay:x} for delayed execution (x in milliseconds).
+      commands:
+        - 'tpacancel'
+
   projectile-hit-message:
     # If set to 'true', a message from lang.yml will be sent to the shooter of the projectile.
     # default: true
