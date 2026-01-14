@@ -92,6 +92,9 @@ public class DuelManager implements Loadable {
             return;
         }
         
+        // Mark match as finished immediately to prevent re-entry from concurrent death events
+        match.setFinished();
+        
         DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(arena.first().getLocation()).runDelayed(() -> {
             if (arena.size() == 0) {
                 match.getAllPlayers().forEach(matchPlayer -> {
@@ -217,6 +220,9 @@ public class DuelManager implements Loadable {
         if (match.isFinished()) {
             return;
         }
+        
+        // Mark match as finished immediately to prevent re-entry from concurrent team member deaths
+        match.setFinished();
         
         DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(deadLocation).runDelayed(() -> {
             if (config.isSpawnFirework()) {
@@ -1039,11 +1045,6 @@ public class DuelManager implements Loadable {
                 // Check if any team is completely eliminated
                 TeamDuelMatch.Team winningTeam = teamMatch.getWinningTeam();
                 if (winningTeam != null && teamMatch.size() == 1) {
-                    // CRITICAL FIX: Mark match as finished IMMEDIATELY to prevent race condition
-                    // where multiple players die before match ending is processed, causing the
-                    // match to never properly end and players to get stuck "in duel"
-                    match.setFinished();
-                    
                     final Location deadLocation = player.getEyeLocation().clone();
                     handleTeamMatchEnd(teamMatch, arena, deadLocation, winningTeam);
                     return;
@@ -1065,10 +1066,6 @@ public class DuelManager implements Loadable {
                 // Match was already ended or cleared
                 return;
             }
-
-            // CRITICAL FIX: Mark match as finished IMMEDIATELY to prevent race condition
-            // where multiple players die before match ending is processed
-            match.setFinished();
 
             final Location deadLocation = player.getEyeLocation().clone();
             handleMatchEnd(match, arena, player, deadLocation, match.getAlivePlayers().iterator().next());
