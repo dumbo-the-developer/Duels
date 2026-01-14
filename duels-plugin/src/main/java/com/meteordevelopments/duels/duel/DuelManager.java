@@ -87,7 +87,7 @@ public class DuelManager implements Loadable {
     }
 
     public void handleMatchEnd(DuelMatch match, ArenaImpl arena, Player loser, Location deadLocation, Player winner) {
-        // Safety check: Don't process if match is already finished (prevents duplicate processing)
+        // Safety check: Don't process if match is already finished (prevents race condition where multiple death events trigger concurrent match ending)
         if (match.isFinished()) {
             return;
         }
@@ -213,7 +213,7 @@ public class DuelManager implements Loadable {
     }
 
     public void handleTeamMatchEnd(TeamDuelMatch match, ArenaImpl arena, Location deadLocation, TeamDuelMatch.Team winningTeam) {
-        // Safety check: Don't process if match is already finished (prevents duplicate processing)
+        // Safety check: Don't process if team match is already finished (prevents race condition where multiple team member deaths trigger concurrent match ending)
         if (match.isFinished()) {
             return;
         }
