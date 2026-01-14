@@ -335,7 +335,7 @@ public class ArenaImpl extends BaseButton implements Arena {
         countdown.startCountdown(0L, 20L);
     }
 
-    boolean isCountingComplete() {
+    public boolean isCountingComplete() {
         return countdown == null;
     }
 

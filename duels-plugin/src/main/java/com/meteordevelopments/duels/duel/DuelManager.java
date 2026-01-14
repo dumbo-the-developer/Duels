@@ -1261,6 +1261,14 @@ public class DuelManager implements Loadable {
                 return;
             }
 
+            // Check if player is in countdown phase - cancel ALL teleports
+            final ArenaImpl arena = arenaManager.get(player);
+            if (arena != null && !arena.isCountingComplete()) {
+                event.setCancelled(true);
+                lang.sendMessage(player, "DUEL.prevent.teleportation");
+                return;
+            }
+
             final Location from = event.getFrom();
 
             if (from.getWorld().equals(to.getWorld()) && from.distance(to) <= config.getDistanceAllowed()) {
