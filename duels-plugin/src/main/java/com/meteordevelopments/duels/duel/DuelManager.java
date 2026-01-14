@@ -87,6 +87,11 @@ public class DuelManager implements Loadable {
     }
 
     public void handleMatchEnd(DuelMatch match, ArenaImpl arena, Player loser, Location deadLocation, Player winner) {
+        // Safety check: Don't process if match is already finished (prevents duplicate processing)
+        if (match.isFinished()) {
+            return;
+        }
+        
         DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(arena.first().getLocation()).runDelayed(() -> {
             if (arena.size() == 0) {
                 match.getAllPlayers().forEach(matchPlayer -> {
@@ -208,6 +213,11 @@ public class DuelManager implements Loadable {
     }
 
     public void handleTeamMatchEnd(TeamDuelMatch match, ArenaImpl arena, Location deadLocation, TeamDuelMatch.Team winningTeam) {
+        // Safety check: Don't process if match is already finished (prevents duplicate processing)
+        if (match.isFinished()) {
+            return;
+        }
+        
         DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(deadLocation).runDelayed(() -> {
             if (config.isSpawnFirework()) {
                 DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(deadLocation).run(() -> {
@@ -1029,6 +1039,11 @@ public class DuelManager implements Loadable {
                 // Check if any team is completely eliminated
                 TeamDuelMatch.Team winningTeam = teamMatch.getWinningTeam();
                 if (winningTeam != null && teamMatch.size() == 1) {
+                    // CRITICAL FIX: Mark match as finished IMMEDIATELY to prevent race condition
+                    // where multiple players die before match ending is processed, causing the
+                    // match to never properly end and players to get stuck "in duel"
+                    match.setFinished();
+                    
                     final Location deadLocation = player.getEyeLocation().clone();
                     handleTeamMatchEnd(teamMatch, arena, deadLocation, winningTeam);
                     return;
@@ -1050,6 +1065,10 @@ public class DuelManager implements Loadable {
                 // Match was already ended or cleared
                 return;
             }
+
+            // CRITICAL FIX: Mark match as finished IMMEDIATELY to prevent race condition
+            // where multiple players die before match ending is processed
+            match.setFinished();
 
             final Location deadLocation = player.getEyeLocation().clone();
             handleMatchEnd(match, arena, player, deadLocation, match.getAlivePlayers().iterator().next());
