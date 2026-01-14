@@ -1249,28 +1249,21 @@ public class DuelManager implements Loadable {
             lang.sendMessage(event.getPlayer(), "DUEL.prevent.command", "command", event.getMessage());
         }
 
-        @EventHandler(ignoreCancelled = true)
+        @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
         public void on(final PlayerTeleportEvent event) {
             final Player player = event.getPlayer();
             final Location to = event.getTo();
 
-            if (!config.isLimitTeleportEnabled()
-                    || event.getCause() == TeleportCause.ENDER_PEARL
-                    || event.getCause() == TeleportCause.SPECTATE
-                    || !arenaManager.isInMatch(player)) {
-                return;
-            }
+            // Some outside plugins bypasses this event and players can get out of the arena.
 
-            // Check if player is in countdown phase - cancel ALL teleports
-            final ArenaImpl arena = arenaManager.get(player);
-            if (arena != null && !arena.isCountingComplete()) {
-                event.setCancelled(true);
-                lang.sendMessage(player, "DUEL.prevent.teleportation");
-                return;
-            }
+            if(!arenaManager.isInMatch(player)) return;
 
+            if (!config.isLimitTeleportEnabled()) return;
+
+            if (event.getCause() == TeleportCause.ENDER_PEARL || event.getCause() == TeleportCause.SPECTATE) return;
+
+            // Only allow ender pearls within distance limit
             final Location from = event.getFrom();
-
             if (from.getWorld().equals(to.getWorld()) && from.distance(to) <= config.getDistanceAllowed()) {
                 return;
             }
