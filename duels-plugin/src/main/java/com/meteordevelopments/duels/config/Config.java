@@ -61,6 +61,12 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private GameMode forceGamemodeOnJoinMode;
     @Getter
+    private boolean checkForPlayersRoutineEnabled;
+    @Getter
+    private int checkForPlayersRoutineTimeSeconds;
+    @Getter
+    private String checkForPlayersRoutineAction;
+    @Getter
     private boolean myPetDespawn;
     @Getter
     private boolean preventBountyLoss;
@@ -459,6 +465,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         whitelistedCommands = configuration.getStringList("duel.whitelisted-commands");
         blacklistedCommands = configuration.getStringList("duel.blacklisted-commands");
 
+        checkForPlayersRoutineEnabled = configuration.getBoolean("duel.check-for-players-routine.enabled", true);
+        checkForPlayersRoutineTimeSeconds = configuration.getInt("duel.check-for-players-routine.check-time-seconds", 10);
+        checkForPlayersRoutineAction = configuration.getString("duel.check-for-players-routine.action", "kill-outside-player");
+        
         queueBlacklistedCommands = configuration.getStringList("queue.blacklisted-commands");
 
         ratingEnabled = configuration.getBoolean("rating.enabled", true);

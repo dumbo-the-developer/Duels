@@ -249,6 +249,23 @@ duel:
       commands:
         - 'tpacancel'
 
+    check-for-players-routine:
+      # If set to 'true', the check for players routine will be enabled.
+      # While this time players will be checked for if they are in the duel world.
+      # If they are not in the duel world, the action will be taken.
+      # default: true
+      enabled: true
+
+      # Time in seconds to check for players.
+      # default: 10
+      check-time-seconds: 10
+
+      #Action to when players outside duel world.
+      # ACTIONS: kill-outside-player, hardstop-arena
+      # default: kill-outside-player 
+      action: kill-outside-player
+
+
   projectile-hit-message:
     # If set to 'true', a message from lang.yml will be sent to the shooter of the projectile.
     # default: true

@@ -72,6 +72,8 @@ public class DuelManager implements Loadable {
     private MyPetHook myPet;
 
     private TaskWrapper durationCheckTask;
+    private final Map<ArenaImpl, TaskWrapper> activeCheckRoutines = new HashMap<>();
+    private final Set<ArenaImpl> activeCheckRoutineFlags = new HashSet<>();
 
     public DuelManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -87,6 +89,13 @@ public class DuelManager implements Loadable {
     }
 
     public void handleMatchEnd(DuelMatch match, ArenaImpl arena, Player loser, Location deadLocation, Player winner) {
+        // Clean up check routine for this arena
+        activeCheckRoutineFlags.remove(arena);
+        final TaskWrapper routineTask = activeCheckRoutines.remove(arena);
+        if (routineTask != null && !routineTask.isCancelled()) {
+            routineTask.cancel();
+        }
+
         DuelsPlugin.getSchedulerAdapter().runTaskLater(arena.first().getLocation(), () -> {
             if (arena.size() == 0) {
                 match.getAllPlayers().forEach(matchPlayer -> {
@@ -819,6 +828,11 @@ public class DuelManager implements Loadable {
 
         final MatchStartEvent event = new MatchStartEvent(match, players.toArray(new Player[players.size()]));
         Bukkit.getPluginManager().callEvent(event);
+        
+        if (config.isCheckForPlayersRoutineEnabled()) {
+            startCheckForPlayersRoutine(match, arena);
+        }
+
         return true;
     }
 
@@ -839,6 +853,86 @@ public class DuelManager implements Loadable {
         } else {
             return startMatch(Collections.singleton(sender), Collections.singleton(target), settings, items, source);
         }
+    }
+
+    private void startCheckForPlayersRoutine(final DuelMatch match, final ArenaImpl arena) {
+        final Location arenaLocation = arena.getPosition(1);
+        if (arenaLocation == null || arenaLocation.getWorld() == null) {
+            return; // Can't check if arena has no valid location
+        }
+        
+        final World arenaWorld = arenaLocation.getWorld();
+        final int checkTimeSeconds = config.getCheckForPlayersRoutineTimeSeconds();
+        final String action = config.getCheckForPlayersRoutineAction();
+        
+        // Cancel any existing routine for this arena
+        activeCheckRoutineFlags.remove(arena);
+        final TaskWrapper existingTask = activeCheckRoutines.remove(arena);
+        if (existingTask != null && !existingTask.isCancelled()) {
+            existingTask.cancel();
+        }
+        
+        // Mark this arena as having an active routine
+        activeCheckRoutineFlags.add(arena);
+        
+        final int[] checkCount = {0}; // Track how many checks we've done
+        
+        // Schedule repeating task every second (20 ticks)
+        final TaskWrapper task = DuelsPlugin.getSchedulerAdapter().runTaskTimerAsynchronously(() -> {
+                // Check if routine should still be active
+                if (!activeCheckRoutineFlags.contains(arena)) {
+                    return; // Routine was cancelled, stop checking
+                }
+                
+                // Check if match is still active
+                if (match.isFinished() || !arena.isUsed() || arena.getMatch() != match) {
+                    activeCheckRoutineFlags.remove(arena);
+                    activeCheckRoutines.remove(arena);
+                    return; // Stop checking
+                }
+                
+                // Check if we've exceeded the time limit
+                if (checkCount[0] >= checkTimeSeconds) {
+                    activeCheckRoutineFlags.remove(arena);
+                    activeCheckRoutines.remove(arena);
+                    return; // Time limit reached, stop routine
+                }
+                
+                checkCount[0]++;
+                
+                // Check each player
+                for (final Player player : match.getAllPlayers()) {
+                    if (!player.isOnline()) {
+                        continue; // Skip offline players
+                    }
+                    
+                    final World playerWorld = player.getWorld();
+                    if (playerWorld == null || !playerWorld.equals(arenaWorld)) {
+                        // Player is outside arena world
+                        if ("hardstop-arena".equalsIgnoreCase(action)) {
+                            // Hard stop the arena immediately and stop checking
+                            activeCheckRoutineFlags.remove(arena);
+                            final TaskWrapper removed = activeCheckRoutines.remove(arena);
+                            if (removed != null && !removed.isCancelled()) {
+                                removed.cancel();
+                            }
+                            DuelsPlugin.getSchedulerAdapter().runTask(arenaLocation, () -> {
+                                hardResetArena(arena);
+                            });
+                            return; // Stop checking immediately
+                        } else if ("kill-outside-player".equalsIgnoreCase(action)) {
+                            // Kill the player but continue checking other players
+                            DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
+                                if (player.isOnline() && !match.isFinished() && arena.getMatch() == match) {
+                                    player.setHealth(0);
+                                }
+                            });
+                        }
+                    }
+                }
+            }, 0L, 20L); // Start immediately, repeat every 20 ticks (1 second)
+        
+        activeCheckRoutines.put(arena, task);
     }
 
     private void addPlayers(final Collection<Player> players, final DuelMatch match, final ArenaImpl arena, final KitImpl kit, final Location location) {
