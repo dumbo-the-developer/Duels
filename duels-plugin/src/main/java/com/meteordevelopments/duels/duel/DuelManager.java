@@ -928,6 +928,13 @@ public class DuelManager implements Loadable {
                 return;
             }
 
+            // Fix dupe bug: Clear cursor item before death to prevent duplication
+            final ItemStack cursor = player.getItemOnCursor();
+            if (cursor != null && cursor.getType() != Material.AIR) {
+                event.getDrops().add(cursor);
+                player.setItemOnCursor(null);
+            }
+
             if (mcMMO != null) {
                 mcMMO.enableSkills(player);
             }
