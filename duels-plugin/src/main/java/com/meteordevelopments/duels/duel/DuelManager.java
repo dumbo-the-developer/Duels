@@ -43,7 +43,7 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
+import com.meteordevelopments.duels.util.SchedulerAdapter.TaskWrapper;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -71,7 +71,7 @@ public class DuelManager implements Loadable {
     private McMMOHook mcMMO;
     private MyPetHook myPet;
 
-    private ScheduledTask durationCheckTask;
+    private TaskWrapper durationCheckTask;
 
     public DuelManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -87,7 +87,7 @@ public class DuelManager implements Loadable {
     }
 
     public void handleMatchEnd(DuelMatch match, ArenaImpl arena, Player loser, Location deadLocation, Player winner) {
-        DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(arena.first().getLocation()).runDelayed(() -> {
+        DuelsPlugin.getSchedulerAdapter().runTaskLater(arena.first().getLocation(), () -> {
             if (arena.size() == 0) {
                 match.getAllPlayers().forEach(matchPlayer -> {
                     handleTie(matchPlayer, arena, match, false);
@@ -101,7 +101,7 @@ public class DuelManager implements Loadable {
             }
 
             if (config.isSpawnFirework()) {
-                DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(deadLocation).run(() -> {
+                DuelsPlugin.getSchedulerAdapter().runTask(deadLocation, () -> {
                     final Firework firework = (Firework) deadLocation.getWorld().spawnEntity(deadLocation, EntityType.FIREWORK);
                     final FireworkMeta meta = firework.getFireworkMeta();
                     String colourName = config.getFireworkColour();
@@ -140,9 +140,7 @@ public class DuelManager implements Loadable {
             final boolean loserIsOnline = loser.isOnline();
             if (loserIsOnline) {
                 // Normal flow: loser is still online (normal death)
-                // CRITICAL FIX: Use region-specific scheduler based on arena location instead of loser's entity scheduler
-                // This prevents the task from failing if the loser quits before the delay completes
-                DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(arena.first().getLocation()).runDelayed(() -> {
+                DuelsPlugin.getSchedulerAdapter().runTaskLater(loser, () -> {
                     // Handle the loser (remove from arena and restore state)
                     // This is especially important for ROUNDS3 where the loser never actually dies
                     if (match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3)) {
@@ -170,19 +168,19 @@ public class DuelManager implements Loadable {
 
                     // FIXED: Use global scheduler for arena.endMatch() to avoid Folia region conflicts
                     // This prevents errors when entities are in different regions or already removed by other plugins
-                    DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().run(() -> {
-                        if (arena.getMatch() != null && arena.getMatch() == match) {
-                            arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
-                        }
+                    DuelsPlugin.getSchedulerAdapter().runTask(() -> {
+                        arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
                     });
                 }, config.getTeleportDelay() * 20L);
             } else {
                 // FIXED: Loser has quit - use global scheduler instead to prevent winners from getting stuck
-                DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().runDelayed(() -> {
+                DuelsPlugin.getSchedulerAdapter().runTaskLater(() -> {
                     // Don't need to handle the loser since they're offline
                     
                     for (Player alivePlayer : winners) {
-                        handleWin(alivePlayer, loser, arena, match);
+                        if (alivePlayer.isOnline()) {  // Safety check
+                            handleWin(alivePlayer, loser, arena, match);
+                        }
                     }
 
                     if (config.isEndCommandsEnabled() && !(!match.isFromQueue() && config.isEndCommandsQueueOnly())) {
@@ -210,9 +208,9 @@ public class DuelManager implements Loadable {
     }
 
     public void handleTeamMatchEnd(TeamDuelMatch match, ArenaImpl arena, Location deadLocation, TeamDuelMatch.Team winningTeam) {
-        DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(deadLocation).runDelayed(() -> {
+        DuelsPlugin.getSchedulerAdapter().runTaskLater(deadLocation, () -> {
             if (config.isSpawnFirework()) {
-                DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(deadLocation).run(() -> {
+                DuelsPlugin.getSchedulerAdapter().runTask(deadLocation, () -> {
                     final Firework firework = (Firework) deadLocation.getWorld().spawnEntity(deadLocation, EntityType.FIREWORK);
                     final FireworkMeta meta = firework.getFireworkMeta();
                     String colourName = config.getFireworkColour();
@@ -231,11 +229,11 @@ public class DuelManager implements Loadable {
             // Restore gamemode for all players immediately using individual schedulers
             final Set<Player> allPlayers = match.getAllPlayers();
             for (Player player : allPlayers) {
-                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                     player.setGameMode(GameMode.SURVIVAL);
                     player.setAllowFlight(false);
                     player.setFlying(false);
-                }, null);
+                });
             }
             
             // Create inventory snapshots for display
@@ -263,7 +261,7 @@ public class DuelManager implements Loadable {
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
             
             // Schedule teleportation and restoration for all players after delay
-            DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(deadLocation).runDelayed(() -> {
+            DuelsPlugin.getSchedulerAdapter().runTaskLater(deadLocation, () -> {
                 // Handle losers (including dead spectators)
                 for (Player loser : losers) {
                     if (mcMMO != null) {
@@ -275,20 +273,20 @@ public class DuelManager implements Loadable {
                         playerManager.remove(loser);
                         
                         // Schedule player operations on entity-specific scheduler for Folia compatibility
-                        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(loser).run(() -> {
+                        DuelsPlugin.getSchedulerAdapter().runTask(loser, () -> {
                             if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {
                                 PlayerUtil.reset(loser);
                             }
                             
                             // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
                             teleport.tryTeleport(loser, loserInfo.getLocation(), () -> {
-                                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(loser).run(() -> {
+                                DuelsPlugin.getSchedulerAdapter().runTask(loser, () -> {
                                     if (loser.isOnline()) {
                                         loserInfo.restore(loser);
                                     }
-                                }, null);
+                                });
                             });
-                        }, null);
+                        });
                     }
                 }
                 
@@ -316,7 +314,7 @@ public class DuelManager implements Loadable {
 
                 // FIXED: Use global scheduler for arena.endMatch() to avoid Folia region conflicts
                 // This prevents errors when entities are in different regions or already removed by other plugins
-                DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().run(() -> {
+                DuelsPlugin.getSchedulerAdapter().runTask(() -> {
                     arena.endMatch(winners.iterator().next().getUniqueId(), losers.iterator().next().getUniqueId(), Reason.OPPONENT_DEFEAT);
                 });
             }, config.getTeleportDelay() * 20L);
@@ -358,7 +356,7 @@ public class DuelManager implements Loadable {
             if (info != null) {
                 // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
                 teleport.tryTeleport(winner, info.getLocation(), () -> {
-                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(winner).run(() -> {
+                    DuelsPlugin.getSchedulerAdapter().runTask(winner, () -> {
                         if (winner.isOnline()) {
                             if (match.isOwnInventory()) {
                                 // Preserve any XP gained during the duel when using own inventory
@@ -368,7 +366,7 @@ public class DuelManager implements Loadable {
                                 info.restore(winner);
                             }
                         }
-                    }, null);
+                    });
                 });
             }
 
@@ -390,7 +388,7 @@ public class DuelManager implements Loadable {
         this.myPet = plugin.getHookManager().getHook(MyPetHook.class);
 
         if (config.getMaxDuration() > 0) {
-            this.durationCheckTask = plugin.doSyncRepeat(() -> {
+            this.durationCheckTask = (TaskWrapper) plugin.doSyncRepeat(() -> {
                 for (final ArenaImpl arena : arenaManager.getArenasImpl()) {
                     final DuelMatch match = arena.getMatch();
 
@@ -429,7 +427,7 @@ public class DuelManager implements Loadable {
                         final boolean alive = !match.isDead(player);
                         
                         try {
-                            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                            DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                                 try {
                                     // Double-check player is still online inside scheduler
                                     if (!player.isOnline()) {
@@ -443,7 +441,7 @@ public class DuelManager implements Loadable {
                                 } catch (Exception ex) {
                                     Log.warn(this, "Error handling tie for player " + player.getName() + ": " + ex.getMessage());
                                 }
-                            }, null);
+                            });
                         } catch (Exception ex) {
                             // Fallback: If entity scheduler fails, try on global scheduler with minimal operations
                             Log.warn(this, "Failed to schedule entity task for " + player.getName() + ", using fallback: " + ex.getMessage());
@@ -457,7 +455,7 @@ public class DuelManager implements Loadable {
                     }
 
                     // FIXED: Always end match on global scheduler after processing all players
-                    DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().runDelayed(() -> {
+                    DuelsPlugin.getSchedulerAdapter().runTaskLater(() -> {
                         try {
                             arena.endMatch(null, null, Reason.MAX_TIME_REACHED);
                         } catch (Exception ex) {
@@ -549,11 +547,11 @@ public class DuelManager implements Loadable {
             if (info != null) {
                 // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
                 teleport.tryTeleport(player, info.getLocation(), () -> {
-                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                         if (player.isOnline()) {
                             info.restore(player);
                         }
-                    }, null);
+                    });
                 });
             } else {
                 // If somehow PlayerInfo is not found...
@@ -616,7 +614,7 @@ public class DuelManager implements Loadable {
             final boolean alive = !match.isDead(player);
             
             try {
-                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                     try {
                         // Double-check player is still online inside scheduler
                         if (!player.isOnline()) {
@@ -630,7 +628,7 @@ public class DuelManager implements Loadable {
                     } catch (Exception ex) {
                         Log.warn(this, "Error handling tie for player " + player.getName() + " in hardreset: " + ex.getMessage());
                     }
-                }, null);
+                });
             } catch (Exception ex) {
                 // Fallback: If entity scheduler fails, try on global scheduler with minimal operations
                 Log.warn(this, "Failed to schedule entity task for " + player.getName() + ", using fallback: " + ex.getMessage());
@@ -644,7 +642,7 @@ public class DuelManager implements Loadable {
         }
         
         // Always end match on global scheduler after processing all players
-        DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().runDelayed(() -> {
+        DuelsPlugin.getSchedulerAdapter().runTaskLater(() -> {
             try {
                 arena.endMatch(null, null, Reason.TIE);
             } catch (Exception ex) {
@@ -697,7 +695,7 @@ public class DuelManager implements Loadable {
             if (info != null) {
                 // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
                 teleport.tryTeleport(winner, info.getLocation(), () -> {
-                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(winner).run(() -> {
+                    DuelsPlugin.getSchedulerAdapter().runTask(winner, () -> {
                         if (winner.isOnline()) {
                             if (match.isOwnInventory()) {
                                 // Preserve any XP gained during the duel when using own inventory
@@ -707,7 +705,7 @@ public class DuelManager implements Loadable {
                                 info.restore(winner);
                             }
                         }
-                    }, null);
+                    });
                 });
             }
 
@@ -746,7 +744,7 @@ public class DuelManager implements Loadable {
             if (info != null) {
                 // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
                 teleport.tryTeleport(loser, info.getLocation(), () -> {
-                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(loser).run(() -> {
+                    DuelsPlugin.getSchedulerAdapter().runTask(loser, () -> {
                         if (loser.isOnline()) {
                             if (match.isOwnInventory()) {
                                 // Preserve any XP gained during the duel when using own inventory
@@ -756,7 +754,7 @@ public class DuelManager implements Loadable {
                                 info.restore(loser);
                             }
                         }
-                    }, null);
+                    });
                 });
             } else {
                 teleport.tryTeleport(loser, playerManager.getLobby());
@@ -856,13 +854,13 @@ public class DuelManager implements Loadable {
             }
 
             // Schedule player operations on entity-specific scheduler for Folia compatibility
-            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+            DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                 if (player.getAllowFlight()) {
                     player.setFlying(false);
                     player.setAllowFlight(false);
                 }
                 // Note: closeInventory() is handled by teleport.tryTeleport() to prevent world mismatch
-            }, null);
+            });
             final boolean dropOwnInv = match.isOwnInventory() && config.isOwnInventoryDropInventoryItems();
             // If using own inventory (regardless of drop setting), do not restore experience to preserve XP changes
             final boolean restoreExperience = !match.isOwnInventory();
@@ -871,7 +869,7 @@ public class DuelManager implements Loadable {
             // FIXED: Schedule kit loading on entity-specific scheduler after teleport completes for Folia compatibility
             if (kit != null) {
                 teleport.tryTeleport(player, location, () -> {
-                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                         if (!player.isOnline()) {
                             return;
                         }
@@ -886,7 +884,7 @@ public class DuelManager implements Loadable {
                             // Load default kit
                             kit.equip(player);
                         }
-                    }, null);
+                    });
                 });
             } else {
                 teleport.tryTeleport(player, location);
@@ -900,16 +898,6 @@ public class DuelManager implements Loadable {
                     }
                 } catch (Exception ex) {
                     Log.warn(this, "Error while running match start commands: " + ex.getMessage());
-                }
-            }
-
-            if (config.isPlayerExecuteCommandsOnArenaPreStartEnabled() && !(match.getSource() == null && config.isPlayerExecuteCommandsOnArenaPreStartQueueOnly())) {
-                try {
-                    for (final String command : config.getPlayerExecuteCommandsOnArenaPreStart()) {
-                        executePlayerCommandWithDelay(player, command);
-                    }
-                } catch (Exception ex) {
-                    Log.warn(this, "Error while running player execute commands on arena pre-start: " + ex.getMessage());
                 }
             }
 
@@ -938,6 +926,13 @@ public class DuelManager implements Loadable {
 
             if (arena == null) {
                 return;
+            }
+
+            // Fix dupe bug: Clear cursor item before death to prevent duplication
+            final ItemStack cursor = player.getItemOnCursor();
+            if (cursor != null && cursor.getType() != Material.AIR) {
+                event.getDrops().add(cursor);
+                player.setItemOnCursor(null);
             }
 
             if (mcMMO != null) {
@@ -1034,9 +1029,9 @@ public class DuelManager implements Loadable {
                 event.setDeathMessage(null);
                 
                 // Immediately set to spectator mode to prevent death screen - schedule on entity-specific scheduler for Folia compatibility
-                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                     player.setGameMode(GameMode.SPECTATOR);
-                }, null);
+                });
                 
                 // Check if any team is completely eliminated
                 TeamDuelMatch.Team winningTeam = teamMatch.getWinningTeam();
@@ -1162,14 +1157,14 @@ public class DuelManager implements Loadable {
                     quittingPlayer.updateInventory();
                 } catch (Exception ex) {
                     // Fallback: If direct call fails, schedule it immediately (shouldn't happen but safety net)
-                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(quittingPlayer).run(() -> {
+                    DuelsPlugin.getSchedulerAdapter().runTask(quittingPlayer, () -> {
                         if (quittingPlayer.isOnline()) {
                             quittingPlayer.setHealth(0);
                             quittingPlayer.getInventory().clear();
                             quittingPlayer.getInventory().setArmorContents(null);
                             quittingPlayer.updateInventory();
                         }
-                    }, null);
+                    });
                 }
                 
                 // Cancel countdown
@@ -1187,7 +1182,6 @@ public class DuelManager implements Loadable {
             }
 
             // Normal quit handling (countdown complete, match in progress)
-            // Player quit during normal gameplay (not dead yet)
             // CRITICAL: Kill the player IMMEDIATELY - PlayerQuitEvent runs on correct thread, player still online
             // Event handlers on Folia run on the correct thread for the entity, so we can call directly
             try {
@@ -1197,14 +1191,14 @@ public class DuelManager implements Loadable {
                 player.updateInventory();
             } catch (Exception ex) {
                 // Fallback: If direct call fails, schedule it immediately (shouldn't happen but safety net)
-                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                     if (player.isOnline()) {
                         player.setHealth(0);
                         player.getInventory().clear();
                         player.getInventory().setArmorContents(null);
                         player.updateInventory();
                     }
-                }, null);
+                });
             }
             
             // Mark player as dead in match (so PlayerDeathEvent knows they're dead)
@@ -1259,21 +1253,20 @@ public class DuelManager implements Loadable {
             lang.sendMessage(event.getPlayer(), "DUEL.prevent.command", "command", event.getMessage());
         }
 
-        @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+        @EventHandler(ignoreCancelled = true)
         public void on(final PlayerTeleportEvent event) {
             final Player player = event.getPlayer();
             final Location to = event.getTo();
 
-            // Some outside plugins bypasses this event and players can get out of the arena.
+            if (!config.isLimitTeleportEnabled()
+                    || event.getCause() == TeleportCause.ENDER_PEARL
+                    || event.getCause() == TeleportCause.SPECTATE
+                    || !arenaManager.isInMatch(player)) {
+                return;
+            }
 
-            if(!arenaManager.isInMatch(player)) return;
-
-            if (!config.isLimitTeleportEnabled()) return;
-
-            if (event.getCause() == TeleportCause.ENDER_PEARL || event.getCause() == TeleportCause.SPECTATE) return;
-
-            // Only allow ender pearls within distance limit
             final Location from = event.getFrom();
+
             if (from.getWorld().equals(to.getWorld()) && from.distance(to) <= config.getDistanceAllowed()) {
                 return;
             }
@@ -1298,102 +1291,8 @@ public class DuelManager implements Loadable {
             lang.sendMessage(player, "DUEL.prevent.inventory-open");
         }
 
-        @EventHandler(priority = EventPriority.NORMAL) // After PlayerInfoManager (HIGHEST)
-        public void on(final PlayerJoinEvent event) {
-            // Skip if feature is disabled
-            if (!config.isDuelWorldsEnabled()) {
-                return;
-            }
-            
-            final Player player = event.getPlayer();
-            
-            // Skip if player is dead (let respawn handle it)
-            if (player.isDead()) {
-                return;
-            }
-            
-            // Check if player is in an arena world
-            if (!isArenaWorld(player.getWorld())) {
-                return; // Not an arena world, nothing to do
-            }
-            
-            // Check if player is in a match
-            if (arenaManager.isInMatch(player)) {
-                return; // Player is in match, they're supposed to be here
-            }
-            
-            // Player is in arena world but NOT in match - teleport to lobby
-            // This handles both:
-            // - Normal case: No PlayerInfo, player shouldn't be here
-            // - Edge case: PlayerInfo exists (from crash/reload), but player restored to arena world
-            
-            // Get lobby location and teleport
-            final Location lobbyLocation = playerManager.getLobby();
-            if (lobbyLocation == null || lobbyLocation.getWorld() == null) {
-                Log.warn(DuelManager.this, String.format(
-                    "Cannot teleport player %s to lobby - lobby location is not set!",
-                    player.getName()
-                ));
-                return;
-            }
-            
-            // Use entity-specific scheduler for Folia compatibility
-            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).runDelayed(() -> {
-                if (!player.isOnline() || player.isDead()) {
-                    return;
-                }
-                
-                // Set gamemode if enabled in config
-                if (config.isForceGamemodeOnJoin()) {
-                    player.setGameMode(config.getForceGamemodeOnJoinMode());
-                }
-                
-                // Teleport to lobby
-                teleport.tryTeleport(player, lobbyLocation, null);
-            }, null, 5L); // 5 tick delay to ensure player is fully loaded
-        }
-
     }
     
-    /**
-     * Checks if a world is in the arena worlds list.
-     * Handles different world name formats (minecraft:overworld, worlds:world, etc.)
-     * 
-     * @param world The world to check
-     * @return true if world is in the arena worlds list, false otherwise
-     */
-    private boolean isArenaWorld(final World world) {
-        if (world == null || config.getDuelWorlds().isEmpty()) {
-            return false;
-        }
-        
-        final String worldName = world.getName();
-        
-        // Check exact match first
-        if (config.getDuelWorlds().contains(worldName)) {
-            return true;
-        }
-        
-        // Check namespaced formats (minecraft:world, worlds:world, multiverse:world, etc.)
-        for (final String configWorld : config.getDuelWorlds()) {
-            // Check if world name matches after removing namespace prefix
-            // Example: "minecraft:world1" matches config "world1"
-            if (worldName.endsWith(":" + configWorld) || worldName.equals(configWorld)) {
-                return true;
-            }
-            // Check if config world matches after removing namespace prefix
-            // Example: config "world1" matches "minecraft:world1"
-            if (configWorld.contains(":")) {
-                final String configWorldName = configWorld.substring(configWorld.lastIndexOf(':') + 1);
-                if (worldName.equals(configWorldName)) {
-                    return true;
-                }
-            }
-        }
-        
-        return false;
-    }
-
     /**
      * Executes a command with optional delay support.
      * Parses {delay:x} placeholder where x is delay in milliseconds.
@@ -1413,7 +1312,7 @@ public class DuelManager implements Loadable {
             long delayTicks = delayMs / 50;
             
             // FIXED: Use global region scheduler for command dispatch in Folia
-            DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().runDelayed(() -> {
+            DuelsPlugin.getSchedulerAdapter().runTaskLater(() -> {
                 try {
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cleanCommand);
                 } catch (Exception ex) {
@@ -1422,49 +1321,13 @@ public class DuelManager implements Loadable {
             }, delayTicks);
         } else {
             // FIXED: Execute immediately on global region scheduler for Folia compatibility
-            DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().run(() -> {
+            DuelsPlugin.getSchedulerAdapter().runTask(() -> {
                 try {
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
                 } catch (Exception ex) {
                     Log.warn(this, "Error executing command: " + ex.getMessage());
                 }
             });
-        }
-    }
-
-    private void executePlayerCommandWithDelay(Player player, String command) {
-        Matcher matcher = DELAY_PATTERN.matcher(command);
-        
-        if (matcher.find()) {
-            // Extract delay value in milliseconds
-            long delayMs = Long.parseLong(matcher.group(1));
-            // Remove the {delay:x} placeholder from the command
-            String cleanCommand = matcher.replaceAll("").trim();
-            
-            // Convert milliseconds to ticks (1 tick = 50ms)
-            long delayTicks = delayMs / 50;
-            
-            // Use entity-specific scheduler for player command execution in Folia
-            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).runDelayed(() -> {
-                try {
-                    if (player.isOnline()) {
-                        player.performCommand(cleanCommand);
-                    }
-                } catch (Exception ex) {
-                    Log.warn(this, "Error executing delayed player command: " + ex.getMessage());
-                }
-            }, null, delayTicks);
-        } else {
-            // Execute immediately on entity-specific scheduler for Folia compatibility
-            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
-                try {
-                    if (player.isOnline()) {
-                        player.performCommand(command);
-                    }
-                } catch (Exception ex) {
-                    Log.warn(this, "Error executing player command: " + ex.getMessage());
-                }
-            }, null);
         }
     }
 }

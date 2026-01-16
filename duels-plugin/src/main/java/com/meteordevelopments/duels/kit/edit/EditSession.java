@@ -73,7 +73,7 @@ public class EditSession {
     public void restoreInventory(Player player) {
         // FIXED: Schedule inventory operations on entity-specific scheduler for Folia compatibility
         // This ensures safety even when called from async callbacks
-        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+        DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
             if (!player.isOnline()) {
                 return;
             }
@@ -96,7 +96,7 @@ public class EditSession {
             
             // Update player
             player.updateInventory();
-        }, null);
+        });
     }
 
     /**
@@ -110,7 +110,7 @@ public class EditSession {
         }
         
         // FIXED: Use teleportAsync with callback to ensure proper thread handling
-        boolean isFolia = DuelsPlugin.getMorePaperLib().scheduling().isUsingFolia();
+        boolean isFolia = DuelsPlugin.getSchedulerAdapter().isFolia();
         if (isFolia) {
             player.teleportAsync(oldLoc).thenAccept(success -> {
                 // Teleport completed, no additional operations needed here

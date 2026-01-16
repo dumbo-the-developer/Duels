@@ -154,16 +154,16 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
         playerManager.create(player);
         
         // FIXED: Schedule PlayerUtil.reset on entity-specific scheduler for Folia compatibility
-        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+        DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
             PlayerUtil.reset(player);
-        }, null);
+        });
 
         // Teleport before putting in map to prevent teleport being cancelled
         teleport.tryTeleport(player, target.getLocation().clone().add(0, 2, 0));
         spectators.put(player.getUniqueId(), spectator);
         arenas.put(arena, spectator);
 
-        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+        DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
             if (!config.isSpecUseSpectatorGamemode()) {
                 player.setGameMode(GameMode.ADVENTURE);
                 player.setAllowFlight(true);
@@ -182,7 +182,7 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
             if (!player.hasPermission(Permissions.SPEC_ANON)) {
                 arena.getMatch().getAllPlayers().forEach(matchPlayer -> lang.sendMessage(matchPlayer, "SPECTATE.arena-broadcast", "name", player.getName()));
             }
-        }, null);
+        });
         return Result.SUCCESS;
     }
 
@@ -199,7 +199,7 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
         final PlayerInfo info = playerManager.remove(player);
 
         // Schedule all player entity operations on entity-specific scheduler for Folia compatibility
-        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+        DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
             player.setGameMode(GameMode.SURVIVAL);
             player.setFlying(false);
             player.setAllowFlight(false);
@@ -209,16 +209,16 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
             if (info != null) {
                 // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
                 teleport.tryTeleport(player, info.getLocation(), () -> {
-                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                         if (player.isOnline()) {
                             info.restore(player);
                         }
-                    }, null);
+                    });
                 });
             } else {
                 teleport.tryTeleport(player, playerManager.getLobby());
             }
-        }, null);
+        });
 
         final DuelMatch match = spectator.getArena().getMatch();
 

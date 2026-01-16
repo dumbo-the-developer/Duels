@@ -29,7 +29,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
+import com.meteordevelopments.duels.util.SchedulerAdapter.TaskWrapper;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -48,7 +48,7 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
 
     private final Map<Location, QueueSignImpl> signs = new HashMap<>();
 
-    private ScheduledTask updateTask;
+    private TaskWrapper updateTask;
 
     public QueueSignManagerImpl(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -80,7 +80,7 @@ public class QueueSignManagerImpl implements Loadable, QueueSignManager, Listene
 
         DuelsPlugin.sendMessage(String.format(SIGNS_LOADED, signs.size()));
 
-        this.updateTask = plugin.doSyncRepeat(() -> signs.entrySet().removeIf(entry -> {
+        this.updateTask = (TaskWrapper) plugin.doSyncRepeat(() -> signs.entrySet().removeIf(entry -> {
             entry.getValue().update();
             return entry.getValue().getQueue().isRemoved();
         }), 20L, 20L);

@@ -49,11 +49,11 @@ public class GiveupCommand extends BaseCommand {
         
         // Kill the player - this will trigger PlayerDeathEvent which handles everything
         // Use entity scheduler to ensure thread safety
-        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+        DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
             if (player.isOnline() && arenaManager.isInMatch(player)) {
                 player.setHealth(0);
             }
-        }, null);
+        });
     }
 }
 

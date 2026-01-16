@@ -66,14 +66,14 @@ public final class Teleport implements Loadable, Listener {
         }
 
         // Schedule passenger removal on entity-specific scheduler for Folia compatibility
-        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+        DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
             for (Entity entity : player.getPassengers()) {
                 player.removePassenger(entity);
             }
-        }, null);
+        });
 
         // Don't close inventory here for Folia - schedule it after teleport completes to prevent world mismatch
-        boolean isFolia = DuelsPlugin.getMorePaperLib().scheduling().isUsingFolia();
+        boolean isFolia = DuelsPlugin.getSchedulerAdapter().isFolia();
 
         if (essentials != null) {
             essentials.setBackLocation(player, location);
@@ -88,18 +88,18 @@ public final class Teleport implements Loadable, Listener {
                     Log.warn(this, "Could not teleport " + player.getName() + "! TeleportAsync failed.");
                 } else {
                     // Close inventory after teleport completes, on the correct thread and in the correct world
-                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                         player.closeInventory();
                         // Execute callback after teleport completes and inventory is closed
                         if (onComplete != null) {
                             // Schedule callback on entity-specific scheduler to ensure correct thread
-                            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                            DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                                 if (player.isOnline()) {
                                     onComplete.run();
                                 }
-                            }, null);
+                            });
                         }
-                    }, null);
+                    });
                 }
             });
         } else {

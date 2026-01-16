@@ -141,9 +141,9 @@ public class KitOptionsListener implements Listener {
                     // Cancel the damage event for non-final rounds
                     event.setDamage(0);
                     // Schedule health modification on entity-specific scheduler for Folia compatibility
-                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                         player.setHealth(player.getMaxHealth());
-                    }, null);
+                    });
 
                     // Start next round
                     match.nextRound();
@@ -151,14 +151,14 @@ public class KitOptionsListener implements Listener {
                     // Reset both players' health and equipment
                     for (Player p : match.getAllPlayers()) {
                         // Schedule player operations on entity-specific scheduler for Folia compatibility
-                        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(p).run(() -> {
+                        DuelsPlugin.getSchedulerAdapter().runTask(p, () -> {
                             PlayerUtil.reset(p);
                             p.setHealth(p.getMaxHealth());
                             p.setNoDamageTicks(40); // Give 2 seconds immunity to prevent damage carry-over
                             if (match.getKit() != null) {
                                 match.getKit().equip(p);
                             }
-                        }, null);
+                        });
                     }
 
                     // Use the plugin's teleport system for both players
@@ -285,12 +285,10 @@ public class KitOptionsListener implements Listener {
                 if (entityType != null) {
                     // Schedule entity spawning on region-specific scheduler for Folia compatibility
                     final org.bukkit.Location spawnLocation = location.clone();
-                    DuelsPlugin.getMorePaperLib().scheduling()
-                        .regionSpecificScheduler(spawnLocation)
-                        .run(() -> {
-                            Entity entity = spawnLocation.getWorld().spawnEntity(spawnLocation, entityType);
-                            arena.getMatch().placedEntities.add(entity);
-                        });
+                    DuelsPlugin.getSchedulerAdapter().runTask(spawnLocation, () -> {
+                        Entity entity = spawnLocation.getWorld().spawnEntity(spawnLocation, entityType);
+                        arena.getMatch().placedEntities.add(entity);
+                    });
                 }
             }
         }else {
@@ -347,9 +345,9 @@ public class KitOptionsListener implements Listener {
         }
 
         // Schedule health modification on entity-specific scheduler for Folia compatibility
-        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+        DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
             player.setHealth(0);
-        }, null);
+        });
     }
 
     @EventHandler
@@ -380,7 +378,7 @@ public class KitOptionsListener implements Listener {
         final ItemStack bowl = config.isSoupRemoveEmptyBowl() ? null : new ItemStack(Material.BOWL);
 
         // FIXED: Schedule inventory operations on entity-specific scheduler for Folia compatibility
-        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+        DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
             if (!player.isOnline()) {
                 return;
             }
@@ -393,15 +391,15 @@ public class KitOptionsListener implements Listener {
                     player.getInventory().setItemInMainHand(bowl);
                 }
             }
-        }, null);
+        });
 
         final double regen = config.getSoupHeartsToRegen() * 2.0;
         final double oldHealth = player.getHealth();
         final double maxHealth = PlayerUtil.getMaxHealth(player);
         // Schedule health modification on entity-specific scheduler for Folia compatibility
-        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+        DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
             player.setHealth(Math.min(oldHealth + regen, maxHealth));
-        }, null);
+        });
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -432,11 +430,11 @@ public class KitOptionsListener implements Listener {
             for (final Player player : event.getPlayers()) {
                 MetadataUtil.put(plugin, player, METADATA_KEY, player.getMaximumNoDamageTicks());
                 // FIXED: Schedule entity state modification on entity-specific scheduler for Folia compatibility
-                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                     if (player.isOnline()) {
                         player.setMaximumNoDamageTicks(0);
                     }
-                }, null);
+                });
             }
         }
 
@@ -462,11 +460,11 @@ public class KitOptionsListener implements Listener {
                 }
 
                 // FIXED: Schedule entity state modification on entity-specific scheduler for Folia compatibility
-                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                     if (player.isOnline()) {
                         player.setMaximumNoDamageTicks((Integer) value);
                     }
-                }, null);
+                });
             });
         }
     }
@@ -496,9 +494,9 @@ public class KitOptionsListener implements Listener {
             // Schedule player entity operation on entity-specific scheduler for Folia compatibility
             // Use doSyncAfter wrapper with entity-specific scheduler inside to handle delay
             plugin.doSyncAfter(() -> {
-                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                     player.setNoDamageTicks(0);
-                }, null);
+                });
             }, 1L);
         }
     }

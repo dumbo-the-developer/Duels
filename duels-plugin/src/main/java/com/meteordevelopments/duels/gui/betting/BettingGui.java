@@ -24,7 +24,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
+import com.meteordevelopments.duels.util.SchedulerAdapter.TaskWrapper;
 
 import java.util.*;
 
@@ -189,11 +189,11 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
         final Player other = Bukkit.getPlayer(sender.equals(player.getUniqueId()) ? target : sender);
 
         if (other != null) {
-            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(other).run(() -> {
+            DuelsPlugin.getSchedulerAdapter().runTask(other, () -> {
                 if (inventory.getViewers().contains(other)) {
                     other.closeInventory();
                 }
-            }, null);
+            });
         }
     }
 
@@ -254,11 +254,11 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
 
         private static final int SLOT_START = 13;
 
-        private ScheduledTask task;
+        private TaskWrapper task;
         private int counter;
 
         public void startTask() {
-            task = DuelsPlugin.getMorePaperLib().scheduling().globalRegionalScheduler().runAtFixedRate(this, 10L, 20L);
+            task = DuelsPlugin.getSchedulerAdapter().runTaskTimerAsynchronously(this, 10L, 20L);
         }
 
         @Override
@@ -294,8 +294,8 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
                 return;
             }
 
-            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(sender).run((Runnable) sender::closeInventory, () -> {});
-            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(target).run((Runnable) target::closeInventory, () -> {});
+            DuelsPlugin.getSchedulerAdapter().runTask(sender, sender::closeInventory);
+            DuelsPlugin.getSchedulerAdapter().runTask(target, target::closeInventory);
 
             final Map<UUID, List<ItemStack>> items = new HashMap<>();
             items.put(sender.getUniqueId(), getSection(sender).collect());

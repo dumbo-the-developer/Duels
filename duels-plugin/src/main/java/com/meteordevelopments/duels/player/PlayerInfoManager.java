@@ -136,11 +136,11 @@ public class PlayerInfoManager implements Loadable {
                 // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
                 teleport.tryTeleport(player, info.getLocation(), () -> {
                     PlayerUtil.reset(player);
-                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                         if (player.isOnline()) {
                             info.restore(player);
                         }
-                    }, null);
+                    });
                 });
             }
         });
@@ -279,20 +279,20 @@ public class PlayerInfoManager implements Loadable {
             // FIXED: Delay teleport and restoration to allow player to fully join in Folia
             // Async teleport during join conflicts with player loading process
             // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
-            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).runDelayed(() -> {
+            DuelsPlugin.getSchedulerAdapter().runTaskLater(player, () -> {
                 if (player.isOnline() && !player.isDead()) {
                     teleport.tryTeleport(player, info.getLocation(), () -> {
                         // Restore player state after teleport completes
                         if (player.isOnline() && !player.isDead()) {
-                            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                            DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                                 if (player.isOnline() && !player.isDead()) {
                                     info.restore(player);
                                 }
-                            }, null);
+                            });
                         }
                     });
                 }
-            }, null, 5L); // 5 tick delay to ensure player is fully loaded
+            }, 5L); // 5 tick delay to ensure player is fully loaded
         }
 
         @EventHandler(priority = EventPriority.HIGHEST)
@@ -315,11 +315,11 @@ public class PlayerInfoManager implements Loadable {
                     // Schedule to set spectator mode after respawn - use entity-specific scheduler for Folia compatibility
                     plugin.doSyncAfter(() -> {
                         if (player.isOnline() && arenaManager.get(player) == arena) {
-                            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                            DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                                 player.setGameMode(GameMode.SPECTATOR);
                                 player.setAllowFlight(true);
                                 player.setFlying(true);
-                            }, null);
+                            });
                         }
                     }, 1L);
                     return;
@@ -351,11 +351,11 @@ public class PlayerInfoManager implements Loadable {
                 if (infoToRestore != null) {
                     // FIXED: Wait for teleport to complete before restoring to prevent dimension change errors
                     teleport.tryTeleport(player, infoToRestore.getLocation(), () -> {
-                        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                        DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                             if (player.isOnline()) {
                                 infoToRestore.restore(player);
                             }
-                        }, null);
+                        });
                     });
                 }
             }, 1L);
