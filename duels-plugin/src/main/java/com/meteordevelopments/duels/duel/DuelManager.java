@@ -1334,37 +1334,53 @@ public class DuelManager implements Loadable {
             event.setCancelled(true);
         }
 
-        @EventHandler(ignoreCancelled = true)
+        @EventHandler(priority = EventPriority.HIGHEST)
         public void on(final PlayerCommandPreprocessEvent event) {
+            final Player player = event.getPlayer();
+            
+            if (!arenaManager.isInMatch(player)) {
+                return;
+            }
+            
             final String command = event.getMessage().substring(1).split(" ")[0].toLowerCase();
 
-            if (!arenaManager.isInMatch(event.getPlayer())
-                    || (config.isBlockAllCommands() ? config.getWhitelistedCommands().contains(command) : !config.getBlacklistedCommands().contains(command))) {
+            // Check if command should be blocked
+            if (config.isBlockAllCommands() ? config.getWhitelistedCommands().contains(command) : !config.getBlacklistedCommands().contains(command)) {
                 return;
             }
 
+            // Cancel the command event - run at HIGHEST priority to ensure we cancel even if other plugins processed it
             event.setCancelled(true);
-            lang.sendMessage(event.getPlayer(), "DUEL.prevent.command", "command", event.getMessage());
+            lang.sendMessage(player, "DUEL.prevent.command", "command", event.getMessage());
         }
 
-        @EventHandler(ignoreCancelled = true)
+        @EventHandler(priority = EventPriority.HIGHEST)
         public void on(final PlayerTeleportEvent event) {
             final Player player = event.getPlayer();
+            
+            // Always check if player is in match, regardless of cancellation state
+            // This ensures we catch teleports even if other plugins tried to process them
+            if (!arenaManager.isInMatch(player)) {
+                return;
+            }
+            
             final Location to = event.getTo();
 
             if (!config.isLimitTeleportEnabled()
                     || event.getCause() == TeleportCause.ENDER_PEARL
-                    || event.getCause() == TeleportCause.SPECTATE
-                    || !arenaManager.isInMatch(player)) {
+                    || event.getCause() == TeleportCause.SPECTATE) {
                 return;
             }
 
             final Location from = event.getFrom();
 
+            // Allow small distance teleports within the same world
             if (from.getWorld().equals(to.getWorld()) && from.distance(to) <= config.getDistanceAllowed()) {
                 return;
             }
 
+            // Cancel teleportation - run at HIGHEST priority to ensure we cancel even if other plugins processed it
+            // This prevents plugins from bypassing command blocking by directly teleporting players
             event.setCancelled(true);
             lang.sendMessage(player, "DUEL.prevent.teleportation");
         }
