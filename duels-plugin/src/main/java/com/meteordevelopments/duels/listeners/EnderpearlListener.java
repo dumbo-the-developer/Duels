@@ -114,23 +114,19 @@ public class EnderpearlListener implements Listener {
                     // Schedule removal on the enderpearl's region thread for Folia compatibility
                     final org.bukkit.Location pearlLocation = enderPearl.getLocation();
                     if (pearlLocation != null) {
-                        DuelsPlugin.getMorePaperLib().scheduling()
-                            .regionSpecificScheduler(pearlLocation)
-                            .run(() -> {
-                                // Double-check entity is still valid before removing
-                                if (enderPearl.isValid() && !enderPearl.isDead()) {
-                                    enderPearl.remove();
-                                }
-                            });
+                        DuelsPlugin.getSchedulerAdapter().runTask(pearlLocation, () -> {
+                            // Double-check entity is still valid before removing
+                            if (enderPearl.isValid() && !enderPearl.isDead()) {
+                                enderPearl.remove();
+                            }
+                        });
                     } else {
                         // Fallback: if location is null, try global scheduler
-                        DuelsPlugin.getMorePaperLib().scheduling()
-                            .globalRegionalScheduler()
-                            .run(() -> {
-                                if (enderPearl.isValid() && !enderPearl.isDead()) {
-                                    enderPearl.remove();
-                                }
-                            });
+                        DuelsPlugin.getSchedulerAdapter().runTask(() -> {
+                            if (enderPearl.isValid() && !enderPearl.isDead()) {
+                                enderPearl.remove();
+                            }
+                        });
                     }
                 }
             });

@@ -24,7 +24,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
+import com.meteordevelopments.duels.util.SchedulerAdapter.TaskWrapper;
 
 import java.io.*;
 import java.util.*;
@@ -54,7 +54,7 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
     private volatile TopEntry losses;
     @Getter
     private volatile TopEntry noKit;
-    private ScheduledTask topTask;
+    private TaskWrapper topTask;
 
     public UserManagerImpl(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -121,7 +121,7 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
             loaded = true;
         });
 
-        this.topTask = plugin.doSyncRepeat(() -> {
+        this.topTask = (TaskWrapper) plugin.doSyncRepeat(() -> {
             final Collection<? extends Kit> kits = plugin.getKitManager().getKits();
 
             plugin.doAsync(() -> {

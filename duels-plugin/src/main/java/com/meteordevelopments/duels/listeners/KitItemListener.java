@@ -97,14 +97,14 @@ public class KitItemListener implements Listener {
 
         event.setCancelled(true);
         // FIXED: Schedule inventory operations on entity-specific scheduler for Folia compatibility
-        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+        DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
             if (!player.isOnline()) {
                 return;
             }
             player.getInventory().remove(item);
             player.sendMessage(WARNING);
             Log.warn(String.format(WARNING_CONSOLE, player.getName()));
-        }, null);
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -128,22 +128,18 @@ public class KitItemListener implements Listener {
         // Schedule item removal on region-specific scheduler for Folia compatibility
         final org.bukkit.Location itemLocation = item.getLocation();
         if (itemLocation != null && item.isValid() && !item.isDead()) {
-            DuelsPlugin.getMorePaperLib().scheduling()
-                .regionSpecificScheduler(itemLocation)
-                .run(() -> {
-                    if (item.isValid() && !item.isDead()) {
-                        item.remove();
-                    }
-                });
+            DuelsPlugin.getSchedulerAdapter().runTask(itemLocation, () -> {
+                if (item.isValid() && !item.isDead()) {
+                    item.remove();
+                }
+            });
         } else {
             // Fallback: if location is null or item is invalid, try global scheduler
-            DuelsPlugin.getMorePaperLib().scheduling()
-                .globalRegionalScheduler()
-                .run(() -> {
-                    if (item.isValid() && !item.isDead()) {
-                        item.remove();
-                    }
-                });
+            DuelsPlugin.getSchedulerAdapter().runTask(() -> {
+                if (item.isValid() && !item.isDead()) {
+                    item.remove();
+                }
+            });
         }
         
         player.sendMessage(WARNING);
@@ -167,13 +163,13 @@ public class KitItemListener implements Listener {
 
         event.setCancelled(true);
         // FIXED: Schedule inventory operations on entity-specific scheduler for Folia compatibility
-        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+        DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
             if (!player.isOnline()) {
                 return;
             }
             player.getInventory().remove(item);
             player.sendMessage(WARNING);
             Log.warn(String.format(WARNING_CONSOLE, player.getName()));
-        }, null);
+        });
     }
 }

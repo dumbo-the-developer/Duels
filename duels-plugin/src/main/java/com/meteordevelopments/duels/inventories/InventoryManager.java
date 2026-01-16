@@ -11,7 +11,7 @@ import com.meteordevelopments.duels.util.TextBuilder;
 import com.meteordevelopments.duels.util.gui.GuiListener;
 import net.md_5.bungee.api.chat.ClickEvent;
 import org.bukkit.entity.Player;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
+import com.meteordevelopments.duels.util.SchedulerAdapter.TaskWrapper;
 
 import java.util.*;
 
@@ -24,7 +24,7 @@ public class InventoryManager implements Loadable {
     private final Config config;
     private final Lang lang;
 
-    private ScheduledTask expireTask;
+    private TaskWrapper expireTask;
 
     public InventoryManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -35,7 +35,7 @@ public class InventoryManager implements Loadable {
 
     @Override
     public void handleLoad() {
-        this.expireTask = plugin.doSyncRepeat(() -> {
+        this.expireTask = (TaskWrapper) plugin.doSyncRepeat(() -> {
             final long now = System.currentTimeMillis();
 
             inventories.entrySet().removeIf(entry -> {

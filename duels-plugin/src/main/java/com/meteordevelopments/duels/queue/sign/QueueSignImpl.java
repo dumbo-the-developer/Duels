@@ -58,32 +58,28 @@ public class QueueSignImpl implements QueueSign {
         // FIXED: Schedule sign operations on region-specific scheduler for Folia compatibility
         final org.bukkit.Location signLocation = sign.getLocation();
         if (signLocation != null) {
-            DuelsPlugin.getMorePaperLib().scheduling()
-                .regionSpecificScheduler(signLocation)
-                .run(() -> {
-                    final Block blockAtLocation = signLocation.getBlock();
-                    if (blockAtLocation.getState() instanceof Sign signState) {
-                        signState.setLine(0, replace(lines[0], 0, 0));
-                        signState.setLine(1, replace(lines[1], 0, 0));
-                        signState.setLine(2, replace(lines[2], 0, 0));
-                        signState.setLine(3, replace(lines[3], 0, 0));
-                        signState.update();
-                    }
-                });
+            DuelsPlugin.getSchedulerAdapter().runTask(signLocation, () -> {
+                final Block blockAtLocation = signLocation.getBlock();
+                if (blockAtLocation.getState() instanceof Sign signState) {
+                    signState.setLine(0, replace(lines[0], 0, 0));
+                    signState.setLine(1, replace(lines[1], 0, 0));
+                    signState.setLine(2, replace(lines[2], 0, 0));
+                    signState.setLine(3, replace(lines[3], 0, 0));
+                    signState.update();
+                }
+            });
         } else {
             // Fallback: use global scheduler if location is null
-            DuelsPlugin.getMorePaperLib().scheduling()
-                .globalRegionalScheduler()
-                .run(() -> {
-                    final Block blockAtLocation = location.getBlock();
-                    if (blockAtLocation.getState() instanceof Sign signState) {
-                        signState.setLine(0, replace(lines[0], 0, 0));
-                        signState.setLine(1, replace(lines[1], 0, 0));
-                        signState.setLine(2, replace(lines[2], 0, 0));
-                        signState.setLine(3, replace(lines[3], 0, 0));
-                        signState.update();
-                    }
-                });
+            DuelsPlugin.getSchedulerAdapter().runTask(() -> {
+                final Block blockAtLocation = location.getBlock();
+                if (blockAtLocation.getState() instanceof Sign signState) {
+                    signState.setLine(0, replace(lines[0], 0, 0));
+                    signState.setLine(1, replace(lines[1], 0, 0));
+                    signState.setLine(2, replace(lines[2], 0, 0));
+                    signState.setLine(3, replace(lines[3], 0, 0));
+                    signState.update();
+                }
+            });
         }
     }
 
@@ -107,12 +103,10 @@ public class QueueSignImpl implements QueueSign {
         if (queue.isRemoved()) {
             // Schedule block operation on region-specific scheduler for Folia compatibility
             final org.bukkit.Location signLocation = sign.getLocation();
-            DuelsPlugin.getMorePaperLib().scheduling()
-                .regionSpecificScheduler(signLocation)
-                .run(() -> {
-                    sign.setType(Material.AIR);
-                    sign.update();
-                });
+            DuelsPlugin.getSchedulerAdapter().runTask(signLocation, () -> {
+                sign.setType(Material.AIR);
+                sign.update();
+            });
             return;
         }
 
@@ -129,32 +123,28 @@ public class QueueSignImpl implements QueueSign {
         // FIXED: Schedule sign operations on region-specific scheduler for Folia compatibility
         final org.bukkit.Location signLocation = sign.getLocation();
         if (signLocation != null) {
-            DuelsPlugin.getMorePaperLib().scheduling()
-                .regionSpecificScheduler(signLocation)
-                .run(() -> {
-                    final Block blockAtLocation = signLocation.getBlock();
-                    if (blockAtLocation.getState() instanceof Sign signState) {
-                        signState.setLine(0, replace(lines[0], inQueue, inMatch));
-                        signState.setLine(1, replace(lines[1], inQueue, inMatch));
-                        signState.setLine(2, replace(lines[2], inQueue, inMatch));
-                        signState.setLine(3, replace(lines[3], inQueue, inMatch));
-                        signState.update();
-                    }
-                });
+            DuelsPlugin.getSchedulerAdapter().runTask(signLocation, () -> {
+                final Block blockAtLocation = signLocation.getBlock();
+                if (blockAtLocation.getState() instanceof Sign signState) {
+                    signState.setLine(0, replace(lines[0], inQueue, inMatch));
+                    signState.setLine(1, replace(lines[1], inQueue, inMatch));
+                    signState.setLine(2, replace(lines[2], inQueue, inMatch));
+                    signState.setLine(3, replace(lines[3], inQueue, inMatch));
+                    signState.update();
+                }
+            });
         } else {
             // Fallback: use global scheduler if location is null
-            DuelsPlugin.getMorePaperLib().scheduling()
-                .globalRegionalScheduler()
-                .run(() -> {
-                    final Block blockAtLocation = location.getBlock();
-                    if (blockAtLocation.getState() instanceof Sign signState) {
-                        signState.setLine(0, replace(lines[0], inQueue, inMatch));
-                        signState.setLine(1, replace(lines[1], inQueue, inMatch));
-                        signState.setLine(2, replace(lines[2], inQueue, inMatch));
-                        signState.setLine(3, replace(lines[3], inQueue, inMatch));
-                        signState.update();
-                    }
-                });
+            DuelsPlugin.getSchedulerAdapter().runTask(() -> {
+                final Block blockAtLocation = location.getBlock();
+                if (blockAtLocation.getState() instanceof Sign signState) {
+                    signState.setLine(0, replace(lines[0], inQueue, inMatch));
+                    signState.setLine(1, replace(lines[1], inQueue, inMatch));
+                    signState.setLine(2, replace(lines[2], inQueue, inMatch));
+                    signState.setLine(3, replace(lines[3], inQueue, inMatch));
+                    signState.update();
+                }
+            });
         }
     }
 

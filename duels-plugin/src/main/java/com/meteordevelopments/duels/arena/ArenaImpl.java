@@ -232,11 +232,9 @@ public class ArenaImpl extends BaseButton implements Arena {
         for(Block block : match.placedBlocks) {
             final org.bukkit.Location blockLocation = block.getLocation();
             if (blockLocation != null) {
-                DuelsPlugin.getMorePaperLib().scheduling()
-                    .regionSpecificScheduler(blockLocation)
-                    .run(() -> {
-                        block.setType(Material.AIR);
-                    });
+                DuelsPlugin.getSchedulerAdapter().runTask(blockLocation, () -> {
+                    block.setType(Material.AIR);
+                });
             }
         }
 
@@ -245,11 +243,9 @@ public class ArenaImpl extends BaseButton implements Arena {
             if (blockLocation != null) {
                 final BlockData blockData = map.getValue();
                 final Location locationCopy = blockLocation.clone();
-                DuelsPlugin.getMorePaperLib().scheduling()
-                    .regionSpecificScheduler(blockLocation)
-                    .run(() -> {
-                        locationCopy.getBlock().setBlockData(blockData);
-                    });
+                DuelsPlugin.getSchedulerAdapter().runTask(blockLocation, () -> {
+                    locationCopy.getBlock().setBlockData(blockData);
+                });
             }
         }
 
@@ -257,13 +253,11 @@ public class ArenaImpl extends BaseButton implements Arena {
         // Also check if entities are still valid (may have been removed by other plugins like Gaia)
         for (Entity entity : match.placedEntities) {
             if (entity != null && entity.isValid() && !entity.isDead() && entity.getLocation() != null) {
-                DuelsPlugin.getMorePaperLib().scheduling()
-                    .regionSpecificScheduler(entity.getLocation())
-                    .run(() -> {
-                        if (entity.isValid() && !entity.isDead()) {
-                            entity.remove();
-                        }
-                    });
+                DuelsPlugin.getSchedulerAdapter().runTask(entity.getLocation(), () -> {
+                    if (entity.isValid() && !entity.isDead()) {
+                        entity.remove();
+                    }
+                });
             }
         }
 
@@ -285,11 +279,9 @@ public class ArenaImpl extends BaseButton implements Arena {
                                 // Schedule block operation on region-specific scheduler for Folia compatibility
                                 final org.bukkit.Location findBlockLocation = findBlock.getLocation();
                                 if (findBlockLocation != null) {
-                                    DuelsPlugin.getMorePaperLib().scheduling()
-                                        .regionSpecificScheduler(findBlockLocation)
-                                        .run(() -> {
-                                            findBlock.setType(Material.AIR);
-                                        });
+                                    DuelsPlugin.getSchedulerAdapter().runTask(findBlockLocation, () -> {
+                                        findBlock.setType(Material.AIR);
+                                    });
                                 }
                             }
                         }
@@ -309,13 +301,11 @@ public class ArenaImpl extends BaseButton implements Arena {
         if(config.isClearItemsAfterMatch()) {
             for (Entity item : match.droppedItems) {
                 if (item != null && item.isValid() && !item.isDead() && item.getLocation() != null) {
-                    DuelsPlugin.getMorePaperLib().scheduling()
-                        .regionSpecificScheduler(item.getLocation())
-                        .run(() -> {
-                            if (item.isValid() && !item.isDead()) {
-                                item.remove();
-                            }
-                        });
+                    DuelsPlugin.getSchedulerAdapter().runTask(item.getLocation(), () -> {
+                        if (item.isValid() && !item.isDead()) {
+                            item.remove();
+                        }
+                    });
                 }
             }
         }

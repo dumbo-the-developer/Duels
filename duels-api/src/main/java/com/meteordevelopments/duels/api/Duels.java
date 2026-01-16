@@ -10,7 +10,7 @@ import com.meteordevelopments.duels.api.user.UserManager;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
+import java.lang.Object;
 
 
 public interface Duels extends Plugin {
@@ -104,7 +104,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    ScheduledTask doSync(@NotNull final Runnable task);
+    Object doSync(@NotNull final Runnable task);
 
 
     /**
@@ -115,7 +115,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    ScheduledTask doSyncAfter(@NotNull final Runnable task, long delay);
+    Object doSyncAfter(@NotNull final Runnable task, long delay);
 
 
     /**
@@ -127,7 +127,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    ScheduledTask doSyncRepeat(@NotNull final Runnable task, long delay, long interval);
+    Object doSyncRepeat(@NotNull final Runnable task, long delay, long interval);
 
 
     /**
@@ -137,7 +137,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    ScheduledTask doAsync(@NotNull final Runnable task);
+    Object doAsync(@NotNull final Runnable task);
 
 
     /**
@@ -148,7 +148,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    ScheduledTask doAsyncAfter(@NotNull final Runnable task, long delay);
+    Object doAsyncAfter(@NotNull final Runnable task, long delay);
 
 
     /**
@@ -160,7 +160,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    ScheduledTask doAsyncRepeat(@NotNull final Runnable task, long delay, long interval);
+    Object doAsyncRepeat(@NotNull final Runnable task, long delay, long interval);
 
 
     /**
@@ -169,7 +169,7 @@ public interface Duels extends Plugin {
      * @param task Task to cancel if not already cancelled.
      * @since 3.2.0
      */
-    void cancelTask(@NotNull final ScheduledTask task);
+    void cancelTask(@NotNull final Object task);
 
     /**
      * Logs a message with {@link java.util.logging.Level#INFO}.

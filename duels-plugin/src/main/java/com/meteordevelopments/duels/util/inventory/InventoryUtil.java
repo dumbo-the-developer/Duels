@@ -91,11 +91,9 @@ public final class InventoryUtil {
             // Schedule item drops on region-specific scheduler for Folia compatibility
             final org.bukkit.Location dropLocation = player.getLocation();
             result.values().forEach(item -> {
-                DuelsPlugin.getMorePaperLib().scheduling()
-                    .regionSpecificScheduler(dropLocation)
-                    .run(() -> {
-                        player.getWorld().dropItemNaturally(dropLocation, item);
-                    });
+                DuelsPlugin.getSchedulerAdapter().runTask(dropLocation, () -> {
+                    player.getWorld().dropItemNaturally(dropLocation, item);
+                });
             });
         }
 

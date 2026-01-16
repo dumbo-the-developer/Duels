@@ -1,6 +1,5 @@
 package com.meteordevelopments.duels.countdown;
 
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -14,11 +13,10 @@ import com.meteordevelopments.duels.match.DuelMatch;
 import com.meteordevelopments.duels.util.StringUtil;
 import com.meteordevelopments.duels.util.compat.Titles;
 import com.meteordevelopments.duels.util.function.Pair;
+import com.meteordevelopments.duels.util.SchedulerAdapter.TaskWrapper;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
 
-public class DuelCountdown extends BukkitRunnable {
+public class DuelCountdown implements Runnable {
 
     protected final Config config;
     protected final Lang lang;
@@ -32,7 +30,7 @@ public class DuelCountdown extends BukkitRunnable {
     private final Map<UUID, Pair<String, Integer>> info = new HashMap<>();
     private int index = 0;
 
-    private final AtomicReference<ScheduledTask> scheduledTask = new AtomicReference<>();
+    private final AtomicReference<TaskWrapper> scheduledTask = new AtomicReference<>();
 
     protected DuelCountdown(final DuelsPlugin plugin, final ArenaImpl arena, final DuelMatch match, final List<String> messages, final List<String> titles) {
         this.config = plugin.getConfiguration();
@@ -88,8 +86,8 @@ public class DuelCountdown extends BukkitRunnable {
         if (!arena.isUsed() || index >= messages.size()) {
             arena.setCountdown(null);
 
-            // Cancel the MorePaperLib task
-            ScheduledTask task = scheduledTask.get();
+            // Cancel the scheduler task
+            TaskWrapper task = scheduledTask.get();
             if (task != null) {
                 task.cancel();
             }
@@ -105,13 +103,10 @@ public class DuelCountdown extends BukkitRunnable {
     }
 
     public void startCountdown(long delay, long period) {
-        ScheduledTask task = DuelsPlugin.getMorePaperLib()
-                .scheduling()
-                .asyncScheduler()
-                .runAtFixedRate(
+        TaskWrapper task = DuelsPlugin.getSchedulerAdapter().runTaskTimerAsynchronously(
                         this,
-                        Duration.ofMillis(delay * 50),
-                        Duration.ofMillis(period * 50)
+                        delay,
+                        period
                 );
         scheduledTask.set(task); // Store the task reference
     }

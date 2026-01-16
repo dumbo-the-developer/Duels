@@ -11,7 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
+import com.meteordevelopments.duels.util.SchedulerAdapter.TaskWrapper;
 
 import java.util.*;
 
@@ -26,7 +26,7 @@ public class PartyManagerImpl implements Loadable, Listener {
     private final Map<UUID, Party> partyMap = new HashMap<>();
     private final List<Party> parties = new ArrayList<>();
 
-    private ScheduledTask autoDisbandTask;
+    private TaskWrapper autoDisbandTask;
 
     public PartyManagerImpl(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -38,7 +38,7 @@ public class PartyManagerImpl implements Loadable, Listener {
     @Override
     public void handleLoad() {
         if (config.getPartyAutoDisbandAfter() > 0) {
-            this.autoDisbandTask = plugin.doSyncRepeat(() -> {
+            this.autoDisbandTask = (TaskWrapper) plugin.doSyncRepeat(() -> {
                 Iterator<Party> iterator = parties.iterator();
 
                 while (iterator.hasNext()) {

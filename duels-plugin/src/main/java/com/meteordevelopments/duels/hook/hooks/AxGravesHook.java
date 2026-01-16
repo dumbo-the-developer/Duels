@@ -47,18 +47,14 @@ public class AxGravesHook extends PluginHook<DuelsPlugin> {
             if (grave != null) {
                 final org.bukkit.Location playerLocation = player.getLocation();
                 if (playerLocation != null) {
-                    DuelsPlugin.getMorePaperLib().scheduling()
-                        .regionSpecificScheduler(playerLocation)
-                        .run(() -> {
-                            grave.remove();
-                        });
+                    DuelsPlugin.getSchedulerAdapter().runTask(playerLocation, () -> {
+                        grave.remove();
+                    });
                 } else {
                     // Fallback: if location is null, try global scheduler
-                    DuelsPlugin.getMorePaperLib().scheduling()
-                        .globalRegionalScheduler()
-                        .run(() -> {
-                            grave.remove();
-                        });
+                    DuelsPlugin.getSchedulerAdapter().runTask(() -> {
+                        grave.remove();
+                    });
                 }
             }
             event.setCancelled(true);

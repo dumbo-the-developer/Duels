@@ -70,14 +70,14 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
         activeSessions.put(playerId, session);
 
         // Use teleportAsync for Folia compatibility
-        boolean isFolia = DuelsPlugin.getMorePaperLib().scheduling().isUsingFolia();
+        boolean isFolia = DuelsPlugin.getSchedulerAdapter().isFolia();
         final org.bukkit.Location kitLobby = plugin.getPlayerManager().getKitLobby();
         
         if (isFolia) {
             player.teleportAsync(kitLobby).thenAccept(success -> {
                 if (success) {
                     // FIXED: Schedule inventory operations on entity-specific scheduler for Folia compatibility
-                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                         if (!player.isOnline()) {
                             return;
                         }
@@ -92,15 +92,15 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
                             // Load default kit
                             loadKitToPlayer(player, kit);
                         }
-                    }, null);
+                    });
                 } else {
                     plugin.getLogger().severe("Unable to teleport " + player.getName() + " to kit lobby");
                     // FIXED: Schedule abortEditSession on entity-specific scheduler since we're in async callback
-                    DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                    DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                         if (player.isOnline()) {
                             abortEditSession(player);
                         }
-                    }, null);
+                    });
                 }
             });
         } else {
