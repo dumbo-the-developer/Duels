@@ -72,8 +72,10 @@ public class DuelManager implements Loadable {
     private MyPetHook myPet;
 
     private TaskWrapper durationCheckTask;
-    private final Map<ArenaImpl, TaskWrapper> activeCheckRoutines = new HashMap<>();
-    private final Set<ArenaImpl> activeCheckRoutineFlags = new HashSet<>();
+    // CRITICAL: Use synchronized collections for thread-safety
+    // Even though runTaskTimer runs on main thread on Paper, Folia might use async scheduler
+    private final Map<ArenaImpl, TaskWrapper> activeCheckRoutines = Collections.synchronizedMap(new HashMap<>());
+    private final Set<ArenaImpl> activeCheckRoutineFlags = Collections.synchronizedSet(new HashSet<>());
 
     public DuelManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -89,14 +91,24 @@ public class DuelManager implements Loadable {
     }
 
     public void handleMatchEnd(DuelMatch match, ArenaImpl arena, Player loser, Location deadLocation, Player winner) {
-        // Clean up check routine for this arena
-        activeCheckRoutineFlags.remove(arena);
-        final TaskWrapper routineTask = activeCheckRoutines.remove(arena);
-        if (routineTask != null && !routineTask.isCancelled()) {
-            routineTask.cancel();
+        // CRITICAL: Synchronized cleanup to prevent race conditions
+        synchronized (activeCheckRoutineFlags) {
+            activeCheckRoutineFlags.remove(arena);
+            final TaskWrapper routineTask = activeCheckRoutines.remove(arena);
+            if (routineTask != null && !routineTask.isCancelled()) {
+                routineTask.cancel();
+            }
         }
 
-        DuelsPlugin.getSchedulerAdapter().runTask(arena.first().getLocation(), () -> {
+        // CRITICAL: Check if arena has players before accessing first() to prevent NPE
+        final Player firstPlayer = arena.first();
+        final Location taskLocation = firstPlayer != null ? firstPlayer.getLocation() : (deadLocation != null ? deadLocation : arena.getPosition(1));
+        if (taskLocation == null || taskLocation.getWorld() == null) {
+            Log.warn(this, "Cannot schedule match end task - no valid location available");
+            return;
+        }
+
+        DuelsPlugin.getSchedulerAdapter().runTask(taskLocation, () -> {
             if (arena.size() == 0) {
                 match.getAllPlayers().forEach(matchPlayer -> {
                     handleTie(matchPlayer, arena, match, false);
@@ -217,6 +229,15 @@ public class DuelManager implements Loadable {
     }
 
     public void handleTeamMatchEnd(TeamDuelMatch match, ArenaImpl arena, Location deadLocation, TeamDuelMatch.Team winningTeam) {
+        // CRITICAL: Synchronized cleanup to prevent race conditions
+        synchronized (activeCheckRoutineFlags) {
+            activeCheckRoutineFlags.remove(arena);
+            final TaskWrapper routineTask = activeCheckRoutines.remove(arena);
+            if (routineTask != null && !routineTask.isCancelled()) {
+                routineTask.cancel();
+            }
+        }
+
         // Safety check: Ensure deadLocation is valid before scheduling
         if (deadLocation == null || deadLocation.getWorld() == null) {
             Log.warn(this, "Cannot schedule team match end task - deadLocation is null or world is null");
@@ -912,15 +933,18 @@ public class DuelManager implements Loadable {
         final int checkTimeSeconds = config.getCheckForPlayersRoutineTimeSeconds();
         final String action = config.getCheckForPlayersRoutineAction();
         
-        // Cancel any existing routine for this arena
-        activeCheckRoutineFlags.remove(arena);
-        final TaskWrapper existingTask = activeCheckRoutines.remove(arena);
-        if (existingTask != null && !existingTask.isCancelled()) {
-            existingTask.cancel();
+        // CRITICAL: Synchronized cleanup and setup to prevent race conditions
+        synchronized (activeCheckRoutineFlags) {
+            // Cancel any existing routine for this arena
+            activeCheckRoutineFlags.remove(arena);
+            final TaskWrapper existingTask = activeCheckRoutines.remove(arena);
+            if (existingTask != null && !existingTask.isCancelled()) {
+                existingTask.cancel();
+            }
+            
+            // Mark this arena as having an active routine
+            activeCheckRoutineFlags.add(arena);
         }
-        
-        // Mark this arena as having an active routine
-        activeCheckRoutineFlags.add(arena);
         
         final int[] checkCount = {0}; // Track how many checks we've done
         
@@ -928,24 +952,30 @@ public class DuelManager implements Loadable {
         // CRITICAL: Use synchronous task instead of async to safely access match state
         // Async tasks can cause race conditions with match ending logic
         final TaskWrapper task = DuelsPlugin.getSchedulerAdapter().runTaskTimer(() -> {
-                // Check if routine should still be active
-                if (!activeCheckRoutineFlags.contains(arena)) {
-                    return; // Routine was cancelled, stop checking
+                // CRITICAL: Synchronized check to prevent race conditions
+                synchronized (activeCheckRoutineFlags) {
+                    if (!activeCheckRoutineFlags.contains(arena)) {
+                        return; // Routine was cancelled, stop checking
+                    }
                 }
                 
                 // CRITICAL: Check match state FIRST before any operations
                 // This prevents the routine from interfering with match ending
                 final DuelMatch currentMatch = arena.getMatch();
                 if (match.isFinished() || !arena.isUsed() || currentMatch != match || currentMatch == null) {
-                    activeCheckRoutineFlags.remove(arena);
-                    activeCheckRoutines.remove(arena);
+                    synchronized (activeCheckRoutineFlags) {
+                        activeCheckRoutineFlags.remove(arena);
+                        activeCheckRoutines.remove(arena);
+                    }
                     return; // Stop checking
                 }
                 
                 // Check if we've exceeded the time limit
                 if (checkCount[0] >= checkTimeSeconds) {
-                    activeCheckRoutineFlags.remove(arena);
-                    activeCheckRoutines.remove(arena);
+                    synchronized (activeCheckRoutineFlags) {
+                        activeCheckRoutineFlags.remove(arena);
+                        activeCheckRoutines.remove(arena);
+                    }
                     return; // Time limit reached, stop routine
                 }
                 
@@ -973,10 +1003,12 @@ public class DuelManager implements Loadable {
                         // Player is outside arena world
                         if ("hardstop-arena".equalsIgnoreCase(action)) {
                             // Hard stop the arena immediately and stop checking
-                            activeCheckRoutineFlags.remove(arena);
-                            final TaskWrapper removed = activeCheckRoutines.remove(arena);
-                            if (removed != null && !removed.isCancelled()) {
-                                removed.cancel();
+                            synchronized (activeCheckRoutineFlags) {
+                                activeCheckRoutineFlags.remove(arena);
+                                final TaskWrapper removed = activeCheckRoutines.remove(arena);
+                                if (removed != null && !removed.isCancelled()) {
+                                    removed.cancel();
+                                }
                             }
                             DuelsPlugin.getSchedulerAdapter().runTask(arenaLocation, () -> {
                                 hardResetArena(arena);
@@ -1000,15 +1032,26 @@ public class DuelManager implements Loadable {
                                     // This prevents the routine from continuing after match has ended
                                     DuelsPlugin.getSchedulerAdapter().runTaskLater(() -> {
                                         // Re-check match state after death event has processed
+                                        // CRITICAL: Use synchronized check to prevent race conditions
                                         if (match.isFinished() || !arena.isUsed() || arena.getMatch() != match) {
                                             // Match ended, stop the routine
-                                            activeCheckRoutineFlags.remove(arena);
-                                            final TaskWrapper removed = activeCheckRoutines.remove(arena);
-                                            if (removed != null && !removed.isCancelled()) {
-                                                removed.cancel();
+                                            synchronized (activeCheckRoutineFlags) {
+                                                if (activeCheckRoutineFlags.contains(arena)) {
+                                                    activeCheckRoutineFlags.remove(arena);
+                                                    final TaskWrapper removed = activeCheckRoutines.remove(arena);
+                                                    if (removed != null && !removed.isCancelled()) {
+                                                        removed.cancel();
+                                                    }
+                                                }
                                             }
                                         }
                                     }, 5L); // 5 tick delay to allow death event to process
+                                    
+                                    // CRITICAL: Stop checking other players if match ended after this kill
+                                    // This prevents multiple kills when match should have ended
+                                    if (match.isFinished() || arena.getMatch() != match) {
+                                        return; // Exit loop early, match ended
+                                    }
                                 }
                             });
                         }
@@ -1016,6 +1059,7 @@ public class DuelManager implements Loadable {
                 }
             }, 0L, 20L); // Start immediately, repeat every 20 ticks (1 second)
         
+        // CRITICAL: Store task reference immediately after scheduling to prevent race conditions
         activeCheckRoutines.put(arena, task);
     }
 
