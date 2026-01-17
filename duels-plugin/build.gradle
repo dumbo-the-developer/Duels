@@ -30,9 +30,6 @@ dependencies {
     implementation('net.essentialsx:EssentialsX:2.21.2') {
         transitive = false
     }
-    implementation(name: 'MVdWPlaceholderAPI-3.1.1') {
-        transitive = false
-    }
     implementation name: 'Vault-1.6.7'
     implementation name: 'CombatTagPlus'
     implementation name: 'Factions-1.6.9.5-U0.1.14'
