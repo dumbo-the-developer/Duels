@@ -41,7 +41,6 @@ dependencies {
     implementation name: 'MyPet-2.3.4'
     implementation name: 'BountyHunters-2.2.6'
     implementation name: 'SimpleClans-2.14.4.1'
-    implementation name: 'LeaderHeadsAPI'
 
     implementation project(':duels-api')
     implementation project(':duels-worldguard')
