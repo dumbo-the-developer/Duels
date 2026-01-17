@@ -466,8 +466,14 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         blacklistedCommands = configuration.getStringList("duel.blacklisted-commands");
 
         checkForPlayersRoutineEnabled = configuration.getBoolean("duel.match.check-for-players-routine.enabled", true);
-        checkForPlayersRoutineTimeSeconds = configuration.getInt("duel.match.check-for-players-routine.check-time-seconds", 30);
-        checkForPlayersRoutineAction = configuration.getString("duel.match.check-for-players-routine.action", "kill-outside-player");
+        checkForPlayersRoutineTimeSeconds = Math.max(configuration.getInt("duel.match.check-for-players-routine.check-time-seconds", 30), 1);
+        final String actionConfig = configuration.getString("duel.match.check-for-players-routine.action", "kill-outside-player");
+        if ("kill-outside-player".equalsIgnoreCase(actionConfig) || "hardstop-arena".equalsIgnoreCase(actionConfig)) {
+            checkForPlayersRoutineAction = actionConfig.toLowerCase();
+        } else {
+            checkForPlayersRoutineAction = "kill-outside-player";
+            Log.warn(this, "Invalid action '" + actionConfig + "' for duel.match.check-for-players-routine.action. Valid values: 'kill-outside-player', 'hardstop-arena'. Defaulting to 'kill-outside-player'.");
+        }
 
         queueBlacklistedCommands = configuration.getStringList("queue.blacklisted-commands");
 

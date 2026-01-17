@@ -513,6 +513,17 @@ public class DuelManager implements Loadable {
             plugin.cancelTask(durationCheckTask);
         }
 
+        // CRITICAL: Cancel all active check-for-players-routine tasks to prevent memory leaks
+        synchronized (activeCheckRoutineFlags) {
+            for (final ArenaImpl arena : new ArrayList<>(activeCheckRoutineFlags)) {
+                final TaskWrapper routineTask = activeCheckRoutines.remove(arena);
+                if (routineTask != null && !routineTask.isCancelled()) {
+                    routineTask.cancel();
+                }
+                activeCheckRoutineFlags.remove(arena);
+            }
+        }
+
         /*
         3 Cases:
         1. size = 2: Match outcome is yet to be decided (INGAME phase)
@@ -621,11 +632,13 @@ public class DuelManager implements Loadable {
             return false;
         }
         
-        // CRITICAL: Clean up check routine for this arena to prevent interference
-        activeCheckRoutineFlags.remove(arena);
-        final TaskWrapper routineTask = activeCheckRoutines.remove(arena);
-        if (routineTask != null && !routineTask.isCancelled()) {
-            routineTask.cancel();
+        // CRITICAL: Synchronized cleanup to prevent race conditions
+        synchronized (activeCheckRoutineFlags) {
+            activeCheckRoutineFlags.remove(arena);
+            final TaskWrapper routineTask = activeCheckRoutines.remove(arena);
+            if (routineTask != null && !routineTask.isCancelled()) {
+                routineTask.cancel();
+            }
         }
         
         // Get all players in the match
@@ -952,115 +965,142 @@ public class DuelManager implements Loadable {
         // CRITICAL: Use synchronous task instead of async to safely access match state
         // Async tasks can cause race conditions with match ending logic
         final TaskWrapper task = DuelsPlugin.getSchedulerAdapter().runTaskTimer(() -> {
-                // CRITICAL: Synchronized check to prevent race conditions
-                synchronized (activeCheckRoutineFlags) {
-                    if (!activeCheckRoutineFlags.contains(arena)) {
-                        return; // Routine was cancelled, stop checking
-                    }
-                }
-                
-                // CRITICAL: Check match state FIRST before any operations
-                // This prevents the routine from interfering with match ending
-                final DuelMatch currentMatch = arena.getMatch();
-                if (match.isFinished() || !arena.isUsed() || currentMatch != match || currentMatch == null) {
+                try {
+                    // CRITICAL: Synchronized check to prevent race conditions
                     synchronized (activeCheckRoutineFlags) {
-                        activeCheckRoutineFlags.remove(arena);
-                        activeCheckRoutines.remove(arena);
-                    }
-                    return; // Stop checking
-                }
-                
-                // Check if we've exceeded the time limit
-                if (checkCount[0] >= checkTimeSeconds) {
-                    synchronized (activeCheckRoutineFlags) {
-                        activeCheckRoutineFlags.remove(arena);
-                        activeCheckRoutines.remove(arena);
-                    }
-                    return; // Time limit reached, stop routine
-                }
-                
-                checkCount[0]++;
-                
-                // Check each player
-                // Create a snapshot to avoid ConcurrentModificationException if players quit during iteration
-                final List<Player> playersToCheck = new ArrayList<>(match.getAllPlayers());
-                
-                for (final Player player : playersToCheck) {
-                    // Edge case: Player may have quit during iteration - verify they're still online and in match
-                    if (!player.isOnline()) {
-                        continue; // Skip offline players
+                        if (!activeCheckRoutineFlags.contains(arena)) {
+                            return; // Routine was cancelled, stop checking
+                        }
                     }
                     
-                    // Double-check: Verify player is still in this match (may have quit or match ended)
-                    // CRITICAL: Re-check match reference to ensure it hasn't changed
-                    final DuelMatch currentMatch2 = arena.getMatch();
-                    if (match.isFinished() || currentMatch2 != match || currentMatch2 == null || !arena.has(player)) {
-                        continue; // Player no longer in match, skip
+                    // CRITICAL: Check match state FIRST before any operations
+                    // This prevents the routine from interfering with match ending
+                    final DuelMatch currentMatch = arena.getMatch();
+                    if (match.isFinished() || !arena.isUsed() || currentMatch != match || currentMatch == null) {
+                        synchronized (activeCheckRoutineFlags) {
+                            activeCheckRoutineFlags.remove(arena);
+                            activeCheckRoutines.remove(arena);
+                        }
+                        return; // Stop checking
                     }
                     
-                    final World playerWorld = player.getWorld();
-                    if (playerWorld == null || !isSameWorld(playerWorld, arenaWorld)) {
-                        // Player is outside arena world
-                        if ("hardstop-arena".equalsIgnoreCase(action)) {
-                            // Hard stop the arena immediately and stop checking
-                            synchronized (activeCheckRoutineFlags) {
-                                activeCheckRoutineFlags.remove(arena);
-                                final TaskWrapper removed = activeCheckRoutines.remove(arena);
-                                if (removed != null && !removed.isCancelled()) {
-                                    removed.cancel();
+                    // Check if we've exceeded the time limit
+                    if (checkCount[0] >= checkTimeSeconds) {
+                        synchronized (activeCheckRoutineFlags) {
+                            activeCheckRoutineFlags.remove(arena);
+                            activeCheckRoutines.remove(arena);
+                        }
+                        return; // Time limit reached, stop routine
+                    }
+                    
+                    checkCount[0]++;
+                    
+                    // Check each player
+                    // Create a snapshot to avoid ConcurrentModificationException if players quit during iteration
+                    final List<Player> playersToCheck = new ArrayList<>(match.getAllPlayers());
+                    
+                    for (final Player player : playersToCheck) {
+                        // Edge case: Player may have quit during iteration - verify they're still online and in match
+                        if (!player.isOnline()) {
+                            continue; // Skip offline players
+                        }
+                        
+                        // Skip dead players in team matches (they're spectators and should be allowed outside arena world)
+                        if (match instanceof TeamDuelMatch && match.isDead(player)) {
+                            continue; // Dead spectators in team matches are allowed to be outside
+                        }
+                        
+                        // Double-check: Verify player is still in this match (may have quit or match ended)
+                        // CRITICAL: Re-check match reference to ensure it hasn't changed
+                        final DuelMatch currentMatch2 = arena.getMatch();
+                        if (match.isFinished() || currentMatch2 != match || currentMatch2 == null || !arena.has(player)) {
+                            continue; // Player no longer in match, skip
+                        }
+                        
+                        final World playerWorld = player.getWorld();
+                        if (playerWorld == null || !isSameWorld(playerWorld, arenaWorld)) {
+                            // Player is outside arena world
+                            if ("hardstop-arena".equalsIgnoreCase(action)) {
+                                // Hard stop the arena immediately and stop checking
+                                synchronized (activeCheckRoutineFlags) {
+                                    activeCheckRoutineFlags.remove(arena);
+                                    final TaskWrapper removed = activeCheckRoutines.remove(arena);
+                                    if (removed != null && !removed.isCancelled()) {
+                                        removed.cancel();
+                                    }
                                 }
-                            }
-                            DuelsPlugin.getSchedulerAdapter().runTask(arenaLocation, () -> {
-                                hardResetArena(arena);
-                            });
-                            return; // Stop checking immediately
-                        } else if ("kill-outside-player".equalsIgnoreCase(action)) {
-                            // Kill the player but continue checking other players
-                            // EDGE CASE: Clear inventory BEFORE killing to prevent item drops when player changes worlds
-                            DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
-                                // Final safety check: Verify player is still online and in match before killing
-                                // CRITICAL: Re-check match reference to ensure it hasn't changed
-                                final DuelMatch currentMatch3 = arena.getMatch();
-                                if (player.isOnline() && !match.isFinished() && currentMatch3 == match && currentMatch3 != null && arena.has(player)) {
-                                    // Clear inventory first, then kill to prevent items from dropping
-                                    player.getInventory().clear();
-                                    player.getInventory().setArmorContents(null);
-                                    player.updateInventory();
-                                    player.setHealth(0);
-                                    
-                                    // CRITICAL: After killing, check if match ended and stop routine if so
-                                    // This prevents the routine from continuing after match has ended
-                                    DuelsPlugin.getSchedulerAdapter().runTaskLater(() -> {
-                                        // Re-check match state after death event has processed
-                                        // CRITICAL: Use synchronized check to prevent race conditions
-                                        if (match.isFinished() || !arena.isUsed() || arena.getMatch() != match) {
-                                            // Match ended, stop the routine
-                                            synchronized (activeCheckRoutineFlags) {
-                                                if (activeCheckRoutineFlags.contains(arena)) {
-                                                    activeCheckRoutineFlags.remove(arena);
-                                                    final TaskWrapper removed = activeCheckRoutines.remove(arena);
-                                                    if (removed != null && !removed.isCancelled()) {
-                                                        removed.cancel();
+                                DuelsPlugin.getSchedulerAdapter().runTask(arenaLocation, () -> {
+                                    hardResetArena(arena);
+                                });
+                                return; // Stop checking immediately
+                            } else if ("kill-outside-player".equalsIgnoreCase(action)) {
+                                // Kill the player but continue checking other players
+                                // EDGE CASE: Clear inventory BEFORE killing to prevent item drops when player changes worlds
+                                DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
+                                    // Final safety check: Verify player is still online and in match before killing
+                                    // CRITICAL: Re-check match reference to ensure it hasn't changed
+                                    final DuelMatch currentMatch3 = arena.getMatch();
+                                    if (player.isOnline() && !match.isFinished() && currentMatch3 == match && currentMatch3 != null && arena.has(player)) {
+                                        // Clear inventory first, then kill to prevent items from dropping
+                                        player.getInventory().clear();
+                                        player.getInventory().setArmorContents(null);
+                                        player.updateInventory();
+                                        player.setHealth(0);
+                                        
+                                        // CRITICAL: After killing, check if match ended and stop routine if so
+                                        // This prevents the routine from continuing after match has ended
+                                        DuelsPlugin.getSchedulerAdapter().runTaskLater(() -> {
+                                            // Re-check match state after death event has processed
+                                            // CRITICAL: Use synchronized check to prevent race conditions
+                                            if (match.isFinished() || !arena.isUsed() || arena.getMatch() != match) {
+                                                // Match ended, stop the routine
+                                                synchronized (activeCheckRoutineFlags) {
+                                                    if (activeCheckRoutineFlags.contains(arena)) {
+                                                        activeCheckRoutineFlags.remove(arena);
+                                                        final TaskWrapper removed = activeCheckRoutines.remove(arena);
+                                                        if (removed != null && !removed.isCancelled()) {
+                                                            removed.cancel();
+                                                        }
                                                     }
                                                 }
                                             }
+                                        }, 5L); // 5 tick delay to allow death event to process
+                                        
+                                        // CRITICAL: Stop checking other players if match ended after this kill
+                                        // This prevents multiple kills when match should have ended
+                                        if (match.isFinished() || arena.getMatch() != match) {
+                                            return; // Exit loop early, match ended
                                         }
-                                    }, 5L); // 5 tick delay to allow death event to process
-                                    
-                                    // CRITICAL: Stop checking other players if match ended after this kill
-                                    // This prevents multiple kills when match should have ended
-                                    if (match.isFinished() || arena.getMatch() != match) {
-                                        return; // Exit loop early, match ended
                                     }
-                                }
-                            });
+                                });
+                            } else {
+                                // Unknown action - this shouldn't happen if config validation works, but log it just in case
+                                Log.warn(this, "Unknown action '" + action + "' in check-for-players-routine for arena " + arena.getName() + ". Valid actions: 'kill-outside-player', 'hardstop-arena'.");
+                            }
                         }
+                    }
+                } catch (Exception ex) {
+                    // CRITICAL: Catch any exceptions to prevent task from stopping unexpectedly
+                    // Log the error and clean up the routine
+                    Log.warn(this, "Error in check-for-players-routine for arena " + arena.getName() + ": " + ex.getMessage());
+                    synchronized (activeCheckRoutineFlags) {
+                        activeCheckRoutineFlags.remove(arena);
+                        activeCheckRoutines.remove(arena);
                     }
                 }
             }, 0L, 20L); // Start immediately, repeat every 20 ticks (1 second)
         
         // CRITICAL: Store task reference immediately after scheduling to prevent race conditions
-        activeCheckRoutines.put(arena, task);
+        // Also check if task is null (scheduling might have failed)
+        if (task != null) {
+            activeCheckRoutines.put(arena, task);
+        } else {
+            // Scheduling failed, clean up flags
+            synchronized (activeCheckRoutineFlags) {
+                activeCheckRoutineFlags.remove(arena);
+            }
+            Log.warn(this, "Failed to schedule check-for-players-routine for arena " + arena.getName());
+        }
     }
 
     private void addPlayers(final Collection<Player> players, final DuelMatch match, final ArenaImpl arena, final KitImpl kit, final Location location) {
