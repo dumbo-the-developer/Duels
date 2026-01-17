@@ -235,6 +235,37 @@ duel:
         - 'give %loser% dirt 1{delay:50}'
         - 'say Congratulations %winner%!{delay:100}'
 
+    player-execute-commands-on-arena-pre-start:
+      # If set to 'true', the commands listed below will be executed as players when they are teleported to the arena (before match starts).
+      # Commands are executed as the player, not as console.
+      # default: false
+      enabled: false
+
+      # If set to 'true', player-execute-commands-on-arena-pre-start will run only for matches started through the queue system.
+      # default: false
+      queue-matches-only: false
+
+      # Commands to execute as each player. Supports {delay:x} for delayed execution (x in milliseconds).
+      commands:
+        - 'tpacancel'
+
+    check-for-players-routine:
+      # If set to 'true', the check for players routine will be enabled.
+      # While this time players will be checked for if they are in the duel world.
+      # If they are not in the duel world, the action will be taken.
+      # default: true
+      enabled: true
+
+      # Time in seconds to check for players.
+      # default: 30
+      check-time-seconds: 30
+
+      #Action to when players outside duel world.
+      # ACTIONS: kill-outside-player, hardstop-arena
+      # default: kill-outside-player 
+      action: kill-outside-player
+
+
   projectile-hit-message:
     # If set to 'true', a message from lang.yml will be sent to the shooter of the projectile.
     # default: true
@@ -793,3 +824,17 @@ no-opponent: 'No opponent'
 # MiniMessage supports modern formatting like <red>text</red>, <bold>text</bold>, gradients, etc.
 # default: false
 use-minimessages: false
+
+# Duel world settings
+# This is an edge-case safety feature that prevents players from logging into arena worlds
+# when they shouldn't be there. If a player logs out in an arena world (due to server crash,
+# plugin reload, or other edge cases) and logs back in, they will be automatically teleported
+# to spawn if they are not currently in a match. This prevents players from being stuck in
+# arena worlds after unexpected disconnections.
+duel-worlds-settings:
+  enabled: false
+  worlds:
+    - 'world1'
+    - 'world2'
+  force-gamemode-on-join: true
+  force-gamemode-on-join-mode: SURVIVAL

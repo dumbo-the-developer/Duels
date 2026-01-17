@@ -5,7 +5,9 @@ import com.google.common.collect.Multimap;
 import lombok.Getter;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.util.EnumUtil;
+import com.meteordevelopments.duels.util.Log;
 import com.meteordevelopments.duels.util.config.AbstractConfiguration;
+import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -50,6 +52,20 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean duelzoneEnabled;
     @Getter
     private List<String> duelzones;
+    @Getter
+    private boolean duelWorldsEnabled;
+    @Getter
+    private List<String> duelWorlds;
+    @Getter
+    private boolean forceGamemodeOnJoin;
+    @Getter
+    private GameMode forceGamemodeOnJoinMode;
+    @Getter
+    private boolean checkForPlayersRoutineEnabled;
+    @Getter
+    private int checkForPlayersRoutineTimeSeconds;
+    @Getter
+    private String checkForPlayersRoutineAction;
     @Getter
     private boolean myPetDespawn;
     @Getter
@@ -114,6 +130,12 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean endCommandsQueueOnly;
     @Getter
     private List<String> endCommands;
+    @Getter
+    private boolean playerExecuteCommandsOnArenaPreStartEnabled;
+    @Getter
+    private boolean playerExecuteCommandsOnArenaPreStartQueueOnly;
+    @Getter
+    private List<String> playerExecuteCommandsOnArenaPreStart;
     @Getter
     private boolean projectileHitMessageEnabled;
     @Getter
@@ -407,6 +429,9 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         endCommandsEnabled = configuration.getBoolean("duel.match.end-commands.enabled", false);
         endCommandsQueueOnly = configuration.getBoolean("duel.match.end-commands.queue-matches-only", false);
         endCommands = configuration.getStringList("duel.match.end-commands.commands");
+        playerExecuteCommandsOnArenaPreStartEnabled = configuration.getBoolean("duel.match.player-execute-commands-on-arena-pre-start.enabled", false);
+        playerExecuteCommandsOnArenaPreStartQueueOnly = configuration.getBoolean("duel.match.player-execute-commands-on-arena-pre-start.queue-matches-only", false);
+        playerExecuteCommandsOnArenaPreStart = configuration.getStringList("duel.match.player-execute-commands-on-arena-pre-start.commands");
         projectileHitMessageEnabled = configuration.getBoolean("duel.projectile-hit-message.enabled", true);
         projectileHitMessageTypes = configuration.getStringList("duel.projectile-hit-message.types");
         preventInventoryOpen = configuration.getBoolean("duel.prevent-inventory-open", true);
@@ -416,6 +441,16 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         forceAllowCombat = configuration.getBoolean("duel.force-allow-combat", true);
         cancelIfMoved = configuration.getBoolean("duel.cancel-if-moved", false);
         blacklistedWorlds = configuration.getStringList("duel.blacklisted-worlds");
+        duelWorldsEnabled = configuration.getBoolean("duel-worlds-settings.enabled", false);
+        duelWorlds = configuration.getStringList("duel-worlds-settings.worlds");
+        forceGamemodeOnJoin = configuration.getBoolean("duel-worlds-settings.force-gamemode-on-join", false);
+        final String gamemodeStr = configuration.getString("duel-worlds-settings.force-gamemode-on-join-mode", "SURVIVAL");
+        try {
+            forceGamemodeOnJoinMode = GameMode.valueOf(gamemodeStr.toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            forceGamemodeOnJoinMode = GameMode.SURVIVAL;
+            Log.warn(this, "Invalid gamemode '" + gamemodeStr + "' for duel-worlds-settings.force-gamemode-on-join-mode, defaulting to SURVIVAL");
+        }
         teleportToLastLocation = configuration.getBoolean("duel.teleport-to-last-location", false);
         teleportDelay = configuration.getInt("duel.teleport-delay", 5);
         spawnFirework = configuration.getBoolean("duel.spawn-firework", true);
@@ -429,6 +464,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         blockAllCommands = configuration.getBoolean("duel.block-all-commands", false);
         whitelistedCommands = configuration.getStringList("duel.whitelisted-commands");
         blacklistedCommands = configuration.getStringList("duel.blacklisted-commands");
+
+        checkForPlayersRoutineEnabled = configuration.getBoolean("duel.match.check-for-players-routine.enabled", true);
+        checkForPlayersRoutineTimeSeconds = configuration.getInt("duel.match.check-for-players-routine.check-time-seconds", 30);
+        checkForPlayersRoutineAction = configuration.getString("duel.match.check-for-players-routine.action", "kill-outside-player");
 
         queueBlacklistedCommands = configuration.getStringList("queue.blacklisted-commands");
 

@@ -72,6 +72,8 @@ public class DuelManager implements Loadable {
     private MyPetHook myPet;
 
     private TaskWrapper durationCheckTask;
+    private final Map<ArenaImpl, TaskWrapper> activeCheckRoutines = new HashMap<>();
+    private final Set<ArenaImpl> activeCheckRoutineFlags = new HashSet<>();
 
     public DuelManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -87,7 +89,14 @@ public class DuelManager implements Loadable {
     }
 
     public void handleMatchEnd(DuelMatch match, ArenaImpl arena, Player loser, Location deadLocation, Player winner) {
-        DuelsPlugin.getSchedulerAdapter().runTaskLater(arena.first().getLocation(), () -> {
+        // Clean up check routine for this arena
+        activeCheckRoutineFlags.remove(arena);
+        final TaskWrapper routineTask = activeCheckRoutines.remove(arena);
+        if (routineTask != null && !routineTask.isCancelled()) {
+            routineTask.cancel();
+        }
+
+        DuelsPlugin.getSchedulerAdapter().runTask(arena.first().getLocation(), () -> {
             if (arena.size() == 0) {
                 match.getAllPlayers().forEach(matchPlayer -> {
                     handleTie(matchPlayer, arena, match, false);
@@ -204,10 +213,15 @@ public class DuelManager implements Loadable {
                     }
                 }, config.getTeleportDelay() * 20L);
             }
-        }, 1L);
+        });
     }
 
     public void handleTeamMatchEnd(TeamDuelMatch match, ArenaImpl arena, Location deadLocation, TeamDuelMatch.Team winningTeam) {
+        // Safety check: Ensure deadLocation is valid before scheduling
+        if (deadLocation == null || deadLocation.getWorld() == null) {
+            Log.warn(this, "Cannot schedule team match end task - deadLocation is null or world is null");
+            return;
+        }
         DuelsPlugin.getSchedulerAdapter().runTaskLater(deadLocation, () -> {
             if (config.isSpawnFirework()) {
                 DuelsPlugin.getSchedulerAdapter().runTask(deadLocation, () -> {
@@ -261,6 +275,11 @@ public class DuelManager implements Loadable {
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
             
             // Schedule teleportation and restoration for all players after delay
+            // Safety check: Ensure deadLocation is still valid
+            if (deadLocation == null || deadLocation.getWorld() == null) {
+                Log.warn(this, "Cannot schedule teleportation task - deadLocation is null or world is null");
+                return;
+            }
             DuelsPlugin.getSchedulerAdapter().runTaskLater(deadLocation, () -> {
                 // Handle losers (including dead spectators)
                 for (Player loser : losers) {
@@ -819,6 +838,11 @@ public class DuelManager implements Loadable {
 
         final MatchStartEvent event = new MatchStartEvent(match, players.toArray(new Player[players.size()]));
         Bukkit.getPluginManager().callEvent(event);
+        
+        if (config.isCheckForPlayersRoutineEnabled()) {
+            startCheckForPlayersRoutine(match, arena);
+        }
+
         return true;
     }
 
@@ -839,6 +863,131 @@ public class DuelManager implements Loadable {
         } else {
             return startMatch(Collections.singleton(sender), Collections.singleton(target), settings, items, source);
         }
+    }
+
+    /**
+     * Compares two world names, handling namespaced worlds (e.g., "minecraft:world" vs "world").
+     * 
+     * @param world1 First world to compare
+     * @param world2 Second world to compare
+     * @return true if worlds have the same name (ignoring namespace), false otherwise
+     */
+    private boolean isSameWorld(final World world1, final World world2) {
+        if (world1 == null || world2 == null) {
+            return false;
+        }
+        if (world1.equals(world2)) {
+            return true; // Same object reference
+        }
+        
+        // Compare by name, handling namespaced worlds
+        String name1 = world1.getName();
+        String name2 = world2.getName();
+        
+        // Remove namespace prefix if present (e.g., "minecraft:world" -> "world")
+        if (name1.contains(":")) {
+            name1 = name1.substring(name1.indexOf(":") + 1);
+        }
+        if (name2.contains(":")) {
+            name2 = name2.substring(name2.indexOf(":") + 1);
+        }
+        
+        return name1.equalsIgnoreCase(name2);
+    }
+
+    private void startCheckForPlayersRoutine(final DuelMatch match, final ArenaImpl arena) {
+        final Location arenaLocation = arena.getPosition(1);
+        if (arenaLocation == null || arenaLocation.getWorld() == null) {
+            return; // Can't check if arena has no valid location
+        }
+        
+        final World arenaWorld = arenaLocation.getWorld();
+        final int checkTimeSeconds = config.getCheckForPlayersRoutineTimeSeconds();
+        final String action = config.getCheckForPlayersRoutineAction();
+        
+        // Cancel any existing routine for this arena
+        activeCheckRoutineFlags.remove(arena);
+        final TaskWrapper existingTask = activeCheckRoutines.remove(arena);
+        if (existingTask != null && !existingTask.isCancelled()) {
+            existingTask.cancel();
+        }
+        
+        // Mark this arena as having an active routine
+        activeCheckRoutineFlags.add(arena);
+        
+        final int[] checkCount = {0}; // Track how many checks we've done
+        
+        // Schedule repeating task every second (20 ticks)
+        final TaskWrapper task = DuelsPlugin.getSchedulerAdapter().runTaskTimerAsynchronously(() -> {
+                // Check if routine should still be active
+                if (!activeCheckRoutineFlags.contains(arena)) {
+                    return; // Routine was cancelled, stop checking
+                }
+                
+                // Check if match is still active
+                if (match.isFinished() || !arena.isUsed() || arena.getMatch() != match) {
+                    activeCheckRoutineFlags.remove(arena);
+                    activeCheckRoutines.remove(arena);
+                    return; // Stop checking
+                }
+                
+                // Check if we've exceeded the time limit
+                if (checkCount[0] >= checkTimeSeconds) {
+                    activeCheckRoutineFlags.remove(arena);
+                    activeCheckRoutines.remove(arena);
+                    return; // Time limit reached, stop routine
+                }
+                
+                checkCount[0]++;
+                
+                // Check each player
+                // Create a snapshot to avoid ConcurrentModificationException if players quit during iteration
+                final List<Player> playersToCheck = new ArrayList<>(match.getAllPlayers());
+                
+                for (final Player player : playersToCheck) {
+                    // Edge case: Player may have quit during iteration - verify they're still online and in match
+                    if (!player.isOnline()) {
+                        continue; // Skip offline players
+                    }
+                    
+                    // Double-check: Verify player is still in this match (may have quit or match ended)
+                    if (match.isFinished() || arena.getMatch() != match || !arena.has(player)) {
+                        continue; // Player no longer in match, skip
+                    }
+                    
+                    final World playerWorld = player.getWorld();
+                    if (playerWorld == null || !isSameWorld(playerWorld, arenaWorld)) {
+                        // Player is outside arena world
+                        if ("hardstop-arena".equalsIgnoreCase(action)) {
+                            // Hard stop the arena immediately and stop checking
+                            activeCheckRoutineFlags.remove(arena);
+                            final TaskWrapper removed = activeCheckRoutines.remove(arena);
+                            if (removed != null && !removed.isCancelled()) {
+                                removed.cancel();
+                            }
+                            DuelsPlugin.getSchedulerAdapter().runTask(arenaLocation, () -> {
+                                hardResetArena(arena);
+                            });
+                            return; // Stop checking immediately
+                        } else if ("kill-outside-player".equalsIgnoreCase(action)) {
+                            // Kill the player but continue checking other players
+                            // EDGE CASE: Clear inventory BEFORE killing to prevent item drops when player changes worlds
+                            DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
+                                // Final safety check: Verify player is still online and in match before killing
+                                if (player.isOnline() && !match.isFinished() && arena.getMatch() == match && arena.has(player)) {
+                                    // Clear inventory first, then kill to prevent items from dropping
+                                    player.getInventory().clear();
+                                    player.getInventory().setArmorContents(null);
+                                    player.updateInventory();
+                                    player.setHealth(0);
+                                }
+                            });
+                        }
+                    }
+                }
+            }, 0L, 20L); // Start immediately, repeat every 20 ticks (1 second)
+        
+        activeCheckRoutines.put(arena, task);
     }
 
     private void addPlayers(final Collection<Player> players, final DuelMatch match, final ArenaImpl arena, final KitImpl kit, final Location location) {
@@ -898,6 +1047,16 @@ public class DuelManager implements Loadable {
                     }
                 } catch (Exception ex) {
                     Log.warn(this, "Error while running match start commands: " + ex.getMessage());
+                }
+            }
+
+            if (config.isPlayerExecuteCommandsOnArenaPreStartEnabled() && !(match.getSource() == null && config.isPlayerExecuteCommandsOnArenaPreStartQueueOnly())) {
+                try {
+                    for (final String command : config.getPlayerExecuteCommandsOnArenaPreStart()) {
+                        executePlayerCommandWithDelay(player, command);
+                    }
+                } catch (Exception ex) {
+                    Log.warn(this, "Error while running player execute commands on arena pre-start: " + ex.getMessage());
                 }
             }
 
@@ -1147,6 +1306,15 @@ public class DuelManager implements Loadable {
                 // Countdown is active - cancel countdown and end match with quitting player as loser
                 final Player quittingPlayer = player;
                 
+                // For own-inventory duels with drop-inventory-items: false, preserve PlayerInfo for restoration
+                final PlayerInfo info = playerManager.get(quittingPlayer);
+                final boolean preserveInventory = match.isOwnInventory() && !config.isOwnInventoryDropInventoryItems();
+                
+                if (preserveInventory && info != null) {
+                    // Update PlayerInfo with current inventory before clearing
+                    info.updateInventory(quittingPlayer);
+                }
+                
                 // CRITICAL: Kill the player IMMEDIATELY - PlayerQuitEvent runs on correct thread, player still online
                 // Event handlers on Folia run on the correct thread for the entity, so we can call directly
                 // This will trigger PlayerDeathEvent which will handle match ending automatically
@@ -1173,8 +1341,11 @@ public class DuelManager implements Loadable {
                 // Mark quitting player as dead in match (PlayerDeathEvent will handle the rest)
                 match.markAsDead(quittingPlayer);
                 
-                // Remove PlayerInfo completely - don't restore anything, let server handle respawn
-                playerManager.remove(quittingPlayer);
+                // For own-inventory duels with drop-inventory-items: false, preserve PlayerInfo for restoration on rejoin
+                // Otherwise, remove PlayerInfo completely - don't restore anything, let server handle respawn
+                if (!preserveInventory) {
+                    playerManager.remove(quittingPlayer);
+                }
                 
                 // DON'T call handleMatchEnd here - let PlayerDeathEvent handle it automatically
                 // This prevents duplicate execution of pre-end commands and match ending
@@ -1182,6 +1353,15 @@ public class DuelManager implements Loadable {
             }
 
             // Normal quit handling (countdown complete, match in progress)
+            // For own-inventory duels with drop-inventory-items: false, preserve PlayerInfo for restoration
+            final PlayerInfo info = playerManager.get(player);
+            final boolean preserveInventory = match.isOwnInventory() && !config.isOwnInventoryDropInventoryItems();
+            
+            if (preserveInventory && info != null) {
+                // Update PlayerInfo with current inventory before clearing
+                info.updateInventory(player);
+            }
+            
             // CRITICAL: Kill the player IMMEDIATELY - PlayerQuitEvent runs on correct thread, player still online
             // Event handlers on Folia run on the correct thread for the entity, so we can call directly
             try {
@@ -1204,8 +1384,11 @@ public class DuelManager implements Loadable {
             // Mark player as dead in match (so PlayerDeathEvent knows they're dead)
             match.markAsDead(player);
             
-            // Remove PlayerInfo completely - don't restore anything, let server handle respawn
-            playerManager.remove(player);
+            // For own-inventory duels with drop-inventory-items: false, preserve PlayerInfo for restoration on rejoin
+            // Otherwise, remove PlayerInfo completely - don't restore anything, let server handle respawn
+            if (!preserveInventory) {
+                playerManager.remove(player);
+            }
             
             // DON'T remove from arena or end match here - let PlayerDeathEvent handle it automatically
             // PlayerDeathEvent will call arena.remove() and check match.size() to end the match
@@ -1240,37 +1423,69 @@ public class DuelManager implements Loadable {
             event.setCancelled(true);
         }
 
-        @EventHandler(ignoreCancelled = true)
+        @EventHandler(priority = EventPriority.HIGHEST)
         public void on(final PlayerCommandPreprocessEvent event) {
+            final Player player = event.getPlayer();
+            
+            if (!arenaManager.isInMatch(player)) {
+                return;
+            }
+            
             final String command = event.getMessage().substring(1).split(" ")[0].toLowerCase();
 
-            if (!arenaManager.isInMatch(event.getPlayer())
-                    || (config.isBlockAllCommands() ? config.getWhitelistedCommands().contains(command) : !config.getBlacklistedCommands().contains(command))) {
+            // Check if command should be blocked
+            if (config.isBlockAllCommands() ? config.getWhitelistedCommands().contains(command) : !config.getBlacklistedCommands().contains(command)) {
                 return;
             }
 
+            // Cancel the command event - run at HIGHEST priority to ensure we cancel even if other plugins processed it
             event.setCancelled(true);
-            lang.sendMessage(event.getPlayer(), "DUEL.prevent.command", "command", event.getMessage());
+            lang.sendMessage(player, "DUEL.prevent.command", "command", event.getMessage());
         }
 
-        @EventHandler(ignoreCancelled = true)
+        @EventHandler(priority = EventPriority.HIGHEST)
         public void on(final PlayerTeleportEvent event) {
             final Player player = event.getPlayer();
+            
+            // Always check if player is in match, regardless of cancellation state
+            // This ensures we catch teleports even if other plugins tried to process them
+            if (!arenaManager.isInMatch(player)) {
+                return;
+            }
+            
             final Location to = event.getTo();
+            if (to == null || to.getWorld() == null) {
+                return;
+            }
 
             if (!config.isLimitTeleportEnabled()
                     || event.getCause() == TeleportCause.ENDER_PEARL
-                    || event.getCause() == TeleportCause.SPECTATE
-                    || !arenaManager.isInMatch(player)) {
+                    || event.getCause() == TeleportCause.SPECTATE) {
                 return;
             }
 
             final Location from = event.getFrom();
-
-            if (from.getWorld().equals(to.getWorld()) && from.distance(to) <= config.getDistanceAllowed()) {
+            if (from == null || from.getWorld() == null) {
                 return;
             }
 
+            // CRITICAL: Check if player is trying to teleport to a different world
+            // This catches cross-world teleports from plugins that bypass command blocking (e.g., clicking chat messages)
+            // Use world name comparison to handle namespaced worlds correctly (e.g., "minecraft:world" vs "world")
+            if (!isSameWorld(from.getWorld(), to.getWorld())) {
+                // Different world - always cancel cross-world teleports during duels
+                event.setCancelled(true);
+                lang.sendMessage(player, "DUEL.prevent.teleportation");
+                return;
+            }
+
+            // Same world - allow small distance teleports within the same world
+            if (from.distance(to) <= config.getDistanceAllowed()) {
+                return;
+            }
+
+            // Cancel teleportation - run at HIGHEST priority to ensure we cancel even if other plugins processed it
+            // This prevents plugins from bypassing command blocking by directly teleporting players
             event.setCancelled(true);
             lang.sendMessage(player, "DUEL.prevent.teleportation");
         }
@@ -1326,6 +1541,44 @@ public class DuelManager implements Loadable {
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
                 } catch (Exception ex) {
                     Log.warn(this, "Error executing command: " + ex.getMessage());
+                }
+            });
+        }
+    }
+
+    private void executePlayerCommandWithDelay(Player player, String command) {
+        Matcher matcher = DELAY_PATTERN.matcher(command);
+        
+        if (matcher.find()) {
+            // Extract delay value in milliseconds
+            long delayMs = Long.parseLong(matcher.group(1));
+            // Remove the {delay:x} placeholder from the command
+            String cleanCommand = matcher.replaceAll("").trim();
+            
+            // Convert milliseconds to ticks (1 tick = 50ms)
+            long delayTicks = delayMs / 50;
+            
+            // Use entity-specific scheduler for Folia compatibility
+            DuelsPlugin.getSchedulerAdapter().runTaskLater(player, () -> {
+                if (!player.isOnline()) {
+                    return;
+                }
+                try {
+                    player.performCommand(cleanCommand);
+                } catch (Exception ex) {
+                    Log.warn(this, "Error executing delayed player command: " + ex.getMessage());
+                }
+            }, delayTicks);
+        } else {
+            // Execute immediately on entity-specific scheduler for Folia compatibility
+            DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
+                if (!player.isOnline()) {
+                    return;
+                }
+                try {
+                    player.performCommand(command);
+                } catch (Exception ex) {
+                    Log.warn(this, "Error executing player command: " + ex.getMessage());
                 }
             });
         }

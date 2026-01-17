@@ -82,4 +82,13 @@ public class PlayerInfo {
         InventoryUtil.addOrDrop(player, extra);
         player.updateInventory();
     }
+
+    /**
+     * Updates the stored inventory with the player's current inventory.
+     * This is used to preserve inventory state when a player quits during an own-inventory duel.
+     */
+    public void updateInventory(final Player player) {
+        items.clear();
+        InventoryUtil.addToMap(player.getInventory(), items);
+    }
 }
