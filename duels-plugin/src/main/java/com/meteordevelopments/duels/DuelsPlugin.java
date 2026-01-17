@@ -466,7 +466,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
         long safeDelay = Math.max(1, delay);
 
-        return DuelsPlugin.schedulerAdapter.runTaskTimerAsynchronously(task, safeDelay, period);
+        return DuelsPlugin.schedulerAdapter.runTaskTimer(task, safeDelay, period);
     }
 
 
