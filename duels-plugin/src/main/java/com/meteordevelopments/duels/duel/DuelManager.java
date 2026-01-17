@@ -96,7 +96,7 @@ public class DuelManager implements Loadable {
             routineTask.cancel();
         }
 
-        DuelsPlugin.getSchedulerAdapter().runTaskLater(arena.first().getLocation(), () -> {
+        DuelsPlugin.getSchedulerAdapter().runTask(arena.first().getLocation(), () -> {
             if (arena.size() == 0) {
                 match.getAllPlayers().forEach(matchPlayer -> {
                     handleTie(matchPlayer, arena, match, false);
@@ -213,10 +213,15 @@ public class DuelManager implements Loadable {
                     }
                 }, config.getTeleportDelay() * 20L);
             }
-        }, 1L);
+        });
     }
 
     public void handleTeamMatchEnd(TeamDuelMatch match, ArenaImpl arena, Location deadLocation, TeamDuelMatch.Team winningTeam) {
+        // Safety check: Ensure deadLocation is valid before scheduling
+        if (deadLocation == null || deadLocation.getWorld() == null) {
+            Log.warn(this, "Cannot schedule team match end task - deadLocation is null or world is null");
+            return;
+        }
         DuelsPlugin.getSchedulerAdapter().runTaskLater(deadLocation, () -> {
             if (config.isSpawnFirework()) {
                 DuelsPlugin.getSchedulerAdapter().runTask(deadLocation, () -> {
@@ -270,6 +275,11 @@ public class DuelManager implements Loadable {
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
             
             // Schedule teleportation and restoration for all players after delay
+            // Safety check: Ensure deadLocation is still valid
+            if (deadLocation == null || deadLocation.getWorld() == null) {
+                Log.warn(this, "Cannot schedule teleportation task - deadLocation is null or world is null");
+                return;
+            }
             DuelsPlugin.getSchedulerAdapter().runTaskLater(deadLocation, () -> {
                 // Handle losers (including dead spectators)
                 for (Player loser : losers) {
@@ -855,6 +865,36 @@ public class DuelManager implements Loadable {
         }
     }
 
+    /**
+     * Compares two world names, handling namespaced worlds (e.g., "minecraft:world" vs "world").
+     * 
+     * @param world1 First world to compare
+     * @param world2 Second world to compare
+     * @return true if worlds have the same name (ignoring namespace), false otherwise
+     */
+    private boolean isSameWorld(final World world1, final World world2) {
+        if (world1 == null || world2 == null) {
+            return false;
+        }
+        if (world1.equals(world2)) {
+            return true; // Same object reference
+        }
+        
+        // Compare by name, handling namespaced worlds
+        String name1 = world1.getName();
+        String name2 = world2.getName();
+        
+        // Remove namespace prefix if present (e.g., "minecraft:world" -> "world")
+        if (name1.contains(":")) {
+            name1 = name1.substring(name1.indexOf(":") + 1);
+        }
+        if (name2.contains(":")) {
+            name2 = name2.substring(name2.indexOf(":") + 1);
+        }
+        
+        return name1.equalsIgnoreCase(name2);
+    }
+
     private void startCheckForPlayersRoutine(final DuelMatch match, final ArenaImpl arena) {
         final Location arenaLocation = arena.getPosition(1);
         if (arenaLocation == null || arenaLocation.getWorld() == null) {
@@ -901,13 +941,22 @@ public class DuelManager implements Loadable {
                 checkCount[0]++;
                 
                 // Check each player
-                for (final Player player : match.getAllPlayers()) {
+                // Create a snapshot to avoid ConcurrentModificationException if players quit during iteration
+                final List<Player> playersToCheck = new ArrayList<>(match.getAllPlayers());
+                
+                for (final Player player : playersToCheck) {
+                    // Edge case: Player may have quit during iteration - verify they're still online and in match
                     if (!player.isOnline()) {
                         continue; // Skip offline players
                     }
                     
+                    // Double-check: Verify player is still in this match (may have quit or match ended)
+                    if (match.isFinished() || arena.getMatch() != match || !arena.has(player)) {
+                        continue; // Player no longer in match, skip
+                    }
+                    
                     final World playerWorld = player.getWorld();
-                    if (playerWorld == null || !playerWorld.equals(arenaWorld)) {
+                    if (playerWorld == null || !isSameWorld(playerWorld, arenaWorld)) {
                         // Player is outside arena world
                         if ("hardstop-arena".equalsIgnoreCase(action)) {
                             // Hard stop the arena immediately and stop checking
@@ -922,8 +971,14 @@ public class DuelManager implements Loadable {
                             return; // Stop checking immediately
                         } else if ("kill-outside-player".equalsIgnoreCase(action)) {
                             // Kill the player but continue checking other players
+                            // EDGE CASE: Clear inventory BEFORE killing to prevent item drops when player changes worlds
                             DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
-                                if (player.isOnline() && !match.isFinished() && arena.getMatch() == match) {
+                                // Final safety check: Verify player is still online and in match before killing
+                                if (player.isOnline() && !match.isFinished() && arena.getMatch() == match && arena.has(player)) {
+                                    // Clear inventory first, then kill to prevent items from dropping
+                                    player.getInventory().clear();
+                                    player.getInventory().setArmorContents(null);
+                                    player.updateInventory();
                                     player.setHealth(0);
                                 }
                             });
@@ -1389,6 +1444,9 @@ public class DuelManager implements Loadable {
             }
             
             final Location to = event.getTo();
+            if (to == null || to.getWorld() == null) {
+                return;
+            }
 
             if (!config.isLimitTeleportEnabled()
                     || event.getCause() == TeleportCause.ENDER_PEARL
@@ -1397,9 +1455,22 @@ public class DuelManager implements Loadable {
             }
 
             final Location from = event.getFrom();
+            if (from == null || from.getWorld() == null) {
+                return;
+            }
 
-            // Allow small distance teleports within the same world
-            if (from.getWorld().equals(to.getWorld()) && from.distance(to) <= config.getDistanceAllowed()) {
+            // CRITICAL: Check if player is trying to teleport to a different world
+            // This catches cross-world teleports from plugins that bypass command blocking (e.g., clicking chat messages)
+            // Use world name comparison to handle namespaced worlds correctly (e.g., "minecraft:world" vs "world")
+            if (!isSameWorld(from.getWorld(), to.getWorld())) {
+                // Different world - always cancel cross-world teleports during duels
+                event.setCancelled(true);
+                lang.sendMessage(player, "DUEL.prevent.teleportation");
+                return;
+            }
+
+            // Same world - allow small distance teleports within the same world
+            if (from.distance(to) <= config.getDistanceAllowed()) {
                 return;
             }
 

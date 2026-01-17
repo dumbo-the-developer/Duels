@@ -257,8 +257,8 @@ duel:
       enabled: true
 
       # Time in seconds to check for players.
-      # default: 10
-      check-time-seconds: 10
+      # default: 30
+      check-time-seconds: 30
 
       #Action to when players outside duel world.
       # ACTIONS: kill-outside-player, hardstop-arena
