@@ -600,6 +600,13 @@ public class DuelManager implements Loadable {
             return false;
         }
         
+        // CRITICAL: Clean up check routine for this arena to prevent interference
+        activeCheckRoutineFlags.remove(arena);
+        final TaskWrapper routineTask = activeCheckRoutines.remove(arena);
+        if (routineTask != null && !routineTask.isCancelled()) {
+            routineTask.cancel();
+        }
+        
         // Get all players in the match
         final List<Player> members = new ArrayList<>(match.getAllPlayers());
         
@@ -918,14 +925,18 @@ public class DuelManager implements Loadable {
         final int[] checkCount = {0}; // Track how many checks we've done
         
         // Schedule repeating task every second (20 ticks)
-        final TaskWrapper task = DuelsPlugin.getSchedulerAdapter().runTaskTimerAsynchronously(() -> {
+        // CRITICAL: Use synchronous task instead of async to safely access match state
+        // Async tasks can cause race conditions with match ending logic
+        final TaskWrapper task = DuelsPlugin.getSchedulerAdapter().runTaskTimer(() -> {
                 // Check if routine should still be active
                 if (!activeCheckRoutineFlags.contains(arena)) {
                     return; // Routine was cancelled, stop checking
                 }
                 
-                // Check if match is still active
-                if (match.isFinished() || !arena.isUsed() || arena.getMatch() != match) {
+                // CRITICAL: Check match state FIRST before any operations
+                // This prevents the routine from interfering with match ending
+                final DuelMatch currentMatch = arena.getMatch();
+                if (match.isFinished() || !arena.isUsed() || currentMatch != match || currentMatch == null) {
                     activeCheckRoutineFlags.remove(arena);
                     activeCheckRoutines.remove(arena);
                     return; // Stop checking
@@ -951,7 +962,9 @@ public class DuelManager implements Loadable {
                     }
                     
                     // Double-check: Verify player is still in this match (may have quit or match ended)
-                    if (match.isFinished() || arena.getMatch() != match || !arena.has(player)) {
+                    // CRITICAL: Re-check match reference to ensure it hasn't changed
+                    final DuelMatch currentMatch2 = arena.getMatch();
+                    if (match.isFinished() || currentMatch2 != match || currentMatch2 == null || !arena.has(player)) {
                         continue; // Player no longer in match, skip
                     }
                     
@@ -974,12 +987,28 @@ public class DuelManager implements Loadable {
                             // EDGE CASE: Clear inventory BEFORE killing to prevent item drops when player changes worlds
                             DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
                                 // Final safety check: Verify player is still online and in match before killing
-                                if (player.isOnline() && !match.isFinished() && arena.getMatch() == match && arena.has(player)) {
+                                // CRITICAL: Re-check match reference to ensure it hasn't changed
+                                final DuelMatch currentMatch3 = arena.getMatch();
+                                if (player.isOnline() && !match.isFinished() && currentMatch3 == match && currentMatch3 != null && arena.has(player)) {
                                     // Clear inventory first, then kill to prevent items from dropping
                                     player.getInventory().clear();
                                     player.getInventory().setArmorContents(null);
                                     player.updateInventory();
                                     player.setHealth(0);
+                                    
+                                    // CRITICAL: After killing, check if match ended and stop routine if so
+                                    // This prevents the routine from continuing after match has ended
+                                    DuelsPlugin.getSchedulerAdapter().runTaskLater(() -> {
+                                        // Re-check match state after death event has processed
+                                        if (match.isFinished() || !arena.isUsed() || arena.getMatch() != match) {
+                                            // Match ended, stop the routine
+                                            activeCheckRoutineFlags.remove(arena);
+                                            final TaskWrapper removed = activeCheckRoutines.remove(arena);
+                                            if (removed != null && !removed.isCancelled()) {
+                                                removed.cancel();
+                                            }
+                                        }
+                                    }, 5L); // 5 tick delay to allow death event to process
                                 }
                             });
                         }
