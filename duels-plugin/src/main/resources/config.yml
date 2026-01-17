@@ -90,24 +90,6 @@ supported-plugins:
     # If set to 'true', SimpleClans KDR will not be affected by duels.
     # default: true
     prevent-kdr-change: true
-  LeaderHeads:
-    wins:
-      menu:
-        # Menu title for the leaderboard 'duelsre-wins'.
-        # default: 'Duel Wins'
-        title: 'Duel Wins'
-        # Menu open command for the leaderboard 'duelsre-wins'.
-        # default: 'openwins'
-        open-command: 'openwins'
-    losses:
-      menu:
-        # Menu title for the leaderboard 'duelsre-losses'.
-        # default: 'Duel Losses'
-        title: 'Duel Losses'
-        # Menu open command for the leaderboard 'duelsre-losses'.
-        # default: 'openlosses'
-        open-command: 'openlosses'
-
 
 request:
   # If set to 'true', players will need to have a cleared inventory in order to send or accept a duel request.
