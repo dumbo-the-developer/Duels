@@ -68,6 +68,11 @@ subprojects {
         }
 
         maven {
+            name = 'factions-repo'
+            url = 'https://dependency.download/releases/'
+        }
+
+        maven {
             name = 'arim-mvn-lgpl3'
             url = 'https://mvn-repo.arim.space/lesser-gpl3/'
         }
