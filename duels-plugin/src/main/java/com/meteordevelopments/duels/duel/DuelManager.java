@@ -1241,6 +1241,15 @@ public class DuelManager implements Loadable {
                 // Countdown is active - cancel countdown and end match with quitting player as loser
                 final Player quittingPlayer = player;
                 
+                // For own-inventory duels with drop-inventory-items: false, preserve PlayerInfo for restoration
+                final PlayerInfo info = playerManager.get(quittingPlayer);
+                final boolean preserveInventory = match.isOwnInventory() && !config.isOwnInventoryDropInventoryItems();
+                
+                if (preserveInventory && info != null) {
+                    // Update PlayerInfo with current inventory before clearing
+                    info.updateInventory(quittingPlayer);
+                }
+                
                 // CRITICAL: Kill the player IMMEDIATELY - PlayerQuitEvent runs on correct thread, player still online
                 // Event handlers on Folia run on the correct thread for the entity, so we can call directly
                 // This will trigger PlayerDeathEvent which will handle match ending automatically
@@ -1267,8 +1276,11 @@ public class DuelManager implements Loadable {
                 // Mark quitting player as dead in match (PlayerDeathEvent will handle the rest)
                 match.markAsDead(quittingPlayer);
                 
-                // Remove PlayerInfo completely - don't restore anything, let server handle respawn
-                playerManager.remove(quittingPlayer);
+                // For own-inventory duels with drop-inventory-items: false, preserve PlayerInfo for restoration on rejoin
+                // Otherwise, remove PlayerInfo completely - don't restore anything, let server handle respawn
+                if (!preserveInventory) {
+                    playerManager.remove(quittingPlayer);
+                }
                 
                 // DON'T call handleMatchEnd here - let PlayerDeathEvent handle it automatically
                 // This prevents duplicate execution of pre-end commands and match ending
@@ -1276,6 +1288,15 @@ public class DuelManager implements Loadable {
             }
 
             // Normal quit handling (countdown complete, match in progress)
+            // For own-inventory duels with drop-inventory-items: false, preserve PlayerInfo for restoration
+            final PlayerInfo info = playerManager.get(player);
+            final boolean preserveInventory = match.isOwnInventory() && !config.isOwnInventoryDropInventoryItems();
+            
+            if (preserveInventory && info != null) {
+                // Update PlayerInfo with current inventory before clearing
+                info.updateInventory(player);
+            }
+            
             // CRITICAL: Kill the player IMMEDIATELY - PlayerQuitEvent runs on correct thread, player still online
             // Event handlers on Folia run on the correct thread for the entity, so we can call directly
             try {
@@ -1298,8 +1319,11 @@ public class DuelManager implements Loadable {
             // Mark player as dead in match (so PlayerDeathEvent knows they're dead)
             match.markAsDead(player);
             
-            // Remove PlayerInfo completely - don't restore anything, let server handle respawn
-            playerManager.remove(player);
+            // For own-inventory duels with drop-inventory-items: false, preserve PlayerInfo for restoration on rejoin
+            // Otherwise, remove PlayerInfo completely - don't restore anything, let server handle respawn
+            if (!preserveInventory) {
+                playerManager.remove(player);
+            }
             
             // DON'T remove from arena or end match here - let PlayerDeathEvent handle it automatically
             // PlayerDeathEvent will call arena.remove() and check match.size() to end the match
