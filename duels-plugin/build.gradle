@@ -30,11 +30,9 @@ dependencies {
     implementation('net.essentialsx:EssentialsX:2.21.2') {
         transitive = false
     }
+    implementation 'dev.kitteh:factions:4.0.0'
     implementation name: 'Vault-1.6.7'
     implementation name: 'CombatTagPlus'
-    implementation name: 'Factions-1.6.9.5-U0.1.14'
-    implementation name: 'MassiveCore'
-    implementation name: 'Factions'
     implementation name: 'MyPet-2.3.4'
     implementation name: 'BountyHunters-2.2.6'
     implementation name: 'SimpleClans-2.14.4.1'
