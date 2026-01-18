@@ -181,7 +181,8 @@ public class SchedulerAdapter {
                         .invoke(regionScheduler, plugin, (Consumer<Object>) t -> task.run(), location, delay);
                 return new FoliaTaskWrapper(scheduledTask);
             } catch (Exception e) {
-                plugin.getLogger().severe("Failed to schedule Folia delayed region task: " + e.getMessage());
+                // Silently fail - we have fallback to global scheduler
+                // This is expected when chunk is not loaded, no need to log
                 return null;
             }
         } else {

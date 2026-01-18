@@ -934,6 +934,23 @@ public class DuelManager implements Loadable {
     }
 
     /**
+     * Normalizes a world name by removing namespace prefix (e.g., "minecraft:world" -> "world").
+     * 
+     * @param worldName The world name to normalize
+     * @return Normalized world name without namespace
+     */
+    private String normalizeWorldName(final String worldName) {
+        if (worldName == null) {
+            return "";
+        }
+        // Remove namespace prefix if present (e.g., "minecraft:world" -> "world")
+        if (worldName.contains(":")) {
+            return worldName.substring(worldName.indexOf(":") + 1);
+        }
+        return worldName;
+    }
+    
+    /**
      * Compares two world names, handling namespaced worlds (e.g., "minecraft:world" vs "world").
      * 
      * @param world1 First world to compare
@@ -948,33 +965,19 @@ public class DuelManager implements Loadable {
             return true; // Same object reference
         }
         
-        // Compare by name, handling namespaced worlds
-        String name1 = world1.getName();
-        String name2 = world2.getName();
-        
-        // Remove namespace prefix if present (e.g., "minecraft:world" -> "world")
-        if (name1.contains(":")) {
-            name1 = name1.substring(name1.indexOf(":") + 1);
-        }
-        if (name2.contains(":")) {
-            name2 = name2.substring(name2.indexOf(":") + 1);
-        }
-        
-        return name1.equalsIgnoreCase(name2);
+        // Compare by normalized name
+        return normalizeWorldName(world1.getName()).equalsIgnoreCase(normalizeWorldName(world2.getName()));
     }
 
     private void startCheckForPlayersRoutine(final DuelMatch match, final ArenaImpl arena) {
-        final Location arenaLocation = arena.getPosition(1);
-        if (arenaLocation == null || arenaLocation.getWorld() == null) {
-            return; // Can't check if arena has no valid location
+        // Get arena world name from position - independent from chunks
+        final Location arenaPosition = arena.getPosition(1);
+        if (arenaPosition == null || arenaPosition.getWorld() == null) {
+            return; // Can't check if arena has no valid position
         }
         
-        final World arenaWorld = arenaLocation.getWorld();
-        // CRITICAL: Check if chunk is loaded - if not, skip location-based scheduling entirely
-        final boolean chunkLoaded = arenaWorld.isChunkLoaded(arenaLocation.getBlockX() >> 4, arenaLocation.getBlockZ() >> 4);
-        if (!chunkLoaded) {
-            Log.warn(this, "Arena location chunk not loaded for check routine, using global scheduler for arena " + arena.getName());
-        }
+        // Store world name as string - independent from World objects and chunks
+        final String arenaWorldName = normalizeWorldName(arenaPosition.getWorld().getName());
         
         final int startDelaySeconds = config.getCheckForPlayersRoutineStartDelaySeconds();
         final int checkTimeSeconds = config.getCheckForPlayersRoutineTimeSeconds();
@@ -996,9 +999,7 @@ public class DuelManager implements Loadable {
         final int[] checkCount = {0}; // Track how many checks we've done
         
         // Schedule the start of the repeating task after the delay
-        // CRITICAL: Use synchronous task instead of async to safely access match state
-        // Async tasks can cause race conditions with match ending logic
-        // If delay is 0, use runTask instead of runTaskLater to avoid Folia scheduling issues
+        // CRITICAL: Always use global scheduler - independent from chunks
         final long delayTicks = startDelaySeconds * 20L;
         final Runnable startRoutineTask = () -> {
             // Double-check match state before starting routine
@@ -1010,7 +1011,7 @@ public class DuelManager implements Loadable {
                 return; // Match ended before routine could start
             }
             
-            // Schedule repeating task every second (20 ticks)
+            // Schedule repeating task every second (20 ticks) on global scheduler
             final TaskWrapper task = DuelsPlugin.getSchedulerAdapter().runTaskTimer(() -> {
                 try {
                     // CRITICAL: Synchronized check to prevent race conditions
@@ -1021,7 +1022,6 @@ public class DuelManager implements Loadable {
                     }
                     
                     // CRITICAL: Check match state FIRST before any operations
-                    // This prevents the routine from interfering with match ending
                     final DuelMatch currentMatch = arena.getMatch();
                     if (match.isFinished() || !arena.isUsed() || currentMatch != match || currentMatch == null) {
                         synchronized (activeCheckRoutineFlags) {
@@ -1043,11 +1043,11 @@ public class DuelManager implements Loadable {
                     checkCount[0]++;
                     
                     // Check each player
-                    // Create a snapshot to avoid ConcurrentModificationException if players quit during iteration
+                    // Create a snapshot to avoid ConcurrentModificationException
                     final List<Player> playersToCheck = new ArrayList<>(match.getAllPlayers());
                     
                     for (final Player player : playersToCheck) {
-                        // CRITICAL: Re-check match state before each player to catch race conditions
+                        // CRITICAL: Re-check match state before each player
                         final DuelMatch currentMatch2 = arena.getMatch();
                         if (match.isFinished() || !arena.isUsed() || currentMatch2 != match || currentMatch2 == null) {
                             // Match ended during iteration, stop immediately
@@ -1058,27 +1058,32 @@ public class DuelManager implements Loadable {
                             return;
                         }
                         
-                        // Edge case: Player may have quit during iteration - verify they're still online and in match
+                        // Skip offline players
                         if (!player.isOnline()) {
-                            continue; // Skip offline players
+                            continue;
                         }
                         
-                        // CRITICAL: Verify player is still actually in the match and not dead
-                        // This prevents killing players who have legitimately left the match
+                        // CRITICAL: Verify player is still in match and not dead
                         if (!arena.has(player) || match.isDead(player) || !match.getAllPlayers().contains(player)) {
-                            continue; // Player no longer in match or is dead, skip
+                            continue;
                         }
                         
-                        // Skip dead players in team matches (they're spectators and should be allowed outside arena world)
+                        // Skip dead players in team matches (spectators)
                         if (match instanceof TeamDuelMatch && match.isDead(player)) {
-                            continue; // Dead spectators in team matches are allowed to be outside
+                            continue;
                         }
                         
+                        // Check if player is in correct world using string comparison
                         final World playerWorld = player.getWorld();
-                        if (playerWorld == null || !isSameWorld(playerWorld, arenaWorld)) {
+                        if (playerWorld == null) {
+                            continue; // Player world is null, skip
+                        }
+                        
+                        final String playerWorldName = normalizeWorldName(playerWorld.getName());
+                        if (!arenaWorldName.equalsIgnoreCase(playerWorldName)) {
                             // Player is outside arena world
                             if ("hardstop-arena".equalsIgnoreCase(action)) {
-                                // Hard stop the arena immediately and stop checking
+                                // Hard stop the arena immediately
                                 synchronized (activeCheckRoutineFlags) {
                                     activeCheckRoutineFlags.remove(arena);
                                     final TaskWrapper removed = activeCheckRoutines.remove(arena);
@@ -1086,31 +1091,29 @@ public class DuelManager implements Loadable {
                                         removed.cancel();
                                     }
                                 }
-                                DuelsPlugin.getSchedulerAdapter().runTask(arenaLocation, () -> {
+                                // Use global scheduler for hardResetArena
+                                DuelsPlugin.getSchedulerAdapter().runTask(() -> {
                                     hardResetArena(arena);
                                 });
                                 return; // Stop checking immediately
                             } else if ("kill-outside-player".equalsIgnoreCase(action)) {
-                                // Kill the player but continue checking other players
-                                // EDGE CASE: Clear inventory BEFORE killing to prevent item drops when player changes worlds
+                                // Kill the player but continue checking others
                                 DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
-                                    // Final safety check: Verify player is still online and in match before killing
-                                    // CRITICAL: Re-check match reference to ensure it hasn't changed
+                                    // Final safety check before killing
                                     final DuelMatch currentMatch3 = arena.getMatch();
-                                    if (player.isOnline() && !match.isFinished() && currentMatch3 == match && currentMatch3 != null && arena.has(player) && !match.isDead(player) && match.getAllPlayers().contains(player)) {
-                                        // Clear inventory first, then kill to prevent items from dropping
+                                    if (player.isOnline() && !match.isFinished() && currentMatch3 == match && 
+                                        currentMatch3 != null && arena.has(player) && !match.isDead(player) && 
+                                        match.getAllPlayers().contains(player)) {
+                                        
+                                        // Clear inventory first, then kill
                                         player.getInventory().clear();
                                         player.getInventory().setArmorContents(null);
                                         player.updateInventory();
                                         player.setHealth(0);
                                         
-                                        // CRITICAL: After killing, check if match ended and stop routine if so
-                                        // This prevents the routine from continuing after match has ended
+                                        // Check if match ended after kill
                                         DuelsPlugin.getSchedulerAdapter().runTaskLater(() -> {
-                                            // Re-check match state after death event has processed
-                                            // CRITICAL: Use synchronized check to prevent race conditions
                                             if (match.isFinished() || !arena.isUsed() || arena.getMatch() != match) {
-                                                // Match ended, stop the routine
                                                 synchronized (activeCheckRoutineFlags) {
                                                     if (activeCheckRoutineFlags.contains(arena)) {
                                                         activeCheckRoutineFlags.remove(arena);
@@ -1121,25 +1124,19 @@ public class DuelManager implements Loadable {
                                                     }
                                                 }
                                             }
-                                        }, 5L); // 5 tick delay to allow death event to process
+                                        }, 5L);
                                         
-                                        // CRITICAL: Stop checking other players if match ended after this kill
-                                        // This prevents multiple kills when match should have ended
+                                        // Stop checking if match ended
                                         if (match.isFinished() || arena.getMatch() != match) {
-                                            return; // Exit loop early, match ended
+                                            return;
                                         }
                                     }
                                 });
-                            } else {
-                                // Unknown action - this shouldn't happen if config validation works, but log it just in case
-                                Log.warn(this, "Unknown action '" + action + "' in check-for-players-routine for arena " + arena.getName() + ". Valid actions: 'kill-outside-player', 'hardstop-arena'.");
                             }
                         }
                     }
                 } catch (Exception ex) {
-                    // CRITICAL: Catch any exceptions to prevent task from stopping unexpectedly
-                    // Log the error and clean up the routine
-                    Log.warn(this, "Error in check-for-players-routine for arena " + arena.getName() + ": " + ex.getMessage());
+                    // CRITICAL: Catch exceptions to prevent task from stopping
                     synchronized (activeCheckRoutineFlags) {
                         activeCheckRoutineFlags.remove(arena);
                         activeCheckRoutines.remove(arena);
@@ -1147,54 +1144,30 @@ public class DuelManager implements Loadable {
                 }
             }, 0L, 20L); // Start immediately, repeat every 20 ticks (1 second)
             
-            // CRITICAL: Store task reference immediately after scheduling to prevent race conditions
-            // Also check if task is null (scheduling might have failed)
+            // Store task reference
             if (task != null) {
                 activeCheckRoutines.put(arena, task);
             } else {
-                // Scheduling failed, clean up flags
+                // Scheduling failed, clean up
                 synchronized (activeCheckRoutineFlags) {
                     activeCheckRoutineFlags.remove(arena);
                 }
-                Log.warn(this, "Failed to schedule check-for-players-routine for arena " + arena.getName());
             }
         };
         
-        // Schedule the delayed start task
-        // CRITICAL: If chunk is not loaded, skip location-based scheduling entirely and use global scheduler
-        TaskWrapper delayTask = null;
-        if (chunkLoaded) {
-            // Chunk is loaded, try location-based scheduling first
-            if (delayTicks == 0) {
-                // No delay, run immediately using runTask
-                delayTask = DuelsPlugin.getSchedulerAdapter().runTask(arenaLocation, startRoutineTask);
-            } else {
-                // Has delay, use runTaskLater
-                delayTask = DuelsPlugin.getSchedulerAdapter().runTaskLater(arenaLocation, startRoutineTask, delayTicks);
-            }
+        // Always use global scheduler - independent from chunks
+        TaskWrapper delayTask;
+        if (delayTicks == 0) {
+            delayTask = DuelsPlugin.getSchedulerAdapter().runTask(startRoutineTask);
+        } else {
+            delayTask = DuelsPlugin.getSchedulerAdapter().runTaskLater(startRoutineTask, delayTicks);
         }
         
-        // If location-based scheduling failed or chunk wasn't loaded, fallback to global scheduler
+        // Handle scheduling failure
         if (delayTask == null) {
-            if (!chunkLoaded) {
-                Log.warn(this, "Chunk not loaded, using global scheduler for check routine for arena " + arena.getName());
-            } else {
-                Log.warn(this, "Location-based scheduling failed for check routine, using global scheduler for arena " + arena.getName());
-            }
-            if (delayTicks == 0) {
-                delayTask = DuelsPlugin.getSchedulerAdapter().runTask(startRoutineTask);
-            } else {
-                delayTask = DuelsPlugin.getSchedulerAdapter().runTaskLater(startRoutineTask, delayTicks);
-            }
-        }
-        
-        // Handle final scheduling failure
-        if (delayTask == null) {
-            // All scheduling attempts failed, clean up flags
             synchronized (activeCheckRoutineFlags) {
                 activeCheckRoutineFlags.remove(arena);
             }
-            Log.warn(this, "Failed to schedule delayed start for check-for-players-routine for arena " + arena.getName());
         }
     }
 

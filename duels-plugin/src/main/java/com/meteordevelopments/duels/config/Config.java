@@ -476,12 +476,12 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         checkForPlayersRoutineEnabled = configuration.getBoolean("duel.match.check-for-players-routine.enabled", true);
         checkForPlayersRoutineStartDelaySeconds = Math.max(configuration.getInt("duel.match.check-for-players-routine.start-delay-seconds", 1), 0);
         checkForPlayersRoutineTimeSeconds = Math.max(configuration.getInt("duel.match.check-for-players-routine.check-time-seconds", 30), 1);
-        final String actionConfig = configuration.getString("duel.match.check-for-players-routine.action", "kill-outside-player");
+        final String actionConfig = configuration.getString("duel.match.check-for-players-routine.action", "hardstop-arena");
         if ("kill-outside-player".equalsIgnoreCase(actionConfig) || "hardstop-arena".equalsIgnoreCase(actionConfig)) {
             checkForPlayersRoutineAction = actionConfig.toLowerCase();
         } else {
-            checkForPlayersRoutineAction = "kill-outside-player";
-            Log.warn(this, "Invalid action '" + actionConfig + "' for duel.match.check-for-players-routine.action. Valid values: 'kill-outside-player', 'hardstop-arena'. Defaulting to 'kill-outside-player'.");
+            checkForPlayersRoutineAction = "hardstop-arena";
+            Log.warn(this, "Invalid action '" + actionConfig + "' for duel.match.check-for-players-routine.action. Valid values: 'kill-outside-player', 'hardstop-arena'. Defaulting to 'hardstop-arena'.");
         }
 
         queueBlacklistedCommands = configuration.getStringList("queue.blacklisted-commands");
