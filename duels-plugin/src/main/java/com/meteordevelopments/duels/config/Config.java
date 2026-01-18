@@ -133,6 +133,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private List<String> endCommands;
     @Getter
+    private boolean hardstopCommandsEnabled;
+    @Getter
+    private List<String> hardstopCommands;
+    @Getter
     private boolean playerExecuteCommandsOnArenaPreStartEnabled;
     @Getter
     private boolean playerExecuteCommandsOnArenaPreStartQueueOnly;
@@ -431,6 +435,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         endCommandsEnabled = configuration.getBoolean("duel.match.end-commands.enabled", false);
         endCommandsQueueOnly = configuration.getBoolean("duel.match.end-commands.queue-matches-only", false);
         endCommands = configuration.getStringList("duel.match.end-commands.commands");
+        hardstopCommandsEnabled = configuration.getBoolean("duel.match.hardstop-commands.enabled", false);
+        hardstopCommands = configuration.getStringList("duel.match.hardstop-commands.commands");
         playerExecuteCommandsOnArenaPreStartEnabled = configuration.getBoolean("duel.match.player-execute-commands-on-arena-pre-start.enabled", false);
         playerExecuteCommandsOnArenaPreStartQueueOnly = configuration.getBoolean("duel.match.player-execute-commands-on-arena-pre-start.queue-matches-only", false);
         playerExecuteCommandsOnArenaPreStart = configuration.getStringList("duel.match.player-execute-commands-on-arena-pre-start.commands");

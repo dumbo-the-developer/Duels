@@ -701,6 +701,33 @@ public class DuelManager implements Loadable {
             }
         }
         
+        // Execute hardstop commands if enabled
+        if (config.isHardstopCommandsEnabled()) {
+            try {
+                // Build comma-separated list of player names
+                String playersList = members.stream()
+                    .filter(Player::isOnline)
+                    .map(Player::getName)
+                    .collect(Collectors.joining(", "));
+                
+                if (playersList.isEmpty()) {
+                    playersList = "None";
+                }
+                
+                for (final String command : config.getHardstopCommands()) {
+                    String processedCommand = command
+                        .replace("%arena%", arena.getName())
+                        .replace("%players%", playersList)
+                        .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "")
+                        .replace("%bet_amount%", String.valueOf(match.getBet()));
+                    
+                    executeCommandWithDelay(processedCommand);
+                }
+            } catch (Exception ex) {
+                Log.warn(this, "Error while running hardstop commands: " + ex.getMessage());
+            }
+        }
+        
         // Always end match on global scheduler after processing all players
         DuelsPlugin.getSchedulerAdapter().runTaskLater(() -> {
             try {

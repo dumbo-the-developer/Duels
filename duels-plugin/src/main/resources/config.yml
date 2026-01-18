@@ -217,6 +217,20 @@ duel:
         - 'give %loser% dirt 1{delay:50}'
         - 'say Congratulations %winner%!{delay:100}'
 
+    hardstop-commands:
+      # If set to 'true', the commands listed below will run when /duels hardstop is used.
+      # default: false
+      enabled: false
+
+      # Available placeholders:
+      # %arena% - Name of the arena
+      # %players% - Comma-separated list of players in the match
+      # %kit% - Name of the kit used in the match
+      # %bet_amount% - Amount of money bet in the match
+      # {delay:x} - Used to give x ms of delay before running any command
+      commands:
+        - 'example command'
+
     player-execute-commands-on-arena-pre-start:
       # If set to 'true', the commands listed below will be executed as players when they are teleported to the arena (before match starts).
       # Commands are executed as the player, not as console.
