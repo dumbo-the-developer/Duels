@@ -238,6 +238,10 @@ duel:
       # default: true
       enabled: true
 
+      # Delay in seconds before starting the check routine.
+      # default: 1
+      start-delay-seconds: 1
+
       # Time in seconds to check for players.
       # default: 30
       check-time-seconds: 30

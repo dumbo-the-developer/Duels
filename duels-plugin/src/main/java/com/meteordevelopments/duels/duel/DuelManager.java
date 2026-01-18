@@ -943,6 +943,7 @@ public class DuelManager implements Loadable {
         }
         
         final World arenaWorld = arenaLocation.getWorld();
+        final int startDelaySeconds = config.getCheckForPlayersRoutineStartDelaySeconds();
         final int checkTimeSeconds = config.getCheckForPlayersRoutineTimeSeconds();
         final String action = config.getCheckForPlayersRoutineAction();
         
@@ -961,10 +962,21 @@ public class DuelManager implements Loadable {
         
         final int[] checkCount = {0}; // Track how many checks we've done
         
-        // Schedule repeating task every second (20 ticks)
+        // Schedule the start of the repeating task after the delay
         // CRITICAL: Use synchronous task instead of async to safely access match state
         // Async tasks can cause race conditions with match ending logic
-        final TaskWrapper task = DuelsPlugin.getSchedulerAdapter().runTaskTimer(() -> {
+        DuelsPlugin.getSchedulerAdapter().runTaskLater(arenaLocation, () -> {
+            // Double-check match state before starting routine
+            final DuelMatch delayedMatch = arena.getMatch();
+            if (match.isFinished() || !arena.isUsed() || delayedMatch != match || delayedMatch == null) {
+                synchronized (activeCheckRoutineFlags) {
+                    activeCheckRoutineFlags.remove(arena);
+                }
+                return; // Match ended before routine could start
+            }
+            
+            // Schedule repeating task every second (20 ticks)
+            final TaskWrapper task = DuelsPlugin.getSchedulerAdapter().runTaskTimer(() -> {
                 try {
                     // CRITICAL: Synchronized check to prevent race conditions
                     synchronized (activeCheckRoutineFlags) {
@@ -1089,18 +1101,19 @@ public class DuelManager implements Loadable {
                     }
                 }
             }, 0L, 20L); // Start immediately, repeat every 20 ticks (1 second)
-        
-        // CRITICAL: Store task reference immediately after scheduling to prevent race conditions
-        // Also check if task is null (scheduling might have failed)
-        if (task != null) {
-            activeCheckRoutines.put(arena, task);
-        } else {
-            // Scheduling failed, clean up flags
-            synchronized (activeCheckRoutineFlags) {
-                activeCheckRoutineFlags.remove(arena);
+            
+            // CRITICAL: Store task reference immediately after scheduling to prevent race conditions
+            // Also check if task is null (scheduling might have failed)
+            if (task != null) {
+                activeCheckRoutines.put(arena, task);
+            } else {
+                // Scheduling failed, clean up flags
+                synchronized (activeCheckRoutineFlags) {
+                    activeCheckRoutineFlags.remove(arena);
+                }
+                Log.warn(this, "Failed to schedule check-for-players-routine for arena " + arena.getName());
             }
-            Log.warn(this, "Failed to schedule check-for-players-routine for arena " + arena.getName());
-        }
+        }, startDelaySeconds * 20L);
     }
 
     private void addPlayers(final Collection<Player> players, final DuelMatch match, final ArenaImpl arena, final KitImpl kit, final Location location) {

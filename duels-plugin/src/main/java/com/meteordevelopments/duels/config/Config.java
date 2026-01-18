@@ -63,6 +63,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean checkForPlayersRoutineEnabled;
     @Getter
+    private int checkForPlayersRoutineStartDelaySeconds;
+    @Getter
     private int checkForPlayersRoutineTimeSeconds;
     @Getter
     private String checkForPlayersRoutineAction;
@@ -466,6 +468,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         blacklistedCommands = configuration.getStringList("duel.blacklisted-commands");
 
         checkForPlayersRoutineEnabled = configuration.getBoolean("duel.match.check-for-players-routine.enabled", true);
+        checkForPlayersRoutineStartDelaySeconds = Math.max(configuration.getInt("duel.match.check-for-players-routine.start-delay-seconds", 1), 0);
         checkForPlayersRoutineTimeSeconds = Math.max(configuration.getInt("duel.match.check-for-players-routine.check-time-seconds", 30), 1);
         final String actionConfig = configuration.getString("duel.match.check-for-players-routine.action", "kill-outside-player");
         if ("kill-outside-player".equalsIgnoreCase(actionConfig) || "hardstop-arena".equalsIgnoreCase(actionConfig)) {
