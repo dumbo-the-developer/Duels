@@ -943,9 +943,9 @@ public class DuelManager implements Loadable {
         }
         
         final World arenaWorld = arenaLocation.getWorld();
-        // CRITICAL: Check if world is loaded before scheduling (required for Folia)
-        if (!arenaWorld.isChunkLoaded(arenaLocation.getBlockX() >> 4, arenaLocation.getBlockZ() >> 4)) {
-            // World chunk not loaded, use global scheduler as fallback
+        // CRITICAL: Check if chunk is loaded - if not, skip location-based scheduling entirely
+        final boolean chunkLoaded = arenaWorld.isChunkLoaded(arenaLocation.getBlockX() >> 4, arenaLocation.getBlockZ() >> 4);
+        if (!chunkLoaded) {
             Log.warn(this, "Arena location chunk not loaded for check routine, using global scheduler for arena " + arena.getName());
         }
         
@@ -1020,21 +1020,31 @@ public class DuelManager implements Loadable {
                     final List<Player> playersToCheck = new ArrayList<>(match.getAllPlayers());
                     
                     for (final Player player : playersToCheck) {
+                        // CRITICAL: Re-check match state before each player to catch race conditions
+                        final DuelMatch currentMatch2 = arena.getMatch();
+                        if (match.isFinished() || !arena.isUsed() || currentMatch2 != match || currentMatch2 == null) {
+                            // Match ended during iteration, stop immediately
+                            synchronized (activeCheckRoutineFlags) {
+                                activeCheckRoutineFlags.remove(arena);
+                                activeCheckRoutines.remove(arena);
+                            }
+                            return;
+                        }
+                        
                         // Edge case: Player may have quit during iteration - verify they're still online and in match
                         if (!player.isOnline()) {
                             continue; // Skip offline players
                         }
                         
+                        // CRITICAL: Verify player is still actually in the match and not dead
+                        // This prevents killing players who have legitimately left the match
+                        if (!arena.has(player) || match.isDead(player) || !match.getAllPlayers().contains(player)) {
+                            continue; // Player no longer in match or is dead, skip
+                        }
+                        
                         // Skip dead players in team matches (they're spectators and should be allowed outside arena world)
                         if (match instanceof TeamDuelMatch && match.isDead(player)) {
                             continue; // Dead spectators in team matches are allowed to be outside
-                        }
-                        
-                        // Double-check: Verify player is still in this match (may have quit or match ended)
-                        // CRITICAL: Re-check match reference to ensure it hasn't changed
-                        final DuelMatch currentMatch2 = arena.getMatch();
-                        if (match.isFinished() || currentMatch2 != match || currentMatch2 == null || !arena.has(player)) {
-                            continue; // Player no longer in match, skip
                         }
                         
                         final World playerWorld = player.getWorld();
@@ -1060,7 +1070,7 @@ public class DuelManager implements Loadable {
                                     // Final safety check: Verify player is still online and in match before killing
                                     // CRITICAL: Re-check match reference to ensure it hasn't changed
                                     final DuelMatch currentMatch3 = arena.getMatch();
-                                    if (player.isOnline() && !match.isFinished() && currentMatch3 == match && currentMatch3 != null && arena.has(player)) {
+                                    if (player.isOnline() && !match.isFinished() && currentMatch3 == match && currentMatch3 != null && arena.has(player) && !match.isDead(player) && match.getAllPlayers().contains(player)) {
                                         // Clear inventory first, then kill to prevent items from dropping
                                         player.getInventory().clear();
                                         player.getInventory().setArmorContents(null);
@@ -1124,19 +1134,26 @@ public class DuelManager implements Loadable {
         };
         
         // Schedule the delayed start task
-        // Try location-based scheduling first, fallback to global scheduler if it fails
+        // CRITICAL: If chunk is not loaded, skip location-based scheduling entirely and use global scheduler
         TaskWrapper delayTask = null;
-        if (delayTicks == 0) {
-            // No delay, run immediately using runTask
-            delayTask = DuelsPlugin.getSchedulerAdapter().runTask(arenaLocation, startRoutineTask);
-        } else {
-            // Has delay, use runTaskLater
-            delayTask = DuelsPlugin.getSchedulerAdapter().runTaskLater(arenaLocation, startRoutineTask, delayTicks);
+        if (chunkLoaded) {
+            // Chunk is loaded, try location-based scheduling first
+            if (delayTicks == 0) {
+                // No delay, run immediately using runTask
+                delayTask = DuelsPlugin.getSchedulerAdapter().runTask(arenaLocation, startRoutineTask);
+            } else {
+                // Has delay, use runTaskLater
+                delayTask = DuelsPlugin.getSchedulerAdapter().runTaskLater(arenaLocation, startRoutineTask, delayTicks);
+            }
         }
         
-        // If location-based scheduling failed (e.g., chunk not loaded on Folia), fallback to global scheduler
+        // If location-based scheduling failed or chunk wasn't loaded, fallback to global scheduler
         if (delayTask == null) {
-            Log.warn(this, "Location-based scheduling failed for check routine, using global scheduler for arena " + arena.getName());
+            if (!chunkLoaded) {
+                Log.warn(this, "Chunk not loaded, using global scheduler for check routine for arena " + arena.getName());
+            } else {
+                Log.warn(this, "Location-based scheduling failed for check routine, using global scheduler for arena " + arena.getName());
+            }
             if (delayTicks == 0) {
                 delayTask = DuelsPlugin.getSchedulerAdapter().runTask(startRoutineTask);
             } else {
@@ -1381,8 +1398,21 @@ public class DuelManager implements Loadable {
                 return;
             }
 
+            // CRITICAL: Safety check - ensure there's at least one alive player (winner)
+            // Edge case: Race condition where both players die simultaneously or match state changes
+            final Set<Player> alivePlayers = match.getAlivePlayers();
+            if (alivePlayers.isEmpty()) {
+                // Edge case: No alive players (tie scenario)
+                // This should be handled by the tie logic in handleMatchEnd, but add safety check
+                Log.warn(DuelManager.this, "No alive players found when ending match in arena " + arena.getName() + " - treating as tie");
+                final Location deadLocation = player.getEyeLocation().clone();
+                handleMatchEnd(match, arena, player, deadLocation, null); // null winner = tie
+                return;
+            }
+
             final Location deadLocation = player.getEyeLocation().clone();
-            handleMatchEnd(match, arena, player, deadLocation, match.getAlivePlayers().iterator().next());
+            final Player winner = alivePlayers.iterator().next();
+            handleMatchEnd(match, arena, player, deadLocation, winner);
         }
 
         @EventHandler(ignoreCancelled = true)
