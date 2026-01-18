@@ -943,6 +943,12 @@ public class DuelManager implements Loadable {
         }
         
         final World arenaWorld = arenaLocation.getWorld();
+        // CRITICAL: Check if world is loaded before scheduling (required for Folia)
+        if (!arenaWorld.isChunkLoaded(arenaLocation.getBlockX() >> 4, arenaLocation.getBlockZ() >> 4)) {
+            // World chunk not loaded, use global scheduler as fallback
+            Log.warn(this, "Arena location chunk not loaded for check routine, using global scheduler for arena " + arena.getName());
+        }
+        
         final int startDelaySeconds = config.getCheckForPlayersRoutineStartDelaySeconds();
         final int checkTimeSeconds = config.getCheckForPlayersRoutineTimeSeconds();
         final String action = config.getCheckForPlayersRoutineAction();
@@ -965,7 +971,9 @@ public class DuelManager implements Loadable {
         // Schedule the start of the repeating task after the delay
         // CRITICAL: Use synchronous task instead of async to safely access match state
         // Async tasks can cause race conditions with match ending logic
-        DuelsPlugin.getSchedulerAdapter().runTaskLater(arenaLocation, () -> {
+        // If delay is 0, use runTask instead of runTaskLater to avoid Folia scheduling issues
+        final long delayTicks = startDelaySeconds * 20L;
+        final Runnable startRoutineTask = () -> {
             // Double-check match state before starting routine
             final DuelMatch delayedMatch = arena.getMatch();
             if (match.isFinished() || !arena.isUsed() || delayedMatch != match || delayedMatch == null) {
@@ -1113,7 +1121,37 @@ public class DuelManager implements Loadable {
                 }
                 Log.warn(this, "Failed to schedule check-for-players-routine for arena " + arena.getName());
             }
-        }, startDelaySeconds * 20L);
+        };
+        
+        // Schedule the delayed start task
+        // Try location-based scheduling first, fallback to global scheduler if it fails
+        TaskWrapper delayTask = null;
+        if (delayTicks == 0) {
+            // No delay, run immediately using runTask
+            delayTask = DuelsPlugin.getSchedulerAdapter().runTask(arenaLocation, startRoutineTask);
+        } else {
+            // Has delay, use runTaskLater
+            delayTask = DuelsPlugin.getSchedulerAdapter().runTaskLater(arenaLocation, startRoutineTask, delayTicks);
+        }
+        
+        // If location-based scheduling failed (e.g., chunk not loaded on Folia), fallback to global scheduler
+        if (delayTask == null) {
+            Log.warn(this, "Location-based scheduling failed for check routine, using global scheduler for arena " + arena.getName());
+            if (delayTicks == 0) {
+                delayTask = DuelsPlugin.getSchedulerAdapter().runTask(startRoutineTask);
+            } else {
+                delayTask = DuelsPlugin.getSchedulerAdapter().runTaskLater(startRoutineTask, delayTicks);
+            }
+        }
+        
+        // Handle final scheduling failure
+        if (delayTask == null) {
+            // All scheduling attempts failed, clean up flags
+            synchronized (activeCheckRoutineFlags) {
+                activeCheckRoutineFlags.remove(arena);
+            }
+            Log.warn(this, "Failed to schedule delayed start for check-for-players-routine for arena " + arena.getName());
+        }
     }
 
     private void addPlayers(final Collection<Player> players, final DuelMatch match, final ArenaImpl arena, final KitImpl kit, final Location location) {
