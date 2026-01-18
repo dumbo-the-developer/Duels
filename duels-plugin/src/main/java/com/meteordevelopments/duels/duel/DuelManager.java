@@ -1547,6 +1547,15 @@ public class DuelManager implements Loadable {
             }
 
             // Normal quit handling (countdown complete, match in progress)
+            // CRITICAL: Check if player is already dead or match is already finished
+            // This prevents duplicate processing if PlayerQuitEvent fires after PlayerDeathEvent
+            // Edge case: Player quits after being killed - match ending already in progress
+            if (match.isDead(player) || match.isFinished()) {
+                // Player already dead or match already ended, nothing to do
+                // PlayerDeathEvent already handled match ending, don't interfere
+                return;
+            }
+            
             // For own-inventory duels with drop-inventory-items: false, preserve PlayerInfo for restoration
             final PlayerInfo info = playerManager.get(player);
             final boolean preserveInventory = match.isOwnInventory() && !config.isOwnInventoryDropInventoryItems();
