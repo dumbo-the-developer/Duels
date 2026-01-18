@@ -2,7 +2,7 @@
 description: Install, configure, and use the Duels plugin.
 ---
 
-# README
+# Home
 
 Duels adds 1v1 (and optionally team) fights with queues, arenas, and rewards.
 
@@ -59,57 +59,15 @@ rewards:
 ```
 {% endcode %}
 
-### Commands
+### Next steps
 
-_Adjust names/aliases to match your plugin._
-
-* `/duel <player>` — send a duel request
-* `/duel accept` — accept the last request
-* `/duel deny` — deny the last request
-* `/duel queue [kit]` — join the queue
-* `/duel leave` — leave queue / cancel
-* `/duels arena create <name>` — create an arena
-* `/duels kit create <name>` — create a kit
-* `/duels reload` — reload configs
-
-### Permissions
-
-_Adjust nodes to match your plugin._
-
-* `duels.use` — basic usage
-* `duels.queue` — queue usage
-* `duels.admin` — admin commands
-
-### Placeholders (optional)
-
-If you support PlaceholderAPI, document your placeholders here:
-
-* `%duels_wins%`
-* `%duels_losses%`
-* `%duels_elo%`
-
-### Common issues
-
-* **Nothing happens when I run a command**
-  * Check permissions.
-  * Check console for startup errors.
-* **Players can’t be teleported into arenas**
-  * Make sure arena spawns are set.
-  * Ensure the world is loaded.
+* [Commands](duels/commands.md)
+* [Permissions](duels/permissions.md)
+* [Placeholders](duels/placeholders.md)
+* [FAQ](duels/faq.md)
+* [Developer API](duels/developer-api.md)
 
 ### Support
 
 * Add your support link (Discord/GitHub Issues)
 * Include your server version, plugin version, and latest logs
-
-### Next pages to add
-
-If you want, I can generate these pages next:
-
-* Installation & updating
-* Configuration reference
-* Arenas
-* Kits
-* Commands & permissions
-* Placeholders
-* API (for developers)
