@@ -683,7 +683,10 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     }
 
     private void checkForUpdatesAndMetrics() {
-        new Metrics(this, BSTATS_ID);
+        // Only initialize bStats if enabled in config
+        if (configuration.isBstatsEnabled()) {
+            new Metrics(this, BSTATS_ID);
+        }
 
         if (!configuration.isCheckForUpdates()) {
             return;

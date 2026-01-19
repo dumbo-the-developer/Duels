@@ -23,6 +23,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean checkForUpdates;
     @Getter
+    private boolean bstatsEnabled;
+    @Getter
     private boolean ctpPreventDuel;
     @Getter
     private boolean ctpPreventTag;
@@ -379,6 +381,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
 
         version = configuration.getInt("config-version");
         checkForUpdates = configuration.getBoolean("check-for-updates", true);
+        bstatsEnabled = configuration.getBoolean("bstats-enabled", true);
 
         userNotFound = configuration.getString("placeholders.user-not-found", "User not found");
         notInMatch = configuration.getString("placeholders.not-in-match", "none");

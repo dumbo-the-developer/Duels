@@ -14,6 +14,11 @@ config-version: 13
 check-for-updates: true
 stay-up-to-date: true
 
+# If set to 'true', bStats metrics will be enabled and data will be sent to bStats.
+# If set to 'false', bStats will be completely disabled and no statistics will be collected or sent.
+# default: true
+bstats-enabled: true
+
 # NOTE: The following options will only activate if the message '[Duels] Hooked into <plugin name>!' is displayed on console.
 # If the plugin in the following list is enabled on your server but Duels fails to hook into them,
 # please contact the developer with the errors displayed on console.
