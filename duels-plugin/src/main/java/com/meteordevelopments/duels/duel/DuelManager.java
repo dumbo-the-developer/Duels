@@ -157,74 +157,52 @@ public class DuelManager implements Loadable {
             
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
             
-            // FIXED: Check if loser is online to use appropriate scheduler for Folia compatibility
-            final boolean loserIsOnline = loser.isOnline();
-            if (loserIsOnline) {
-                // Normal flow: loser is still online (normal death)
-                DuelsPlugin.getSchedulerAdapter().runTaskLater(loser, () -> {
+            // FIXED: Use global scheduler - completely entity-independent
+            // This works even if both players quit, loser quits, or winner quits
+            // Global scheduler is always available and doesn't depend on entities or locations
+            DuelsPlugin.getSchedulerAdapter().runTaskLater(() -> {
+                // Check if match still exists and is not finished
+                if (arena.getMatch() == null || arena.getMatch() != match || match.isFinished()) {
+                    return; // Match already ended or cleared
+                }
+                
+                // Handle loser if still online
+                if (loser.isOnline()) {
                     // Handle the loser (remove from arena and restore state)
                     // This is especially important for ROUNDS3 where the loser never actually dies
                     if (match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3)) {
                         handleLoss(loser, arena, match);
                     }
-                    
-                    for (Player alivePlayer : winners) {
+                }
+                // If loser is offline, skip loser handling (already handled or not needed)
+                
+                // Handle winners (check online status for each)
+                for (Player alivePlayer : winners) {
+                    if (alivePlayer.isOnline()) {
                         handleWin(alivePlayer, loser, arena, match);
                     }
+                }
 
-                    if (config.isEndCommandsEnabled() && !(!match.isFromQueue() && config.isEndCommandsQueueOnly())) {
-                        try {
-                            for (final String command : config.getEndCommands()) {
-                                String processedCommand = command
-                                        .replace("%winner%", winner.getName()).replace("%loser%", loser.getName())
-                                        .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "").replace("%arena%", arena.getName())
-                                        .replace("%bet_amount%", String.valueOf(match.getBet()));
-                                
-                                executeCommandWithDelay(processedCommand);
-                            }
-                        } catch (Exception ex) {
-                            Log.warn(DuelManager.this, "Error while running match end commands: " + ex.getMessage());
+                if (config.isEndCommandsEnabled() && !(!match.isFromQueue() && config.isEndCommandsQueueOnly())) {
+                    try {
+                        for (final String command : config.getEndCommands()) {
+                            String processedCommand = command
+                                    .replace("%winner%", winner.getName()).replace("%loser%", loser.getName())
+                                    .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "").replace("%arena%", arena.getName())
+                                    .replace("%bet_amount%", String.valueOf(match.getBet()));
+                            
+                            executeCommandWithDelay(processedCommand);
                         }
+                    } catch (Exception ex) {
+                        Log.warn(DuelManager.this, "Error while running match end commands: " + ex.getMessage());
                     }
+                }
 
-                    // FIXED: Use global scheduler for arena.endMatch() to avoid Folia region conflicts
-                    // This prevents errors when entities are in different regions or already removed by other plugins
-                    DuelsPlugin.getSchedulerAdapter().runTask(() -> {
-                        arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
-                    });
-                }, config.getTeleportDelay() * 20L);
-            } else {
-                // FIXED: Loser has quit - use global scheduler instead to prevent winners from getting stuck
-                DuelsPlugin.getSchedulerAdapter().runTaskLater(() -> {
-                    // Don't need to handle the loser since they're offline
-                    
-                    for (Player alivePlayer : winners) {
-                        if (alivePlayer.isOnline()) {  // Safety check
-                            handleWin(alivePlayer, loser, arena, match);
-                        }
-                    }
-
-                    if (config.isEndCommandsEnabled() && !(!match.isFromQueue() && config.isEndCommandsQueueOnly())) {
-                        try {
-                            for (final String command : config.getEndCommands()) {
-                                String processedCommand = command
-                                        .replace("%winner%", winner.getName()).replace("%loser%", loser.getName())
-                                        .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "").replace("%arena%", arena.getName())
-                                        .replace("%bet_amount%", String.valueOf(match.getBet()));
-                                
-                                executeCommandWithDelay(processedCommand);
-                            }
-                        } catch (Exception ex) {
-                            Log.warn(DuelManager.this, "Error while running match end commands: " + ex.getMessage());
-                        }
-                    }
-
-                    // CRITICAL: Check if match still exists before ending (might have been cleared already)
-                    if (arena.getMatch() != null && arena.getMatch() == match) {
-                        arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
-                    }
-                }, config.getTeleportDelay() * 20L);
-            }
+                // CRITICAL: Check if match still exists before ending (might have been cleared already)
+                if (arena.getMatch() != null && arena.getMatch() == match) {
+                    arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
+                }
+            }, config.getTeleportDelay() * 20L);
         });
     }
 
