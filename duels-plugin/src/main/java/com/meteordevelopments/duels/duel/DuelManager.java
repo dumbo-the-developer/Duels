@@ -1551,8 +1551,67 @@ public class DuelManager implements Loadable {
             // This prevents duplicate processing if PlayerQuitEvent fires after PlayerDeathEvent
             // Edge case: Player quits after being killed - match ending already in progress
             if (match.isDead(player) || match.isFinished()) {
-                // Player already dead or match already ended, nothing to do
-                // PlayerDeathEvent already handled match ending, don't interfere
+                // Player already dead - check if we're in end game phase and match needs to be completed
+                if (!match.isFinished() && arena.isEndGame()) {
+                    // Match is in end game phase (winner determined, waiting for teleport delay)
+                    // The scheduled task in handleMatchEnd() was scheduled on the loser entity
+                    // If loser quits, the task might not execute on Folia - ensure match ends properly
+                    final Set<Player> alivePlayers = match.getAlivePlayers();
+                    if (!alivePlayers.isEmpty()) {
+                        final Player winner = alivePlayers.iterator().next();
+                        final UUID loserUuid = player.getUniqueId();
+                        final String loserName = player.getName();
+                        
+                        // Schedule match end using global scheduler to ensure it completes
+                        // Use the same delay as configured, but on global scheduler instead of entity scheduler
+                        DuelsPlugin.getSchedulerAdapter().runTaskLater(() -> {
+                            // Double-check match is still active and not finished
+                            if (arena.getMatch() != null && arena.getMatch() == match && !match.isFinished()) {
+                                // Get winner again (in case state changed)
+                                final Set<Player> currentAlivePlayers = match.getAlivePlayers();
+                                if (!currentAlivePlayers.isEmpty()) {
+                                    final Player currentWinner = currentAlivePlayers.iterator().next();
+                                    
+                                    // Execute the end match logic directly (similar to lines 198-225)
+                                    for (Player alivePlayer : currentAlivePlayers) {
+                                        if (alivePlayer.isOnline()) {
+                                            handleWin(alivePlayer, player, arena, match);
+                                        }
+                                    }
+
+                                    if (config.isEndCommandsEnabled() && !(!match.isFromQueue() && config.isEndCommandsQueueOnly())) {
+                                        try {
+                                            for (final String command : config.getEndCommands()) {
+                                                String processedCommand = command
+                                                        .replace("%winner%", currentWinner.getName()).replace("%loser%", loserName)
+                                                        .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "").replace("%arena%", arena.getName())
+                                                        .replace("%bet_amount%", String.valueOf(match.getBet()));
+                                                
+                                                executeCommandWithDelay(processedCommand);
+                                            }
+                                        } catch (Exception ex) {
+                                            Log.warn(DuelManager.this, "Error while running match end commands: " + ex.getMessage());
+                                        }
+                                    }
+
+                                    // End the match
+                                    if (arena.getMatch() != null && arena.getMatch() == match) {
+                                        arena.endMatch(currentWinner.getUniqueId(), loserUuid, Reason.OPPONENT_DEFEAT);
+                                    }
+                                }
+                            }
+                        }, config.getTeleportDelay() * 20L);
+                    } else {
+                        // No alive players - treat as tie
+                        DuelsPlugin.getSchedulerAdapter().runTaskLater(() -> {
+                            if (arena.getMatch() != null && arena.getMatch() == match && !match.isFinished()) {
+                                final Location deadLocation = player.getLocation().clone();
+                                handleMatchEnd(match, arena, player, deadLocation, null);
+                            }
+                        }, config.getTeleportDelay() * 20L);
+                    }
+                }
+                // Match is finished or will be finished by the scheduled task above
                 return;
             }
             
