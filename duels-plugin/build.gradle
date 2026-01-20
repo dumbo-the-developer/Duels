@@ -30,7 +30,7 @@ dependencies {
     implementation('net.essentialsx:EssentialsX:2.21.2') {
         transitive = false
     }
-    implementation 'dev.kitteh:factions:4.0.0'
+    implementation 'dev.kitteh:factions:4.4.0'
     implementation name: 'Vault-1.6.7'
     implementation name: 'CombatTagPlus'
     implementation name: 'MyPet-2.3.4'
