@@ -42,7 +42,7 @@ dependencies {
     implementation project(':duels-worldguard-v7')
     implementation 'io.papermc:paperlib:1.0.8'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.20.1'
-    implementation 'org.json:json:20250517'
+    implementation 'org.json:json:20251224'
     implementation 'net.kyori:adventure-text-minimessage:4.26.1'
     implementation 'net.kyori:adventure-text-serializer-legacy:4.26.1'
     implementation 'net.kyori:adventure-api:4.26.1'
