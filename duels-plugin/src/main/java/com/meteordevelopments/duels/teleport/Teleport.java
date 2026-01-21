@@ -65,10 +65,14 @@ public final class Teleport implements Loadable, Listener {
             return;
         }
 
-        // Schedule passenger removal on entity-specific scheduler for Folia compatibility
+        // Schedule passenger removal and bed exit on entity-specific scheduler for Folia compatibility
         DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
             for (Entity entity : player.getPassengers()) {
                 player.removePassenger(entity);
+            }
+            // Force player to leave bed to prevent teleport failure and duplication exploits
+            if (player.isSleeping()) {
+                player.wakeup(true);
             }
         });
 
@@ -104,7 +108,7 @@ public final class Teleport implements Loadable, Listener {
             });
         } else {
             // For non-Folia, close inventory before synchronous teleport (original behavior)
-            player.closeInventory();
+            DuelsPlugin.getSchedulerAdapter().runTask(player, player::closeInventory);
             if (!player.teleport(location)) {
                 Log.warn(this, "Could not teleport " + player.getName() + "! Player is dead or is vehicle");
             } else if (onComplete != null) {
