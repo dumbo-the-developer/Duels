@@ -70,10 +70,10 @@ public class TeleportListener implements Listener {
             return;
         }
         // FIXED: Schedule inventory operations on entity-specific scheduler for Folia compatibility
-        DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
-            if (player.isOnline()) {
-                player.closeInventory();
-            }
-        });
+
+        if (player.isOnline()) {
+            player.closeInventory();
+        }
+
     }
 }
