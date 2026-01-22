@@ -258,7 +258,7 @@ public class BettingGui extends AbstractGui<DuelsPlugin> {
         private int counter;
 
         public void startTask() {
-            task = DuelsPlugin.getSchedulerAdapter().runTaskTimerAsynchronously(this, 10L, 20L);
+            task = DuelsPlugin.getSchedulerAdapter().runTaskTimer(this, 10L, 20L);
         }
 
         @Override
