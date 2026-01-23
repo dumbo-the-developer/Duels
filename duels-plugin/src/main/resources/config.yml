@@ -14,6 +14,11 @@ config-version: 13
 check-for-updates: true
 stay-up-to-date: true
 
+# If set to 'true', bStats metrics will be enabled and data will be sent to bStats.
+# If set to 'false', bStats will be completely disabled and no statistics will be collected or sent.
+# default: true
+bstats-enabled: true
+
 # NOTE: The following options will only activate if the message '[Duels] Hooked into <plugin name>!' is displayed on console.
 # If the plugin in the following list is enabled on your server but Duels fails to hook into them,
 # please contact the developer with the errors displayed on console.
@@ -217,6 +222,20 @@ duel:
         - 'give %loser% dirt 1{delay:50}'
         - 'say Congratulations %winner%!{delay:100}'
 
+    hardstop-commands:
+      # If set to 'true', the commands listed below will run when /duels hardstop is used.
+      # default: false
+      enabled: false
+
+      # Available placeholders:
+      # %arena% - Name of the arena
+      # %players% - Comma-separated list of players in the match
+      # %kit% - Name of the kit used in the match
+      # %bet_amount% - Amount of money bet in the match
+      # {delay:x} - Used to give x ms of delay before running any command
+      commands:
+        - 'example command'
+
     player-execute-commands-on-arena-pre-start:
       # If set to 'true', the commands listed below will be executed as players when they are teleported to the arena (before match starts).
       # Commands are executed as the player, not as console.
@@ -238,14 +257,18 @@ duel:
       # default: true
       enabled: true
 
+      # Delay in seconds before starting the check routine.
+      # default: 1
+      start-delay-seconds: 1
+
       # Time in seconds to check for players.
       # default: 30
       check-time-seconds: 30
 
       #Action to when players outside duel world.
       # ACTIONS: kill-outside-player, hardstop-arena
-      # default: kill-outside-player 
-      action: kill-outside-player
+      # default: hardstop-arena 
+      action: hardstop-arena
 
 
   projectile-hit-message:

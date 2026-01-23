@@ -23,6 +23,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean checkForUpdates;
     @Getter
+    private boolean bstatsEnabled;
+    @Getter
     private boolean ctpPreventDuel;
     @Getter
     private boolean ctpPreventTag;
@@ -62,6 +64,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private GameMode forceGamemodeOnJoinMode;
     @Getter
     private boolean checkForPlayersRoutineEnabled;
+    @Getter
+    private int checkForPlayersRoutineStartDelaySeconds;
     @Getter
     private int checkForPlayersRoutineTimeSeconds;
     @Getter
@@ -130,6 +134,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean endCommandsQueueOnly;
     @Getter
     private List<String> endCommands;
+    @Getter
+    private boolean hardstopCommandsEnabled;
+    @Getter
+    private List<String> hardstopCommands;
     @Getter
     private boolean playerExecuteCommandsOnArenaPreStartEnabled;
     @Getter
@@ -373,6 +381,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
 
         version = configuration.getInt("config-version");
         checkForUpdates = configuration.getBoolean("check-for-updates", true);
+        bstatsEnabled = configuration.getBoolean("bstats-enabled", true);
 
         userNotFound = configuration.getString("placeholders.user-not-found", "User not found");
         notInMatch = configuration.getString("placeholders.not-in-match", "none");
@@ -429,6 +438,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         endCommandsEnabled = configuration.getBoolean("duel.match.end-commands.enabled", false);
         endCommandsQueueOnly = configuration.getBoolean("duel.match.end-commands.queue-matches-only", false);
         endCommands = configuration.getStringList("duel.match.end-commands.commands");
+        hardstopCommandsEnabled = configuration.getBoolean("duel.match.hardstop-commands.enabled", false);
+        hardstopCommands = configuration.getStringList("duel.match.hardstop-commands.commands");
         playerExecuteCommandsOnArenaPreStartEnabled = configuration.getBoolean("duel.match.player-execute-commands-on-arena-pre-start.enabled", false);
         playerExecuteCommandsOnArenaPreStartQueueOnly = configuration.getBoolean("duel.match.player-execute-commands-on-arena-pre-start.queue-matches-only", false);
         playerExecuteCommandsOnArenaPreStart = configuration.getStringList("duel.match.player-execute-commands-on-arena-pre-start.commands");
@@ -466,8 +477,15 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         blacklistedCommands = configuration.getStringList("duel.blacklisted-commands");
 
         checkForPlayersRoutineEnabled = configuration.getBoolean("duel.match.check-for-players-routine.enabled", true);
-        checkForPlayersRoutineTimeSeconds = configuration.getInt("duel.match.check-for-players-routine.check-time-seconds", 30);
-        checkForPlayersRoutineAction = configuration.getString("duel.match.check-for-players-routine.action", "kill-outside-player");
+        checkForPlayersRoutineStartDelaySeconds = Math.max(configuration.getInt("duel.match.check-for-players-routine.start-delay-seconds", 1), 0);
+        checkForPlayersRoutineTimeSeconds = Math.max(configuration.getInt("duel.match.check-for-players-routine.check-time-seconds", 30), 1);
+        final String actionConfig = configuration.getString("duel.match.check-for-players-routine.action", "hardstop-arena");
+        if ("kill-outside-player".equalsIgnoreCase(actionConfig) || "hardstop-arena".equalsIgnoreCase(actionConfig)) {
+            checkForPlayersRoutineAction = actionConfig.toLowerCase();
+        } else {
+            checkForPlayersRoutineAction = "hardstop-arena";
+            Log.warn(this, "Invalid action '" + actionConfig + "' for duel.match.check-for-players-routine.action. Valid values: 'kill-outside-player', 'hardstop-arena'. Defaulting to 'hardstop-arena'.");
+        }
 
         queueBlacklistedCommands = configuration.getStringList("queue.blacklisted-commands");
 
