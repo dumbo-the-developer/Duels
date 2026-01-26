@@ -27,9 +27,15 @@ public class LoadkitCommand extends BaseCommand {
         }
 
         final Player player = (Player) sender;
-        player.getInventory().clear();
-        kit.equip(player);
-        lang.sendMessage(sender, "COMMAND.duels.load-kit", "name", name);
+        // FIXED: Schedule inventory operations on entity-specific scheduler for Folia compatibility
+        DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
+            if (!player.isOnline()) {
+                return;
+            }
+            player.getInventory().clear();
+            kit.equip(player);
+            lang.sendMessage(sender, "COMMAND.duels.load-kit", "name", name);
+        });
     }
 
     @Override

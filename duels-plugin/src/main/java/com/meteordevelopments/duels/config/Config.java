@@ -5,7 +5,9 @@ import com.google.common.collect.Multimap;
 import lombok.Getter;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.util.EnumUtil;
+import com.meteordevelopments.duels.util.Log;
 import com.meteordevelopments.duels.util.config.AbstractConfiguration;
+import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -20,6 +22,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private int version;
     @Getter
     private boolean checkForUpdates;
+    @Getter
+    private boolean bstatsEnabled;
     @Getter
     private boolean ctpPreventDuel;
     @Getter
@@ -50,6 +54,22 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     private boolean duelzoneEnabled;
     @Getter
     private List<String> duelzones;
+    @Getter
+    private boolean duelWorldsEnabled;
+    @Getter
+    private List<String> duelWorlds;
+    @Getter
+    private boolean forceGamemodeOnJoin;
+    @Getter
+    private GameMode forceGamemodeOnJoinMode;
+    @Getter
+    private boolean checkForPlayersRoutineEnabled;
+    @Getter
+    private int checkForPlayersRoutineStartDelaySeconds;
+    @Getter
+    private int checkForPlayersRoutineTimeSeconds;
+    @Getter
+    private String checkForPlayersRoutineAction;
     @Getter
     private boolean myPetDespawn;
     @Getter
@@ -103,11 +123,27 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private List<String> startCommands;
     @Getter
+    private boolean preEndCommandsEnabled;
+    @Getter
+    private boolean preEndCommandsQueueOnly;
+    @Getter
+    private List<String> preEndCommands;
+    @Getter
     private boolean endCommandsEnabled;
     @Getter
     private boolean endCommandsQueueOnly;
     @Getter
     private List<String> endCommands;
+    @Getter
+    private boolean hardstopCommandsEnabled;
+    @Getter
+    private List<String> hardstopCommands;
+    @Getter
+    private boolean playerExecuteCommandsOnArenaPreStartEnabled;
+    @Getter
+    private boolean playerExecuteCommandsOnArenaPreStartQueueOnly;
+    @Getter
+    private List<String> playerExecuteCommandsOnArenaPreStart;
     @Getter
     private boolean projectileHitMessageEnabled;
     @Getter
@@ -223,6 +259,42 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private short settingsFillerData;
     @Getter
+    private String sendButtonType;
+    @Getter
+    private short sendButtonData;
+    @Getter
+    private List<Integer> sendButtonSlots;
+    @Getter
+    private List<Integer> sendButtonGlowingSlots;
+    @Getter
+    private String cancelButtonType;
+    @Getter
+    private short cancelButtonData;
+    @Getter
+    private List<Integer> cancelButtonSlots;
+    @Getter
+    private List<Integer> cancelButtonGlowingSlots;
+    @Getter
+    private String kitSelectorButtonType;
+    @Getter
+    private short kitSelectorButtonData;
+    @Getter
+    private String arenaSelectorButtonType;
+    @Getter
+    private short arenaSelectorButtonData;
+    @Getter
+    private String ownInventoryButtonType;
+    @Getter
+    private short ownInventoryButtonData;
+    @Getter
+    private String itemBettingButtonType;
+    @Getter
+    private short itemBettingButtonData;
+    @Getter
+    private String detailsButtonType;
+    @Getter
+    private short detailsButtonData;
+    @Getter
     private int queuesRows;
     @Getter
     private String queuesFillerType;
@@ -249,7 +321,19 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean disableMovementInEndgame;
     @Getter
-    private boolean sendDeathMessages;
+    private boolean messageOnDeathWithKiller;
+    @Getter
+    private boolean messageOnDeathNoKiller;
+    @Getter
+    private boolean messageOnEndTie;
+    @Getter
+    private boolean messageOnEndPluginDisable;
+    @Getter
+    private boolean messageOnEndOpponentDefeat;
+    @Getter
+    private boolean messageOnEndTeamOpponentDefeat;
+    @Getter
+    private boolean messageOnEndPartyOpponentDefeat;
     @Getter
     private int partyInviteExpiration;
     @Getter
@@ -297,6 +381,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
 
         version = configuration.getInt("config-version");
         checkForUpdates = configuration.getBoolean("check-for-updates", true);
+        bstatsEnabled = configuration.getBoolean("bstats-enabled", true);
 
         userNotFound = configuration.getString("placeholders.user-not-found", "User not found");
         notInMatch = configuration.getString("placeholders.not-in-match", "none");
@@ -347,9 +432,17 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         startCommandsEnabled = configuration.getBoolean("duel.match.start-commands.enabled", false);
         startCommandsQueueOnly = configuration.getBoolean("duel.match.start-commands.queue-matches-only", false);
         startCommands = configuration.getStringList("duel.match.start-commands.commands");
+        preEndCommandsEnabled = configuration.getBoolean("duel.match.pre-end-commands.enabled", false);
+        preEndCommandsQueueOnly = configuration.getBoolean("duel.match.pre-end-commands.queue-matches-only", false);
+        preEndCommands = configuration.getStringList("duel.match.pre-end-commands.commands");
         endCommandsEnabled = configuration.getBoolean("duel.match.end-commands.enabled", false);
         endCommandsQueueOnly = configuration.getBoolean("duel.match.end-commands.queue-matches-only", false);
         endCommands = configuration.getStringList("duel.match.end-commands.commands");
+        hardstopCommandsEnabled = configuration.getBoolean("duel.match.hardstop-commands.enabled", false);
+        hardstopCommands = configuration.getStringList("duel.match.hardstop-commands.commands");
+        playerExecuteCommandsOnArenaPreStartEnabled = configuration.getBoolean("duel.match.player-execute-commands-on-arena-pre-start.enabled", false);
+        playerExecuteCommandsOnArenaPreStartQueueOnly = configuration.getBoolean("duel.match.player-execute-commands-on-arena-pre-start.queue-matches-only", false);
+        playerExecuteCommandsOnArenaPreStart = configuration.getStringList("duel.match.player-execute-commands-on-arena-pre-start.commands");
         projectileHitMessageEnabled = configuration.getBoolean("duel.projectile-hit-message.enabled", true);
         projectileHitMessageTypes = configuration.getStringList("duel.projectile-hit-message.types");
         preventInventoryOpen = configuration.getBoolean("duel.prevent-inventory-open", true);
@@ -359,6 +452,16 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         forceAllowCombat = configuration.getBoolean("duel.force-allow-combat", true);
         cancelIfMoved = configuration.getBoolean("duel.cancel-if-moved", false);
         blacklistedWorlds = configuration.getStringList("duel.blacklisted-worlds");
+        duelWorldsEnabled = configuration.getBoolean("duel-worlds-settings.enabled", false);
+        duelWorlds = configuration.getStringList("duel-worlds-settings.worlds");
+        forceGamemodeOnJoin = configuration.getBoolean("duel-worlds-settings.force-gamemode-on-join", false);
+        final String gamemodeStr = configuration.getString("duel-worlds-settings.force-gamemode-on-join-mode", "SURVIVAL");
+        try {
+            forceGamemodeOnJoinMode = GameMode.valueOf(gamemodeStr.toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            forceGamemodeOnJoinMode = GameMode.SURVIVAL;
+            Log.warn(this, "Invalid gamemode '" + gamemodeStr + "' for duel-worlds-settings.force-gamemode-on-join-mode, defaulting to SURVIVAL");
+        }
         teleportToLastLocation = configuration.getBoolean("duel.teleport-to-last-location", false);
         teleportDelay = configuration.getInt("duel.teleport-delay", 5);
         spawnFirework = configuration.getBoolean("duel.spawn-firework", true);
@@ -372,6 +475,17 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         blockAllCommands = configuration.getBoolean("duel.block-all-commands", false);
         whitelistedCommands = configuration.getStringList("duel.whitelisted-commands");
         blacklistedCommands = configuration.getStringList("duel.blacklisted-commands");
+
+        checkForPlayersRoutineEnabled = configuration.getBoolean("duel.match.check-for-players-routine.enabled", true);
+        checkForPlayersRoutineStartDelaySeconds = Math.max(configuration.getInt("duel.match.check-for-players-routine.start-delay-seconds", 1), 0);
+        checkForPlayersRoutineTimeSeconds = Math.max(configuration.getInt("duel.match.check-for-players-routine.check-time-seconds", 30), 1);
+        final String actionConfig = configuration.getString("duel.match.check-for-players-routine.action", "hardstop-arena");
+        if ("kill-outside-player".equalsIgnoreCase(actionConfig) || "hardstop-arena".equalsIgnoreCase(actionConfig)) {
+            checkForPlayersRoutineAction = actionConfig.toLowerCase();
+        } else {
+            checkForPlayersRoutineAction = "hardstop-arena";
+            Log.warn(this, "Invalid action '" + actionConfig + "' for duel.match.check-for-players-routine.action. Valid values: 'kill-outside-player', 'hardstop-arena'. Defaulting to 'hardstop-arena'.");
+        }
 
         queueBlacklistedCommands = configuration.getStringList("queue.blacklisted-commands");
 
@@ -415,6 +529,30 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         arenaSelectorFillerData = (short) configuration.getInt("guis.arena-selector.space-filler-item.data", 0);
         settingsFillerType = configuration.getString("guis.settings.space-filler-item.type", "STAINED_GLASS_PANE");
         settingsFillerData = (short) configuration.getInt("guis.settings.space-filler-item.data", 0);
+        sendButtonType = configuration.getString("guis.settings.send-button.item.type", "LIME_STAINED_GLASS_PANE");
+        sendButtonData = (short) configuration.getInt("guis.settings.send-button.item.data", 0);
+        sendButtonSlots = configuration.getIntegerList("guis.settings.send-button.slots");
+        if (sendButtonSlots.isEmpty()) {
+            sendButtonSlots = Arrays.asList(0, 1, 2, 9, 10, 11, 18, 19, 20);
+        }
+        sendButtonGlowingSlots = configuration.getIntegerList("guis.settings.send-button.glowing-slots");
+        cancelButtonType = configuration.getString("guis.settings.cancel-button.item.type", "RED_STAINED_GLASS_PANE");
+        cancelButtonData = (short) configuration.getInt("guis.settings.cancel-button.item.data", 0);
+        cancelButtonSlots = configuration.getIntegerList("guis.settings.cancel-button.slots");
+        if (cancelButtonSlots.isEmpty()) {
+            cancelButtonSlots = Arrays.asList(6, 7, 8, 15, 16, 17, 24, 25, 26);
+        }
+        cancelButtonGlowingSlots = configuration.getIntegerList("guis.settings.cancel-button.glowing-slots");
+        kitSelectorButtonType = configuration.getString("guis.settings.kit-selector-button.item.type", "DIAMOND_SWORD");
+        kitSelectorButtonData = (short) configuration.getInt("guis.settings.kit-selector-button.item.data", 0);
+        arenaSelectorButtonType = configuration.getString("guis.settings.arena-selector-button.item.type", "GRASS_BLOCK");
+        arenaSelectorButtonData = (short) configuration.getInt("guis.settings.arena-selector-button.item.data", 0);
+        ownInventoryButtonType = configuration.getString("guis.settings.own-inventory-button.item.type", "CHEST");
+        ownInventoryButtonData = (short) configuration.getInt("guis.settings.own-inventory-button.item.data", 0);
+        itemBettingButtonType = configuration.getString("guis.settings.item-betting-button.item.type", "GOLD_INGOT");
+        itemBettingButtonData = (short) configuration.getInt("guis.settings.item-betting-button.item.data", 0);
+        detailsButtonType = configuration.getString("guis.settings.details-button.item.type", "OAK_SIGN");
+        detailsButtonData = (short) configuration.getInt("guis.settings.details-button.item.data", 0);
         queuesRows = Math.min(Math.max(configuration.getInt("guis.queues.rows", 3), 1), 5);
         queuesFillerType = configuration.getString("guis.queues.space-filler-item.type", "STAINED_GLASS_PANE");
         queuesFillerData = (short) configuration.getInt("guis.queues.space-filler-item.data", 0);
@@ -429,7 +567,13 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         disableEnderpearlInEndgame = configuration.getBoolean("disable-enderpearl-in-endgame", true);
         disableMovementInEndgame = configuration.getBoolean("disable-movement-in-endgame", false);
 
-        sendDeathMessages = configuration.getBoolean("duel.send-death-messages", true);
+        messageOnDeathWithKiller = configuration.getBoolean("duel.messages.on-death.with-killer", true);
+        messageOnDeathNoKiller = configuration.getBoolean("duel.messages.on-death.no-killer", true);
+        messageOnEndTie = configuration.getBoolean("duel.messages.on-end.tie", true);
+        messageOnEndPluginDisable = configuration.getBoolean("duel.messages.on-end.plugin-disable", true);
+        messageOnEndOpponentDefeat = configuration.getBoolean("duel.messages.on-end.opponent-defeat", true);
+        messageOnEndTeamOpponentDefeat = configuration.getBoolean("duel.messages.on-end.team-opponent-defeat", true);
+        messageOnEndPartyOpponentDefeat = configuration.getBoolean("duel.messages.on-end.party-opponent-defeat", true);
         partyInviteExpiration = configuration.getInt("party.invite-expiration", 30);
         partyAutoDisbandAfter = configuration.getInt("party.auto-disband-after", 10);
         partyMaxSize = configuration.getInt("party.max-size", 10);

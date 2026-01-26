@@ -36,8 +36,12 @@ public class DeletesignCommand extends BaseCommand {
             return;
         }
 
-        sign.setType(Material.AIR);
-        sign.update(true);
+        // Schedule block operation on region-specific scheduler for Folia compatibility
+        final org.bukkit.Location signLocation = sign.getLocation();
+        DuelsPlugin.getSchedulerAdapter().runTask(signLocation, () -> {
+            sign.setType(Material.AIR);
+            sign.update(true);
+        });
 
         final Location location = sign.getLocation();
         final Queue queue = queueSign.getQueue();

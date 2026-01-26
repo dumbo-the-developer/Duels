@@ -4,6 +4,7 @@ import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.Permissions;
 import com.meteordevelopments.duels.gui.BaseButton;
 import com.meteordevelopments.duels.setting.Settings;
+import com.meteordevelopments.duels.util.compat.Items;
 import com.meteordevelopments.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -11,7 +12,8 @@ import org.bukkit.entity.Player;
 public class KitSelectButton extends BaseButton {
 
     public KitSelectButton(final DuelsPlugin plugin) {
-        super(plugin, ItemBuilder.of(Material.DIAMOND_SWORD).name(plugin.getLang().getMessage("GUI.settings.buttons.kit-selector.name"), plugin.getLang()).build());
+        super(plugin, ItemBuilder.of(Items.from(plugin.getConfiguration().getKitSelectorButtonType(), plugin.getConfiguration().getKitSelectorButtonData()))
+                .name(plugin.getLang().getMessage("GUI.settings.buttons.kit-selector.name"), plugin.getLang()).build());
     }
 
     @Override

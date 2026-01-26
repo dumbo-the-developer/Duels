@@ -69,21 +69,58 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
         EditSession session = new EditSession(player, kitName);
         activeSessions.put(playerId, session);
 
-        if (player.teleport(plugin.getPlayerManager().getKitLobby())){
-            // Clear player inventory
-            player.getInventory().clear();
+        // Use teleportAsync for Folia compatibility
+        boolean isFolia = DuelsPlugin.getSchedulerAdapter().isFolia();
+        final org.bukkit.Location kitLobby = plugin.getPlayerManager().getKitLobby();
+        
+        if (isFolia) {
+            player.teleportAsync(kitLobby).thenAccept(success -> {
+                if (success) {
+                    // FIXED: Schedule inventory operations on entity-specific scheduler for Folia compatibility
+                    DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
+                        if (!player.isOnline()) {
+                            return;
+                        }
+                        // Clear player inventory
+                        player.getInventory().clear();
+                        
+                        // Load kit into player inventory - check for custom kit first
+                        if (hasPlayerKit(player, kitName)) {
+                            // Load player's custom kit
+                            loadPlayerKit(player, kitName);
+                        } else {
+                            // Load default kit
+                            loadKitToPlayer(player, kit);
+                        }
+                    });
+                } else {
+                    plugin.getLogger().severe("Unable to teleport " + player.getName() + " to kit lobby");
+                    // FIXED: Schedule abortEditSession on entity-specific scheduler since we're in async callback
+                    DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
+                        if (player.isOnline()) {
+                            abortEditSession(player);
+                        }
+                    });
+                }
+            });
+        } else {
+            if (player.teleport(kitLobby)) {
+                // Clear player inventory
+                player.getInventory().clear();
 
-            // Load kit into player inventory - check for custom kit first
-            if (hasPlayerKit(player, kitName)) {
-                // Load player's custom kit
-                loadPlayerKit(player, kitName);
+                // Load kit into player inventory - check for custom kit first
+                if (hasPlayerKit(player, kitName)) {
+                    // Load player's custom kit
+                    loadPlayerKit(player, kitName);
+                } else {
+                    // Load default kit
+                    loadKitToPlayer(player, kit);
+                }
             } else {
-                // Load default kit
-                loadKitToPlayer(player, kit);
+                plugin.getLogger().severe("Unable to teleport " + player.getName() + " to kit lobby");
+                // For non-Folia, abortEditSession is safe to call directly from command handler
+                abortEditSession(player);
             }
-        }else {
-            plugin.getLogger().severe("Unable to teleport to player " + player.getName());
-            abortEditSession(player);
         }
         return true;
     }

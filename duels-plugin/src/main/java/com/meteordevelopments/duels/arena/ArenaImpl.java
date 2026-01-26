@@ -228,16 +228,37 @@ public class ArenaImpl extends BaseButton implements Arena {
         final Queue source = match.getSource();
         match.setFinished();
 
+        // Schedule block operations on region-specific schedulers for Folia compatibility
         for(Block block : match.placedBlocks) {
-            block.setType(Material.AIR);
+            final org.bukkit.Location blockLocation = block.getLocation();
+            if (blockLocation != null) {
+                DuelsPlugin.getSchedulerAdapter().runTask(blockLocation, () -> {
+                    block.setType(Material.AIR);
+                });
+            }
         }
 
         for(Map.Entry<Location, BlockData> map : match.brokenBlocks.entrySet()) {
-            map.getKey().getBlock().setBlockData(map.getValue());
+            final org.bukkit.Location blockLocation = map.getKey();
+            if (blockLocation != null) {
+                final BlockData blockData = map.getValue();
+                final Location locationCopy = blockLocation.clone();
+                DuelsPlugin.getSchedulerAdapter().runTask(blockLocation, () -> {
+                    locationCopy.getBlock().setBlockData(blockData);
+                });
+            }
         }
 
-        for (Entity entity : match.placedEntities){
-            entity.remove();
+        // FIXED: Use region-specific schedulers for entity removal to prevent Folia threading errors
+        // Also check if entities are still valid (may have been removed by other plugins like Gaia)
+        for (Entity entity : match.placedEntities) {
+            if (entity != null && entity.isValid() && !entity.isDead() && entity.getLocation() != null) {
+                DuelsPlugin.getSchedulerAdapter().runTask(entity.getLocation(), () -> {
+                    if (entity.isValid() && !entity.isDead()) {
+                        entity.remove();
+                    }
+                });
+            }
         }
 
         for (Block block : match.liquids) {
@@ -255,7 +276,13 @@ public class ArenaImpl extends BaseButton implements Arena {
 
                             if (type.contains("water") || type.contains("lava") || type.contains("cobblestone") || type.contains("obsidian")) {
                                 waterFound = true;
-                                findBlock.setType(Material.AIR);
+                                // Schedule block operation on region-specific scheduler for Folia compatibility
+                                final org.bukkit.Location findBlockLocation = findBlock.getLocation();
+                                if (findBlockLocation != null) {
+                                    DuelsPlugin.getSchedulerAdapter().runTask(findBlockLocation, () -> {
+                                        findBlock.setType(Material.AIR);
+                                    });
+                                }
                             }
                         }
                     }
@@ -269,8 +296,18 @@ public class ArenaImpl extends BaseButton implements Arena {
             }
         }
 
+        // FIXED: Use region-specific schedulers for item removal to prevent Folia threading errors
+        // Also check if items are still valid (may have been removed by other plugins like Gaia)
         if(config.isClearItemsAfterMatch()) {
-            match.droppedItems.forEach(Entity::remove);
+            for (Entity item : match.droppedItems) {
+                if (item != null && item.isValid() && !item.isDead() && item.getLocation() != null) {
+                    DuelsPlugin.getSchedulerAdapter().runTask(item.getLocation(), () -> {
+                        if (item.isValid() && !item.isDead()) {
+                            item.remove();
+                        }
+                    });
+                }
+            }
         }
 
         match = null;
@@ -288,7 +325,7 @@ public class ArenaImpl extends BaseButton implements Arena {
         countdown.startCountdown(0L, 20L);
     }
 
-    boolean isCountingComplete() {
+    public boolean isCountingComplete() {
         return countdown == null;
     }
 
