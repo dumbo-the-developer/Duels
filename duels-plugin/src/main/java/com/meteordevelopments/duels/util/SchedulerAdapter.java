@@ -181,7 +181,8 @@ public class SchedulerAdapter {
                         .invoke(regionScheduler, plugin, (Consumer<Object>) t -> task.run(), location, delay);
                 return new FoliaTaskWrapper(scheduledTask);
             } catch (Exception e) {
-                plugin.getLogger().severe("Failed to schedule Folia delayed region task: " + e.getMessage());
+                // Silently fail - we have fallback to global scheduler
+                // This is expected when chunk is not loaded, no need to log
                 return null;
             }
         } else {
@@ -242,6 +243,39 @@ public class SchedulerAdapter {
             }
         } else {
             return new BukkitTaskWrapper(Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, task, delay, period));
+        }
+    }
+
+    public TaskWrapper runTaskTimer(Runnable task, long delay, long period) {
+        if (isFolia) {
+            try {
+                // Convert ticks to milliseconds (1 tick = 50ms)
+                long delayMs = delay * 50;
+                long periodMs = period * 50;
+
+                // Create a cancellable wrapper for Folia tasks before scheduling
+                // The wrapper is used in the task lambda below to check cancellation state
+                FoliaTaskWrapper wrapper = new FoliaTaskWrapper(null);
+
+                // Schedule the task with cancellation check
+                // Note: The wrapper is captured in this lambda and won't be visible to other
+                // threads until this method returns, so there's no race condition risk
+                Object scheduledTask = runAtFixedRateMethod.invoke(asyncScheduler, plugin,
+                        (Consumer<Object>) t -> {
+                            if (!wrapper.isCancelled()) {
+                                task.run();
+                            }
+                        }, delayMs, periodMs, TimeUnit.MILLISECONDS);
+
+                // Set the scheduled task reference for potential external cancellation attempts
+                wrapper.setTask(scheduledTask);
+                return wrapper;
+            } catch (Exception e) {
+                plugin.getLogger().severe("Failed to schedule Folia repeating async task: " + e.getMessage());
+                return null;
+            }
+        } else {
+            return new BukkitTaskWrapper(Bukkit.getScheduler().runTaskTimer(plugin, task, delay, period));
         }
     }
 

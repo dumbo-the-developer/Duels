@@ -14,6 +14,11 @@ config-version: 13
 check-for-updates: true
 stay-up-to-date: true
 
+# If set to 'true', bStats metrics will be enabled and data will be sent to bStats.
+# If set to 'false', bStats will be completely disabled and no statistics will be collected or sent.
+# default: true
+bstats-enabled: true
+
 # NOTE: The following options will only activate if the message '[Duels] Hooked into <plugin name>!' is displayed on console.
 # If the plugin in the following list is enabled on your server but Duels fails to hook into them,
 # please contact the developer with the errors displayed on console.
@@ -90,24 +95,6 @@ supported-plugins:
     # If set to 'true', SimpleClans KDR will not be affected by duels.
     # default: true
     prevent-kdr-change: true
-  LeaderHeads:
-    wins:
-      menu:
-        # Menu title for the leaderboard 'duelsre-wins'.
-        # default: 'Duel Wins'
-        title: 'Duel Wins'
-        # Menu open command for the leaderboard 'duelsre-wins'.
-        # default: 'openwins'
-        open-command: 'openwins'
-    losses:
-      menu:
-        # Menu title for the leaderboard 'duelsre-losses'.
-        # default: 'Duel Losses'
-        title: 'Duel Losses'
-        # Menu open command for the leaderboard 'duelsre-losses'.
-        # default: 'openlosses'
-        open-command: 'openlosses'
-
 
 request:
   # If set to 'true', players will need to have a cleared inventory in order to send or accept a duel request.
@@ -234,6 +221,55 @@ duel:
         - 'give %winner% diamond 1{delay:10}'
         - 'give %loser% dirt 1{delay:50}'
         - 'say Congratulations %winner%!{delay:100}'
+
+    hardstop-commands:
+      # If set to 'true', the commands listed below will run when /duels hardstop is used.
+      # default: false
+      enabled: false
+
+      # Available placeholders:
+      # %arena% - Name of the arena
+      # %players% - Comma-separated list of players in the match
+      # %kit% - Name of the kit used in the match
+      # %bet_amount% - Amount of money bet in the match
+      # {delay:x} - Used to give x ms of delay before running any command
+      commands:
+        - 'example command'
+
+    player-execute-commands-on-arena-pre-start:
+      # If set to 'true', the commands listed below will be executed as players when they are teleported to the arena (before match starts).
+      # Commands are executed as the player, not as console.
+      # default: false
+      enabled: false
+
+      # If set to 'true', player-execute-commands-on-arena-pre-start will run only for matches started through the queue system.
+      # default: false
+      queue-matches-only: false
+
+      # Commands to execute as each player. Supports {delay:x} for delayed execution (x in milliseconds).
+      commands:
+        - 'tpacancel'
+
+    check-for-players-routine:
+      # If set to 'true', the check for players routine will be enabled.
+      # While this time players will be checked for if they are in the duel world.
+      # If they are not in the duel world, the action will be taken.
+      # default: true
+      enabled: true
+
+      # Delay in seconds before starting the check routine.
+      # default: 1
+      start-delay-seconds: 1
+
+      # Time in seconds to check for players.
+      # default: 30
+      check-time-seconds: 30
+
+      #Action to when players outside duel world.
+      # ACTIONS: kill-outside-player, hardstop-arena
+      # default: hardstop-arena 
+      action: hardstop-arena
+
 
   projectile-hit-message:
     # If set to 'true', a message from lang.yml will be sent to the shooter of the projectile.
@@ -793,3 +829,17 @@ no-opponent: 'No opponent'
 # MiniMessage supports modern formatting like <red>text</red>, <bold>text</bold>, gradients, etc.
 # default: false
 use-minimessages: false
+
+# Duel world settings
+# This is an edge-case safety feature that prevents players from logging into arena worlds
+# when they shouldn't be there. If a player logs out in an arena world (due to server crash,
+# plugin reload, or other edge cases) and logs back in, they will be automatically teleported
+# to spawn if they are not currently in a match. This prevents players from being stuck in
+# arena worlds after unexpected disconnections.
+duel-worlds-settings:
+  enabled: false
+  worlds:
+    - 'world1'
+    - 'world2'
+  force-gamemode-on-join: true
+  force-gamemode-on-join-mode: SURVIVAL

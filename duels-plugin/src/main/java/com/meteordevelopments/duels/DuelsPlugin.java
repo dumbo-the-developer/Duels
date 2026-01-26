@@ -466,7 +466,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
         long safeDelay = Math.max(1, delay);
 
-        return DuelsPlugin.schedulerAdapter.runTaskTimerAsynchronously(task, safeDelay, period);
+        return DuelsPlugin.schedulerAdapter.runTaskTimer(task, safeDelay, period);
     }
 
 
@@ -683,7 +683,10 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     }
 
     private void checkForUpdatesAndMetrics() {
-        new Metrics(this, BSTATS_ID);
+        // Only initialize bStats if enabled in config
+        if (configuration.isBstatsEnabled()) {
+            new Metrics(this, BSTATS_ID);
+        }
 
         if (!configuration.isCheckForUpdates()) {
             return;
