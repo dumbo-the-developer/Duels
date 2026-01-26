@@ -43,7 +43,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
+import com.tcoded.folialib.wrapper.task.WrappedTask;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -75,7 +75,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
     private WorldGuardHook worldGuard;
     private CombatLogXHook combatLogX;
     private VaultHook vault;
-    private ScheduledTask queueTask;
+    private WrappedTask queueTask;
 
     @Getter
     private MultiPageGui<DuelsPlugin> gui;

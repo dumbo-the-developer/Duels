@@ -7,6 +7,7 @@ import com.meteordevelopments.duels.listeners.*;
 import com.meteordevelopments.duels.party.PartyManagerImpl;
 import com.meteordevelopments.duels.util.*;
 import com.meteordevelopments.duels.validator.ValidatorManager;
+import com.tcoded.folialib.FoliaLib;
 import lombok.Getter;
 import com.meteordevelopments.duels.api.Duels;
 import com.meteordevelopments.duels.api.command.SubCommand;
@@ -50,10 +51,8 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import space.arim.morepaperlib.MorePaperLib;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
+import com.tcoded.folialib.wrapper.task.WrappedTask;
 import java.io.IOException;
-import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,7 +69,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private static DuelsPlugin instance;
     @Getter
-    private static MorePaperLib morePaperLib;
+    private static FoliaLib foliaLib;
 
     private final List<Loadable> loadables = new ArrayList<>();
     private final Map<String, AbstractCommand<DuelsPlugin>> commands = new HashMap<>();
@@ -126,7 +125,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     public void onEnable() {
 
         instance = this;
-        morePaperLib = new MorePaperLib(this);
+        foliaLib = new FoliaLib(this);
         Log.addSource(this);
         JsonUtil.registerDeserializer(ItemData.class, ItemDataDeserializer.class);
 
@@ -452,49 +451,45 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     }
 
     @Override
-    public ScheduledTask doSync(@NotNull final Runnable task) {
+    public WrappedTask doSync(@NotNull final Runnable task) {
         Objects.requireNonNull(task, "task");
-        return DuelsPlugin.morePaperLib.scheduling().globalRegionalScheduler().run(task);
+        return DuelsPlugin.foliaLib.getScheduler().runLater(task, 1L);
     }
 
     @Override
-    public ScheduledTask doSyncAfter(@NotNull final Runnable task, final long delay) {
+    public WrappedTask doSyncAfter(@NotNull final Runnable task, final long delay) {
         Objects.requireNonNull(task, "task");
-        return DuelsPlugin.morePaperLib.scheduling().globalRegionalScheduler().runDelayed(task, delay);
+        return DuelsPlugin.foliaLib.getScheduler().runLater(task, delay);
     }
 
     @Override
-    public ScheduledTask doSyncRepeat(@NotNull final Runnable task, final long delay, final long period) {
+    public WrappedTask doSyncRepeat(@NotNull final Runnable task, final long delay, final long period) {
         Objects.requireNonNull(task, "task");
-
         long safeDelay = Math.max(1, delay);
-
-        return DuelsPlugin.morePaperLib.scheduling()
-                .globalRegionalScheduler()
-                .runAtFixedRate(task, safeDelay, period);
+        return DuelsPlugin.foliaLib.getScheduler().runTimer(task, safeDelay, period);
     }
 
 
     @Override
-    public ScheduledTask doAsync(@NotNull final Runnable task) {
+    public WrappedTask doAsync(@NotNull final Runnable task) {
         Objects.requireNonNull(task, "task");
-        return DuelsPlugin.morePaperLib.scheduling().asyncScheduler().run(task);
+        return DuelsPlugin.foliaLib.getScheduler().runLaterAsync(task, 1L);
     }
 
     @Override
-    public ScheduledTask doAsyncAfter(@NotNull final Runnable task, final long delay) {
+    public WrappedTask doAsyncAfter(@NotNull final Runnable task, final long delay) {
         Objects.requireNonNull(task, "task");
-        return DuelsPlugin.morePaperLib.scheduling().asyncScheduler().runDelayed(task, Duration.ofMillis(delay * 50));
+        return DuelsPlugin.foliaLib.getScheduler().runLaterAsync(task, delay);
     }
 
     @Override
-    public ScheduledTask doAsyncRepeat(@NotNull final Runnable task, final long delay, final long period) {
+    public WrappedTask doAsyncRepeat(@NotNull final Runnable task, final long delay, final long period) {
         Objects.requireNonNull(task, "task");
-        return DuelsPlugin.morePaperLib.scheduling().asyncScheduler().runAtFixedRate(task, Duration.ofMillis(delay * 50), Duration.ofMillis(period * 50));
+        return DuelsPlugin.foliaLib.getScheduler().runTimerAsync(task, delay, period);
     }
 
     @Override
-    public void cancelTask(@NotNull final ScheduledTask task) {
+    public void cancelTask(@NotNull final WrappedTask task) {
         Objects.requireNonNull(task, "task");
         task.cancel();
     }

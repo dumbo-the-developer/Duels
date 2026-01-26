@@ -325,7 +325,7 @@ public class PlayerInfoManager implements Loadable {
                 }
 
                 remove(player);
-                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> info.restore(player), null);
+                DuelsPlugin.getFoliaLib().getScheduler().runAtEntity(player, task -> info.restore(player));
             }, 1L);
         }
     }

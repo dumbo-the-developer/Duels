@@ -27,6 +27,7 @@ import com.meteordevelopments.duels.util.compat.CompatUtil;
 import com.meteordevelopments.duels.util.compat.Titles;
 import com.meteordevelopments.duels.util.inventory.InventoryUtil;
 import com.meteordevelopments.duels.util.validator.ValidatorUtil;
+import com.tcoded.folialib.wrapper.task.WrappedTask;
 import org.bukkit.*;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
@@ -43,7 +44,6 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -71,7 +71,7 @@ public class DuelManager implements Loadable {
     private McMMOHook mcMMO;
     private MyPetHook myPet;
 
-    private ScheduledTask durationCheckTask;
+    private WrappedTask durationCheckTask;
 
     public DuelManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -87,7 +87,7 @@ public class DuelManager implements Loadable {
     }
 
     public void handleMatchEnd(DuelMatch match, ArenaImpl arena, Player loser, Location deadLocation, Player winner) {
-        DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(arena.first().getLocation()).runDelayed(() -> {
+        DuelsPlugin.getFoliaLib().getScheduler().runAtLocationLater(arena.first().getLocation(), () -> {
             if (arena.size() == 0) {
                 match.getAllPlayers().forEach(matchPlayer -> {
                     handleTie(matchPlayer, arena, match, false);
@@ -99,7 +99,7 @@ public class DuelManager implements Loadable {
             }
 
             if (config.isSpawnFirework()) {
-                DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(deadLocation).run(() -> {
+                DuelsPlugin.getFoliaLib().getScheduler().runAtLocation(deadLocation, task -> {
                     final Firework firework = (Firework) deadLocation.getWorld().spawnEntity(deadLocation, EntityType.FIREWORK);
                     final FireworkMeta meta = firework.getFireworkMeta();
                     String colourName = config.getFireworkColour();
@@ -116,7 +116,7 @@ public class DuelManager implements Loadable {
             winners.forEach(w -> inventoryManager.create(w, false));
             userDataManager.handleMatchEnd(match, winners);
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
-            DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(loser).runDelayed(() -> {
+            DuelsPlugin.getFoliaLib().getScheduler().runAtEntityLater(loser, () -> {
                 // Handle the loser (remove from arena and restore state)
                 // This is especially important for ROUNDS3 where the loser never actually dies
                 if (match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3)) {
@@ -148,9 +148,9 @@ public class DuelManager implements Loadable {
     }
 
     public void handleTeamMatchEnd(TeamDuelMatch match, ArenaImpl arena, Location deadLocation, TeamDuelMatch.Team winningTeam) {
-        DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(deadLocation).runDelayed(() -> {
+        DuelsPlugin.getFoliaLib().getScheduler().runAtLocationLater(deadLocation, task -> {
             if (config.isSpawnFirework()) {
-                DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(deadLocation).run(() -> {
+                DuelsPlugin.getFoliaLib().getScheduler().runAtLocation(deadLocation, task2 -> {
                     final Firework firework = (Firework) deadLocation.getWorld().spawnEntity(deadLocation, EntityType.FIREWORK);
                     final FireworkMeta meta = firework.getFireworkMeta();
                     String colourName = config.getFireworkColour();
@@ -169,11 +169,11 @@ public class DuelManager implements Loadable {
             // Restore gamemode for all players immediately using individual schedulers
             final Set<Player> allPlayers = match.getAllPlayers();
             for (Player player : allPlayers) {
-                DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+                DuelsPlugin.getFoliaLib().getScheduler().runAtEntity(player, task2 -> {
                     player.setGameMode(GameMode.SURVIVAL);
                     player.setAllowFlight(false);
                     player.setFlying(false);
-                }, null);
+                });
             }
             
             // Create inventory snapshots for display
@@ -182,7 +182,7 @@ public class DuelManager implements Loadable {
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
             
             // Schedule teleportation and restoration for all players after delay
-            DuelsPlugin.getMorePaperLib().scheduling().regionSpecificScheduler(deadLocation).runDelayed(() -> {
+            DuelsPlugin.getFoliaLib().getScheduler().runAtLocationLater(deadLocation, task2 -> {
                 // Handle losers (including dead spectators)
                 for (Player loser : losers) {
                     if (mcMMO != null) {
