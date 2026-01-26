@@ -83,7 +83,6 @@ shadowJar {
     final String group = project.group.toString() + "." + parent.name.toLowerCase() + ".shaded."
     relocate 'com.fasterxml.jackson', 'com.meteordevelopments.duels.shaded.jackson'
     relocate 'io.papermc.lib', group + 'paperlib'
-    relocate("com.tcoded.folialib", group + "folialib")
 }
 
 // To build Duels plugin jar, run './gradlew clean build'.
