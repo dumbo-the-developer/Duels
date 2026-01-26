@@ -4,13 +4,13 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath("com.gradleup.shadow:shadow-gradle-plugin:9.3.0")
+        classpath("com.gradleup.shadow:shadow-gradle-plugin:9.3.1")
     }
 }
 
 allprojects {
     group = 'com.meteordevelopments'
-    version = '5.6'
+    version = '5.8'
 }
 
 subprojects {
@@ -65,6 +65,16 @@ subprojects {
         maven {
             name = 'essentialsx-repo'
             url = 'https://repo.essentialsx.net/releases/'
+        }
+
+        maven {
+            name = 'factions-repo'
+            url = 'https://dependency.download/releases/'
+        }
+
+        maven {
+            name = "tcoded-releases"
+            url = "https://repo.tcoded.com/releases"
         }
 
         maven {

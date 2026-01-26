@@ -5,13 +5,13 @@ import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.config.Lang;
 import com.meteordevelopments.duels.util.EventUtil;
 import com.meteordevelopments.duels.util.Loadable;
+import com.tcoded.folialib.wrapper.task.WrappedTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
 
 import java.util.*;
 
@@ -26,7 +26,7 @@ public class PartyManagerImpl implements Loadable, Listener {
     private final Map<UUID, Party> partyMap = new HashMap<>();
     private final List<Party> parties = new ArrayList<>();
 
-    private ScheduledTask autoDisbandTask;
+    private WrappedTask autoDisbandTask;
 
     public PartyManagerImpl(final DuelsPlugin plugin) {
         this.plugin = plugin;

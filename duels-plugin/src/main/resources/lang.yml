@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 13
+config-version: 15
 
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.

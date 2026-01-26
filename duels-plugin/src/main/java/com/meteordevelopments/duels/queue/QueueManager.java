@@ -3,6 +3,7 @@ package com.meteordevelopments.duels.queue;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Charsets;
 import com.meteordevelopments.duels.hook.hooks.*;
+import com.tcoded.folialib.wrapper.task.WrappedTask;
 import lombok.Getter;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.api.event.queue.QueueCreateEvent;
@@ -43,7 +44,6 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -75,7 +75,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
     private WorldGuardHook worldGuard;
     private CombatLogXHook combatLogX;
     private VaultHook vault;
-    private ScheduledTask queueTask;
+    private WrappedTask queueTask;
 
     @Getter
     private MultiPageGui<DuelsPlugin> gui;

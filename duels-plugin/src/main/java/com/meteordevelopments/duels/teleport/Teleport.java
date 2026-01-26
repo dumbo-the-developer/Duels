@@ -65,7 +65,7 @@ public final class Teleport implements Loadable, Listener {
 
         MetadataUtil.put(plugin, player, METADATA_KEY, location.clone());
 
-        boolean isFolia = DuelsPlugin.getMorePaperLib().scheduling().isUsingFolia();
+        boolean isFolia = DuelsPlugin.getFoliaLib().isFolia();
 
         if (isFolia) {
             player.teleportAsync(location).thenAccept(success -> {

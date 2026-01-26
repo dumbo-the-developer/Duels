@@ -7,10 +7,11 @@ import com.meteordevelopments.duels.api.queue.DQueueManager;
 import com.meteordevelopments.duels.api.queue.sign.QueueSignManager;
 import com.meteordevelopments.duels.api.spectate.SpectateManager;
 import com.meteordevelopments.duels.api.user.UserManager;
+import com.tcoded.folialib.wrapper.task.WrappedTask;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
+import java.lang.Object;
 
 
 public interface Duels extends Plugin {
@@ -104,7 +105,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    ScheduledTask doSync(@NotNull final Runnable task);
+    WrappedTask doSync(@NotNull final Runnable task);
 
 
     /**
@@ -115,7 +116,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    ScheduledTask doSyncAfter(@NotNull final Runnable task, long delay);
+    WrappedTask doSyncAfter(@NotNull final Runnable task, long delay);
 
 
     /**
@@ -127,7 +128,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    ScheduledTask doSyncRepeat(@NotNull final Runnable task, long delay, long interval);
+    WrappedTask doSyncRepeat(@NotNull final Runnable task, long delay, long interval);
 
 
     /**
@@ -137,7 +138,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    ScheduledTask doAsync(@NotNull final Runnable task);
+    WrappedTask doAsync(@NotNull final Runnable task);
 
 
     /**
@@ -148,7 +149,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    ScheduledTask doAsyncAfter(@NotNull final Runnable task, long delay);
+    WrappedTask doAsyncAfter(@NotNull final Runnable task, long delay);
 
 
     /**
@@ -160,7 +161,7 @@ public interface Duels extends Plugin {
      * @return BukkitTask executed.
      * @since 3.1.0
      */
-    ScheduledTask doAsyncRepeat(@NotNull final Runnable task, long delay, long interval);
+    WrappedTask doAsyncRepeat(@NotNull final Runnable task, long delay, long interval);
 
 
     /**
@@ -169,7 +170,7 @@ public interface Duels extends Plugin {
      * @param task Task to cancel if not already cancelled.
      * @since 3.2.0
      */
-    void cancelTask(@NotNull final ScheduledTask task);
+    void cancelTask(@NotNull final WrappedTask task);
 
     /**
      * Logs a message with {@link java.util.logging.Level#INFO}.

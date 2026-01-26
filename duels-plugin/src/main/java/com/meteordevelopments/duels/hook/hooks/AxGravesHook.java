@@ -41,7 +41,22 @@ public class AxGravesHook extends PluginHook<DuelsPlugin> {
                 return;
             }
 
-            event.getGrave().remove();
+            // Schedule grave removal on player's entity scheduler for Folia compatibility
+            // Grave is not an Entity, so we schedule on the player's scheduler
+            final var grave = event.getGrave();
+            if (grave != null) {
+                final org.bukkit.Location playerLocation = player.getLocation();
+                if (playerLocation != null) {
+                    DuelsPlugin.getFoliaLib().getScheduler().runAtLocation(playerLocation, task -> {
+                        grave.remove();
+                    });
+                } else {
+                    // Fallback: if location is null, try global scheduler
+                    DuelsPlugin.getFoliaLib().getScheduler().runNextTick(task -> {
+                        grave.remove();
+                    });
+                }
+            }
             event.setCancelled(true);
         }
     }

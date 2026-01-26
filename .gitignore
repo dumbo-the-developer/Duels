@@ -1,6 +1,6 @@
 # User-specific stuff
 .idea/
-
+/DuelsDashboardExtension/
 *.iml
 *.ipr
 *.iws

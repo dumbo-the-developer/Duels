@@ -159,7 +159,7 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
         spectators.put(player.getUniqueId(), spectator);
         arenas.put(arena, spectator);
 
-        DuelsPlugin.getMorePaperLib().scheduling().entitySpecificScheduler(player).run(() -> {
+        DuelsPlugin.getFoliaLib().getScheduler().runAtEntity(player, task -> {
             if (!config.isSpecUseSpectatorGamemode()) {
                 player.setGameMode(GameMode.ADVENTURE);
                 player.setAllowFlight(true);
@@ -178,7 +178,7 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
             if (!player.hasPermission(Permissions.SPEC_ANON)) {
                 arena.getMatch().getAllPlayers().forEach(matchPlayer -> lang.sendMessage(matchPlayer, "SPECTATE.arena-broadcast", "name", player.getName()));
             }
-        }, null);
+        });
         return Result.SUCCESS;
     }
 

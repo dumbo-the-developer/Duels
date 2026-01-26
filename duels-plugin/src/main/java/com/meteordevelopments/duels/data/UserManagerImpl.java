@@ -6,6 +6,7 @@ import com.meteordevelopments.duels.match.DuelMatch;
 import com.meteordevelopments.duels.match.party.PartyDuelMatch;
 import com.meteordevelopments.duels.party.Party;
 import com.meteordevelopments.duels.util.*;
+import com.tcoded.folialib.wrapper.task.WrappedTask;
 import lombok.Getter;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.Permissions;
@@ -24,7 +25,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import space.arim.morepaperlib.scheduling.ScheduledTask;
 
 import java.io.*;
 import java.util.*;
@@ -54,7 +54,7 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
     private volatile TopEntry losses;
     @Getter
     private volatile TopEntry noKit;
-    private ScheduledTask topTask;
+    private WrappedTask topTask;
 
     public UserManagerImpl(final DuelsPlugin plugin) {
         this.plugin = plugin;
