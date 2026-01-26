@@ -1,0 +1,94 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath("com.gradleup.shadow:shadow-gradle-plugin:9.3.0")
+    }
+}
+
+allprojects {
+    group = 'com.meteordevelopments'
+    version = '5.6'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'com.gradleup.shadow'
+    apply plugin: 'maven-publish'
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven {
+            name = 'spigot-repo'
+            url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+        }
+
+        maven {
+            name = "papermc-repo"
+            url = "https://repo.papermc.io/repository/maven-public/"
+        }
+
+        maven {
+            name = 'bungeecord-repo'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/groups/public/"
+        }
+
+        maven {
+            name = 'mojang-repo'
+            url = 'https://libraries.minecraft.net/'
+        }
+
+        maven {
+            name = 'clip-repo'
+            url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+        }
+
+        maven {
+            name = 'enginehub-repo'
+            url = 'https://maven.enginehub.org/repo/'
+        }
+
+        maven {
+            name = 'codemc-repo'
+            url = 'https://repo.codemc.io/repository/maven-public/'
+        }
+
+        maven {
+            name = 'essentialsx-repo'
+            url = 'https://repo.essentialsx.net/releases/'
+        }
+
+        maven {
+            name = 'arim-mvn-lgpl3'
+            url = 'https://mvn-repo.arim.space/lesser-gpl3/'
+        }
+
+        maven {
+            name = "combatlogx"
+            url = "https://nexus.sirblobman.xyz/public/"
+        }
+
+        maven {
+            name = "jitpack"
+            url = "https://jitpack.io"
+        }
+
+        maven {
+            name = 'axPlugins'
+            url = 'https://repo.artillex-studios.com/releases/'
+        }
+
+        flatDir {
+            dirs "$rootDir/libs/"
+        }
+    }
+}

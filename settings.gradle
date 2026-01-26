@@ -1,0 +1,6 @@
+rootProject.name = 'Duels-Optimised'
+
+include 'duels-worldguard'
+include 'duels-worldguard-v7'
+include 'duels-api'
+include 'duels-plugin'

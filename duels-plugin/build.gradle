@@ -1,0 +1,103 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+clean.doFirst {
+    delete "$rootDir/out/"
+}
+
+processResources {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+    from(sourceSets.main.resources.srcDirs) {
+        include '**/*.yml'
+        filter(ReplaceTokens, tokens: [VERSION: project.version])
+    }
+}
+
+dependencies {
+    compileOnly 'org.jetbrains:annotations-java5:24.1.0'
+    compileOnly 'org.projectlombok:lombok:1.18.42'
+    annotationProcessor 'org.projectlombok:lombok:1.18.42'
+    implementation 'io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT'
+    implementation 'commons-lang:commons-lang:2.6'
+    implementation 'com.mojang:authlib:1.5.25'
+    implementation 'me.clip:placeholderapi:2.11.7'
+    implementation 'com.github.sirblobman.api:core:2.9-SNAPSHOT'
+    implementation 'com.github.timderspieler:DeluxeCombat-API:1.5.1'
+    implementation 'com.github.sirblobman.combatlogx:api:11.5-SNAPSHOT'
+    implementation 'com.artillexstudios:AxGraves:1.7.0'
+    implementation 'com.github.No-Not-Jaden:NotBounties:1.22.17R5'
+    implementation 'me.chancesd.pvpmanager:pvpmanager:4.0.8'
+    implementation('net.essentialsx:EssentialsX:2.21.2') {
+        transitive = false
+    }
+    implementation(name: 'MVdWPlaceholderAPI-3.1.1') {
+        transitive = false
+    }
+    implementation name: 'Vault-1.6.7'
+    implementation name: 'CombatTagPlus'
+    implementation name: 'Factions-1.6.9.5-U0.1.14'
+    implementation name: 'MassiveCore'
+    implementation name: 'Factions'
+    implementation name: 'MyPet-2.3.4'
+    implementation name: 'BountyHunters-2.2.6'
+    implementation name: 'SimpleClans-2.14.4.1'
+    implementation name: 'LeaderHeadsAPI'
+
+    implementation project(':duels-api')
+    implementation project(':duels-worldguard')
+    implementation project(':duels-worldguard-v7')
+    implementation 'io.papermc:paperlib:1.0.8'
+    implementation 'space.arim.morepaperlib:morepaperlib:0.4.4'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.20.1'
+    implementation 'org.json:json:20251224'
+    implementation 'net.kyori:adventure-text-minimessage:4.26.1'
+    implementation 'net.kyori:adventure-text-serializer-legacy:4.26.1'
+    implementation 'net.kyori:adventure-api:4.26.1'
+    implementation 'net.kyori:examination-api:1.3.0'
+    implementation 'net.kyori:adventure-key:4.26.1'
+    implementation 'net.kyori:adventure-nbt:4.26.1'
+}
+
+shadowJar {
+    getDestinationDirectory().set(file("$rootDir/out/"))
+
+    final String archiveName = parent.name + '-' + project.version + '.jar'
+    getArchiveFileName().set(archiveName)
+
+    dependencies {
+        include(project(':duels-api'))
+        include(project(':duels-worldguard'))
+        include(project(':duels-worldguard-v7'))
+        include(dependency('com.fasterxml.jackson.core:.*'))
+        include(dependency('io.papermc:.*'))
+        include(dependency('org.json:.*'))
+        include(dependency('space.arim.morepaperlib:.*'))
+        include(dependency('net.kyori:adventure-text-minimessage:.*'))
+        include(dependency('net.kyori:adventure-text-serializer-legacy:.*'))
+        include(dependency('net.kyori:adventure-api:.*'))
+        include(dependency('net.kyori:examination-api:.*'))
+        include(dependency('net.kyori:adventure-key:.*'))
+        include(dependency('net.kyori:adventure-nbt:.*'))
+    }
+
+    final String group = project.group.toString() + "." + parent.name.toLowerCase() + ".shaded."
+    relocate 'com.fasterxml.jackson', 'com.meteordevelopments.duels.shaded.jackson'
+    relocate 'io.papermc.lib', group + 'paperlib'
+    relocate 'space.arim.morepaperlib', group + 'morepaperlib'
+}
+
+// To build Duels plugin jar, run './gradlew clean build'.
+build {
+    dependsOn(shadowJar)
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = project.group.toString()
+            artifactId = project.name.toLowerCase()
+            version = project.version
+            from components.java
+        }
+    }
+}
