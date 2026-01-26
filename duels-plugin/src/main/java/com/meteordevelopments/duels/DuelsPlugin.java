@@ -676,6 +676,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         new EnderpearlListener(this);
         new KitOptionsListener(this);
         new LingerPotionListener(this);
+        new com.meteordevelopments.duels.listeners.DuelWorldsListener(this);
         new com.meteordevelopments.duels.kit.edit.KitEditManager(this);
         registerListener(new com.meteordevelopments.duels.kit.edit.KitEditListener(this));
 
