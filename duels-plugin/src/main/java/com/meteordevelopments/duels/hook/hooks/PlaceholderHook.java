@@ -4,6 +4,7 @@ import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.api.arena.Arena;
 import com.meteordevelopments.duels.api.kit.Kit;
 import com.meteordevelopments.duels.api.match.Match;
+import com.meteordevelopments.duels.api.queue.DQueue;
 import com.meteordevelopments.duels.api.spectate.Spectator;
 import com.meteordevelopments.duels.api.user.User;
 import com.meteordevelopments.duels.util.StringUtil;
@@ -14,6 +15,7 @@ import org.apache.commons.lang.time.DurationFormatUtils;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 public class PlaceholderHook extends PluginHook<DuelsPlugin> {
 
@@ -26,17 +28,17 @@ public class PlaceholderHook extends PluginHook<DuelsPlugin> {
 
     public class Placeholders extends PlaceholderExpansion {
         @Override
-        public String getIdentifier() {
+        public @NonNull String getIdentifier() {
             return "duels";
         }
 
         @Override
-        public String getAuthor() {
+        public @NonNull String getAuthor() {
             return "DUMBO";
         }
 
         @Override
-        public String getVersion() {
+        public @NonNull String getVersion() {
             return "1.0";
         }
 
@@ -116,84 +118,124 @@ public class PlaceholderHook extends PluginHook<DuelsPlugin> {
                 return kit != null ? String.valueOf(user.getRating(kit)) : StringUtil.color(plugin.getConfiguration().getNoKit());
             }
 
-			if (identifier.startsWith("getplayersinqueue_")){
+            if (identifier.startsWith("isinqueue_")){
                 user = plugin.getUserManager().get(player);
                 if (user == null) {
                     return StringUtil.color(plugin.getConfiguration().getUserNotFound());
                 }
 
-				identifier = identifier.replace("getplayersinqueue_", "");
+                identifier = identifier.replace("isinqueue_", "");
+                DQueue queue = plugin.getQueueManager().getByName(identifier);
 
-				// Try to find queue by name first
-				com.meteordevelopments.duels.api.queue.DQueue queue = plugin.getQueueManager().getByName(identifier);
-				
-				if (queue == null) {
-					// Fallback to old kit-based system
-					int bet = 0;
-					String kitName = identifier;
-					int sep = identifier.lastIndexOf('_');
-					if (sep >= 0 && sep + 1 < identifier.length()) {
-						String betStr = identifier.substring(sep + 1);
-						try {
-							bet = Integer.parseInt(betStr);
-							kitName = identifier.substring(0, sep);
-						} catch (NumberFormatException ignored) {
-							// Keep default bet = 0 and full identifier as kit name
-						}
-					}
+                if (queue == null) {
+                    // Fallback to old kit-based system
+                    int bet = 0;
+                    String kitName = identifier;
+                    int sep = identifier.lastIndexOf('_');
+                    if (sep >= 0 && sep + 1 < identifier.length()) {
+                        String betStr = identifier.substring(sep + 1);
+                        try {
+                            bet = Integer.parseInt(betStr);
+                            kitName = identifier.substring(0, sep);
+                        } catch (NumberFormatException ignored) {
+                            // Keep default bet = 0 and full identifier as kit name
+                        }
+                    }
 
-					final Kit kit = plugin.getKitManager().get(kitName);
-					if (kit == null) {
-						return StringUtil.color(plugin.getConfiguration().getNoKit());
-					}
-					
-					queue = plugin.getQueueManager().get(kit, bet);
-					if (queue == null) {
-						return "0";
-					}
-				}
+                    final Kit kit = plugin.getKitManager().get(kitName);
+                    if (kit == null) {
+                        return StringUtil.color(plugin.getConfiguration().getNoKit());
+                    }
 
-				int queuedPlayers = queue.getQueuedPlayers().size();
+                    queue = plugin.getQueueManager().get(kit, bet);
+                    if (queue == null) {
+                        return "0";
+                    }
+                }
+
+                if (queue.isInQueue(player)){
+                    return "Yes";
+                }else return "No";
+            }
+
+            if (identifier.startsWith("getplayersinqueue_")){
+                user = plugin.getUserManager().get(player);
+                if (user == null) {
+                    return StringUtil.color(plugin.getConfiguration().getUserNotFound());
+                }
+
+                identifier = identifier.replace("getplayersinqueue_", "");
+
+                // Try to find queue by name first
+                com.meteordevelopments.duels.api.queue.DQueue queue = plugin.getQueueManager().getByName(identifier);
+
+                if (queue == null) {
+                    // Fallback to old kit-based system
+                    int bet = 0;
+                    String kitName = identifier;
+                    int sep = identifier.lastIndexOf('_');
+                    if (sep >= 0 && sep + 1 < identifier.length()) {
+                        String betStr = identifier.substring(sep + 1);
+                        try {
+                            bet = Integer.parseInt(betStr);
+                            kitName = identifier.substring(0, sep);
+                        } catch (NumberFormatException ignored) {
+                            // Keep default bet = 0 and full identifier as kit name
+                        }
+                    }
+
+                    final Kit kit = plugin.getKitManager().get(kitName);
+                    if (kit == null) {
+                        return StringUtil.color(plugin.getConfiguration().getNoKit());
+                    }
+
+                    queue = plugin.getQueueManager().get(kit, bet);
+                    if (queue == null) {
+                        return "0";
+                    }
+                }
+
+                int queuedPlayers = queue.getQueuedPlayers().size();
                 return queuedPlayers > 0 ? String.valueOf(queuedPlayers) : "0";
             }
 
-			if (identifier.startsWith("getplayersplayinginqueue_")){
+            if (identifier.startsWith("getplayersplayinginqueue_")){
                 user = plugin.getUserManager().get(player);
                 if (user == null) {
                     return StringUtil.color(plugin.getConfiguration().getUserNotFound());
                 }
-				identifier = identifier.replace("getplayersplayinginqueue_", "");
-				
-				// Try to find queue by name first
-				com.meteordevelopments.duels.api.queue.DQueue queue = plugin.getQueueManager().getByName(identifier);
-				
-				if (queue == null) {
-					// Fallback to old kit-based system
-					int bet = 0;
-					String kitName = identifier;
-					int sep = identifier.lastIndexOf('_');
-					if (sep >= 0 && sep + 1 < identifier.length()) {
-						String betStr = identifier.substring(sep + 1);
-						try {
-							bet = Integer.parseInt(betStr);
-							kitName = identifier.substring(0, sep);
-						} catch (NumberFormatException ignored) {
-							// Keep default bet = 0 and full identifier as kit name
-						}
-					}
-					
-					final Kit kit = plugin.getKitManager().get(kitName);
-					if (kit == null) {
-						return StringUtil.color(plugin.getConfiguration().getNoKit());
-					}
-					
-					queue = plugin.getQueueManager().get(kit, bet);
-					if (queue == null) {
-						return "0";
-					}
-				}
-				
-				long playersInMatch = queue.getPlayersInMatch();
+                identifier = identifier.replace("getplayersplayinginqueue_", "");
+
+                // Try to find queue by name first
+                com.meteordevelopments.duels.api.queue.DQueue queue = plugin.getQueueManager().getByName(identifier);
+
+                if (queue == null) {
+                    // Fallback to old kit-based system
+                    int bet = 0;
+                    String kitName = identifier;
+                    int sep = identifier.lastIndexOf('_');
+                    if (sep >= 0 && sep + 1 < identifier.length()) {
+                        String betStr = identifier.substring(sep + 1);
+                        try {
+                            bet = Integer.parseInt(betStr);
+                            kitName = identifier.substring(0, sep);
+                        } catch (NumberFormatException ignored) {
+                            // Keep default bet = 0 and full identifier as kit name
+                        }
+                    }
+
+                    final Kit kit = plugin.getKitManager().get(kitName);
+                    if (kit == null) {
+                        return StringUtil.color(plugin.getConfiguration().getNoKit());
+                    }
+
+                    queue = plugin.getQueueManager().get(kit, bet);
+                    if (queue == null) {
+                        return "0";
+                    }
+                }
+
+                long playersInMatch = queue.getPlayersInMatch();
                 return Long.toString(playersInMatch);
             }
 
