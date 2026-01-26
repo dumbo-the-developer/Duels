@@ -270,6 +270,13 @@ duel:
       # default: hardstop-arena 
       action: hardstop-arena
 
+  default-combat-actions:
+    # If set to 'true', players will be killed when they quit the duel.
+    # This setting will override the action "on-quit-clear-inventory" 
+    on-quit-kill-player: false
+    # If set to 'true', players will have their inventory cleared when they quit the duel.
+    on-quit-clear-inventory: false
+
 
   projectile-hit-message:
     # If set to 'true', a message from lang.yml will be sent to the shooter of the projectile.

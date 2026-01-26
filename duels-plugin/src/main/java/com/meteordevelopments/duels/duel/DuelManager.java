@@ -158,28 +158,47 @@ public class DuelManager implements Loadable {
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
             
             // FIXED: Use global scheduler - completely entity-independent
-            // This works even if both players quit, loser quits, or winner quits
-            // Global scheduler is always available and doesn't depend on entities or locations
+            // CRITICAL FIX: Always preserve PlayerInfo for inventory restoration, even if players are offline
+            // PlayerInfo will be preserved for offline players and restored when they rejoin
             DuelsPlugin.getSchedulerAdapter().runTaskLater(() -> {
                 // Check if match still exists and is not finished
                 if (arena.getMatch() == null || arena.getMatch() != match || match.isFinished()) {
                     return; // Match already ended or cleared
                 }
                 
-                // Handle loser if still online
+                // CRITICAL FIX: Handle loser - restore if online, preserve PlayerInfo if offline
+                final PlayerInfo loserInfo = playerManager.get(loser);
                 if (loser.isOnline()) {
                     // Handle the loser (remove from arena and restore state)
                     // This is especially important for ROUNDS3 where the loser never actually dies
                     if (match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3)) {
                         handleLoss(loser, arena, match);
                     }
+                } else if (loserInfo != null) {
+                    // Loser is offline - preserve PlayerInfo for restoration on rejoin
+                    // Don't remove PlayerInfo - it will be restored when player rejoins
+                    // Add bet items to extra items for restoration
+                    final List<ItemStack> items = match.getItems(loser);
+                    if (items != null && !items.isEmpty()) {
+                        loserInfo.getExtra().addAll(items);
+                    }
                 }
-                // If loser is offline, skip loser handling (already handled or not needed)
                 
-                // Handle winners (check online status for each)
+                // CRITICAL FIX: Handle winners - restore if online, preserve PlayerInfo if offline
                 for (Player alivePlayer : winners) {
                     if (alivePlayer.isOnline()) {
                         handleWin(alivePlayer, loser, arena, match);
+                    } else {
+                        // Winner is offline - preserve PlayerInfo for restoration on rejoin
+                        final PlayerInfo winnerInfo = playerManager.get(alivePlayer);
+                        if (winnerInfo != null) {
+                            // Add reward items to extra items for restoration
+                            final List<ItemStack> items = match.getItems();
+                            if (items != null && !items.isEmpty()) {
+                                winnerInfo.getExtra().addAll(items);
+                            }
+                            // Don't remove PlayerInfo - it will be restored when player rejoins
+                        }
                     }
                 }
 
@@ -1513,11 +1532,13 @@ public class DuelManager implements Loadable {
                 // Mark quitting player as dead in match (PlayerDeathEvent will handle the rest)
                 match.markAsDead(quittingPlayer);
                 
-                // For own-inventory duels with drop-inventory-items: false, preserve PlayerInfo for restoration on rejoin
-                // Otherwise, remove PlayerInfo completely - don't restore anything, let server handle respawn
-                if (!preserveInventory) {
-                    playerManager.remove(quittingPlayer);
-                }
+                // CRITICAL FIX: NEVER remove PlayerInfo when player quits during match
+                // PlayerInfo must be preserved so inventory can be restored when:
+                // 1. Player rejoins (handled by PlayerInfoManager)
+                // 2. Match ends (handled by handleMatchEnd)
+                // 3. Server shuts down (handled by handleUnload)
+                // PlayerInfo will be removed only after successful restoration in handleWin/handleLoss/handleTie
+                // DO NOT remove PlayerInfo here - this was causing inventory loss!
                 
                 // DON'T call handleMatchEnd here - let PlayerDeathEvent handle it automatically
                 // This prevents duplicate execution of pre-end commands and match ending
@@ -1602,8 +1623,17 @@ public class DuelManager implements Loadable {
                 info.updateInventory(player);
             }
             
+            // CRITICAL FIX: Always preserve PlayerInfo when player quits during match
+            // This ensures inventory can be restored when player rejoins or match ends
+            // Only update inventory if we're preserving it, otherwise PlayerInfo already has the original inventory saved
+            if (info != null && !preserveInventory) {
+                // For non-own-inventory matches, PlayerInfo already has the original inventory saved
+                // Just ensure we don't lose it - don't remove PlayerInfo here
+            }
+            
             // CRITICAL: Kill the player IMMEDIATELY - PlayerQuitEvent runs on correct thread, player still online
             // Event handlers on Folia run on the correct thread for the entity, so we can call directly
+            // This will trigger PlayerDeathEvent which will handle match ending automatically
             try {
                 player.setHealth(0);
                 player.getInventory().clear();
@@ -1624,11 +1654,13 @@ public class DuelManager implements Loadable {
             // Mark player as dead in match (so PlayerDeathEvent knows they're dead)
             match.markAsDead(player);
             
-            // For own-inventory duels with drop-inventory-items: false, preserve PlayerInfo for restoration on rejoin
-            // Otherwise, remove PlayerInfo completely - don't restore anything, let server handle respawn
-            if (!preserveInventory) {
-                playerManager.remove(player);
-            }
+            // CRITICAL FIX: NEVER remove PlayerInfo when player quits during match
+            // PlayerInfo must be preserved so inventory can be restored when:
+            // 1. Player rejoins (handled by PlayerInfoManager)
+            // 2. Match ends (handled by handleMatchEnd)
+            // 3. Server shuts down (handled by handleUnload)
+            // PlayerInfo will be removed only after successful restoration in handleWin/handleLoss/handleTie
+            // DO NOT remove PlayerInfo here - this was causing inventory loss!
             
             // DON'T remove from arena or end match here - let PlayerDeathEvent handle it automatically
             // PlayerDeathEvent will call arena.remove() and check match.size() to end the match
