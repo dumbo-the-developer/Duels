@@ -3,6 +3,7 @@ package com.meteordevelopments.duels.listeners;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.arena.ArenaManagerImpl;
 import com.meteordevelopments.duels.config.Config;
+import com.meteordevelopments.duels.player.PlayerInfoManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -19,20 +20,23 @@ import java.util.List;
 
 /**
  * Prevents players from being in duel worlds when they're not in a match.
- * Teleports them to spawn if they log into or enter a duel world without being in a match.
- * This is an edge-case safety feature that prevents players from logging into arena worlds
- * when they shouldn't be there (e.g., after server crash, plugin reload, or unexpected disconnections).
+ * Teleports them to lobby (same as /duels setlobby) if they log into or enter a duel world 
+ * without being in a match. This is an edge-case safety feature that prevents players from 
+ * logging into arena worlds when they shouldn't be there (e.g., after server crash, plugin 
+ * reload, or unexpected disconnections).
  */
 public class DuelWorldsListener implements Listener {
 
     private final DuelsPlugin plugin;
     private final Config config;
     private final ArenaManagerImpl arenaManager;
+    private final PlayerInfoManager playerManager;
 
     public DuelWorldsListener(final DuelsPlugin plugin) {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.arenaManager = plugin.getArenaManager();
+        this.playerManager = plugin.getPlayerManager();
 
         // Only register if feature is enabled
         if (config.isDuelWorldsEnabled()) {
@@ -88,20 +92,18 @@ public class DuelWorldsListener implements Listener {
     }
 
     /**
-     * Teleports player to spawn location
+     * Teleports player to lobby location (same as /duels setlobby)
      */
     private void teleportToSpawn(final Player player) {
-        final World world = player.getWorld();
-        if (world == null) {
+        final Location lobbyLocation = playerManager.getLobby();
+        if (lobbyLocation == null || lobbyLocation.getWorld() == null) {
             return;
         }
-
-        final Location spawnLocation = world.getSpawnLocation();
         
         // Use Folia-compatible teleport
         DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
-            if (player.isOnline() && player.getWorld() == world) {
-                plugin.getTeleport().tryTeleport(player, spawnLocation, null);
+            if (player.isOnline()) {
+                plugin.getTeleport().tryTeleport(player, lobbyLocation, null);
                 
                 // Apply gamemode if configured
                 if (config.isForceGamemodeOnJoin()) {
