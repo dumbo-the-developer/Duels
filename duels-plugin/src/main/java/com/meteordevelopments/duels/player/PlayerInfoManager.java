@@ -10,6 +10,7 @@ import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.data.LocationData;
 import com.meteordevelopments.duels.data.PlayerData;
 import com.meteordevelopments.duels.hook.hooks.EssentialsHook;
+import com.meteordevelopments.duels.match.DuelMatch;
 import com.meteordevelopments.duels.match.team.TeamDuelMatch;
 import com.meteordevelopments.duels.teleport.Teleport;
 import com.meteordevelopments.duels.util.Loadable;
@@ -338,11 +339,16 @@ public class PlayerInfoManager implements Loadable {
                     return;
                 }
                 
-                // Double-check: Don't remove PlayerInfo if player is dead in team match
+                // CRITICAL FIX: Don't remove PlayerInfo if player is still in a match
+                // This prevents inventory loss when player respawns before handleMatchEnd completes
                 final ArenaImpl stillInArena = arenaManager.get(player);
-                if (stillInArena != null && stillInArena.getMatch() instanceof TeamDuelMatch stillTeamMatch) {
-                    if (stillTeamMatch.isDead(player)) {
-                        // Player is still dead in team match, don't restore them
+                if (stillInArena != null && stillInArena.getMatch() != null) {
+                    final DuelMatch stillMatch = stillInArena.getMatch();
+                    // If match is ending (end game phase) or player is dead in team match, don't restore yet
+                    // Let handleMatchEnd/handleLoss/handleWin handle the restoration
+                    if (stillInArena.isEndGame() || (stillMatch instanceof TeamDuelMatch teamMatch && teamMatch.isDead(player))) {
+                        // Match is ending or player is dead in team match - don't restore yet
+                        // PlayerInfo will be restored by handleLoss/handleWin when match fully ends
                         return;
                     }
                 }
