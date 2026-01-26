@@ -10,7 +10,7 @@ buildscript {
 
 allprojects {
     group = 'com.meteordevelopments'
-    version = '5.7'
+    version = '5.8'
 }
 
 subprojects {
@@ -65,6 +65,11 @@ subprojects {
         maven {
             name = 'essentialsx-repo'
             url = 'https://repo.essentialsx.net/releases/'
+        }
+
+        maven {
+            name = 'factions-repo'
+            url = 'https://dependency.download/releases/'
         }
 
         maven {

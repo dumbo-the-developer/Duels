@@ -4,6 +4,7 @@ import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.api.arena.Arena;
 import com.meteordevelopments.duels.api.kit.Kit;
 import com.meteordevelopments.duels.api.match.Match;
+import com.meteordevelopments.duels.api.queue.DQueue;
 import com.meteordevelopments.duels.api.spectate.Spectator;
 import com.meteordevelopments.duels.api.user.User;
 import com.meteordevelopments.duels.util.StringUtil;
@@ -114,6 +115,46 @@ public class PlaceholderHook extends PluginHook<DuelsPlugin> {
 
                 final Kit kit = plugin.getKitManager().get(identifier);
                 return kit != null ? String.valueOf(user.getRating(kit)) : StringUtil.color(plugin.getConfiguration().getNoKit());
+            }
+
+            if (identifier.startsWith("isinqueue_")){
+                user = plugin.getUserManager().get(player);
+                if (user == null) {
+                    return StringUtil.color(plugin.getConfiguration().getUserNotFound());
+                }
+
+                identifier = identifier.replace("isinqueue_", "");
+                DQueue queue = plugin.getQueueManager().getByName(identifier);
+
+                if (queue == null) {
+                    // Fallback to old kit-based system
+                    int bet = 0;
+                    String kitName = identifier;
+                    int sep = identifier.lastIndexOf('_');
+                    if (sep >= 0 && sep + 1 < identifier.length()) {
+                        String betStr = identifier.substring(sep + 1);
+                        try {
+                            bet = Integer.parseInt(betStr);
+                            kitName = identifier.substring(0, sep);
+                        } catch (NumberFormatException ignored) {
+                            // Keep default bet = 0 and full identifier as kit name
+                        }
+                    }
+
+                    final Kit kit = plugin.getKitManager().get(kitName);
+                    if (kit == null) {
+                        return StringUtil.color(plugin.getConfiguration().getNoKit());
+                    }
+
+                    queue = plugin.getQueueManager().get(kit, bet);
+                    if (queue == null) {
+                        return "0";
+                    }
+                }
+
+                if (queue.isInQueue(player)){
+                    return "Yes";
+                }else return "No";
             }
 
 			if (identifier.startsWith("getplayersinqueue_")){
