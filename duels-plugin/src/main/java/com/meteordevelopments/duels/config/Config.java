@@ -181,6 +181,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private double distanceAllowed;
     @Getter
+    private boolean onQuitKillPlayer;
+    @Getter
+    private boolean onQuitClearInventory;
+    @Getter
     private boolean blockAllCommands;
     @Getter
     private List<String> whitelistedCommands;
@@ -472,6 +476,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         preventItemPickup = configuration.getBoolean("duel.prevent-item-pickup", true);
         limitTeleportEnabled = configuration.getBoolean("duel.limit-teleportation.enabled", true);
         distanceAllowed = configuration.getDouble("duel.limit-teleportation.distance-allowed", 5.0);
+        onQuitKillPlayer = configuration.getBoolean("duel.default-combat-actions.on-quit-kill-player", false);
+        onQuitClearInventory = configuration.getBoolean("duel.default-combat-actions.on-quit-clear-inventory", false);
         blockAllCommands = configuration.getBoolean("duel.block-all-commands", false);
         whitelistedCommands = configuration.getStringList("duel.whitelisted-commands");
         blacklistedCommands = configuration.getStringList("duel.blacklisted-commands");

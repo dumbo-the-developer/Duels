@@ -1506,31 +1506,72 @@ public class DuelManager implements Loadable {
                     info.updateInventory(quittingPlayer);
                 }
                 
-                // CRITICAL: Kill the player IMMEDIATELY - PlayerQuitEvent runs on correct thread, player still online
-                // Event handlers on Folia run on the correct thread for the entity, so we can call directly
-                // This will trigger PlayerDeathEvent which will handle match ending automatically
-                try {
-                    quittingPlayer.setHealth(0);
-                    quittingPlayer.getInventory().clear();
-                    quittingPlayer.getInventory().setArmorContents(null);
-                    quittingPlayer.updateInventory();
-                } catch (Exception ex) {
-                    // Fallback: If direct call fails, schedule it immediately (shouldn't happen but safety net)
-                    DuelsPlugin.getSchedulerAdapter().runTask(quittingPlayer, () -> {
-                        if (quittingPlayer.isOnline()) {
-                            quittingPlayer.setHealth(0);
+                // Cancel countdown
+                arena.setCountdown(null);
+                
+                // Apply config-based actions for player quit
+                if (config.isOnQuitKillPlayer()) {
+                    // Kill the player - this will trigger PlayerDeathEvent which will handle match ending automatically
+                    try {
+                        quittingPlayer.setHealth(0);
+                        if (config.isOnQuitClearInventory()) {
                             quittingPlayer.getInventory().clear();
                             quittingPlayer.getInventory().setArmorContents(null);
                             quittingPlayer.updateInventory();
                         }
-                    });
+                    } catch (Exception ex) {
+                        // Fallback: If direct call fails, schedule it immediately (shouldn't happen but safety net)
+                        DuelsPlugin.getSchedulerAdapter().runTask(quittingPlayer, () -> {
+                            if (quittingPlayer.isOnline()) {
+                                quittingPlayer.setHealth(0);
+                                if (config.isOnQuitClearInventory()) {
+                                    quittingPlayer.getInventory().clear();
+                                    quittingPlayer.getInventory().setArmorContents(null);
+                                    quittingPlayer.updateInventory();
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Mark quitting player as dead in match (PlayerDeathEvent will handle the rest)
+                    match.markAsDead(quittingPlayer);
+                    
+                    // DON'T call handleMatchEnd here - let PlayerDeathEvent handle it automatically
+                    // This prevents duplicate execution of pre-end commands and match ending
+                } else {
+                    // Don't kill player - end match directly
+                    // Mark quitting player as dead in match (for match ending logic)
+                    match.markAsDead(quittingPlayer);
+                    
+                    // Clear inventory if configured
+                    if (config.isOnQuitClearInventory()) {
+                        try {
+                            quittingPlayer.getInventory().clear();
+                            quittingPlayer.getInventory().setArmorContents(null);
+                            quittingPlayer.updateInventory();
+                        } catch (Exception ex) {
+                            DuelsPlugin.getSchedulerAdapter().runTask(quittingPlayer, () -> {
+                                if (quittingPlayer.isOnline()) {
+                                    quittingPlayer.getInventory().clear();
+                                    quittingPlayer.getInventory().setArmorContents(null);
+                                    quittingPlayer.updateInventory();
+                                }
+                            });
+                        }
+                    }
+                    
+                    // End match directly since we're not killing the player
+                    final Set<Player> alivePlayers = match.getAlivePlayers();
+                    if (!alivePlayers.isEmpty()) {
+                        final Player winner = alivePlayers.iterator().next();
+                        final Location deadLocation = quittingPlayer.getLocation().clone();
+                        handleMatchEnd(match, arena, quittingPlayer, deadLocation, winner);
+                    } else {
+                        // No alive players - treat as tie
+                        final Location deadLocation = quittingPlayer.getLocation().clone();
+                        handleMatchEnd(match, arena, quittingPlayer, deadLocation, null);
+                    }
                 }
-                
-                // Cancel countdown
-                arena.setCountdown(null);
-                
-                // Mark quitting player as dead in match (PlayerDeathEvent will handle the rest)
-                match.markAsDead(quittingPlayer);
                 
                 // CRITICAL FIX: NEVER remove PlayerInfo when player quits during match
                 // PlayerInfo must be preserved so inventory can be restored when:
@@ -1540,9 +1581,7 @@ public class DuelManager implements Loadable {
                 // PlayerInfo will be removed only after successful restoration in handleWin/handleLoss/handleTie
                 // DO NOT remove PlayerInfo here - this was causing inventory loss!
                 
-                // DON'T call handleMatchEnd here - let PlayerDeathEvent handle it automatically
-                // This prevents duplicate execution of pre-end commands and match ending
-                return; // Exit early - countdown quit handled, PlayerDeathEvent will handle match end
+                return; // Exit early - countdown quit handled
             }
 
             // Normal quit handling (countdown complete, match in progress)
@@ -1631,28 +1670,69 @@ public class DuelManager implements Loadable {
                 // Just ensure we don't lose it - don't remove PlayerInfo here
             }
             
-            // CRITICAL: Kill the player IMMEDIATELY - PlayerQuitEvent runs on correct thread, player still online
-            // Event handlers on Folia run on the correct thread for the entity, so we can call directly
-            // This will trigger PlayerDeathEvent which will handle match ending automatically
-            try {
-                player.setHealth(0);
-                player.getInventory().clear();
-                player.getInventory().setArmorContents(null);
-                player.updateInventory();
-            } catch (Exception ex) {
-                // Fallback: If direct call fails, schedule it immediately (shouldn't happen but safety net)
-                DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
-                    if (player.isOnline()) {
-                        player.setHealth(0);
+            // Apply config-based actions for player quit
+            if (config.isOnQuitKillPlayer()) {
+                // Kill the player - this will trigger PlayerDeathEvent which will handle match ending automatically
+                try {
+                    player.setHealth(0);
+                    if (config.isOnQuitClearInventory()) {
                         player.getInventory().clear();
                         player.getInventory().setArmorContents(null);
                         player.updateInventory();
                     }
-                });
+                } catch (Exception ex) {
+                    // Fallback: If direct call fails, schedule it immediately (shouldn't happen but safety net)
+                    DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
+                        if (player.isOnline()) {
+                            player.setHealth(0);
+                            if (config.isOnQuitClearInventory()) {
+                                player.getInventory().clear();
+                                player.getInventory().setArmorContents(null);
+                                player.updateInventory();
+                            }
+                        }
+                    });
+                }
+                
+                // Mark player as dead in match (so PlayerDeathEvent knows they're dead)
+                match.markAsDead(player);
+            } else {
+                // Don't kill player - end match directly
+                // Clear inventory if configured
+                if (config.isOnQuitClearInventory()) {
+                    try {
+                        player.getInventory().clear();
+                        player.getInventory().setArmorContents(null);
+                        player.updateInventory();
+                    } catch (Exception ex) {
+                        DuelsPlugin.getSchedulerAdapter().runTask(player, () -> {
+                            if (player.isOnline()) {
+                                player.getInventory().clear();
+                                player.getInventory().setArmorContents(null);
+                                player.updateInventory();
+                            }
+                        });
+                    }
+                }
+                
+                // Mark player as dead in match (for match ending logic)
+                match.markAsDead(player);
+                
+                // End match directly since we're not killing the player
+                final Set<Player> alivePlayers = match.getAlivePlayers();
+                if (!alivePlayers.isEmpty()) {
+                    final Player winner = alivePlayers.iterator().next();
+                    final Location deadLocation = player.getLocation().clone();
+                    handleMatchEnd(match, arena, player, deadLocation, winner);
+                } else {
+                    // No alive players - treat as tie
+                    final Location deadLocation = player.getLocation().clone();
+                    handleMatchEnd(match, arena, player, deadLocation, null);
+                }
+                
+                // Match is finished or will be finished by handleMatchEnd
+                return;
             }
-            
-            // Mark player as dead in match (so PlayerDeathEvent knows they're dead)
-            match.markAsDead(player);
             
             // CRITICAL FIX: NEVER remove PlayerInfo when player quits during match
             // PlayerInfo must be preserved so inventory can be restored when:
