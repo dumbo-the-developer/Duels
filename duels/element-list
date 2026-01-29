@@ -11,6 +11,12 @@ com.meteordevelopments.duels.api.event.request
 com.meteordevelopments.duels.api.event.spectate
 com.meteordevelopments.duels.api.event.user
 com.meteordevelopments.duels.api.extension
+com.meteordevelopments.duels.api.folialib
+com.meteordevelopments.duels.api.folialib.enums
+com.meteordevelopments.duels.api.folialib.impl
+com.meteordevelopments.duels.api.folialib.task
+com.meteordevelopments.duels.api.folialib.type
+com.meteordevelopments.duels.api.folialib.util
 com.meteordevelopments.duels.api.kit
 com.meteordevelopments.duels.api.match
 com.meteordevelopments.duels.api.queue
@@ -18,3 +24,4 @@ com.meteordevelopments.duels.api.queue.sign
 com.meteordevelopments.duels.api.request
 com.meteordevelopments.duels.api.spectate
 com.meteordevelopments.duels.api.user
+com.tcoded.folialib.enums
