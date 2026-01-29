@@ -36,9 +36,17 @@ public class TeleportListener implements Listener {
     }
 
     private boolean isSimilar(final Location first, final Location second) {
-        return Math.abs(first.getX() - second.getX()) + Math.abs(first.getY() - second.getY()) + Math.abs(first.getZ() - second.getZ()) < 5;
+        // Different worlds = different locations, period
+        if (first.getWorld() == null || second.getWorld() == null) {
+            return false;
+        }
+        if (!first.getWorld().equals(second.getWorld())) {
+            return false;
+        }
+        return Math.abs(first.getX() - second.getX()) +
+                Math.abs(first.getY() - second.getY()) +
+                Math.abs(first.getZ() - second.getZ()) < 5;
     }
-
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void on(final PlayerTeleportEvent event) {
         final Player player = event.getPlayer();
