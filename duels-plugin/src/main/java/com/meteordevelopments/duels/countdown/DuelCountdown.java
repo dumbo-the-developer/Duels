@@ -13,7 +13,7 @@ import com.meteordevelopments.duels.match.DuelMatch;
 import com.meteordevelopments.duels.util.StringUtil;
 import com.meteordevelopments.duels.util.compat.Titles;
 import com.meteordevelopments.duels.util.function.Pair;
-import com.tcoded.folialib.wrapper.task.WrappedTask;
+import com.meteordevelopments.duels.api.folialib.task.WrappedTask;
 import org.bukkit.entity.Player;
 
 public class DuelCountdown implements Runnable {

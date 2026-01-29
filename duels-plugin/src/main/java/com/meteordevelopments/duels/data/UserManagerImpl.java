@@ -24,7 +24,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import com.tcoded.folialib.wrapper.task.WrappedTask;
+import com.meteordevelopments.duels.api.folialib.task.WrappedTask;
 
 import java.io.*;
 import java.util.*;

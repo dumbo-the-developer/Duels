@@ -27,7 +27,7 @@ import com.meteordevelopments.duels.util.compat.CompatUtil;
 import com.meteordevelopments.duels.util.compat.Titles;
 import com.meteordevelopments.duels.util.inventory.InventoryUtil;
 import com.meteordevelopments.duels.util.validator.ValidatorUtil;
-import com.tcoded.folialib.wrapper.task.WrappedTask;
+import com.meteordevelopments.duels.api.folialib.task.WrappedTask;
 import org.bukkit.*;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;

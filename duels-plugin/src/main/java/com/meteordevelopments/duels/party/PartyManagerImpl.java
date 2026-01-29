@@ -11,7 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import com.tcoded.folialib.wrapper.task.WrappedTask;
+import com.meteordevelopments.duels.api.folialib.task.WrappedTask;
 
 import java.util.*;
 

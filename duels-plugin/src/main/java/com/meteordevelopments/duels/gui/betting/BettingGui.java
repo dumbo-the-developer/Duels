@@ -15,7 +15,7 @@ import com.meteordevelopments.duels.util.gui.GuiListener;
 import com.meteordevelopments.duels.util.inventory.InventoryBuilder;
 import com.meteordevelopments.duels.util.inventory.InventoryUtil;
 import com.meteordevelopments.duels.util.inventory.Slots;
-import com.tcoded.folialib.wrapper.task.WrappedTask;
+import com.meteordevelopments.duels.api.folialib.task.WrappedTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

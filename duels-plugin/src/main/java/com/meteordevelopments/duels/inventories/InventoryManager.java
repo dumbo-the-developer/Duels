@@ -11,7 +11,7 @@ import com.meteordevelopments.duels.util.TextBuilder;
 import com.meteordevelopments.duels.util.gui.GuiListener;
 import net.md_5.bungee.api.chat.ClickEvent;
 import org.bukkit.entity.Player;
-import com.tcoded.folialib.wrapper.task.WrappedTask;
+import com.meteordevelopments.duels.api.folialib.task.WrappedTask;
 
 import java.util.*;
 
