@@ -892,6 +892,8 @@ public class DuelManager implements Loadable {
             if (!config.isLimitTeleportEnabled()
                     || event.getCause() == TeleportCause.ENDER_PEARL
                     || event.getCause() == TeleportCause.SPECTATE
+                    || event.getCause() == TeleportCause.PLUGIN
+                    || event.getCause() == TeleportCause.UNKNOWN
                     || !arenaManager.isInMatch(player)) {
                 return;
             }
