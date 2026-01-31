@@ -4,6 +4,8 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.api.event.match.MatchStartEvent;
+import com.meteordevelopments.duels.api.event.match.MatchEndEvent;
+import com.meteordevelopments.duels.arena.ArenaImpl;
 import com.meteordevelopments.duels.arena.ArenaManagerImpl;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EnderPearl;
@@ -17,9 +19,7 @@ import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.lang.ref.WeakReference;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Prevents players throwing an enderpearl before entering a duel and teleporting out with kit items.
@@ -30,8 +30,9 @@ public class EnderpearlListener implements Listener {
 
     private final ArenaManagerImpl arenaManager;
 
-    // Maps an enderpearl thrower to enderpearls thrown.
+    // Maps an enderpearl thrower to enderpearls thrown (before entering a match).
     private final Multimap<UUID, Pearl> pearls = HashMultimap.create();
+    private final Map<ArenaImpl, Set<Pearl>> arenaPearls = new HashMap<>();
 
     public EnderpearlListener(final DuelsPlugin plugin) {
         this.arenaManager = plugin.getArenaManager();
@@ -61,8 +62,9 @@ public class EnderpearlListener implements Listener {
             return;
         }
 
-        // Ignore pearls thrown in match
-        if (arenaManager.isInMatch(player)) {
+        final ArenaImpl arena = arenaManager.get(player);
+        if (arena != null) {
+            arenaPearls.computeIfAbsent(arena, k -> new HashSet<>()).add(new Pearl(enderPearl));
             return;
         }
 
@@ -76,30 +78,51 @@ public class EnderpearlListener implements Listener {
             return;
         }
 
-        if (!(enderPearl.getShooter() instanceof Player)) {
+        if (!(enderPearl.getShooter() instanceof Player player)) {
             return;
         }
 
-        final Collection<Pearl> pearls = this.pearls.asMap().get(((Player) enderPearl.getShooter()).getUniqueId());
+        final Collection<Pearl> pearls = this.pearls.asMap().get(player.getUniqueId());
 
-        if (pearls == null || pearls.isEmpty()) {
-            return;
+        if (pearls != null && !pearls.isEmpty()) {
+            final Iterator<Pearl> iterator = pearls.iterator();
+
+            while (iterator.hasNext()) {
+                final Pearl pearl = iterator.next();
+
+                if (enderPearl.equals(pearl.pearl.get())) {
+                    iterator.remove();
+                    break;
+                }
+            }
         }
 
-        final Iterator<Pearl> iterator = pearls.iterator();
-
-        while (iterator.hasNext()) {
-            final Pearl pearl = iterator.next();
-
-            if (enderPearl.equals(pearl.pearl.get())) {
-                iterator.remove();
-                break;
+        final ArenaImpl arena = arenaManager.get(player);
+        if (arena != null) {
+            final Set<Pearl> arenaPearls = this.arenaPearls.get(arena);
+            if (arenaPearls != null) {
+                arenaPearls.removeIf(pearl -> enderPearl.equals(pearl.pearl.get()));
             }
         }
     }
 
     @EventHandler
     public void on(final MatchStartEvent event) {
+        final ArenaImpl arena = (ArenaImpl) event.getMatch().getArena();
+        final Set<Pearl> existingPearls = arenaPearls.get(arena);
+
+        if (existingPearls != null) {
+            existingPearls.forEach(pearl -> {
+                final EnderPearl enderPearl = pearl.pearl.get();
+                if (enderPearl != null && !enderPearl.isDead()) {
+                    enderPearl.remove();
+                }
+            });
+            existingPearls.clear();
+        } else {
+            arenaPearls.put(arena, new HashSet<>());
+        }
+
         for (final Player player : event.getPlayers()) {
             final Collection<Pearl> pearls = this.pearls.asMap().remove(player.getUniqueId());
 
@@ -120,6 +143,25 @@ public class EnderpearlListener implements Listener {
     @EventHandler
     public void on(final PlayerQuitEvent event) {
         pearls.asMap().remove(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void on(final MatchEndEvent event) {
+        final ArenaImpl arena = (ArenaImpl) event.getMatch().getArena();
+        final Set<Pearl> pearls = arenaPearls.get(arena);
+
+        if (pearls != null && !pearls.isEmpty()) {
+            final Set<Pearl> pearlsCopy = new HashSet<>(pearls);
+            pearls.clear();
+
+            pearlsCopy.forEach(pearl -> {
+                final EnderPearl enderPearl = pearl.pearl.get();
+
+                if (enderPearl != null && !enderPearl.isDead()) {
+                    enderPearl.remove();
+                }
+            });
+        }
     }
 
     private static class Pearl {
