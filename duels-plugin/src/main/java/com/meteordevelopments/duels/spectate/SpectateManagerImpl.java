@@ -34,6 +34,7 @@ import org.bukkit.event.block.BlockCanBuildEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -317,7 +318,9 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
             final Player player = event.getPlayer();
             final SpectatorImpl spectator = get(player);
 
-            if (spectator == null) {
+            if (spectator == null
+                    || event.getCause() == TeleportCause.PLUGIN
+                    || event.getCause() == TeleportCause.UNKNOWN) {
                 return;
             }
 
