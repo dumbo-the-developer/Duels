@@ -61,7 +61,7 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">org.bukkit.command.TabExecutor (also extends org.bukkit.command.TabCompleter)
 <ul>
-<li class="circle">org.bukkit.plugin.Plugin
+<li class="circle">org.bukkit.plugin.Plugin (also extends io.papermc.paper.plugin.lifecycle.event.LifecycleEventOwner, net.kyori.adventure.key.Namespaced)
 <ul>
 <li class="circle">com.meteordevelopments.duels.api.<a href="Duels.html" class="type-name-link" title="interface in com.meteordevelopments.duels.api">Duels</a></li>
 </ul>
@@ -70,11 +70,29 @@ loadScripts(document, 'script');</script>
 </li>
 </ul>
 </li>
+<li class="circle">io.papermc.paper.plugin.lifecycle.event.LifecycleEventOwner
+<ul>
+<li class="circle">org.bukkit.plugin.Plugin (also extends net.kyori.adventure.key.Namespaced, org.bukkit.command.TabExecutor)
+<ul>
+<li class="circle">com.meteordevelopments.duels.api.<a href="Duels.html" class="type-name-link" title="interface in com.meteordevelopments.duels.api">Duels</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="circle">net.kyori.adventure.key.Namespaced
+<ul>
+<li class="circle">org.bukkit.plugin.Plugin (also extends io.papermc.paper.plugin.lifecycle.event.LifecycleEventOwner, org.bukkit.command.TabExecutor)
+<ul>
+<li class="circle">com.meteordevelopments.duels.api.<a href="Duels.html" class="type-name-link" title="interface in com.meteordevelopments.duels.api">Duels</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="circle">org.bukkit.command.TabCompleter
 <ul>
 <li class="circle">org.bukkit.command.TabExecutor (also extends org.bukkit.command.CommandExecutor)
 <ul>
-<li class="circle">org.bukkit.plugin.Plugin
+<li class="circle">org.bukkit.plugin.Plugin (also extends io.papermc.paper.plugin.lifecycle.event.LifecycleEventOwner, net.kyori.adventure.key.Namespaced)
 <ul>
 <li class="circle">com.meteordevelopments.duels.api.<a href="Duels.html" class="type-name-link" title="interface in com.meteordevelopments.duels.api">Duels</a></li>
 </ul>

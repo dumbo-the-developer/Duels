@@ -88,7 +88,7 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Superinterfaces:</dt>
-<dd><code>org.bukkit.command.CommandExecutor</code>, <code>org.bukkit.plugin.Plugin</code>, <code>org.bukkit.command.TabCompleter</code>, <code>org.bukkit.command.TabExecutor</code></dd>
+<dd><code>org.bukkit.command.CommandExecutor</code>, <code>io.papermc.paper.plugin.lifecycle.event.LifecycleEventOwner</code>, <code>net.kyori.adventure.key.Namespaced</code>, <code>org.bukkit.plugin.Plugin</code>, <code>org.bukkit.command.TabCompleter</code>, <code>org.bukkit.command.TabExecutor</code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">Duels</span><span class="extends-implements">
@@ -227,8 +227,11 @@ extends org.bukkit.plugin.Plugin</span></div>
 <h3 id="methods-inherited-from-class-org.bukkit.command.CommandExecutor">Methods inherited from interface&nbsp;org.bukkit.command.CommandExecutor</h3>
 <code>onCommand</code></div>
 <div class="inherited-list">
+<h3 id="methods-inherited-from-class-net.kyori.adventure.key.Namespaced">Methods inherited from interface&nbsp;net.kyori.adventure.key.Namespaced</h3>
+<code>namespace</code></div>
+<div class="inherited-list">
 <h3 id="methods-inherited-from-class-org.bukkit.plugin.Plugin">Methods inherited from interface&nbsp;org.bukkit.plugin.Plugin</h3>
-<code>getComponentLogger, getConfig, getDataFolder, getDefaultBiomeProvider, getDefaultWorldGenerator, getDescription, getLog4JLogger, getLogger, getName, getPluginLoader, getPluginMeta, getResource, getServer, getSLF4JLogger, isEnabled, isNaggable, onDisable, onEnable, onLoad, reloadConfig, saveConfig, saveDefaultConfig, saveResource, setNaggable</code></div>
+<code>getComponentLogger, getConfig, getDataFolder, getDataPath, getDefaultBiomeProvider, getDefaultWorldGenerator, getDescription, getLifecycleManager, getLog4JLogger, getLogger, getName, getPluginLoader, getPluginMeta, getResource, getServer, getSLF4JLogger, isEnabled, isNaggable, onDisable, onEnable, onLoad, reloadConfig, saveConfig, saveDefaultConfig, saveResource, setNaggable</code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-org.bukkit.command.TabCompleter">Methods inherited from interface&nbsp;org.bukkit.command.TabCompleter</h3>
 <code>onTabComplete</code></div>
