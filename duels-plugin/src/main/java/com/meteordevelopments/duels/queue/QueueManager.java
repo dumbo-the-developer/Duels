@@ -150,85 +150,129 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
             for (final Queue queue : queues) {
                 final Set<QueueEntry> remove = new HashSet<>();
+                final Set<QueueEntry> offlinePlayers = new HashSet<>();
 
                 // Group-based matching for x vs x
                 final int size = Math.max(1, queue.getTeamSize());
                 final List<QueueEntry> entries = new ArrayList<>(queue.getPlayers());
-
-                // Attempt to find two disjoint groups of 'size' each that can fight
-                // Simple greedy approach: iterate windows
-                for (int i = 0; i <= entries.size() - size; i++) {
-                    if (update) { break; }
-                    final List<QueueEntry> firstGroup = new ArrayList<>();
-                    boolean skipI = false;
-                    for (int k = 0; k < size; k++) {
-                        final QueueEntry e = entries.get(i + k);
-                        if (remove.contains(e)) { skipI = true; break; }
-                        firstGroup.add(e);
-                    }
-                    if (skipI) { continue; }
-
-                    for (int j = i + size; j <= entries.size() - size; j++) {
-                        final List<QueueEntry> secondGroup = new ArrayList<>();
-                        boolean ok = true;
-                        for (int k = 0; k < size; k++) {
-                            final QueueEntry e = entries.get(j + k);
-                            if (remove.contains(e)) { ok = false; break; }
-                            secondGroup.add(e);
-                        }
-                        if (!ok) { continue; }
-
-                        // Rating compatibility check: all-vs-all pairs should be allowed
-                        boolean compatible = true;
-                        for (final QueueEntry a : firstGroup) {
-                            for (final QueueEntry b : secondGroup) {
-                                if (!canFight(queue.getKit(), userManager.get(a.getPlayer()), userManager.get(b.getPlayer()))) {
-                                    compatible = false;
-                                    break;
-                                }
-                            }
-                            if (!compatible) break;
-                        }
-                        if (!compatible) { continue; }
-
-                        // Build Settings and start match using party or individuals
-                        final Settings setting = new Settings(plugin);
-                        if (queue.getKit() != null) {
-                            setting.setKit(kitManager.get(queue.getKit().getName()));
-                        } else {
-                            setting.setOwnInventory(true);
-                        }
-                        setting.setBet(queue.getBet());
-
-                        final List<Player> firstPlayers = new ArrayList<>();
-                        final List<Player> secondPlayers = new ArrayList<>();
-                        for (final QueueEntry e : firstGroup) {
-                            final Player p = e.getPlayer();
-                            firstPlayers.add(p);
-                            setting.getCache().put(p.getUniqueId(), e.getInfo());
-                        }
-                        for (final QueueEntry e : secondGroup) {
-                            final Player p = e.getPlayer();
-                            secondPlayers.add(p);
-                            setting.getCache().put(p.getUniqueId(), e.getInfo());
-                        }
-
-                        // Clear parties to avoid mismatch unless both sides are proper parties
-                        setting.setSenderParty(null);
-                        setting.setTargetParty(null);
-
-                        final String kit = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("GENERAL.none");
-                        firstPlayers.forEach(p -> lang.sendMessage(p, "QUEUE.found-opponent", "name", secondPlayers.getFirst().getName(), "kit", kit, "bet_amount", queue.getBet()));
-                        secondPlayers.forEach(p -> lang.sendMessage(p, "QUEUE.found-opponent", "name", firstPlayers.getFirst().getName(), "kit", kit, "bet_amount", queue.getBet()));
-
-                        duelManager.startMatch(firstPlayers, secondPlayers, setting, null, queue);
-
-                        remove.addAll(firstGroup);
-                        remove.addAll(secondGroup);
-                        update = true;
-                        break;
+                
+                // First pass: remove offline players from consideration
+                for (final QueueEntry entry : entries) {
+                    if (!entry.getPlayer().isOnline()) {
+                        offlinePlayers.add(entry);
                     }
                 }
+                
+                // Remove offline players from queue
+                if (!offlinePlayers.isEmpty()) {
+                    queue.removeAll(offlinePlayers);
+                    entries.removeAll(offlinePlayers);
+                    update = true;
+                }
+
+                // Attempt to find two disjoint groups of 'size' each that can fight
+                // Continue matching until no more valid matches can be found
+                boolean foundMatch;
+                do {
+                    foundMatch = false;
+                    
+                    // Simple greedy approach: iterate windows
+                    outerLoop:
+                    for (int i = 0; i <= entries.size() - size; i++) {
+                        final List<QueueEntry> firstGroup = new ArrayList<>();
+                        boolean skipI = false;
+                        for (int k = 0; k < size; k++) {
+                            final QueueEntry e = entries.get(i + k);
+                            if (remove.contains(e)) { skipI = true; break; }
+                            // Double-check player is still online
+                            if (!e.getPlayer().isOnline()) { 
+                                remove.add(e);
+                                skipI = true; 
+                                break; 
+                            }
+                            firstGroup.add(e);
+                        }
+                        if (skipI) { continue; }
+
+                        for (int j = i + size; j <= entries.size() - size; j++) {
+                            final List<QueueEntry> secondGroup = new ArrayList<>();
+                            boolean ok = true;
+                            for (int k = 0; k < size; k++) {
+                                final QueueEntry e = entries.get(j + k);
+                                if (remove.contains(e)) { ok = false; break; }
+                                // Double-check player is still online
+                                if (!e.getPlayer().isOnline()) { 
+                                    remove.add(e);
+                                    ok = false; 
+                                    break; 
+                                }
+                                secondGroup.add(e);
+                            }
+                            if (!ok) { continue; }
+
+                            // Rating compatibility check: all-vs-all pairs should be allowed
+                            boolean compatible = true;
+                            for (final QueueEntry a : firstGroup) {
+                                for (final QueueEntry b : secondGroup) {
+                                    if (!canFight(queue.getKit(), userManager.get(a.getPlayer()), userManager.get(b.getPlayer()))) {
+                                        compatible = false;
+                                        break;
+                                    }
+                                }
+                                if (!compatible) break;
+                            }
+                            if (!compatible) { continue; }
+
+                            // Build Settings and start match using party or individuals
+                            final Settings setting = new Settings(plugin);
+                            if (queue.getKit() != null) {
+                                setting.setKit(kitManager.get(queue.getKit().getName()));
+                            } else {
+                                setting.setOwnInventory(true);
+                            }
+                            setting.setBet(queue.getBet());
+
+                            final List<Player> firstPlayers = new ArrayList<>();
+                            final List<Player> secondPlayers = new ArrayList<>();
+                            for (final QueueEntry e : firstGroup) {
+                                final Player p = e.getPlayer();
+                                firstPlayers.add(p);
+                                setting.getCache().put(p.getUniqueId(), e.getInfo());
+                            }
+                            for (final QueueEntry e : secondGroup) {
+                                final Player p = e.getPlayer();
+                                secondPlayers.add(p);
+                                setting.getCache().put(p.getUniqueId(), e.getInfo());
+                            }
+
+                            // Clear parties to avoid mismatch unless both sides are proper parties
+                            setting.setSenderParty(null);
+                            setting.setTargetParty(null);
+
+                            final String kit = queue.getKit() != null ? queue.getKit().getName() : lang.getMessage("GENERAL.none");
+                            
+                            // FIXED: Check if match actually started before removing players from queue
+                            final boolean matchStarted = duelManager.startMatch(firstPlayers, secondPlayers, setting, null, queue);
+                            
+                            if (matchStarted) {
+                                firstPlayers.forEach(p -> lang.sendMessage(p, "QUEUE.found-opponent", "name", secondPlayers.getFirst().getName(), "kit", kit, "bet_amount", queue.getBet()));
+                                secondPlayers.forEach(p -> lang.sendMessage(p, "QUEUE.found-opponent", "name", firstPlayers.getFirst().getName(), "kit", kit, "bet_amount", queue.getBet()));
+                                
+                                remove.addAll(firstGroup);
+                                remove.addAll(secondGroup);
+                                foundMatch = true;
+                                update = true;
+                                break outerLoop; // Found a match, restart search to avoid index issues
+                            }
+                            // If match failed to start, players stay in queue and we try next combination
+                        }
+                    }
+                    
+                    // Remove matched players from entries list for next iteration
+                    if (foundMatch) {
+                        entries.removeAll(remove);
+                    }
+                } while (foundMatch && entries.size() >= size * 2); // Continue while we can potentially form more matches
 
                 if (queue.removeAll(remove) && !update) {
                     update = true;
