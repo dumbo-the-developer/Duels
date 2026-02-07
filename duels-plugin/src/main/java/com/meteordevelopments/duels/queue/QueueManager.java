@@ -176,7 +176,6 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
                 do {
                     foundMatch = false;
                     
-                    // Simple greedy approach: iterate windows
                     outerLoop:
                     for (int i = 0; i <= entries.size() - size; i++) {
                         final List<QueueEntry> firstGroup = new ArrayList<>();
