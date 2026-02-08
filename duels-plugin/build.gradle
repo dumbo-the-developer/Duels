@@ -20,7 +20,7 @@ dependencies {
     implementation 'io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT'
     implementation 'commons-lang:commons-lang:2.6'
     implementation 'com.mojang:authlib:1.5.25'
-    implementation 'me.clip:placeholderapi:2.11.7'
+    implementation 'me.clip:placeholderapi:2.12.2'
     implementation 'com.github.sirblobman.api:core:2.9-SNAPSHOT'
     implementation 'com.github.timderspieler:DeluxeCombat-API:1.5.1'
     implementation 'com.github.sirblobman.combatlogx:api:11.5-SNAPSHOT'
