@@ -170,11 +170,29 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
                     update = true;
                 }
 
+                // Skip matching if not enough players
+                if (entries.size() < size * 2) {
+                    continue;
+                }
+
+                // Check if any arena is available for this queue's kit before attempting to match
+                // This prevents spamming "no arena available" messages when many players are in queue
+                final com.meteordevelopments.duels.kit.KitImpl queueKit = queue.getKit() != null ? kitManager.get(queue.getKit().getName()) : null;
+                if (arenaManager.randomArena(queueKit) == null) {
+                    // No arena available, skip matching for this queue this tick
+                    continue;
+                }
+
                 // Attempt to find two disjoint groups of 'size' each that can fight
                 // Continue matching until no more valid matches can be found
                 boolean foundMatch;
                 do {
                     foundMatch = false;
+
+                    // Re-check arena availability at the start of each match attempt
+                    if (arenaManager.randomArena(queueKit) == null) {
+                        break; // No more arenas available, stop trying to match
+                    }
                     
                     // Simple greedy approach: iterate windows
                     outerLoop:

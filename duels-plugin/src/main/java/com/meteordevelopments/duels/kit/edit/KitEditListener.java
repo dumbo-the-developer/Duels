@@ -77,6 +77,7 @@ public class KitEditListener implements Listener {
     /**
      * Prevents inventory interactions during kit editing.
      * Temporarily disabled to allow kit editing - only blocks external inventories.
+     * Also prevents stack splitting - only allows moving entire stacks between slots.
      */
     @EventHandler(priority = EventPriority.NORMAL)
     public void onInventoryClick(InventoryClickEvent event) {
@@ -91,17 +92,32 @@ public class KitEditListener implements Listener {
                 event.getInventory().getType() != org.bukkit.event.inventory.InventoryType.CRAFTING) {
                 event.setCancelled(true);
                 plugin.getLang().sendMessage(player, "KIT.EDIT.inventory-blocked");
+                return;
             }
-            if (event.getClick() == ClickType.DROP || event.getClick() == ClickType.CONTROL_DROP){
+            
+            // Block drop actions
+            if (event.getClick() == ClickType.DROP || event.getClick() == ClickType.CONTROL_DROP) {
                 event.setCancelled(true);
                 plugin.getLang().sendMessage(player, "KIT.EDIT.drop-blocked");
+                return;
+            }
+            
+            // Block right-click actions that split stacks
+            // RIGHT: splits stack in half when picking up
+            // SHIFT_RIGHT: shift + right click
+            // DOUBLE_CLICK: collects all items of same type (changes stacking)
+            if (event.getClick() == ClickType.RIGHT || 
+                event.getClick() == ClickType.SHIFT_RIGHT ||
+                event.getClick() == ClickType.DOUBLE_CLICK) {
+                event.setCancelled(true);
+                return;
             }
         }
     }
 
     /**
      * Prevents inventory drag events during kit editing.
-     * Temporarily disabled to allow kit editing - only blocks external inventories.
+     * Blocks all drag events to prevent stack splitting across multiple slots.
      */
     @EventHandler(priority = EventPriority.NORMAL)
     public void onInventoryDrag(InventoryDragEvent event) {
@@ -110,13 +126,8 @@ public class KitEditListener implements Listener {
         }
 
         if (KitEditManager.getInstance().isEditing(player)) {
-            // Only block drags with external inventories (chests, etc.)
-            // Allow all player inventory drags for kit editing
-            if (event.getInventory().getType() != org.bukkit.event.inventory.InventoryType.PLAYER &&
-                event.getInventory().getType() != org.bukkit.event.inventory.InventoryType.CRAFTING) {
-                event.setCancelled(true);
-                plugin.getLang().sendMessage(player, "KIT.EDIT.inventory-blocked");
-            }
+            // Block all drag events - dragging distributes items across slots (splits stacks)
+            event.setCancelled(true);
         }
     }
 
