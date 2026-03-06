@@ -11,7 +11,8 @@ import org.bukkit.entity.Player;
 public class RequestDetailsButton extends BaseButton {
 
     public RequestDetailsButton(final DuelsPlugin plugin) {
-        super(plugin, ItemBuilder.of(Items.SIGN).name(plugin.getLang().getMessage("GUI.settings.buttons.details.name"), plugin.getLang()).build());
+        super(plugin, ItemBuilder.of(Items.from(plugin.getConfiguration().getDetailsButtonType(), plugin.getConfiguration().getDetailsButtonData()))
+                .name(plugin.getLang().getMessage("GUI.settings.buttons.details.name"), plugin.getLang()).build());
     }
 
     @Override

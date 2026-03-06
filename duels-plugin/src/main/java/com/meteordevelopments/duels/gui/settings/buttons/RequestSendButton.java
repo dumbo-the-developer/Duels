@@ -12,7 +12,8 @@ import org.bukkit.entity.Player;
 public class RequestSendButton extends BaseButton {
 
     public RequestSendButton(final DuelsPlugin plugin) {
-        super(plugin, ItemBuilder.of(Items.GREEN_PANE.clone()).name(plugin.getLang().getMessage("GUI.settings.buttons.send.name"), plugin.getLang()).build());
+        super(plugin, ItemBuilder.of(Items.from(plugin.getConfiguration().getSendButtonType(), plugin.getConfiguration().getSendButtonData()))
+                .name(plugin.getLang().getMessage("GUI.settings.buttons.send.name"), plugin.getLang()).build());
     }
 
     @Override
