@@ -1,7 +1,6 @@
 package com.meteordevelopments.duels.teleport;
 
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.api.event.match.MatchEndEvent;
 import com.meteordevelopments.duels.hook.hooks.EssentialsHook;
 import com.meteordevelopments.duels.util.Loadable;
 import com.meteordevelopments.duels.util.Log;
