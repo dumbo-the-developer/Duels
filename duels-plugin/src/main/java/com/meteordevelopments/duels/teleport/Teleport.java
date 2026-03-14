@@ -1,6 +1,7 @@
 package com.meteordevelopments.duels.teleport;
 
 import com.meteordevelopments.duels.DuelsPlugin;
+import com.meteordevelopments.duels.api.event.match.MatchEndEvent;
 import com.meteordevelopments.duels.hook.hooks.EssentialsHook;
 import com.meteordevelopments.duels.util.Loadable;
 import com.meteordevelopments.duels.util.Log;
@@ -55,6 +56,10 @@ public final class Teleport implements Loadable, Listener {
 
         for (Entity entity : player.getPassengers()) {
             player.removePassenger(entity);
+        }
+
+        if (player.isInsideVehicle()) {
+            player.leaveVehicle();
         }
 
         player.closeInventory();
