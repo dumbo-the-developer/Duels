@@ -57,6 +57,16 @@ public final class Teleport implements Loadable, Listener {
             player.removePassenger(entity);
         }
 
+        // Wake up sleeping players (bed) and eject from vehicles,
+        // otherwise player.teleport() fails with "Player is dead or is vehicle"
+        if (player.isSleeping()) {
+            player.wakeup(false);
+        }
+
+        if (player.isInsideVehicle()) {
+            player.leaveVehicle();
+        }
+
         player.closeInventory();
 
         if (essentials != null) {
