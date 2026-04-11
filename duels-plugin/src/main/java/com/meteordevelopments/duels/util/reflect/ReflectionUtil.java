@@ -18,9 +18,26 @@ public final class ReflectionUtil {
         PACKAGE_VERSION = packageName.substring(packageName.lastIndexOf('.') + 1);
         if (PACKAGE_VERSION.equalsIgnoreCase("craftbukkit")) {
             String bukkitVersion = Bukkit.getBukkitVersion();
-            MAJOR_VERSION = NumberUtil.parseInt(bukkitVersion.split("-")[0].split("\\.")[1]).orElse(0);
+            final String versionPart = bukkitVersion.split("-")[0];
+            final String[] parts = versionPart.split("\\.");
+            if (parts.length >= 2 && "1".equals(parts[0])) {
+                MAJOR_VERSION = NumberUtil.parseInt(parts[1]).orElse(0);
+            } else {
+                MAJOR_VERSION = NumberUtil.parseInt(parts[0]).orElse(0);
+            }
         } else {
-            MAJOR_VERSION = NumberUtil.parseInt(PACKAGE_VERSION.split("_")[1]).orElse(0);
+            if (PACKAGE_VERSION.contains("_")) {
+                MAJOR_VERSION = NumberUtil.parseInt(PACKAGE_VERSION.split("_")[1]).orElse(0);
+            } else {
+                String bukkitVersion = Bukkit.getBukkitVersion();
+                String versionPart = bukkitVersion.split("-")[0];
+                String[] parts = versionPart.split("\\.");
+
+                int major = NumberUtil.parseInt(parts[0]).orElse(0);
+                int minor = parts.length > 1 ? NumberUtil.parseInt(parts[1]).orElse(0) : 0;
+
+                MAJOR_VERSION = (major == 1 ? minor : major);
+            }
         }
     }
 
