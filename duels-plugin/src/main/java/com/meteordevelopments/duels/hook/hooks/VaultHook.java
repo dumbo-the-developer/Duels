@@ -5,6 +5,7 @@ import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.util.Log;
 import com.meteordevelopments.duels.util.hook.PluginHook;
 import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -53,7 +54,16 @@ public class VaultHook extends PluginHook<DuelsPlugin> {
 
     public void add(final int amount, final Collection<Player> players) {
         if (economy != null) {
-            players.forEach(player -> economy.depositPlayer(player, amount));
+            for (final Player player : players) {
+                final EconomyResponse response = economy.depositPlayer(player, amount);
+
+                if (response == null || !response.transactionSuccess()) {
+                    Log.warn("Vault deposit failed for player=" + player.getName()
+                            + ", amount=" + amount
+                            + ", responseType=" + (response != null ? response.type : "null")
+                            + ", error=" + (response != null ? response.errorMessage : "no response"));
+                }
+            }
         }
     }
 
@@ -64,7 +74,16 @@ public class VaultHook extends PluginHook<DuelsPlugin> {
 
     public void remove(final int amount, final Collection<Player> players) {
         if (economy != null) {
-            players.forEach(player -> economy.withdrawPlayer(player, amount));
+            for (final Player player : players) {
+                final EconomyResponse response = economy.withdrawPlayer(player, amount);
+
+                if (response == null || !response.transactionSuccess()) {
+                    Log.warn("Vault withdraw failed for player=" + player.getName()
+                            + ", amount=" + amount
+                            + ", responseType=" + (response != null ? response.type : "null")
+                            + ", error=" + (response != null ? response.errorMessage : "no response"));
+                }
+            }
         }
     }
 

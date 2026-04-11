@@ -8,6 +8,7 @@ import com.meteordevelopments.duels.util.inventory.InventoryUtil;
 import com.meteordevelopments.duels.util.json.JsonUtil;
 import com.google.common.base.Charsets;
 import lombok.Getter;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -66,25 +67,39 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
             return false;
         }
 
-        EditSession session = new EditSession(player, kitName);
+        EditSession session = new EditSession(plugin, player, kitName);
         activeSessions.put(playerId, session);
 
-        if (player.teleport(plugin.getPlayerManager().getKitLobby())){
-            // Clear player inventory
+        Location kitLobby = plugin.getPlayerManager().getKitLobby();
+        if (kitLobby == null || kitLobby.getWorld() == null) {
+            plugin.getLogger().severe("Unable to start kit edit for " + player.getName() + ": kit lobby is not configured.");
+            abortEditSession(player);
+            return false;
+        }
+
+        teleportAsync(player, kitLobby).thenAccept(success -> {
+            if (!success) {
+                plugin.getLogger().severe("Unable to teleport player " + player.getName() + " to the kit lobby.");
+                plugin.getLang().sendMessage(player, "KIT.EDIT.start-failed", "kit", kitName);
+                abortEditSession(player);
+                return;
+            }
+
+            // Clear inventory after teleport, then load the editable kit.
             player.getInventory().clear();
 
-            // Load kit into player inventory - check for custom kit first
             if (hasPlayerKit(player, kitName)) {
-                // Load player's custom kit
                 loadPlayerKit(player, kitName);
             } else {
-                // Load default kit
                 loadKitToPlayer(player, kit);
             }
-        }else {
-            plugin.getLogger().severe("Unable to teleport to player " + player.getName());
+        }).exceptionally(throwable -> {
+            plugin.getLogger().severe("Failed to teleport player " + player.getName() + " for kit edit: " + throwable.getMessage());
+            plugin.getLang().sendMessage(player, "KIT.EDIT.start-failed", "kit", kitName);
             abortEditSession(player);
-        }
+            return null;
+        });
+
         return true;
     }
     

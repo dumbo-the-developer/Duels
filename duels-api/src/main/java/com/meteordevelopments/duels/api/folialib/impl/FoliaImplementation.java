@@ -334,7 +334,16 @@ public class FoliaImplementation implements PlatformScheduler {
 	@Override
     public WrappedTask runAtEntityLater(Entity entity, @NotNull Runnable runnable, Runnable fallback, long delay) {
         delay = ensureValidDuration(delay);
-        return this.wrapTask(entity.getScheduler().runDelayed(plugin, task -> runnable.run(), fallback, delay));
+
+        ScheduledTask scheduledTask = entity.getScheduler().runDelayed(plugin, task -> runnable.run(), fallback, delay);
+        if (scheduledTask == null) {
+            if (fallback != null) {
+                fallback.run();
+            }
+            return null;
+        }
+
+        return this.wrapTask(scheduledTask);
     }
 
     @Override
@@ -356,10 +365,18 @@ public class FoliaImplementation implements PlatformScheduler {
         }
 
         delay = ensureValidDuration(delay);
-        entity.getScheduler().runDelayed(plugin, task -> {
+        ScheduledTask scheduledTask = entity.getScheduler().runDelayed(plugin, task -> {
             consumer.accept(this.wrapTask(task));
             future.complete(null);
         }, fallback, delay);
+
+        if (scheduledTask == null) {
+            if (fallback != null) {
+                fallback.run();
+            } else {
+                future.complete(null);
+            }
+        }
 
         return future;
     }
@@ -383,9 +400,16 @@ public class FoliaImplementation implements PlatformScheduler {
     public WrappedTask runAtEntityTimer(Entity entity, @NotNull Runnable runnable, Runnable fallback, long delay, long period) {
         delay = ensureValidDuration(delay);
         period = ensureValidDuration(period);
-        return this.wrapTask(
-                entity.getScheduler().runAtFixedRate(plugin, task -> runnable.run(), fallback, delay, period)
-        );
+
+        ScheduledTask scheduledTask = entity.getScheduler().runAtFixedRate(plugin, task -> runnable.run(), fallback, delay, period);
+        if (scheduledTask == null) {
+            if (fallback != null) {
+                fallback.run();
+            }
+            return null;
+        }
+
+        return this.wrapTask(scheduledTask);
     }
 
     @Override
@@ -397,7 +421,10 @@ public class FoliaImplementation implements PlatformScheduler {
     public void runAtEntityTimer(Entity entity, @NotNull Consumer<WrappedTask> consumer, Runnable fallback, long delay, long period) {
         delay = ensureValidDuration(delay);
         period = ensureValidDuration(period);
-        entity.getScheduler().runAtFixedRate(plugin, task -> consumer.accept(this.wrapTask(task)), fallback, delay, period);
+        ScheduledTask scheduledTask = entity.getScheduler().runAtFixedRate(plugin, task -> consumer.accept(this.wrapTask(task)), fallback, delay, period);
+        if (scheduledTask == null && fallback != null) {
+            fallback.run();
+        }
     }
 
     @Override

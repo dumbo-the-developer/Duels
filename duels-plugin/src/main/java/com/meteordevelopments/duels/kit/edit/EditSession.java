@@ -1,5 +1,8 @@
 package com.meteordevelopments.duels.kit.edit;
 
+import com.meteordevelopments.duels.DuelsPlugin;
+import com.meteordevelopments.duels.util.Loadable;
+import com.meteordevelopments.duels.util.Log;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -27,8 +30,10 @@ public class EditSession {
     @Getter
     private final long sessionStartTime;
     private final Location playerLoc;
+    private final DuelsPlugin plugin;
     
-    public EditSession(Player player, String kitName) {
+    public EditSession(DuelsPlugin plugin, Player player, String kitName) {
+        this.plugin = plugin;
         this.playerId = player.getUniqueId();
         this.playerName = player.getName();
         this.kitName = kitName;
@@ -90,7 +95,14 @@ public class EditSession {
         player.updateInventory();
     }
 
-    public void returnToOldLocation(Player player){
-        teleportAsync(player, getPlayerOriginalLoc());
+    public void returnToOldLocation(Player player) {
+        teleportAsync(player, getPlayerOriginalLoc()).thenAccept(success -> {
+            if (!success) {
+                Log.warn((Loadable) this, "Could not teleport " + player.getName() + " back to original kit edit location!");
+            }
+        }).exceptionally(throwable -> {
+            Log.warn((Loadable) this, "Failed to teleport " + player.getName() + " back to original location: " + throwable.getMessage());
+            return null;
+        });
     }
 }
