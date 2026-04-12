@@ -97,7 +97,7 @@ loadScripts(document, 'script');</script>
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab3" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab3', 3)" class="table-tab">Abstract Methods</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab3" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab3', 3)" class="table-tab">Abstract Methods</button><button id="method-summary-table-tab5" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab5', 3)" class="table-tab">Default Methods</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">Modifier and Type</div>
@@ -107,6 +107,16 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#canRequest()" class="member-name-link">canRequest</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Whether or not this user is receiving duel requests.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default long</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#getDuelCooldownRemaining()" class="member-name-link">getDuelCooldownRemaining</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
+<div class="block">Gets the remaining duel cooldown time in milliseconds.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>long</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getDuelCooldownUntil()" class="member-name-link">getDuelCooldownUntil</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">The timestamp in milliseconds when the duel cooldown ends.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>int</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getLosses()" class="member-name-link">getLosses</a>()</code></div>
@@ -143,20 +153,30 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Total wins of this user.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#reset()" class="member-name-link">reset</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Resets user's wins, losses, recent matches, and all rating.</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code>default boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5"><code><a href="#isInDuelCooldown()" class="member-name-link">isInDuelCooldown</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab5">
+<div class="block">Whether this user is currently in duel cooldown.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#resetRating()" class="member-name-link">resetRating</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#reset()" class="member-name-link">reset</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Resets the rating to default for the no kit rating.</div>
+<div class="block">Resets user's wins, losses, recent matches, and all rating.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#resetRating(com.meteordevelopments.duels.api.kit.Kit)" class="member-name-link">resetRating</a><wbr>(<a href="../kit/Kit.html" title="interface in com.meteordevelopments.duels.api.kit">Kit</a>&nbsp;kit)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#resetRating()" class="member-name-link">resetRating</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Resets the rating to default for the no kit rating.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#resetRating(com.meteordevelopments.duels.api.kit.Kit)" class="member-name-link">resetRating</a><wbr>(<a href="../kit/Kit.html" title="interface in com.meteordevelopments.duels.api.kit">Kit</a>&nbsp;kit)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Resets the rating to default for the given <a href="../kit/Kit.html" title="interface in com.meteordevelopments.duels.api.kit"><code>Kit</code></a>.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setDuelCooldownUntil(long)" class="member-name-link">setDuelCooldownUntil</a><wbr>(long&nbsp;duelCooldownUntil)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Sets the timestamp in milliseconds when the duel cooldown ends.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setLosses(int)" class="member-name-link">setLosses</a><wbr>(int&nbsp;losses)</code></div>
@@ -252,6 +272,50 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>losses</code> - New total losses.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getDuelCooldownUntil()">
+<h3>getDuelCooldownUntil</h3>
+<div class="member-signature"><span class="return-type">long</span>&nbsp;<span class="element-name">getDuelCooldownUntil</span>()</div>
+<div class="block">The timestamp in milliseconds when the duel cooldown ends.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>Duel cooldown expiry time in milliseconds since epoch.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="setDuelCooldownUntil(long)">
+<h3>setDuelCooldownUntil</h3>
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">setDuelCooldownUntil</span><wbr><span class="parameters">(long&nbsp;duelCooldownUntil)</span></div>
+<div class="block">Sets the timestamp in milliseconds when the duel cooldown ends.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>duelCooldownUntil</code> - Duel cooldown expiry time in milliseconds since epoch.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="isInDuelCooldown()">
+<h3>isInDuelCooldown</h3>
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isInDuelCooldown</span>()</div>
+<div class="block">Whether this user is currently in duel cooldown.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>True if duel cooldown is still active. False otherwise.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getDuelCooldownRemaining()">
+<h3>getDuelCooldownRemaining</h3>
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">getDuelCooldownRemaining</span>()</div>
+<div class="block">Gets the remaining duel cooldown time in milliseconds.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>Remaining cooldown time in milliseconds, or 0 if no cooldown is active.</dd>
 </dl>
 </section>
 </li>
