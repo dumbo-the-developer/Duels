@@ -41,7 +41,12 @@ public class CommandsConfig extends AbstractConfiguration<DuelsPlugin> {
     private CommandSettings readSettings(final FileConfiguration configuration, final CommandKey key) {
         final String path = String.format("commands.%s", key.getPath());
         final String name = normalize(configuration.getString(path + ".name"), key.getDefaultName());
-        final List<String> aliases = normalizeAliases(configuration.getStringList(path + ".aliases"), name, key.getDefaultAliases());
+        final String aliasesPath = path + ".aliases";
+        final List<String> aliases = normalizeAliases(
+            configuration.isSet(aliasesPath) ? configuration.getStringList(aliasesPath) : null,
+            name,
+            configuration.isSet(aliasesPath) ? Collections.emptyList() : key.getDefaultAliases()
+        );
         return new CommandSettings(name, aliases);
     }
 

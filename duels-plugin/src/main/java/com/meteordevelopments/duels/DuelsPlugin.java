@@ -192,6 +192,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
      * @return true if unload was successful, otherwise false
      */
     private boolean unload() {
+        unregisterPluginCommands();
         registeredListeners.forEach(HandlerList::unregisterAll);
         registeredListeners.clear();
         // Unregister all extension listeners that isn't using the method Duels#registerListener
@@ -220,6 +221,42 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         }
 
         return true;
+    }
+
+    private void unregisterPluginCommands() {
+        final CommandMap commandMap = getCommandMap();
+        if (commandMap == null) {
+            return;
+        }
+
+        final Map<String, org.bukkit.command.Command> knownCommands = getKnownCommands(commandMap);
+        if (knownCommands == null) {
+            return;
+        }
+
+        int removed = 0;
+        final Iterator<Map.Entry<String, org.bukkit.command.Command>> iterator = knownCommands.entrySet().iterator();
+        while (iterator.hasNext()) {
+            final Map.Entry<String, org.bukkit.command.Command> entry = iterator.next();
+            final org.bukkit.command.Command command = entry.getValue();
+
+            if (!(command instanceof PluginCommand pluginCommand)) {
+                continue;
+            }
+
+            final org.bukkit.plugin.Plugin owner = pluginCommand.getPlugin();
+            if (owner == null || !owner.getName().equalsIgnoreCase(getDescription().getName())) {
+                continue;
+            }
+
+            command.unregister(commandMap);
+            iterator.remove();
+            removed++;
+        }
+
+        if (removed > 0) {
+            getLogger().info("Unregistered " + removed + " stale command entries from command map.");
+        }
     }
 
     private void registerAllCommands() {
