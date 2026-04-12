@@ -47,6 +47,7 @@ import com.meteordevelopments.duels.util.json.JsonUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandMap;
+import org.bukkit.entity.Player;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
@@ -402,6 +403,16 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             getLogger().log(Level.SEVERE, "Failed to construct PluginCommand for '" + name + "'", t);
             return null;
         }
+    }
+
+    @Override
+    public boolean teleportToLobby(@NotNull final Player player) {
+        if (playerManager == null || teleport == null || player == null) {
+            return false;
+        }
+
+        teleport.tryTeleport(player, playerManager.getLobby());
+        return true;
     }
 
     @Override

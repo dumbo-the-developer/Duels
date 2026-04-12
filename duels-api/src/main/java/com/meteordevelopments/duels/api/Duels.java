@@ -7,6 +7,7 @@ import com.meteordevelopments.duels.api.queue.DQueueManager;
 import com.meteordevelopments.duels.api.queue.sign.QueueSignManager;
 import com.meteordevelopments.duels.api.spectate.SpectateManager;
 import com.meteordevelopments.duels.api.user.UserManager;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -68,6 +69,16 @@ public interface Duels extends Plugin {
      */
     @NotNull
     QueueSignManager getQueueSignManager();
+
+
+    /**
+     * Teleports the given player to the Duels lobby/spawn location.
+     *
+     * @param player Player to teleport. Should not be null!
+     * @return True if the teleport was started successfully. False otherwise.
+     * @since 3.5.0
+     */
+    boolean teleportToLobby(@NotNull final Player player);
 
 
     /**
