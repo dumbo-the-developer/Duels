@@ -680,6 +680,13 @@ public class DuelManager implements Loadable {
                 return;
             }
 
+            // Cursor-held items are not part of death drops, so clear them before the
+            // match logic decides how to handle the death.
+            if (player.getItemOnCursor() != null) {
+                player.setItemOnCursor(null);
+                player.updateInventory();
+            }
+
             // Handle ROUNDS3 deaths that bypass EntityDamageEvent (like /kill command)
             if (match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3)) {
                 event.setDeathMessage(null);
