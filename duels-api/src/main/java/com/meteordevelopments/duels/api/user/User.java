@@ -62,6 +62,42 @@ public interface User {
 
 
     /**
+     * The timestamp in milliseconds when the duel cooldown ends.
+     *
+     * @return Duel cooldown expiry time in milliseconds since epoch.
+     */
+    long getDuelCooldownUntil();
+
+
+    /**
+     * Sets the timestamp in milliseconds when the duel cooldown ends.
+     *
+     * @param duelCooldownUntil Duel cooldown expiry time in milliseconds since epoch.
+     */
+    void setDuelCooldownUntil(final long duelCooldownUntil);
+
+
+    /**
+     * Whether this user is currently in duel cooldown.
+     *
+     * @return True if duel cooldown is still active. False otherwise.
+     */
+    default boolean isInDuelCooldown() {
+        return getDuelCooldownUntil() > System.currentTimeMillis();
+    }
+
+
+    /**
+     * Gets the remaining duel cooldown time in milliseconds.
+     *
+     * @return Remaining cooldown time in milliseconds, or 0 if no cooldown is active.
+     */
+    default long getDuelCooldownRemaining() {
+        return Math.max(getDuelCooldownUntil() - System.currentTimeMillis(), 0L);
+    }
+
+
+    /**
      * Whether or not this user is receiving duel requests.
      *
      * @return True if this user has requests enabled. False otherwise.

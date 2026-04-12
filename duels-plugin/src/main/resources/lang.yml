@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 15
+config-version: 16
 
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
@@ -54,6 +54,7 @@ ERROR:
     in-creative-mode: '{PREFIX} &cYou cannot duel in creative mode.'
     in-blacklisted-world: '{PREFIX} &cYou cannot duel in this world.'
     is-tagged: '{PREFIX} &cYou cannot duel while combat tagged.'
+    in-cooldown: '{PREFIX} &c%name% is in duel cooldown for %time%.'
     not-in-duelzone: '{PREFIX} &cYou can only duel in the following regions: %regions%'
     requests-disabled: '{PREFIX} &c%name% is currently not accepting duel requests.'
     already-has-request: '{PREFIX} &cYou already have a request sent to %name%.'

@@ -5,8 +5,10 @@ import com.meteordevelopments.duels.api.event.request.RequestSendEvent;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.config.Lang;
 import com.meteordevelopments.duels.setting.Settings;
+import com.meteordevelopments.duels.util.DateUtil;
 import com.meteordevelopments.duels.util.Loadable;
 import com.meteordevelopments.duels.util.TextBuilder;
+import com.meteordevelopments.duels.data.UserManagerImpl;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent.Action;
 import org.bukkit.Bukkit;
@@ -22,11 +24,13 @@ public class RequestManager implements Loadable, Listener {
 
     private final Config config;
     private final Lang lang;
+    private final UserManagerImpl userManager;
     private final Map<UUID, Map<UUID, RequestImpl>> requests = new HashMap<>();
 
     public RequestManager(final DuelsPlugin plugin) {
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
+        this.userManager = plugin.getUserManager();
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
@@ -52,6 +56,27 @@ public class RequestManager implements Loadable, Listener {
 
     public void send(final Player sender, final Player target, final Settings settings) {
         final RequestImpl request = new RequestImpl(sender, target, settings);
+        final Collection<Player> senderPlayers = request.isPartyDuel() ? request.getSenderParty().getOnlineMembers() : Collections.singleton(sender);
+        final Collection<Player> targetPlayers = request.isPartyDuel() ? request.getTargetParty().getOnlineMembers() : Collections.singleton(target);
+
+        final Player senderCooldownPlayer = userManager.getCooldownPlayer(senderPlayers);
+
+        if (senderCooldownPlayer != null) {
+            lang.sendMessage(sender, "ERROR.duel.in-cooldown",
+                    "name", senderCooldownPlayer.getName(),
+                    "time", DateUtil.formatMilliseconds(userManager.getDuelCooldownRemaining(senderCooldownPlayer)));
+            return;
+        }
+
+        final Player targetCooldownPlayer = userManager.getCooldownPlayer(targetPlayers);
+
+        if (targetCooldownPlayer != null) {
+            lang.sendMessage(sender, "ERROR.duel.in-cooldown",
+                    "name", targetCooldownPlayer.getName(),
+                    "time", DateUtil.formatMilliseconds(userManager.getDuelCooldownRemaining(targetCooldownPlayer)));
+            return;
+        }
+
         final RequestSendEvent event = new RequestSendEvent(sender, target, request);
         Bukkit.getPluginManager().callEvent(event);
 

@@ -18,7 +18,6 @@ import com.meteordevelopments.duels.validator.validators.match.*;
 import com.meteordevelopments.duels.validator.validators.request.self.*;
 import com.meteordevelopments.duels.validator.validators.request.target.*;
 import org.bukkit.entity.Player;
-
 import lombok.Getter;
 
 public class ValidatorManager implements Loadable {
@@ -57,6 +56,7 @@ public class ValidatorManager implements Loadable {
         selfValidators.put(SelfDuelZoneValidator.class, new SelfEmptyInventoryValidator(plugin));
         selfValidators.put(SelfCheckMatchValidator.class, new SelfPreventCreativeValidator(plugin));
         selfValidators.put(SelfCheckSpectateValidator.class, new SelfEmptyInventoryValidator(plugin));
+        selfValidators.put(SelfCooldownValidator.class, new SelfCooldownValidator(plugin));
 
         targetValidators.put(TargetCheckSelfValidator.class, new TargetCheckSelfValidator(plugin));
         targetValidators.put(TargetCanRequestValidator.class, new TargetCanRequestValidator(plugin));
@@ -67,6 +67,7 @@ public class ValidatorManager implements Loadable {
         targetValidators.put(TargetNoRequestValidator.class, new TargetNoRequestValidator(plugin));
         targetValidators.put(TargetHasRequestValidator.class, new TargetHasRequestValidator(plugin));
         targetValidators.put(TargetPartyOwnerValidator.class, new TargetPartyOwnerValidator(plugin));
+        targetValidators.put(TargetCooldownValidator.class, new TargetCooldownValidator(plugin));
 
         duelSelfValidators = ValidatorUtil.buildList(
                 self(SelfEmptyInventoryValidator.class),
@@ -75,7 +76,8 @@ public class ValidatorManager implements Loadable {
                 self(SelfCombatTagValidator.class),
                 self(SelfDuelZoneValidator.class),
                 self(SelfCheckMatchValidator.class),
-                self(SelfCheckSpectateValidator.class)
+            self(SelfCheckSpectateValidator.class),
+            self(SelfCooldownValidator.class)
         );
         duelTargetValidators = ValidatorUtil.buildList(
                 target(TargetCheckSelfValidator.class),
@@ -84,7 +86,8 @@ public class ValidatorManager implements Loadable {
                 target(TargetCheckMatchValidator.class),
                 target(TargetCheckSpectateValidator.class),
                 target(TargetHasRequestValidator.class),
-                target(TargetPartyOwnerValidator.class)
+            target(TargetPartyOwnerValidator.class),
+            target(TargetCooldownValidator.class)
         );
 
         duelAcceptSelfValidators = duelSelfValidators;
@@ -95,7 +98,8 @@ public class ValidatorManager implements Loadable {
                 target(TargetCheckSelfMatchValidator.class),
                 target(TargetCheckSpectateValidator.class),
                 target(TargetNoRequestValidator.class),
-                target(TargetPartyOwnerValidator.class)
+                target(TargetPartyOwnerValidator.class),
+                target(TargetCooldownValidator.class)
         );
 
         duelDenyTargetValidators = ValidatorUtil.buildList(

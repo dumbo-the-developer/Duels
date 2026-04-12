@@ -25,6 +25,7 @@ import com.meteordevelopments.duels.setting.Settings;
 import com.meteordevelopments.duels.spectate.SpectateManagerImpl;
 import com.meteordevelopments.duels.util.Loadable;
 import com.meteordevelopments.duels.util.Log;
+import com.meteordevelopments.duels.util.DateUtil;
 import com.meteordevelopments.duels.util.NumberUtil;
 import com.meteordevelopments.duels.util.compat.Items;
 import com.meteordevelopments.duels.util.gui.MultiPageGui;
@@ -457,6 +458,13 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
         if (spectateManager.isSpectating(player)) {
             lang.sendMessage(player, "ERROR.duel.already-spectating.sender");
+            return false;
+        }
+
+        if (userManager.isOnDuelCooldown(player)) {
+            lang.sendMessage(player, "ERROR.duel.in-cooldown",
+                    "name", player.getName(),
+                    "time", DateUtil.formatMilliseconds(userManager.getDuelCooldownRemaining(player)));
             return false;
         }
 

@@ -287,6 +287,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean sendDeathMessages;
     @Getter
+    private long duelCooldown;
+    @Getter
     private int partyInviteExpiration;
     @Getter
     private int partyAutoDisbandAfter;
@@ -490,6 +492,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         disableMovementInEndgame = configuration.getBoolean("disable-movement-in-endgame", false);
 
         sendDeathMessages = configuration.getBoolean("duel.send-death-messages", true);
+        duelCooldown = Math.max(configuration.getLong("duel.cooldown", 0L), 0L);
         partyInviteExpiration = configuration.getInt("party.invite-expiration", 30);
         partyAutoDisbandAfter = configuration.getInt("party.auto-disband-after", 10);
         partyMaxSize = configuration.getInt("party.max-size", 10);

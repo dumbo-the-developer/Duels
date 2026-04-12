@@ -7,6 +7,7 @@ import com.meteordevelopments.duels.hook.hooks.worldguard.WorldGuardHook;
 import com.meteordevelopments.duels.party.Party;
 import com.meteordevelopments.duels.request.RequestImpl;
 import com.meteordevelopments.duels.setting.Settings;
+import com.meteordevelopments.duels.util.DateUtil;
 import com.meteordevelopments.duels.util.function.Pair;
 
 import com.meteordevelopments.duels.util.validator.ValidatorUtil;
@@ -47,6 +48,24 @@ public class AcceptCommand extends BaseCommand {
         final Collection<Player> targetPlayers = targetParty == null ? Collections.singleton(target) : targetParty.getOnlineMembers();
 
         if (!ValidatorUtil.validate(validatorManager.getDuelAcceptTargetValidators(), new Pair<>(player, target), targetParty, targetPlayers)) {
+            return;
+        }
+
+        final Player senderCooldownPlayer = userManager.getCooldownPlayer(players);
+
+        if (senderCooldownPlayer != null) {
+            lang.sendMessage(player, "ERROR.duel.in-cooldown",
+                    "name", senderCooldownPlayer.getName(),
+                    "time", DateUtil.formatMilliseconds(userManager.getDuelCooldownRemaining(senderCooldownPlayer)));
+            return;
+        }
+
+        final Player targetCooldownPlayer = userManager.getCooldownPlayer(targetPlayers);
+
+        if (targetCooldownPlayer != null) {
+            lang.sendMessage(player, "ERROR.duel.in-cooldown",
+                    "name", targetCooldownPlayer.getName(),
+                    "time", DateUtil.formatMilliseconds(userManager.getDuelCooldownRemaining(targetCooldownPlayer)));
             return;
         }
 

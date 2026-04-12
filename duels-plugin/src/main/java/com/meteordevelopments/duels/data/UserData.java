@@ -33,6 +33,8 @@ public class UserData implements User {
     private volatile int wins;
     @Getter
     private volatile int losses;
+    @Getter
+    private volatile long duelCooldownUntil;
     private boolean requests = true;
     private ConcurrentHashMap<String, Integer> rating;
     private List<MatchData> matches = new ArrayList<>();
@@ -113,6 +115,7 @@ public class UserData implements User {
     public void reset() {
         wins = 0;
         losses = 0;
+        duelCooldownUntil = 0L;
         matches.clear();
         rating.clear();
 
@@ -161,6 +164,15 @@ public class UserData implements User {
     public void addLoss() {
         final int losses = this.losses;
         this.losses = losses + 1;
+    }
+
+    @Override
+    public void setDuelCooldownUntil(final long duelCooldownUntil) {
+        this.duelCooldownUntil = Math.max(duelCooldownUntil, 0L);
+
+        if (isOffline()) {
+            trySave();
+        }
     }
 
     public void addMatch(final MatchData matchData) {

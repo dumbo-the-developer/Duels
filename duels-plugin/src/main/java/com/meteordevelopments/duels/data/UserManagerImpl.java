@@ -218,6 +218,48 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
         return DateUtil.format((creation + config.getTopUpdateInterval() - System.currentTimeMillis()) / 1000L);
     }
 
+    public boolean isOnDuelCooldown(@NotNull final Player player) {
+        Objects.requireNonNull(player, "player");
+        final UserData user = get(player);
+        return user != null && user.isInDuelCooldown();
+    }
+
+    public long getDuelCooldownRemaining(@NotNull final Player player) {
+        Objects.requireNonNull(player, "player");
+        final UserData user = get(player);
+        return user != null ? user.getDuelCooldownRemaining() : 0L;
+    }
+
+    public Player getCooldownPlayer(@NotNull final Collection<Player> players) {
+        Objects.requireNonNull(players, "players");
+        return players.stream().filter(this::isOnDuelCooldown).findFirst().orElse(null);
+    }
+
+    public boolean hasDuelCooldown(@NotNull final Collection<Player> players) {
+        Objects.requireNonNull(players, "players");
+        return getCooldownPlayer(players) != null;
+    }
+
+    public void applyDuelCooldown(@NotNull final Collection<Player> players) {
+        Objects.requireNonNull(players, "players");
+
+        final long cooldown = config.getDuelCooldown();
+
+        if (cooldown <= 0L) {
+            return;
+        }
+
+        final long until = System.currentTimeMillis() + (cooldown * 1000L);
+
+        for (final Player player : players) {
+            final UserData user = get(player);
+
+            if (user != null) {
+                user.setDuelCooldownUntil(until);
+            }
+        }
+    }
+
     private TopEntry get(final long interval, final TopEntry previous, final Function<User, Integer> function, final String type, final String identifier) {
         if (previous == null || System.currentTimeMillis() - previous.getCreation() >= interval) {
             return new TopEntry(type, identifier, subList(sorted(function)));
@@ -385,6 +427,8 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
             );
         }
 
+        applyDuelCooldown(match.getAllPlayers());
+
         if (message == null) {
             return;
         }
@@ -484,6 +528,9 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
                 player.sendMessage(message);
             }
         }
+
+        applyDuelCooldown(winners);
+        applyDuelCooldown(losers);
     }
 
 }

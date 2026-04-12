@@ -7,7 +7,7 @@
 #                                       #
 #########################################
 # DO NOT EDIT THIS VALUE!
-config-version: 15
+config-version: 16
 
 # If set to 'true', a notification and a download link will be printed on both console and in-game when a new update is available.
 # default: true
@@ -259,6 +259,11 @@ duel:
   # If set to 'true', death messages will be sent to players in match & spectators of the arena.
   # default: true
   send-death-messages: true
+
+  # Duel cooldown in seconds after a player finishes a duel.
+  # Set to 0 to disable duel cooldown.
+  # default: 0
+  cooldown: 0
 
   # If set to 'true', players will be teleported to the location where they were before the duel instead of duel lobby.
   # default: false

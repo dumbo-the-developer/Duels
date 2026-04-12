@@ -93,6 +93,7 @@ public class DuelManager implements Loadable {
                     handleTie(matchPlayer, arena, match, false);
                     lang.sendMessage(matchPlayer, "DUEL.on-end.tie");
                 });
+                userDataManager.applyDuelCooldown(match.getAllPlayers());
                 plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
                 arena.endMatch(null, null, Reason.TIE);
                 return;
@@ -517,6 +518,17 @@ public class DuelManager implements Loadable {
         final Collection<Player> players = new ArrayList<>(first.size() + second.size());
         players.addAll(first);
         players.addAll(second);
+
+        if (config.getDuelCooldown() > 0L) {
+            final Player cooldownPlayer = userDataManager.getCooldownPlayer(players);
+
+            if (cooldownPlayer != null) {
+                lang.sendMessage(players, "ERROR.duel.in-cooldown",
+                        "name", cooldownPlayer.getName(),
+                        "time", DateUtil.formatMilliseconds(userDataManager.getDuelCooldownRemaining(cooldownPlayer)));
+                return false;
+            }
+        }
 
         if (!ValidatorUtil.validate(plugin.getValidatorManager().getMatchValidators(), players, settings)) {
             refundItems(players, items);

@@ -12,6 +12,7 @@ import com.meteordevelopments.duels.party.Party;
 import com.meteordevelopments.duels.setting.Settings;
 import com.meteordevelopments.duels.util.NumberUtil;
 import com.meteordevelopments.duels.util.StringUtil;
+import com.meteordevelopments.duels.util.DateUtil;
 import com.meteordevelopments.duels.util.function.Pair;
 import com.meteordevelopments.duels.util.validator.ValidatorUtil;
 import org.bukkit.Bukkit;
@@ -85,6 +86,15 @@ public class DuelCommand extends BaseCommand {
         final Party targetParty = partyManager.get(target);
         final Collection<Player> targetPlayers = targetParty == null ? Collections.singleton(target) : targetParty.getOnlineMembers();
         if (!ValidatorUtil.validate(validatorManager.getDuelTargetValidators(), new Pair<>(player, target), targetParty, targetPlayers)) {
+            return true;
+        }
+
+        final Player cooldownPlayer = userManager.getCooldownPlayer(players);
+
+        if (cooldownPlayer != null) {
+            lang.sendMessage(sender, "ERROR.duel.in-cooldown",
+                    "name", cooldownPlayer.getName(),
+                    "time", DateUtil.formatMilliseconds(userManager.getDuelCooldownRemaining(cooldownPlayer)));
             return true;
         }
 
