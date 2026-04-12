@@ -4,7 +4,7 @@ import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.gui.BaseButton;
 import com.meteordevelopments.duels.gui.options.OptionsGui;
 import com.meteordevelopments.duels.gui.options.OptionsGui.Option;
-import com.meteordevelopments.duels.kit.KitImpl;
+import com.meteordevelopments.duels.core.kit.KitImpl;
 import com.meteordevelopments.duels.util.inventory.ItemBuilder;
 import org.bukkit.entity.Player;
 

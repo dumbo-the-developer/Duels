@@ -3,7 +3,7 @@ package com.meteordevelopments.duels.command.commands.queue.subcommands;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.Permissions;
 import com.meteordevelopments.duels.command.BaseCommand;
-import com.meteordevelopments.duels.queue.Queue;
+import com.meteordevelopments.duels.core.queue.Queue;
 import com.meteordevelopments.duels.util.StringUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;

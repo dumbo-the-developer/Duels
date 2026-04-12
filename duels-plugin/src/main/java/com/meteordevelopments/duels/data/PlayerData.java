@@ -1,6 +1,6 @@
 package com.meteordevelopments.duels.data;
 
-import com.meteordevelopments.duels.player.PlayerInfo;
+import com.meteordevelopments.duels.core.player.PlayerInfo;
 import com.meteordevelopments.duels.util.Log;
 import org.bukkit.inventory.ItemStack;
 

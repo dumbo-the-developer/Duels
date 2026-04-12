@@ -1,8 +1,8 @@
 package com.meteordevelopments.duels.data;
 
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.kit.KitImpl;
-import com.meteordevelopments.duels.kit.KitImpl.Characteristic;
+import com.meteordevelopments.duels.core.kit.KitImpl;
+import com.meteordevelopments.duels.core.kit.KitImpl.Characteristic;
 import com.meteordevelopments.duels.util.Log;
 import com.meteordevelopments.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;

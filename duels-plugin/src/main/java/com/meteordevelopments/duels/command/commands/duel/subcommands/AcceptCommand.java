@@ -5,7 +5,7 @@ import com.meteordevelopments.duels.api.event.request.RequestAcceptEvent;
 import com.meteordevelopments.duels.command.BaseCommand;
 import com.meteordevelopments.duels.hook.hooks.worldguard.WorldGuardHook;
 import com.meteordevelopments.duels.party.Party;
-import com.meteordevelopments.duels.request.RequestImpl;
+import com.meteordevelopments.duels.core.request.RequestImpl;
 import com.meteordevelopments.duels.setting.Settings;
 import com.meteordevelopments.duels.util.DateUtil;
 import com.meteordevelopments.duels.util.function.Pair;

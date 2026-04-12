@@ -4,9 +4,9 @@ import com.meteordevelopments.duels.party.Party;
 import lombok.Getter;
 import lombok.Setter;
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.arena.ArenaImpl;
+import com.meteordevelopments.duels.core.arena.ArenaImpl;
 import com.meteordevelopments.duels.gui.settings.SettingsGui;
-import com.meteordevelopments.duels.kit.KitImpl;
+import com.meteordevelopments.duels.core.kit.KitImpl;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 

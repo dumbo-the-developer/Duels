@@ -2,8 +2,8 @@ package com.meteordevelopments.duels.listeners;
 
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.Permissions;
-import com.meteordevelopments.duels.arena.ArenaManagerImpl;
-import com.meteordevelopments.duels.kit.edit.KitEditManager;
+import com.meteordevelopments.duels.core.arena.ArenaManagerImpl;
+import com.meteordevelopments.duels.core.kit.edit.KitEditManager;
 import com.meteordevelopments.duels.util.Log;
 import com.meteordevelopments.duels.util.StringUtil;
 import com.meteordevelopments.duels.util.compat.Identifiers;

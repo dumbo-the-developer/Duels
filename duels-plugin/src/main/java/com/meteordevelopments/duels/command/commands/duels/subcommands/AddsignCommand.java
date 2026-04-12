@@ -2,8 +2,8 @@ package com.meteordevelopments.duels.command.commands.duels.subcommands;
 
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.command.BaseCommand;
-import com.meteordevelopments.duels.kit.KitImpl;
-import com.meteordevelopments.duels.queue.Queue;
+import com.meteordevelopments.duels.core.kit.KitImpl;
+import com.meteordevelopments.duels.core.queue.Queue;
 import com.meteordevelopments.duels.util.BlockUtil;
 import com.meteordevelopments.duels.util.NumberUtil;
 import com.meteordevelopments.duels.util.StringUtil;

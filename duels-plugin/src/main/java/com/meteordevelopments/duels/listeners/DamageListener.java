@@ -1,8 +1,8 @@
 package com.meteordevelopments.duels.listeners;
 
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.arena.ArenaImpl;
-import com.meteordevelopments.duels.arena.ArenaManagerImpl;
+import com.meteordevelopments.duels.core.arena.ArenaImpl;
+import com.meteordevelopments.duels.core.arena.ArenaManagerImpl;
 import com.meteordevelopments.duels.party.PartyManagerImpl;
 import com.meteordevelopments.duels.util.EventUtil;
 import org.bukkit.Bukkit;

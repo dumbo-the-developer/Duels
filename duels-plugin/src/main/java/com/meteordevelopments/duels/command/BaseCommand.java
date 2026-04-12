@@ -1,24 +1,24 @@
 package com.meteordevelopments.duels.command;
 
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.arena.ArenaManagerImpl;
-import com.meteordevelopments.duels.betting.BettingManager;
+import com.meteordevelopments.duels.core.arena.ArenaManagerImpl;
+import com.meteordevelopments.duels.core.betting.BettingManager;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.config.Lang;
 import com.meteordevelopments.duels.data.UserManagerImpl;
-import com.meteordevelopments.duels.duel.DuelManager;
+import com.meteordevelopments.duels.core.DuelManager;
 import com.meteordevelopments.duels.hook.HookManager;
 import com.meteordevelopments.duels.inventories.InventoryManager;
-import com.meteordevelopments.duels.kit.KitManagerImpl;
+import com.meteordevelopments.duels.core.kit.KitManagerImpl;
 import com.meteordevelopments.duels.party.PartyManagerImpl;
-import com.meteordevelopments.duels.player.PlayerInfoManager;
-import com.meteordevelopments.duels.queue.QueueManager;
-import com.meteordevelopments.duels.queue.sign.QueueSignManagerImpl;
-import com.meteordevelopments.duels.request.RequestManager;
+import com.meteordevelopments.duels.core.player.PlayerInfoManager;
+import com.meteordevelopments.duels.core.queue.QueueManager;
+import com.meteordevelopments.duels.core.queue.sign.QueueSignManagerImpl;
+import com.meteordevelopments.duels.core.request.RequestManager;
 import com.meteordevelopments.duels.setting.SettingsManager;
-import com.meteordevelopments.duels.spectate.SpectateManagerImpl;
+import com.meteordevelopments.duels.core.spectate.SpectateManagerImpl;
 import com.meteordevelopments.duels.util.command.AbstractCommand;
-import com.meteordevelopments.duels.validator.ValidatorManager;
+import com.meteordevelopments.duels.core.validator.ValidatorManager;
 import org.bukkit.command.CommandSender;
 
 import java.util.Collection;

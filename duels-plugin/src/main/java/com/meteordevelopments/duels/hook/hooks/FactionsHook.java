@@ -4,7 +4,7 @@ import com.massivecraft.factions.entity.MPlayer;
 import com.massivecraft.factions.event.EventFactionsPowerChange;
 import com.massivecraft.factions.event.PowerLossEvent;
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.arena.ArenaManagerImpl;
+import com.meteordevelopments.duels.core.arena.ArenaManagerImpl;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.util.Log;
 import com.meteordevelopments.duels.util.hook.PluginHook;

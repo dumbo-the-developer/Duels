@@ -3,7 +3,7 @@ package com.meteordevelopments.duels.hook.hooks;
 import com.github.sirblobman.combatlogx.api.ICombatLogX;
 import com.github.sirblobman.combatlogx.api.event.PlayerPreTagEvent;
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.arena.ArenaManagerImpl;
+import com.meteordevelopments.duels.core.arena.ArenaManagerImpl;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.util.hook.PluginHook;
 import org.bukkit.Bukkit;

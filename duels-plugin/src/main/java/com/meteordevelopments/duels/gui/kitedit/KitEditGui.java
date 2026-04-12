@@ -2,7 +2,7 @@ package com.meteordevelopments.duels.gui.kitedit;
 
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.gui.kitedit.buttons.KitEditButton;
-import com.meteordevelopments.duels.kit.KitImpl;
+import com.meteordevelopments.duels.core.kit.KitImpl;
 import com.meteordevelopments.duels.util.compat.Items;
 import com.meteordevelopments.duels.util.gui.MultiPageGui;
 import com.meteordevelopments.duels.util.inventory.ItemBuilder;

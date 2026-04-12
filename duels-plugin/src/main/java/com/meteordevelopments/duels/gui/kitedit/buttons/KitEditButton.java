@@ -2,8 +2,8 @@ package com.meteordevelopments.duels.gui.kitedit.buttons;
 
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.gui.BaseButton;
-import com.meteordevelopments.duels.kit.KitImpl;
-import com.meteordevelopments.duels.kit.edit.KitEditManager;
+import com.meteordevelopments.duels.core.kit.KitImpl;
+import com.meteordevelopments.duels.core.kit.edit.KitEditManager;
 import org.bukkit.entity.Player;
 
 /**

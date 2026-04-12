@@ -2,10 +2,10 @@ package com.meteordevelopments.duels.listeners;
 
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.Permissions;
-import com.meteordevelopments.duels.arena.ArenaManagerImpl;
+import com.meteordevelopments.duels.core.arena.ArenaManagerImpl;
 import com.meteordevelopments.duels.config.Lang;
-import com.meteordevelopments.duels.spectate.SpectateManagerImpl;
-import com.meteordevelopments.duels.teleport.Teleport;
+import com.meteordevelopments.duels.core.spectate.SpectateManagerImpl;
+import com.meteordevelopments.duels.core.teleport.Teleport;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;

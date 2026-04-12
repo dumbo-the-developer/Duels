@@ -2,10 +2,10 @@ package com.meteordevelopments.duels.gui.bind.buttons;
 
 import lombok.Setter;
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.arena.ArenaImpl;
+import com.meteordevelopments.duels.core.arena.ArenaImpl;
 import com.meteordevelopments.duels.gui.BaseButton;
 import com.meteordevelopments.duels.gui.bind.BindGui;
-import com.meteordevelopments.duels.kit.KitImpl;
+import com.meteordevelopments.duels.core.kit.KitImpl;
 import com.meteordevelopments.duels.util.StringUtil;
 import com.meteordevelopments.duels.util.compat.Items;
 import com.meteordevelopments.duels.util.inventory.ItemBuilder;

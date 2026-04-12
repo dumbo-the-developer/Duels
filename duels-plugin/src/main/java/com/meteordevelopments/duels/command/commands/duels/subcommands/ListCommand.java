@@ -3,9 +3,9 @@ package com.meteordevelopments.duels.command.commands.duels.subcommands;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.api.kit.Kit;
 import com.meteordevelopments.duels.api.queue.DQueue;
-import com.meteordevelopments.duels.arena.ArenaImpl;
+import com.meteordevelopments.duels.core.arena.ArenaImpl;
 import com.meteordevelopments.duels.command.BaseCommand;
-import com.meteordevelopments.duels.queue.sign.QueueSignImpl;
+import com.meteordevelopments.duels.core.queue.sign.QueueSignImpl;
 import com.meteordevelopments.duels.util.StringUtil;
 import org.bukkit.command.CommandSender;
 

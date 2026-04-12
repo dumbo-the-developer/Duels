@@ -1,15 +1,15 @@
 package com.meteordevelopments.duels.gui;
 
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.arena.ArenaManagerImpl;
+import com.meteordevelopments.duels.core.arena.ArenaManagerImpl;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.config.Lang;
-import com.meteordevelopments.duels.kit.KitManagerImpl;
-import com.meteordevelopments.duels.queue.QueueManager;
-import com.meteordevelopments.duels.queue.sign.QueueSignManagerImpl;
-import com.meteordevelopments.duels.request.RequestManager;
+import com.meteordevelopments.duels.core.kit.KitManagerImpl;
+import com.meteordevelopments.duels.core.queue.QueueManager;
+import com.meteordevelopments.duels.core.queue.sign.QueueSignManagerImpl;
+import com.meteordevelopments.duels.core.request.RequestManager;
 import com.meteordevelopments.duels.setting.SettingsManager;
-import com.meteordevelopments.duels.spectate.SpectateManagerImpl;
+import com.meteordevelopments.duels.core.spectate.SpectateManagerImpl;
 import com.meteordevelopments.duels.util.gui.Button;
 import org.bukkit.inventory.ItemStack;
 

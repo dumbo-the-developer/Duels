@@ -1,9 +1,9 @@
 package com.meteordevelopments.duels.data;
 
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.kit.KitImpl;
-import com.meteordevelopments.duels.queue.Queue;
-import com.meteordevelopments.duels.queue.sign.QueueSignImpl;
+import com.meteordevelopments.duels.core.kit.KitImpl;
+import com.meteordevelopments.duels.core.queue.Queue;
+import com.meteordevelopments.duels.core.queue.sign.QueueSignImpl;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;

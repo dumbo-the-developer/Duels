@@ -1,7 +1,7 @@
 package com.meteordevelopments.duels.command.commands.duels.subcommands;
 
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.arena.ArenaImpl;
+import com.meteordevelopments.duels.core.arena.ArenaImpl;
 import com.meteordevelopments.duels.command.BaseCommand;
 import com.meteordevelopments.duels.util.StringUtil;
 import com.meteordevelopments.duels.util.inventory.InventoryUtil;

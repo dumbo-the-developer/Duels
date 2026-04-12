@@ -5,7 +5,7 @@ import com.meteordevelopments.duels.Permissions;
 import com.meteordevelopments.duels.api.user.UserManager.TopData;
 import com.meteordevelopments.duels.api.user.UserManager.TopEntry;
 import com.meteordevelopments.duels.command.BaseCommand;
-import com.meteordevelopments.duels.kit.KitImpl;
+import com.meteordevelopments.duels.core.kit.KitImpl;
 import com.meteordevelopments.duels.util.StringUtil;
 import org.bukkit.command.CommandSender;
 

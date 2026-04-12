@@ -4,7 +4,7 @@ import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.config.Lang;
 import com.meteordevelopments.duels.gui.inventory.InventoryGui;
-import com.meteordevelopments.duels.match.DuelMatch;
+import com.meteordevelopments.duels.core.match.DuelMatch;
 import com.meteordevelopments.duels.util.Loadable;
 import com.meteordevelopments.duels.util.StringUtil;
 import com.meteordevelopments.duels.util.TextBuilder;

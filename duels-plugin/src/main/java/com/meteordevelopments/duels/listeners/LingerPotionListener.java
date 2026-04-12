@@ -1,10 +1,10 @@
 package com.meteordevelopments.duels.listeners;
 
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.arena.ArenaImpl;
-import com.meteordevelopments.duels.arena.ArenaManagerImpl;
-import com.meteordevelopments.duels.match.team.TeamDuelMatch;
-import com.meteordevelopments.duels.spectate.SpectateManagerImpl;
+import com.meteordevelopments.duels.core.arena.ArenaImpl;
+import com.meteordevelopments.duels.core.arena.ArenaManagerImpl;
+import com.meteordevelopments.duels.core.match.team.TeamDuelMatch;
+import com.meteordevelopments.duels.core.spectate.SpectateManagerImpl;
 import com.meteordevelopments.duels.util.compat.CompatUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

@@ -1,9 +1,9 @@
 package com.meteordevelopments.duels.data;
 
 import com.google.common.collect.Lists;
-import com.meteordevelopments.duels.kit.KitImpl;
-import com.meteordevelopments.duels.match.DuelMatch;
-import com.meteordevelopments.duels.match.party.PartyDuelMatch;
+import com.meteordevelopments.duels.core.kit.KitImpl;
+import com.meteordevelopments.duels.core.match.DuelMatch;
+import com.meteordevelopments.duels.core.match.party.PartyDuelMatch;
 import com.meteordevelopments.duels.party.Party;
 import com.meteordevelopments.duels.util.*;
 import lombok.Getter;

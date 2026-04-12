@@ -1,7 +1,7 @@
 package com.meteordevelopments.duels.data;
 
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.queue.Queue;
+import com.meteordevelopments.duels.core.queue.Queue;
 
 public class QueueData {
 

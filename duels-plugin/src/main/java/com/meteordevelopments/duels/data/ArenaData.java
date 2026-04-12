@@ -2,7 +2,7 @@ package com.meteordevelopments.duels.data;
 
 import lombok.Getter;
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.arena.ArenaImpl;
+import com.meteordevelopments.duels.core.arena.ArenaImpl;
 
 import java.util.*;
 

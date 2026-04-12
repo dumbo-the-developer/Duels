@@ -4,7 +4,7 @@ import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.config.Lang;
 import com.meteordevelopments.duels.gui.bind.buttons.BindButton;
-import com.meteordevelopments.duels.kit.KitImpl;
+import com.meteordevelopments.duels.core.kit.KitImpl;
 import com.meteordevelopments.duels.util.compat.Items;
 import com.meteordevelopments.duels.util.gui.MultiPageGui;
 import com.meteordevelopments.duels.util.inventory.ItemBuilder;

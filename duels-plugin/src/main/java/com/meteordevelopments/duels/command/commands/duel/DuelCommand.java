@@ -7,7 +7,7 @@ import com.meteordevelopments.duels.command.commands.duel.subcommands.*;
 import com.meteordevelopments.duels.config.CommandsConfig.CommandSettings;
 import com.meteordevelopments.duels.hook.hooks.VaultHook;
 import com.meteordevelopments.duels.hook.hooks.worldguard.WorldGuardHook;
-import com.meteordevelopments.duels.kit.KitImpl;
+import com.meteordevelopments.duels.core.kit.KitImpl;
 import com.meteordevelopments.duels.party.Party;
 import com.meteordevelopments.duels.setting.Settings;
 import com.meteordevelopments.duels.util.NumberUtil;

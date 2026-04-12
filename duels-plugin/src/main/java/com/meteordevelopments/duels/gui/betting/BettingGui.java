@@ -1,7 +1,7 @@
 package com.meteordevelopments.duels.gui.betting;
 
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.duel.DuelManager;
+import com.meteordevelopments.duels.core.DuelManager;
 import com.meteordevelopments.duels.gui.betting.buttons.CancelButton;
 import com.meteordevelopments.duels.gui.betting.buttons.DetailsButton;
 import com.meteordevelopments.duels.gui.betting.buttons.HeadButton;

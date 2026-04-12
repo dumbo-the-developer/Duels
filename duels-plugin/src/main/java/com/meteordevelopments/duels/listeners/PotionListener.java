@@ -1,7 +1,7 @@
 package com.meteordevelopments.duels.listeners;
 
 import com.meteordevelopments.duels.DuelsPlugin;
-import com.meteordevelopments.duels.arena.ArenaManagerImpl;
+import com.meteordevelopments.duels.core.arena.ArenaManagerImpl;
 import com.meteordevelopments.duels.util.compat.CompatUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

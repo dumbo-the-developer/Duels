@@ -2,7 +2,7 @@ package com.meteordevelopments.duels.command.commands.kit;
 
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.command.BaseCommand;
-import com.meteordevelopments.duels.kit.edit.KitEditManager;
+import com.meteordevelopments.duels.core.kit.edit.KitEditManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
