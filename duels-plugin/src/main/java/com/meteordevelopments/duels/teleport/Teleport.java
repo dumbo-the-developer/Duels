@@ -53,8 +53,20 @@ public final class Teleport implements Loadable, Listener {
             return;
         }
 
+        if (!player.isOnline() || !player.isValid()) {
+            return;
+        }
+
         for (Entity entity : player.getPassengers()) {
             player.removePassenger(entity);
+        }
+
+        if (player.isSleeping()) {
+            player.wakeup(false);
+        }
+
+        if (player.isInsideVehicle()) {
+            player.leaveVehicle();
         }
 
         player.closeInventory();
@@ -68,15 +80,32 @@ public final class Teleport implements Loadable, Listener {
         boolean isFolia = DuelsPlugin.getFoliaLib().isFolia();
 
         if (isFolia) {
+            tryTeleportFolia(player, location, false);
+        } else {
+            if (!player.teleport(location)) {
+                Log.warn(this, "Could not teleport " + player.getName() + "! Player is dead or is vehicle");
+            }
+        }
+    }
+
+    private void tryTeleportFolia(final Player player, final Location location, final boolean retried) {
+        if (!player.isOnline() || !player.isValid()) {
+            return;
+        }
+
+        try {
             player.teleportAsync(location).thenAccept(success -> {
                 if (!success) {
                     Log.warn(this, "Could not teleport " + player.getName() + "! TeleportAsync failed.");
                 }
             });
-        } else {
-            if (!player.teleport(location)) {
-                Log.warn(this, "Could not teleport " + player.getName() + "! Player is dead or is vehicle");
+        } catch (IllegalStateException ex) {
+            if (!retried) {
+                plugin.doSyncAfter(() -> tryTeleportFolia(player, location, true), 1L);
+                return;
             }
+
+            Log.warn(this, "Could not teleport " + player.getName() + " on Folia: " + ex.getMessage());
         }
     }
 
