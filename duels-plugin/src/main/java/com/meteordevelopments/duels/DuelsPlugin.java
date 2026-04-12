@@ -238,9 +238,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         }
 
         int removed = 0;
-        final Iterator<Map.Entry<String, org.bukkit.command.Command>> iterator = knownCommands.entrySet().iterator();
-        while (iterator.hasNext()) {
-            final Map.Entry<String, org.bukkit.command.Command> entry = iterator.next();
+        final List<String> keysToRemove = new ArrayList<>();
+
+        for (final Map.Entry<String, org.bukkit.command.Command> entry : knownCommands.entrySet()) {
             final org.bukkit.command.Command command = entry.getValue();
 
             if (!(command instanceof PluginCommand pluginCommand)) {
@@ -253,8 +253,13 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             }
 
             command.unregister(commandMap);
-            iterator.remove();
-            removed++;
+            keysToRemove.add(entry.getKey());
+        }
+
+        for (final String key : keysToRemove) {
+            if (knownCommands.remove(key) != null) {
+                removed++;
+            }
         }
 
         if (removed > 0) {
