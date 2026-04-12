@@ -61,6 +61,14 @@ public final class Teleport implements Loadable, Listener {
             player.removePassenger(entity);
         }
 
+        if (player.isSleeping()) {
+            player.wakeup(false);
+        }
+
+        if (player.isInsideVehicle()) {
+            player.leaveVehicle();
+        }
+
         player.closeInventory();
 
         if (essentials != null) {
