@@ -62,6 +62,25 @@ public class KitOptionsListener implements Listener {
         return match != null && match.getKit() != null && match.getKit().hasCharacteristic(characteristic);
     }
 
+    private boolean hasUsableTotem(final Player player) {
+        final Material totemType = Material.matchMaterial("TOTEM_OF_UNDYING");
+        if (totemType == null) {
+            return false;
+        }
+
+        final ItemStack mainHand = player.getInventory().getItemInMainHand();
+        if (mainHand != null && mainHand.getType() == totemType) {
+            return true;
+        }
+
+        if (!CompatUtil.isPre1_9()) {
+            final ItemStack offHand = player.getInventory().getItemInOffHand();
+            return offHand != null && offHand.getType() == totemType;
+        }
+
+        return false;
+    }
+
     @EventHandler
     public void on(final EntityResurrectEvent event) {
         if (!(event.getEntity() instanceof Player player)) {
@@ -107,8 +126,9 @@ public class KitOptionsListener implements Listener {
         // For ROUNDS3, if damage would kill the player, handle round end
         if (isEnabled(arena, Characteristic.ROUNDS3)) {
             double finalHealth = player.getHealth() - event.getFinalDamage();
-            // Check if player just used a totem - if so, don't end the round
-            if (finalHealth <= 0 && !recentTotemUsers.contains(player.getUniqueId())) {
+            // Ignore lethal damage that will be consumed by a totem pop.
+            final boolean hasTotemProtection = recentTotemUsers.contains(player.getUniqueId()) || hasUsableTotem(player);
+            if (finalHealth <= 0 && !hasTotemProtection) {
                 // Cancel the damage event immediately to prevent any delayed damage
                 event.setCancelled(true);
 
