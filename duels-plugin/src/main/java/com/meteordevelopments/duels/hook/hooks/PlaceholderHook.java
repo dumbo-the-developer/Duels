@@ -17,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 
+import java.util.Locale;
+
 public class PlaceholderHook extends PluginHook<DuelsPlugin> {
 
     public static final String NAME = "PlaceholderAPI";
@@ -99,6 +101,13 @@ public class PlaceholderHook extends PluginHook<DuelsPlugin> {
                     int wins = user.getWins();
                     int losses = user.getLosses();
                     return String.valueOf(wlr(wins, losses));
+                case "average_rating":
+                case "avg_rating":
+                    user = plugin.getUserManager().get(player);
+                    if (user == null) {
+                        return StringUtil.color(plugin.getConfiguration().getUserNotFound());
+                    }
+                    return String.format(Locale.US, "%.2f", averageRating(user));
             }
 
             if (identifier.startsWith("rating_")) {
@@ -336,6 +345,18 @@ public class PlaceholderHook extends PluginHook<DuelsPlugin> {
             } else {
                 return (float)(wins / losses);
             }
+        }
+
+        private double averageRating(@NotNull User user) {
+            long total = user.getRating();
+            int count = 1;
+
+            for (Kit kit : plugin.getKitManager().getKits()) {
+                total += user.getRating(kit);
+                count++;
+            }
+
+            return count == 0 ? 0D : (double) total / count;
         }
     }
 }
