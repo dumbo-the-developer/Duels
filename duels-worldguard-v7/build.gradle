@@ -1,5 +1,5 @@
 dependencies {
-    implementation('com.sk89q.worldguard:worldguard-bukkit:7.0.15') {
+    implementation('com.sk89q.worldguard:worldguard-bukkit:7.0.16') {
         exclude group: 'org.bukkit', module: 'bukkit'
     }
     implementation project(':duels-worldguard')
