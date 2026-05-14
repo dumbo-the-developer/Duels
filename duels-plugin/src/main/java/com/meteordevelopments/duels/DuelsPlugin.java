@@ -704,6 +704,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         try {
             loadables.add(extensionManager = new ExtensionManager(this));
             extensionManager.handleLoad();
+            lastLoad = loadables.indexOf(extensionManager);
             sendMessage("&dSuccessfully loaded extensions in &f[" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
         } catch (Exception e) {
             sendMessage("&cFailed to load extensions: " + e.getMessage());
