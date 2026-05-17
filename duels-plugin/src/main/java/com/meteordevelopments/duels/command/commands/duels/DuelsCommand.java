@@ -24,6 +24,8 @@ public class DuelsCommand extends BaseCommand {
                 new CreateCommand(plugin),
                 new DeleteCommand(plugin),
                 new SetCommand(plugin),
+                new WandCommand(plugin),
+                new SetRegionCommand(plugin),
                 new ToggleCommand(plugin),
                 new TeleportCommand(plugin),
                 new CreatequeueCommand(plugin),

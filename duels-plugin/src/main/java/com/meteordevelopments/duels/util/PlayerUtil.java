@@ -22,7 +22,7 @@ public final class PlayerUtil {
         if (CompatUtil.isPre1_9()) {
             return player.getMaxHealth();
         } else {
-            final AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+            final AttributeInstance attribute = player.getAttribute(Attribute.MAX_HEALTH);
 
             if (attribute == null) {
                 return DEFAULT_MAX_HEALTH;

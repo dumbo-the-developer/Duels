@@ -103,7 +103,7 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
         arenas.clear();
     }
 
-    void saveArenas() {
+    public void saveArenas() {
         List<ArenaData> data = new ArrayList<>();
         for (ArenaImpl arena : arenas) {
             data.add(new ArenaData(arena));

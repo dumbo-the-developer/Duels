@@ -94,7 +94,7 @@ public class SettingsGui extends SinglePageGui<DuelsPlugin> {
         final ItemMeta meta = displayed.getItemMeta();
 
         if (meta != null) {
-            meta.addEnchant(Enchantment.DURABILITY, 1, false);
+            meta.addEnchant(Enchantment.UNBREAKING, 1, false);
 
             if (CompatUtil.hasItemFlag()) {
                 meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);

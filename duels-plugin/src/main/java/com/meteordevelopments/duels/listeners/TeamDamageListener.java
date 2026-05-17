@@ -210,13 +210,11 @@ public class TeamDamageListener implements Listener {
             PotionEffectType type = effect.getType();
             // Check for harmful effects
             if (type.equals(PotionEffectType.POISON) || 
-                type.equals(PotionEffectType.HARM) ||
+                type.equals(PotionEffectType.INSTANT_DAMAGE) ||
                 type.equals(PotionEffectType.WITHER) ||
-                type.equals(PotionEffectType.WEAKNESS) ||
-                type.equals(PotionEffectType.SLOW) ||
-                type.equals(PotionEffectType.SLOW_DIGGING) ||
-                type.equals(PotionEffectType.BLINDNESS) ||
-                type.equals(PotionEffectType.CONFUSION) ||
+                type.equals(PotionEffectType.SLOWNESS) ||
+                type.equals(PotionEffectType.MINING_FATIGUE) ||
+                type.equals(PotionEffectType.NAUSEA) ||
                 type.equals(PotionEffectType.HUNGER) ||
                 type.equals(PotionEffectType.LEVITATION) ||
                 type.equals(PotionEffectType.UNLUCK) ||

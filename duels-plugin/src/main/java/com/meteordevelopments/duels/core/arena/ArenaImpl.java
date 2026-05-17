@@ -45,6 +45,9 @@ public class ArenaImpl extends BaseButton implements Arena {
     private boolean disabled;
     private final Set<KitImpl> kits = new HashSet<>();
     private final Map<Integer, Location> positions = new HashMap<>();
+    @Setter
+    private Location regionPos1, regionPos2;
+    private final ArenaSnapshot snapshot;
     private DuelMatch match;
     private ItemStack originalDisplayed; // Stores the display item with {status} placeholder
     @Setter(value = AccessLevel.PACKAGE)
@@ -61,6 +64,7 @@ public class ArenaImpl extends BaseButton implements Arena {
         );
         this.name = name;
         this.disabled = disabled;
+        this.snapshot = new ArenaSnapshot();
         // Store the original display item with {status} placeholder
         this.originalDisplayed = getDisplayed().clone();
     }
@@ -215,6 +219,11 @@ public class ArenaImpl extends BaseButton implements Arena {
         } else {
             this.match = new DuelMatch(plugin, this, kit, items, settings.getBet(), source);
         }
+
+        if (regionPos1 != null && regionPos2 != null) {
+            this.snapshot.capture(regionPos1, regionPos2);
+        }
+
         refreshGui(false);
         return match;
     }
@@ -228,44 +237,48 @@ public class ArenaImpl extends BaseButton implements Arena {
         final Queue source = match.getSource();
         match.setFinished();
 
-        for(Block block : match.placedBlocks) {
-            block.setType(Material.AIR);
-        }
+        if (regionPos1 != null && regionPos2 != null) {
+            this.snapshot.restore();
+        } else {
+            for(Block block : match.placedBlocks) {
+                block.setType(Material.AIR);
+            }
 
-        for(Map.Entry<Location, BlockData> map : match.brokenBlocks.entrySet()) {
-            map.getKey().getBlock().setBlockData(map.getValue());
-        }
+            for(Map.Entry<Location, BlockData> map : match.brokenBlocks.entrySet()) {
+                map.getKey().getBlock().setBlockData(map.getValue());
+            }
 
-        for (Entity entity : match.placedEntities){
-            entity.remove();
-        }
+            for (Entity entity : match.placedEntities){
+                entity.remove();
+            }
 
-        for (Block block : match.liquids) {
-            Location loc = block.getLocation();
-            int radius = 1;
+            for (Block block : match.liquids) {
+                Location loc = block.getLocation();
+                int radius = 1;
 
-            while (true) {
-                boolean waterFound = false;
+                while (true) {
+                    boolean waterFound = false;
 
-                for (int x = -radius; x <= radius; x++) {
-                    for (int y = -radius; y <= radius; y++) {
-                        for (int z = -radius; z <= radius; z++) {
-                            Block findBlock = loc.clone().add(x, y, z).getBlock();
-                            String type = findBlock.getType().name().toLowerCase();
+                    for (int x = -radius; x <= radius; x++) {
+                        for (int y = -radius; y <= radius; y++) {
+                            for (int z = -radius; z <= radius; z++) {
+                                Block findBlock = loc.clone().add(x, y, z).getBlock();
+                                String type = findBlock.getType().name().toLowerCase();
 
-                            if (type.contains("water") || type.contains("lava") || type.contains("cobblestone") || type.contains("obsidian")) {
-                                waterFound = true;
-                                findBlock.setType(Material.AIR);
+                                if (type.contains("water") || type.contains("lava") || type.contains("cobblestone") || type.contains("obsidian")) {
+                                    waterFound = true;
+                                    findBlock.setType(Material.AIR);
+                                }
                             }
                         }
                     }
-                }
 
-                if (!waterFound) {
-                    break;
-                }
+                    if (!waterFound) {
+                        break;
+                    }
 
-                radius++;
+                    radius++;
+                }
             }
         }
 

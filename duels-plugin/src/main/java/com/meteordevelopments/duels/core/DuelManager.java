@@ -102,7 +102,7 @@ public class DuelManager implements Loadable {
 
             if (config.isSpawnFirework()) {
                 DuelsPlugin.getFoliaLib().getScheduler().runAtLocation(deadLocation, task -> {
-                    final Firework firework = (Firework) deadLocation.getWorld().spawnEntity(deadLocation, EntityType.FIREWORK);
+                    final Firework firework = (Firework) deadLocation.getWorld().spawnEntity(deadLocation, EntityType.FIREWORK_ROCKET);
                     final FireworkMeta meta = firework.getFireworkMeta();
                     String colourName = config.getFireworkColour();
                     String typeName = config.getFireworkType();
@@ -153,7 +153,7 @@ public class DuelManager implements Loadable {
         DuelsPlugin.getFoliaLib().getScheduler().runAtLocationLater(deadLocation, task -> {
             if (config.isSpawnFirework()) {
                 DuelsPlugin.getFoliaLib().getScheduler().runAtLocation(deadLocation, task2 -> {
-                    final Firework firework = (Firework) deadLocation.getWorld().spawnEntity(deadLocation, EntityType.FIREWORK);
+                    final Firework firework = (Firework) deadLocation.getWorld().spawnEntity(deadLocation, EntityType.FIREWORK_ROCKET);
                     final FireworkMeta meta = firework.getFireworkMeta();
                     String colourName = config.getFireworkColour();
                     String typeName = config.getFireworkType();

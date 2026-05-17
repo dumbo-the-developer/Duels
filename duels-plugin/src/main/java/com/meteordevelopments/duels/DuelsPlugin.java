@@ -14,6 +14,7 @@ import lombok.Getter;
 import com.meteordevelopments.duels.api.Duels;
 import com.meteordevelopments.duels.api.command.SubCommand;
 import com.meteordevelopments.duels.core.arena.ArenaManagerImpl;
+import com.meteordevelopments.duels.core.arena.RegionSelectionManager;
 import com.meteordevelopments.duels.core.betting.BettingManager;
 import com.meteordevelopments.duels.command.commands.SpectateCommand;
 import com.meteordevelopments.duels.command.commands.KitCommand;
@@ -121,6 +122,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private PartyManagerImpl partyManager;
     @Getter
     private ValidatorManager validatorManager;
+    @Getter
+    private RegionSelectionManager regionSelectionManager;
     private CommandsConfig commandsConfig;
     private static final Logger LOGGER = Logger.getLogger("[Duels-Optimised]");
 
@@ -238,9 +241,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         }
 
         int removed = 0;
-        final List<String> keysToRemove = new ArrayList<>();
-
-        for (final Map.Entry<String, org.bukkit.command.Command> entry : knownCommands.entrySet()) {
+        final Iterator<Map.Entry<String, org.bukkit.command.Command>> iterator = knownCommands.entrySet().iterator();
+        while (iterator.hasNext()) {
+            final Map.Entry<String, org.bukkit.command.Command> entry = iterator.next();
             final org.bukkit.command.Command command = entry.getValue();
 
             if (!(command instanceof PluginCommand pluginCommand)) {
@@ -253,13 +256,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             }
 
             command.unregister(commandMap);
-            keysToRemove.add(entry.getKey());
-        }
-
-        for (final String key : keysToRemove) {
-            if (knownCommands.remove(key) != null) {
-                removed++;
-            }
+            iterator.remove();
+            removed++;
         }
 
         if (removed > 0) {
@@ -677,6 +675,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadAndTrack("request manager", () -> loadables.add(requestManager = new RequestManager(this)));
         loadAndTrack("hook manager", () -> hookManager = new HookManager(this));
         loadAndTrack("validator manager", () -> loadables.add(validatorManager = new ValidatorManager(this)));
+        loadAndTrack("region selection manager", () -> regionSelectionManager = new RegionSelectionManager());
         loadAndTrack("teleport manager", () -> loadables.add(teleport = new Teleport(this)));
 
         if (!load()) {
@@ -704,7 +703,6 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         try {
             loadables.add(extensionManager = new ExtensionManager(this));
             extensionManager.handleLoad();
-            lastLoad = loadables.indexOf(extensionManager);
             sendMessage("&dSuccessfully loaded extensions in &f[" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
         } catch (Exception e) {
             sendMessage("&cFailed to load extensions: " + e.getMessage());
@@ -726,6 +724,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         new EnderpearlListener(this);
         new KitOptionsListener(this);
         new LingerPotionListener(this);
+        new WandListener(this);
         new KitEditManager(this);
         registerListener(new KitEditListener(this));
 

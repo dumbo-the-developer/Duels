@@ -4,13 +4,13 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath("com.gradleup.shadow:shadow-gradle-plugin:9.4.1")
+        classpath("com.gradleup.shadow:shadow-gradle-plugin:9.4.0")
     }
 }
 
 allprojects {
     group = 'com.meteordevelopments'
-    version = '7.1'
+    version = '7.0'
 }
 
 subprojects {
@@ -27,6 +27,13 @@ subprojects {
 
     tasks.withType(JavaCompile).configureEach {
         options.release.set(21)
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            force 'com.google.guava:guava:33.5.0-jre'
+            force 'com.google.code.gson:gson:2.13.2'
+        }
     }
 
     repositories {

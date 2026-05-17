@@ -65,16 +65,11 @@ public class LingerPotionListener {
                         for (org.bukkit.potion.PotionEffect eff : event.getEntity().getCustomEffects()) {
                             final org.bukkit.potion.PotionEffectType t = eff.getType();
                             if (t.equals(org.bukkit.potion.PotionEffectType.POISON) ||
-                                t.equals(org.bukkit.potion.PotionEffectType.HARM) ||
+                                t.equals(org.bukkit.potion.PotionEffectType.INSTANT_DAMAGE) ||
                                 t.equals(org.bukkit.potion.PotionEffectType.WITHER) ||
-                                t.equals(org.bukkit.potion.PotionEffectType.WEAKNESS) ||
-                                t.equals(org.bukkit.potion.PotionEffectType.SLOW) ||
-                                t.equals(org.bukkit.potion.PotionEffectType.SLOW_DIGGING) ||
-                                t.equals(org.bukkit.potion.PotionEffectType.BLINDNESS) ||
-                                t.equals(org.bukkit.potion.PotionEffectType.CONFUSION) ||
-                                t.equals(org.bukkit.potion.PotionEffectType.HUNGER) ||
-                                t.equals(org.bukkit.potion.PotionEffectType.LEVITATION) ||
-                                t.equals(org.bukkit.potion.PotionEffectType.UNLUCK) ||
+                                t.equals(org.bukkit.potion.PotionEffectType.SLOWNESS) ||
+                                t.equals(org.bukkit.potion.PotionEffectType.MINING_FATIGUE) ||
+                                t.equals(org.bukkit.potion.PotionEffectType.NAUSEA) ||
                                 t.equals(org.bukkit.potion.PotionEffectType.BAD_OMEN) ||
                                 t.equals(org.bukkit.potion.PotionEffectType.DARKNESS)) {
                                 harmful = true;
@@ -85,7 +80,7 @@ public class LingerPotionListener {
                         if (!harmful) {
                             final org.bukkit.potion.PotionType base = event.getEntity().getBasePotionData().getType();
                             if (base == org.bukkit.potion.PotionType.POISON ||
-                                base == org.bukkit.potion.PotionType.INSTANT_DAMAGE ||
+                                base == org.bukkit.potion.PotionType.HARMING ||
                                 base == org.bukkit.potion.PotionType.SLOWNESS ||
                                 base == org.bukkit.potion.PotionType.WEAKNESS) {
                                 harmful = true;
