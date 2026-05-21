@@ -121,6 +121,7 @@ ERROR:
     already-in: '{PREFIX} &cYou are already in a queue!'
     not-in-queue: '{PREFIX} &cYou are not in a queue.'
     not-enough-money: '{PREFIX} &cYou need $%bet_amount% to join that queue.'
+    party-too-large: '{PREFIX} &cYour party has %party_size% members, but this queue allows teams of %team_size%.'
     no-queues-available: '{PREFIX} &cNo queues are available.'
   sign:
     not-a-sign: '{PREFIX} &cThe block you are looking at is not a sign!'

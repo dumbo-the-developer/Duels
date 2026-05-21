@@ -32,10 +32,12 @@ import com.meteordevelopments.duels.api.folialib.task.WrappedTask;
 import org.bukkit.*;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
@@ -853,11 +855,32 @@ public class DuelManager implements Loadable {
                 return;
             }
 
-            // Kill the player to trigger the death handler which ends the match.
-            // Do NOT call PlayerUtil.reset() or info.restore() here — the player is dead
-            // and modifying their state causes corruption (e.g. stuck in adventure-like mode).
-            // PlayerInfo stays in cache and will be restored via PlayerRespawnEvent on rejoin.
             player.setHealth(0);
+            player.getInventory().clear();
+            player.getInventory().setArmorContents(null);
+            player.updateInventory();
+
+            final PlayerInfo info = playerManager.get(player);
+            info.restore(player);
+        }
+
+        @EventHandler(ignoreCancelled = true)
+        public void on(final BlockDropItemEvent event) {
+            final Player player = event.getPlayer();
+            final ArenaImpl arena = arenaManager.get(player);
+
+            if (arena == null) {
+                return;
+            }
+
+            final DuelMatch match = arena.getMatch();
+            if (match == null) {
+                return;
+            }
+
+            for (Item item : event.getItems()) {
+                match.brokenBlockDrops.add(item);
+            }
         }
 
         @EventHandler(ignoreCancelled = true)

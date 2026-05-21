@@ -35,6 +35,8 @@ import com.meteordevelopments.duels.util.inventory.InventoryUtil;
 import com.meteordevelopments.duels.util.inventory.ItemBuilder;
 import com.meteordevelopments.duels.util.io.FileUtil;
 import com.meteordevelopments.duels.util.json.JsonUtil;
+import com.meteordevelopments.duels.party.Party;
+import com.meteordevelopments.duels.party.PartyManagerImpl;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -68,6 +70,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
     private final ArenaManagerImpl arenaManager;
     private final SpectateManagerImpl spectateManager;
     private final DuelManager duelManager;
+    private final PartyManagerImpl partyManager;
     private final File file;
 
     private final List<Queue> queues = new ArrayList<>();
@@ -92,6 +95,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         this.arenaManager = plugin.getArenaManager();
         this.spectateManager = plugin.getSpectateManager();
         this.duelManager = plugin.getDuelManager();
+        this.partyManager = plugin.getPartyManager();
         this.file = new File(plugin.getDataFolder(), FILE_NAME);
 
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -197,38 +201,24 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
                         break; // No more arenas available, stop trying to match
                     }
                     
+                    final List<QueueUnit> units = buildUnits(entries);
+                    
                     outerLoop:
-                    for (int i = 0; i <= entries.size() - size; i++) {
-                        final List<QueueEntry> firstGroup = new ArrayList<>();
-                        boolean skipI = false;
-                        for (int k = 0; k < size; k++) {
-                            final QueueEntry e = entries.get(i + k);
-                            if (remove.contains(e)) { skipI = true; break; }
-                            // Double-check player is still online
-                            if (!e.getPlayer().isOnline()) { 
-                                remove.add(e);
-                                skipI = true; 
-                                break; 
-                            }
-                            firstGroup.add(e);
+                    for (int i = 0; i < units.size(); i++) {
+                        final GroupResult firstGroupResult = buildGroup(units, i, size);
+                        if (firstGroupResult == null) {
+                            continue;
                         }
-                        if (skipI) { continue; }
 
-                        for (int j = i + size; j <= entries.size() - size; j++) {
-                            final List<QueueEntry> secondGroup = new ArrayList<>();
-                            boolean ok = true;
-                            for (int k = 0; k < size; k++) {
-                                final QueueEntry e = entries.get(j + k);
-                                if (remove.contains(e)) { ok = false; break; }
-                                // Double-check player is still online
-                                if (!e.getPlayer().isOnline()) { 
-                                    remove.add(e);
-                                    ok = false; 
-                                    break; 
-                                }
-                                secondGroup.add(e);
+                        final List<QueueEntry> firstGroup = flattenUnits(firstGroupResult.units);
+
+                        for (int j = firstGroupResult.nextIndex; j < units.size(); j++) {
+                            final GroupResult secondGroupResult = buildGroup(units, j, size);
+                            if (secondGroupResult == null) {
+                                continue;
                             }
-                            if (!ok) { continue; }
+
+                            final List<QueueEntry> secondGroup = flattenUnits(secondGroupResult.units);
 
                             // Rating compatibility check: all-vs-all pairs should be allowed
                             boolean compatible = true;
@@ -243,7 +233,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
                             }
                             if (!compatible) { continue; }
 
-                            // Build Settings and start match using party or individuals
+                            // Build Settings and start match using party-safe groups
                             final Settings setting = new Settings(plugin);
                             if (queue.getKit() != null) {
                                 setting.setKit(kitManager.get(queue.getKit().getName()));
@@ -265,7 +255,6 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
                                 setting.getCache().put(p.getUniqueId(), e.getInfo());
                             }
 
-                            // Clear parties to avoid mismatch unless both sides are proper parties
                             setting.setSenderParty(null);
                             setting.setTargetParty(null);
 
@@ -280,17 +269,14 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
                                 
                                 remove.addAll(firstGroup);
                                 remove.addAll(secondGroup);
+                                entries.removeAll(firstGroup);
+                                entries.removeAll(secondGroup);
                                 foundMatch = true;
                                 update = true;
                                 break outerLoop; // Found a match, restart search to avoid index issues
                             }
                             // If match failed to start, players stay in queue and we try next combination
                         }
-                    }
-                    
-                    // Remove matched players from entries list for next iteration
-                    if (foundMatch) {
-                        entries.removeAll(remove);
                     }
                 } while (foundMatch && entries.size() >= size * 2); // Continue while we can potentially form more matches
 
@@ -475,6 +461,14 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
             return false;
         }
 
+        final Party party = partyManager.get(player);
+        if (party != null && party.size() > queue.getTeamSize()) {
+            lang.sendMessage(player, "ERROR.queue.party-too-large",
+                    "party_size", party.size(),
+                    "team_size", queue.getTeamSize());
+            return false;
+        }
+
         if (config.isRequiresClearedInventory() && InventoryUtil.hasItem(player)) {
             lang.sendMessage(player, "ERROR.duel.inventory-not-empty");
             return false;
@@ -553,5 +547,104 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
         event.setCancelled(true);
         lang.sendMessage(event.getPlayer(), "QUEUE.prevent.command", "command", event.getMessage());
+    }
+
+    private List<QueueUnit> buildUnits(final List<QueueEntry> entries) {
+        final Map<Player, QueueEntry> entryByPlayer = new HashMap<>();
+        final Map<Player, Integer> entryIndex = new HashMap<>();
+
+        for (int i = 0; i < entries.size(); i++) {
+            final QueueEntry entry = entries.get(i);
+            entryByPlayer.put(entry.getPlayer(), entry);
+            entryIndex.put(entry.getPlayer(), i);
+        }
+
+        final Set<Player> grouped = new HashSet<>();
+        final List<QueueUnit> units = new ArrayList<>();
+
+        for (final QueueEntry entry : entries) {
+            final Player player = entry.getPlayer();
+            if (!grouped.add(player)) {
+                continue;
+            }
+
+            final Party party = partyManager.get(player);
+            if (party == null) {
+                units.add(new QueueUnit(Collections.singletonList(entry)));
+                continue;
+            }
+
+            final List<QueueEntry> partyEntries = new ArrayList<>();
+            for (final Player member : party.getOnlineMembers()) {
+                final QueueEntry memberEntry = entryByPlayer.get(member);
+                if (memberEntry != null) {
+                    partyEntries.add(memberEntry);
+                }
+            }
+
+            if (partyEntries.size() <= 1) {
+                units.add(new QueueUnit(Collections.singletonList(entry)));
+                continue;
+            }
+
+            partyEntries.sort(Comparator.comparingInt(e -> entryIndex.getOrDefault(e.getPlayer(), Integer.MAX_VALUE)));
+            for (final QueueEntry partyEntry : partyEntries) {
+                grouped.add(partyEntry.getPlayer());
+            }
+
+            units.add(new QueueUnit(partyEntries));
+        }
+
+        return units;
+    }
+
+    private static GroupResult buildGroup(final List<QueueUnit> units, final int startIndex, final int teamSize) {
+        int sum = 0;
+        final List<QueueUnit> group = new ArrayList<>();
+
+        for (int i = startIndex; i < units.size(); i++) {
+            final QueueUnit unit = units.get(i);
+            if (unit.size > teamSize) {
+                return null;
+            }
+            if (sum + unit.size > teamSize) {
+                return null;
+            }
+            group.add(unit);
+            sum += unit.size;
+            if (sum == teamSize) {
+                return new GroupResult(group, i + 1);
+            }
+        }
+
+        return null;
+    }
+
+    private static List<QueueEntry> flattenUnits(final List<QueueUnit> units) {
+        final List<QueueEntry> flattened = new ArrayList<>();
+        for (final QueueUnit unit : units) {
+            flattened.addAll(unit.entries);
+        }
+        return flattened;
+    }
+
+    private static final class QueueUnit {
+        private final List<QueueEntry> entries;
+        private final int size;
+
+        private QueueUnit(final List<QueueEntry> entries) {
+            this.entries = entries;
+            this.size = entries.size();
+        }
+    }
+
+    private static final class GroupResult {
+        private final List<QueueUnit> units;
+        private final int nextIndex;
+
+        private GroupResult(final List<QueueUnit> units, final int nextIndex) {
+            this.units = units;
+            this.nextIndex = nextIndex;
+        }
     }
 }

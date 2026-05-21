@@ -29,6 +29,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -238,6 +239,10 @@ public class ArenaImpl extends BaseButton implements Arena {
 
         for (Entity entity : match.placedEntities){
             entity.remove();
+        }
+
+        for (Item item : match.brokenBlockDrops) {
+            item.remove();
         }
 
         for (Block block : match.liquids) {

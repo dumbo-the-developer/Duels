@@ -52,6 +52,7 @@ public class DuelMatch implements Match {
     public List<Block> liquids = new ArrayList<>();
     public List<Entity> placedEntities = new ArrayList<>();
     public List<Item> droppedItems = new ArrayList<>();
+    public List<Item> brokenBlockDrops = new ArrayList<>();
 
     // Default value for players is false, which is set to true if player is killed in the match.
     private final Map<Player, Boolean> players = new HashMap<>();
