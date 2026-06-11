@@ -1,0 +1,8 @@
+name: DuelsFFA
+version: 1.0.0
+main: com.meteordevelopments.duelsffa.FfaExtension
+authors: [ DUMBO ]
+description: Free-for-all arenas with kit binding and FAWE regen.
+website: https://meteordevelopments.com
+api-version: 7.1
+depends: [ FastAsyncWorldEdit ]

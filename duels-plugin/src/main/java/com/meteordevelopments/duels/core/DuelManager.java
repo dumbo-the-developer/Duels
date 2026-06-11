@@ -90,7 +90,7 @@ public class DuelManager implements Loadable {
     }
 
     public void handleMatchEnd(DuelMatch match, ArenaImpl arena, Player loser, Location deadLocation, Player winner) {
-        DuelsPlugin.getFoliaLib().getScheduler().runAtLocationLater(arena.first().getLocation(), () -> {
+        DuelsPlugin.getFoliaLib().getScheduler().runAtLocationLater(arena.first().getLocation(), task -> {
             if (arena.size() == 0) {
                 match.getAllPlayers().forEach(matchPlayer -> {
                     handleTie(matchPlayer, arena, match, false);
@@ -103,7 +103,7 @@ public class DuelManager implements Loadable {
             }
 
             if (config.isSpawnFirework()) {
-                DuelsPlugin.getFoliaLib().getScheduler().runAtLocation(deadLocation, task -> {
+                DuelsPlugin.getFoliaLib().getScheduler().runAtLocation(deadLocation, fireworkTask -> {
                     final Firework firework = (Firework) deadLocation.getWorld().spawnEntity(deadLocation, EntityType.FIREWORK);
                     final FireworkMeta meta = firework.getFireworkMeta();
                     String colourName = config.getFireworkColour();
@@ -120,9 +120,10 @@ public class DuelManager implements Loadable {
             winners.forEach(w -> inventoryManager.create(w, false));
             userDataManager.handleMatchEnd(match, winners);
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
-            DuelsPlugin.getFoliaLib().getScheduler().runAtEntityLater(loser, () -> {
-                // Handle the loser (remove from arena and restore state)
-                // This is especially important for ROUNDS3 where the loser never actually dies
+            DuelsPlugin.getFoliaLib().getScheduler().runAtLocationLater(arena.first().getLocation(), task2 -> {
+                // Handle the loser (remove from arena and restore state) before respawn can
+                // move them back to the saved duel-accept location.
+                // This is especially important for ROUNDS3 where the loser may respawn.
                 if (match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3)) {
                     handleLoss(loser, arena, match);
                 }
@@ -147,7 +148,7 @@ public class DuelManager implements Loadable {
                 }
 
                 arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
-            }, null, config.getTeleportDelay() * 20L);
+            }, config.getTeleportDelay() * 20L);
         }, 1L);
     }
 
@@ -169,17 +170,9 @@ public class DuelManager implements Loadable {
 
             final Set<Player> winners = match.getWinningTeamPlayers();
             final Set<Player> losers = match.getLosingTeamPlayers();
-            
-            // Restore gamemode for all players immediately using individual schedulers
+
             final Set<Player> allPlayers = match.getAllPlayers();
-            for (Player player : allPlayers) {
-                DuelsPlugin.getFoliaLib().getScheduler().runAtEntity(player, task2 -> {
-                    player.setGameMode(GameMode.SURVIVAL);
-                    player.setAllowFlight(false);
-                    player.setFlying(false);
-                });
-            }
-            
+
             // Create inventory snapshots for display
             allPlayers.forEach(p -> inventoryManager.create(p, false));
             userDataManager.handleTeamMatchEnd(match, winners, losers);
@@ -187,6 +180,15 @@ public class DuelManager implements Loadable {
             
             // Schedule teleportation and restoration for all players after delay
             DuelsPlugin.getFoliaLib().getScheduler().runAtLocationLater(deadLocation, task2 -> {
+                // Restore gamemode for all players when the match is actually ending
+                for (Player player : allPlayers) {
+                    DuelsPlugin.getFoliaLib().getScheduler().runAtEntity(player, task3 -> {
+                        player.setGameMode(GameMode.SURVIVAL);
+                        player.setAllowFlight(false);
+                        player.setFlying(false);
+                    });
+                }
+
                 // Handle losers (including dead spectators)
                 for (Player loser : losers) {
                     if (mcMMO != null) {
@@ -736,7 +738,9 @@ public class DuelManager implements Loadable {
                 top.clear();
             }
 
-            if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {
+            final boolean dropOwnInv = match.isOwnInventory() && config.isOwnInventoryDropInventoryItems();
+
+            if (!dropOwnInv) {
                 event.getDrops().clear();
                 event.setKeepLevel(true);
                 event.setDroppedExp(0);
@@ -765,9 +769,13 @@ public class DuelManager implements Loadable {
                 arena.remove(player);
                 
                 // Prevent death screen and respawn for team matches
-                event.setKeepInventory(true);
-                event.setDroppedExp(0);
-                event.getDrops().clear();
+                if (!dropOwnInv) {
+                    event.setKeepInventory(true);
+                    event.setDroppedExp(0);
+                    event.getDrops().clear();
+                } else {
+                    event.setKeepInventory(false);
+                }
                 event.setDeathMessage(null);
                 
                 // Immediately set to spectator mode to prevent death screen

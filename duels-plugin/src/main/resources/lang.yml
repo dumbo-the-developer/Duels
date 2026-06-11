@@ -142,9 +142,11 @@ ERROR:
 
 COMMAND:
   kit:
-    usage: '{PREFIX} &cUsage: /kit [edit|save] [kitname]'
+    usage: '{PREFIX} &cUsage: /kit [edit|save|reset] [player] [kitname]'
     edit:
       usage: '{PREFIX} &cUsage: /kit edit <kitname>'
+    reset:
+      usage: '{PREFIX} &cUsage: /kit reset <kitname> or /kit reset <player> <kitname>'
     unknown-subcommand: '{PREFIX} &cUnknown subcommand: %subcommand%'
   duel:
     usage:
@@ -297,6 +299,7 @@ COMMAND:
         - '{HALF_LINE} &fKit Commands {HALF_LINE}'
         - '&f/%command% savekit <-o> [name] &e- &7Saves a kit with given name.'
         - '&f/%command% loadkit [name] &e- &7Loads the selected kit to your inventory.'
+        - '&f/%command% kitgive [kit] [player] &e- &7Gives a kit to a player.'
         - '&f/%command% deletekit [name] &e- &7Deletes a kit.'
         - '&f/%command% setitem [name] &e- &7Sets the displayed item for selected kit.'
         - '&f/%command% options [kit] &e- &7Opens the options gui for selected kit.'
@@ -341,6 +344,8 @@ COMMAND:
     save-kit: '{PREFIX} &7Kit &3%name% &7was successfully saved.'
     delete-kit: '{PREFIX} &7Kit &3%name% &7was successfully removed.'
     load-kit: '{PREFIX} &7Kit &3%name% &7was loaded in your inventory.'
+    kit-give: '{PREFIX} &7Gave kit &3%kit% &7to &f%name%&7.'
+    kit-give-target: '{PREFIX} &7You were given kit &3%kit%&7.'
     set-item: '{PREFIX} &7Kit &3%name%&7''s displayed item was changed to your held item.'
     set-arena-item: '{PREFIX} &7Arena &e%name%&7''s displayed item was changed to your held item.'
     create-queue: '{PREFIX} &7Created a queue with kit &3%kit% &7and bet &6$%bet_amount%&7.'
@@ -738,3 +743,9 @@ KIT:
       block-place-blocked: '{PREFIX} &cYou cannot place blocks while editing a kit.'
       interact-blocked: '{PREFIX} &cYou cannot interact with blocks while editing a kit.'
       cancelled: '{PREFIX} &aKit editing session cancelled. Your inventory has been restored.'
+    RESET:
+      success: '{PREFIX} &aYour edited &e%kit% &akit has been reset to the default.'
+      success-other: '{PREFIX} &aReset &e%name%&a''s edited &e%kit% &akit to the default.'
+      reset-by-admin: '{PREFIX} &e%kit% &ahas been reset to the default by an administrator.'
+      not-edited: '{PREFIX} &c%name% does not have an edited &e%kit% &ckit.'
+      failed: '{PREFIX} &cFailed to reset %name%''s &e%kit% &ckit.'

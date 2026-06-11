@@ -140,9 +140,11 @@ ERROR:
 
 COMMAND:
   kit:
-    usage: '{PREFIX} <red>Usage: /kit [edit|save] [kitname]'
+    usage: '{PREFIX} <red>Usage: /kit [edit|save|reset] [player] [kitname]'
     edit:
       usage: '{PREFIX} <red>Usage: /kit edit <kitname>'
+    reset:
+      usage: '{PREFIX} <red>Usage: /kit reset <kitname> or /kit reset <player> <kitname>'
     unknown-subcommand: '{PREFIX} <red>Unknown subcommand: %subcommand%'
   duel:
     usage:
@@ -295,6 +297,7 @@ COMMAND:
         - '{HALF_LINE} <white>Kit Commands {HALF_LINE}'
         - '<white>/%command% savekit <-o> [name] <yellow>- <gray>Saves a kit with given name.'
         - '<white>/%command% loadkit [name] <yellow>- <gray>Loads the selected kit to your inventory.'
+        - '<white>/%command% kitgive [kit] [player] <yellow>- <gray>Gives a kit to a player.'
         - '<white>/%command% deletekit [name] <yellow>- <gray>Deletes a kit.'
         - '<white>/%command% setitem [name] <yellow>- <gray>Sets the displayed item for selected kit.'
         - '<white>/%command% options [kit] <yellow>- <gray>Opens the options gui for selected kit.'
@@ -339,6 +342,8 @@ COMMAND:
     save-kit: '{PREFIX} <gray>Kit <dark_aqua>%name% <gray>was successfully saved.'
     delete-kit: '{PREFIX} <gray>Kit <dark_aqua>%name% <gray>was successfully removed.'
     load-kit: '{PREFIX} <gray>Kit <dark_aqua>%name% <gray>was loaded in your inventory.'
+    kit-give: '{PREFIX} <gray>Gave kit <dark_aqua>%kit% <gray>to <white>%name%<gray>.'
+    kit-give-target: '{PREFIX} <gray>You were given kit <dark_aqua>%kit%<gray>.'
     set-item: '{PREFIX} <gray>Kit <dark_aqua>%name%<gray>''s displayed item was changed to your held item.'
     set-arena-item: '{PREFIX} <gray>Arena <yellow>%name%<gray>''s displayed item was changed to your held item.'
     create-queue: '{PREFIX} <gray>Created a queue with kit <dark_aqua>%kit% <gray>and bet <gold>$%bet_amount%<gray>.'
@@ -736,3 +741,9 @@ KIT:
     block-place-blocked: '{PREFIX} <red>You cannot place blocks while editing a kit.'
     interact-blocked: '{PREFIX} <red>You cannot interact with blocks while editing a kit.'
     cancelled: '{PREFIX} <green>Kit editing session cancelled. Your inventory has been restored.'
+  RESET:
+    success: '{PREFIX} <green>Your edited <yellow>%kit% <green>kit has been reset to the default.'
+    success-other: '{PREFIX} <green>Reset <yellow>%name%<green>''s edited <yellow>%kit% <green>kit to the default.'
+    reset-by-admin: '{PREFIX} <yellow>%kit% <green>has been reset to the default by an administrator.'
+    not-edited: '{PREFIX} <red>%name% does not have an edited <yellow>%kit% <red>kit.'
+    failed: '{PREFIX} <red>Failed to reset %name%''s <yellow>%kit% <red>kit.'

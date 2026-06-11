@@ -1,6 +1,8 @@
 package com.meteordevelopments.duels.core.kit.edit;
 
 import com.meteordevelopments.duels.DuelsPlugin;
+import com.meteordevelopments.duels.util.inventory.InventoryUtil;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -14,6 +16,11 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.CraftingInventory;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Handles all events to prevent exploits during kit editing sessions.
@@ -95,8 +102,21 @@ public class KitEditListener implements Listener {
                 return;
             }
             
-            // Block drop actions
-            if (event.getClick() == ClickType.DROP || event.getClick() == ClickType.CONTROL_DROP) {
+            // Block drop actions (keyboard or cursor drop)
+            if (event.getClick() == ClickType.DROP || event.getClick() == ClickType.CONTROL_DROP
+                    || event.getAction() == InventoryAction.DROP_ALL_CURSOR
+                    || event.getAction() == InventoryAction.DROP_ONE_CURSOR
+                    || event.getAction() == InventoryAction.DROP_ALL_SLOT
+                    || event.getAction() == InventoryAction.DROP_ONE_SLOT) {
+                event.setCancelled(true);
+                plugin.getLang().sendMessage(player, "KIT.EDIT.drop-blocked");
+                return;
+            }
+
+            // Prevent armor shift-click from dropping when inventory is full
+            if (event.getSlotType() == InventoryType.SlotType.ARMOR
+                    && event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY
+                    && player.getInventory().firstEmpty() == -1) {
                 event.setCancelled(true);
                 plugin.getLang().sendMessage(player, "KIT.EDIT.drop-blocked");
                 return;
@@ -159,6 +179,27 @@ public class KitEditListener implements Listener {
         }
 
         if (KitEditManager.getInstance().isEditing(player)) {
+            if (event.getInventory().getType() == org.bukkit.event.inventory.InventoryType.CRAFTING
+                    && event.getInventory() instanceof CraftingInventory craftingInventory) {
+                ItemStack[] matrix = craftingInventory.getMatrix();
+                List<ItemStack> returnItems = new ArrayList<>();
+
+                for (ItemStack item : matrix) {
+                    if (item != null && item.getType() != Material.AIR) {
+                        returnItems.add(item);
+                    }
+                }
+
+                if (!returnItems.isEmpty()) {
+                    InventoryUtil.addOrDrop(player, returnItems);
+                }
+
+                craftingInventory.setMatrix(new ItemStack[matrix.length]);
+                craftingInventory.setResult(null);
+                player.updateInventory();
+                return;
+            }
+
             // Prevent any item transfers by clearing external inventories
             if (event.getInventory().getType() != org.bukkit.event.inventory.InventoryType.PLAYER) {
                 event.getInventory().clear();

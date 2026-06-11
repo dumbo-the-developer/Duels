@@ -1,0 +1,18 @@
+# Format: world;x;y;z;yaw;pitch
+lobby: ""
+default-regen-interval-minutes: 30
+prevent-leave-arena: true
+
+worldedit:
+  fast-mode: true
+  copy-entities: false
+  copy-biomes: false
+  paste-ignore-air: false
+  flush-queue: true
+
+fawe:
+  clipboard-cleanup:
+    enabled: false
+    folder: plugins/FastAsyncWorldEdit/clipboard
+    max-age-hours: 24
+    max-total-mb: 1024

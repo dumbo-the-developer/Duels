@@ -1,0 +1,51 @@
+STRINGS:
+  PREFIX: '&8[&6FFA&8]'
+  LINE: '&6&m-----------------------------'
+
+ERROR:
+  invalid-sub-command: '{PREFIX} &c''%argument%'' is not a valid command. Please type ''/ffa'' for help.'
+  player-only: '{PREFIX} &cThis command is player only.'
+  no-permission: '{PREFIX} &cYou do not have permission.'
+  arena-not-found: '{PREFIX} &cArena ''%name%'' not found.'
+  arena-already-exists: '{PREFIX} &cArena ''%name%'' already exists.'
+  arena-disabled: '{PREFIX} &cArena ''%name%'' is disabled.'
+  arena-resetting: '{PREFIX} &cArena ''%name%'' is currently regenerating.'
+  no-arenas: '{PREFIX} &cNo FFA arenas are available.'
+  no-selection: '{PREFIX} &cYou must set pos1 and pos2 first.'
+  kit-not-found: '{PREFIX} &cKit ''%name%'' not found.'
+  kit-no-permission: '{PREFIX} &cYou do not have permission for kit ''%name%''.'
+  already-in-ffa: '{PREFIX} &cYou are already in an FFA arena.'
+  not-in-ffa: '{PREFIX} &cYou are not in an FFA arena.'
+  no-spawns: '{PREFIX} &cArena ''%name%'' has no spawns.'
+  no-zone: '{PREFIX} &cArena ''%name%'' has no regen zone.'
+  create-failed: '{PREFIX} &cFailed to create arena ''%name%''.'
+  leave-arena: '{PREFIX} &cYou left the arena.'
+
+COMMAND:
+  ffa:
+    usage:
+    - '{LINE}'
+    - '&f/ffa join <arena> &e- &7Join an arena.'
+    - '&f/ffa leave &e- &7Leave your arena.'
+    - '&f/ffa pos1 &e- &7Set first position from target block.'
+    - '&f/ffa pos2 &e- &7Set second position from target block.'
+    - '&f/ffa create <name> <kit|none> &e- &7Create an arena.'
+    - '&f/ffa list &e- &7List arenas.'
+    - '&f/ffa forceregenerate <name> &e- &7Force arena regen.'
+    - '&f/ffa enable <name> &e- &7Enable an arena.'
+    - '&f/ffa disable <name> &e- &7Disable an arena.'
+    - '{LINE}'
+
+    join: '{PREFIX} &7Joined arena &f%arena%&7.'
+    leave: '{PREFIX} &7Left arena &f%arena%&7.'
+    create: '{PREFIX} &7Created arena &f%arena% &7with kit &f%kit%&7.'
+    pos-set: '{PREFIX} &7%pos% position set at &f%location%&7.'
+    list:
+      header: '{PREFIX} &7List of loaded &fFFA Arenas&7:'
+      format: '&6- &f%name% &7[kit: &f%kit%&7, enabled: &f%enabled%&7]'
+      footer: '{PREFIX} &7Total: &a%count%'
+    regen:
+      start: '{PREFIX} &7Regenerating &f%name%&7...'
+      end: '{PREFIX} &7Regen complete for &f%name%&7.'
+    enable: '{PREFIX} &7Enabled arena &f%name%&7.'
+    disable: '{PREFIX} &7Disabled arena &f%name%&7.'

@@ -4,7 +4,7 @@
 *.iml
 *.ipr
 *.iws
-
+DuelsFFA/target
 # IntelliJ
 out/
 # mpeltonen/sbt-idea plugin

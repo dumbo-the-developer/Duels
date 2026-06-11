@@ -15,6 +15,7 @@ import org.bukkit.inventory.PlayerInventory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -262,6 +263,26 @@ public class KitEditManager extends PluginHook<DuelsPlugin> {
         File playerDir = new File(playerKitsDirectory, playerId.toString());
         File kitFile = new File(playerDir, kitName + ".json");
         return kitFile.exists();
+    }
+
+    /**
+     * Removes a player's custom kit so the default kit is used again.
+     */
+    public boolean resetPlayerKit(Player player, String kitName) {
+        EditSession session = activeSessions.get(player.getUniqueId());
+        if (session != null && session.getKitName().equalsIgnoreCase(kitName)) {
+            abortEditSession(player);
+        }
+
+        File playerDir = new File(playerKitsDirectory, player.getUniqueId().toString());
+        File kitFile = new File(playerDir, kitName + ".json");
+
+        try {
+            return Files.deleteIfExists(kitFile.toPath());
+        } catch (IOException e) {
+            plugin.getLogger().severe("Failed to reset player kit " + kitName + " for " + player.getName() + ": " + e.getMessage());
+            return false;
+        }
     }
     
     /**
