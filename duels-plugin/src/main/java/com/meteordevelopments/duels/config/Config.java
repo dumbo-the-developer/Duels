@@ -53,6 +53,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean myPetDespawn;
     @Getter
+    private boolean mcPetsDespawn;
+    @Getter
     private boolean preventBountyLoss;
     @Getter
     private boolean preventBountyLossByNotBounties;
@@ -358,6 +360,7 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         duelzoneEnabled = configuration.getBoolean("supported-plugins.WorldGuard.duelzone.enabled", false);
         duelzones = configuration.getStringList("supported-plugins.WorldGuard.duelzone.regions");
         myPetDespawn = configuration.getBoolean("supported-plugins.MyPet.despawn-pet-in-duel", false);
+        mcPetsDespawn = configuration.getBoolean("supported-plugins.MCPets.despawn-pet-in-duel", false);
         preventBountyLoss = configuration.getBoolean("supported-plugins.BountyHunters.prevent-bounty-loss-in-duel", true);
         preventBountyLossByNotBounties = configuration.getBoolean("supported-plugins.NotBounties.prevent-bounty-loss-in-duel", true);
         preventKDRChange = configuration.getBoolean("supported-plugins.SimpleClans.prevent-kdr-change", true);
