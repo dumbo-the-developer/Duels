@@ -1,0 +1,747 @@
+# DO NOT EDIT THIS VALUE!
+config-version: 16
+
+STRINGS:
+  PREFIX: '&9[Duels]'
+  LINE: '&9&m------------------------------------&r'
+  HALF_LINE: '&9&m----------------&r'
+  FAIL_PREFIX: '&cError al iniciar el combate:'
+
+
+GENERAL:
+  true: '&averdadero'
+  false: '&cfalso'
+  enabled: '&aactivado'
+  disabled: '&cdesactivado'
+  not-selected: 'No seleccionado'
+  random: 'Aleatorio'
+  none: 'ninguno'
+  kit-selector: 'Selector de kit'
+  arena-selector: 'Selector de arena'
+  item-betting: 'Apuesta de objetos'
+  betting: 'Apuesta'
+
+
+ERROR:
+  no-permission: '{PREFIX} &c¡No tienes el permiso necesario: ''%permission%'''
+  data:
+    load-failure: '{PREFIX} &cNo se pudieron cargar tus estadísticas. Intenta reconectarte.'
+    not-loaded: '{PREFIX} &cLos usuarios aún se están cargando, inténtalo más tarde.'
+    not-found: '{PREFIX} &c%name% no tiene estadísticas disponibles.'
+  top:
+    no-data-available: '{PREFIX} &cNo hay datos disponibles.'
+  player:
+    not-found: '{PREFIX} &c%name% no está en línea.'
+    no-longer-online: '{PREFIX} &cEse jugador ya no está en línea.'
+  arena:
+    not-found: '{PREFIX} &cNo existe una arena llamada ''%name%''.'
+    already-exists: '{PREFIX} &cYa existe una arena llamada ''%name%''.'
+    delete-failure: '{PREFIX} &cNo se puede eliminar una arena en uso. Desactívala primero con ''/duels toggle %name%'''
+    invalid-position: '{PREFIX} &cLa posición debe ser 1 o 2.'
+    no-position-set: '{PREFIX} &cLa arena ''%name%'' no tiene posiciones configuradas.'
+    empty-hand: '{PREFIX} &cDebes tener un objeto en la mano para usar este comando.'
+  kit:
+    not-found: '{PREFIX} &cNo existe un kit llamado ''%name%''.'
+    already-exists: '{PREFIX} &cYa existe un kit llamado ''%name%''.'
+    empty-hand: '{PREFIX} &cDebes tener un objeto en la mano para usar este comando.'
+
+  player-only: '{PREFIX} &cEste comando solo puede ser usado por jugadores.'
+  duel:
+    is-self: '{PREFIX} &cNo puedes duelo contigo mismo.'
+    inventory-not-empty: '{PREFIX} &cDebes tener el inventario vacío para usar este comando.'
+    in-creative-mode: '{PREFIX} &cNo puedes duelo en modo creativo.'
+    in-blacklisted-world: '{PREFIX} &cNo puedes duelo en este mundo.'
+    is-tagged: '{PREFIX} &cNo puedes duelo mientras estás en combate.'
+    in-cooldown: '{PREFIX} &c%name% está en tiempo de espera por %time%.'
+    not-in-duelzone: '{PREFIX} &cSolo puedes duelo en las siguientes regiones: %regions%'
+    requests-disabled: '{PREFIX} &c%name% no está aceptando solicitudes de duelo en este momento.'
+    already-has-request: '{PREFIX} &cYa tienes una solicitud enviada a %name%.'
+    no-request: '{PREFIX} &cNo tienes ninguna solicitud de %name%.'
+    already-in-match:
+      sender: '{PREFIX} &cNo puedes hacer esto mientras estás en un duelo.'
+      target: '{PREFIX} &c%name% ya está en un duelo.'
+    mode-unselected: '{PREFIX} &cDebes elegir un kit o activar el modo de inventario propio.'
+    mode-fixed: '{PREFIX} &cNo tienes permiso para desactivar el modo de inventario propio.'
+    already-spectating:
+      sender: '{PREFIX} &cNo puedes hacer esto mientras estás en modo espectador.'
+      target: '{PREFIX} &c%name% está en modo espectador.'
+    not-in-match: '{PREFIX} &c%name% no está en un duelo.'
+    prevent-teleportation: '{PREFIX} &cNo puedes teletransportarte a ese jugador porque está en un duelo.'
+  party-duel:
+    inventory-not-empty: '{PREFIX} &cTú y los miembros de tu grupo deben tener el inventario vacío.'
+    in-creative-mode: '{PREFIX} &cTú o un miembro de tu grupo está en modo creativo.'
+    in-blacklisted-world: '{PREFIX} &cTú o un miembro de tu grupo está en un mundo bloqueado.'
+    is-tagged: '{PREFIX} &cTú o un miembro de tu grupo está en combate.'
+    not-in-duelzone: '{PREFIX} &cTú o un miembro de tu grupo no está en alguna de las siguientes regiones: %regions%'
+    already-has-request: '{PREFIX} &cYa tienes una solicitud enviada al grupo de %name%.'
+    no-request: '{PREFIX} &cNo tienes ninguna solicitud del grupo de %name%.'
+    already-in-match:
+      sender: '{PREFIX} &cNo puedes hacer esto mientras tu grupo está en un duelo.'
+      target: '{PREFIX} &cEl grupo de %name% ya está en un duelo.'
+    already-spectating:
+      sender: '{PREFIX} &cNo puedes hacer esto mientras tú o un miembro de tu grupo está en modo espectador.'
+      target: '{PREFIX} &cUn miembro del grupo de %name% está en modo espectador.'
+    option-unavailable: '{PREFIX} &cLas apuestas de objetos/dinero no están disponibles para duelos en grupo.'
+  party:
+    is-self: '{PREFIX} &cNo puedes crear un grupo contigo mismo.'
+    is-not-owner: '{PREFIX} &cDebes ser el líder del grupo para hacer esto.'
+    is-owner: '{PREFIX} &cNo puedes abandonar el grupo siendo el líder. Usa ''/party transfer'' para transferir el liderazgo o ''/party disband'' para disolver el grupo.'
+    requests-disabled: '{PREFIX} &c%name% no está aceptando solicitudes de grupo en este momento.'
+    already-has-invite: '{PREFIX} &cYa enviaste una invitación a %name%.'
+    no-invite: '{PREFIX} &cNo tienes ninguna invitación de %name%.'
+    not-found: '{PREFIX} &cEse grupo ya no existe.'
+    already-in-party:
+      sender: '{PREFIX} &cNo puedes hacer esto mientras estás en un grupo.'
+      target: '{PREFIX} &c%name% ya está en un grupo.'
+    not-in-party:
+      sender: '{PREFIX} &cDebes estar en un grupo para hacer esto.'
+      target: '{PREFIX} &c%name% no está en un grupo.'
+    not-a-member: '{PREFIX} &c%name% no es miembro de tu grupo.'
+    in-same-party: '{PREFIX} &c%name% está en tu grupo.'
+    kick-self: '{PREFIX} &cNo puedes expulsarte a ti mismo del grupo.'
+    is-not-same-size: '{PREFIX} &cLos grupos deben ser del mismo tamaño para hacer esto.'
+    is-not-online:
+      sender: '{PREFIX} &c¡Todos los miembros de tu grupo deben estar en línea!'
+      target: '{PREFIX} &c¡Todos los miembros del grupo de %name% deben estar en línea!'
+    max-size-reached:
+      sender: '{PREFIX} &c¡Tu grupo ha alcanzado el número máximo de miembros!'
+      target: '{PREFIX} &c¡El grupo de %name% ha alcanzado el número máximo de miembros!'
+    cannot-friendly-fire: '{PREFIX} &cEl fuego amigo no está permitido.'
+  setting:
+    disabled-option: '{PREFIX} &c%option% está desactivado en este momento.'
+    arena-not-applicable: '{PREFIX} &cNo puedes usar el kit %kit% en la arena %arena%.'
+  inventory-view:
+    not-a-uuid: '{PREFIX} &c%input% no es un UUID válido.'
+    not-found: '{PREFIX} &cNo existe ningún inventario con el UUID ''%uuid%''.'
+  queue:
+    not-found: '{PREFIX} &cNo existe ninguna cola con el kit %kit% y apuesta $%bet_amount%.'
+    already-exists: '{PREFIX} &cYa existe una cola con el kit ''%kit%'' y apuesta $%bet_amount%.'
+    already-in: '{PREFIX} &c¡Ya estás en una cola!'
+    not-in-queue: '{PREFIX} &cNo estás en ninguna cola.'
+    not-enough-money: '{PREFIX} &cNecesitas $%bet_amount% para unirte a esa cola.'
+    party-too-large: '{PREFIX} &cTu grupo tiene %party_size% miembros, pero esta cola permite equipos de %team_size%.'
+    no-queues-available: '{PREFIX} &cNo hay colas disponibles.'
+  sign:
+    not-a-sign: '{PREFIX} &c¡El bloque que estás mirando no es un letrero!'
+    not-found: '{PREFIX} &c¡Ese letrero no es un letrero de cola!'
+    already-exists: '{PREFIX} &c¡Ese letrero ya es un letrero de cola! Para eliminarlo, usa ''/duels delsign'''
+    cancel-break: '{PREFIX} &c¡No puedes romper un letrero de cola manualmente! Usa el comando ''/duels delsign'''
+  sound:
+    not-found: '{PREFIX} &cNo existe ningún sonido llamado ''%name%''.'
+  command:
+    invalid-sub-command: '{PREFIX} &c''%argument%'' no es un subcomando válido. Escribe ''/%command%'' para obtener ayuda.'
+    invalid-option: '{PREFIX} &c''%option%'' no es una opción válida. Las opciones disponibles son: %available_options%'
+    invalid-action: '{PREFIX} &c''%action%'' no es una acción válida. Las acciones disponibles son: %available_actions%'
+    not-enough-money: '{PREFIX} &c¡No tienes suficiente dinero para apostar!'
+    lobby-save-failure: '{PREFIX} &cNo se pudo guardar la ubicación del lobby. Revisa la consola para más información.'
+    name-not-alphanumeric: '{PREFIX} &c''%name%'' no es alfanumérico.'
+    invalid-argument: "{PREFIX} &cArgumento inválido: {arg}. No se permiten marcadores de posición en los comandos."
+
+
+COMMAND:
+  kit:
+    usage: '{PREFIX} &cUso: /kit [edit|save|reset] [jugador] [nombre del kit]'
+    edit:
+      usage: '{PREFIX} &cUso: /kit edit <nombre del kit>'
+    reset:
+      usage: '{PREFIX} &cUso: /kit reset <nombre del kit> o /kit reset <jugador> <nombre del kit>'
+    unknown-subcommand: '{PREFIX} &cSubcomando desconocido: %subcommand%'
+  duel:
+    usage:
+      - '{LINE}'
+      - '&f/%command% [jugador] &e- &7Envía una solicitud de duelo al jugador.'
+      - '&f/%command% [jugador] <cantidad> &e- &7Envía una solicitud de duelo con apuesta.'
+      - '&f/%command% [accept | deny] [jugador] &e- &7Acepta o rechaza una solicitud de duelo.'
+      - '&f/%command% stats <nombre> &e- &7Muestra tus estadísticas de duelo.'
+      - '&f/%command% toggle &e- &7Activa o desactiva la recepción de solicitudes de duelo.'
+      - '&f/%command% top [-|wins|losses|kit] &e- &7Muestra el top de victorias, derrotas o puntuación para el kit.'
+      - '{LINE}'
+    request:
+      send:
+        sender:
+          - '{LINE}'
+          - '&7Solicitud de duelo enviada a &f%name%&7.'
+          - '&6- &7Kit: &3%kit%'
+          - '&6- &7Inventario propio: &r%own_inventory%'
+          - '&6- &7Arena: &e%arena%'
+          - '&6- &7Apuesta: &6$%bet_amount%'
+          - '&6- &7Apuesta de objetos: &r%item_betting%'
+          - '{LINE}'
+        receiver:
+          - '{LINE}'
+          - '&7Solicitud de duelo recibida de &f%name%&7.'
+          - '&6- &7Kit: &3%kit%'
+          - '&6- &7Inventario propio: &r%own_inventory%'
+          - '&6- &7Arena: &e%arena%'
+          - '&6- &7Apuesta: &6$%bet_amount%'
+          - '&6- &7Apuesta de objetos: &r%item_betting%'
+          - '{LINE}'
+        clickable-text:
+          info:
+            text: '&7Clic para '
+            hover-text: ''
+          accept:
+            text: '&a&l[ACEPTAR] '
+            hover-text: '&7Clic para &aaceptar &7esta solicitud.'
+          deny:
+            text: '&c&l[RECHAZAR]'
+            hover-text: '&7Clic para &crechazar &7esta solicitud.'
+      accept:
+        sender: '{PREFIX} &f%name% &7ha aceptado tu solicitud de duelo.'
+        receiver: '{PREFIX} &7Solicitud de duelo de &f%name%&7 aceptada.'
+      deny:
+        sender: '{PREFIX} &7Tu solicitud de duelo a &f%name% &7fue rechazada.'
+        receiver: '{PREFIX} &7Solicitud de duelo de &f%name%&7 rechazada.'
+    party-request:
+      send:
+        sender-party:
+          - '{LINE}'
+          - '&f%owner% &7ha enviado una solicitud de duelo al grupo de &f%name%&7.'
+          - '&6- &7Kit: &3%kit%'
+          - '&6- &7Inventario propio: &r%own_inventory%'
+          - '&6- &7Arena: &e%arena%'
+          - '{LINE}'
+        receiver-party:
+          - '{LINE}'
+          - '&7Solicitud de duelo recibida del grupo de &f%name%&7.'
+          - '&6- &7Kit: &3%kit%'
+          - '&6- &7Inventario propio: &r%own_inventory%'
+          - '&6- &7Arena: &e%arena%'
+        clickable-text:
+          info:
+            text: '&7Clic para '
+            hover-text: ''
+          accept:
+            text: '&a&l[ACEPTAR] '
+            hover-text: '&7Clic para &aaceptar &7esta solicitud.'
+          deny:
+            text: '&c&l[RECHAZAR]'
+            hover-text: '&7Clic para &crechazar &7esta solicitud.'
+          extra:
+            text: '{LINE}'
+            hover-text: ''
+      accept:
+        sender-party:
+          - '{LINE}'
+          - '{PREFIX} &7El grupo de &f%name% &7ha aceptado la solicitud de duelo de &f%owner%&7.'
+          - '{LINE}'
+        receiver-party:
+          - '{LINE}'
+          - '{PREFIX} &f%owner% &7ha aceptado la solicitud de duelo del grupo de &f%name%&7.'
+          - '{LINE}'
+      deny:
+        sender-party:
+          - '{LINE}'
+          - '{PREFIX} &7El grupo de &f%name% &7ha rechazado la solicitud de duelo de &f%owner%&7.'
+          - '{LINE}'
+        receiver-party:
+          - '{LINE}'
+          - '{PREFIX} &7&f%owner%&7 ha rechazado la solicitud de duelo del grupo de &f%name%&7.'
+          - '{LINE}'
+    stats:
+      displayed:
+        - '{LINE}'
+        - '&7Estadísticas de &f%name% &e-'
+        - '&7Victorias: &a%wins%'
+        - '&7Derrotas: &c%losses%'
+        - '&7Ratio V/D: &b%wl_ratio%'
+        - '&7Solicitudes: &r%requests_enabled%'
+      rating:
+        header: '&7Puntuaciones &e-'
+        format: '&f%type%&7: &b%rating%'
+        footer: ''
+      match:
+        header: '&7Partidas recientes &e-'
+        format: '&a%winner% &fvs &c%loser% &6[¡Pasa el cursor!]'
+        hover-text:
+          - '&7Kit: &3%kit%'
+          - '&7Duración: &a%duration%'
+          - '&7Hace: &f%time%'
+          - '&7Vida: &d%health%❤'
+        footer: '{LINE}'
+    toggle:
+      enabled: '{PREFIX} &aAhora recibes solicitudes de duelo.'
+      disabled: '{PREFIX} &cYa no aceptas solicitudes de duelo.'
+    top:
+      next-update: '{PREFIX} &7Próxima actualización: &f%remaining%'
+      header: '{HALF_LINE} &7Top &f10 &7%type% {HALF_LINE}'
+      display-format: '&e%rank%. &f%name% &e- &f%score% &7%identifier%'
+      footer: '{HALF_LINE} &7Top &f10 &7%type% {HALF_LINE}'
+
+  duels:
+    usage:
+      - '{LINE}'
+      - '&f/%command% help &e- &7Muestra esta página.'
+      - '&f/%command% help arena &e- &7Muestra la lista de comandos de arena.'
+      - '&f/%command% help kit &e- &7Muestra la lista de comandos de kit.'
+      - '&f/%command% help queue &e- &7Muestra la lista de comandos de cola.'
+      - '&f/%command% help sign &e- &7Muestra la lista de comandos de letrero.'
+      - '&f/%command% help user &e- &7Muestra la lista de comandos de edición de usuario.'
+      - '&f/%command% help extra &e- &7Muestra la lista de comandos extra.'
+      - '{LINE}'
+    help:
+      arena:
+        - '{HALF_LINE} &fComandos de Arena {HALF_LINE}'
+        - '&f/%command% create [nombre] &e- &7Crea una arena con el nombre dado.'
+        - '&f/%command% set [nombre] [1|2] &e- &7Establece la posición de teletransporte de una arena.'
+        - '&f/%command% delete [nombre] &e- &7Elimina una arena.'
+        - '&f/%command% setarenaitem [nombre] &e- &7Establece el objeto mostrado para la arena seleccionada.'
+        - '&f/%command% info [nombre] &e- &7Muestra información sobre la arena seleccionada.'
+        - '&f/%command% toggle [nombre] &e- &7Activa o desactiva una arena.'
+        - '&f/%command% tp [nombre] <1|2> &e- &7Teletransporta a una arena.'
+        - '&f/%command% list &e- &7Muestra la lista de todas las arenas.'
+        - '{HALF_LINE} &fComandos de Arena {HALF_LINE}'
+      kit:
+        - '{HALF_LINE} &fComandos de Kit {HALF_LINE}'
+        - '&f/%command% savekit <-o> [nombre] &e- &7Guarda un kit con el nombre dado.'
+        - '&f/%command% loadkit [nombre] &e- &7Carga el kit seleccionado en tu inventario.'
+        - '&f/%command% kitgive [kit] [jugador] &e- &7Da un kit a un jugador.'
+        - '&f/%command% deletekit [nombre] &e- &7Elimina un kit.'
+        - '&f/%command% setitem [nombre] &e- &7Establece el objeto mostrado para el kit seleccionado.'
+        - '&f/%command% options [kit] &e- &7Abre la GUI de opciones para el kit seleccionado.'
+        - '&f/%command% bind [kit] &e- &7Abre la GUI de vinculación de arenas para el kit seleccionado.'
+        - '&f/%command% list &e- &7Muestra la lista de todos los kits.'
+        - '{HALF_LINE} &fComandos de Kit {HALF_LINE}'
+      queue:
+        - '{HALF_LINE} &fComandos de Cola {HALF_LINE}'
+        - '&f/%command% createqueue [apuesta] [-|kit] &e- &7Crea una cola con apuesta y kit.'
+        - '&f/%command% deletequeue &e- &7Elimina la cola con apuesta y kit.'
+        - '&f/%command% list &e- &7Muestra la lista de colas disponibles.'
+        - '{HALF_LINE} &fComandos de Cola {HALF_LINE}'
+      sign:
+        - '{HALF_LINE} &fComandos de Letrero {HALF_LINE}'
+        - '&f/%command% addsign [apuesta] [-|kit] &e- &7Crea un letrero de cola con apuesta y kit.'
+        - '&f/%command% delsign &e- &7Elimina el letrero de cola que estás mirando.'
+        - '&f/%command% list &e- &7Muestra la lista de letreros de cola.'
+        - '{HALF_LINE} &fComandos de Letrero {HALF_LINE}'
+      user:
+        - '{HALF_LINE} &fComandos de Edición de Usuario {HALF_LINE}'
+        - '&f/%command% setrating [nombre] [-|kit] [cantidad] &e- &7Establece la puntuación del jugador para el kit.'
+        - '&f/%command% edit [nombre] [add|remove|set] [wins|losses] [cantidad] &e- &7Edita las estadísticas del jugador.'
+        - '&f/%command% resetrating [nombre] [-|kit|all] &e- &7Restablece la puntuación del jugador para el kit.'
+        - '&f/%command% reset [nombre] &e- &7Restablece las estadísticas del jugador.'
+        - '{HALF_LINE} &fComandos de Edición de Usuario {HALF_LINE}'
+      extra:
+        - '{HALF_LINE} &fComandos Extra {HALF_LINE}'
+        - '&f/%command% setlobby &e- &7Establece la ubicación del lobby de duelo.'
+        - '&f/%command% lobby &e- &7Teletransporta al lobby de duelo.'
+        - '&f/%command% playsound [nombre] &e- &7Reproduce el sonido seleccionado si está definido en la configuración.'
+        - '&f/%command% reload <módulo> &e- &7Recarga el plugin o el módulo especificado.'
+        - '{HALF_LINE} &fComandos Extra {HALF_LINE}'
+    create: '{PREFIX} &7La arena &e%name% &7fue creada exitosamente. Para configurar los puntos de aparición, usa el comando &f/duels set %name% 1'
+    delete: '{PREFIX} &7La arena &e%name% &7fue eliminada exitosamente.'
+    set: '{PREFIX} &7Posición &f%position% &7establecida para la arena &e%name% &7en &f%location%&7.'
+    toggle: '{PREFIX} &7La arena &e%name% &7ahora está &r%state%&7.'
+    disable: '{PREFIX} &7La arena &e%name% &7fue desactivada.'
+    enable: '{PREFIX} &7La arena &e%name% &7fue activada.'
+    already-disabled: '{PREFIX} &c%name% ya está desactivada.'
+    already-enabled: '{PREFIX} &c%name% ya está activada.'
+    teleport: '{PREFIX} &7Has sido teletransportado a la posición &f%position% &7de la arena &e%name%&7.'
+    save-kit: '{PREFIX} &7El kit &3%name% &7fue guardado exitosamente.'
+    delete-kit: '{PREFIX} &7El kit &3%name% &7fue eliminado exitosamente.'
+    load-kit: '{PREFIX} &7El kit &3%name% &7fue cargado en tu inventario.'
+    kit-give: '{PREFIX} &7Kit &3%kit% &7entregado a &f%name%&7.'
+    kit-give-target: '{PREFIX} &7Se te entregó el kit &3%kit%&7.'
+    set-item: '{PREFIX} &7El objeto mostrado del kit &3%name%&7 fue cambiado al objeto que sostienes.'
+    set-arena-item: '{PREFIX} &7El objeto mostrado de la arena &e%name%&7 fue cambiado al objeto que sostienes.'
+    create-queue: '{PREFIX} &7Cola creada con el kit &3%kit% &7y apuesta &6$%bet_amount%&7.'
+    delete-queue: '{PREFIX} &7Cola eliminada con el kit &3%kit% &7y apuesta &6$%bet_amount%&7.'
+    add-sign: '{PREFIX} &7Letrero de cola creado en &f%location% &7con el kit &3%kit% &7y apuesta &6$%bet_amount%&7.'
+    del-sign: '{PREFIX} &7Letrero de cola eliminado en &f%location% &7con el kit &3%kit% &7y apuesta &6$%bet_amount%&7.'
+    set-lobby: '{PREFIX} &7Lobby de duelo establecido en tu ubicación actual.'
+    lobby: '{PREFIX} &7¡Has sido teletransportado al lobby!'
+    edit: '{PREFIX} &7Acción ejecutada para &f%name%&7: &f%action% %amount% %type%'
+    set-rating: '{PREFIX} &7La puntuación de &f%name%&7 para el kit &3%kit% &7fue establecida en &a%rating%&7.'
+    reset-rating: '{PREFIX} &7Puntuación de &f%name%&7 para el kit &3%kit%&7 restablecida.'
+    reset: '{PREFIX} &7Estadísticas de &f%name%&7 restablecidas.'
+    info:
+      - '{HALF_LINE} &7Arena &e%name% {HALF_LINE}'
+      - '&7En uso: &r%in_use%'
+      - '&7Desactivada: &r%disabled%'
+      - '&7Kits vinculados: &3%kits%'
+      - '&7Posiciones: &f%positions%'
+      - '&7Jugadores: &f%players%'
+      - '{HALF_LINE} &7Arena &e%name% {HALF_LINE}'
+    list:
+      - '{LINE}'
+      - '&4ROJO OSCURO&7: Arena desactivada'
+      - '&9AZUL&7: Arena sin posiciones de aparición'
+      - '&aVERDE&7: Arena disponible'
+      - '&cROJO&7: Arena en uso'
+      - '&7Arenas: &r%arenas%'
+      - '&7Kits: &f%kits%'
+      - '&7Colas: &b%queues%'
+      - '&7Letreros de cola: &f%queue_signs%'
+      - '&7El lobby de duelo está en &f%lobby%&7.'
+      - '{LINE}'
+
+  spectate:
+    usage:
+      - '{LINE}'
+      - '&f/spectate [jugador] &e- &7Especta a un jugador en duelo.'
+      - '{LINE}'
+    start-spectate: '{PREFIX} &7Ahora espectando &f%name%&7 vs &f%opponent%&7 en la arena &e%arena%&7. Escribe &f/spectate &7para dejar de espectar.'
+    stop-spectate: '{PREFIX} &7Ya no estás espectando a &f%name%&7.'
+  party:
+    usage:
+      - '{LINE}'
+      - '&f/%command% toggle &e- &7Activa o desactiva la recepción de invitaciones de grupo.'
+      - '&f/%command% [jugador] &e- &7Envía una invitación de grupo a un jugador.'
+      - '&f/%command% list &e- &7Lista los miembros del grupo actual.'
+      - '&f/%command% accept [jugador] &e- &7Acepta una invitación de grupo.'
+      - '&f/%command% leave &e- &7Abandona el grupo actual.'
+      - '&f/%command% kick [jugador] &e- &7Expulsa a un jugador de tu grupo.'
+      - '&f/%command% friendlyfire &e- &7Activa o desactiva el fuego amigo para tu grupo.'
+      - '&f/%command% transfer [jugador] &e- &7Transfiere el liderazgo del grupo al jugador.'
+      - '&f/%command% disband &e- &7Disuelve el grupo actual.'
+      - '{LINE}'
+    toggle:
+      enabled: '{PREFIX} &aAhora recibes solicitudes de grupo.'
+      disabled: '{PREFIX} &cYa no aceptas solicitudes de grupo.'
+    list:
+      - '{LINE}'
+      - '&7Líder: &f%owner%'
+      - '&7Miembros (&r%members_count%&7): &r%members%'
+      - '&7En línea (&r%online_count%&7): &r%online_members%'
+      - '{LINE}'
+    invite:
+      send:
+        receiver:
+          - '{LINE}'
+          - '{PREFIX} &7Invitación de grupo recibida de &f%name%&7. Escribe &f/party accept %name% &7para unirte.'
+          - '{LINE}'
+        members:
+          - '{LINE}'
+          - '{PREFIX} &f%owner% &7ha invitado a &f%name% &7al grupo!'
+          - '{LINE}'
+      accept:
+        receiver:
+          - '{LINE}'
+          - '{PREFIX} &7Invitación de grupo de &f%name%&7 aceptada.'
+          - '{LINE}'
+        members:
+          - '{LINE}'
+          - '{PREFIX} &f%name% &7se unió al grupo!'
+          - '{LINE}'
+    leave:
+      sender:
+        - '{LINE}'
+        - '{PREFIX} &7Abandonaste el grupo de &f%name%&7.'
+        - '{LINE}'
+      members:
+        - '{LINE}'
+        - '{PREFIX} &f%name% &7abandonó el grupo!'
+        - '{LINE}'
+    kick:
+      receiver:
+        - '{LINE}'
+        - '{PREFIX} &f%owner% &7te expulsó del grupo!'
+        - '{LINE}'
+      members:
+        - '{LINE}'
+        - '{PREFIX} &f%owner% &7expulsó a &f%name% &7del grupo!'
+        - '{LINE}'
+    friendly-fire:
+      enabled:
+        - '{LINE}'
+        - '{PREFIX} &cEl fuego amigo &7ahora está &aactivado&7!'
+        - '{LINE}'
+      disabled:
+        - '{LINE}'
+        - '{PREFIX} &cEl fuego amigo &7ahora está &cdesactivado&7!'
+        - '{LINE}'
+    transfer:
+      - '{LINE}'
+      - '{PREFIX} &f%owner% &7transfirió el grupo a &f%name%&7.'
+      - '{LINE}'
+    disband:
+      - '{LINE}'
+      - '{PREFIX} &f%owner% &7disolvió el grupo.'
+      - '{LINE}'
+
+  sub-command-usage: '{PREFIX} &f/%command% %usage% &e- &7%description%'
+
+
+DUEL:
+  start-failure:
+    mode-unselected: '{FAIL_PREFIX} &cSe debe seleccionar un kit o activar el modo de inventario propio para iniciar un duelo.'
+    player-is-dead: '{FAIL_PREFIX} ¡Tú o tu oponente está muerto en este momento!'
+    in-blacklisted-world: '{FAIL_PREFIX} ¡Tú o tu oponente está en un mundo bloqueado!'
+    is-tagged: '{FAIL_PREFIX} ¡Tú o tu oponente está en combate!'
+    player-moved: '{FAIL_PREFIX} ¡Tú o tu oponente se movió tras enviar/aceptar la solicitud!'
+    not-in-duelzone: '{FAIL_PREFIX} ¡Tú o tu oponente salió de la zona de duelo tras enviar/aceptar la solicitud!'
+    in-creative-mode: '{FAIL_PREFIX} ¡Tú o tu oponente está en modo creativo!'
+    no-arena-available: '{FAIL_PREFIX} No hay arenas disponibles en este momento. Inténtalo más tarde.'
+    arena-in-use: '{FAIL_PREFIX} La arena seleccionada ya está en uso. Por favor elige otra.'
+    arena-not-applicable: '{FAIL_PREFIX} El kit %kit% no puede usarse en la arena seleccionada.'
+    not-enough-money: '{FAIL_PREFIX} Tú o tu oponente no tiene $%bet_amount%.'
+  rounds:
+    round-end: '{PREFIX} &7¡Ronda &e%round% &7terminada! ¡&f%winner% &7ganó la ronda!'
+    round-status: '{PREFIX} &7Marcador actual: &f%player1% &7(&a%wins1%&7) vs &f%player2% &7(&a%wins2%&7)'
+    round-start: '{PREFIX} &7Ronda &e%round% &7comenzando...'
+    match-point: '{PREFIX} &c&lPunto de partido &7para &f%player%&7!'
+  party-start-failure:
+    option-unavailable: '{FAIL_PREFIX} &cLas apuestas de objetos/dinero no están disponibles para duelos en grupo.'
+    party-changed: '{FAIL_PREFIX} El remitente o el aceptante de la solicitud cambió su grupo.'
+    player-is-dead: '{FAIL_PREFIX} ¡Uno o más jugadores están muertos!'
+    in-blacklisted-world: '{FAIL_PREFIX} ¡Uno o más jugadores están en un mundo bloqueado!'
+    is-tagged: '{FAIL_PREFIX} ¡Uno o más jugadores están en combate!'
+    player-moved: '{FAIL_PREFIX} ¡Uno o más jugadores se movieron tras enviar/aceptar la solicitud!'
+    not-in-duelzone: '{FAIL_PREFIX} ¡Uno o más jugadores salieron de la zona de duelo tras enviar/aceptar la solicitud!'
+    in-creative-mode: '{FAIL_PREFIX} ¡Uno o más jugadores están en modo creativo!'
+    is-not-same-size: '{PREFIX} &cLos grupos deben ser del mismo tamaño para hacer esto.'
+    is-not-all-online: '{FAIL_PREFIX} ¡Todos los miembros de los grupos deben estar en línea!'
+  prevent:
+    item-drop: '&cNo puedes soltar objetos durante un duelo.'
+    command: '&cNo puedes usar ''%command%'' durante un duelo.'
+    teleportation: '&cNo puedes teletransportarte durante un duelo.'
+    inventory-open: '&cNo puedes abrir inventarios durante un duelo.'
+  projectile-hit-message: '{PREFIX} &f%name% &7ahora tiene &d%health%❤&7!'
+  on-death:
+    with-killer: '{PREFIX} &a%killer% &7ha eliminado a &c%name% &7con &d%health%❤&7.'
+    no-killer: '{PREFIX} &c%name% &7murió.'
+  on-end:
+    tie: '{PREFIX} &7¡Empate!'
+    plugin-disable: '{PREFIX} &cEl plugin se está desactivando. El combate finaliza automáticamente.'
+    opponent-defeat: '{PREFIX} &f%winner% &a(%winner_rating%) (+%change%) &7derrotó a &f%loser% &c(%loser_rating%) (-%change%) &7con el kit &3%kit% &7en la arena &e%arena%&7.'
+    team-opponent-defeat: '{PREFIX} &f%winners% &7derrotó a &f%losers% &7con el kit &3%kit% &7en la arena &e%arena%&7.'
+    party-opponent-defeat: '{PREFIX} &f%winners% &7derrotó a &f%losers% &7con el kit &3%kit% &7en la arena &e%arena%&7.'
+  inventories:
+    message: '&7Inventarios (clic en el nombre para ver): '
+    name-color: '&b'
+  reward:
+    money:
+      message: '{PREFIX} &7¡Has recibido &6$%money% &7por ganar contra &f%name%&7!'
+      title: '&e¡GANASTE &6$%money%&e!'
+    items:
+      message: '{PREFIX} &7¡Has recibido los objetos de &f%name%&7 por ganar!'
+
+
+PARTY:
+  auto-disband:
+    - '{LINE}'
+    - '{PREFIX} &7El grupo fue disuelto automáticamente por inactividad.'
+    - '{LINE}'
+
+
+QUEUE:
+  prevent:
+    command: '&cNo puedes usar ''%command%'' mientras estás en cola.'
+  add: '{PREFIX} &7Has sido añadido a la cola para el kit &3%kit% &7y apuesta &6$%bet_amount%&7. Vuelve a hacer clic en el letrero o escribe &f/queue leave &7para salir de la cola.'
+  remove: '{PREFIX} &7Has sido eliminado de la cola.'
+  found-opponent: '{PREFIX} &7¡Oponente encontrado: &f%name%&7! Iniciando partida con el kit &3%kit% &7y apuesta &6$%bet_amount%&7...'
+
+
+SIGN:
+  format:
+    - '&a[Clic para unirse]'
+    - '&3%name%&f:&e$%bet_amount%'
+    - '&f&l%in_queue% EN COLA'
+    - '&f&l%in_match% EN PARTIDA'
+
+
+SPECTATE:
+  arena-broadcast: '{PREFIX} &f%name% &7¡ahora está espectando el combate!'
+  match-end: '{PREFIX} &7El combate que espectabas ha terminado.'
+  prevent:
+    command: '&cNo puedes usar ''%command%'' en modo espectador.'
+    teleportation: '&cNo puedes teletransportarte en modo espectador.'
+
+
+GUI:
+  settings:
+    title: 'Configuración de solicitud'
+    buttons:
+      details:
+        name: '&9Detalles de la solicitud'
+        lore:
+          - '&7Oponente: &f%opponent%'
+          - '&7Kit: &3%kit%'
+          - '&7Inventario propio: &r%own_inventory%'
+          - '&7Arena: &e%arena%'
+          - '&7Objetos de apuesta: &r%item_betting%'
+          - '&7Apuesta: &6$%bet_amount%'
+          - ' '
+          - '&7Para cambiar la cantidad'
+          - '&7de apuesta, escribe'
+          - '&b/duel %opponent% [cantidad]'
+      kit-selector:
+        name: '&9Selección de kit'
+        lore:
+          - '&7Kit seleccionado: &3%kit%'
+          - ' '
+          - '&a¡Clic para cambiar el kit!'
+        lore-no-permission:
+          - '&cNo tienes permiso para'
+          - '&cusar esta opción.'
+      use-own-inventory:
+        name: '&9Usar inventario propio'
+        material: CHEST
+        lore:
+          - '&7Inventario propio: &r%own_inventory%'
+          - ' '
+          - '&a¡Clic para activar/desactivar el inventario propio!'
+        lore-no-permission:
+          - '&cNo tienes permiso para'
+          - '&cusar esta opción.'
+      arena-selector:
+        name: '&9Selección de arena'
+        lore:
+          - '&7Arena seleccionada: &e%arena%'
+          - ' '
+          - '&a¡Clic para cambiar la arena!'
+        lore-no-permission:
+          - '&cNo tienes permiso para'
+          - '&cusar esta opción.'
+      item-betting:
+        name: '&9Permitir apuesta de objetos'
+        lore:
+          - '&7Apuesta de objetos: &r%item_betting%'
+          - ' '
+          - '&a¡Clic para activar/desactivar la apuesta de objetos!'
+        lore-no-permission:
+          - '&cNo tienes permiso para'
+          - '&cusar esta opción.'
+      send:
+        name: '&a&lENVIAR SOLICITUD'
+      cancel:
+        name: '&c&lCANCELAR'
+  kit-selector:
+    title: 'Selección de kit'
+    buttons:
+      previous-page:
+        name: '&aPágina anterior'
+      next-page:
+        name: '&aPágina siguiente'
+      empty:
+        name: '&cEsta página está vacía.'
+  kit-edit-selector:
+    title: 'Seleccionar kit para editar'
+    buttons:
+      previous-page:
+        name: '&aPágina anterior'
+      next-page:
+        name: '&aPágina siguiente'
+      empty:
+        name: '&cNo hay kits disponibles para editar.'
+  arena-selector:
+    title: 'Selección de arena'
+    buttons:
+      arena:
+        name: '&e%name%'
+        lore-default:
+          - '&eEstado: &r{status}'
+        lore-available:
+          - '&aDisponible'
+        lore-unavailable:
+          - '&cNo disponible'
+      previous-page:
+        name: '&aPágina anterior'
+      next-page:
+        name: '&aPágina siguiente'
+      empty:
+        name: '&cEsta página está vacía.'
+  queues:
+    title: 'Colas disponibles'
+    buttons:
+      queue:
+        name: '&3%name%'
+        lore:
+          - '&7Apuesta: &6$%bet_amount%'
+          - '&7En cola: &f%in_queue%'
+          - '&7En partida: &f%in_match%'
+          - ' '
+          - '&a&l¡Clic para unirse a la cola!'
+      previous-page:
+        name: '&aPágina anterior'
+      next-page:
+        name: '&aPágina siguiente'
+      empty:
+        name: '&cEsta página está vacía.'
+  item-betting:
+    title: '¡El ganador se lo lleva todo!'
+    buttons:
+      head:
+        name: '&e%name%'
+      state:
+        name-ready: '&a&lLISTO'
+        name-not-ready: '&7&lNO LISTO'
+      details:
+        name: '&9Detalles del combate'
+        lore:
+          - '&7Kit: &3%kit%'
+          - '&7Arena: &e%arena%'
+          - '&7Apuesta: &6$%bet_amount%'
+      cancel:
+        name: '&c&lCLIC PARA CANCELAR'
+        lore:
+          - '&7Clic o cierra el inventario'
+          - '&7para cancelar el combate.'
+  inventory-view:
+    title: '&e%name%'
+    buttons:
+      head:
+        name: '&e%name%'
+      potion-counter:
+        name: '&d%potions% pociones de vida'
+      effects:
+        name: '&bEfectos de poción'
+        lore-format: '&7%type% %amplifier% (%duration%s)'
+      hunger:
+        name: '&6%hunger% barras'
+      health:
+        name: '&c%health% ❤'
+  options:
+    title: 'Kit: %kit%'
+    buttons:
+      option:
+        name: '&b%name%'
+        lore:
+          - ' '
+          - '&7Estado: &r%state%'
+          - ' '
+          - '&r&lCLIC PARA ACTIVAR/DESACTIVAR'
+  bind:
+    title: 'Kit: %kit%'
+    buttons:
+      arena:
+        name: '&e%arena%'
+        lore-bound:
+          - '&7Kits vinculados: &3%kits%'
+          - ' '
+          - '&a&lVINCULADO'
+          - ' '
+          - '&r&lCLIC PARA ACTIVAR/DESACTIVAR'
+        lore-not-bound:
+          - '&7Kits vinculados: &3%kits%'
+          - ' '
+          - '&c&lNO VINCULADO'
+          - ' '
+          - '&r&lCLIC PARA ACTIVAR/DESACTIVAR'
+
+
+KIT:
+    EDIT:
+      started: '{PREFIX} &aAhora estás editando el kit &e%kit%&a. Usa &e/kit save &acuando termines.'
+      saved: '{PREFIX} &aTu kit &e%kit% &aha sido guardado y tu inventario restaurado.'
+      already-editing: '{PREFIX} &cYa estás editando un kit. Usa &e/kit save &cprimero para guardarlo.'
+      not-editing: '{PREFIX} &cActualmente no estás editando ningún kit.'
+      start-failed: '{PREFIX} &cNo se pudo iniciar la sesión de edición de kit.'
+      save-failed: '{PREFIX} &cNo se pudo guardar el kit. Inténtalo de nuevo.'
+      in-queue: '{PREFIX} &cNo puedes editar kits mientras estás en cola. Sal de la cola primero.'
+      in-match: '{PREFIX} &cNo puedes editar kits durante un combate. Espera a que termine.'
+      session-aborted: '{PREFIX} &cTu sesión de edición de kit fue cancelada porque te uniste a una cola o combate.'
+      invalid-items: '{PREFIX} &c¡Sesión de edición de kit cancelada! Solo puedes modificar objetos del kit predeterminado. No se permiten objetos externos.'
+      command-blocked: '{PREFIX} &cNo puedes usar otros comandos mientras editas un kit. Usa &e/kit save &cpara guardar.'
+      drop-blocked: '{PREFIX} &cNo puedes soltar objetos mientras editas un kit.'
+      inventory-blocked: '{PREFIX} &cNo puedes acceder a inventarios externos mientras editas un kit.'
+      block-break-blocked: '{PREFIX} &cNo puedes romper bloques mientras editas un kit.'
+      block-place-blocked: '{PREFIX} &cNo puedes colocar bloques mientras editas un kit.'
+      interact-blocked: '{PREFIX} &cNo puedes interactuar con bloques mientras editas un kit.'
+      cancelled: '{PREFIX} &aSesión de edición de kit cancelada. Tu inventario ha sido restaurado.'
+    RESET:
+      success: '{PREFIX} &aTu kit editado &e%kit% &aha sido restablecido al predeterminado.'
+      success-other: '{PREFIX} &aEl kit editado &e%kit% &ade &e%name%&a ha sido restablecido al predeterminado.'
+      reset-by-admin: '{PREFIX} &eEl kit %kit% &aha sido restablecido al predeterminado por un administrador.'
+      not-edited: '{PREFIX} &c%name% no tiene un kit editado de &e%kit%&c.'
+      failed: '{PREFIX} &cNo se pudo restablecer el kit &e%kit% &cde %name%.'

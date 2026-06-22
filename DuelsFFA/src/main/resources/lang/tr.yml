@@ -1,0 +1,56 @@
+STRINGS:
+  PREFIX: '&8[&6FFA&8]'
+  LINE: '&6&m-----------------------------'
+
+ERROR:
+  invalid-sub-command: '{PREFIX} &c''%argument%'' geçerli bir komut değil. Yardım için ''/ffa'' yaz.'
+  player-only: '{PREFIX} &cBu komut yalnızca oyuncular tarafından kullanılabilir.'
+  no-permission: '{PREFIX} &cBu işlem için yetkin yok.'
+  arena-not-found: '{PREFIX} &c''%name%'' adında bir arena bulunamadı.'
+  arena-already-exists: '{PREFIX} &c''%name%'' adında bir arena zaten mevcut.'
+  arena-disabled: '{PREFIX} &c''%name%'' arenası devre dışı.'
+  arena-resetting: '{PREFIX} &c''%name%'' arenası şu an yeniden oluşturuluyor.'
+  no-arenas: '{PREFIX} &cKullanılabilir FFA arenası yok.'
+  no-selection: '{PREFIX} &cÖnce pos1 ve pos2 konumlarını belirlemelisin.'
+  kit-not-found: '{PREFIX} &c''%name%'' adında bir kit bulunamadı.'
+  kit-no-permission: '{PREFIX} &c''%name%'' kitini kullanmak için yetkin yok.'
+  already-in-ffa: '{PREFIX} &cZaten bir FFA arenasındasın.'
+  not-in-ffa: '{PREFIX} &cBir FFA arenasında değilsin.'
+  no-spawns: '{PREFIX} &c''%name%'' arenasında doğum noktası yok.'
+  no-zone: '{PREFIX} &c''%name%'' arenasında yenileme bölgesi yok.'
+  create-failed: '{PREFIX} &c''%name%'' arenası oluşturulamadı.'
+  leave-arena: '{PREFIX} &cArenadan ayrıldın.'
+
+COMMAND:
+  ffa:
+    usage-single: '{PREFIX} &cKullanım: /ffa %usage%'
+    usage:
+    - '{LINE}'
+    - '&f/ffa join <arena> &e- &7Bir arenaya katıl.'
+    - '&f/ffa leave &e- &7Arenandan ayrıl.'
+    - '&f/ffa pos1 &e- &7Hedef bloktan birinci konumu belirle.'
+    - '&f/ffa pos2 &e- &7Hedef bloktan ikinci konumu belirle.'
+    - '&f/ffa create <ad> <kit|none> &e- &7Arena oluştur.'
+    - '&f/ffa setspawn <ad> &e- &7Arena doğum noktasını belirle.'
+    - '&f/ffa addspawn <ad> &e- &7Ek doğum noktası ekle.'
+    - '&f/ffa list &e- &7Arenaları listele.'
+    - '&f/ffa forceregenerate <ad> &e- &7Arenayı zorla yenile.'
+    - '&f/ffa enable <ad> &e- &7Arenayı etkinleştir.'
+    - '&f/ffa disable <ad> &e- &7Arenayı devre dışı bırak.'
+    - '{LINE}'
+
+    join: '{PREFIX} &7&f%arena% &7arenasına katıldın.'
+    leave: '{PREFIX} &7&f%arena% &7arenasından ayrıldın.'
+    create: '{PREFIX} &7&f%arena% &7arenası &f%kit% &7kiti ile oluşturuldu.'
+    setspawn: '{PREFIX} &7&f%arena% &7arenası için doğum noktası belirlendi.'
+    addspawn: '{PREFIX} &7&f%arena% &7arenasına doğum noktası eklendi.'
+    pos-set: '{PREFIX} &7%pos% konumu &f%location%&7 olarak belirlendi.'
+    list:
+      header: '{PREFIX} &7Yüklü &fFFA Arenaları&7 listesi:'
+      format: '&6- &f%name% &7[kit: &f%kit%&7, aktif: &f%enabled%&7]'
+      footer: '{PREFIX} &7Toplam: &a%count%'
+    regen:
+      start: '{PREFIX} &7&f%name% &7yenileniyor...'
+      end: '{PREFIX} &7&f%name% &7için yenileme tamamlandı.'
+    enable: '{PREFIX} &7&f%name% &7arenası etkinleştirildi.'
+    disable: '{PREFIX} &7&f%name% &7arenası devre dışı bırakıldı.'

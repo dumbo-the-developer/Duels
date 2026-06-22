@@ -1,0 +1,56 @@
+STRINGS:
+  PREFIX: '&8[&6FFA&8]'
+  LINE: '&6&m-----------------------------'
+
+ERROR:
+  invalid-sub-command: '{PREFIX} &c''%argument%'' no es un comando válido. Escribe ''/ffa'' para obtener ayuda.'
+  player-only: '{PREFIX} &cEste comando solo puede ser usado por jugadores.'
+  no-permission: '{PREFIX} &cNo tienes permiso para esto.'
+  arena-not-found: '{PREFIX} &cArena ''%name%'' no encontrada.'
+  arena-already-exists: '{PREFIX} &cLa arena ''%name%'' ya existe.'
+  arena-disabled: '{PREFIX} &cLa arena ''%name%'' está desactivada.'
+  arena-resetting: '{PREFIX} &cLa arena ''%name%'' se está regenerando actualmente.'
+  no-arenas: '{PREFIX} &cNo hay arenas FFA disponibles.'
+  no-selection: '{PREFIX} &cDebes establecer pos1 y pos2 primero.'
+  kit-not-found: '{PREFIX} &cKit ''%name%'' no encontrado.'
+  kit-no-permission: '{PREFIX} &cNo tienes permiso para el kit ''%name%''.'
+  already-in-ffa: '{PREFIX} &cYa estás en una arena FFA.'
+  not-in-ffa: '{PREFIX} &cNo estás en una arena FFA.'
+  no-spawns: '{PREFIX} &cLa arena ''%name%'' no tiene puntos de aparición.'
+  no-zone: '{PREFIX} &cLa arena ''%name%'' no tiene zona de regeneración.'
+  create-failed: '{PREFIX} &cError al crear la arena ''%name%''.'
+  leave-arena: '{PREFIX} &cAbandonaste la arena.'
+
+COMMAND:
+  ffa:
+    usage-single: '{PREFIX} &cUso: /ffa %usage%'
+    usage:
+    - '{LINE}'
+    - '&f/ffa join <arena> &e- &7Unirse a una arena.'
+    - '&f/ffa leave &e- &7Abandonar tu arena.'
+    - '&f/ffa pos1 &e- &7Establecer primera posición desde el bloque objetivo.'
+    - '&f/ffa pos2 &e- &7Establecer segunda posición desde el bloque objetivo.'
+    - '&f/ffa create <nombre> <kit|none> &e- &7Crear una arena.'
+    - '&f/ffa setspawn <nombre> &e- &7Establecer punto de aparición de la arena.'
+    - '&f/ffa addspawn <nombre> &e- &7Añadir otro punto de aparición.'
+    - '&f/ffa list &e- &7Listar arenas.'
+    - '&f/ffa forceregenerate <nombre> &e- &7Forzar regeneración de arena.'
+    - '&f/ffa enable <nombre> &e- &7Activar una arena.'
+    - '&f/ffa disable <nombre> &e- &7Desactivar una arena.'
+    - '{LINE}'
+
+    join: '{PREFIX} &7Te uniste a la arena &f%arena%&7.'
+    leave: '{PREFIX} &7Abandonaste la arena &f%arena%&7.'
+    create: '{PREFIX} &7Arena &f%arena% &7creada con el kit &f%kit%&7.'
+    setspawn: '{PREFIX} &7Punto de aparición establecido para la arena &f%arena%&7.'
+    addspawn: '{PREFIX} &7Punto de aparición añadido para la arena &f%arena%&7.'
+    pos-set: '{PREFIX} &7Posición %pos% establecida en &f%location%&7.'
+    list:
+      header: '{PREFIX} &7Lista de &fArenas FFA&7 cargadas:'
+      format: '&6- &f%name% &7[kit: &f%kit%&7, activada: &f%enabled%&7]'
+      footer: '{PREFIX} &7Total: &a%count%'
+    regen:
+      start: '{PREFIX} &7Regenerando &f%name%&7...'
+      end: '{PREFIX} &7Regeneración completada para &f%name%&7.'
+    enable: '{PREFIX} &7Arena &f%name%&7 activada.'
+    disable: '{PREFIX} &7Arena &f%name%&7 desactivada.'
