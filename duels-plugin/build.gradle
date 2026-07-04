@@ -39,6 +39,7 @@ dependencies {
     implementation name: 'MassiveCore'
     implementation name: 'Factions'
     implementation name: 'MyPet-2.3.4'
+    implementation name: 'MCPets-4.1.12'
     implementation name: 'BountyHunters-2.2.6'
     implementation name: 'SimpleClans-2.14.4.1'
     implementation name: 'LeaderHeadsAPI'

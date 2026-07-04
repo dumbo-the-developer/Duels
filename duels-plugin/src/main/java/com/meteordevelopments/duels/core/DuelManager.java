@@ -73,6 +73,7 @@ public class DuelManager implements Loadable {
     private EssentialsHook essentials;
     private McMMOHook mcMMO;
     private MyPetHook myPet;
+    private MCPetsHook mcPets;
 
     private WrappedTask durationCheckTask;
 
@@ -294,6 +295,7 @@ public class DuelManager implements Loadable {
         this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
         this.mcMMO = plugin.getHookManager().getHook(McMMOHook.class);
         this.myPet = plugin.getHookManager().getHook(MyPetHook.class);
+        this.mcPets = plugin.getHookManager().getHook(MCPetsHook.class);
 
         if (config.getMaxDuration() > 0) {
             this.durationCheckTask = plugin.doSyncRepeat(() -> {
@@ -650,6 +652,10 @@ public class DuelManager implements Loadable {
 
             if (myPet != null) {
                 myPet.removePet(player);
+            }
+
+            if (mcPets != null) {
+                mcPets.removePets(player);
             }
 
             if (essentials != null) {

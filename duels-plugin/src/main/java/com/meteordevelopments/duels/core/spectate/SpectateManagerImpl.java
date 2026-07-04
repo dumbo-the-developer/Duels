@@ -16,6 +16,7 @@ import com.meteordevelopments.duels.core.match.DuelMatch;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.config.Lang;
 import com.meteordevelopments.duels.hook.hooks.EssentialsHook;
+import com.meteordevelopments.duels.hook.hooks.MCPetsHook;
 import com.meteordevelopments.duels.hook.hooks.MyPetHook;
 import com.meteordevelopments.duels.core.player.PlayerInfo;
 import com.meteordevelopments.duels.core.player.PlayerInfoManager;
@@ -60,6 +61,7 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
 
     private Teleport teleport;
     private MyPetHook myPet;
+    private MCPetsHook mcPets;
     private EssentialsHook essentials;
 
     public SpectateManagerImpl(final DuelsPlugin plugin) {
@@ -77,6 +79,7 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
         // Late-init since SpectateManager is loaded before below variables are loaded
         this.teleport = plugin.getTeleport();
         this.myPet = plugin.getHookManager().getHook(MyPetHook.class);
+        this.mcPets = plugin.getHookManager().getHook(MCPetsHook.class);
         this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
     }
 
@@ -149,6 +152,10 @@ public class SpectateManagerImpl implements Loadable, SpectateManager {
         // Remove pet before teleport
         if (myPet != null) {
             myPet.removePet(player);
+        }
+
+        if (mcPets != null) {
+            mcPets.removePets(player);
         }
 
         // Cache current player state to return to after spectating is over
