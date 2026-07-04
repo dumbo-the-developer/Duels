@@ -1,0 +1,747 @@
+# DO NOT EDIT THIS VALUE!
+config-version: 16
+
+STRINGS:
+  PREFIX: '&9[Duels]'
+  LINE: '&9&m------------------------------------&r'
+  HALF_LINE: '&9&m----------------&r'
+  FAIL_PREFIX: '&cОшибка запуска матча:'
+
+
+GENERAL:
+  true: '&aда'
+  false: '&cнет'
+  enabled: '&aвключено'
+  disabled: '&cотключено'
+  not-selected: 'Не выбрано'
+  random: 'Случайно'
+  none: 'нет'
+  kit-selector: 'Выбор кита'
+  arena-selector: 'Выбор арены'
+  item-betting: 'Ставка предметами'
+  betting: 'Ставка'
+
+
+ERROR:
+  no-permission: '{PREFIX} &cУ тебя нет права: ''%permission%'''
+  data:
+    load-failure: '{PREFIX} &cНе удалось загрузить статистику дуэлей. Попробуй перезайти.'
+    not-loaded: '{PREFIX} &cПользователи ещё загружаются, попробуй позже.'
+    not-found: '{PREFIX} &cУ %name% нет статистики дуэлей.'
+  top:
+    no-data-available: '{PREFIX} &cДанных нет.'
+  player:
+    not-found: '{PREFIX} &c%name% не в сети.'
+    no-longer-online: '{PREFIX} &cЭтот игрок больше не в сети.'
+  arena:
+    not-found: '{PREFIX} &cАрена с названием ''%name%'' не найдена.'
+    already-exists: '{PREFIX} &cАрена с названием ''%name%'' уже существует.'
+    delete-failure: '{PREFIX} &cНельзя удалить арену, которая сейчас используется. Сначала отключи её командой ''/duels toggle %name%'''
+    invalid-position: '{PREFIX} &cПозиция должна быть 1 или 2.'
+    no-position-set: '{PREFIX} &cДля арены ''%name%'' не установлены позиции.'
+    empty-hand: '{PREFIX} &cДля этой команды нужно держать предмет в руке.'
+  kit:
+    not-found: '{PREFIX} &cКит с названием ''%name%'' не найден.'
+    already-exists: '{PREFIX} &cКит с названием ''%name%'' уже существует.'
+    empty-hand: '{PREFIX} &cДля этой команды нужно держать предмет в руке.'
+
+  player-only: '{PREFIX} &cЭту команду могут использовать только игроки.'
+  duel:
+    is-self: '{PREFIX} &cТы не можешь вызвать самого себя на дуэль.'
+    inventory-not-empty: '{PREFIX} &cИнвентарь должен быть пустым для использования этой команды.'
+    in-creative-mode: '{PREFIX} &cНельзя проводить дуэль в режиме творчества.'
+    in-blacklisted-world: '{PREFIX} &cНельзя проводить дуэль в этом мире.'
+    is-tagged: '{PREFIX} &cНельзя проводить дуэль во время боя.'
+    in-cooldown: '{PREFIX} &c%name% находится в кулдауне дуэли ещё %time%.'
+    not-in-duelzone: '{PREFIX} &cДуэли можно проводить только в следующих регионах: %regions%'
+    requests-disabled: '{PREFIX} &c%name% в данный момент не принимает запросы на дуэль.'
+    already-has-request: '{PREFIX} &cТы уже отправил запрос игроку %name%.'
+    no-request: '{PREFIX} &cУ тебя нет запроса от %name%.'
+    already-in-match:
+      sender: '{PREFIX} &cТы не можешь сделать это во время дуэли.'
+      target: '{PREFIX} &c%name% уже участвует в дуэли.'
+    mode-unselected: '{PREFIX} &cНеобходимо выбрать кит или включить режим своего инвентаря.'
+    mode-fixed: '{PREFIX} &cТебе не разрешено отключать режим своего инвентаря.'
+    already-spectating:
+      sender: '{PREFIX} &cТы не можешь сделать это в режиме наблюдателя.'
+      target: '{PREFIX} &c%name% находится в режиме наблюдателя.'
+    not-in-match: '{PREFIX} &c%name% не участвует в дуэли.'
+    prevent-teleportation: '{PREFIX} &cНельзя телепортироваться к этому игроку — он участвует в дуэли.'
+  party-duel:
+    inventory-not-empty: '{PREFIX} &cТы и члены группы должны иметь пустой инвентарь.'
+    in-creative-mode: '{PREFIX} &cТы или член группы находится в режиме творчества.'
+    in-blacklisted-world: '{PREFIX} &cТы или член группы находится в заблокированном мире.'
+    is-tagged: '{PREFIX} &cТы или член группы находится в бою.'
+    not-in-duelzone: '{PREFIX} &cТы или член группы не в одном из следующих регионов: %regions%'
+    already-has-request: '{PREFIX} &cТы уже отправил запрос группе %name%.'
+    no-request: '{PREFIX} &cУ тебя нет запроса от группы %name%.'
+    already-in-match:
+      sender: '{PREFIX} &cТы не можешь делать это, пока группа в дуэли.'
+      target: '{PREFIX} &cГруппа %name% уже участвует в дуэли.'
+    already-spectating:
+      sender: '{PREFIX} &cТы не можешь делать это, пока ты или член группы — наблюдатель.'
+      target: '{PREFIX} &cЧлен группы %name% находится в режиме наблюдателя.'
+    option-unavailable: '{PREFIX} &cСтавки предметами/деньгами недоступны для групповых дуэлей.'
+  party:
+    is-self: '{PREFIX} &cНельзя создать группу с самим собой.'
+    is-not-owner: '{PREFIX} &cТы должен быть лидером группы для этого действия.'
+    is-owner: '{PREFIX} &cТы не можешь покинуть группу, будучи лидером. Используй ''/party transfer'' для передачи лидерства или ''/party disband'' для роспуска.'
+    requests-disabled: '{PREFIX} &c%name% в данный момент не принимает приглашения в группу.'
+    already-has-invite: '{PREFIX} &cТы уже отправил приглашение игроку %name%.'
+    no-invite: '{PREFIX} &cУ тебя нет приглашения от %name%.'
+    not-found: '{PREFIX} &cЭта группа больше не существует.'
+    already-in-party:
+      sender: '{PREFIX} &cТы не можешь делать это, находясь в группе.'
+      target: '{PREFIX} &c%name% уже состоит в группе.'
+    not-in-party:
+      sender: '{PREFIX} &cТы должен быть в группе для этого действия.'
+      target: '{PREFIX} &c%name% не состоит в группе.'
+    not-a-member: '{PREFIX} &c%name% не является членом твоей группы.'
+    in-same-party: '{PREFIX} &c%name% уже в твоей группе.'
+    kick-self: '{PREFIX} &cНельзя исключить самого себя из группы.'
+    is-not-same-size: '{PREFIX} &cРазмеры групп должны совпадать для этого действия.'
+    is-not-online:
+      sender: '{PREFIX} &cВсе члены твоей группы должны быть в сети!'
+      target: '{PREFIX} &cВсе члены группы %name% должны быть в сети!'
+    max-size-reached:
+      sender: '{PREFIX} &cТвоя группа достигла максимального количества участников!'
+      target: '{PREFIX} &cГруппа %name% достигла максимального количества участников!'
+    cannot-friendly-fire: '{PREFIX} &cДружественный огонь запрещён.'
+  setting:
+    disabled-option: '{PREFIX} &c%option% в данный момент отключено.'
+    arena-not-applicable: '{PREFIX} &cНельзя использовать кит %kit% на арене %arena%.'
+  inventory-view:
+    not-a-uuid: '{PREFIX} &c%input% не является корректным UUID.'
+    not-found: '{PREFIX} &cИнвентарь с UUID ''%uuid%'' не найден.'
+  queue:
+    not-found: '{PREFIX} &cОчередь с китом %kit% и ставкой $%bet_amount% не найдена.'
+    already-exists: '{PREFIX} &cОчередь с китом ''%kit%'' и ставкой $%bet_amount% уже существует.'
+    already-in: '{PREFIX} &cТы уже находишься в очереди!'
+    not-in-queue: '{PREFIX} &cТы не находишься в очереди.'
+    not-enough-money: '{PREFIX} &cДля входа в эту очередь нужно $%bet_amount%.'
+    party-too-large: '{PREFIX} &cВ твоей группе %party_size% игроков, но эта очередь допускает команды по %team_size% человек.'
+    no-queues-available: '{PREFIX} &cНет доступных очередей.'
+  sign:
+    not-a-sign: '{PREFIX} &cБлок, на который ты смотришь, не является табличкой!'
+    not-found: '{PREFIX} &cЭта табличка не является табличкой очереди!'
+    already-exists: '{PREFIX} &cЭта табличка уже является табличкой очереди! Для удаления используй ''/duels delsign'''
+    cancel-break: '{PREFIX} &cНельзя сломать табличку очереди вручную! Используй команду ''/duels delsign'''
+  sound:
+    not-found: '{PREFIX} &cЗвук с именем ''%name%'' не найден.'
+  command:
+    invalid-sub-command: '{PREFIX} &c''%argument%'' — неверная подкоманда. Введи ''/%command%'' для справки.'
+    invalid-option: '{PREFIX} &c''%option%'' — неверный параметр. Доступные параметры: %available_options%'
+    invalid-action: '{PREFIX} &c''%action%'' — неверное действие. Доступные действия: %available_actions%'
+    not-enough-money: '{PREFIX} &cНедостаточно денег для ставки!'
+    lobby-save-failure: '{PREFIX} &cНе удалось сохранить местоположение лобби. Проверь консоль для подробностей.'
+    name-not-alphanumeric: '{PREFIX} &c''%name%'' не является буквенно-цифровым.'
+    invalid-argument: "{PREFIX} &cНеверный аргумент: {arg}. Заполнители не разрешены в командах."
+
+
+COMMAND:
+  kit:
+    usage: '{PREFIX} &cИспользование: /kit [edit|save|reset] [игрок] [название кита]'
+    edit:
+      usage: '{PREFIX} &cИспользование: /kit edit <название кита>'
+    reset:
+      usage: '{PREFIX} &cИспользование: /kit reset <название кита> или /kit reset <игрок> <название кита>'
+    unknown-subcommand: '{PREFIX} &cНеизвестная подкоманда: %subcommand%'
+  duel:
+    usage:
+      - '{LINE}'
+      - '&f/%command% [игрок] &e- &7Отправляет запрос на дуэль игроку.'
+      - '&f/%command% [игрок] <сумма> &e- &7Отправляет запрос на дуэль со ставкой.'
+      - '&f/%command% [accept | deny] [игрок] &e- &7Принимает или отклоняет запрос на дуэль.'
+      - '&f/%command% stats <имя> &e- &7Показывает статистику дуэлей.'
+      - '&f/%command% toggle &e- &7Включить/отключить получение запросов на дуэль.'
+      - '&f/%command% top [-|wins|losses|kit] &e- &7Показывает топ побед, поражений или рейтинга кита.'
+      - '{LINE}'
+    request:
+      send:
+        sender:
+          - '{LINE}'
+          - '&7Запрос на дуэль отправлен игроку &f%name%&7.'
+          - '&6- &7Кит: &3%kit%'
+          - '&6- &7Свой инвентарь: &r%own_inventory%'
+          - '&6- &7Арена: &e%arena%'
+          - '&6- &7Ставка: &6$%bet_amount%'
+          - '&6- &7Ставка предметами: &r%item_betting%'
+          - '{LINE}'
+        receiver:
+          - '{LINE}'
+          - '&7Получен запрос на дуэль от &f%name%&7.'
+          - '&6- &7Кит: &3%kit%'
+          - '&6- &7Свой инвентарь: &r%own_inventory%'
+          - '&6- &7Арена: &e%arena%'
+          - '&6- &7Ставка: &6$%bet_amount%'
+          - '&6- &7Ставка предметами: &r%item_betting%'
+          - '{LINE}'
+        clickable-text:
+          info:
+            text: '&7Нажми, чтобы '
+            hover-text: ''
+          accept:
+            text: '&a&l[ПРИНЯТЬ] '
+            hover-text: '&7Нажми, чтобы &aпринять &7этот запрос.'
+          deny:
+            text: '&c&l[ОТКЛОНИТЬ]'
+            hover-text: '&7Нажми, чтобы &cотклонить &7этот запрос.'
+      accept:
+        sender: '{PREFIX} &f%name% &7принял твой запрос на дуэль.'
+        receiver: '{PREFIX} &7Запрос на дуэль от &f%name%&7 принят.'
+      deny:
+        sender: '{PREFIX} &7Твой запрос на дуэль к &f%name% &7был отклонён.'
+        receiver: '{PREFIX} &7Запрос на дуэль от &f%name%&7 отклонён.'
+    party-request:
+      send:
+        sender-party:
+          - '{LINE}'
+          - '&f%owner% &7отправил запрос на дуэль группе &f%name%&7.'
+          - '&6- &7Кит: &3%kit%'
+          - '&6- &7Свой инвентарь: &r%own_inventory%'
+          - '&6- &7Арена: &e%arena%'
+          - '{LINE}'
+        receiver-party:
+          - '{LINE}'
+          - '&7Получен запрос на дуэль от группы &f%name%&7.'
+          - '&6- &7Кит: &3%kit%'
+          - '&6- &7Свой инвентарь: &r%own_inventory%'
+          - '&6- &7Арена: &e%arena%'
+        clickable-text:
+          info:
+            text: '&7Нажми, чтобы '
+            hover-text: ''
+          accept:
+            text: '&a&l[ПРИНЯТЬ] '
+            hover-text: '&7Нажми, чтобы &aпринять &7этот запрос.'
+          deny:
+            text: '&c&l[ОТКЛОНИТЬ]'
+            hover-text: '&7Нажми, чтобы &cотклонить &7этот запрос.'
+          extra:
+            text: '{LINE}'
+            hover-text: ''
+      accept:
+        sender-party:
+          - '{LINE}'
+          - '{PREFIX} &7Группа &f%name% &7приняла запрос на дуэль от &f%owner%&7.'
+          - '{LINE}'
+        receiver-party:
+          - '{LINE}'
+          - '{PREFIX} &f%owner% &7принял запрос на дуэль от группы &f%name%&7.'
+          - '{LINE}'
+      deny:
+        sender-party:
+          - '{LINE}'
+          - '{PREFIX} &7Группа &f%name% &7отклонила запрос на дуэль от &f%owner%&7.'
+          - '{LINE}'
+        receiver-party:
+          - '{LINE}'
+          - '{PREFIX} &7&f%owner%&7 отклонил запрос на дуэль от группы &f%name%&7.'
+          - '{LINE}'
+    stats:
+      displayed:
+        - '{LINE}'
+        - '&7Статистика &f%name% &e-'
+        - '&7Побед: &a%wins%'
+        - '&7Поражений: &c%losses%'
+        - '&7Соотношение П/П: &b%wl_ratio%'
+        - '&7Запросы: &r%requests_enabled%'
+      rating:
+        header: '&7Рейтинги &e-'
+        format: '&f%type%&7: &b%rating%'
+        footer: ''
+      match:
+        header: '&7Последние матчи &e-'
+        format: '&a%winner% &fпротив &c%loser% &6[Наведи курсор!]'
+        hover-text:
+          - '&7Кит: &3%kit%'
+          - '&7Длительность: &a%duration%'
+          - '&7Время: &f%time% назад'
+          - '&7Здоровье: &d%health%❤'
+        footer: '{LINE}'
+    toggle:
+      enabled: '{PREFIX} &aТеперь ты получаешь запросы на дуэль.'
+      disabled: '{PREFIX} &cТеперь ты не принимаешь запросы на дуэль.'
+    top:
+      next-update: '{PREFIX} &7Следующее обновление: &f%remaining%'
+      header: '{HALF_LINE} &7Топ &f10 &7%type% {HALF_LINE}'
+      display-format: '&e%rank%. &f%name% &e- &f%score% &7%identifier%'
+      footer: '{HALF_LINE} &7Топ &f10 &7%type% {HALF_LINE}'
+
+  duels:
+    usage:
+      - '{LINE}'
+      - '&f/%command% help &e- &7Показывает эту страницу.'
+      - '&f/%command% help arena &e- &7Показывает список команд арены.'
+      - '&f/%command% help kit &e- &7Показывает список команд китов.'
+      - '&f/%command% help queue &e- &7Показывает список команд очереди.'
+      - '&f/%command% help sign &e- &7Показывает список команд табличек.'
+      - '&f/%command% help user &e- &7Показывает список команд редактирования пользователя.'
+      - '&f/%command% help extra &e- &7Показывает список дополнительных команд.'
+      - '{LINE}'
+    help:
+      arena:
+        - '{HALF_LINE} &fКоманды арены {HALF_LINE}'
+        - '&f/%command% create [название] &e- &7Создаёт арену с указанным названием.'
+        - '&f/%command% set [название] [1|2] &e- &7Устанавливает позицию телепортации арены.'
+        - '&f/%command% delete [название] &e- &7Удаляет арену.'
+        - '&f/%command% setarenaitem [название] &e- &7Устанавливает отображаемый предмет для выбранной арены.'
+        - '&f/%command% info [название] &e- &7Показывает информацию о выбранной арене.'
+        - '&f/%command% toggle [название] &e- &7Включает или отключает арену.'
+        - '&f/%command% tp [название] <1|2> &e- &7Телепортирует на арену.'
+        - '&f/%command% list &e- &7Показывает список всех арен.'
+        - '{HALF_LINE} &fКоманды арены {HALF_LINE}'
+      kit:
+        - '{HALF_LINE} &fКоманды китов {HALF_LINE}'
+        - '&f/%command% savekit <-o> [название] &e- &7Сохраняет кит с указанным названием.'
+        - '&f/%command% loadkit [название] &e- &7Загружает выбранный кит в инвентарь.'
+        - '&f/%command% kitgive [кит] [игрок] &e- &7Выдаёт кит игроку.'
+        - '&f/%command% deletekit [название] &e- &7Удаляет кит.'
+        - '&f/%command% setitem [название] &e- &7Устанавливает отображаемый предмет для выбранного кита.'
+        - '&f/%command% options [кит] &e- &7Открывает меню настроек для выбранного кита.'
+        - '&f/%command% bind [кит] &e- &7Открывает меню привязки арен для выбранного кита.'
+        - '&f/%command% list &e- &7Показывает список всех китов.'
+        - '{HALF_LINE} &fКоманды китов {HALF_LINE}'
+      queue:
+        - '{HALF_LINE} &fКоманды очереди {HALF_LINE}'
+        - '&f/%command% createqueue [ставка] [-|кит] &e- &7Создаёт очередь со ставкой и китом.'
+        - '&f/%command% deletequeue &e- &7Удаляет очередь со ставкой и китом.'
+        - '&f/%command% list &e- &7Показывает список доступных очередей.'
+        - '{HALF_LINE} &fКоманды очереди {HALF_LINE}'
+      sign:
+        - '{HALF_LINE} &fКоманды табличек {HALF_LINE}'
+        - '&f/%command% addsign [ставка] [-|кит] &e- &7Создаёт табличку очереди со ставкой и китом.'
+        - '&f/%command% delsign &e- &7Удаляет табличку очереди, на которую ты смотришь.'
+        - '&f/%command% list &e- &7Показывает список табличек очереди.'
+        - '{HALF_LINE} &fКоманды табличек {HALF_LINE}'
+      user:
+        - '{HALF_LINE} &fКоманды редактирования пользователя {HALF_LINE}'
+        - '&f/%command% setrating [имя] [-|кит] [кол-во] &e- &7Устанавливает рейтинг игрока для кита.'
+        - '&f/%command% edit [имя] [add|remove|set] [wins|losses] [кол-во] &e- &7Редактирует статистику игрока.'
+        - '&f/%command% resetrating [имя] [-|кит|all] &e- &7Сбрасывает рейтинг игрока для кита.'
+        - '&f/%command% reset [имя] &e- &7Сбрасывает статистику игрока.'
+        - '{HALF_LINE} &fКоманды редактирования пользователя {HALF_LINE}'
+      extra:
+        - '{HALF_LINE} &fДополнительные команды {HALF_LINE}'
+        - '&f/%command% setlobby &e- &7Устанавливает местоположение лобби дуэлей.'
+        - '&f/%command% lobby &e- &7Телепортирует в лобби дуэлей.'
+        - '&f/%command% playsound [название] &e- &7Воспроизводит выбранный звук, если он определён в конфиге.'
+        - '&f/%command% reload <модуль> &e- &7Перезагружает плагин или указанный модуль.'
+        - '{HALF_LINE} &fДополнительные команды {HALF_LINE}'
+    create: '{PREFIX} &7Арена &e%name% &7успешно создана. Для установки точек появления используй команду &f/duels set %name% 1'
+    delete: '{PREFIX} &7Арена &e%name% &7успешно удалена.'
+    set: '{PREFIX} &7Позиция &f%position% &7для арены &e%name% &7установлена в &f%location%&7.'
+    toggle: '{PREFIX} &7Арена &e%name% &7теперь &r%state%&7.'
+    disable: '{PREFIX} &7Арена &e%name% &7отключена.'
+    enable: '{PREFIX} &7Арена &e%name% &7включена.'
+    already-disabled: '{PREFIX} &c%name% уже отключена.'
+    already-enabled: '{PREFIX} &c%name% уже включена.'
+    teleport: '{PREFIX} &7Ты телепортирован на позицию &f%position% &7арены &e%name%&7.'
+    save-kit: '{PREFIX} &7Кит &3%name% &7успешно сохранён.'
+    delete-kit: '{PREFIX} &7Кит &3%name% &7успешно удалён.'
+    load-kit: '{PREFIX} &7Кит &3%name% &7загружен в инвентарь.'
+    kit-give: '{PREFIX} &7Кит &3%kit% &7выдан игроку &f%name%&7.'
+    kit-give-target: '{PREFIX} &7Тебе выдан кит &3%kit%&7.'
+    set-item: '{PREFIX} &7Отображаемый предмет кита &3%name%&7 изменён на предмет в руке.'
+    set-arena-item: '{PREFIX} &7Отображаемый предмет арены &e%name%&7 изменён на предмет в руке.'
+    create-queue: '{PREFIX} &7Создана очередь с китом &3%kit% &7и ставкой &6$%bet_amount%&7.'
+    delete-queue: '{PREFIX} &7Удалена очередь с китом &3%kit% &7и ставкой &6$%bet_amount%&7.'
+    add-sign: '{PREFIX} &7Создана табличка очереди в &f%location% &7с китом &3%kit% &7и ставкой &6$%bet_amount%&7.'
+    del-sign: '{PREFIX} &7Удалена табличка очереди в &f%location% &7с китом &3%kit% &7и ставкой &6$%bet_amount%&7.'
+    set-lobby: '{PREFIX} &7Лобби дуэлей установлено в твоём текущем местоположении.'
+    lobby: '{PREFIX} &7Ты телепортирован в лобби!'
+    edit: '{PREFIX} &7Выполнено действие для &f%name%&7: &f%action% %amount% %type%'
+    set-rating: '{PREFIX} &7Рейтинг &f%name%&7 для кита &3%kit% &7установлен на &a%rating%&7.'
+    reset-rating: '{PREFIX} &7Рейтинг &f%name%&7 для кита &3%kit%&7 сброшен.'
+    reset: '{PREFIX} &7Статистика &f%name%&7 сброшена.'
+    info:
+      - '{HALF_LINE} &7Арена &e%name% {HALF_LINE}'
+      - '&7Используется: &r%in_use%'
+      - '&7Отключена: &r%disabled%'
+      - '&7Привязанные киты: &3%kits%'
+      - '&7Позиции: &f%positions%'
+      - '&7Игроки: &f%players%'
+      - '{HALF_LINE} &7Арена &e%name% {HALF_LINE}'
+    list:
+      - '{LINE}'
+      - '&4ТЁМНО-КРАСНЫЙ&7: Отключённая арена'
+      - '&9СИНИЙ&7: Арена без установленных позиций'
+      - '&aЗЕЛЁНЫЙ&7: Доступная арена'
+      - '&cКРАСНЫЙ&7: Арена в использовании'
+      - '&7Арены: &r%arenas%'
+      - '&7Киты: &f%kits%'
+      - '&7Очереди: &b%queues%'
+      - '&7Таблички очереди: &f%queue_signs%'
+      - '&7Лобби дуэлей находится в &f%lobby%&7.'
+      - '{LINE}'
+
+  spectate:
+    usage:
+      - '{LINE}'
+      - '&f/spectate [игрок] &e- &7Наблюдает за игроком в дуэли.'
+      - '{LINE}'
+    start-spectate: '{PREFIX} &7Теперь наблюдаешь за матчем &f%name%&7 против &f%opponent%&7 на арене &e%arena%&7. Введи &f/spectate &7чтобы прекратить.'
+    stop-spectate: '{PREFIX} &7Ты больше не наблюдаешь за &f%name%&7.'
+  party:
+    usage:
+      - '{LINE}'
+      - '&f/%command% toggle &e- &7Включить/отключить получение приглашений в группу.'
+      - '&f/%command% [игрок] &e- &7Отправляет приглашение в группу игроку.'
+      - '&f/%command% list &e- &7Показывает список участников текущей группы.'
+      - '&f/%command% accept [игрок] &e- &7Принимает приглашение в группу.'
+      - '&f/%command% leave &e- &7Покидает текущую группу.'
+      - '&f/%command% kick [игрок] &e- &7Исключает игрока из группы.'
+      - '&f/%command% friendlyfire &e- &7Включить/отключить дружественный огонь.'
+      - '&f/%command% transfer [игрок] &e- &7Передаёт лидерство группы игроку.'
+      - '&f/%command% disband &e- &7Распускает текущую группу.'
+      - '{LINE}'
+    toggle:
+      enabled: '{PREFIX} &aТеперь ты получаешь запросы группы.'
+      disabled: '{PREFIX} &cТеперь ты не принимаешь запросы группы.'
+    list:
+      - '{LINE}'
+      - '&7Лидер: &f%owner%'
+      - '&7Участники (&r%members_count%&7): &r%members%'
+      - '&7В сети (&r%online_count%&7): &r%online_members%'
+      - '{LINE}'
+    invite:
+      send:
+        receiver:
+          - '{LINE}'
+          - '{PREFIX} &7Получено приглашение в группу от &f%name%&7. Введи &f/party accept %name% &7чтобы вступить.'
+          - '{LINE}'
+        members:
+          - '{LINE}'
+          - '{PREFIX} &f%owner% &7пригласил &f%name% &7в группу!'
+          - '{LINE}'
+      accept:
+        receiver:
+          - '{LINE}'
+          - '{PREFIX} &7Приглашение в группу от &f%name%&7 принято.'
+          - '{LINE}'
+        members:
+          - '{LINE}'
+          - '{PREFIX} &f%name% &7вступил в группу!'
+          - '{LINE}'
+    leave:
+      sender:
+        - '{LINE}'
+        - '{PREFIX} &7Ты покинул группу &f%name%&7.'
+        - '{LINE}'
+      members:
+        - '{LINE}'
+        - '{PREFIX} &f%name% &7покинул группу!'
+        - '{LINE}'
+    kick:
+      receiver:
+        - '{LINE}'
+        - '{PREFIX} &f%owner% &7исключил тебя из группы!'
+        - '{LINE}'
+      members:
+        - '{LINE}'
+        - '{PREFIX} &f%owner% &7исключил &f%name% &7из группы!'
+        - '{LINE}'
+    friendly-fire:
+      enabled:
+        - '{LINE}'
+        - '{PREFIX} &cДружественный огонь &7теперь &aвключён&7!'
+        - '{LINE}'
+      disabled:
+        - '{LINE}'
+        - '{PREFIX} &cДружественный огонь &7теперь &cотключён&7!'
+        - '{LINE}'
+    transfer:
+      - '{LINE}'
+      - '{PREFIX} &f%owner% &7передал лидерство группы игроку &f%name%&7.'
+      - '{LINE}'
+    disband:
+      - '{LINE}'
+      - '{PREFIX} &f%owner% &7распустил группу.'
+      - '{LINE}'
+
+  sub-command-usage: '{PREFIX} &f/%command% %usage% &e- &7%description%'
+
+
+DUEL:
+  start-failure:
+    mode-unselected: '{FAIL_PREFIX} &cДля начала дуэли необходимо выбрать кит или включить режим своего инвентаря.'
+    player-is-dead: '{FAIL_PREFIX} Ты или твой противник сейчас мёртв!'
+    in-blacklisted-world: '{FAIL_PREFIX} Ты или твой противник находится в заблокированном мире!'
+    is-tagged: '{FAIL_PREFIX} Ты или твой противник находится в бою!'
+    player-moved: '{FAIL_PREFIX} Ты или твой противник переместился после отправки/принятия запроса!'
+    not-in-duelzone: '{FAIL_PREFIX} Ты или твой противник вышел из зоны дуэлей после отправки/принятия запроса!'
+    in-creative-mode: '{FAIL_PREFIX} Ты или твой противник находится в режиме творчества!'
+    no-arena-available: '{FAIL_PREFIX} Сейчас нет доступных арен. Попробуй позже.'
+    arena-in-use: '{FAIL_PREFIX} Выбранная арена уже используется. Выбери другую арену.'
+    arena-not-applicable: '{FAIL_PREFIX} Кит %kit% нельзя использовать на выбранной арене.'
+    not-enough-money: '{FAIL_PREFIX} У тебя или твоего противника нет $%bet_amount%.'
+  rounds:
+    round-end: '{PREFIX} &7Раунд &e%round% &7завершён! &f%winner% &7выиграл раунд!'
+    round-status: '{PREFIX} &7Текущий счёт: &f%player1% &7(&a%wins1%&7) против &f%player2% &7(&a%wins2%&7)'
+    round-start: '{PREFIX} &7Раунд &e%round% &7начинается...'
+    match-point: '{PREFIX} &c&lМатчбол &7для &f%player%&7!'
+  party-start-failure:
+    option-unavailable: '{FAIL_PREFIX} &cСтавки предметами/деньгами недоступны для групповых дуэлей.'
+    party-changed: '{FAIL_PREFIX} Отправитель или получатель запроса изменил состав группы.'
+    player-is-dead: '{FAIL_PREFIX} Один или несколько игроков мертвы!'
+    in-blacklisted-world: '{FAIL_PREFIX} Один или несколько игроков находятся в заблокированном мире!'
+    is-tagged: '{FAIL_PREFIX} Один или несколько игроков находятся в бою!'
+    player-moved: '{FAIL_PREFIX} Один или несколько игроков переместились после отправки/принятия запроса!'
+    not-in-duelzone: '{FAIL_PREFIX} Один или несколько игроков вышли из зоны дуэлей после отправки/принятия запроса!'
+    in-creative-mode: '{FAIL_PREFIX} Один или несколько игроков находятся в режиме творчества!'
+    is-not-same-size: '{PREFIX} &cРазмеры групп должны совпадать для этого действия.'
+    is-not-all-online: '{FAIL_PREFIX} Все участники всех групп должны быть в сети!'
+  prevent:
+    item-drop: '&cНельзя бросать предметы во время дуэли.'
+    command: '&cНельзя использовать ''%command%'' во время дуэли.'
+    teleportation: '&cНельзя телепортироваться во время дуэли.'
+    inventory-open: '&cНельзя открывать инвентари во время дуэли.'
+  projectile-hit-message: '{PREFIX} &f%name% &7сейчас имеет &d%health%❤&7!'
+  on-death:
+    with-killer: '{PREFIX} &a%killer% &7убил &c%name% &7с &d%health%❤&7.'
+    no-killer: '{PREFIX} &c%name% &7погиб.'
+  on-end:
+    tie: '{PREFIX} &7Ничья!'
+    plugin-disable: '{PREFIX} &cПлагин отключается! Матч завершается автоматически.'
+    opponent-defeat: '{PREFIX} &f%winner% &a(%winner_rating%) (+%change%) &7победил &f%loser% &c(%loser_rating%) (-%change%) &7с китом &3%kit% &7на арене &e%arena%&7.'
+    team-opponent-defeat: '{PREFIX} &f%winners% &7победила &f%losers% &7с китом &3%kit% &7на арене &e%arena%&7.'
+    party-opponent-defeat: '{PREFIX} &f%winners% &7победила &f%losers% &7с китом &3%kit% &7на арене &e%arena%&7.'
+  inventories:
+    message: '&7Инвентари (нажми на имя для просмотра): '
+    name-color: '&b'
+  reward:
+    money:
+      message: '{PREFIX} &7Ты получил &6$%money% &7за победу над &f%name%&7!'
+      title: '&eТЫ ВЫИГРАЛ &6$%money%&e!'
+    items:
+      message: '{PREFIX} &7Ты получил предметы &f%name%&7 за победу!'
+
+
+PARTY:
+  auto-disband:
+    - '{LINE}'
+    - '{PREFIX} &7Группа была автоматически распущена из-за неактивности.'
+    - '{LINE}'
+
+
+QUEUE:
+  prevent:
+    command: '&cНельзя использовать ''%command%'' в очереди.'
+  add: '{PREFIX} &7Ты добавлен в очередь для кита &3%kit% &7и ставки &6$%bet_amount%&7. Нажми на табличку снова или введи &f/queue leave &7чтобы выйти из очереди.'
+  remove: '{PREFIX} &7Ты удалён из очереди.'
+  found-opponent: '{PREFIX} &7Противник найден: &f%name%&7! Начинается матч с китом &3%kit% &7и ставкой &6$%bet_amount%&7...'
+
+
+SIGN:
+  format:
+    - '&a[Нажми, чтобы войти]'
+    - '&3%name%&f:&e$%bet_amount%'
+    - '&f&l%in_queue% В ОЧЕРЕДИ'
+    - '&f&l%in_match% В МАТЧЕ'
+
+
+SPECTATE:
+  arena-broadcast: '{PREFIX} &f%name% &7теперь наблюдает за матчем!'
+  match-end: '{PREFIX} &7Матч, за которым ты наблюдал, завершился.'
+  prevent:
+    command: '&cНельзя использовать ''%command%'' в режиме наблюдателя.'
+    teleportation: '&cНельзя телепортироваться в режиме наблюдателя.'
+
+
+GUI:
+  settings:
+    title: 'Настройки запроса'
+    buttons:
+      details:
+        name: '&9Детали запроса'
+        lore:
+          - '&7Противник: &f%opponent%'
+          - '&7Кит: &3%kit%'
+          - '&7Свой инвентарь: &r%own_inventory%'
+          - '&7Арена: &e%arena%'
+          - '&7Предметы ставки: &r%item_betting%'
+          - '&7Ставка: &6$%bet_amount%'
+          - ' '
+          - '&7Чтобы изменить сумму'
+          - '&7ставки, введи'
+          - '&b/duel %opponent% [сумма]'
+      kit-selector:
+        name: '&9Выбор кита'
+        lore:
+          - '&7Выбранный кит: &3%kit%'
+          - ' '
+          - '&aНажми для смены кита!'
+        lore-no-permission:
+          - '&cУ тебя нет права'
+          - '&cиспользовать эту опцию.'
+      use-own-inventory:
+        name: '&9Использовать свой инвентарь'
+        material: CHEST
+        lore:
+          - '&7Свой инвентарь: &r%own_inventory%'
+          - ' '
+          - '&aНажми для включения/отключения своего инвентаря!'
+        lore-no-permission:
+          - '&cУ тебя нет права'
+          - '&cиспользовать эту опцию.'
+      arena-selector:
+        name: '&9Выбор арены'
+        lore:
+          - '&7Выбранная арена: &e%arena%'
+          - ' '
+          - '&aНажми для смены арены!'
+        lore-no-permission:
+          - '&cУ тебя нет права'
+          - '&cиспользовать эту опцию.'
+      item-betting:
+        name: '&9Разрешить ставку предметами'
+        lore:
+          - '&7Ставка предметами: &r%item_betting%'
+          - ' '
+          - '&aНажми для включения/отключения ставки предметами!'
+        lore-no-permission:
+          - '&cУ тебя нет права'
+          - '&cиспользовать эту опцию.'
+      send:
+        name: '&a&lОТПРАВИТЬ ЗАПРОС'
+      cancel:
+        name: '&c&lОТМЕНА'
+  kit-selector:
+    title: 'Выбор кита'
+    buttons:
+      previous-page:
+        name: '&aПредыдущая страница'
+      next-page:
+        name: '&aСледующая страница'
+      empty:
+        name: '&cЭта страница пуста.'
+  kit-edit-selector:
+    title: 'Выбери кит для редактирования'
+    buttons:
+      previous-page:
+        name: '&aПредыдущая страница'
+      next-page:
+        name: '&aСледующая страница'
+      empty:
+        name: '&cНет доступных китов для редактирования.'
+  arena-selector:
+    title: 'Выбор арены'
+    buttons:
+      arena:
+        name: '&e%name%'
+        lore-default:
+          - '&eСтатус: &r{status}'
+        lore-available:
+          - '&aДоступна'
+        lore-unavailable:
+          - '&cНедоступна'
+      previous-page:
+        name: '&aПредыдущая страница'
+      next-page:
+        name: '&aСледующая страница'
+      empty:
+        name: '&cЭта страница пуста.'
+  queues:
+    title: 'Доступные очереди'
+    buttons:
+      queue:
+        name: '&3%name%'
+        lore:
+          - '&7Ставка: &6$%bet_amount%'
+          - '&7В очереди: &f%in_queue%'
+          - '&7В матче: &f%in_match%'
+          - ' '
+          - '&a&lНажми, чтобы встать в очередь!'
+      previous-page:
+        name: '&aПредыдущая страница'
+      next-page:
+        name: '&aСледующая страница'
+      empty:
+        name: '&cЭта страница пуста.'
+  item-betting:
+    title: 'Победитель забирает всё!'
+    buttons:
+      head:
+        name: '&e%name%'
+      state:
+        name-ready: '&a&lГОТОВ'
+        name-not-ready: '&7&lНЕ ГОТОВ'
+      details:
+        name: '&9Детали матча'
+        lore:
+          - '&7Кит: &3%kit%'
+          - '&7Арена: &e%arena%'
+          - '&7Ставка: &6$%bet_amount%'
+      cancel:
+        name: '&c&lНАЖМИ ДЛЯ ОТМЕНЫ'
+        lore:
+          - '&7Нажми или закрой инвентарь'
+          - '&7для отмены матча.'
+  inventory-view:
+    title: '&e%name%'
+    buttons:
+      head:
+        name: '&e%name%'
+      potion-counter:
+        name: '&d%potions% зелий здоровья'
+      effects:
+        name: '&bЭффекты зелий'
+        lore-format: '&7%type% %amplifier% (%duration%с)'
+      hunger:
+        name: '&6%hunger% ед. сытости'
+      health:
+        name: '&c%health% ❤'
+  options:
+    title: 'Кит: %kit%'
+    buttons:
+      option:
+        name: '&b%name%'
+        lore:
+          - ' '
+          - '&7Статус: &r%state%'
+          - ' '
+          - '&r&lНАЖМИ ДЛЯ ПЕРЕКЛЮЧЕНИЯ'
+  bind:
+    title: 'Кит: %kit%'
+    buttons:
+      arena:
+        name: '&e%arena%'
+        lore-bound:
+          - '&7Привязанные киты: &3%kits%'
+          - ' '
+          - '&a&lПРИВЯЗАН'
+          - ' '
+          - '&r&lНАЖМИ ДЛЯ ПЕРЕКЛЮЧЕНИЯ'
+        lore-not-bound:
+          - '&7Привязанные киты: &3%kits%'
+          - ' '
+          - '&c&lНЕ ПРИВЯЗАН'
+          - ' '
+          - '&r&lНАЖМИ ДЛЯ ПЕРЕКЛЮЧЕНИЯ'
+
+
+KIT:
+    EDIT:
+      started: '{PREFIX} &aТы теперь редактируешь кит &e%kit%&a. Используй &e/kit save &aкогда закончишь.'
+      saved: '{PREFIX} &aКит &e%kit% &aсохранён и инвентарь восстановлен.'
+      already-editing: '{PREFIX} &cТы уже редактируешь кит. Сначала сохрани его командой &e/kit save&c.'
+      not-editing: '{PREFIX} &cТы сейчас не редактируешь никакой кит.'
+      start-failed: '{PREFIX} &cНе удалось начать сеанс редактирования кита.'
+      save-failed: '{PREFIX} &cНе удалось сохранить кит. Попробуй снова.'
+      in-queue: '{PREFIX} &cНельзя редактировать кит в очереди. Сначала выйди из очереди.'
+      in-match: '{PREFIX} &cНельзя редактировать кит во время матча. Дождись окончания матча.'
+      session-aborted: '{PREFIX} &cСеанс редактирования кита прерван, так как ты вступил в очередь или матч.'
+      invalid-items: '{PREFIX} &cСеанс редактирования кита прерван! Можно изменять только предметы из стандартного кита. Внешние предметы не разрешены.'
+      command-blocked: '{PREFIX} &cНельзя использовать другие команды при редактировании кита. Используй &e/kit save &cдля сохранения.'
+      drop-blocked: '{PREFIX} &cНельзя бросать предметы при редактировании кита.'
+      inventory-blocked: '{PREFIX} &cНельзя открывать внешние инвентари при редактировании кита.'
+      block-break-blocked: '{PREFIX} &cНельзя ломать блоки при редактировании кита.'
+      block-place-blocked: '{PREFIX} &cНельзя ставить блоки при редактировании кита.'
+      interact-blocked: '{PREFIX} &cНельзя взаимодействовать с блоками при редактировании кита.'
+      cancelled: '{PREFIX} &aСеанс редактирования кита отменён. Инвентарь восстановлен.'
+    RESET:
+      success: '{PREFIX} &aТвой отредактированный кит &e%kit% &aсброшен до стандартного.'
+      success-other: '{PREFIX} &aОтредактированный кит &e%kit% &aигрока &e%name%&a сброшен до стандартного.'
+      reset-by-admin: '{PREFIX} &eКит %kit% &aбыл сброшен до стандартного администратором.'
+      not-edited: '{PREFIX} &cУ %name% нет отредактированного кита &e%kit%&c.'
+      failed: '{PREFIX} &cНе удалось сбросить кит &e%kit% &cигрока %name%.'

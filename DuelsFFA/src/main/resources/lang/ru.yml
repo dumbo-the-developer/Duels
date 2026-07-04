@@ -1,0 +1,56 @@
+STRINGS:
+  PREFIX: '&8[&6FFA&8]'
+  LINE: '&6&m-----------------------------'
+
+ERROR:
+  invalid-sub-command: '{PREFIX} &c''%argument%'' — неверная команда. Введи ''/ffa'' для справки.'
+  player-only: '{PREFIX} &cЭту команду могут использовать только игроки.'
+  no-permission: '{PREFIX} &cУ тебя нет права на это.'
+  arena-not-found: '{PREFIX} &cАрена ''%name%'' не найдена.'
+  arena-already-exists: '{PREFIX} &cАрена ''%name%'' уже существует.'
+  arena-disabled: '{PREFIX} &cАрена ''%name%'' отключена.'
+  arena-resetting: '{PREFIX} &cАрена ''%name%'' сейчас регенерирует.'
+  no-arenas: '{PREFIX} &cНет доступных FFA арен.'
+  no-selection: '{PREFIX} &cСначала необходимо установить pos1 и pos2.'
+  kit-not-found: '{PREFIX} &cКит ''%name%'' не найден.'
+  kit-no-permission: '{PREFIX} &cУ тебя нет права на кит ''%name%''.'
+  already-in-ffa: '{PREFIX} &cТы уже находишься на FFA арене.'
+  not-in-ffa: '{PREFIX} &cТы не находишься на FFA арене.'
+  no-spawns: '{PREFIX} &cУ арены ''%name%'' нет точек появления.'
+  no-zone: '{PREFIX} &cУ арены ''%name%'' нет зоны регенерации.'
+  create-failed: '{PREFIX} &cНе удалось создать арену ''%name%''.'
+  leave-arena: '{PREFIX} &cТы покинул арену.'
+
+COMMAND:
+  ffa:
+    usage-single: '{PREFIX} &cИспользование: /ffa %usage%'
+    usage:
+    - '{LINE}'
+    - '&f/ffa join <арена> &e- &7Войти на арену.'
+    - '&f/ffa leave &e- &7Покинуть арену.'
+    - '&f/ffa pos1 &e- &7Установить первую позицию по целевому блоку.'
+    - '&f/ffa pos2 &e- &7Установить вторую позицию по целевому блоку.'
+    - '&f/ffa create <название> <кит|none> &e- &7Создать арену.'
+    - '&f/ffa setspawn <название> &e- &7Установить точку появления арены.'
+    - '&f/ffa addspawn <название> &e- &7Добавить дополнительную точку появления.'
+    - '&f/ffa list &e- &7Список арен.'
+    - '&f/ffa forceregenerate <название> &e- &7Принудительная регенерация арены.'
+    - '&f/ffa enable <название> &e- &7Включить арену.'
+    - '&f/ffa disable <название> &e- &7Отключить арену.'
+    - '{LINE}'
+
+    join: '{PREFIX} &7Ты вошёл на арену &f%arena%&7.'
+    leave: '{PREFIX} &7Ты покинул арену &f%arena%&7.'
+    create: '{PREFIX} &7Арена &f%arena% &7создана с китом &f%kit%&7.'
+    setspawn: '{PREFIX} &7Точка появления арены &f%arena%&7 установлена.'
+    addspawn: '{PREFIX} &7Дополнительная точка появления арены &f%arena%&7 добавлена.'
+    pos-set: '{PREFIX} &7Позиция %pos% установлена в &f%location%&7.'
+    list:
+      header: '{PREFIX} &7Список загруженных &fFFA Арен&7:'
+      format: '&6- &f%name% &7[кит: &f%kit%&7, активна: &f%enabled%&7]'
+      footer: '{PREFIX} &7Всего: &a%count%'
+    regen:
+      start: '{PREFIX} &7Регенерация &f%name%&7...'
+      end: '{PREFIX} &7Регенерация &f%name%&7 завершена.'
+    enable: '{PREFIX} &7Арена &f%name%&7 включена.'
+    disable: '{PREFIX} &7Арена &f%name%&7 отключена.'
