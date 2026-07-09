@@ -92,6 +92,14 @@ public class DuelManager implements Loadable {
     }
 
     public void handleMatchEnd(DuelMatch match, ArenaImpl arena, Player loser, Location deadLocation, Player winner) {
+        final boolean rounds3 = match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3);
+
+        // For a decisive ROUNDS3 hit, the loser is still alive because the damage event was cancelled.
+        // Remove and teleport them immediately so they cannot die in the arena before the delayed end flow runs.
+        if (rounds3 && !loser.isDead()) {
+            handleLoss(loser, arena, match);
+        }
+
         DuelsPlugin.getFoliaLib().getScheduler().runAtLocationLater(arena.first().getLocation(), task -> {
             if (arena.size() == 0) {
                 match.getAllPlayers().forEach(matchPlayer -> {
@@ -123,10 +131,9 @@ public class DuelManager implements Loadable {
             userDataManager.handleMatchEnd(match, winners);
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
             DuelsPlugin.getFoliaLib().getScheduler().runAtLocationLater(arena.first().getLocation(), task2 -> {
-                // Handle the loser (remove from arena and restore state) before respawn can
-                // move them back to the saved duel-accept location.
-                // This is especially important for ROUNDS3 where the loser may respawn.
-                if (match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3)) {
+                // Handle a dead ROUNDS3 loser here so /kill-style deaths still cache their items.
+                // Non-dead losers are already restored immediately above.
+                if (rounds3 && playerManager.get(loser) != null) {
                     handleLoss(loser, arena, match);
                 }
                 
