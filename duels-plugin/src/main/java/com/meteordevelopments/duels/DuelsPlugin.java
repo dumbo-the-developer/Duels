@@ -198,11 +198,11 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         unregisterPluginCommands();
         registeredListeners.forEach(HandlerList::unregisterAll);
         registeredListeners.clear();
-        // Unregister all extension listeners that isn't using the method Duels#registerListener
+        // Unregister all extension listeners that aren't using Duels#registerListener
         HandlerList.getRegisteredListeners(this)
-                .stream()
-                .filter(listener -> listener.getListener().getClass().getClassLoader().getClass().isAssignableFrom(ExtensionClassLoader.class))
-                .forEach(listener -> HandlerList.unregisterAll(listener.getListener()));
+            .stream()
+            .filter(listener -> listener.getListener().getClass().getClassLoader() instanceof ExtensionClassLoader)
+            .forEach(listener -> HandlerList.unregisterAll(listener.getListener()));
         commands.clear();
 
         for (final Loadable loadable : Lists.reverse(loadables)) {
@@ -482,6 +482,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             return false;
         }
 
+        registerAllCommands();
+        loadPreListeners();
+
         return true;
     }
 
@@ -703,8 +706,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         sendMessage("&eLoading extensions...");
         try {
             loadables.add(extensionManager = new ExtensionManager(this));
-            extensionManager.handleLoad();
             lastLoad = loadables.indexOf(extensionManager);
+            extensionManager.handleLoad();
             sendMessage("&dSuccessfully loaded extensions in &f[" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + "&f]");
         } catch (Exception e) {
             sendMessage("&cFailed to load extensions: " + e.getMessage());
