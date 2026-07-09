@@ -44,6 +44,7 @@ public final class PlayerUtil {
         player.setSaturation(DEFAULT_SATURATION);
         player.setFoodLevel(DEFAULT_MAX_FOOD_LEVEL);
         player.setItemOnCursor(null);
+        player.getInventory().setItemInOffHand(null);
 
         final Inventory top = player.getOpenInventory().getTopInventory();
 

@@ -15,6 +15,7 @@ public final class InventoryUtil {
 
     private static final String INVENTORY_IDENTIFIER = "INVENTORY";
     private static final String ARMOR_IDENTIFIER = "ARMOR";
+    private static final String OFFHAND_IDENTIFIER = "OFFHAND";
 
     private InventoryUtil() {
     }
@@ -47,6 +48,14 @@ public final class InventoryUtil {
         }
 
         items.put(ARMOR_IDENTIFIER, armorContents);
+
+        final Map<Integer, ItemStack> offHandContents = new HashMap<>();
+        final ItemStack offHand = inventory.getItemInOffHand();
+        if (offHand != null && offHand.getType() != Material.AIR) {
+            offHandContents.put(0, offHand.clone());
+        }
+
+        items.put(OFFHAND_IDENTIFIER, offHandContents);
     }
 
     public static void fillFromMap(final PlayerInventory inventory, final Map<String, Map<Integer, ItemStack>> items) {
@@ -65,6 +74,12 @@ public final class InventoryUtil {
             armorItems.forEach((slot, item) -> armor[4 - slot] = item.clone());
             inventory.setArmorContents(armor);
         }
+
+        final Map<Integer, ItemStack> offHandItems = items.get(OFFHAND_IDENTIFIER);
+        if (offHandItems != null) {
+            final ItemStack offHand = offHandItems.get(0);
+            inventory.setItemInOffHand(offHand != null ? offHand.clone() : null);
+        }
     }
 
     public static boolean hasItem(final Player player) {
@@ -74,6 +89,11 @@ public final class InventoryUtil {
             if (item != null && item.getType() != Material.AIR) {
                 return true;
             }
+        }
+
+        final ItemStack offHand = inventory.getItemInOffHand();
+        if (offHand != null && offHand.getType() != Material.AIR) {
+            return true;
         }
 
         return false;
