@@ -519,7 +519,9 @@ DUEL:
       title: '&eYOU WON &6$%money%&e!'
     items:
       message: '{PREFIX} &7You have received &f%name%&7''s items for winning!'
-
+  leave:
+    countdown-active: '{PREFIX} &cYou cannot give up during countdown.'
+    endgame-phase: '{PREFIX} &cMatch is already ending.'
 
 PARTY:
   auto-disband:

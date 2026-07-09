@@ -7,6 +7,7 @@ import com.meteordevelopments.duels.core.arena.ArenaImpl;
 import com.meteordevelopments.duels.core.arena.ArenaManagerImpl;
 import com.meteordevelopments.duels.core.kit.edit.KitEditManager;
 import com.meteordevelopments.duels.core.match.DuelMatch;
+import com.meteordevelopments.duels.core.match.party.PartyDuelMatch;
 import com.meteordevelopments.duels.core.match.team.TeamDuelMatch;
 import com.meteordevelopments.duels.core.arena.fireworks.FireworkUtils;
 import com.meteordevelopments.duels.config.Config;
@@ -133,20 +134,23 @@ public class DuelManager implements Loadable {
                     handleWin(alivePlayer, loser, arena, match);
                 }
 
-                if (config.isEndCommandsEnabled() && !(!match.isFromQueue() && config.isEndCommandsQueueOnly())) {
-                    try {
-                        for (final String command : config.getEndCommands()) {
-                            String processedCommand = command
-                                    .replace("%winner%", winner.getName()).replace("%loser%", loser.getName())
-                                    .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "").replace("%arena%", arena.getName())
-                                    .replace("%bet_amount%", String.valueOf(match.getBet()));
-                            
-                            executeCommandWithDelay(processedCommand);
-                        }
-                    } catch (Exception ex) {
-                        Log.warn(DuelManager.this, "Error while running match end commands: " + ex.getMessage());
+                Collection<Player> winnerPlayers = winners;
+                Collection<Player> loserPlayers = Collections.singleton(loser);
+
+                if (match instanceof PartyDuelMatch partyMatch) {
+                    final Party winnerParty = partyMatch.getPlayerToParty().get(winner);
+                    final Party loserParty = partyMatch.getPlayerToParty().get(loser);
+
+                    if (winnerParty != null) {
+                        winnerPlayers = new HashSet<>(partyMatch.getPartyToPlayers().get(winnerParty));
+                    }
+
+                    if (loserParty != null) {
+                        loserPlayers = new HashSet<>(partyMatch.getPartyToPlayers().get(loserParty));
                     }
                 }
+
+                runEndCommands(match, arena, winnerPlayers, loserPlayers);
 
                 arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
             }, config.getTeleportDelay() * 20L);
@@ -214,22 +218,7 @@ public class DuelManager implements Loadable {
                     handleTeamWin(winner, losers, arena, match);
                 }
 
-                if (config.isEndCommandsEnabled() && !(!match.isFromQueue() && config.isEndCommandsQueueOnly())) {
-                    try {
-                        for (final String command : config.getEndCommands()) {
-                            String winnerNames = winners.stream().map(Player::getName).collect(Collectors.joining(", "));
-                            String loserNames = losers.stream().map(Player::getName).collect(Collectors.joining(", "));
-                            String processedCommand = command
-                                    .replace("%winner%", winnerNames).replace("%loser%", loserNames)
-                                    .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "").replace("%arena%", arena.getName())
-                                    .replace("%bet_amount%", String.valueOf(match.getBet()));
-                            
-                            executeCommandWithDelay(processedCommand);
-                        }
-                    } catch (Exception ex) {
-                        Log.warn(DuelManager.this, "Error while running match end commands: " + ex.getMessage());
-                    }
-                }
+                runEndCommands(match, arena, winners, losers);
 
                 arena.endMatch(winners.iterator().next().getUniqueId(), losers.iterator().next().getUniqueId(), Reason.OPPONENT_DEFEAT);
             }, config.getTeleportDelay() * 20L);
@@ -1011,5 +1000,45 @@ public class DuelManager implements Loadable {
             // No delay, execute immediately
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
         }
+    }
+
+    private void runEndCommands(final DuelMatch match, final ArenaImpl arena, final Collection<Player> winners,
+                                final Collection<Player> losers) {
+        if (!config.isEndCommandsEnabled() || (!match.isFromQueue() && config.isEndCommandsQueueOnly())) {
+            return;
+        }
+
+        try {
+            final String winnerNames = winners.stream().map(Player::getName).collect(Collectors.joining(", "));
+            final String loserNames = losers.stream().map(Player::getName).collect(Collectors.joining(", "));
+
+            for (final String command : config.getEndCommands()) {
+                for (final Player winner : winners) {
+                    executeCommandWithDelay(replaceEndCommandPlaceholders(command, winner, true, winnerNames, loserNames, match, arena));
+                }
+
+                for (final Player loser : losers) {
+                    executeCommandWithDelay(replaceEndCommandPlaceholders(command, loser, false, winnerNames, loserNames, match, arena));
+                }
+            }
+        } catch (Exception ex) {
+            Log.warn(DuelManager.this, "Error while running match end commands: " + ex.getMessage());
+        }
+    }
+
+    private String replaceEndCommandPlaceholders(final String command, final Player player, final boolean winnerSide,
+                                                 final String winnerNames, final String loserNames,
+                                                 final DuelMatch match, final ArenaImpl arena) {
+        final String playerName = player.getName();
+        final String winnerValue = winnerSide ? playerName : winnerNames;
+        final String loserValue = winnerSide ? loserNames : playerName;
+
+        return command
+                .replace("%player%", playerName)
+                .replace("%winner%", winnerValue)
+                .replace("%loser%", loserValue)
+                .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "")
+                .replace("%arena%", arena.getName())
+                .replace("%bet_amount%", String.valueOf(match.getBet()));
     }
 }

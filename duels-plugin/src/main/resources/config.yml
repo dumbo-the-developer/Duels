@@ -210,6 +210,7 @@ duel:
       queue-matches-only: false
 
       # Available placeholders:
+      # %player% - Name of the player the command is being run for
       # %winner% - Name of the winner of the match
       # %loser% - Name of the loser of the match
       # {delay:x} - Used to give x ms of delay before running any command
