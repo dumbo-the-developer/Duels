@@ -25,14 +25,7 @@ public class LeaveCommand extends BaseCommand {
         final ArenaImpl arena = arenaManager.get(player);
         final var match = arena.getMatch();
 
-        // Check if countdown is complete (match has started)
-        // Countdown runs for the length of countdown messages (typically 5-6 seconds)
-        // We check if countdown is enabled and if match duration is less than countdown duration
         if (match != null && config.isCdEnabled()) {
-            // Countdown messages are shown every second (20 ticks)
-            // Countdown duration = (number of messages - 1) * 1000ms
-            // The last message ("Now in a match") is shown AFTER countdown completes
-            // Add 500ms buffer to account for timing differences
             final int countdownDuration = (config.getCdDuelMessages().size() - 1) * 1000 + 500;
             if (match.getDurationInMillis() < countdownDuration) {
                 lang.sendMessage(player, "DUEL.leave.countdown-active");
@@ -40,9 +33,8 @@ public class LeaveCommand extends BaseCommand {
             }
         }
 
-        // Check if match is not in endgame phase
         if (arena.isEndGame()) {
-            lang.sendMessage(player, "DUEL.leave.endgame-phase");
+            duelManager.leaveDuringEndgame(player);
             return;
         }
 

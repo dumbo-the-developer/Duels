@@ -477,12 +477,17 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
 
     @Override
     public boolean reload() {
-        if (!(unload() && load())) {
+        if (!unload()) {
             getServer().getPluginManager().disablePlugin(this);
             return false;
         }
 
         registerAllCommands();
+
+        if (!load()) {
+            getServer().getPluginManager().disablePlugin(this);
+            return false;
+        }
         loadPreListeners();
 
         return true;

@@ -77,6 +77,7 @@ public class DuelManager implements Loadable {
     private MCPetsHook mcPets;
 
     private WrappedTask durationCheckTask;
+    private final Set<UUID> endgameLeaveRequests = new HashSet<>();
 
     public DuelManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -162,6 +163,26 @@ public class DuelManager implements Loadable {
                 arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
             }, config.getTeleportDelay() * 20L);
         }, 1L);
+    }
+
+    public boolean leaveDuringEndgame(final Player player) {
+        final ArenaImpl arena = arenaManager.get(player);
+        if (arena == null || !arena.isEndGame()) {
+            return false;
+        }
+
+        endgameLeaveRequests.add(player.getUniqueId());
+
+        final PlayerInfo info = playerManager.get(player);
+        final Location destination = info != null ? info.getLocation() : playerManager.getLobby();
+
+        plugin.doSyncAfter(() -> {
+            if (player.isOnline()) {
+                teleport.tryTeleport(player, destination);
+            }
+        }, 1L);
+
+        return true;
     }
 
     public void handleTeamMatchEnd(TeamDuelMatch match, ArenaImpl arena, Location deadLocation, TeamDuelMatch.Team winningTeam) {
@@ -419,6 +440,7 @@ public class DuelManager implements Loadable {
      * @param match    Match the player is in
      */
     private void handleWin(final Player winner, final Player opponent, final ArenaImpl arena, final DuelMatch match) {
+        final boolean leaveRequested = endgameLeaveRequests.remove(winner.getUniqueId());
         arena.remove(winner);
 
         final String opponentName = opponent != null ? opponent.getName() : lang.getMessage("GENERAL.none");
@@ -439,12 +461,24 @@ public class DuelManager implements Loadable {
             mcMMO.enableSkills(winner);
         }
 
-        final PlayerInfo info = playerManager.get(winner);
+        final PlayerInfo info = playerManager.remove(winner);
         final List<ItemStack> items = match.getItems();
 
-        if (!winner.isDead()) {
-            playerManager.remove(winner);
+        if (leaveRequested) {
+            if (info != null) {
+                teleport.tryTeleport(winner, info.getLocation());
+            } else {
+                teleport.tryTeleport(winner, playerManager.getLobby());
+            }
 
+            if (InventoryUtil.addOrDrop(winner, items)) {
+                lang.sendMessage(winner, "DUEL.reward.items.message", "name", opponentName);
+            }
+
+            return;
+        }
+
+        if (!winner.isDead()) {
             if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {
                 PlayerUtil.reset(winner);
             }
@@ -813,7 +847,7 @@ public class DuelManager implements Loadable {
 
             final ArenaImpl arena = arenaManager.get(player);
 
-            if (arena == null || !arena.isEndGame()) {
+            if (arena == null || !arena.isEndGame() || endgameLeaveRequests.contains(player.getUniqueId())) {
                 return;
             }
 
@@ -829,7 +863,7 @@ public class DuelManager implements Loadable {
             final Player player = event.getPlayer();
             final ArenaImpl arena = arenaManager.get(player);
 
-            if (arena == null || !arena.isEndGame()) {
+            if (arena == null || !arena.isEndGame() || endgameLeaveRequests.contains(player.getUniqueId())) {
                 return;
             }
 
@@ -850,7 +884,7 @@ public class DuelManager implements Loadable {
                 return;
             }
 
-            if (!arena.isEndGame()) {
+            if (!arena.isEndGame() || endgameLeaveRequests.contains(player.getUniqueId())) {
                 return;
             }
 
@@ -967,7 +1001,7 @@ public class DuelManager implements Loadable {
 
             final Player player = (Player) event.getPlayer();
 
-            if (!arenaManager.isInMatch(player)) {
+            if (!arenaManager.isInMatch(player) || endgameLeaveRequests.contains(player.getUniqueId())) {
                 return;
             }
 
