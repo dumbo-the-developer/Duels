@@ -730,43 +730,53 @@ public class DuelManager implements Loadable {
 
             // Handle ROUNDS3 deaths that bypass EntityDamageEvent (like /kill command)
             if (match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3)) {
-                event.setDeathMessage(null);
-                event.getDrops().clear();
-                event.setKeepLevel(true);
-                event.setDroppedExp(0);
-                event.setKeepInventory(true);
-                
-                // Check if this is a direct death (like /kill) by checking if there was no recent damage event
-                // In this case, we need to properly end the match
-                final EntityDamageEvent lastDamage = player.getLastDamageCause();
-                final boolean directDeath = lastDamage == null || 
-                        (System.currentTimeMillis() - lastDamage.getEntity().getTicksLived() * 50L > 1000);
-                
-                if (directDeath) {
-                    // Player died through /kill or similar - award round win to opponent
-                    Player winner = match.getAlivePlayers().stream()
-                            .filter(p -> !p.equals(player))
-                            .findFirst()
-                            .orElse(null);
-                    
-                    if (winner != null) {
-                        // Mark as match-ending win for the opponent
-                        match.addRoundWin(winner);
-                        match.addRoundWin(winner); // Add twice to immediately win
-                        match.markAsDead(player);
-                        
-                        arena.broadcast(plugin.getLang().getMessage("DUEL.on-death.no-killer", 
-                                "name", player.getName()));
-                        
-                        // Use delayed task to allow death to process
-                        final Location deadLocation = player.getLocation().clone();
-                        plugin.doSyncAfter(() -> {
-                            handleMatchEnd(match, arena, player, deadLocation, winner);
-                        }, 1L);
+                final boolean decisive = match.getAlivePlayers().stream()
+                        .filter(p -> !p.equals(player))
+                        .anyMatch(match::hasWonMatch);
+
+                if (!decisive) {
+                    // Non-decisive ROUNDS3 death that bypasses EntityDamageEvent (like /kill command).
+                    event.setDeathMessage(null);
+                    event.getDrops().clear();
+                    event.setKeepLevel(true);
+                    event.setDroppedExp(0);
+                    event.setKeepInventory(true);
+
+                    // Check if this is a direct death (like /kill) by checking if there was no recent damage event
+                    // In this case, we need to properly end the match
+                    final EntityDamageEvent lastDamage = player.getLastDamageCause();
+                    final boolean directDeath = lastDamage == null ||
+                            (System.currentTimeMillis() - lastDamage.getEntity().getTicksLived() * 50L > 1000);
+
+                    if (directDeath) {
+                        // Player died through /kill or similar - award round win to opponent
+                        Player winner = match.getAlivePlayers().stream()
+                                .filter(p -> !p.equals(player))
+                                .findFirst()
+                                .orElse(null);
+
+                        if (winner != null) {
+                            // Mark as match-ending win for the opponent
+                            match.addRoundWin(winner);
+                            match.addRoundWin(winner); // Add twice to immediately win
+                            match.markAsDead(player);
+
+                            arena.broadcast(plugin.getLang().getMessage("DUEL.on-death.no-killer",
+                                    "name", player.getName()));
+
+                            // Use delayed task to allow death to process
+                            final Location deadLocation = player.getLocation().clone();
+                            plugin.doSyncAfter(() -> {
+                                handleMatchEnd(match, arena, player, deadLocation, winner);
+                            }, 1L);
+                        }
                     }
+                    return;
                 }
-                return;
+                // decisive death - fall through to the normal death handling below,
+                // exactly like a non-ROUNDS3 duel (real death message, stats, handleMatchEnd, etc.)
             }
+
 
             final Inventory top = player.getOpenInventory().getTopInventory();
 
