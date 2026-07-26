@@ -4,8 +4,10 @@ import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.api.event.request.RequestSendEvent;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.config.Lang;
+import com.meteordevelopments.duels.gui.bedrock.BedrockAcceptForm;
 import com.meteordevelopments.duels.setting.Settings;
 import com.meteordevelopments.duels.util.DateUtil;
+import com.meteordevelopments.duels.util.FloodgateUtil;
 import com.meteordevelopments.duels.util.Loadable;
 import com.meteordevelopments.duels.util.TextBuilder;
 import com.meteordevelopments.duels.data.UserManagerImpl;
@@ -22,12 +24,14 @@ import java.util.*;
 @SuppressWarnings("deprecation")
 public class RequestManager implements Loadable, Listener {
 
+    private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
     private final UserManagerImpl userManager;
     private final Map<UUID, Map<UUID, RequestImpl>> requests = new HashMap<>();
 
     public RequestManager(final DuelsPlugin plugin) {
+        this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
         this.userManager = plugin.getUserManager();
@@ -106,6 +110,11 @@ public class RequestManager implements Loadable, Listener {
             lang.sendMessage(target, "COMMAND.duel.request.send.receiver",
                     "name", sender.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
             sendClickableMessage("COMMAND.duel.request.send.clickable-text.", sender, Collections.singleton(target));
+
+            // Send a Bedrock-friendly accept/deny form if the target is a Bedrock player
+            if (FloodgateUtil.isBedrockPlayer(target)) {
+                BedrockAcceptForm.send(plugin, sender, target, settings);
+            }
         }
     }
 

@@ -102,6 +102,11 @@ subprojects {
             url = "https://repo.tcoded.com/releases"
         }
 
+        maven {
+            name = 'opencollab-repo'
+            url = 'https://repo.opencollab.dev/main/'
+        }
+
         flatDir {
             dirs "$rootDir/libs/"
         }

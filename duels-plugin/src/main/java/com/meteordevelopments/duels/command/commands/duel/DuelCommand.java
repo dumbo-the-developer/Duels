@@ -5,11 +5,13 @@ import com.meteordevelopments.duels.Permissions;
 import com.meteordevelopments.duels.command.BaseCommand;
 import com.meteordevelopments.duels.command.commands.duel.subcommands.*;
 import com.meteordevelopments.duels.config.CommandsConfig.CommandSettings;
+import com.meteordevelopments.duels.gui.bedrock.BedrockDuelForm;
 import com.meteordevelopments.duels.hook.hooks.VaultHook;
 import com.meteordevelopments.duels.hook.hooks.worldguard.WorldGuardHook;
 import com.meteordevelopments.duels.core.kit.KitImpl;
 import com.meteordevelopments.duels.party.Party;
 import com.meteordevelopments.duels.setting.Settings;
+import com.meteordevelopments.duels.util.FloodgateUtil;
 import com.meteordevelopments.duels.util.NumberUtil;
 import com.meteordevelopments.duels.util.StringUtil;
 import com.meteordevelopments.duels.util.DateUtil;
@@ -198,6 +200,9 @@ public class DuelCommand extends BaseCommand {
         if (sendRequest) {
             // If all settings were selected via command, send request without opening settings GUI.
             requestManager.send(player, target, settings);
+        } else if (FloodgateUtil.isBedrockPlayer(player)) {
+            // Bedrock players get a Floodgate form instead of the Java inventory GUI
+            BedrockDuelForm.open(plugin, player, target, settings);
         } else if (config.isOwnInventoryEnabled()) {
             // If own inventory is enabled, prompt request settings GUI.
             settings.openGui(player);

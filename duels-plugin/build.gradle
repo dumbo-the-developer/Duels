@@ -47,6 +47,7 @@ dependencies {
     implementation project(':duels-api')
     implementation project(':duels-worldguard')
     implementation project(':duels-worldguard-v7')
+    compileOnly 'org.geysermc.floodgate:api:2.2.5-SNAPSHOT'
     implementation 'io.papermc:paperlib:1.0.8'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.1'
     implementation 'org.json:json:20251224'
