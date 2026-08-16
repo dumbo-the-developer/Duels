@@ -3,6 +3,7 @@ package com.meteordevelopments.duels.command.commands.kit;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.api.kit.Kit;
 import com.meteordevelopments.duels.command.BaseCommand;
+import com.meteordevelopments.duels.config.CommandsConfig;
 import com.meteordevelopments.duels.gui.kitedit.KitEditGui;
 import com.meteordevelopments.duels.core.kit.KitImpl;
 import com.meteordevelopments.duels.core.kit.edit.KitEditManager;
@@ -54,7 +55,7 @@ public class KiteditCommand extends BaseCommand {
         
         // Check if player is already editing
         if (KitEditManager.getInstance().isEditing(player)) {
-            lang.sendMessage(player, "KIT.EDIT.already-editing");
+            lang.sendMessage(player, "KIT.EDIT.already-editing", "command", plugin.getCommandsConfig().get(CommandsConfig.CommandKey.KIT).getName());
             return;
         }
         
@@ -79,7 +80,7 @@ public class KiteditCommand extends BaseCommand {
         
         // Start editing session
         if (KitEditManager.getInstance().startEditSession(player, kitName)) {
-            lang.sendMessage(player, "KIT.EDIT.started", "kit", kitName);
+            lang.sendMessage(player, "KIT.EDIT.started", "kit", kitName, "command", plugin.getCommandsConfig().get(CommandsConfig.CommandKey.KIT).getName());
         } else {
             lang.sendMessage(player, "KIT.EDIT.start-failed", "kit", kitName);
         }
@@ -88,7 +89,7 @@ public class KiteditCommand extends BaseCommand {
     private void openKitEditGui(Player player) {
         // Check if player is already editing
         if (KitEditManager.getInstance().isEditing(player)) {
-            lang.sendMessage(player, "KIT.EDIT.already-editing");
+            lang.sendMessage(player, "KIT.EDIT.already-editing", "command", plugin.getCommandsConfig().get(CommandsConfig.CommandKey.KIT).getName());
             return;
         }
         
@@ -176,7 +177,7 @@ public class KiteditCommand extends BaseCommand {
         
         // Start editing session
         if (KitEditManager.getInstance().startEditSession(player, kitName)) {
-            lang.sendMessage(player, "KIT.EDIT.started", "kit", kitName);
+            lang.sendMessage(player, "KIT.EDIT.started", "kit", kitName, "command", plugin.getCommandsConfig().get(CommandsConfig.CommandKey.KIT).getName());
         } else {
             lang.sendMessage(player, "KIT.EDIT.start-failed", "kit", kitName);
         }

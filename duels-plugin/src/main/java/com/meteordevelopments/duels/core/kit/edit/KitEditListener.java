@@ -1,6 +1,7 @@
 package com.meteordevelopments.duels.core.kit.edit;
 
 import com.meteordevelopments.duels.DuelsPlugin;
+import com.meteordevelopments.duels.config.CommandsConfig;
 import com.meteordevelopments.duels.util.inventory.InventoryUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -21,10 +22,11 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Handles all events to prevent exploits during kit editing sessions.
- * Blocks all interactions except /kitsave command.
+ * Blocks all interactions except the configured kit command while editing.
  */
 public class KitEditListener implements Listener {
 
@@ -35,7 +37,7 @@ public class KitEditListener implements Listener {
     }
 
     /**
-     * Blocks all commands except /kitsave during kit editing.
+     * Blocks all commands except the configured kit command during kit editing.
      */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
@@ -45,13 +47,35 @@ public class KitEditListener implements Listener {
             return;
         }
 
-        String command = event.getMessage().toLowerCase().trim();
+        String command = event.getMessage().trim();
+        String commandLabel = command.startsWith("/") ? command.substring(1) : command;
+        int spaceIndex = commandLabel.indexOf(' ');
+        if (spaceIndex >= 0) {
+            commandLabel = commandLabel.substring(0, spaceIndex);
+        }
+        commandLabel = commandLabel.toLowerCase(Locale.ROOT);
 
-        // Allow plugin kit commands while editing (e.g., /kit save, /kit edit cancel)
-        if (!command.equals("/kit") && !command.startsWith("/kit ")) {
+        CommandsConfig.CommandSettings kitCommand = plugin.getCommandsConfig().get(CommandsConfig.CommandKey.KIT);
+
+        // Allow the configured kit command while editing (e.g., /dkit save, /dkit edit cancel)
+        if (!commandMatches(commandLabel, kitCommand)) {
             event.setCancelled(true);
             plugin.getLang().sendMessage(player, "KIT.EDIT.command-blocked");
         }
+    }
+
+    private boolean commandMatches(String commandLabel, CommandsConfig.CommandSettings settings) {
+        if (settings.getName().equalsIgnoreCase(commandLabel)) {
+            return true;
+        }
+
+        for (String alias : settings.getAliases()) {
+            if (alias.equalsIgnoreCase(commandLabel)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

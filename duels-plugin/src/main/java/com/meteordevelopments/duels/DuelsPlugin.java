@@ -121,6 +121,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private PartyManagerImpl partyManager;
     @Getter
     private ValidatorManager validatorManager;
+    @Getter
     private CommandsConfig commandsConfig;
     private static final Logger LOGGER = Logger.getLogger("[Duels-Optimised]");
 

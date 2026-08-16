@@ -724,9 +724,9 @@ GUI:
 
 KIT:
   EDIT:
-    started: '{PREFIX} <green>You are now editing kit <yellow>%kit%<green>. Use <yellow>/kitsave <green>when done.'
+    started: '{PREFIX} <green>You are now editing kit <yellow>%kit%<green>. Use <yellow>/%command% save <green>when done.'
     saved: '{PREFIX} <green>Your kit <yellow>%kit% <green>has been saved and your inventory restored.'
-    already-editing: '{PREFIX} <red>You are already editing a kit. Use <yellow>/kitsave <red>to save first.'
+    already-editing: '{PREFIX} <red>You are already editing a kit. Use <yellow>/%command% save <red>to save first.'
     not-editing: '{PREFIX} <red>You are not currently editing a kit.'
     start-failed: '{PREFIX} <red>Failed to start kit editing session.'
     save-failed: '{PREFIX} <red>Failed to save kit. Please try again.'
@@ -734,7 +734,7 @@ KIT:
     in-match: '{PREFIX} <red>You cannot edit kits while in a match. Wait for the match to end.'
     session-aborted: '{PREFIX} <red>Your kit editing session has been aborted because you joined a queue or match.'
     invalid-items: '{PREFIX} <red>Kit editing session aborted! You can only modify items from the default kit. External items are not allowed.'
-    command-blocked: '{PREFIX} <red>You cannot use other commands while editing a kit. Use <yellow>/kitsave <red>to save.'
+    command-blocked: '{PREFIX} <red>You cannot use other commands while editing a kit. Use <yellow>/%command% save <red>to save.'
     drop-blocked: '{PREFIX} <red>You cannot drop items while editing a kit.'
     inventory-blocked: '{PREFIX} <red>You cannot access external inventories while editing a kit.'
     block-break-blocked: '{PREFIX} <red>You cannot break blocks while editing a kit.'
