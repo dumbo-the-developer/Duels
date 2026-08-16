@@ -965,12 +965,13 @@ public class DuelManager implements Loadable {
             if (!config.isLimitTeleportEnabled()
                     || event.getCause() == TeleportCause.ENDER_PEARL
                     || event.getCause() == TeleportCause.SPECTATE
-                    || event.getCause() == TeleportCause.PLUGIN
-                    || event.getCause() == TeleportCause.UNKNOWN
                     || !arenaManager.isInMatch(player)) {
                 return;
             }
 
+            // External plugins and command-based teleport requests should also be blocked when the
+            // duel teleport limit is enabled. Internal forced teleports still work because the
+            // Teleport helper clears the cancellation later via metadata.
             final Location from = event.getFrom();
 
             if (from.getWorld().equals(to.getWorld()) && from.distance(to) <= config.getDistanceAllowed()) {
