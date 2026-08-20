@@ -2,6 +2,7 @@ package com.meteordevelopments.duels.core.request;
 
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.api.event.request.RequestSendEvent;
+import com.meteordevelopments.duels.config.CommandsConfig;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.config.Lang;
 import com.meteordevelopments.duels.gui.bedrock.BedrockAcceptForm;
@@ -27,6 +28,7 @@ public class RequestManager implements Loadable, Listener {
     private final DuelsPlugin plugin;
     private final Config config;
     private final Lang lang;
+    private final CommandsConfig commandsConfig;
     private final UserManagerImpl userManager;
     private final Map<UUID, Map<UUID, RequestImpl>> requests = new HashMap<>();
 
@@ -34,6 +36,7 @@ public class RequestManager implements Loadable, Listener {
         this.plugin = plugin;
         this.config = plugin.getConfiguration();
         this.lang = plugin.getLang();
+        this.commandsConfig = plugin.getCommandsConfig();
         this.userManager = plugin.getUserManager();
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
@@ -119,13 +122,14 @@ public class RequestManager implements Loadable, Listener {
     }
 
     private void sendClickableMessage(final String path, final Player sender, final Collection<Player> targets) {
+        final String duelCommand = commandsConfig.get(CommandsConfig.CommandKey.DUEL).getName();
         TextBuilder
                 .of(lang.getMessage(path + "info.text"), null, null, Action.SHOW_TEXT, lang.getMessage(path + "info.hover-text"))
                 .add(lang.getMessage(path + "accept.text"),
-                        ClickEvent.Action.RUN_COMMAND, "/duel accept " + sender.getName(),
+                        ClickEvent.Action.RUN_COMMAND, "/" + duelCommand + " accept " + sender.getName(),
                         Action.SHOW_TEXT, lang.getMessage(path + "accept.hover-text"))
                 .add(lang.getMessage(path + "deny.text"),
-                        ClickEvent.Action.RUN_COMMAND, "/duel deny " + sender.getName(),
+                        ClickEvent.Action.RUN_COMMAND, "/" + duelCommand + " deny " + sender.getName(),
                         Action.SHOW_TEXT, lang.getMessage(path + "deny.hover-text"))
                 .send(targets);
     }
