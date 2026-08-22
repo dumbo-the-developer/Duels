@@ -1,8 +1,10 @@
 com.meteordevelopments.duels.api
 com.meteordevelopments.duels.api.arena
 com.meteordevelopments.duels.api.command
+com.meteordevelopments.duels.api.customkit
 com.meteordevelopments.duels.api.event
 com.meteordevelopments.duels.api.event.arena
+com.meteordevelopments.duels.api.event.customkit
 com.meteordevelopments.duels.api.event.kit
 com.meteordevelopments.duels.api.event.match
 com.meteordevelopments.duels.api.event.queue

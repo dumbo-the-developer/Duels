@@ -142,15 +142,23 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Whether or not this user is receiving duel requests.</div>
 </dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html#clone()" class="member-name-link">clone()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a></dt>
+<dd>
+<div class="block">Creates a deep clone of this custom kit.</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/package-summary.html">com.meteordevelopments.duels.api</a> - package com.meteordevelopments.duels.api</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/arena/package-summary.html">com.meteordevelopments.duels.api.arena</a> - package com.meteordevelopments.duels.api.arena</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/command/package-summary.html">com.meteordevelopments.duels.api.command</a> - package com.meteordevelopments.duels.api.command</dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/package-summary.html">com.meteordevelopments.duels.api.customkit</a> - package com.meteordevelopments.duels.api.customkit</dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/event/package-summary.html">com.meteordevelopments.duels.api.event</a> - package com.meteordevelopments.duels.api.event</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/event/arena/package-summary.html">com.meteordevelopments.duels.api.event.arena</a> - package com.meteordevelopments.duels.api.event.arena</dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/package-summary.html">com.meteordevelopments.duels.api.event.customkit</a> - package com.meteordevelopments.duels.api.event.customkit</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/event/kit/package-summary.html">com.meteordevelopments.duels.api.event.kit</a> - package com.meteordevelopments.duels.api.event.kit</dt>
 <dd>&nbsp;</dd>
@@ -210,9 +218,53 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Creates a kit with given name and <code>Player</code>'s inventory contents.</div>
 </dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html#createKit(org.bukkit.entity.Player,java.lang.String)" class="member-name-link">createKit(Player, String)</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitManager</a></dt>
+<dd>
+<div class="block">Creates and saves a new custom kit for the player.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" class="type-name-link" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a> - Interface in <a href="com/meteordevelopments/duels/api/customkit/package-summary.html">com.meteordevelopments.duels.api.customkit</a></dt>
+<dd>
+<div class="block">Represents a player-created custom duel kit.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitCreateEvent.html" class="type-name-link" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitCreateEvent</a> - Class in <a href="com/meteordevelopments/duels/api/event/customkit/package-summary.html">com.meteordevelopments.duels.api.event.customkit</a></dt>
+<dd>
+<div class="block">Called when a player creates a new custom kit.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitCreateEvent.html#%3Cinit%3E(org.bukkit.entity.Player,com.meteordevelopments.duels.api.customkit.CustomKit)" class="member-name-link">CustomKitCreateEvent(Player, CustomKit)</a> - Constructor for class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitCreateEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitCreateEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitDeleteEvent.html" class="type-name-link" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitDeleteEvent</a> - Class in <a href="com/meteordevelopments/duels/api/event/customkit/package-summary.html">com.meteordevelopments.duels.api.event.customkit</a></dt>
+<dd>
+<div class="block">Called when a player deletes a custom kit.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitDeleteEvent.html#%3Cinit%3E(org.bukkit.entity.Player,com.meteordevelopments.duels.api.customkit.CustomKit)" class="member-name-link">CustomKitDeleteEvent(Player, CustomKit)</a> - Constructor for class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitDeleteEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitDeleteEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEditEvent.html" class="type-name-link" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitEditEvent</a> - Class in <a href="com/meteordevelopments/duels/api/event/customkit/package-summary.html">com.meteordevelopments.duels.api.event.customkit</a></dt>
+<dd>
+<div class="block">Called when a player modifies and saves a custom kit.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEditEvent.html#%3Cinit%3E(org.bukkit.entity.Player,com.meteordevelopments.duels.api.customkit.CustomKit)" class="member-name-link">CustomKitEditEvent(Player, CustomKit)</a> - Constructor for class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEditEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitEditEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEquipEvent.html" class="type-name-link" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitEquipEvent</a> - Class in <a href="com/meteordevelopments/duels/api/event/customkit/package-summary.html">com.meteordevelopments.duels.api.event.customkit</a></dt>
+<dd>
+<div class="block">Called when a player is equipped with a custom kit.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEquipEvent.html#%3Cinit%3E(org.bukkit.entity.Player,com.meteordevelopments.duels.api.customkit.CustomKit)" class="member-name-link">CustomKitEquipEvent(Player, CustomKit)</a> - Constructor for class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEquipEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitEquipEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html" class="type-name-link" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitManager</a> - Interface in <a href="com/meteordevelopments/duels/api/customkit/package-summary.html">com.meteordevelopments.duels.api.customkit</a></dt>
+<dd>
+<div class="block">Manages player-created custom duel kits.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html" class="type-name-link" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitSnapshot</a> - Interface in <a href="com/meteordevelopments/duels/api/customkit/package-summary.html">com.meteordevelopments.duels.api.customkit</a></dt>
+<dd>
+<div class="block">Represents an immutable snapshot of a custom kit at the time a duel request was sent.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:D">D</h2>
 <dl class="index">
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html#deleteKit(java.util.UUID,java.util.UUID)" class="member-name-link">deleteKit(UUID, UUID)</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitManager</a></dt>
+<dd>
+<div class="block">Deletes a custom kit owned by the player.</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/folialib/util/FoliaLibOptions.html#disableInvalidTickDebugMode()" class="member-name-link">disableInvalidTickDebugMode()</a> - Method in class com.meteordevelopments.duels.api.folialib.util.<a href="com/meteordevelopments/duels/api/folialib/util/FoliaLibOptions.html" title="class in com.meteordevelopments.duels.api.folialib.util">FoliaLibOptions</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/folialib/FoliaLib.html#disableInvalidTickValueWarning()" class="member-name-link">disableInvalidTickValueWarning()</a> - Method in class com.meteordevelopments.duels.api.folialib.<a href="com/meteordevelopments/duels/api/folialib/FoliaLib.html" title="class in com.meteordevelopments.duels.api.folialib">FoliaLib</a></dt>
@@ -263,6 +315,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/extension/DuelsExtension.html#%3Cinit%3E()" class="member-name-link">DuelsExtension()</a> - Constructor for class com.meteordevelopments.duels.api.extension.<a href="com/meteordevelopments/duels/api/extension/DuelsExtension.html" title="class in com.meteordevelopments.duels.api.extension">DuelsExtension</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html#duplicateKit(org.bukkit.entity.Player,java.util.UUID,java.lang.String)" class="member-name-link">duplicateKit(Player, UUID, String)</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitManager</a></dt>
+<dd>
+<div class="block">Duplicates an existing custom kit for a player under a new name.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:E">E</h2>
 <dl class="index">
@@ -280,6 +336,14 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/user/UserManager.TopEntry.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in class com.meteordevelopments.duels.api.user.<a href="com/meteordevelopments/duels/api/user/UserManager.TopEntry.html" title="class in com.meteordevelopments.duels.api.user">UserManager.TopEntry</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html#equip(org.bukkit.entity.Player)" class="member-name-link">equip(Player)</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a></dt>
+<dd>
+<div class="block">Equips the player with the contents of this custom kit.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html#equip(org.bukkit.entity.Player)" class="member-name-link">equip(Player)</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitSnapshot</a></dt>
+<dd>
+<div class="block">Equips a player with deep-cloned items from this snapshot.</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/kit/Kit.html#equip(org.bukkit.entity.Player)" class="member-name-link">equip(Player)</a> - Method in interface com.meteordevelopments.duels.api.kit.<a href="com/meteordevelopments/duels/api/kit/Kit.html" title="interface in com.meteordevelopments.duels.api.kit">Kit</a></dt>
 <dd>
 <div class="block">Equips the <code>Player</code> with the contents of this kit.</div>
@@ -412,6 +476,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">An UnmodifiableList of <a href="com/meteordevelopments/duels/api/arena/Arena.html" title="interface in com.meteordevelopments.duels.api.arena"><code>Arena</code></a>s that are currently loaded.</div>
 </dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html#getArmor()" class="member-name-link">getArmor()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a></dt>
+<dd>
+<div class="block">Armor contents mapping (0: Helmet, 1: Chestplate, 2: Leggings, 3: Boots).</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html#getArmor()" class="member-name-link">getArmor()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitSnapshot</a></dt>
+<dd>
+<div class="block">Armor contents mapping (0: Helmet, 1: Chestplate, 2: Leggings, 3: Boots).</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/match/Match.html#getBet()" class="member-name-link">getBet()</a> - Method in interface com.meteordevelopments.duels.api.match.<a href="com/meteordevelopments/duels/api/match/Match.html" title="interface in com.meteordevelopments.duels.api.match">Match</a></dt>
 <dd>
 <div class="block">The bet amount for this <a href="com/meteordevelopments/duels/api/match/Match.html" title="interface in com.meteordevelopments.duels.api.match"><code>Match</code></a>.</div>
@@ -428,12 +500,20 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/extension/DuelsExtension.html#getConfig()" class="member-name-link">getConfig()</a> - Method in class com.meteordevelopments.duels.api.extension.<a href="com/meteordevelopments/duels/api/extension/DuelsExtension.html" title="class in com.meteordevelopments.duels.api.extension">DuelsExtension</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html#getCreated()" class="member-name-link">getCreated()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a></dt>
+<dd>
+<div class="block">Creation timestamp in milliseconds.</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/user/MatchInfo.html#getCreation()" class="member-name-link">getCreation()</a> - Method in interface com.meteordevelopments.duels.api.user.<a href="com/meteordevelopments/duels/api/user/MatchInfo.html" title="interface in com.meteordevelopments.duels.api.user">MatchInfo</a></dt>
 <dd>
 <div class="block">The created timestamp of this match info in milliseconds.</div>
 </dd>
 <dt><a href="com/meteordevelopments/duels/api/user/UserManager.TopEntry.html#getCreation()" class="member-name-link">getCreation()</a> - Method in class com.meteordevelopments.duels.api.user.<a href="com/meteordevelopments/duels/api/user/UserManager.TopEntry.html" title="class in com.meteordevelopments.duels.api.user">UserManager.TopEntry</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/Duels.html#getCustomKitManager()" class="member-name-link">getCustomKitManager()</a> - Method in interface com.meteordevelopments.duels.api.<a href="com/meteordevelopments/duels/api/Duels.html" title="interface in com.meteordevelopments.duels.api">Duels</a></dt>
+<dd>
+<div class="block">Gets the CustomKitManager singleton used by Duels.</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/user/UserManager.TopEntry.html#getData()" class="member-name-link">getData()</a> - Method in class com.meteordevelopments.duels.api.user.<a href="com/meteordevelopments/duels/api/user/UserManager.TopEntry.html" title="class in com.meteordevelopments.duels.api.user">UserManager.TopEntry</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/extension/DuelsExtension.html#getDataFolder()" class="member-name-link">getDataFolder()</a> - Method in class com.meteordevelopments.duels.api.extension.<a href="com/meteordevelopments/duels/api/extension/DuelsExtension.html" title="class in com.meteordevelopments.duels.api.extension">DuelsExtension</a></dt>
@@ -441,6 +521,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/meteordevelopments/duels/api/command/SubCommand.html#getDescription()" class="member-name-link">getDescription()</a> - Method in class com.meteordevelopments.duels.api.command.<a href="com/meteordevelopments/duels/api/command/SubCommand.html" title="class in com.meteordevelopments.duels.api.command">SubCommand</a></dt>
 <dd>
 <div class="block">The description of this subcommand.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html#getDescription()" class="member-name-link">getDescription()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a></dt>
+<dd>
+<div class="block">Description lines of this custom kit for GUI display.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html#getDescription()" class="member-name-link">getDescription()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitSnapshot</a></dt>
+<dd>
+<div class="block">Description lines of the kit.</div>
 </dd>
 <dt><a href="com/meteordevelopments/duels/api/kit/Kit.html#getDisplayed()" class="member-name-link">getDisplayed()</a> - Method in interface com.meteordevelopments.duels.api.kit.<a href="com/meteordevelopments/duels/api/kit/Kit.html" title="interface in com.meteordevelopments.duels.api.kit">Kit</a></dt>
 <dd>
@@ -469,6 +557,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/meteordevelopments/duels/api/event/arena/ArenaSetPositionEvent.html#getHandlerList()" class="member-name-link">getHandlerList()</a> - Static method in class com.meteordevelopments.duels.api.event.arena.<a href="com/meteordevelopments/duels/api/event/arena/ArenaSetPositionEvent.html" title="class in com.meteordevelopments.duels.api.event.arena">ArenaSetPositionEvent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/event/arena/ArenaStateChangeEvent.html#getHandlerList()" class="member-name-link">getHandlerList()</a> - Static method in class com.meteordevelopments.duels.api.event.arena.<a href="com/meteordevelopments/duels/api/event/arena/ArenaStateChangeEvent.html" title="class in com.meteordevelopments.duels.api.event.arena">ArenaStateChangeEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitCreateEvent.html#getHandlerList()" class="member-name-link">getHandlerList()</a> - Static method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitCreateEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitCreateEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitDeleteEvent.html#getHandlerList()" class="member-name-link">getHandlerList()</a> - Static method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitDeleteEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitDeleteEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEditEvent.html#getHandlerList()" class="member-name-link">getHandlerList()</a> - Static method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEditEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitEditEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEquipEvent.html#getHandlerList()" class="member-name-link">getHandlerList()</a> - Static method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEquipEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitEquipEvent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/event/kit/KitCreateEvent.html#getHandlerList()" class="member-name-link">getHandlerList()</a> - Static method in class com.meteordevelopments.duels.api.event.kit.<a href="com/meteordevelopments/duels/api/event/kit/KitCreateEvent.html" title="class in com.meteordevelopments.duels.api.event.kit">KitCreateEvent</a></dt>
 <dd>&nbsp;</dd>
@@ -512,6 +608,14 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/event/arena/ArenaStateChangeEvent.html#getHandlers()" class="member-name-link">getHandlers()</a> - Method in class com.meteordevelopments.duels.api.event.arena.<a href="com/meteordevelopments/duels/api/event/arena/ArenaStateChangeEvent.html" title="class in com.meteordevelopments.duels.api.event.arena">ArenaStateChangeEvent</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitCreateEvent.html#getHandlers()" class="member-name-link">getHandlers()</a> - Method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitCreateEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitCreateEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitDeleteEvent.html#getHandlers()" class="member-name-link">getHandlers()</a> - Method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitDeleteEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitDeleteEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEditEvent.html#getHandlers()" class="member-name-link">getHandlers()</a> - Method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEditEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitEditEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEquipEvent.html#getHandlers()" class="member-name-link">getHandlers()</a> - Method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEquipEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitEquipEvent</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/event/kit/KitCreateEvent.html#getHandlers()" class="member-name-link">getHandlers()</a> - Method in class com.meteordevelopments.duels.api.event.kit.<a href="com/meteordevelopments/duels/api/event/kit/KitCreateEvent.html" title="class in com.meteordevelopments.duels.api.event.kit">KitCreateEvent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/event/kit/KitEquipEvent.html#getHandlers()" class="member-name-link">getHandlers()</a> - Method in class com.meteordevelopments.duels.api.event.kit.<a href="com/meteordevelopments/duels/api/event/kit/KitEquipEvent.html" title="class in com.meteordevelopments.duels.api.event.kit">KitEquipEvent</a></dt>
@@ -550,6 +654,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">The winner's finishing health.</div>
 </dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html#getIcon()" class="member-name-link">getIcon()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a></dt>
+<dd>
+<div class="block">Display icon ItemStack for GUI representations.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html#getIcon()" class="member-name-link">getIcon()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitSnapshot</a></dt>
+<dd>
+<div class="block">Display icon ItemStack for GUI preview.</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/user/UserManager.TopEntry.html#getIdentifier()" class="member-name-link">getIdentifier()</a> - Method in class com.meteordevelopments.duels.api.user.<a href="com/meteordevelopments/duels/api/user/UserManager.TopEntry.html" title="class in com.meteordevelopments.duels.api.user">UserManager.TopEntry</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/folialib/FoliaLib.html#getImpl()" class="member-name-link">getImpl()</a> - Method in class com.meteordevelopments.duels.api.folialib.<a href="com/meteordevelopments/duels/api/folialib/FoliaLib.html" title="class in com.meteordevelopments.duels.api.folialib">FoliaLib</a></dt>
@@ -566,10 +678,26 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="deprecation-block"><span class="deprecated-label">Deprecated.</span></div>
 </dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html#getItems()" class="member-name-link">getItems()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a></dt>
+<dd>
+<div class="block">Inventory layout mapping (slot index 0-35 -&gt; ItemStack).</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html#getItems()" class="member-name-link">getItems()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitSnapshot</a></dt>
+<dd>
+<div class="block">Inventory layout mapping (slot index 0-35 -&gt; defensive copy of ItemStack).</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/match/Match.html#getItems(org.bukkit.entity.Player)" class="member-name-link">getItems(Player)</a> - Method in interface com.meteordevelopments.duels.api.match.<a href="com/meteordevelopments/duels/api/match/Match.html" title="interface in com.meteordevelopments.duels.api.match">Match</a></dt>
 <dd>
 <div class="block">UnmodifiableList of ItemStacks the player has bet for this <a href="com/meteordevelopments/duels/api/match/Match.html" title="interface in com.meteordevelopments.duels.api.match"><code>Match</code></a>.</div>
 </dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitCreateEvent.html#getKit()" class="member-name-link">getKit()</a> - Method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitCreateEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitCreateEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitDeleteEvent.html#getKit()" class="member-name-link">getKit()</a> - Method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitDeleteEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitDeleteEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEditEvent.html#getKit()" class="member-name-link">getKit()</a> - Method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEditEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitEditEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEquipEvent.html#getKit()" class="member-name-link">getKit()</a> - Method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEquipEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitEquipEvent</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/event/kit/KitEvent.html#getKit()" class="member-name-link">getKit()</a> - Method in class com.meteordevelopments.duels.api.event.kit.<a href="com/meteordevelopments/duels/api/event/kit/KitEvent.html" title="class in com.meteordevelopments.duels.api.event.kit">KitEvent</a></dt>
 <dd>
 <div class="block"><a href="com/meteordevelopments/duels/api/kit/Kit.html" title="interface in com.meteordevelopments.duels.api.kit"><code>Kit</code></a> instance associated with this event.</div>
@@ -590,6 +718,18 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">The name of the kit used in this match or null if no kit was used.</div>
 </dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html#getKit(java.util.UUID,java.lang.String)" class="member-name-link">getKit(UUID, String)</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitManager</a></dt>
+<dd>
+<div class="block">Gets a custom kit by owner UUID and kit name (case-insensitive).</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html#getKit(java.util.UUID,java.util.UUID)" class="member-name-link">getKit(UUID, UUID)</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitManager</a></dt>
+<dd>
+<div class="block">Gets a custom kit by owner UUID and kit ID.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html#getKitId()" class="member-name-link">getKitId()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitSnapshot</a></dt>
+<dd>
+<div class="block">Unique identifier of the original custom kit.</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/Duels.html#getKitManager()" class="member-name-link">getKitManager()</a> - Method in interface com.meteordevelopments.duels.api.<a href="com/meteordevelopments/duels/api/Duels.html" title="interface in com.meteordevelopments.duels.api">Duels</a></dt>
 <dd>
 <div class="block">Gets the KitManager singleton used by Duels.</div>
@@ -597,6 +737,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/meteordevelopments/duels/api/kit/KitManager.html#getKits()" class="member-name-link">getKits()</a> - Method in interface com.meteordevelopments.duels.api.kit.<a href="com/meteordevelopments/duels/api/kit/KitManager.html" title="interface in com.meteordevelopments.duels.api.kit">KitManager</a></dt>
 <dd>
 <div class="block">An UnmodifiableList of <a href="com/meteordevelopments/duels/api/kit/Kit.html" title="interface in com.meteordevelopments.duels.api.kit"><code>Kit</code></a>s that are currently loaded.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html#getKits(java.util.UUID)" class="member-name-link">getKits(UUID)</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitManager</a></dt>
+<dd>
+<div class="block">Gets all custom kits owned by the given player UUID.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html#getKits(org.bukkit.entity.Player)" class="member-name-link">getKits(Player)</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitManager</a></dt>
+<dd>
+<div class="block">Gets all custom kits owned by the player.</div>
 </dd>
 <dt><a href="com/meteordevelopments/duels/api/command/SubCommand.html#getLength()" class="member-name-link">getLength()</a> - Method in class com.meteordevelopments.duels.api.command.<a href="com/meteordevelopments/duels/api/command/SubCommand.html" title="class in com.meteordevelopments.duels.api.command">SubCommand</a></dt>
 <dd>
@@ -634,6 +782,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">UnmodifiableList of recent matches for this user.</div>
 </dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html#getMaxKits(org.bukkit.entity.Player)" class="member-name-link">getMaxKits(Player)</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitManager</a></dt>
+<dd>
+<div class="block">Calculates the maximum custom kit limit allowed for the player based on permissions and config.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html#getModified()" class="member-name-link">getModified()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a></dt>
+<dd>
+<div class="block">Last modified timestamp in milliseconds.</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/arena/Arena.html#getName()" class="member-name-link">getName()</a> - Method in interface com.meteordevelopments.duels.api.arena.<a href="com/meteordevelopments/duels/api/arena/Arena.html" title="interface in com.meteordevelopments.duels.api.arena">Arena</a></dt>
 <dd>
 <div class="block">The name of this arena.</div>
@@ -641,6 +797,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/meteordevelopments/duels/api/command/SubCommand.html#getName()" class="member-name-link">getName()</a> - Method in class com.meteordevelopments.duels.api.command.<a href="com/meteordevelopments/duels/api/command/SubCommand.html" title="class in com.meteordevelopments.duels.api.command">SubCommand</a></dt>
 <dd>
 <div class="block">The name of this subcommand.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html#getName()" class="member-name-link">getName()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a></dt>
+<dd>
+<div class="block">Name of this custom kit.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html#getName()" class="member-name-link">getName()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitSnapshot</a></dt>
+<dd>
+<div class="block">Name of the kit.</div>
 </dd>
 <dt><a href="com/meteordevelopments/duels/api/extension/DuelsExtension.html#getName()" class="member-name-link">getName()</a> - Method in class com.meteordevelopments.duels.api.extension.<a href="com/meteordevelopments/duels/api/extension/DuelsExtension.html" title="class in com.meteordevelopments.duels.api.extension">DuelsExtension</a></dt>
 <dd>&nbsp;</dd>
@@ -654,12 +818,28 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/meteordevelopments/duels/api/user/UserManager.TopData.html#getName()" class="member-name-link">getName()</a> - Method in class com.meteordevelopments.duels.api.user.<a href="com/meteordevelopments/duels/api/user/UserManager.TopData.html" title="class in com.meteordevelopments.duels.api.user">UserManager.TopData</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html#getOffHand()" class="member-name-link">getOffHand()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a></dt>
+<dd>
+<div class="block">Offhand item (or null/air if empty).</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html#getOffHand()" class="member-name-link">getOffHand()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitSnapshot</a></dt>
+<dd>
+<div class="block">Offhand item (or null if empty).</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/arena/Arena.html#getOpponent(org.bukkit.entity.Player)" class="member-name-link">getOpponent(Player)</a> - Method in interface com.meteordevelopments.duels.api.arena.<a href="com/meteordevelopments/duels/api/arena/Arena.html" title="interface in com.meteordevelopments.duels.api.arena">Arena</a></dt>
 <dd>
 <div class="block">The <a href="com/meteordevelopments/duels/api/match/Match.html" title="interface in com.meteordevelopments.duels.api.match"><code>Match</code></a> opponent playing in this arena.</div>
 </dd>
 <dt><a href="com/meteordevelopments/duels/api/folialib/FoliaLib.html#getOptions()" class="member-name-link">getOptions()</a> - Method in class com.meteordevelopments.duels.api.folialib.<a href="com/meteordevelopments/duels/api/folialib/FoliaLib.html" title="class in com.meteordevelopments.duels.api.folialib">FoliaLib</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html#getOwner()" class="member-name-link">getOwner()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a></dt>
+<dd>
+<div class="block">UUID of the player who created and owns this custom kit.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html#getOwner()" class="member-name-link">getOwner()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitSnapshot.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitSnapshot</a></dt>
+<dd>
+<div class="block">UUID of the kit owner.</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/folialib/task/WrappedBukkitTask.html#getOwningPlugin()" class="member-name-link">getOwningPlugin()</a> - Method in class com.meteordevelopments.duels.api.folialib.task.<a href="com/meteordevelopments/duels/api/folialib/task/WrappedBukkitTask.html" title="class in com.meteordevelopments.duels.api.folialib.task">WrappedBukkitTask</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/folialib/task/WrappedFoliaTask.html#getOwningPlugin()" class="member-name-link">getOwningPlugin()</a> - Method in class com.meteordevelopments.duels.api.folialib.task.<a href="com/meteordevelopments/duels/api/folialib/task/WrappedFoliaTask.html" title="class in com.meteordevelopments.duels.api.folialib.task">WrappedFoliaTask</a></dt>
@@ -879,6 +1059,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/meteordevelopments/duels/api/user/UserManager.TopEntry.html#getType()" class="member-name-link">getType()</a> - Method in class com.meteordevelopments.duels.api.user.<a href="com/meteordevelopments/duels/api/user/UserManager.TopEntry.html" title="class in com.meteordevelopments.duels.api.user">UserManager.TopEntry</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html#getUniqueId()" class="member-name-link">getUniqueId()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a></dt>
+<dd>
+<div class="block">Unique stable identifier for this custom kit.</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/command/SubCommand.html#getUsage()" class="member-name-link">getUsage()</a> - Method in class com.meteordevelopments.duels.api.command.<a href="com/meteordevelopments/duels/api/command/SubCommand.html" title="class in com.meteordevelopments.duels.api.command">SubCommand</a></dt>
 <dd>
 <div class="block">The usage of this subcommand.</div>
@@ -930,6 +1114,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/user/UserManager.TopEntry.html#hashCode()" class="member-name-link">hashCode()</a> - Method in class com.meteordevelopments.duels.api.user.<a href="com/meteordevelopments/duels/api/user/UserManager.TopEntry.html" title="class in com.meteordevelopments.duels.api.user">UserManager.TopEntry</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html#hasReachedLimit(org.bukkit.entity.Player)" class="member-name-link">hasReachedLimit(Player)</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitManager</a></dt>
+<dd>
+<div class="block">Checks if a player has reached their custom kit limit.</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/event/SourcedEvent.html#hasSource()" class="member-name-link">hasSource()</a> - Method in class com.meteordevelopments.duels.api.event.<a href="com/meteordevelopments/duels/api/event/SourcedEvent.html" title="class in com.meteordevelopments.duels.api.event">SourcedEvent</a></dt>
 <dd>
 <div class="block">Whether or not this event has a source specified.</div>
@@ -976,6 +1164,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/meteordevelopments/duels/api/event/arena/ArenaSetPositionEvent.html#isCancelled()" class="member-name-link">isCancelled()</a> - Method in class com.meteordevelopments.duels.api.event.arena.<a href="com/meteordevelopments/duels/api/event/arena/ArenaSetPositionEvent.html" title="class in com.meteordevelopments.duels.api.event.arena">ArenaSetPositionEvent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/event/arena/ArenaStateChangeEvent.html#isCancelled()" class="member-name-link">isCancelled()</a> - Method in class com.meteordevelopments.duels.api.event.arena.<a href="com/meteordevelopments/duels/api/event/arena/ArenaStateChangeEvent.html" title="class in com.meteordevelopments.duels.api.event.arena">ArenaStateChangeEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitCreateEvent.html#isCancelled()" class="member-name-link">isCancelled()</a> - Method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitCreateEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitCreateEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitDeleteEvent.html#isCancelled()" class="member-name-link">isCancelled()</a> - Method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitDeleteEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitDeleteEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEditEvent.html#isCancelled()" class="member-name-link">isCancelled()</a> - Method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEditEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitEditEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEquipEvent.html#isCancelled()" class="member-name-link">isCancelled()</a> - Method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEquipEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitEquipEvent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/event/kit/KitEquipEvent.html#isCancelled()" class="member-name-link">isCancelled()</a> - Method in class com.meteordevelopments.duels.api.event.kit.<a href="com/meteordevelopments/duels/api/event/kit/KitEquipEvent.html" title="class in com.meteordevelopments.duels.api.event.kit">KitEquipEvent</a></dt>
 <dd>&nbsp;</dd>
@@ -1951,6 +2147,10 @@ loadScripts(document, 'script');</script>
 <dl class="index">
 <dt><a href="com/meteordevelopments/duels/api/extension/DuelsExtension.html#saveConfig()" class="member-name-link">saveConfig()</a> - Method in class com.meteordevelopments.duels.api.extension.<a href="com/meteordevelopments/duels/api/extension/DuelsExtension.html" title="class in com.meteordevelopments.duels.api.extension">DuelsExtension</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html#saveKit(com.meteordevelopments.duels.api.customkit.CustomKit)" class="member-name-link">saveKit(CustomKit)</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitManager</a></dt>
+<dd>
+<div class="block">Saves changes made to a custom kit asynchronously.</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/extension/DuelsExtension.html#saveResource(java.lang.String)" class="member-name-link">saveResource(String)</a> - Method in class com.meteordevelopments.duels.api.extension.<a href="com/meteordevelopments/duels/api/extension/DuelsExtension.html" title="class in com.meteordevelopments.duels.api.extension">DuelsExtension</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/folialib/enums/EntityTaskResult.html#SCHEDULER_RETIRED" class="member-name-link">SCHEDULER_RETIRED</a> - Enum constant in enum class com.meteordevelopments.duels.api.folialib.enums.<a href="com/meteordevelopments/duels/api/folialib/enums/EntityTaskResult.html" title="enum class in com.meteordevelopments.duels.api.folialib.enums">EntityTaskResult</a></dt>
@@ -1973,6 +2173,14 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/event/arena/ArenaStateChangeEvent.html#setCancelled(boolean)" class="member-name-link">setCancelled(boolean)</a> - Method in class com.meteordevelopments.duels.api.event.arena.<a href="com/meteordevelopments/duels/api/event/arena/ArenaStateChangeEvent.html" title="class in com.meteordevelopments.duels.api.event.arena">ArenaStateChangeEvent</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitCreateEvent.html#setCancelled(boolean)" class="member-name-link">setCancelled(boolean)</a> - Method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitCreateEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitCreateEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitDeleteEvent.html#setCancelled(boolean)" class="member-name-link">setCancelled(boolean)</a> - Method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitDeleteEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitDeleteEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEditEvent.html#setCancelled(boolean)" class="member-name-link">setCancelled(boolean)</a> - Method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEditEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitEditEvent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEquipEvent.html#setCancelled(boolean)" class="member-name-link">setCancelled(boolean)</a> - Method in class com.meteordevelopments.duels.api.event.customkit.<a href="com/meteordevelopments/duels/api/event/customkit/CustomKitEquipEvent.html" title="class in com.meteordevelopments.duels.api.event.customkit">CustomKitEquipEvent</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/event/kit/KitEquipEvent.html#setCancelled(boolean)" class="member-name-link">setCancelled(boolean)</a> - Method in class com.meteordevelopments.duels.api.event.kit.<a href="com/meteordevelopments/duels/api/event/kit/KitEquipEvent.html" title="class in com.meteordevelopments.duels.api.event.kit">KitEquipEvent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/event/queue/QueueJoinEvent.html#setCancelled(boolean)" class="member-name-link">setCancelled(boolean)</a> - Method in class com.meteordevelopments.duels.api.event.queue.<a href="com/meteordevelopments/duels/api/event/queue/QueueJoinEvent.html" title="class in com.meteordevelopments.duels.api.event.queue">QueueJoinEvent</a></dt>
@@ -1987,6 +2195,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/meteordevelopments/duels/api/event/spectate/SpectateStartEvent.html#setCancelled(boolean)" class="member-name-link">setCancelled(boolean)</a> - Method in class com.meteordevelopments.duels.api.event.spectate.<a href="com/meteordevelopments/duels/api/event/spectate/SpectateStartEvent.html" title="class in com.meteordevelopments.duels.api.event.spectate">SpectateStartEvent</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html#setDescription(java.util.List)" class="member-name-link">setDescription(List&lt;String&gt;)</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a></dt>
+<dd>
+<div class="block">Sets the description lines of this custom kit.</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/arena/Arena.html#setDisabled(boolean)" class="member-name-link">setDisabled(boolean)</a> - Method in interface com.meteordevelopments.duels.api.arena.<a href="com/meteordevelopments/duels/api/arena/Arena.html" title="interface in com.meteordevelopments.duels.api.arena">Arena</a></dt>
 <dd>
 <div class="block">Calls <a href="com/meteordevelopments/duels/api/arena/Arena.html#setDisabled(org.bukkit.command.CommandSender,boolean)"><code>Arena.setDisabled(CommandSender, boolean)</code></a> with the source being null.</div>
@@ -2005,6 +2217,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="com/meteordevelopments/duels/api/extension/DuelsExtension.html#setEnabled(boolean)" class="member-name-link">setEnabled(boolean)</a> - Method in class com.meteordevelopments.duels.api.extension.<a href="com/meteordevelopments/duels/api/extension/DuelsExtension.html" title="class in com.meteordevelopments.duels.api.extension">DuelsExtension</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html#setIcon(org.bukkit.inventory.ItemStack)" class="member-name-link">setIcon(ItemStack)</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a></dt>
+<dd>
+<div class="block">Sets the display icon ItemStack.</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/event/arena/ArenaSetPositionEvent.html#setLocation(org.bukkit.Location)" class="member-name-link">setLocation(Location)</a> - Method in class com.meteordevelopments.duels.api.event.arena.<a href="com/meteordevelopments/duels/api/event/arena/ArenaSetPositionEvent.html" title="class in com.meteordevelopments.duels.api.event.arena">ArenaSetPositionEvent</a></dt>
 <dd>
 <div class="block">Sets a new location for the spawnpoint.</div>
@@ -2012,6 +2228,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/meteordevelopments/duels/api/user/User.html#setLosses(int)" class="member-name-link">setLosses(int)</a> - Method in interface com.meteordevelopments.duels.api.user.<a href="com/meteordevelopments/duels/api/user/User.html" title="interface in com.meteordevelopments.duels.api.user">User</a></dt>
 <dd>
 <div class="block">Sets new total wins for this user.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html#setName(java.lang.String)" class="member-name-link">setName(String)</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a></dt>
+<dd>
+<div class="block">Sets the name of this custom kit.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html#setOffHand(org.bukkit.inventory.ItemStack)" class="member-name-link">setOffHand(ItemStack)</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a></dt>
+<dd>
+<div class="block">Sets the offhand item.</div>
 </dd>
 <dt><a href="com/meteordevelopments/duels/api/event/arena/ArenaSetPositionEvent.html#setPos(int)" class="member-name-link">setPos(int)</a> - Method in class com.meteordevelopments.duels.api.event.arena.<a href="com/meteordevelopments/duels/api/event/arena/ArenaSetPositionEvent.html" title="class in com.meteordevelopments.duels.api.event.arena">ArenaSetPositionEvent</a></dt>
 <dd>
@@ -2144,6 +2368,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/user/UserManager.TopEntry.html#%3Cinit%3E(java.lang.String,java.lang.String,java.util.List)" class="member-name-link">TopEntry(String, String, List&lt;UserManager.TopData&gt;)</a> - Constructor for class com.meteordevelopments.duels.api.user.<a href="com/meteordevelopments/duels/api/user/UserManager.TopEntry.html" title="class in com.meteordevelopments.duels.api.user">UserManager.TopEntry</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html#toSnapshot()" class="member-name-link">toSnapshot()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a></dt>
+<dd>
+<div class="block">Creates an immutable snapshot of this kit at the current moment.</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/folialib/util/TimeConverter.html#toTicks(long,java.util.concurrent.TimeUnit)" class="member-name-link">toTicks(long, TimeUnit)</a> - Static method in class com.meteordevelopments.duels.api.folialib.util.<a href="com/meteordevelopments/duels/api/folialib/util/TimeConverter.html" title="class in com.meteordevelopments.duels.api.folialib.util">TimeConverter</a></dt>
 <dd>&nbsp;</dd>
 </dl>
@@ -2155,6 +2383,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/folialib/impl/UnsupportedImplementation.html#%3Cinit%3E(com.meteordevelopments.duels.api.folialib.FoliaLib)" class="member-name-link">UnsupportedImplementation(FoliaLib)</a> - Constructor for class com.meteordevelopments.duels.api.folialib.impl.<a href="com/meteordevelopments/duels/api/folialib/impl/UnsupportedImplementation.html" title="class in com.meteordevelopments.duels.api.folialib.impl">UnsupportedImplementation</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/customkit/CustomKit.html#updateModified()" class="member-name-link">updateModified()</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKit.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKit</a></dt>
+<dd>
+<div class="block">Updates the last modified timestamp to current time.</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/folialib/util/FoliaLibOptions.html#useIsValidOnNonFolia()" class="member-name-link">useIsValidOnNonFolia()</a> - Method in class com.meteordevelopments.duels.api.folialib.util.<a href="com/meteordevelopments/duels/api/folialib/util/FoliaLibOptions.html" title="class in com.meteordevelopments.duels.api.folialib.util">FoliaLibOptions</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/user/User.html" class="type-name-link" title="interface in com.meteordevelopments.duels.api.user">User</a> - Interface in <a href="com/meteordevelopments/duels/api/user/package-summary.html">com.meteordevelopments.duels.api.user</a></dt>
