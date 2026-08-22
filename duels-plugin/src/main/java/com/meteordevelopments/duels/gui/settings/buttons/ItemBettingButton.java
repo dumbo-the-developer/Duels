@@ -38,6 +38,11 @@ public class ItemBettingButton extends BaseButton {
 
         final Settings settings = settingManager.getSafely(player);
 
+        if (settings.getCustomKit() != null) {
+            lang.sendMessage(player, "ERROR.customkits.item-betting-disabled");
+            return;
+        }
+
         if (settings.isPartyDuel()) {
             lang.sendMessage(player, "ERROR.party-duel.option-unavailable");
             return;

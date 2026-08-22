@@ -27,9 +27,18 @@ public class RequestDetailsButton extends BaseButton {
             return;
         }
 
+        final String kit;
+        if (settings.getCustomKit() != null) {
+            kit = "[Custom] " + settings.getCustomKit().getName();
+        } else if (settings.getKit() != null) {
+            kit = settings.getKit().getName();
+        } else {
+            kit = lang.getMessage("GENERAL.not-selected");
+        }
+
         final String lore = lang.getMessage("GUI.settings.buttons.details.lore",
                 "opponent", target.getName(),
-                "kit", settings.getKit() != null ? settings.getKit().getName() : lang.getMessage("GENERAL.not-selected"),
+                "kit", kit,
                 "own_inventory", settings.isOwnInventory() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled"),
                 "arena", settings.getArena() != null ? settings.getArena().getName() : lang.getMessage("GENERAL.random"),
                 "item_betting", settings.isItemBetting() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled"),

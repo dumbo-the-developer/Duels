@@ -76,6 +76,20 @@ public class PlaceholderHook extends PluginHook<DuelsPlugin> {
                         return StringUtil.color(plugin.getConfiguration().getUserNotFound());
                     }
                     return String.valueOf(user.canRequest());
+                case "customkits_count":
+                    return String.valueOf(plugin.getCustomKitManager().getKits(player.getUniqueId()).size());
+                case "customkits_limit": {
+                    final int max = plugin.getCustomKitManager().getMaxKits(player);
+                    return max == Integer.MAX_VALUE ? "Unlimited" : String.valueOf(max);
+                }
+                case "customkits_remaining": {
+                    final int max = plugin.getCustomKitManager().getMaxKits(player);
+                    return max == Integer.MAX_VALUE ? "Unlimited" : String.valueOf(Math.max(0, max - plugin.getCustomKitManager().getKits(player.getUniqueId()).size()));
+                }
+                case "customkit_name": {
+                    final com.meteordevelopments.duels.setting.Settings s = plugin.getSettingManager().getSafely(player);
+                    return s != null && s.getCustomKit() != null ? s.getCustomKit().getName() : "None";
+                }
                 //case "hits": {
                 //    Arena arena = plugin.getArenaManager().get(player);
                 //    // Only activate when winner is undeclared

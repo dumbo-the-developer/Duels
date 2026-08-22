@@ -655,7 +655,10 @@ public class DuelManager implements Loadable {
             playerManager.create(player, dropOwnInv, restoreExperience);
             teleport.tryTeleport(player, location);
 
-            if (kit != null) {
+            if (match.getCustomKitSnapshot() != null) {
+                PlayerUtil.reset(player);
+                match.getCustomKitSnapshot().equip(player);
+            } else if (kit != null) {
                 PlayerUtil.reset(player);
                 
                 // Check for player-specific kit first

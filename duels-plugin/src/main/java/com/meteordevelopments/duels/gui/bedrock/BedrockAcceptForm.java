@@ -27,11 +27,17 @@ public final class BedrockAcceptForm {
      * @param settings the duel settings from the request (used for display only)
      */
     public static void send(final DuelsPlugin plugin, final Player sender, final Player target, final Settings settings) {
-        final String kit = settings.getKit() != null
-                ? settings.getKit().getName()
-                : (settings.isOwnInventory()
-                        ? plugin.getLang().getMessage("GENERAL.enabled")
-                        : plugin.getLang().getMessage("GENERAL.not-selected"));
+        final String kit;
+        if (settings.getCustomKit() != null) {
+            kit = "[Custom] " + settings.getCustomKit().getName();
+        } else if (settings.getKit() != null) {
+            kit = settings.getKit().getName();
+        } else if (settings.isOwnInventory()) {
+            kit = plugin.getLang().getMessage("GENERAL.enabled");
+        } else {
+            kit = plugin.getLang().getMessage("GENERAL.not-selected");
+        }
+
         final String arena = settings.getArena() != null
                 ? settings.getArena().getName()
                 : plugin.getLang().getMessage("GENERAL.random");
@@ -58,30 +64,37 @@ public final class BedrockAcceptForm {
 
         content.append("\n§fDo you accept?");
 
-        final SimpleForm form = SimpleForm.builder()
+        final com.meteordevelopments.duels.api.customkit.CustomKitSnapshot snapshot = settings.getCustomKitSnapshot() != null
+                ? settings.getCustomKitSnapshot()
+                : (settings.getCustomKit() != null ? settings.getCustomKit().toSnapshot() : null);
+
+        final SimpleForm.Builder formBuilder = SimpleForm.builder()
                 .title("Duel Request")
                 .content(content.toString())
                 .button("§a✔ Accept")
-                .button("§c✘ Deny")
-                .validResultHandler(response -> {
-                    final int clicked = response.clickedButtonId();
-                    // Run the command as the player on the main thread
-                    DuelsPlugin.getFoliaLib().getScheduler().runNextTick(task -> {
-                        if (clicked == 0) {
-                            // Accept
-                            Bukkit.dispatchCommand(target, "duel accept " + sender.getName());
-                        } else {
-                            // Deny
-                            Bukkit.dispatchCommand(target, "duel deny " + sender.getName());
-                        }
-                    });
-                })
-                .closedOrInvalidResultHandler(() -> {
-                    // Player closed the form — treat as implicit deny (no action needed,
-                    // the request will expire naturally)
-                })
-                .build();
+                .button("§c✘ Deny");
 
-        FloodgateApi.getInstance().sendForm(target.getUniqueId(), form);
+        if (snapshot != null) {
+            formBuilder.button("§b👁 Preview Custom Kit");
+        }
+
+        formBuilder.validResultHandler(response -> {
+            final int clicked = response.clickedButtonId();
+            // Run the command as the player on the main thread
+            DuelsPlugin.getFoliaLib().getScheduler().runNextTick(task -> {
+                if (clicked == 0) {
+                    // Accept
+                    Bukkit.dispatchCommand(target, "duel accept " + sender.getName());
+                } else if (clicked == 1) {
+                    // Deny
+                    Bukkit.dispatchCommand(target, "duel deny " + sender.getName());
+                } else if (clicked == 2 && snapshot != null) {
+                    // Preview Kit
+                    BedrockCustomKitForm.openPreview(plugin, target, snapshot, () -> BedrockAcceptForm.send(plugin, sender, target, settings));
+                }
+            });
+        });
+
+        FloodgateApi.getInstance().sendForm(target.getUniqueId(), formBuilder.build());
     }
 }

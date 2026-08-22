@@ -35,7 +35,7 @@ public class RequestSendButton extends BaseButton {
             return;
         }
 
-        if (!settings.isOwnInventory() && settings.getKit() == null) {
+        if (!settings.isOwnInventory() && settings.getKit() == null && settings.getCustomKit() == null && settings.getCustomKitSnapshot() == null) {
             player.closeInventory();
             lang.sendMessage(player, "ERROR.duel.mode-unselected");
             return;

@@ -26,6 +26,18 @@ public final class Permissions {
     public static final String PARTY_LIST_OTHERS = PARTY + ".list.others";
     public static final String PARTY_TOGGLE = PARTY + ".toggle";
 
+    // Player-Created Custom Kits Permissions
+    public static final String CUSTOMKITS_USE = "duels.customkits.use";
+    public static final String CUSTOMKITS_CREATE = "duels.customkits.create";
+    public static final String CUSTOMKITS_EDIT = "duels.customkits.edit";
+    public static final String CUSTOMKITS_DELETE = "duels.customkits.delete";
+    public static final String CUSTOMKITS_RENAME = "duels.customkits.rename";
+    public static final String CUSTOMKITS_DUPLICATE = "duels.customkits.duplicate";
+    public static final String CUSTOMKITS_LIMIT_PREFIX = "duels.customkits.limit.";
+    public static final String CUSTOMKITS_LIMIT_UNLIMITED = "duels.customkits.limit.unlimited";
+    public static final String CUSTOMKITS_ADMIN = "duels.customkits.admin";
+    public static final String CUSTOMKITS_BYPASS_RESTRICTIONS = "duels.customkits.bypass.restrictions";
+
     private Permissions() {
     }
 }

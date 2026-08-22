@@ -48,6 +48,19 @@ public class KitCommand extends BaseCommand {
             case "reset":
                 new KitresetCommand(plugin).executeCommand(sender, args);
                 break;
+
+            case "custom":
+            case "customkits":
+                if (sender instanceof org.bukkit.entity.Player player) {
+                    if (com.meteordevelopments.duels.util.FloodgateUtil.isBedrockPlayer(player)) {
+                        com.meteordevelopments.duels.gui.bedrock.BedrockCustomKitForm.openMainMenu(plugin, player);
+                    } else {
+                        com.meteordevelopments.duels.gui.customkit.CustomKitMenuGui.open(plugin, player);
+                    }
+                } else {
+                    lang.sendMessage(sender, "ERROR.player-only");
+                }
+                break;
                 
             default:
                 lang.sendMessage(sender, "COMMAND.kit.unknown-subcommand", "subcommand", subCommand);
@@ -58,7 +71,7 @@ public class KitCommand extends BaseCommand {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return List.of("edit", "save", "reset");
+            return List.of("edit", "save", "reset", "custom");
         }
         
         if (args.length == 2 && args[0].equalsIgnoreCase("edit")) {

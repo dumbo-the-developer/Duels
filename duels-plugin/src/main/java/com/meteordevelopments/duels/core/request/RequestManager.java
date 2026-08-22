@@ -94,7 +94,15 @@ public class RequestManager implements Loadable, Listener {
         final boolean isParty = request.isPartyDuel();
         get(sender, true).put(isParty ? request.getTargetParty().getOwner().getUuid() : target.getUniqueId(), request);
 
-        final String kit = settings.getKit() != null ? settings.getKit().getName() : lang.getMessage("GENERAL.not-selected");
+        final String kit;
+        if (settings.getCustomKit() != null) {
+            kit = "[Custom] " + settings.getCustomKit().getName();
+        } else if (settings.getKit() != null) {
+            kit = settings.getKit().getName();
+        } else {
+            kit = lang.getMessage("GENERAL.not-selected");
+        }
+
         final String ownInventory = settings.isOwnInventory() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled");
         final String arena = settings.getArena() != null ? settings.getArena().getName() : lang.getMessage("GENERAL.random");
 
@@ -104,7 +112,7 @@ public class RequestManager implements Loadable, Listener {
                     "owner", sender.getName(), "name", target.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena);
             lang.sendMessage(targetPartyLeader, "COMMAND.duel.party-request.send.receiver-party",
                     "name", sender.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena);
-            sendClickableMessage("COMMAND.duel.party-request.send.clickable-text.", sender, Collections.singleton(targetPartyLeader));
+            sendClickableMessage("COMMAND.duel.party-request.send.clickable-text.", sender, Collections.singleton(targetPartyLeader), settings);
         } else {
             final int betAmount = settings.getBet();
             final String itemBetting = settings.isItemBetting() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled");
@@ -112,7 +120,7 @@ public class RequestManager implements Loadable, Listener {
                     "name", target.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
             lang.sendMessage(target, "COMMAND.duel.request.send.receiver",
                     "name", sender.getName(), "kit", kit, "own_inventory", ownInventory, "arena", arena, "bet_amount", betAmount, "item_betting", itemBetting);
-            sendClickableMessage("COMMAND.duel.request.send.clickable-text.", sender, Collections.singleton(target));
+            sendClickableMessage("COMMAND.duel.request.send.clickable-text.", sender, Collections.singleton(target), settings);
 
             // Send a Bedrock-friendly accept/deny form if the target is a Bedrock player
             if (FloodgateUtil.isBedrockPlayer(target)) {
@@ -121,17 +129,24 @@ public class RequestManager implements Loadable, Listener {
         }
     }
 
-    private void sendClickableMessage(final String path, final Player sender, final Collection<Player> targets) {
+    private void sendClickableMessage(final String path, final Player sender, final Collection<Player> targets, final Settings settings) {
         final String duelCommand = commandsConfig.get(CommandsConfig.CommandKey.DUEL).getName();
-        TextBuilder
+        final TextBuilder builder = TextBuilder
                 .of(lang.getMessage(path + "info.text"), null, null, Action.SHOW_TEXT, lang.getMessage(path + "info.hover-text"))
                 .add(lang.getMessage(path + "accept.text"),
                         ClickEvent.Action.RUN_COMMAND, "/" + duelCommand + " accept " + sender.getName(),
                         Action.SHOW_TEXT, lang.getMessage(path + "accept.hover-text"))
                 .add(lang.getMessage(path + "deny.text"),
                         ClickEvent.Action.RUN_COMMAND, "/" + duelCommand + " deny " + sender.getName(),
-                        Action.SHOW_TEXT, lang.getMessage(path + "deny.hover-text"))
-                .send(targets);
+                        Action.SHOW_TEXT, lang.getMessage(path + "deny.hover-text"));
+
+        if (settings != null && (settings.getCustomKitSnapshot() != null || settings.getCustomKit() != null)) {
+            builder.add(" §b[Preview Kit]",
+                    ClickEvent.Action.RUN_COMMAND, "/" + duelCommand + " preview " + sender.getName(),
+                    Action.SHOW_TEXT, "§7Click to preview kit contents");
+        }
+
+        builder.send(targets);
     }
 
     public RequestImpl get(final Player sender, final Player target) {

@@ -33,6 +33,8 @@ public class DuelMatch implements Match {
     private final ArenaImpl arena;
     @Getter
     private final KitImpl kit;
+    @Getter
+    private final com.meteordevelopments.duels.setting.Settings settings;
     private final Map<UUID, List<ItemStack>> items;
     @Getter
     private final int bet;
@@ -58,11 +60,16 @@ public class DuelMatch implements Match {
     private final Map<Player, Boolean> players = new HashMap<>();
 
     public DuelMatch(final DuelsPlugin plugin, final ArenaImpl arena, final KitImpl kit, final Map<UUID, List<ItemStack>> items, final int bet, final Queue source) {
+        this(plugin, arena, kit, items, null, bet, source);
+    }
+
+    public DuelMatch(final DuelsPlugin plugin, final ArenaImpl arena, final KitImpl kit, final Map<UUID, List<ItemStack>> items, final com.meteordevelopments.duels.setting.Settings settings, final int bet, final Queue source) {
         this.partyManager = plugin.getPartyManager();
         this.creation = System.currentTimeMillis();
         this.arena = arena;
         this.kit = kit;
         this.items = items;
+        this.settings = settings;
         this.bet = bet;
         this.source = source;
     }
@@ -75,8 +82,12 @@ public class DuelMatch implements Match {
         return source != null;
     }
 
+    public com.meteordevelopments.duels.api.customkit.CustomKitSnapshot getCustomKitSnapshot() {
+        return settings != null ? settings.getCustomKitSnapshot() : null;
+    }
+
     public boolean isOwnInventory() {
-        return kit == null;
+        return kit == null && getCustomKitSnapshot() == null;
     }
     
     public void setFinished() {

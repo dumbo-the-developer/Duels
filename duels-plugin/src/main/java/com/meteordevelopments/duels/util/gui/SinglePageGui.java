@@ -61,6 +61,6 @@ public class SinglePageGui<P extends JavaPlugin> extends AbstractGui<P> {
             return;
         }
 
-        button.onClick(player);
+        button.onClick(player, event);
     }
 }

@@ -15,7 +15,7 @@ public class ModeValidator extends BaseBiValidator<Collection<Player>, Settings>
 
     @Override
     public boolean validate(final Collection<Player> players, final Settings settings) {
-        if (!settings.isOwnInventory() && settings.getKit() == null) {
+        if (!settings.isOwnInventory() && settings.getKit() == null && settings.getCustomKit() == null && settings.getCustomKitSnapshot() == null) {
             lang.sendMessage(players, "DUEL.start-failure.mode-unselected");
             return false;
         }

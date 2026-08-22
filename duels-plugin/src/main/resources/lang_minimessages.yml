@@ -22,6 +22,7 @@ GENERAL:
   arena-selector: 'Arena Selector'
   item-betting: 'Item Betting'
   betting: 'Betting'
+  cancelled: '{PREFIX} <yellow>Action cancelled.</yellow>'
 
 
 ERROR:
@@ -46,6 +47,28 @@ ERROR:
     not-found: '{PREFIX} <red>No kit exists with the name ''%name%''.'
     already-exists: '{PREFIX} <red>A kit named ''%name%'' already exists.'
     empty-hand: '{PREFIX} <red>You must be holding an item to use this command.'
+  customkits:
+    limit-reached: '{PREFIX} <red>You have reached your custom kit limit of <yellow>%limit%</yellow>.'
+    name-empty: '{PREFIX} <red>Kit name cannot be empty.'
+    name-too-short: '{PREFIX} <red>Kit name must be at least <yellow>%min%</yellow> characters long.'
+    name-too-long: '{PREFIX} <red>Kit name cannot exceed <yellow>%max%</yellow> characters.'
+    name-no-spaces: '{PREFIX} <red>Kit name cannot contain spaces.'
+    name-invalid-chars: '{PREFIX} <red>Kit name contains invalid characters.'
+    name-duplicate: '{PREFIX} <red>You already have a custom kit named ''<yellow>%name%</yellow>''.'
+    not-found: '{PREFIX} <red>Custom kit ''<yellow>%name%</yellow>'' was not found.'
+    material-blocked: '{PREFIX} <red>Material ''<yellow>%material%</yellow>'' is not allowed in custom kits.'
+    material-not-allowed: '{PREFIX} <red>Material ''<yellow>%material%</yellow>'' is not allowed in custom kits.'
+    invalid-amount: '{PREFIX} <red>Invalid item amount.'
+    enchantment-blocked: '{PREFIX} <red>Enchantment ''<yellow>%enchantment%</yellow>'' is not allowed.'
+    enchantment-incompatible: '{PREFIX} <red>Enchantment ''<yellow>%enchantment%</yellow>'' cannot be applied to ''<yellow>%item%</yellow>''.'
+    enchantment-level-too-high: '{PREFIX} <red>Enchantment ''<yellow>%enchantment%</yellow>'' level exceeds maximum allowed (<yellow>%max%</yellow>).'
+    too-many-attributes: '{PREFIX} <red>Too many attribute modifiers on item (max: <yellow>%max%</yellow>).'
+    attribute-amount-invalid: '{PREFIX} <red>Attribute modifier amount for <yellow>%attribute%</yellow> must be between <yellow>%min%</yellow> and <yellow>%max%</yellow>.'
+    kit-null: '{PREFIX} <red>Invalid custom kit.'
+    invalid-armor-slot: '{PREFIX} <red>Item ''<yellow>%material%</yellow>'' cannot be equipped in the <yellow>%slot%</yellow> slot.'
+    potion-not-extendable: '{PREFIX} <red>This potion type cannot be extended.'
+    potion-not-upgradeable: '{PREFIX} <red>This potion type cannot be upgraded to Tier II.'
+    item-betting-disabled: '{PREFIX} <red>Player-created custom kit duels only support money betting. Item betting is disabled.'
   player-only: '{PREFIX} <red>This command can only be used by players.'
   duel:
     is-self: '{PREFIX} <red>You cannot duel yourself.'
@@ -238,6 +261,9 @@ COMMAND:
           - '{LINE}'
           - '{PREFIX} <gray><white>%owner%<gray>''s has declined the duel request from <white>%name%''s Party<gray>.'
           - '{LINE}'
+      preview:
+        server-kit: '{PREFIX} <green>Kit used for this duel request is server kit: <yellow>%kit%</yellow>'
+        own-inventory: '{PREFIX} <green>This duel request uses own inventory.'
     stats:
       displayed:
         - '{LINE}'
@@ -461,6 +487,28 @@ COMMAND:
       - '{PREFIX} <white>%owner% <gray>has disbanded the party.'
       - '{LINE}'
 
+  customkits:
+    created: '{PREFIX} <green>Custom kit ''<yellow>%kit%</yellow>'' created successfully!'
+    saved: '{PREFIX} <green>Custom kit ''<yellow>%kit%</yellow>'' saved successfully!'
+    renamed: '{PREFIX} <green>Custom kit renamed to ''<yellow>%kit%</yellow>''.'
+    duplicated: '{PREFIX} <green>Custom kit duplicated as ''<yellow>%kit%</yellow>''!'
+    deleted: '{PREFIX} <green>Custom kit ''<yellow>%kit%</yellow>'' has been deleted.'
+    enter-name: '{PREFIX} <green>Please type the new kit name in chat (or type <red>cancel</red>):'
+    enter-new-name: '{PREFIX} <green>Please type the new name for this kit in chat (or type <red>cancel</red>):'
+    enter-description: '{PREFIX} <green>Type kit description in chat (or type <red>clear</red> to remove, or <red>cancel</red>):'
+    description-updated: '{PREFIX} <green>Kit description has been updated.'
+    icon-changed: '{PREFIX} <green>Kit icon changed to <yellow>%material%</yellow>.'
+    no-item-in-hand: '{PREFIX} <red>You must be holding an item in your main hand to set it as kit icon.'
+    usage-create: '{PREFIX} <red>Usage: /customkits create <name>'
+    usage-edit: '{PREFIX} <red>Usage: /customkits edit <name>'
+    usage-delete: '{PREFIX} <red>Usage: /customkits delete <name>'
+    usage-duplicate: '{PREFIX} <red>Usage: /customkits duplicate <oldname> <newname>'
+    usage-preview: '{PREFIX} <red>Usage: /customkits preview <name>'
+    list:
+      header: '{PREFIX} <green>Your Custom Kits (<yellow>%count%</yellow>):'
+      entry: '{PREFIX} <gray>%kits%'
+      empty: '{PREFIX} <red>You do not have any custom kits.'
+
   sub-command-usage: '{PREFIX} <white>/%command% %usage% <yellow>- <gray>%description%'
 
 
@@ -551,6 +599,38 @@ SPECTATE:
 
 
 GUI:
+  customkits-menu:
+    title: 'My Custom Kits'
+  customkit-selector:
+    title: 'Select Custom Kit'
+  kit-type-selector:
+    title: 'Select Kit Type'
+  customkit-editor:
+    title: 'Editing: %kit%'
+  customkit-preview:
+    title: 'Preview: %kit%'
+  material-browser:
+    title: 'Material Browser'
+  item-editor:
+    title: 'Item Editor'
+    enter-damage: '{PREFIX} <green>Type durability damage value in chat (or 0 for max durability):'
+    enter-model-data: '{PREFIX} <green>Type custom model data integer in chat (or 0 to remove):'
+    enter-rgb-color: '{PREFIX} <green>Type RGB color in chat (e.g. <yellow>255 0 0</yellow>):'
+  enchantment-editor:
+    title: 'Enchantment Editor'
+  attribute-editor:
+    title: 'Attribute Modifier Editor'
+    enter-amount: '{PREFIX} <green>Type attribute modifier amount in chat:'
+  armor-trim-editor:
+    title: 'Armor Trim Editor'
+  potion-editor:
+    title: 'Potion Settings Editor'
+    enter-duration-amplifier: '{PREFIX} <green>Type duration (seconds) and amplifier (e.g. <yellow>60 2</yellow>) in chat:'
+  lore-editor:
+    title: 'Name & Lore Editor'
+    enter-display-name: '{PREFIX} <green>Type display name in chat:'
+    enter-lore-line: '{PREFIX} <green>Type lore line to add in chat:'
+    enter-new-lore-line: '{PREFIX} <green>Type replacement lore line in chat:'
   settings:
     title: 'Request Settings'
     buttons:

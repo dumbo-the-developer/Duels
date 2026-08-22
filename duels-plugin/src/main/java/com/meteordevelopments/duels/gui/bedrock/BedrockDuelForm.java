@@ -51,8 +51,16 @@ public final class BedrockDuelForm {
         if (config.isOwnInventoryEnabled()) {
             kitOptions.add("Own Inventory");
         }
+
+        final List<com.meteordevelopments.duels.api.customkit.CustomKit> customKits = plugin.getCustomKitManager().getKits(player.getUniqueId());
+        for (final com.meteordevelopments.duels.api.customkit.CustomKit ck : customKits) {
+            kitOptions.add("[Custom] " + ck.getName());
+        }
+
         final List<String> kitNames = kitManager.getNames(false);
-        kitOptions.addAll(kitNames);
+        for (final String sk : kitNames) {
+            kitOptions.add("[Server] " + sk);
+        }
 
         // --- Build arena options ---
         final List<String> arenaOptions = new ArrayList<>();
@@ -66,7 +74,7 @@ public final class BedrockDuelForm {
                 .title("Duel " + target.getName());
 
         // Component 0: Kit dropdown
-        if (config.isKitSelectingEnabled() || config.isOwnInventoryEnabled()) {
+        if (config.isKitSelectingEnabled() || config.isOwnInventoryEnabled() || !customKits.isEmpty()) {
             builder.dropdown("Select Kit", kitOptions);
         }
 
@@ -82,7 +90,7 @@ public final class BedrockDuelForm {
         }
 
         // Track component indices dynamically
-        final boolean hasKitDropdown = config.isKitSelectingEnabled() || config.isOwnInventoryEnabled();
+        final boolean hasKitDropdown = config.isKitSelectingEnabled() || config.isOwnInventoryEnabled() || !customKits.isEmpty();
         final boolean hasArenaDropdown = config.isArenaSelectingEnabled();
         final int kitIndex = 0;
         final int arenaIndex = hasKitDropdown ? 1 : 0;
@@ -93,30 +101,46 @@ public final class BedrockDuelForm {
             // --- Kit ---
             if (hasKitDropdown) {
                 final int kitSelection = response.asDropdown(kitIndex);
-                if (config.isOwnInventoryEnabled() && kitSelection == 0) {
-                    // "Own Inventory" selected
-                    if (config.isOwnInventoryUsePermission()
-                            && !player.hasPermission(Permissions.OWN_INVENTORY)
-                            && !player.hasPermission(Permissions.SETTING_ALL)) {
-                        plugin.getLang().sendMessage(player, "ERROR.no-permission", "permission", Permissions.OWN_INVENTORY);
-                        return;
-                    }
-                    settings.setOwnInventory(true);
-                } else {
-                    final int nameIndex = config.isOwnInventoryEnabled() ? kitSelection - 1 : kitSelection;
-                    if (nameIndex >= 0 && nameIndex < kitNames.size()) {
-                        final String kitName = kitNames.get(nameIndex);
-                        final KitImpl kit = kitManager.get(kitName);
+                int offset = 0;
 
-                        if (kit != null) {
-                            final String permission = String.format(Permissions.KIT, kitName.replace(" ", "-").toLowerCase());
-                            if (kit.isUsePermission()
-                                    && !player.hasPermission(Permissions.KIT_ALL)
-                                    && !player.hasPermission(permission)) {
-                                plugin.getLang().sendMessage(player, "ERROR.no-permission", "permission", permission);
-                                return;
+                if (config.isOwnInventoryEnabled()) {
+                    if (kitSelection == 0) {
+                        if (config.isOwnInventoryUsePermission()
+                                && !player.hasPermission(Permissions.OWN_INVENTORY)
+                                && !player.hasPermission(Permissions.SETTING_ALL)) {
+                            plugin.getLang().sendMessage(player, "ERROR.no-permission", "permission", Permissions.OWN_INVENTORY);
+                            return;
+                        }
+                        settings.setOwnInventory(true);
+                        offset = -1; // handled
+                    } else {
+                        offset = 1;
+                    }
+                }
+
+                if (offset != -1) {
+                    final int adjustedIndex = kitSelection - offset;
+                    if (adjustedIndex >= 0 && adjustedIndex < customKits.size()) {
+                        // Custom Kit selected
+                        final com.meteordevelopments.duels.api.customkit.CustomKit chosen = customKits.get(adjustedIndex);
+                        settings.setCustomKit(chosen);
+                    } else {
+                        // Server Kit selected
+                        final int serverKitIndex = adjustedIndex - customKits.size();
+                        if (serverKitIndex >= 0 && serverKitIndex < kitNames.size()) {
+                            final String kitName = kitNames.get(serverKitIndex);
+                            final KitImpl kit = kitManager.get(kitName);
+
+                            if (kit != null) {
+                                final String permission = String.format(Permissions.KIT, kitName.replace(" ", "-").toLowerCase());
+                                if (kit.isUsePermission()
+                                        && !player.hasPermission(Permissions.KIT_ALL)
+                                        && !player.hasPermission(permission)) {
+                                    plugin.getLang().sendMessage(player, "ERROR.no-permission", "permission", permission);
+                                    return;
+                                }
+                                settings.setKit(kit);
                             }
-                            settings.setKit(kit);
                         }
                     }
                 }

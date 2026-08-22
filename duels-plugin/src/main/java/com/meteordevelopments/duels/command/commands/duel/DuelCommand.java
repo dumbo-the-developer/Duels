@@ -42,7 +42,8 @@ public class DuelCommand extends BaseCommand {
                 new TopCommand(plugin),
                 new InventoryCommand(plugin),
                 new VersionCommand(plugin),
-                new LeaveCommand(plugin)
+                new LeaveCommand(plugin),
+                new PreviewCommand(plugin)
         );
         this.worldGuard = hookManager.getHook(WorldGuardHook.class);
         this.vault = hookManager.getHook(VaultHook.class);

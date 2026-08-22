@@ -21,4 +21,7 @@ commands:
   kit:
     name: kit
     aliases: [dkit]
+  customkits:
+    name: customkits
+    aliases: [customkit, ckit, ckits]
 

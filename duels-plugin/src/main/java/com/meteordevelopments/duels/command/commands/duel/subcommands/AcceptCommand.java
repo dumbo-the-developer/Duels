@@ -78,7 +78,7 @@ public class AcceptCommand extends BaseCommand {
         }
 
         final Settings settings = request.getSettings();
-        final String kit = settings.getKit() != null ? settings.getKit().getName() : lang.getMessage("GENERAL.not-selected");
+        final String kit = settings.getCustomKitSnapshot() != null ? "[Custom] " + settings.getCustomKitSnapshot().getName() : (settings.getCustomKit() != null ? "[Custom] " + settings.getCustomKit().getName() : (settings.getKit() != null ? settings.getKit().getName() : lang.getMessage("GENERAL.not-selected")));
         final String ownInventory = settings.isOwnInventory() ? lang.getMessage("GENERAL.enabled") : lang.getMessage("GENERAL.disabled");
         final String arena = settings.getArena() != null ? settings.getArena().getName() : lang.getMessage("GENERAL.random");
         if (request.isPartyDuel()) {

@@ -762,3 +762,105 @@ no-opponent: 'No opponent'
 # MiniMessage supports modern formatting like <red>text</red>, <bold>text</bold>, gradients, etc.
 # default: false
 use-minimessages: false
+
+# ==============================================================================
+# PLAYER-CREATED CUSTOM KITS CONFIGURATION
+# ==============================================================================
+custom-kits:
+  # Enable or disable the player-created custom kits system.
+  enabled: true
+
+  # Custom Kit Limits per player
+  limits:
+    # Default limit of custom kits for regular players without specific permission.
+    default: 1
+    # Permission node granting unlimited custom kits.
+    unlimited-permission: 'duels.customkits.limit.unlimited'
+    # Permission tiers: permission node -> max allowed custom kits.
+    permissions:
+      duels.customkits.limit.1: 1
+      duels.customkits.limit.3: 3
+      duels.customkits.limit.5: 5
+      duels.customkits.limit.10: 10
+      duels.customkits.limit.25: 25
+
+  # Kit Naming Rules
+  naming:
+    min-length: 3
+    max-length: 24
+    allow-spaces: true
+    allowed-pattern: '^[a-zA-Z0-9 _-]+$'
+
+  # Editing session close behavior
+  # Options: CONFIRM (ask player to save/discard), DISCARD (auto discard unsaved), AUTO_SAVE_DRAFT
+  editing:
+    close-behavior: CONFIRM
+
+  # Material Restrictions
+  restrictions:
+    # Mode: BLOCKLIST (all items allowed except blocked) or ALLOWLIST (only listed items allowed)
+    material-mode: BLOCKLIST
+    blocked-materials:
+      - BEDROCK
+      - BARRIER
+      - STRUCTURE_BLOCK
+      - STRUCTURE_VOID
+      - COMMAND_BLOCK
+      - CHAIN_COMMAND_BLOCK
+      - REPEATING_COMMAND_BLOCK
+      - COMMAND_BLOCK_MINECART
+      - JIGSAW
+      - LIGHT
+      - SPAWNER
+    allowed-materials: []
+
+  # Enchantment Restrictions
+  enchantments:
+    enabled: true
+    allow-unsafe: false
+    allow-incompatible: false
+    default-max-level: 5
+    blocked:
+      - MENDING
+    overrides:
+      sharpness: 5
+      protection: 4
+      power: 5
+
+  # Attribute Modifier Restrictions
+  attributes:
+    enabled: true
+    max-modifiers-per-item: 5
+    limits:
+      GENERIC_ATTACK_DAMAGE:
+        min: -10.0
+        max: 20.0
+      GENERIC_ATTACK_SPEED:
+        min: -4.0
+        max: 20.0
+      GENERIC_ARMOR:
+        min: 0.0
+        max: 30.0
+      GENERIC_ARMOR_TOUGHNESS:
+        min: 0.0
+        max: 20.0
+      GENERIC_KNOCKBACK_RESISTANCE:
+        min: 0.0
+        max: 1.0
+      GENERIC_MOVEMENT_SPEED:
+        min: -0.5
+        max: 1.0
+      GENERIC_MAX_HEALTH:
+        min: 1.0
+        max: 40.0
+
+  # Betting settings (Custom kit duels strictly support MONEY BETTING only)
+  betting:
+    type: MONEY_ONLY
+    minimum: 0.0
+    maximum: 1000000.0
+    allow-zero: true
+
+  # Formatting settings
+  formatting:
+    minimessage: true
