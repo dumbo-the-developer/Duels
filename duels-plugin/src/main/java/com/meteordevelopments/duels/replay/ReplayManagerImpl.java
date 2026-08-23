@@ -47,6 +47,9 @@ public class ReplayManagerImpl implements ReplayManager, Loadable, Reloadable, L
     public void handleLoad() {
         ConfigManager.loadConfigs();
 
+        // Restore any spectators from prior server crashes/restarts
+        com.meteordevelopments.duels.replay.playback.session.ReplaySpectatorStorage.checkAndRestoreAllOnline();
+
         this.storage = new DefaultReplaySaver();
         ReplaySaver.register(storage);
 

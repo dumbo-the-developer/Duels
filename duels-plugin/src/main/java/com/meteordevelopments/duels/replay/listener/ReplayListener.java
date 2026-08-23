@@ -307,9 +307,17 @@ public class ReplayListener extends AbstractListener {
 		}
 	}
 	
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onJoin(PlayerJoinEvent e) {
 		Player joined = e.getPlayer();
+
+		// If player was in a replay when the server crashed or restarted, restore them immediately
+		if (com.meteordevelopments.duels.replay.playback.session.ReplaySpectatorStorage.hasSnapshot(joined.getUniqueId())) {
+			if (com.meteordevelopments.duels.replay.playback.session.ReplaySpectatorStorage.restoreSnapshot(joined)) {
+				DuelsPlugin.getInstance().getLang().sendMessage(joined, "REPLAY.restored-after-restart");
+			}
+		}
+
 		for (Replayer replayer : ReplayHelper.replaySessions.values()) {
 			Player spectator = replayer.getWatchingPlayer();
 			if (spectator != null && spectator.isOnline() && spectator != joined) {

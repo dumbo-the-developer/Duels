@@ -13,7 +13,6 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.replay.api.ReplaySessionFinishEvent;
@@ -24,25 +23,26 @@ import com.meteordevelopments.duels.replay.config.ItemConfigType;
 
 public class ReplaySession {
 
-	private Replayer replayer;
-	
-	private Player player;
-	
-	private ItemStack content[];
+	private final Replayer replayer;
+	private final Player player;
+	private final ReplayPacketListener packetListener;
+
+	private ItemStack[] content;
+	private ItemStack[] armor;
+	private ItemStack offhand;
 	
 	private int level;
-	
 	private float xp;
-	
+	private double health;
+	private int food;
+	private GameMode previousGameMode;
+	private boolean wasAllowFlight;
+	private boolean wasFlying;
 	private Location start;
-	
-	private ReplayPacketListener packetListener;
-	
+
 	public ReplaySession(Replayer replayer) {
 		this.replayer = replayer;
-		
 		this.player = this.replayer.getWatchingPlayer();
-		
 		this.packetListener = new ReplayPacketListener(replayer);
 	}
 	
@@ -50,11 +50,24 @@ public class ReplaySession {
 		this.packetListener.register();
 
 		this.content = this.player.getInventory().getContents();
+		this.armor = this.player.getInventory().getArmorContents();
+		try {
+			this.offhand = this.player.getInventory().getItemInOffHand();
+		} catch (Throwable ignored) {}
+
 		if (this.start == null) {
 			this.start = this.player.getLocation();
 		}
 		this.level = this.player.getLevel();
 		this.xp = this.player.getExp();
+		this.health = this.player.getHealth();
+		this.food = this.player.getFoodLevel();
+		this.previousGameMode = this.player.getGameMode();
+		this.wasAllowFlight = this.player.getAllowFlight();
+		this.wasFlying = this.player.isFlying();
+
+		// Save snapshot to disk immediately for crash/restart safety
+		ReplaySpectatorStorage.saveSnapshot(this.player, this.start, this.level, this.xp);
 
 		this.player.setHealth(this.player.getMaxHealth());
 		this.player.setFoodLevel(20);
@@ -80,7 +93,6 @@ public class ReplaySession {
 				}
 			});
 		
-		
 		this.player.setAllowFlight(true);
 		this.player.setFlying(true);
 		this.player.setCollidable(false);
@@ -92,7 +104,6 @@ public class ReplaySession {
 			this.player.hidePlayer(DuelsPlugin.getInstance(), all);
 			all.hidePlayer(DuelsPlugin.getInstance(), this.player);
 		}
-
 	}
 	
 	public void stopSession() {
@@ -102,42 +113,66 @@ public class ReplaySession {
 		
 		this.packetListener.unregister();
 
-		
-		DuelsPlugin.getFoliaLib().getScheduler().runAtEntity(player, task -> {
-			resetPlayer();
+		// Perform immediate synchronous reset so inventory is never lost
+		resetPlayer();
+		if (start != null && start.getWorld() != null) {
 			player.teleport(start);
+		}
 
-			for (Player all : Bukkit.getOnlinePlayers()) {
-				if (all == player) continue;
-				player.showPlayer(DuelsPlugin.getInstance(), all);
-				all.showPlayer(DuelsPlugin.getInstance(), player);
-			}
+		for (Player all : Bukkit.getOnlinePlayers()) {
+			if (all == player) continue;
+			player.showPlayer(DuelsPlugin.getInstance(), all);
+			all.showPlayer(DuelsPlugin.getInstance(), player);
+		}
 
+		try {
 			ReplaySessionFinishEvent finishEvent = new ReplaySessionFinishEvent(replayer.getReplay(), player);
 			Bukkit.getPluginManager().callEvent(finishEvent);
-		});
-		
-
+		} catch (Throwable ignored) {}
 	}
 	
 	public void resetPlayer() {
-		packetListener.resetCamera(player);
+		try {
+			packetListener.resetCamera(player);
+		} catch (Throwable ignored) {}
 
 		player.getInventory().clear();
-		player.getInventory().setContents(content);
+		if (content != null) {
+			player.getInventory().setContents(content);
+		}
+		if (armor != null) {
+			player.getInventory().setArmorContents(armor);
+		}
+		if (offhand != null) {
+			try {
+				player.getInventory().setItemInOffHand(offhand);
+			} catch (Throwable ignored) {}
+		}
 		
 		player.setCollidable(true);
 		player.setInvisible(false);
 
-		if (player.getGameMode() != GameMode.CREATIVE) {
-			player.setFlying(false);
-			player.setAllowFlight(false);
+		if (previousGameMode != null) {
+			player.setGameMode(previousGameMode);
+		}
+
+		player.setAllowFlight(wasAllowFlight);
+		player.setFlying(wasFlying && wasAllowFlight);
+
+		if (health > 0) {
+			player.setHealth(Math.min(health, player.getMaxHealth()));
+		}
+		if (food > 0) {
+			player.setFoodLevel(food);
 		}
 
 		if (ConfigManager.PROGRESS_TYPE == ReplayProgressType.XP_BAR) {
 			player.setLevel(level);
 			player.setExp(xp);
 		}
+
+		// Delete persistent snapshot file
+		ReplaySpectatorStorage.deleteSnapshot(player.getUniqueId());
 	}
 
 	public void setStart(Location start) {

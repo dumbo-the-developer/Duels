@@ -613,6 +613,7 @@ REPLAY:
   deleted: '{PREFIX} &aReplay ''&e%id%&a'' was deleted.'
   delete-no-permission: '{PREFIX} &cYou do not have permission to delete replays.'
   finished-watching: '{PREFIX} &7Finished watching replay.'
+  restored-after-restart: '{PREFIX} &aYour inventory and location have been restored from your previous replay session.'
   recording-started: '{PREFIX} &7Duel recording started.'
   recording-saved: '{PREFIX} &7Duel recording saved with ID: &e%id%&7.'
   world-not-found: '{PREFIX} &cWorld ''&e%world%&c'' was not found for this replay.'
