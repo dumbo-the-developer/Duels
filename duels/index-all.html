@@ -196,6 +196,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/queue/sign/package-summary.html">com.meteordevelopments.duels.api.queue.sign</a> - package com.meteordevelopments.duels.api.queue.sign</dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/replay/package-summary.html">com.meteordevelopments.duels.api.replay</a> - package com.meteordevelopments.duels.api.replay</dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/request/package-summary.html">com.meteordevelopments.duels.api.request</a> - package com.meteordevelopments.duels.api.request</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/spectate/package-summary.html">com.meteordevelopments.duels.api.spectate</a> - package com.meteordevelopments.duels.api.spectate</dt>
@@ -264,6 +266,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html#deleteKit(java.util.UUID,java.util.UUID)" class="member-name-link">deleteKit(UUID, UUID)</a> - Method in interface com.meteordevelopments.duels.api.customkit.<a href="com/meteordevelopments/duels/api/customkit/CustomKitManager.html" title="interface in com.meteordevelopments.duels.api.customkit">CustomKitManager</a></dt>
 <dd>
 <div class="block">Deletes a custom kit owned by the player.</div>
+</dd>
+<dt><a href="com/meteordevelopments/duels/api/replay/ReplayManager.html#deleteReplay(java.lang.String)" class="member-name-link">deleteReplay(String)</a> - Method in interface com.meteordevelopments.duels.api.replay.<a href="com/meteordevelopments/duels/api/replay/ReplayManager.html" title="interface in com.meteordevelopments.duels.api.replay">ReplayManager</a></dt>
+<dd>
+<div class="block">Deletes a recorded replay by its ID.</div>
 </dd>
 <dt><a href="com/meteordevelopments/duels/api/folialib/util/FoliaLibOptions.html#disableInvalidTickDebugMode()" class="member-name-link">disableInvalidTickDebugMode()</a> - Method in class com.meteordevelopments.duels.api.folialib.util.<a href="com/meteordevelopments/duels/api/folialib/util/FoliaLibOptions.html" title="class in com.meteordevelopments.duels.api.folialib.util">FoliaLibOptions</a></dt>
 <dd>&nbsp;</dd>
@@ -957,6 +963,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">End reason of the <a href="com/meteordevelopments/duels/api/match/Match.html" title="interface in com.meteordevelopments.duels.api.match"><code>Match</code></a>.</div>
 </dd>
+<dt><a href="com/meteordevelopments/duels/api/Duels.html#getReplayManager()" class="member-name-link">getReplayManager()</a> - Method in interface com.meteordevelopments.duels.api.<a href="com/meteordevelopments/duels/api/Duels.html" title="interface in com.meteordevelopments.duels.api">Duels</a></dt>
+<dd>
+<div class="block">Gets the ReplayManager singleton used by Duels.</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/event/request/RequestEvent.html#getRequest()" class="member-name-link">getRequest()</a> - Method in class com.meteordevelopments.duels.api.event.request.<a href="com/meteordevelopments/duels/api/event/request/RequestEvent.html" title="class in com.meteordevelopments.duels.api.event.request">RequestEvent</a></dt>
 <dd>
 <div class="block"><a href="com/meteordevelopments/duels/api/request/Request.html" title="interface in com.meteordevelopments.duels.api.request"><code>Request</code></a> instance associated with this event.</div>
@@ -1365,6 +1375,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Whether or not this kit requires a permission.</div>
 </dd>
+<dt><a href="com/meteordevelopments/duels/api/replay/ReplayManager.html#isWatching(org.bukkit.entity.Player)" class="member-name-link">isWatching(Player)</a> - Method in interface com.meteordevelopments.duels.api.replay.<a href="com/meteordevelopments/duels/api/replay/ReplayManager.html" title="interface in com.meteordevelopments.duels.api.replay">ReplayManager</a></dt>
+<dd>
+<div class="block">Checks if a player is currently watching a replay.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:K">K</h2>
 <dl class="index">
@@ -1471,6 +1485,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/folialib/impl/PlatformScheduler.html" class="type-name-link" title="interface in com.meteordevelopments.duels.api.folialib.impl">PlatformScheduler</a> - Interface in <a href="com/meteordevelopments/duels/api/folialib/impl/package-summary.html">com.meteordevelopments.duels.api.folialib.impl</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/meteordevelopments/duels/api/replay/ReplayManager.html#playReplay(org.bukkit.entity.Player,java.lang.String)" class="member-name-link">playReplay(Player, String)</a> - Method in interface com.meteordevelopments.duels.api.replay.<a href="com/meteordevelopments/duels/api/replay/ReplayManager.html" title="interface in com.meteordevelopments.duels.api.replay">ReplayManager</a></dt>
+<dd>
+<div class="block">Starts replay playback for a player.</div>
+</dd>
 <dt><a href="com/meteordevelopments/duels/api/event/match/MatchEndEvent.Reason.html#PLUGIN_DISABLE" class="member-name-link">PLUGIN_DISABLE</a> - Enum constant in enum class com.meteordevelopments.duels.api.event.match.<a href="com/meteordevelopments/duels/api/event/match/MatchEndEvent.Reason.html" title="enum class in com.meteordevelopments.duels.api.event.match">MatchEndEvent.Reason</a></dt>
 <dd>&nbsp;</dd>
 </dl>
@@ -1571,6 +1589,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Removes the <code>Player</code> from the queue.</div>
 </dd>
+<dt><a href="com/meteordevelopments/duels/api/replay/ReplayManager.html" class="type-name-link" title="interface in com.meteordevelopments.duels.api.replay">ReplayManager</a> - Interface in <a href="com/meteordevelopments/duels/api/replay/package-summary.html">com.meteordevelopments.duels.api.replay</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/meteordevelopments/duels/api/request/Request.html" class="type-name-link" title="interface in com.meteordevelopments.duels.api.request">Request</a> - Interface in <a href="com/meteordevelopments/duels/api/request/package-summary.html">com.meteordevelopments.duels.api.request</a></dt>
 <dd>
 <div class="block">Represents a Request sent.</div>

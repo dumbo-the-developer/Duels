@@ -23,6 +23,7 @@ com.meteordevelopments.duels.api.kit
 com.meteordevelopments.duels.api.match
 com.meteordevelopments.duels.api.queue
 com.meteordevelopments.duels.api.queue.sign
+com.meteordevelopments.duels.api.replay
 com.meteordevelopments.duels.api.request
 com.meteordevelopments.duels.api.spectate
 com.meteordevelopments.duels.api.user
