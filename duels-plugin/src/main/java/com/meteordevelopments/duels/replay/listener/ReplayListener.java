@@ -289,17 +289,13 @@ public class ReplayListener extends AbstractListener {
 	@EventHandler
 	public void onSneak(PlayerToggleSneakEvent e) {
 		Player p = e.getPlayer();
-		if (ReplayHelper.replaySessions.containsKey(p.getName())) {
+		if (e.isSneaking() && ReplayHelper.replaySessions.containsKey(p.getName())) {
 			ReplayPacketListener packetListener = ReplayHelper.replaySessions.get(p.getName()).getSession().getPacketListener();
-			
-			if (packetListener.getPrevious() != -1) {
-				packetListener.setCamera(p, p.getEntityId(), packetListener.getPrevious());
-				
-				p.setAllowFlight(true);
+			if (packetListener.isSpectating(p)) {
+				packetListener.resetCamera(p);
+				ReplayHelper.sendTitle(p, " ", "§7Free Camera Mode", 20);
 			}
 		}
-
-
 	}
 
 	@EventHandler

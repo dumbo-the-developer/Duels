@@ -1,5 +1,6 @@
 package com.meteordevelopments.duels.replay.playback;
 
+import com.meteordevelopments.duels.replay.packet.WrapperPlayClientEntityAction;
 import com.meteordevelopments.duels.replay.packet.WrapperPlayClientUseEntity;
 import com.meteordevelopments.duels.replay.packet.WrapperPlayServerCamera;
 import com.meteordevelopments.duels.replay.packet.WrapperPlayServerEntityDestroy;
@@ -10,6 +11,7 @@ import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.EnumWrappers.EntityUseAction;
+import com.comphenix.protocol.wrappers.EnumWrappers.PlayerAction;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.replay.listener.AbstractListener;
 import com.meteordevelopments.duels.replay.util.VersionUtil;
@@ -26,17 +28,18 @@ public class ReplayPacketListener extends AbstractListener {
 
     private PacketAdapter packetAdapter;
 
-    private Replayer replayer;
+    private final Replayer replayer;
 
     private int previous;
 
-    private HashMap<Player, Integer> spectating;
+    private final HashMap<Player, Integer> spectating;
+    private final HashMap<Player, Long> spectateStartTime;
 
     public ReplayPacketListener(Replayer replayer) {
         this.replayer = replayer;
         this.spectating = new HashMap<>();
+        this.spectateStartTime = new HashMap<>();
         this.previous = -1;
-
     }
 
     @Override
@@ -45,6 +48,8 @@ public class ReplayPacketListener extends AbstractListener {
 
         this.packetAdapter = new PacketAdapter(DuelsPlugin.getInstance(), ListenerPriority.NORMAL, 
                 PacketType.Play.Client.USE_ENTITY, 
+                PacketType.Play.Client.ENTITY_ACTION,
+                PacketType.Play.Client.STEER_VEHICLE,
                 PacketType.Play.Server.ENTITY_DESTROY,
                 PacketType.Play.Server.BLOCK_CHANGE,
                 PacketType.Play.Server.MULTI_BLOCK_CHANGE,
@@ -54,12 +59,47 @@ public class ReplayPacketListener extends AbstractListener {
             @SuppressWarnings("deprecation")
             @Override
             public void onPacketReceiving(PacketEvent event) {
-                WrapperPlayClientUseEntity packet = new WrapperPlayClientUseEntity(event.getPacket());
-                Player p = event.getPlayer();
+                final PacketType type = event.getPacketType();
+                final Player p = event.getPlayer();
 
-                if (packet.getType() == EntityUseAction.ATTACK && ReplayHelper.replaySessions.containsKey(p.getName()) && replayer.getNPCList().values().stream().anyMatch(ent -> packet.getTargetID() == ent.getId())) {
-                    if (p.getGameMode() != GameMode.SPECTATOR) previous = p.getGameMode().getValue();
-                    setCamera(p, packet.getTargetID(), 3F);
+                if (type == PacketType.Play.Client.USE_ENTITY) {
+                    WrapperPlayClientUseEntity packet = new WrapperPlayClientUseEntity(event.getPacket());
+                    if (packet.getType() == EntityUseAction.ATTACK && ReplayHelper.replaySessions.containsKey(p.getName()) && replayer.getNPCList().values().stream().anyMatch(ent -> packet.getTargetID() == ent.getId())) {
+                        setCamera(p, packet.getTargetID(), 3F);
+                    }
+                } else if (type == PacketType.Play.Client.ENTITY_ACTION) {
+                    if (ReplayHelper.replaySessions.containsKey(p.getName()) && isSpectating(p)) {
+                        WrapperPlayClientEntityAction packet = new WrapperPlayClientEntityAction(event.getPacket());
+                        PlayerAction action = packet.getAction();
+                        long elapsed = System.currentTimeMillis() - spectateStartTime.getOrDefault(p, 0L);
+                        if (action == PlayerAction.START_SNEAKING && elapsed > 500) {
+                            DuelsPlugin.getFoliaLib().getScheduler().runAtEntity(p, task -> {
+                                resetCamera(p);
+                                ReplayHelper.sendTitle(p, " ", "§7Free Camera Mode", 20);
+                            });
+                        }
+                    }
+                } else if (type == PacketType.Play.Client.STEER_VEHICLE) {
+                    if (ReplayHelper.replaySessions.containsKey(p.getName()) && isSpectating(p)) {
+                        boolean unmount = false;
+                        try {
+                            if (event.getPacket().getBooleans().size() > 1) {
+                                unmount = Boolean.TRUE.equals(event.getPacket().getBooleans().read(1));
+                            } else if (event.getPacket().getBytes().size() > 0) {
+                                byte flags = event.getPacket().getBytes().read(0);
+                                unmount = (flags & 0x02) != 0;
+                            }
+                        } catch (Exception ignored) {
+                            unmount = false;
+                        }
+                        long elapsed = System.currentTimeMillis() - spectateStartTime.getOrDefault(p, 0L);
+                        if (unmount && elapsed > 500) {
+                            DuelsPlugin.getFoliaLib().getScheduler().runAtEntity(p, task -> {
+                                resetCamera(p);
+                                ReplayHelper.sendTitle(p, " ", "§7Free Camera Mode", 20);
+                            });
+                        }
+                    }
                 }
             }
 
@@ -90,7 +130,7 @@ public class ReplayPacketListener extends AbstractListener {
 
                         for (int id : entityIds) {
                             if (id == spectating.get(p)) {
-                                setCamera(p, p.getEntityId(), previous);
+                                resetCamera(p);
                             }
                         }
                     }
@@ -120,14 +160,26 @@ public class ReplayPacketListener extends AbstractListener {
     }
 
     public void resetCamera(Player p) {
-        if (this.spectating.containsKey(p)) {
-            this.spectating.remove(p);
-
-            setCamera(p, p.getEntityId(), previous);
-        }
+        this.spectating.remove(p);
+        this.spectateStartTime.remove(p);
+        int targetGm = (previous >= 0) ? previous : ((p.getGameMode() != GameMode.SPECTATOR) ? p.getGameMode().getValue() : 0);
+        setCamera(p, p.getEntityId(), (float) targetGm);
+        p.setAllowFlight(true);
+        p.setFlying(true);
     }
 
     public void setCamera(Player p, int entityID, float gamemode) {
+        if (gamemode == 3F) {
+            if (previous < 0) {
+                previous = (p.getGameMode() != GameMode.SPECTATOR) ? p.getGameMode().getValue() : 0;
+            }
+            this.spectating.put(p, entityID);
+            this.spectateStartTime.put(p, System.currentTimeMillis());
+        } else {
+            this.spectating.remove(p);
+            this.spectateStartTime.remove(p);
+        }
+
         WrapperPlayServerCamera camera = new WrapperPlayServerCamera();
         camera.setCameraId(entityID);
 
@@ -143,11 +195,5 @@ public class ReplayPacketListener extends AbstractListener {
 
         state.sendPacket(p);
         camera.sendPacket(p);
-
-        if (gamemode == 3F) {
-            this.spectating.put(p, entityID);
-        } else if (this.spectating.containsKey(p)) {
-            this.spectating.remove(p);
-        }
     }
 }
