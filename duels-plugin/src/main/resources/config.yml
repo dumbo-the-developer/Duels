@@ -864,3 +864,60 @@ custom-kits:
   # Formatting settings
   formatting:
     minimessage: true
+
+#########################################
+# REPLAY SYSTEM
+#########################################
+replay:
+  # If set to 'true', duels will automatically record replays when a match begins.
+  # default: true
+  enabled: true
+
+  # Maximum recording length in seconds before a replay is automatically stopped.
+  # default: 3600
+  max-length: 3600
+
+  # If set to 'true', in-progress recordings will be saved when the plugin or server disables.
+  # default: true
+  save-on-stop: true
+
+  # Quality of recording: HIGH, MEDIUM, LOW
+  # default: HIGH
+  quality: HIGH
+
+  # Number of days before old replays are automatically cleaned up and deleted (-1 to disable).
+  # default: 30
+  cleanup-days: 30
+
+  # If set to 'true', all other online players will be hidden while watching a replay.
+  # default: true
+  hide-players: true
+
+  # Playback progress display type: ACTION_BAR, XP_BAR, NONE
+  # default: ACTION_BAR
+  progress-display: ACTION_BAR
+
+  # Playback pause mechanism: true = modern freeze, false = tick halt
+  # default: true
+  use-modern-pause: true
+
+  # If set to 'true', world block changes made during playback will be reset on finish.
+  # default: false
+  reset-world-changes: false
+
+  # Detail settings for recording
+  recording:
+    blocks:
+      # If set to 'true', block place and break changes will be recorded.
+      enabled: true
+      # If set to 'true', real block changes in world are replayed.
+      real-changes: true
+    entities:
+      # If set to 'true', extra non-player entities will be recorded.
+      enabled: false
+      # If set to 'true', item drops and pickups will be recorded.
+      items: true
+    chat:
+      # If set to 'true', duel chat will be recorded.
+      enabled: false
+      format: "&r<{name}> {message}"

@@ -510,6 +510,11 @@ COMMAND:
       header: '{PREFIX} &aYour Custom Kits (&e%count%&a):'
       entry: '{PREFIX} &7%kits%'
       empty: '{PREFIX} &cYou do not have any custom kits.'
+    
+    replay:
+      usage: '{PREFIX} &cUsage: /%command% [play <id>|list [player]|stop|delete <id>]'
+      unknown: '{PREFIX} &cUnknown replay or player ''&e%name%&c''. Usage: /%command% [play <id>|list [player]|stop|delete <id>]'
+      only-players: '{PREFIX} &cOnly in-game players can use this command.'
 
   sub-command-usage: '{PREFIX} &f/%command% %usage% &e- &7%description%'
 
@@ -599,6 +604,35 @@ SPECTATE:
   prevent:
     command: '&cYou cannot use ''%command%'' while in spectator mode.'
     teleportation: '&cYou cannot teleport while in spectator mode.'
+
+
+REPLAY:
+  already-watching: '{PREFIX} &cYou are already watching a replay.'
+  not-watching: '{PREFIX} &cYou are not currently watching a replay.'
+  not-found: '{PREFIX} &cReplay ''&e%id%&c'' was not found or failed to load.'
+  deleted: '{PREFIX} &aReplay ''&e%id%&a'' was deleted.'
+  delete-no-permission: '{PREFIX} &cYou do not have permission to delete replays.'
+  finished-watching: '{PREFIX} &7Finished watching replay.'
+  recording-started: '{PREFIX} &7Duel recording started.'
+  recording-saved: '{PREFIX} &7Duel recording saved with ID: &e%id%&7.'
+  world-not-found: '{PREFIX} &cWorld ''&e%world%&c'' was not found for this replay.'
+  prevent:
+    command: '&cYou cannot use ''%command%'' while watching a replay. Use /replay stop to exit.'
+    teleportation: '&cYou cannot teleport while watching a replay.'
+    inventory-open: '&cYou cannot open inventories while watching a replay.'
+    item-drop: '&cYou cannot drop items while watching a replay.'
+    damage: '&cYou cannot take or deal damage while watching a replay.'
+    block-break: '&cYou cannot break blocks while watching a replay.'
+    block-place: '&cYou cannot place blocks while watching a replay.'
+    interact: '&cYou cannot interact with blocks while watching a replay.'
+  items:
+    teleport: '&6&lTeleport'
+    speed: '&e&lSpeed: &6%speed%x'
+    pause: '&c&lPause'
+    play: '&a&lPlay'
+    forward: '&b&lForward (10s)'
+    backward: '&b&lBackward (10s)'
+    leave: '&4&lLeave Replay'
 
 
 GUI:
@@ -803,6 +837,59 @@ GUI:
           - '&c&lNOT BOUND'
           - ' '
           - '&r&lCLICK TO TOGGLE'
+  replay-browser:
+    title: 'Duel Replays'
+    player-title: 'Replays: %player%'
+    buttons:
+      entry:
+        name: '&eReplay: &b%player1% &7vs &b%player2%'
+        lore:
+          - '&7ID: &8%id%'
+          - '&7Winner: &a%winner%'
+          - '&7Loser: &c%loser%'
+          - '&7Kit: &f%kit%'
+          - '&7Arena: &e%arena%'
+          - '&7Duration: &e%duration%'
+          - '&7End Reason: &7%reason%'
+          - '&7Date: &8%date%'
+          - ' '
+          - '&e► Left-Click to view options / watch'
+        lore-admin:
+          - '&c► Shift-Right-Click to delete'
+      previous-page:
+        name: '&a« Previous Page'
+      next-page:
+        name: '&aNext Page »'
+      empty:
+        name: '&cNo replays found.'
+  replay-details:
+    title: 'Replay: %id%'
+    buttons:
+      summary:
+        name: '&e&lMatch Details'
+        lore:
+          - '&7Replay ID: &f%id%'
+          - '&7Player 1: &b%player1%'
+          - '&7Player 2: &b%player2%'
+          - '&7Winner: &a%winner%'
+          - '&7Loser: &c%loser%'
+          - '&7Kit: &f%kit%'
+          - '&7Arena: &e%arena%'
+          - '&7Duration: &e%duration%'
+          - '&7Bet: &6$%bet%'
+          - '&7End Reason: &7%reason%'
+          - '&7Date: &8%date%'
+      play:
+        name: '&a&l▶ Watch Replay'
+        lore:
+          - '&7Click to enter replay viewer mode.'
+          - '&eTakes you into spectator camera!'
+      delete:
+        name: '&c&l✖ Delete Replay'
+        lore:
+          - '&7Click to permanently delete this replay.'
+      back:
+        name: '&7« Back to Replay List'
 
 
 KIT:

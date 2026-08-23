@@ -1,0 +1,200 @@
+package com.meteordevelopments.duels.replay.recording;
+
+import com.comphenix.protocol.wrappers.WrappedGameProfile;
+import com.comphenix.protocol.wrappers.WrappedSignedProperty;
+import com.google.common.collect.Multimap;
+import com.meteordevelopments.duels.DuelsPlugin;
+import com.meteordevelopments.duels.api.folialib.task.WrappedTask;
+import com.meteordevelopments.duels.replay.ReplayManagerImpl;
+import com.meteordevelopments.duels.replay.api.IReplayHook;
+import com.meteordevelopments.duels.replay.api.ReplayAPI;
+import com.meteordevelopments.duels.replay.config.ConfigManager;
+import com.meteordevelopments.duels.replay.storage.ReplaySaver;
+import com.meteordevelopments.duels.replay.Replay;
+import com.meteordevelopments.duels.replay.data.ActionData;
+import com.meteordevelopments.duels.replay.data.ActionType;
+import com.meteordevelopments.duels.replay.data.ReplayData;
+import com.meteordevelopments.duels.replay.data.ReplayInfo;
+import com.meteordevelopments.duels.replay.data.types.*;
+import com.meteordevelopments.duels.replay.util.NPCManager;
+import com.meteordevelopments.duels.replay.util.fetcher.JsonData;
+import com.meteordevelopments.duels.replay.util.fetcher.PlayerInfo;
+import com.meteordevelopments.duels.replay.util.fetcher.SkinInfo;
+import com.meteordevelopments.duels.replay.util.fetcher.WebsiteFetcher;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+import java.util.*;
+
+public class Recorder {
+
+    private List<String> players;
+
+    private Replay replay;
+
+    private ReplayData data;
+
+    private WrappedTask task;
+    private int currentTick;
+    private PacketRecorder packetRecorder;
+
+    private CommandSender sender;
+
+    public Recorder(Replay replay, List<Player> players, CommandSender sender) {
+        this.players = new ArrayList<>();
+        this.data = new ReplayData();
+        this.replay = replay;
+        this.sender = sender;
+
+        HashMap<String, PlayerWatcher> tmpWatchers = new HashMap<>();
+        for (Player player : players) {
+            if (this.players.contains(player.getName())) continue;
+
+            this.players.add(player.getName());
+            tmpWatchers.put(player.getName(), new PlayerWatcher(player.getName()));
+        }
+
+        this.data.setWatchers(tmpWatchers);
+    }
+
+    public void start() {
+        this.packetRecorder = new PacketRecorder(this);
+        this.packetRecorder.register();
+
+        for (String names : this.players) {
+            if (Bukkit.getPlayer(names) != null) {
+                Player player = Bukkit.getPlayer(names);
+                createSpawnAction(player, player.getLocation(), true);
+            }
+        }
+
+        this.task = DuelsPlugin.getFoliaLib().getScheduler().runTimerAsync(() -> {
+            HashMap<String, List<PacketData>> tmpMap = new HashMap<>(packetRecorder.getPacketData());
+
+            for (String name : tmpMap.keySet()) {
+                List<PacketData> list = new ArrayList<>(tmpMap.get(name));
+                for (Iterator<PacketData> it = list.iterator(); it.hasNext(); ) {
+                    PacketData packetData = it.next();
+
+                    if (packetData instanceof BlockChangeData && !ConfigManager.RECORD_BLOCKS) continue;
+                    if (packetData instanceof EntityItemData) {
+                        EntityItemData data = (EntityItemData) packetData;
+                        if (data.getAction() != 2 && !ConfigManager.RECORD_ITEMS) continue;
+                    }
+                    if ((packetData instanceof EntityData || packetData instanceof EntityMovingData || packetData instanceof EntityAnimationData) && !ConfigManager.RECORD_ENTITIES)
+                        continue;
+                    if (packetData instanceof ChatData && !ConfigManager.RECORD_CHAT) continue;
+
+                    ActionData actionData = new ActionData(currentTick, ActionType.PACKET, name, packetData);
+                    addData(currentTick, actionData);
+                }
+            }
+
+            packetRecorder.getPacketData().keySet().removeAll(tmpMap.keySet());
+
+            if (ReplayAPI.getInstance().getHookManager().isRegistered()) {
+                for (IReplayHook hook : ReplayAPI.getInstance().getHookManager().getHooks()) {
+                    for (String names : players) {
+                        List<PacketData> customList = hook.onRecord(names);
+                        customList.stream().filter(Objects::nonNull).forEach(customData -> {
+                            ActionData customAction = new ActionData(currentTick, ActionType.CUSTOM, names, customData);
+                            addData(currentTick, customAction);
+                        });
+                    }
+                }
+            }
+
+            Recorder.this.currentTick++;
+
+            if ((Recorder.this.currentTick / 20) >= ConfigManager.MAX_LENGTH) stop(ConfigManager.SAVE_STOP);
+        }, 1L, 1L);
+    }
+
+    public void addData(int tick, ActionData actionData) {
+        List<ActionData> list = new ArrayList<>();
+        if (this.data.getActions().containsKey(tick)) {
+            list = this.data.getActions().get(tick);
+        }
+
+        list.add(actionData);
+        this.data.getActions().put(tick, list);
+    }
+
+    public void stop(boolean save) {
+        this.packetRecorder.unregister();
+        if (this.task != null) {
+            this.task.cancel();
+        }
+
+        if (save) {
+            this.data.setDuration(this.currentTick);
+
+            String creator = this.sender != null ? this.sender.getName() : "CONSOLE";
+            this.data.setCreator(creator);
+            this.data.setWatchers(new HashMap<>());
+            this.replay.setData(this.data);
+            this.replay.setReplayInfo(new ReplayInfo(this.replay.getId(), creator, System.currentTimeMillis(), this.currentTick));
+            ReplaySaver.save(this.replay);
+        } else {
+            this.data.getActions().clear();
+        }
+
+        this.replay.setRecording(false);
+
+        if (ReplayManagerImpl.activeReplays.containsKey(this.replay.getId())) {
+            ReplayManagerImpl.activeReplays.remove(this.replay.getId());
+        }
+    }
+
+    public void createSpawnAction(Player player, Location loc, boolean first) {
+        SignatureData[] signArr = new SignatureData[1];
+
+        if (!Bukkit.getOnlineMode() && ConfigManager.USE_OFFLINE_SKINS) {
+            DuelsPlugin.getFoliaLib().getScheduler().runAsync(task -> {
+                PlayerInfo info = (PlayerInfo) WebsiteFetcher.getJson("https://api.mojang.com/users/profiles/minecraft/" + player.getName(), true, new JsonData(true, new PlayerInfo()));
+
+                if (info != null) {
+                    SkinInfo skin = (SkinInfo) WebsiteFetcher.getJson("https://sessionserver.mojang.com/session/minecraft/profile/" + info.getId() + "?unsigned=false", true, new JsonData(true, new SkinInfo()));
+
+                    Map<String, String> props = skin.getProperties().get(0);
+                    signArr[0] = new SignatureData(props.get("name"), props.get("value"), props.get("signature"));
+                }
+
+                ActionData spawnData = new ActionData(0, ActionType.SPAWN, player.getName(), new SpawnData(player.getUniqueId(), LocationData.fromLocation(loc), signArr[0]));
+                addData(first ? 0 : currentTick, spawnData);
+
+                ActionData invData = new ActionData(0, ActionType.PACKET, player.getName(), NPCManager.copyFromPlayer(player, true, true));
+                addData(first ? 0 : currentTick, invData);
+            });
+        }
+
+        Multimap<String, WrappedSignedProperty> map = WrappedGameProfile.fromPlayer(player).getProperties();
+        for (String prop : map.asMap().keySet()) {
+            for (WrappedSignedProperty sp : map.get(prop)) {
+                signArr[0] = new SignatureData(sp.getName(), sp.getValue(), sp.getSignature());
+            }
+        }
+
+        if (!ConfigManager.USE_OFFLINE_SKINS || Bukkit.getOnlineMode()) {
+            ActionData spawnData = new ActionData(0, ActionType.SPAWN, player.getName(), new SpawnData(player.getUniqueId(), LocationData.fromLocation(loc), signArr[0]));
+            addData(currentTick, spawnData);
+
+            ActionData invData = new ActionData(currentTick, ActionType.PACKET, player.getName(), NPCManager.copyFromPlayer(player, true, true));
+            addData(currentTick, invData);
+        }
+    }
+
+    public List<String> getPlayers() {
+        return players;
+    }
+
+    public ReplayData getData() {
+        return data;
+    }
+
+    public int getCurrentTick() {
+        return currentTick;
+    }
+}

@@ -38,6 +38,11 @@ public final class Permissions {
     public static final String CUSTOMKITS_ADMIN = "duels.customkits.admin";
     public static final String CUSTOMKITS_BYPASS_RESTRICTIONS = "duels.customkits.bypass.restrictions";
 
+    // Replay Permissions
+    public static final String REPLAY = "duels.replay";
+    public static final String REPLAY_OTHERS = "duels.replay.others";
+    public static final String REPLAY_ADMIN = "duels.replay.admin";
+
     private Permissions() {
     }
 }

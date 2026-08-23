@@ -1,0 +1,51 @@
+package com.meteordevelopments.duels.replay.data.types;
+
+public class FishingData extends PacketData {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3909142114596921006L;
+	
+	
+	private LocationData location;
+	
+	private double x, y, z;
+	
+	private int id;
+
+	private String owner;
+	
+	public FishingData(int id, LocationData location, double x, double y, double z, String owner)  {
+		this.location = location;
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this.id = id;
+		this.owner = owner;
+	}
+	
+	public LocationData getLocation() {
+		return location;
+	}
+	
+	public double getX() {
+		return x;
+	}
+	
+	public double getY() {
+		return y;
+	}
+	
+	public double getZ() {
+		return z;
+	}
+	
+	public int getId() {
+		return id;
+	}
+
+	public String getOwner() {
+		return owner;
+	}
+}

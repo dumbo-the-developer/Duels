@@ -321,6 +321,38 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private boolean useMinimessage;
 
+    // Replay Configuration
+    @Getter
+    private boolean replayEnabled;
+    @Getter
+    private int replayMaxLength;
+    @Getter
+    private boolean replaySaveOnStop;
+    @Getter
+    private String replayQuality;
+    @Getter
+    private int replayCleanupDays;
+    @Getter
+    private boolean replayHidePlayers;
+    @Getter
+    private String replayProgressDisplay;
+    @Getter
+    private boolean replayUseModernPause;
+    @Getter
+    private boolean replayResetWorldChanges;
+    @Getter
+    private boolean replayRecordBlocks;
+    @Getter
+    private boolean replayRecordBlocksRealChanges;
+    @Getter
+    private boolean replayRecordEntities;
+    @Getter
+    private boolean replayRecordItems;
+    @Getter
+    private boolean replayRecordChat;
+    @Getter
+    private String replayChatFormat;
+
     private final Multimap<String, MessageSound> messageToSounds = HashMultimap.create();
 
     public Config(final DuelsPlugin plugin) {
@@ -505,6 +537,23 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         cdPartyDuelMessages = configuration.getStringList("countdown.party-duel.messages");
         cdPartyDuelTitles = configuration.getStringList("countdown.party-duel.titles");
         useMinimessage = configuration.getBoolean("use-minimessages");
+
+        // Replay Configuration
+        replayEnabled = configuration.getBoolean("replay.enabled", true);
+        replayMaxLength = configuration.getInt("replay.max-length", 3600);
+        replaySaveOnStop = configuration.getBoolean("replay.save-on-stop", true);
+        replayQuality = configuration.getString("replay.quality", "HIGH");
+        replayCleanupDays = configuration.getInt("replay.cleanup-days", 30);
+        replayHidePlayers = configuration.getBoolean("replay.hide-players", true);
+        replayProgressDisplay = configuration.getString("replay.progress-display", "ACTION_BAR");
+        replayUseModernPause = configuration.getBoolean("replay.use-modern-pause", true);
+        replayResetWorldChanges = configuration.getBoolean("replay.reset-world-changes", false);
+        replayRecordBlocks = configuration.getBoolean("replay.recording.blocks.enabled", true);
+        replayRecordBlocksRealChanges = configuration.getBoolean("replay.recording.blocks.real-changes", true);
+        replayRecordEntities = configuration.getBoolean("replay.recording.entities.enabled", false);
+        replayRecordItems = configuration.getBoolean("replay.recording.entities.items", true);
+        replayRecordChat = configuration.getBoolean("replay.recording.chat.enabled", false);
+        replayChatFormat = configuration.getString("replay.recording.chat.format", "&r<{name}> {message}");
 
         final ConfigurationSection sounds = configuration.getConfigurationSection("sounds");
 

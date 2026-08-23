@@ -21,9 +21,9 @@ dependencies {
     implementation 'commons-lang:commons-lang:2.6'
     implementation 'com.mojang:authlib:1.5.25'
     implementation 'me.clip:placeholderapi:2.12.2'
-    implementation 'com.github.sirblobman.api:core:2.8-SNAPSHOT'
+    implementation 'com.github.sirblobman.api:core:2.9-SNAPSHOT'
     implementation 'com.github.timderspieler:DeluxeCombat-API:1.5.1'
-    implementation("com.github.sirblobman.combatlogx:api:11.6-SNAPSHOT")
+    implementation("com.github.sirblobman.combatlogx:api:11.7-SNAPSHOT")
     implementation 'com.artillexstudios:AxGraves:1.7.0'
     implementation 'com.github.No-Not-Jaden:NotBounties:1.22.34'
     implementation 'me.chancesd.pvpmanager:pvpmanager:4.0.9'
@@ -48,6 +48,7 @@ dependencies {
     implementation project(':duels-worldguard')
     implementation project(':duels-worldguard-v7')
     compileOnly 'org.geysermc.floodgate:api:2.2.5-SNAPSHOT'
+    compileOnly 'net.dmulloy2:ProtocolLib:5.4.0'
     implementation 'io.papermc:paperlib:1.0.8'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.1'
     implementation 'org.json:json:20251224'

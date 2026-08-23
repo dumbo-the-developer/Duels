@@ -126,6 +126,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private ValidatorManager validatorManager;
     @Getter
     private CommandsConfig commandsConfig;
+    @Getter
+    private com.meteordevelopments.duels.replay.ReplayManagerImpl replayManager;
     private static final Logger LOGGER = Logger.getLogger("[Duels-Optimised]");
 
     @Override
@@ -283,6 +285,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         final CommandsConfig.CommandSettings duels = commandsConfig.get(CommandsConfig.CommandKey.DUELS);
         final CommandsConfig.CommandSettings kit = commandsConfig.get(CommandsConfig.CommandKey.KIT);
         final CommandsConfig.CommandSettings customkits = commandsConfig.get(CommandsConfig.CommandKey.CUSTOMKITS);
+        final CommandsConfig.CommandSettings replay = commandsConfig.get(CommandsConfig.CommandKey.REPLAY);
 
         // Store mappings from original keys to actual names for API compatibility
         commandKeyMap.put("duel", duel.getName().toLowerCase());
@@ -292,6 +295,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         commandKeyMap.put("duels", duels.getName().toLowerCase());
         commandKeyMap.put("kit", kit.getName().toLowerCase());
         commandKeyMap.put("customkits", customkits.getName().toLowerCase());
+        commandKeyMap.put("replay", replay.getName().toLowerCase());
 
         registerCommands(
             new DuelCommand(this, duel),
@@ -300,7 +304,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             new SpectateCommand(this, spectate),
             new DuelsCommand(this, duels),
             new KitCommand(this, kit),
-            new com.meteordevelopments.duels.command.commands.CustomKitsCommand(this, customkits)
+            new com.meteordevelopments.duels.command.commands.CustomKitsCommand(this, customkits),
+            new com.meteordevelopments.duels.command.commands.ReplayCommand(this, replay)
         );
 
         sendMessage("&dSuccessfully registered commands [" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + ChatColor.WHITE + "]");
@@ -694,6 +699,11 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadAndTrack("hook manager", () -> hookManager = new HookManager(this));
         loadAndTrack("validator manager", () -> loadables.add(validatorManager = new ValidatorManager(this)));
         loadAndTrack("teleport manager", () -> loadables.add(teleport = new Teleport(this)));
+        loadAndTrack("replay manager", () -> {
+            replayManager = new com.meteordevelopments.duels.replay.ReplayManagerImpl(this);
+            loadables.add(replayManager);
+            registerListener(replayManager);
+        });
 
         if (!load()) {
             getServer().getPluginManager().disablePlugin(this);
