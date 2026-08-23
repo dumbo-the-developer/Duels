@@ -43,6 +43,8 @@ import com.meteordevelopments.duels.api.folialib.task.WrappedTask;
 
 public class Replayer {
 
+	public static final ThreadLocal<Boolean> IS_REPLAY_SENDING = ThreadLocal.withInitial(() -> false);
+
 	private HashMap<String, INPC> npcs;
 	
 	private HashMap<Integer, IEntity> entities;
@@ -142,19 +144,24 @@ public class Replayer {
 			if (tick == 0 && started) return;
 			this.started = true;
 
-			List<ActionData> list = data.getActions().get(tick);
-			for (ActionData action : list) {
+			IS_REPLAY_SENDING.set(true);
+			try {
+				List<ActionData> list = data.getActions().get(tick);
+				for (ActionData action : list) {
 
-				utils.handleAction(action, data, mode);
+					utils.handleAction(action, data, mode);
 
-				if (action.getType() == ActionType.CUSTOM) {
-					if (ReplayAPI.getInstance().getHookManager().isRegistered()) {
-						for (IReplayHook hook : ReplayAPI.getInstance().getHookManager().getHooks()) {
-							hook.onPlay(action, Replayer.this);
+					if (action.getType() == ActionType.CUSTOM) {
+						if (ReplayAPI.getInstance().getHookManager().isRegistered()) {
+							for (IReplayHook hook : ReplayAPI.getInstance().getHookManager().getHooks()) {
+								hook.onPlay(action, Replayer.this);
+							}
 						}
 					}
+				
 				}
-			
+			} finally {
+				IS_REPLAY_SENDING.set(false);
 			}
 			
 			if (tick == 0) data.getActions().remove(tick);

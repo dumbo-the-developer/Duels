@@ -124,7 +124,16 @@ public class ItemConfig {
     }
 
     public static void addDefaults() {
-        items.put(ItemConfigType.TELEPORT, new ItemConfigOption(Material.COMPASS, "&7Teleport", 0));
+        Material inspectMat = Material.matchMaterial("SPYGLASS");
+        if (inspectMat == null) {
+            inspectMat = Material.matchMaterial("ENDER_EYE");
+            if (inspectMat == null) {
+                inspectMat = Material.COMPASS;
+            }
+        }
+        final ItemConfigOption inspectOption = new ItemConfigOption(inspectMat, "&b&lInspect Perspective", 0);
+        items.put(ItemConfigType.INSPECT, inspectOption);
+        items.put(ItemConfigType.TELEPORT, inspectOption);
         items.put(ItemConfigType.SPEED, new ItemConfigOption(MaterialBridge.CLOCK.toMaterial(), "&cSlow &8[&eRight&8] &aFast &8[&eShift Right&8]", 1));
         items.put(ItemConfigType.LEAVE, new ItemConfigOption(MaterialBridge.OAK_DOOR.toMaterial(), "&7Leave replay", 8));
         items.put(ItemConfigType.RESUME, new ItemConfigOption(Material.SLIME_BLOCK, "&aResume", 4));

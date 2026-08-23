@@ -60,14 +60,15 @@ public class ReplaySession {
 		this.player.setFoodLevel(20);
 		this.player.getInventory().clear();
 		
-		ItemConfigOption teleport = ItemConfig.getItem(ItemConfigType.TELEPORT);
+		ItemConfigOption inspect = ItemConfig.getItem(ItemConfigType.INSPECT);
+		if (inspect == null) inspect = ItemConfig.getItem(ItemConfigType.TELEPORT);
 		ItemConfigOption time = ItemConfig.getItem(ItemConfigType.SPEED);
 		ItemConfigOption leave = ItemConfig.getItem(ItemConfigType.LEAVE);
 		ItemConfigOption backward = ItemConfig.getItem(ItemConfigType.BACKWARD);
 		ItemConfigOption forward = ItemConfig.getItem(ItemConfigType.FORWARD);
 		ItemConfigOption pauseResume = ItemConfig.getItem(ItemConfigType.PAUSE);
 
-		List<ItemConfigOption> configItems = Arrays.asList(teleport, time, leave, backward, forward, pauseResume);
+		List<ItemConfigOption> configItems = Arrays.asList(inspect, time, leave, backward, forward, pauseResume);
 
 		configItems.stream()
 			.filter(Objects::nonNull)
@@ -82,15 +83,15 @@ public class ReplaySession {
 		
 		this.player.setAllowFlight(true);
 		this.player.setFlying(true);
+		this.player.setCollidable(false);
+		this.player.setInvisible(true);
 		
-		if (ConfigManager.HIDE_PLAYERS) {
-			for (Player all : Bukkit.getOnlinePlayers()) {
-				if (all == this.player) continue;
-				
-				this.player.hidePlayer(all);
-			}
+		for (Player all : Bukkit.getOnlinePlayers()) {
+			if (all == this.player) continue;
+			
+			this.player.hidePlayer(DuelsPlugin.getInstance(), all);
+			all.hidePlayer(DuelsPlugin.getInstance(), this.player);
 		}
-
 
 	}
 	
@@ -106,11 +107,10 @@ public class ReplaySession {
 			resetPlayer();
 			player.teleport(start);
 
-			if (ConfigManager.HIDE_PLAYERS) {
-				for (Player all : Bukkit.getOnlinePlayers()) {
-					if (all == player) continue;
-					player.showPlayer(all);
-				}
+			for (Player all : Bukkit.getOnlinePlayers()) {
+				if (all == player) continue;
+				player.showPlayer(DuelsPlugin.getInstance(), all);
+				all.showPlayer(DuelsPlugin.getInstance(), player);
 			}
 
 			ReplaySessionFinishEvent finishEvent = new ReplaySessionFinishEvent(replayer.getReplay(), player);
@@ -126,6 +126,9 @@ public class ReplaySession {
 		player.getInventory().clear();
 		player.getInventory().setContents(content);
 		
+		player.setCollidable(true);
+		player.setInvisible(false);
+
 		if (player.getGameMode() != GameMode.CREATIVE) {
 			player.setFlying(false);
 			player.setAllowFlight(false);

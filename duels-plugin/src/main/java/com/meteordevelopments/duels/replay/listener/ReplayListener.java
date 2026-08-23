@@ -105,8 +105,8 @@ public class ReplayListener extends AbstractListener {
 					replayer.stop();
 				}
 				
-				if (itemType == ItemConfigType.TELEPORT) {
-					ReplayHelper.createTeleporter(p, replayer, 1);
+				if (itemType == ItemConfigType.INSPECT || itemType == ItemConfigType.TELEPORT) {
+					ReplayHelper.createInspectGui(p, replayer, 1);
 				}
 				
 				ItemConfigOption pauseResume = ItemConfig.getItem(ItemConfigType.RESUME);
@@ -136,27 +136,33 @@ public class ReplayListener extends AbstractListener {
                 // Avoid IncompatibleClassChangeError < 1.21
                 String title = VersionUtil.isAbove(VersionUtil.VersionEnum.V1_21) ? e.getView().getTitle() : LegacyUtils.getInventoryTitle(e);
 
-                if (title.equalsIgnoreCase("§7Teleporter")) {
+                if (title != null && (title.contains("Inspect") || title.contains("Teleporter"))) {
                     Replayer replayer = ReplayHelper.replaySessions.get(p.getName());
 
-                    if (e.getCurrentItem() != null && e.getCurrentItem().getItemMeta() != null && e.getCurrentItem().getItemMeta().getDisplayName() != null) {
+                    if (e.getCurrentItem() != null && e.getCurrentItem().getItemMeta() != null) {
                         if (e.getCurrentItem().getType() == MaterialBridge.PLAYER_HEAD.toMaterial()) {
-                            String owner = e.getCurrentItem().getItemMeta().getDisplayName().replaceAll("§6", "");
-                            if (replayer.getNPCList().containsKey(owner)) {
+                            String owner = null;
+                            if (e.getCurrentItem().getItemMeta() instanceof org.bukkit.inventory.meta.SkullMeta sm && sm.getOwner() != null && !sm.getOwner().isEmpty()) {
+                                owner = sm.getOwner();
+                            } else if (e.getCurrentItem().getItemMeta().getDisplayName() != null) {
+                                owner = org.bukkit.ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName());
+                            }
+
+                            if (owner != null && replayer.getNPCList().containsKey(owner)) {
                                 INPC npc = replayer.getNPCList().get(owner);
-                                p.teleport(npc.getLocation());
+                                p.closeInventory();
+                                replayer.getSession().getPacketListener().setCamera(p, npc.getId(), 3F);
+                                ReplayHelper.sendTitle(p, "§b" + owner, "§7Press §f[SHIFT] §7to exit perspective", 40);
                             }
                         } else if (e.getCurrentItem().getType() == Material.ARROW) {
                             if (e.getSlot() == e.getInventory().getSize() - 1) {
                                 int nextPage = e.getCurrentItem().getAmount();
-                                ReplayHelper.createTeleporter(p, replayer, nextPage);
+                                ReplayHelper.createInspectGui(p, replayer, nextPage);
                             } else if (e.getSlot() == e.getInventory().getSize() - 9) {
                                 int previousPage = e.getCurrentItem().getAmount();
-                                ReplayHelper.createTeleporter(p, replayer, previousPage);
+                                ReplayHelper.createInspectGui(p, replayer, previousPage);
                             }
                         }
-
-
                     }
                 }
             }
@@ -307,5 +313,43 @@ public class ReplayListener extends AbstractListener {
 	
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
+		Player joined = e.getPlayer();
+		for (Replayer replayer : ReplayHelper.replaySessions.values()) {
+			Player spectator = replayer.getWatchingPlayer();
+			if (spectator != null && spectator.isOnline() && spectator != joined) {
+				joined.hidePlayer(DuelsPlugin.getInstance(), spectator);
+				spectator.hidePlayer(DuelsPlugin.getInstance(), joined);
+			}
+		}
+	}
+
+	@EventHandler
+	public void onEntityDamageByEntity(org.bukkit.event.entity.EntityDamageByEntityEvent e) {
+		if (e.getDamager() instanceof Player p && ReplayHelper.replaySessions.containsKey(p.getName())) {
+			e.setCancelled(true);
+		}
+		if (e.getEntity() instanceof Player p && ReplayHelper.replaySessions.containsKey(p.getName())) {
+			e.setCancelled(true);
+		}
+	}
+
+	@EventHandler
+	public void onTarget(org.bukkit.event.entity.EntityTargetEvent e) {
+		if (e.getTarget() instanceof Player p && ReplayHelper.replaySessions.containsKey(p.getName())) {
+			e.setCancelled(true);
+		}
+	}
+
+	@EventHandler
+	public void onEntityPickup(org.bukkit.event.entity.EntityPickupItemEvent e) {
+		if (e.getEntity() instanceof Player p && ReplayHelper.replaySessions.containsKey(p.getName())) {
+			e.setCancelled(true);
+		}
+		boolean isReplayItem = ReplayHelper.replaySessions.values()
+				.stream()
+				.anyMatch(replayer -> replayer.getUtils().getEntities().containsValue(e.getItem()));
+		if (isReplayItem) {
+			e.setCancelled(true);
+		}
 	}
 }

@@ -43,7 +43,13 @@ public class ReplayPacketListener extends AbstractListener {
     public void register() {
         if (isRegistered()) return;
 
-        this.packetAdapter = new PacketAdapter(DuelsPlugin.getInstance(), ListenerPriority.NORMAL, PacketType.Play.Client.USE_ENTITY, PacketType.Play.Server.ENTITY_DESTROY) {
+        this.packetAdapter = new PacketAdapter(DuelsPlugin.getInstance(), ListenerPriority.NORMAL, 
+                PacketType.Play.Client.USE_ENTITY, 
+                PacketType.Play.Server.ENTITY_DESTROY,
+                PacketType.Play.Server.BLOCK_CHANGE,
+                PacketType.Play.Server.MULTI_BLOCK_CHANGE,
+                PacketType.Play.Server.BLOCK_ACTION,
+                PacketType.Play.Server.EXPLOSION) {
 
             @SuppressWarnings("deprecation")
             @Override
@@ -54,28 +60,38 @@ public class ReplayPacketListener extends AbstractListener {
                 if (packet.getType() == EntityUseAction.ATTACK && ReplayHelper.replaySessions.containsKey(p.getName()) && replayer.getNPCList().values().stream().anyMatch(ent -> packet.getTargetID() == ent.getId())) {
                     if (p.getGameMode() != GameMode.SPECTATOR) previous = p.getGameMode().getValue();
                     setCamera(p, packet.getTargetID(), 3F);
-
                 }
             }
 
             @Override
             public void onPacketSending(PacketEvent event) {
-                WrapperPlayServerEntityDestroy packet = new WrapperPlayServerEntityDestroy(event.getPacket());
+                PacketType type = event.getPacketType();
                 Player p = event.getPlayer();
 
-                if (ReplayHelper.replaySessions.containsKey(p.getName()) && isSpectating(p)) {
-
-                    List<Integer> entityIds;
-                    if (VersionUtil.isAbove(VersionEnum.V1_17)) {
-                        entityIds = packet.getHandle().getIntLists().read(0);
-
-                    } else {
-                        entityIds = IntStream.of(packet.getEntityIDs()).boxed().collect(Collectors.toList());
+                if (type == PacketType.Play.Server.BLOCK_CHANGE || type == PacketType.Play.Server.MULTI_BLOCK_CHANGE || type == PacketType.Play.Server.BLOCK_ACTION || type == PacketType.Play.Server.EXPLOSION) {
+                    if (ReplayHelper.replaySessions.containsKey(p.getName())) {
+                        if (!Replayer.IS_REPLAY_SENDING.get()) {
+                            event.setCancelled(true);
+                            return;
+                        }
                     }
+                }
 
-                    for (int id : entityIds) {
-                        if (id == spectating.get(p)) {
-                            setCamera(p, p.getEntityId(), previous);
+                if (type == PacketType.Play.Server.ENTITY_DESTROY) {
+                    WrapperPlayServerEntityDestroy packet = new WrapperPlayServerEntityDestroy(event.getPacket());
+
+                    if (ReplayHelper.replaySessions.containsKey(p.getName()) && isSpectating(p)) {
+                        List<Integer> entityIds;
+                        if (VersionUtil.isAbove(VersionEnum.V1_17)) {
+                            entityIds = packet.getHandle().getIntLists().read(0);
+                        } else {
+                            entityIds = IntStream.of(packet.getEntityIDs()).boxed().collect(Collectors.toList());
+                        }
+
+                        for (int id : entityIds) {
+                            if (id == spectating.get(p)) {
+                                setCamera(p, p.getEntityId(), previous);
+                            }
                         }
                     }
                 }

@@ -626,7 +626,8 @@ REPLAY:
     block-place: '&cYou cannot place blocks while watching a replay.'
     interact: '&cYou cannot interact with blocks while watching a replay.'
   items:
-    teleport: '&6&lTeleport'
+    inspect: '&b&lInspect Perspective'
+    teleport: '&b&lInspect Perspective'
     speed: '&e&lSpeed: &6%speed%x'
     pause: '&c&lPause'
     play: '&a&lPlay'

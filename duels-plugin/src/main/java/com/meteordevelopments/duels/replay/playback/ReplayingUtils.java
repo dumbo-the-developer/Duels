@@ -594,9 +594,9 @@ public class ReplayingUtils {
 			if (blockChange.doPlayEffect()) {
 				if (blockChange.isBlockBreak()) {
 					if (VersionUtil.isAbove(VersionEnum.V1_13)) {
-						loc.getWorld().playEffect(loc, Effect.STEP_SOUND, blockChange.getBefore().toMaterial());
+						replayer.getWatchingPlayer().playEffect(loc, Effect.STEP_SOUND, blockChange.getBefore().toMaterial());
 					} else {
-						loc.getWorld().playEffect(loc, Effect.STEP_SOUND, blockChange.getBefore().getId(), 15);
+						replayer.getWatchingPlayer().playEffect(loc, Effect.STEP_SOUND, blockChange.getBefore().getId());
 					}
 				}
 			} else if (blockChange.doBlockChange()) {
@@ -611,17 +611,16 @@ public class ReplayingUtils {
 				if (id == 9) id = 8;
 				if (id == 11) id = 10;
 			}
-			if (ConfigManager.REAL_CHANGES) {
-				if (VersionUtil.isAbove(VersionEnum.V1_13)) {
-					loc.getBlock().setType(getBlockMaterial(blockChange.getAfter()), true);
-				} else {
-					LegacyBlock.setTypeIdAndData(loc.getBlock(), id, (byte) subId, true);
-				}
-			} else if (blockChange.doBlockChange()) {
-				if (VersionUtil.isAbove(VersionEnum.V1_13)) {
-					replayer.getWatchingPlayer().sendBlockChange(loc, getBlockMaterial(blockChange.getAfter()).createBlockData());
-				} else {
-					LegacyBlock.sendBlockChange(replayer.getWatchingPlayer(), loc, id, (byte) subId);
+			if (blockChange.doBlockChange()) {
+				Replayer.IS_REPLAY_SENDING.set(true);
+				try {
+					if (VersionUtil.isAbove(VersionEnum.V1_13)) {
+						replayer.getWatchingPlayer().sendBlockChange(loc, getBlockMaterial(blockChange.getAfter()).createBlockData());
+					} else {
+						LegacyBlock.sendBlockChange(replayer.getWatchingPlayer(), loc, id, (byte) subId);
+					}
+				} finally {
+					Replayer.IS_REPLAY_SENDING.set(false);
 				}
 			}
 		});
@@ -630,11 +629,11 @@ public class ReplayingUtils {
 	private void playTNTFuse(Location loc, BlockChangeData blockChange) {
 		if (VersionUtil.isCompatible(VersionEnum.V1_8)) {
 			if (MaterialBridge.fromID(blockChange.getBefore().getId()) == Material.TNT) {
-				loc.getWorld().playSound(loc, Sound.valueOf("FUSE"), 1, 1);
+				replayer.getWatchingPlayer().playSound(loc, Sound.valueOf("FUSE"), 1, 1);
 			}
 		} else {
-			if (blockChange.getBefore().getItemStack().getItemStack().get("type").equals("TNT")) {
-				loc.getWorld().playSound(loc, Sound.ENTITY_TNT_PRIMED, 1, 1);
+			if (blockChange.getBefore().getItemStack() != null && blockChange.getBefore().getItemStack().getItemStack() != null && "TNT".equals(blockChange.getBefore().getItemStack().getItemStack().get("type"))) {
+				replayer.getWatchingPlayer().playSound(loc, Sound.ENTITY_TNT_PRIMED, 1, 1);
 			}
 		}
 	}

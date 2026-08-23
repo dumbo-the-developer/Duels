@@ -71,9 +71,17 @@ public class ReplayHelper {
         return createItem(ItemConfig.getItem(ItemConfigType.RESUME));
     }
 
-    public static void createTeleporter(Player player, Replayer replayer, int page) {
+    public static void createInspectGui(Player player, Replayer replayer, int page) {
         List<String> npcNames = new ArrayList<>(replayer.getNPCList().keySet());
-        int size = (int) Math.ceil(npcNames.size() / 9.0) * 9;
+        if (npcNames.isEmpty() && replayer.getReplay() != null && replayer.getReplay().getMetadata() != null) {
+            if (replayer.getReplay().getMetadata().getPlayer1Name() != null) {
+                npcNames.add(replayer.getReplay().getMetadata().getPlayer1Name());
+            }
+            if (replayer.getReplay().getMetadata().getPlayer2Name() != null) {
+                npcNames.add(replayer.getReplay().getMetadata().getPlayer2Name());
+            }
+        }
+        int size = Math.max(9, (int) Math.ceil(Math.max(1, npcNames.size()) / 9.0) * 9);
 
         int pageSize = 9 * 5;
         int pages = (int) Math.ceil((double) size / pageSize);
@@ -82,42 +90,57 @@ public class ReplayHelper {
             pageSize = size;
         }
 
-        List<String> elements = npcNames.subList((page - 1) * pageSize, Math.min(page * pageSize, npcNames.size()));
+        List<String> elements = npcNames.subList(Math.min((page - 1) * pageSize, npcNames.size()), Math.min(page * pageSize, npcNames.size()));
 
         int inventorySize = Math.max(9, pages > 1 ? pageSize + 9 : pageSize);
-        Inventory inv = Bukkit.createInventory(null, inventorySize, "§7Teleporter");
+        Inventory inv = Bukkit.createInventory(null, inventorySize, "§8Inspect Perspective");
 
         int index = 0;
 
         for (String name : elements) {
             ItemStack stack = new ItemStack(MaterialBridge.PLAYER_HEAD.toMaterial(), 1, (short) 3);
             SkullMeta meta = (SkullMeta) stack.getItemMeta();
-            meta.setDisplayName("§6" + name);
-            meta.setOwner(name);
-            stack.setItemMeta(meta);
+            if (meta != null) {
+                meta.setDisplayName("§e§l" + name);
+                meta.setOwner(name);
+                List<String> lore = new ArrayList<>();
+                lore.add("§7Click to view §b" + name + "§7's first-person perspective.");
+                lore.add("§7Watch crosshair placement, aim, and combat!");
+                lore.add(" ");
+                lore.add("§a► Click to Spectate");
+                lore.add("§8(Press SHIFT to exit back to free camera)");
+                meta.setLore(lore);
+                stack.setItemMeta(meta);
+            }
 
             inv.setItem(index, stack);
-
             index++;
         }
 
         if (page < pages) {
             ItemStack nextPage = new ItemStack(Material.ARROW, page + 1);
             ItemMeta nextMeta = nextPage.getItemMeta();
-            nextMeta.setDisplayName("§aNext Page");
-            nextPage.setItemMeta(nextMeta);
+            if (nextMeta != null) {
+                nextMeta.setDisplayName("§aNext Page");
+                nextPage.setItemMeta(nextMeta);
+            }
             inv.setItem(inventorySize - 1, nextPage);
         }
         if (page > 1) {
             ItemStack previousPage = new ItemStack(Material.ARROW, page - 1);
             ItemMeta previousMeta = previousPage.getItemMeta();
-            previousMeta.setDisplayName("§aPrevious Page");
-            previousPage.setItemMeta(previousMeta);
+            if (previousMeta != null) {
+                previousMeta.setDisplayName("§aPrevious Page");
+                previousPage.setItemMeta(previousMeta);
+            }
             inv.setItem(inventorySize - 9, previousPage);
         }
 
-
         player.openInventory(inv);
+    }
+
+    public static void createTeleporter(Player player, Replayer replayer, int page) {
+        createInspectGui(player, replayer, page);
     }
 
 
