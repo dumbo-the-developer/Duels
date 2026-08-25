@@ -24,13 +24,17 @@ public class Settings {
     @Getter
     private KitImpl kit;
     @Getter
+    private com.meteordevelopments.duels.api.customkit.CustomKit customKit;
+    @Getter
+    @Setter
+    private com.meteordevelopments.duels.api.customkit.CustomKitSnapshot customKitSnapshot;
+    @Getter
     @Setter
     private ArenaImpl arena;
     @Getter
     @Setter
     private int bet;
     @Getter
-    @Setter
     private boolean itemBetting;
     @Getter
     private boolean ownInventory;
@@ -59,6 +63,8 @@ public class Settings {
         senderParty = null;
         targetParty = null;
         kit = null;
+        customKit = null;
+        customKitSnapshot = null;
         arena = null;
         bet = 0;
         itemBetting = false;
@@ -120,9 +126,29 @@ public class Settings {
         return senderParty != null && targetParty != null;
     }
 
+    public void setItemBetting(final boolean itemBetting) {
+        // Player-created custom kit duels ONLY support money betting.
+        if (this.customKit != null) {
+            this.itemBetting = false;
+            return;
+        }
+        this.itemBetting = itemBetting;
+    }
+
     public void setKit(final KitImpl kit) {
         this.kit = kit;
+        this.customKit = null;
+        this.customKitSnapshot = null;
         this.ownInventory = false;
+    }
+
+    public void setCustomKit(final com.meteordevelopments.duels.api.customkit.CustomKit customKit) {
+        this.customKit = customKit;
+        this.kit = null;
+        this.customKitSnapshot = customKit != null ? customKit.toSnapshot() : null;
+        this.ownInventory = false;
+        // Enforce money betting only for custom kit duels
+        this.itemBetting = false;
     }
 
     public void setOwnInventory(final boolean ownInventory) {
@@ -130,6 +156,8 @@ public class Settings {
 
         if (ownInventory) {
             this.kit = null;
+            this.customKit = null;
+            this.customKitSnapshot = null;
         }
     }
 
@@ -140,6 +168,8 @@ public class Settings {
         copy.senderParty = senderParty;
         copy.targetParty = targetParty;
         copy.kit = kit;
+        copy.customKit = customKit;
+        copy.customKitSnapshot = customKitSnapshot;
         copy.arena = arena;
         copy.bet = bet;
         copy.itemBetting = itemBetting;

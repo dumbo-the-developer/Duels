@@ -56,6 +56,8 @@ public class PlayerInfo {
     }
 
     public void restore(final Player player) {
+        PlayerUtil.reset(player);
+
         final double maxHealth = PlayerUtil.getMaxHealth(player);
         player.addPotionEffects(effects);
         player.setHealth(Math.min(health, maxHealth));
@@ -74,6 +76,8 @@ public class PlayerInfo {
      * changes that occurred during the match (for example, if the player picked up XP orbs).
      */
     public void restoreWithoutExperience(final Player player) {
+        PlayerUtil.reset(player);
+
         final double maxHealth = PlayerUtil.getMaxHealth(player);
         player.addPotionEffects(effects);
         player.setHealth(Math.min(health, maxHealth));

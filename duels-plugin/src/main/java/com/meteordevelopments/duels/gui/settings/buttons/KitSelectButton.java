@@ -24,7 +24,16 @@ public class KitSelectButton extends BaseButton {
         }
 
         final Settings settings = settingManager.getSafely(player);
-        final String kit = settings.getKit() != null ? settings.getKit().getName() : lang.getMessage("GENERAL.not-selected");
+        final String kit;
+        if (settings.getCustomKit() != null) {
+            kit = "[Custom] " + settings.getCustomKit().getName();
+        } else if (settings.getKit() != null) {
+            kit = settings.getKit().getName();
+        } else if (settings.isOwnInventory()) {
+            kit = lang.getMessage("GUI.settings.buttons.use-own-inventory.name");
+        } else {
+            kit = lang.getMessage("GENERAL.not-selected");
+        }
         final String lore = lang.getMessage("GUI.settings.buttons.kit-selector.lore", "kit", kit);
         setLore(lang, lore.split("\n"));
     }
@@ -36,6 +45,6 @@ public class KitSelectButton extends BaseButton {
             return;
         }
 
-        kitManager.getGui().open(player);
+        com.meteordevelopments.duels.gui.customkit.CustomKitTypeSelectGui.open(plugin, player);
     }
 }

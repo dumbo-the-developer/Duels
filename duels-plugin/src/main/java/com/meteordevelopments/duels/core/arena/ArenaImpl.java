@@ -214,7 +214,7 @@ public class ArenaImpl extends BaseButton implements Arena {
         } else if (source != null && source.getTeamSize() > 1) {
             this.match = new TeamDuelMatch(plugin, this, kit, items, settings.getBet(), source);
         } else {
-            this.match = new DuelMatch(plugin, this, kit, items, settings.getBet(), source);
+            this.match = new DuelMatch(plugin, this, kit, items, settings, settings.getBet(), source);
         }
         refreshGui(false);
         return match;

@@ -10,7 +10,7 @@ buildscript {
 
 allprojects {
     group = 'com.meteordevelopments'
-    version = '7.5'
+    version = '8.0'
 }
 
 subprojects {
@@ -90,6 +90,10 @@ subprojects {
         maven {
             name = "jitpack"
             url = "https://jitpack.io"
+            content {
+                excludeGroup "com.github.sirblobman.api"
+                excludeGroup "com.github.sirblobman.combatlogx"
+            }
         }
 
         maven {
@@ -100,6 +104,16 @@ subprojects {
         maven {
             name = "tcoded-releases"
             url = "https://repo.tcoded.com/releases"
+        }
+
+        maven {
+            name = 'opencollab-repo'
+            url = 'https://repo.opencollab.dev/main/'
+        }
+
+        maven {
+            name = 'dmulloy2-repo'
+            url = "https://repo.dmulloy2.net/repository/public/"
         }
 
         flatDir {

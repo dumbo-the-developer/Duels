@@ -2,6 +2,7 @@ package com.meteordevelopments.duels.gui.kitedit.buttons;
 
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.gui.BaseButton;
+import com.meteordevelopments.duels.config.CommandsConfig;
 import com.meteordevelopments.duels.core.kit.KitImpl;
 import com.meteordevelopments.duels.core.kit.edit.KitEditManager;
 import org.bukkit.entity.Player;
@@ -22,7 +23,7 @@ public class KitEditButton extends BaseButton {
     public void onClick(final Player player) {
         // Check if player is already editing
         if (KitEditManager.getInstance().isEditing(player)) {
-            lang.sendMessage(player, "KIT.EDIT.already-editing");
+            lang.sendMessage(player, "KIT.EDIT.already-editing", "command", plugin.getCommandsConfig().get(CommandsConfig.CommandKey.KIT).getName());
             return;
         }
         
@@ -43,7 +44,7 @@ public class KitEditButton extends BaseButton {
 
         // Start editing session
         if (KitEditManager.getInstance().startEditSession(player, kit.getName())) {
-            lang.sendMessage(player, "KIT.EDIT.started", "kit", kit.getName());
+            lang.sendMessage(player, "KIT.EDIT.started", "kit", kit.getName(), "command", plugin.getCommandsConfig().get(CommandsConfig.CommandKey.KIT).getName());
         } else {
             lang.sendMessage(player, "KIT.EDIT.start-failed", "kit", kit.getName());
         }

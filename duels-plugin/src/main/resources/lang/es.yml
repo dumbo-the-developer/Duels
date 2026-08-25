@@ -722,9 +722,9 @@ GUI:
 
 KIT:
     EDIT:
-      started: '{PREFIX} &aAhora estás editando el kit &e%kit%&a. Usa &e/kit save &acuando termines.'
+      started: '{PREFIX} &aAhora estás editando el kit &e%kit%&a. Usa &e/%command% save &acuando termines.'
       saved: '{PREFIX} &aTu kit &e%kit% &aha sido guardado y tu inventario restaurado.'
-      already-editing: '{PREFIX} &cYa estás editando un kit. Usa &e/kit save &cprimero para guardarlo.'
+      already-editing: '{PREFIX} &cYa estás editando un kit. Usa &e/%command% save &cprimero para guardarlo.'
       not-editing: '{PREFIX} &cActualmente no estás editando ningún kit.'
       start-failed: '{PREFIX} &cNo se pudo iniciar la sesión de edición de kit.'
       save-failed: '{PREFIX} &cNo se pudo guardar el kit. Inténtalo de nuevo.'
@@ -732,7 +732,7 @@ KIT:
       in-match: '{PREFIX} &cNo puedes editar kits durante un combate. Espera a que termine.'
       session-aborted: '{PREFIX} &cTu sesión de edición de kit fue cancelada porque te uniste a una cola o combate.'
       invalid-items: '{PREFIX} &c¡Sesión de edición de kit cancelada! Solo puedes modificar objetos del kit predeterminado. No se permiten objetos externos.'
-      command-blocked: '{PREFIX} &cNo puedes usar otros comandos mientras editas un kit. Usa &e/kit save &cpara guardar.'
+      command-blocked: '{PREFIX} &cNo puedes usar otros comandos mientras editas un kit. Usa &e/%command% save &cpara guardar.'
       drop-blocked: '{PREFIX} &cNo puedes soltar objetos mientras editas un kit.'
       inventory-blocked: '{PREFIX} &cNo puedes acceder a inventarios externos mientras editas un kit.'
       block-break-blocked: '{PREFIX} &cNo puedes romper bloques mientras editas un kit.'

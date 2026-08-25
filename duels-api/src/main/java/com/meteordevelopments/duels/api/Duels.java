@@ -44,6 +44,24 @@ public interface Duels extends Plugin {
 
 
     /**
+     * Gets the CustomKitManager singleton used by Duels.
+     *
+     * @return CustomKitManager singleton
+     */
+    @NotNull
+    com.meteordevelopments.duels.api.customkit.CustomKitManager getCustomKitManager();
+
+
+    /**
+     * Gets the ReplayManager singleton used by Duels.
+     *
+     * @return ReplayManager singleton
+     */
+    @NotNull
+    com.meteordevelopments.duels.api.replay.ReplayManager getReplayManager();
+
+
+    /**
      * Gets the SpectateManager singleton used by Duels.
      *
      * @return SpectateManager singleton

@@ -27,6 +27,9 @@ public class RequestImpl implements Request {
         this.sender = sender.getUniqueId();
         this.target = target.getUniqueId();
         this.settings = setting.lightCopy();
+        if (setting.getCustomKit() != null) {
+            this.settings.setCustomKitSnapshot(setting.getCustomKit().toSnapshot());
+        }
     }
 
     @Nullable

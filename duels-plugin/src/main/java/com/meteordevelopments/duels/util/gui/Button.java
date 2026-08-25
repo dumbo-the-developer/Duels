@@ -120,4 +120,8 @@ public class Button<P extends JavaPlugin> {
 
     public void onClick(final Player player) {
     }
+
+    public void onClick(final Player player, final org.bukkit.event.inventory.InventoryClickEvent event) {
+        onClick(player);
+    }
 }

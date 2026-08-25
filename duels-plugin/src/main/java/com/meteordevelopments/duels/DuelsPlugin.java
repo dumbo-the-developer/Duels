@@ -3,6 +3,7 @@ package com.meteordevelopments.duels;
 import com.google.common.collect.Lists;
 import com.meteordevelopments.duels.command.commands.party.PartyCommand;
 import com.meteordevelopments.duels.config.CommandsConfig;
+import com.meteordevelopments.duels.core.customkit.CustomKitManagerImpl;
 import com.meteordevelopments.duels.core.kit.edit.KitEditListener;
 import com.meteordevelopments.duels.core.kit.edit.KitEditManager;
 import com.meteordevelopments.duels.listeners.*;
@@ -92,6 +93,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     @Getter
     private KitManagerImpl kitManager;
     @Getter
+    private CustomKitManagerImpl customKitManager;
+    @Getter
     private ArenaManagerImpl arenaManager;
     @Getter
     private SettingsManager settingManager;
@@ -121,7 +124,10 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private PartyManagerImpl partyManager;
     @Getter
     private ValidatorManager validatorManager;
+    @Getter
     private CommandsConfig commandsConfig;
+    @Getter
+    private com.meteordevelopments.duels.replay.ReplayManagerImpl replayManager;
     private static final Logger LOGGER = Logger.getLogger("[Duels-Optimised]");
 
     @Override
@@ -278,6 +284,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         final CommandsConfig.CommandSettings spectate = commandsConfig.get(CommandsConfig.CommandKey.SPECTATE);
         final CommandsConfig.CommandSettings duels = commandsConfig.get(CommandsConfig.CommandKey.DUELS);
         final CommandsConfig.CommandSettings kit = commandsConfig.get(CommandsConfig.CommandKey.KIT);
+        final CommandsConfig.CommandSettings customkits = commandsConfig.get(CommandsConfig.CommandKey.CUSTOMKITS);
+        final CommandsConfig.CommandSettings replay = commandsConfig.get(CommandsConfig.CommandKey.REPLAY);
 
         // Store mappings from original keys to actual names for API compatibility
         commandKeyMap.put("duel", duel.getName().toLowerCase());
@@ -286,6 +294,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         commandKeyMap.put("spectate", spectate.getName().toLowerCase());
         commandKeyMap.put("duels", duels.getName().toLowerCase());
         commandKeyMap.put("kit", kit.getName().toLowerCase());
+        commandKeyMap.put("customkits", customkits.getName().toLowerCase());
+        commandKeyMap.put("replay", replay.getName().toLowerCase());
 
         registerCommands(
             new DuelCommand(this, duel),
@@ -293,7 +303,9 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
             new QueueCommand(this, queue),
             new SpectateCommand(this, spectate),
             new DuelsCommand(this, duels),
-            new KitCommand(this, kit)
+            new KitCommand(this, kit),
+            new com.meteordevelopments.duels.command.commands.CustomKitsCommand(this, customkits),
+            new com.meteordevelopments.duels.command.commands.ReplayCommand(this, replay)
         );
 
         sendMessage("&dSuccessfully registered commands [" + CC.getTimeDifferenceAndColor(start, System.currentTimeMillis()) + ChatColor.WHITE + "]");
@@ -673,6 +685,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadAndTrack("gui listener", () -> loadables.add(guiListener = new GuiListener<>(this)));
         loadAndTrack("party manager", () -> loadables.add(partyManager = new PartyManagerImpl(this)));
         loadAndTrack("kit manager", () -> loadables.add(kitManager = new KitManagerImpl(this)));
+        loadAndTrack("custom kit manager", () -> loadables.add(customKitManager = new com.meteordevelopments.duels.core.customkit.CustomKitManagerImpl(this)));
         loadAndTrack("arena manager", () -> loadables.add(arenaManager = new ArenaManagerImpl(this)));
         loadAndTrack("settings manager", () -> loadables.add(settingManager = new SettingsManager(this)));
         loadAndTrack("player manager", () -> loadables.add(playerManager = new PlayerInfoManager(this)));
@@ -686,6 +699,11 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadAndTrack("hook manager", () -> hookManager = new HookManager(this));
         loadAndTrack("validator manager", () -> loadables.add(validatorManager = new ValidatorManager(this)));
         loadAndTrack("teleport manager", () -> loadables.add(teleport = new Teleport(this)));
+        loadAndTrack("replay manager", () -> {
+            replayManager = new com.meteordevelopments.duels.replay.ReplayManagerImpl(this);
+            loadables.add(replayManager);
+            registerListener(replayManager);
+        });
 
         if (!load()) {
             getServer().getPluginManager().disablePlugin(this);

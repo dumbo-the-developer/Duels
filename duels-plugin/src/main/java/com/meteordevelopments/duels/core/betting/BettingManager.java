@@ -35,6 +35,11 @@ public class BettingManager implements Loadable, Listener {
     }
 
     public void open(final Settings settings, final Player sender, final Player target) {
+        if (settings.getCustomKit() != null) {
+            plugin.getLang().sendMessage(sender, "ERROR.customkits.item-betting-disabled");
+            return;
+        }
+
         final BettingGui gui = new BettingGui(plugin, settings, sender, target);
         guiListener.addGui(sender, gui).open(sender);
         guiListener.addGui(target, gui).open(target);

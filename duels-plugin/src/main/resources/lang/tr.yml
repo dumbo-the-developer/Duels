@@ -722,9 +722,9 @@ GUI:
 
 KIT:
     EDIT:
-      started: '{PREFIX} &aArtık &e%kit% &akitini düzenliyorsun. Bitince &e/kit save &8kullan.'
+      started: '{PREFIX} &aArtık &e%kit% &akitini düzenliyorsun. Bitince &e/%command% save &8kullan.'
       saved: '{PREFIX} &a&e%kit% &akitin kaydedildi ve envanterın geri yüklendi.'
-      already-editing: '{PREFIX} &cZaten bir kit düzenliyorsun. Önce &e/kit save &cile kaydet.'
+      already-editing: '{PREFIX} &cZaten bir kit düzenliyorsun. Önce &e/%command% save &cile kaydet.'
       not-editing: '{PREFIX} &cŞu an bir kit düzenlemiyorsun.'
       start-failed: '{PREFIX} &cKit düzenleme oturumu başlatılamadı.'
       save-failed: '{PREFIX} &cKit kaydedilemedi. Lütfen tekrar dene.'
@@ -732,7 +732,7 @@ KIT:
       in-match: '{PREFIX} &cMaç sırasında kit düzenleyemezsin. Maç bitene kadar bekle.'
       session-aborted: '{PREFIX} &cKuyruğa veya maça girdiğin için kit düzenleme oturumun iptal edildi.'
       invalid-items: '{PREFIX} &cKit düzenleme oturumu iptal edildi! Yalnızca varsayılan kitteki eşyaları değiştirebilirsin. Dış eşyalara izin verilmez.'
-      command-blocked: '{PREFIX} &cKit düzenlerken başka komut kullanamazsın. &e/kit save &cile kaydet.'
+      command-blocked: '{PREFIX} &cKit düzenlerken başka komut kullanamazsın. &e/%command% save &cile kaydet.'
       drop-blocked: '{PREFIX} &cKit düzenlerken eşya düşüremezsin.'
       inventory-blocked: '{PREFIX} &cKit düzenlerken dış envanterlere erişemezsin.'
       block-break-blocked: '{PREFIX} &cKit düzenlerken blok kıramazsın.'

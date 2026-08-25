@@ -58,6 +58,7 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
             if (key.startsWith("STRINGS")) {
                 final String[] args = key.split(Pattern.quote("."));
                 strings.put(args[args.length - 1], message);
+                messages.put(key, message);
             } else {
                 messages.put(key, message);
             }

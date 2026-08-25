@@ -7,7 +7,6 @@ import com.meteordevelopments.duels.core.arena.ArenaImpl;
 import com.meteordevelopments.duels.core.arena.ArenaManagerImpl;
 import com.meteordevelopments.duels.core.kit.edit.KitEditManager;
 import com.meteordevelopments.duels.core.match.DuelMatch;
-import com.meteordevelopments.duels.core.match.party.PartyDuelMatch;
 import com.meteordevelopments.duels.core.match.team.TeamDuelMatch;
 import com.meteordevelopments.duels.core.arena.fireworks.FireworkUtils;
 import com.meteordevelopments.duels.config.Config;
@@ -74,10 +73,10 @@ public class DuelManager implements Loadable {
     private EssentialsHook essentials;
     private McMMOHook mcMMO;
     private MyPetHook myPet;
-    private MCPetsHook mcPets;
 
     private WrappedTask durationCheckTask;
     private final Set<UUID> endgameLeaveRequests = new HashSet<>();
+    private final Set<String> endgameLeaveCommandRuns = new HashSet<>();
 
     public DuelManager(final DuelsPlugin plugin) {
         this.plugin = plugin;
@@ -93,15 +92,7 @@ public class DuelManager implements Loadable {
     }
 
     public void handleMatchEnd(DuelMatch match, ArenaImpl arena, Player loser, Location deadLocation, Player winner) {
-        final boolean rounds3 = match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3);
-
-        // For a decisive ROUNDS3 hit, the loser is still alive because the damage event was cancelled.
-        // Remove and teleport them immediately so they cannot die in the arena before the delayed end flow runs.
-        if (rounds3 && !loser.isDead()) {
-            handleLoss(loser, arena, match);
-        }
-
-        DuelsPlugin.getFoliaLib().getScheduler().runAtLocationLater(arena.first().getLocation(), task -> {
+        DuelsPlugin.getFoliaLib().getScheduler().runAtLocationLater(arena.first().getLocation(), () -> {
             if (arena.size() == 0) {
                 match.getAllPlayers().forEach(matchPlayer -> {
                     handleTie(matchPlayer, arena, match, false);
@@ -114,7 +105,7 @@ public class DuelManager implements Loadable {
             }
 
             if (config.isSpawnFirework()) {
-                DuelsPlugin.getFoliaLib().getScheduler().runAtLocation(deadLocation, fireworkTask -> {
+                DuelsPlugin.getFoliaLib().getScheduler().runAtLocation(deadLocation, task -> {
                     final Firework firework = (Firework) deadLocation.getWorld().spawnEntity(deadLocation, EntityType.FIREWORK);
                     final FireworkMeta meta = firework.getFireworkMeta();
                     String colourName = config.getFireworkColour();
@@ -131,10 +122,10 @@ public class DuelManager implements Loadable {
             winners.forEach(w -> inventoryManager.create(w, false));
             userDataManager.handleMatchEnd(match, winners);
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
-            DuelsPlugin.getFoliaLib().getScheduler().runAtLocationLater(arena.first().getLocation(), task2 -> {
-                // Handle a dead ROUNDS3 loser here so /kill-style deaths still cache their items.
-                // Non-dead losers are already restored immediately above.
-                if (rounds3 && playerManager.get(loser) != null) {
+            DuelsPlugin.getFoliaLib().getScheduler().runAtEntityLater(loser, () -> {
+                // Handle the loser (remove from arena and restore state)
+                // This is especially important for ROUNDS3 where the loser never actually dies
+                if (match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3)) {
                     handleLoss(loser, arena, match);
                 }
                 
@@ -142,47 +133,14 @@ public class DuelManager implements Loadable {
                     handleWin(alivePlayer, loser, arena, match);
                 }
 
-                Collection<Player> winnerPlayers = winners;
-                Collection<Player> loserPlayers = Collections.singleton(loser);
-
-                if (match instanceof PartyDuelMatch partyMatch) {
-                    final Party winnerParty = partyMatch.getPlayerToParty().get(winner);
-                    final Party loserParty = partyMatch.getPlayerToParty().get(loser);
-
-                    if (winnerParty != null) {
-                        winnerPlayers = new HashSet<>(partyMatch.getPartyToPlayers().get(winnerParty));
-                    }
-
-                    if (loserParty != null) {
-                        loserPlayers = new HashSet<>(partyMatch.getPartyToPlayers().get(loserParty));
-                    }
+                if (!endgameLeaveCommandRuns.contains(arena.getName())) {
+                    runEndCommands(match, arena, winners, Collections.singleton(loser));
                 }
 
-                runEndCommands(match, arena, winnerPlayers, loserPlayers);
-
                 arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
-            }, config.getTeleportDelay() * 20L);
+                clearEndgameLeaveState(arena, match);
+            }, null, config.getTeleportDelay() * 20L);
         }, 1L);
-    }
-
-    public boolean leaveDuringEndgame(final Player player) {
-        final ArenaImpl arena = arenaManager.get(player);
-        if (arena == null || !arena.isEndGame()) {
-            return false;
-        }
-
-        endgameLeaveRequests.add(player.getUniqueId());
-
-        final PlayerInfo info = playerManager.get(player);
-        final Location destination = info != null ? info.getLocation() : playerManager.getLobby();
-
-        plugin.doSyncAfter(() -> {
-            if (player.isOnline()) {
-                teleport.tryTeleport(player, destination);
-            }
-        }, 1L);
-
-        return true;
     }
 
     public void handleTeamMatchEnd(TeamDuelMatch match, ArenaImpl arena, Location deadLocation, TeamDuelMatch.Team winningTeam) {
@@ -203,9 +161,17 @@ public class DuelManager implements Loadable {
 
             final Set<Player> winners = match.getWinningTeamPlayers();
             final Set<Player> losers = match.getLosingTeamPlayers();
-
+            
+            // Restore gamemode for all players immediately using individual schedulers
             final Set<Player> allPlayers = match.getAllPlayers();
-
+            for (Player player : allPlayers) {
+                DuelsPlugin.getFoliaLib().getScheduler().runAtEntity(player, task2 -> {
+                    player.setGameMode(GameMode.SURVIVAL);
+                    player.setAllowFlight(false);
+                    player.setFlying(false);
+                });
+            }
+            
             // Create inventory snapshots for display
             allPlayers.forEach(p -> inventoryManager.create(p, false));
             userDataManager.handleTeamMatchEnd(match, winners, losers);
@@ -213,15 +179,6 @@ public class DuelManager implements Loadable {
             
             // Schedule teleportation and restoration for all players after delay
             DuelsPlugin.getFoliaLib().getScheduler().runAtLocationLater(deadLocation, task2 -> {
-                // Restore gamemode for all players when the match is actually ending
-                for (Player player : allPlayers) {
-                    DuelsPlugin.getFoliaLib().getScheduler().runAtEntity(player, task3 -> {
-                        player.setGameMode(GameMode.SURVIVAL);
-                        player.setAllowFlight(false);
-                        player.setFlying(false);
-                    });
-                }
-
                 // Handle losers (including dead spectators)
                 for (Player loser : losers) {
                     if (mcMMO != null) {
@@ -246,16 +203,53 @@ public class DuelManager implements Loadable {
                     handleTeamWin(winner, losers, arena, match);
                 }
 
-                runEndCommands(match, arena, winners, losers);
+                if (!endgameLeaveCommandRuns.contains(arena.getName())) {
+                    runEndCommands(match, arena, winners, losers);
+                }
 
                 arena.endMatch(winners.iterator().next().getUniqueId(), losers.iterator().next().getUniqueId(), Reason.OPPONENT_DEFEAT);
+                clearEndgameLeaveState(arena, match);
             }, config.getTeleportDelay() * 20L);
         }, 1L);
+    }
+
+    public boolean leaveDuringEndgame(final Player player) {
+        final ArenaImpl arena = arenaManager.get(player);
+        if (arena == null || !arena.isEndGame()) {
+            return false;
+        }
+
+        final DuelMatch match = arena.getMatch();
+        if (match == null) {
+            return false;
+        }
+
+        endgameLeaveRequests.add(player.getUniqueId());
+
+        final PlayerInfo info = playerManager.get(player);
+        if (info != null) {
+            teleport.tryTeleport(player, info.getLocation());
+        } else {
+            teleport.tryTeleport(player, playerManager.getLobby());
+        }
+
+        if (endgameLeaveCommandRuns.add(arena.getName())) {
+            final Set<Player> winners = match.getAlivePlayers();
+            final Set<Player> losers = match.getAllPlayers().stream()
+                    .filter(matchPlayer -> !winners.contains(matchPlayer))
+                    .collect(Collectors.toSet());
+
+            runEndCommands(match, arena, winners, losers);
+        }
+
+        return true;
     }
 
     private void handleTeamWin(final Player winner, final Set<Player> losers, final ArenaImpl arena, final DuelMatch match) {
         // Don't remove the winner in team matches - they should stay alive
         // arena.remove(winner);
+
+        final boolean leaveRequested = endgameLeaveRequests.remove(winner.getUniqueId());
 
         final String opponentNames = losers.stream().map(Player::getName).collect(Collectors.joining(", "));
 
@@ -275,8 +269,17 @@ public class DuelManager implements Loadable {
             mcMMO.enableSkills(winner);
         }
 
-        final PlayerInfo info = playerManager.get(winner);
         final List<ItemStack> items = match.getItems();
+
+        if (leaveRequested) {
+            playerManager.remove(winner);
+            if (InventoryUtil.addOrDrop(winner, items)) {
+                lang.sendMessage(winner, "DUEL.reward.items.message", "name", opponentNames);
+            }
+            return;
+        }
+
+        final PlayerInfo info = playerManager.get(winner);
 
         if (!winner.isDead()) {
             playerManager.remove(winner);
@@ -312,7 +315,6 @@ public class DuelManager implements Loadable {
         this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
         this.mcMMO = plugin.getHookManager().getHook(McMMOHook.class);
         this.myPet = plugin.getHookManager().getHook(MyPetHook.class);
-        this.mcPets = plugin.getHookManager().getHook(MCPetsHook.class);
 
         if (config.getMaxDuration() > 0) {
             this.durationCheckTask = plugin.doSyncRepeat(() -> {
@@ -440,7 +442,6 @@ public class DuelManager implements Loadable {
      * @param match    Match the player is in
      */
     private void handleWin(final Player winner, final Player opponent, final ArenaImpl arena, final DuelMatch match) {
-        final boolean leaveRequested = endgameLeaveRequests.remove(winner.getUniqueId());
         arena.remove(winner);
 
         final String opponentName = opponent != null ? opponent.getName() : lang.getMessage("GENERAL.none");
@@ -461,15 +462,10 @@ public class DuelManager implements Loadable {
             mcMMO.enableSkills(winner);
         }
 
-        final PlayerInfo info = playerManager.remove(winner);
         final List<ItemStack> items = match.getItems();
 
-        if (leaveRequested) {
-            if (info != null) {
-                teleport.tryTeleport(winner, info.getLocation());
-            } else {
-                teleport.tryTeleport(winner, playerManager.getLobby());
-            }
+        if (endgameLeaveRequests.remove(winner.getUniqueId())) {
+            playerManager.remove(winner);
 
             if (InventoryUtil.addOrDrop(winner, items)) {
                 lang.sendMessage(winner, "DUEL.reward.items.message", "name", opponentName);
@@ -478,7 +474,11 @@ public class DuelManager implements Loadable {
             return;
         }
 
+        final PlayerInfo info = playerManager.get(winner);
+
         if (!winner.isDead()) {
+            playerManager.remove(winner);
+
             if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {
                 PlayerUtil.reset(winner);
             }
@@ -655,7 +655,10 @@ public class DuelManager implements Loadable {
             playerManager.create(player, dropOwnInv, restoreExperience);
             teleport.tryTeleport(player, location);
 
-            if (kit != null) {
+            if (match.getCustomKitSnapshot() != null) {
+                PlayerUtil.reset(player);
+                match.getCustomKitSnapshot().equip(player);
+            } else if (kit != null) {
                 PlayerUtil.reset(player);
                 
                 // Check for player-specific kit first
@@ -682,10 +685,6 @@ public class DuelManager implements Loadable {
 
             if (myPet != null) {
                 myPet.removePet(player);
-            }
-
-            if (mcPets != null) {
-                mcPets.removePets(player);
             }
 
             if (essentials != null) {
@@ -774,9 +773,7 @@ public class DuelManager implements Loadable {
                 top.clear();
             }
 
-            final boolean dropOwnInv = match.isOwnInventory() && config.isOwnInventoryDropInventoryItems();
-
-            if (!dropOwnInv) {
+            if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {
                 event.getDrops().clear();
                 event.setKeepLevel(true);
                 event.setDroppedExp(0);
@@ -805,13 +802,9 @@ public class DuelManager implements Loadable {
                 arena.remove(player);
                 
                 // Prevent death screen and respawn for team matches
-                if (!dropOwnInv) {
-                    event.setKeepInventory(true);
-                    event.setDroppedExp(0);
-                    event.getDrops().clear();
-                } else {
-                    event.setKeepInventory(false);
-                }
+                event.setKeepInventory(true);
+                event.setDroppedExp(0);
+                event.getDrops().clear();
                 event.setDeathMessage(null);
                 
                 // Immediately set to spectator mode to prevent death screen
@@ -895,17 +888,15 @@ public class DuelManager implements Loadable {
         public void on(final PlayerQuitEvent event) {
             final Player player = event.getPlayer();
 
-            if (!arenaManager.isInMatch(player)) {
+            if (!arenaManager.isInMatch(player) || endgameLeaveRequests.contains(player.getUniqueId())) {
                 return;
             }
 
+            // Kill the player to trigger the death handler which ends the match.
+            // Do NOT call PlayerUtil.reset() or info.restore() here — the player is dead
+            // and modifying their state causes corruption (e.g. stuck in adventure-like mode).
+            // PlayerInfo stays in cache and will be restored via PlayerRespawnEvent on rejoin.
             player.setHealth(0);
-            player.getInventory().clear();
-            player.getInventory().setArmorContents(null);
-            player.updateInventory();
-
-            final PlayerInfo info = playerManager.get(player);
-            info.restore(player);
         }
 
         @EventHandler(ignoreCancelled = true)
@@ -977,12 +968,13 @@ public class DuelManager implements Loadable {
             if (!config.isLimitTeleportEnabled()
                     || event.getCause() == TeleportCause.ENDER_PEARL
                     || event.getCause() == TeleportCause.SPECTATE
-                    || event.getCause() == TeleportCause.PLUGIN
-                    || event.getCause() == TeleportCause.UNKNOWN
                     || !arenaManager.isInMatch(player)) {
                 return;
             }
 
+            // External plugins and command-based teleport requests should also be blocked when the
+            // duel teleport limit is enabled. Internal forced teleports still work because the
+            // Teleport helper clears the cancellation later via metadata.
             final Location from = event.getFrom();
 
             if (from.getWorld().equals(to.getWorld()) && from.distance(to) <= config.getDistanceAllowed()) {
@@ -1001,7 +993,7 @@ public class DuelManager implements Loadable {
 
             final Player player = (Player) event.getPlayer();
 
-            if (!arenaManager.isInMatch(player) || endgameLeaveRequests.contains(player.getUniqueId())) {
+            if (!arenaManager.isInMatch(player)) {
                 return;
             }
 
@@ -1054,32 +1046,22 @@ public class DuelManager implements Loadable {
             final String loserNames = losers.stream().map(Player::getName).collect(Collectors.joining(", "));
 
             for (final String command : config.getEndCommands()) {
-                for (final Player winner : winners) {
-                    executeCommandWithDelay(replaceEndCommandPlaceholders(command, winner, true, winnerNames, loserNames, match, arena));
-                }
+                final String processedCommand = command
+                        .replace("%winner%", winnerNames)
+                        .replace("%loser%", loserNames)
+                        .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "")
+                        .replace("%arena%", arena.getName())
+                        .replace("%bet_amount%", String.valueOf(match.getBet()));
 
-                for (final Player loser : losers) {
-                    executeCommandWithDelay(replaceEndCommandPlaceholders(command, loser, false, winnerNames, loserNames, match, arena));
-                }
+                executeCommandWithDelay(processedCommand);
             }
         } catch (Exception ex) {
             Log.warn(DuelManager.this, "Error while running match end commands: " + ex.getMessage());
         }
     }
 
-    private String replaceEndCommandPlaceholders(final String command, final Player player, final boolean winnerSide,
-                                                 final String winnerNames, final String loserNames,
-                                                 final DuelMatch match, final ArenaImpl arena) {
-        final String playerName = player.getName();
-        final String winnerValue = winnerSide ? playerName : winnerNames;
-        final String loserValue = winnerSide ? loserNames : playerName;
-
-        return command
-                .replace("%player%", playerName)
-                .replace("%winner%", winnerValue)
-                .replace("%loser%", loserValue)
-                .replace("%kit%", match.getKit() != null ? match.getKit().getName() : "")
-                .replace("%arena%", arena.getName())
-                .replace("%bet_amount%", String.valueOf(match.getBet()));
+    private void clearEndgameLeaveState(final ArenaImpl arena, final DuelMatch match) {
+        endgameLeaveCommandRuns.remove(arena.getName());
+        match.getAllPlayers().forEach(player -> endgameLeaveRequests.remove(player.getUniqueId()));
     }
 }
