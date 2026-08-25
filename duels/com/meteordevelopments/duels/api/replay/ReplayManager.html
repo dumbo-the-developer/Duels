@@ -108,14 +108,19 @@ loadScripts(document, 'script');</script>
 <div class="block">Deletes a recorded replay by its ID.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isWatching(org.bukkit.entity.Player)" class="member-name-link">isWatching</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isAvailable()" class="member-name-link">isAvailable</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Checks if the replay system is available and enabled (e.g.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isWatching(org.bukkit.entity.Player)" class="member-name-link">isWatching</a><wbr>(org.bukkit.entity.Player&nbsp;player)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Checks if a player is currently watching a replay.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#playReplay(org.bukkit.entity.Player,java.lang.String)" class="member-name-link">playReplay</a><wbr>(org.bukkit.entity.Player&nbsp;watcher,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#playReplay(org.bukkit.entity.Player,java.lang.String)" class="member-name-link">playReplay</a><wbr>(org.bukkit.entity.Player&nbsp;watcher,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;replayId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Starts replay playback for a player.</div>
 </div>
 </div>
@@ -170,6 +175,17 @@ loadScripts(document, 'script');</script>
 <dd><code>player</code> - the player to check</dd>
 <dt>Returns:</dt>
 <dd>true if the player is in an active replay session, false otherwise</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="isAvailable()">
+<h3>isAvailable</h3>
+<div class="member-signature"><span class="return-type">boolean</span>&nbsp;<span class="element-name">isAvailable</span>()</div>
+<div class="block">Checks if the replay system is available and enabled (e.g. required dependencies like ProtocolLib are present).</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>true if the replay system is available, false otherwise</dd>
 </dl>
 </section>
 </li>
