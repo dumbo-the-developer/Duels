@@ -1,5 +1,6 @@
 package com.meteordevelopments.duels.util.inventory;
 
+import com.meteordevelopments.duels.util.StringUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -10,7 +11,7 @@ public final class InventoryBuilder {
     private final Inventory inventory;
 
     private InventoryBuilder(final String title, final int size) {
-        this.inventory = Bukkit.createInventory(null, size, title);
+        this.inventory = Bukkit.createInventory(null, size, title != null ? StringUtil.color(title) : "");
     }
 
     public static InventoryBuilder of(final String title, final int size) {

@@ -38,15 +38,27 @@ public class KitImpl extends BaseButton implements Kit {
 
     public KitImpl(final DuelsPlugin plugin, final String name, final ItemStack displayed, final boolean usePermission,
                    final boolean arenaSpecific, final Set<Characteristic> characteristics) {
-        super(plugin, displayed != null ? displayed : ItemBuilder
-                .of(Material.DIAMOND_SWORD)
-                .name("&7&l" + name, plugin.getLang())
-                .lore(plugin.getLang(), "&aClick to send", "&aa duel request", "&awith this kit!")
-                .build());
+        super(plugin, displayed != null ? displayed : buildDefaultItem(plugin, name));
         this.name = name;
         this.usePermission = usePermission;
         this.arenaSpecific = arenaSpecific;
         this.characteristics = characteristics;
+    }
+
+    private static ItemStack buildDefaultItem(final DuelsPlugin plugin, final String name) {
+        if (plugin.getGuiConfigManager() != null && plugin.getGuiConfigManager().getKitSelectGuiConfig() != null) {
+            final com.meteordevelopments.duels.gui.configuration.GuiItemConfig kitBtn = plugin.getGuiConfigManager().getKitSelectGuiConfig().getKitButton();
+            if (kitBtn != null && kitBtn.getName() != null) {
+                final Map<String, String> placeholders = new HashMap<>();
+                placeholders.put("name", name);
+                return kitBtn.buildItem(plugin.getLang(), false, placeholders);
+            }
+        }
+        return ItemBuilder
+                .of(Material.DIAMOND_SWORD)
+                .name("&b&l" + name, plugin.getLang())
+                .lore(plugin.getLang(), "&7Click to select this kit!")
+                .build();
     }
 
     public KitImpl(final DuelsPlugin plugin, final String name, final PlayerInventory inventory) {

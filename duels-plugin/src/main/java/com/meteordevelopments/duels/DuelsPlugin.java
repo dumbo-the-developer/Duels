@@ -56,6 +56,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import com.meteordevelopments.duels.api.folialib.task.WrappedTask;
+import com.meteordevelopments.duels.gui.configuration.GuiConfigManager;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
@@ -86,6 +87,8 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
     private Config configuration;
     @Getter
     private Lang lang;
+    @Getter
+    private GuiConfigManager guiConfigManager;
     @Getter
     private UserManagerImpl userManager;
     @Getter
@@ -681,6 +684,7 @@ public class DuelsPlugin extends JavaPlugin implements Duels, LogSource {
         loadAndTrack("config", () -> loadables.add(configuration = new Config(this)));
         loadAndTrack("commands config", () -> loadables.add(commandsConfig = new CommandsConfig(this)));
         loadAndTrack("lang", () -> loadables.add(lang = new Lang(this)));
+        loadAndTrack("gui config", () -> loadables.add(guiConfigManager = new GuiConfigManager(this)));
         loadAndTrack("user manager", () -> loadables.add(userManager = new UserManagerImpl(this)));
         loadAndTrack("gui listener", () -> loadables.add(guiListener = new GuiListener<>(this)));
         loadAndTrack("party manager", () -> loadables.add(partyManager = new PartyManagerImpl(this)));

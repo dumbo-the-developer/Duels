@@ -1,0 +1,119 @@
+# =============================================================
+# Duels - Kit Type Selector GUI Configuration
+# =============================================================
+# This GUI opens when a player clicks on the Kit Selector option
+# in the Duel Request Settings GUI.
+#
+# Configurations available:
+#   title: The inventory title (supports & color codes and MiniMessage tags)
+#   rows: Number of rows in the GUI (1 - 6)
+#   decorations: Custom decorative/filler items placed into specific slots
+#   buttons: Functional interactive buttons
+#
+# Slot definitions support:
+#   slot: 4                          (single slot)
+#   slots: [0, 1, 2, 3]              (list of slots)
+#   slots: ["0-8", "18-26"]          (ranges of slots)
+#   glowing-slots: [10, 16]          (slots with enchantment glow)
+# =============================================================
+
+title: '&8Select Kit Type'
+rows: 4
+
+# =============================================================
+# DECORATIONS
+# =============================================================
+decorations:
+  # Outer frame border
+  border:
+    slots:
+      - "0-8"
+      - 9
+      - 17
+      - 18
+      - 26
+      - "27-30"
+      - "32-35"
+    item:
+      material: STAINED_GLASS_PANE
+      data: 7
+      name: '&r'
+      lore: []
+      glowing: false
+      custom-model-data: 0
+
+  # Inner background filler
+  inner-filler:
+    slots:
+      - 10
+      - 12
+      - 14
+      - 16
+      - "19-25"
+    item:
+      material: STAINED_GLASS_PANE
+      data: 15
+      name: '&r'
+      lore: []
+      glowing: false
+      custom-model-data: 0
+
+# =============================================================
+# FUNCTIONAL BUTTONS
+# =============================================================
+buttons:
+  server-kits:
+    slot: 11
+    item:
+      material: DIAMOND_SWORD
+      data: 0
+      name: '&b&lServer Kits'
+      lore:
+        - '&7Select from predefined server duel kits.'
+        - ' '
+        - '&aClick to browse Server Kits'
+      glowing: false
+      custom-model-data: 0
+
+  custom-kits:
+    slot: 13
+    item:
+      material: NETHERITE_SWORD
+      data: 0
+      name: '&d&lMy Custom Kits'
+      lore:
+        - '&7Select one of your custom duel kits.'
+        - ' '
+        - '&aClick to browse Custom Kits'
+      lore-no-permission:
+        - '&cYou do not have permission to'
+        - '&cuse custom kits.'
+      glowing: false
+      custom-model-data: 0
+
+  own-inventory:
+    slot: 15
+    item:
+      material: CHEST
+      data: 0
+      name: '&e&lUse Own Inventory'
+      lore:
+        - '&7Duel with items in your current inventory.'
+        - ' '
+        - '&aClick to enable Own Inventory mode'
+      lore-no-permission:
+        - '&cYou do not have permission to'
+        - '&cuse this option.'
+      glowing: false
+      custom-model-data: 0
+
+  back:
+    slot: 31
+    item:
+      material: BARRIER
+      data: 0
+      name: '&c&lBack'
+      lore:
+        - '&7Click to return to Duel Settings.'
+      glowing: false
+      custom-model-data: 0

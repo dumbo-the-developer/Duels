@@ -1,0 +1,114 @@
+# =============================================================
+# Duels - Arena Selector GUI Configuration
+# =============================================================
+# This GUI opens when a player clicks on the Arena Selector option
+# in the Duel Request Settings GUI.
+#
+# Configurations available:
+#   title: The inventory title (supports & color codes and MiniMessage tags)
+#   rows: Number of rows in the GUI (1 - 6)
+#   item-slots: The exact slots where arenas are populated dynamically per page
+#   decorations: Custom decorative/filler items placed into specific slots
+#   buttons: Navigation and action buttons
+#
+# Slot definitions support:
+#   slot: 4                          (single slot)
+#   slots: [0, 1, 2, 3]              (list of slots)
+#   slots: ["0-8", "18-26"]          (ranges of slots)
+#   glowing-slots: [10, 16]          (slots with enchantment glow)
+# =============================================================
+
+title: '&8Arena Selection'
+rows: 4
+
+# =============================================================
+# DYNAMIC ITEM FILL SLOTS
+# =============================================================
+# Arenas will be placed into these slots sequentially on each page.
+item-slots:
+  - "10-16"
+  - "19-25"
+
+# =============================================================
+# DECORATIONS
+# =============================================================
+decorations:
+  # Outer frame border
+  border:
+    slots:
+      - "0-9"
+      - 17
+      - 18
+      - 26
+      - "28-30"
+      - "32-34"
+    item:
+      material: STAINED_GLASS_PANE
+      data: 7
+      name: '&r'
+      lore: []
+      glowing: false
+      custom-model-data: 0
+
+# =============================================================
+# BUTTONS
+# =============================================================
+buttons:
+  previous-page:
+    slot: 27
+    item:
+      material: ARROW
+      data: 0
+      name: '&a&l« Previous Page'
+      lore:
+        - '&7Click to go to the previous page.'
+      glowing: false
+      custom-model-data: 0
+
+  next-page:
+    slot: 35
+    item:
+      material: ARROW
+      data: 0
+      name: '&a&lNext Page »'
+      lore:
+        - '&7Click to go to the next page.'
+      glowing: false
+      custom-model-data: 0
+
+  back:
+    slot: 31
+    item:
+      material: BARRIER
+      data: 0
+      name: '&c&lBack'
+      lore:
+        - '&7Click to return to Duel Settings.'
+      glowing: false
+      custom-model-data: 0
+
+  empty:
+    slot: 22
+    item:
+      material: STICK
+      data: 0
+      name: '&c&lNo Arenas Available'
+      lore:
+        - '&7There are currently no arenas available.'
+      glowing: false
+      custom-model-data: 0
+
+  # Template format for arena display items
+  arena:
+    item:
+      material: EMPTY_MAP
+      data: 0
+      name: '&a&lArena %name%'
+      lore:
+        - '&7Status: %status%'
+        - ' '
+        - '&aClick to select this arena!'
+      lore-available: '&aAvailable'
+      lore-unavailable: '&cUnavailable'
+      glowing: false
+      custom-model-data: 0

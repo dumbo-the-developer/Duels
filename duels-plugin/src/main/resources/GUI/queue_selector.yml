@@ -1,0 +1,103 @@
+# =============================================================
+# Duels - Queue Selector GUI Configuration
+# =============================================================
+# This GUI opens when a player uses /queue, /duel queue, or clicks
+# a queue sign.
+#
+# Configurations available:
+#   title: The inventory title (supports & color codes and MiniMessage tags)
+#   rows: Number of rows in the GUI (1 - 6)
+#   item-slots: The exact slots where queues are populated dynamically per page
+#   decorations: Custom decorative/filler items placed into specific slots
+#   buttons: Navigation and queue item template settings
+#
+# Slot definitions support:
+#   slot: 4                          (single slot)
+#   slots: [0, 1, 2, 3]              (list of slots)
+#   slots: ["0-8", "18-26"]          (ranges of slots)
+#   glowing-slots: [10, 16]          (slots with enchantment glow)
+# =============================================================
+
+title: '&8Duel Queues'
+rows: 4
+
+# =============================================================
+# DYNAMIC ITEM FILL SLOTS
+# =============================================================
+# Queues will be placed into these slots sequentially on each page.
+item-slots:
+  - "10-16"
+  - "19-25"
+
+# =============================================================
+# DECORATIONS
+# =============================================================
+decorations:
+  # Outer frame border
+  border:
+    slots:
+      - "0-9"
+      - 17
+      - 18
+      - 26
+      - "28-34"
+    item:
+      material: STAINED_GLASS_PANE
+      data: 7
+      name: '&r'
+      lore: []
+      glowing: false
+      custom-model-data: 0
+
+# =============================================================
+# BUTTONS
+# =============================================================
+buttons:
+  previous-page:
+    slot: 27
+    item:
+      material: ARROW
+      data: 0
+      name: '&a&l« Previous Page'
+      lore:
+        - '&7Click to go to the previous page.'
+      glowing: false
+      custom-model-data: 0
+
+  next-page:
+    slot: 35
+    item:
+      material: ARROW
+      data: 0
+      name: '&a&lNext Page »'
+      lore:
+        - '&7Click to go to the next page.'
+      glowing: false
+      custom-model-data: 0
+
+  empty:
+    slot: 22
+    item:
+      material: STICK
+      data: 0
+      name: '&c&lNo Queues Available'
+      lore:
+        - '&7There are currently no active duel queues.'
+      glowing: false
+      custom-model-data: 0
+
+  # Template format for queue display items
+  queue:
+    item:
+      material: DIAMOND_SWORD
+      data: 0
+      name: '&a&l%name%'
+      lore:
+        - '&7Kit: &b%kit%'
+        - '&7Bet: &6$%bet_amount%'
+        - '&7In Queue: &a%in_queue%'
+        - '&7In Match: &e%in_match%'
+        - ' '
+        - '&aClick to join this queue!'
+      glowing: false
+      custom-model-data: 0

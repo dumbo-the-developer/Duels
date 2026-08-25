@@ -54,16 +54,28 @@ public class ArenaImpl extends BaseButton implements Arena {
     private DuelCountdown countdown;
 
     public ArenaImpl(final DuelsPlugin plugin, final String name, final boolean disabled) {
-        super(plugin, ItemBuilder
-                .of(Items.EMPTY_MAP)
-                .name(plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.name", "name", name), plugin.getLang())
-                .lore(plugin.getLang(), plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.lore-default").split("\n"))
-                .build()
-        );
+        super(plugin, buildDefaultItem(plugin, name));
         this.name = name;
         this.disabled = disabled;
         // Store the original display item with {status} placeholder
         this.originalDisplayed = getDisplayed().clone();
+    }
+
+    private static ItemStack buildDefaultItem(final DuelsPlugin plugin, final String name) {
+        if (plugin.getGuiConfigManager() != null && plugin.getGuiConfigManager().getArenaSelectGuiConfig() != null) {
+            final com.meteordevelopments.duels.gui.configuration.GuiItemConfig arenaBtn = plugin.getGuiConfigManager().getArenaSelectGuiConfig().getArenaButton();
+            if (arenaBtn != null && arenaBtn.getName() != null) {
+                final Map<String, String> placeholders = new HashMap<>();
+                placeholders.put("name", name);
+                placeholders.put("status", "%status%");
+                return arenaBtn.buildItem(plugin.getLang(), false, placeholders);
+            }
+        }
+        return ItemBuilder
+                .of(Items.EMPTY_MAP)
+                .name(plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.name", "name", name), plugin.getLang())
+                .lore(plugin.getLang(), plugin.getLang().getMessage("GUI.arena-selector.buttons.arena.lore-default").split("\n"))
+                .build();
     }
 
     public ArenaImpl(final DuelsPlugin plugin, final String name) {
@@ -75,25 +87,30 @@ public class ArenaImpl extends BaseButton implements Arena {
         if (originalDisplayed == null) {
             return;
         }
-        
-        // Get the status text to replace {status} placeholder with
-        final String statusText = available 
-            ? lang.getMessage("GUI.arena-selector.buttons.arena.lore-available")
-            : lang.getMessage("GUI.arena-selector.buttons.arena.lore-unavailable");
-        
-        // Clone the original and replace {status} in the clone
+
+        // Get the status text to replace {status} / %status% placeholder with
+        final String statusText;
+        if (plugin.getGuiConfigManager() != null && plugin.getGuiConfigManager().getArenaSelectGuiConfig() != null) {
+            final com.meteordevelopments.duels.gui.configuration.ArenaSelectGuiConfig arenaGuiConfig = plugin.getGuiConfigManager().getArenaSelectGuiConfig();
+            statusText = available ? arenaGuiConfig.getArenaAvailableText() : arenaGuiConfig.getArenaUnavailableText();
+        } else {
+            statusText = available 
+                ? lang.getMessage("GUI.arena-selector.buttons.arena.lore-available")
+                : lang.getMessage("GUI.arena-selector.buttons.arena.lore-unavailable");
+        }
+
+        // Clone the original and replace {status} and %status% in the clone
         final ItemStack refreshed = originalDisplayed.clone();
         final ItemMeta meta = refreshed.getItemMeta();
         if (meta != null && meta.hasLore()) {
             final List<String> updatedLore = new ArrayList<>();
             for (final String line : meta.getLore()) {
-                // Replace {status} placeholder with the status text
-                updatedLore.add(line.replace("{status}", statusText));
+                updatedLore.add(lang.toLegacyString(line.replace("{status}", statusText).replace("%status%", statusText)));
             }
             meta.setLore(updatedLore);
             refreshed.setItemMeta(meta);
         }
-        
+
         // Set the refreshed item as the new displayed item
         super.setDisplayed(refreshed);
     }

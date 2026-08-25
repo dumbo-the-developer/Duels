@@ -37,6 +37,8 @@ import com.meteordevelopments.duels.util.io.FileUtil;
 import com.meteordevelopments.duels.util.json.JsonUtil;
 import com.meteordevelopments.duels.party.Party;
 import com.meteordevelopments.duels.party.PartyManagerImpl;
+import com.meteordevelopments.duels.gui.configuration.QueueSelectGuiConfig;
+import com.meteordevelopments.duels.gui.configuration.GuiItemConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -119,11 +121,37 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
 
     @Override
     public void handleLoad() throws IOException {
-        this.gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.queues.title"), config.getQueuesRows(), queues);
-        gui.setSpaceFiller(Items.from(config.getQueuesFillerType(), config.getQueuesFillerData()));
-        gui.setPrevButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.previous-page.name"), lang).build());
-        gui.setNextButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.next-page.name"), lang).build());
-        gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.empty.name"), lang).build());
+        final QueueSelectGuiConfig queueGuiConfig = plugin.getGuiConfigManager().getQueueSelectGuiConfig();
+        final String title = queueGuiConfig != null ? queueGuiConfig.getTitle() : lang.getMessage("GUI.queues.title");
+        final int rows = queueGuiConfig != null ? queueGuiConfig.getRows() : config.getQueuesRows();
+
+        this.gui = new MultiPageGui<>(plugin, title, rows, queues);
+
+        if (queueGuiConfig != null) {
+            gui.setItemSlots(queueGuiConfig.getItemSlots());
+            gui.setDecorations(queueGuiConfig.getDecorations());
+
+            final GuiItemConfig prevCfg = queueGuiConfig.getPreviousPageButton();
+            if (prevCfg != null) {
+                gui.setPrevButtonSlots(prevCfg.getSlots(), prevCfg.buildItem(lang));
+            }
+
+            final GuiItemConfig nextCfg = queueGuiConfig.getNextPageButton();
+            if (nextCfg != null) {
+                gui.setNextButtonSlots(nextCfg.getSlots(), nextCfg.buildItem(lang));
+            }
+
+            final GuiItemConfig emptyCfg = queueGuiConfig.getEmptyButton();
+            if (emptyCfg != null) {
+                gui.setEmptyIndicatorSlots(emptyCfg.getSlots(), emptyCfg.buildItem(lang));
+            }
+        } else {
+            gui.setSpaceFiller(Items.from(config.getQueuesFillerType(), config.getQueuesFillerData()));
+            gui.setPrevButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.previous-page.name"), lang).build());
+            gui.setNextButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.queues.buttons.next-page.name"), lang).build());
+            gui.setEmptyIndicator(ItemBuilder.of(Material.STICK).name(lang.getMessage("GUI.queues.buttons.empty.name"), lang).build());
+        }
+
         plugin.getGuiListener().addGui(gui);
 
         if (FileUtil.checkNonEmpty(file, true)) {

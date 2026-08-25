@@ -1,0 +1,184 @@
+# =============================================================
+# Duels - Request Settings GUI Configuration
+# =============================================================
+# This GUI opens when a player initiates a duel request (/duel <player>).
+#
+# Configurations available:
+#   title: The inventory title (supports & color codes and MiniMessage tags)
+#   rows: Number of rows in the GUI (1 - 6)
+#   decorations: Custom decorative/filler items placed into specific slots
+#   buttons: Functional interactive buttons
+#
+# Slot definitions support:
+#   slot: 4                          (single slot)
+#   slots: [0, 1, 2, 3]              (list of slots)
+#   slots: ["0-8", "18-26"]          (ranges of slots)
+#   glowing-slots: [10, 16]          (slots with enchantment glow)
+# =============================================================
+
+title: '&8Request Settings'
+rows: 6
+
+# =============================================================
+# DECORATIONS
+# =============================================================
+decorations:
+  # Outer frame border
+  border:
+    slots:
+      - "0-3"
+      - "5-8"
+      - 9
+      - 17
+      - 18
+      - 26
+      - 27
+      - 35
+      - 36
+      - 44
+      - "48-50"
+    item:
+      material: STAINED_GLASS_PANE
+      data: 7
+      name: '&r'
+      lore: []
+      glowing: false
+      custom-model-data: 0
+
+  # Inner background filler
+  inner-filler:
+    slots:
+      - "10-16"
+      - 19
+      - 21
+      - 23
+      - 25
+      - "28-30"
+      - "32-34"
+      - "37-43"
+    item:
+      material: STAINED_GLASS_PANE
+      data: 15
+      name: '&r'
+      lore: []
+      glowing: false
+      custom-model-data: 0
+
+# =============================================================
+# FUNCTIONAL BUTTONS
+# =============================================================
+buttons:
+  details:
+    slot: 4
+    item:
+      material: OAK_SIGN
+      data: 0
+      name: '&9&lRequest Details'
+      lore:
+        - '&7Opponent: &f%opponent%'
+        - '&7Kit: &3%kit%'
+        - '&7Own Inventory: &r%own_inventory%'
+        - '&7Arena: &e%arena%'
+        - '&7Bet Items: &r%item_betting%'
+        - '&7Bet: &6$%bet_amount%'
+        - ' '
+        - '&7To change the bet amount,'
+        - '&7type &b/duel %opponent% [amount]'
+      glowing: false
+      custom-model-data: 0
+
+  kit-selector:
+    slot: 20
+    item:
+      material: DIAMOND_SWORD
+      data: 0
+      name: '&b&lKit Selection'
+      lore:
+        - '&7Selected Kit: &3%kit%'
+        - ' '
+        - '&aClick to change kit!'
+      lore-no-permission:
+        - '&cYou do not have permission to'
+        - '&cuse this option.'
+      glowing: false
+      custom-model-data: 0
+
+  own-inventory:
+    slot: 22
+    item:
+      material: CHEST
+      data: 0
+      name: '&e&lUse Own Inventory'
+      lore:
+        - '&7Own Inventory: &r%own_inventory%'
+        - ' '
+        - '&aClick to toggle own inventory!'
+      lore-no-permission:
+        - '&cYou do not have permission to'
+        - '&cuse this option.'
+      glowing: false
+      custom-model-data: 0
+
+  arena-selector:
+    slot: 24
+    item:
+      material: GRASS_BLOCK
+      data: 0
+      name: '&a&lArena Selection'
+      lore:
+        - '&7Selected Arena: &e%arena%'
+        - ' '
+        - '&aClick to change arena!'
+      lore-no-permission:
+        - '&cYou do not have permission to'
+        - '&cuse this option.'
+      glowing: false
+      custom-model-data: 0
+
+  item-betting:
+    slot: 31
+    item:
+      material: GOLD_INGOT
+      data: 0
+      name: '&6&lAllow Item Betting'
+      lore:
+        - '&7Item Betting: &r%item_betting%'
+        - ' '
+        - '&aClick to toggle item betting!'
+      lore-no-permission:
+        - '&cYou do not have permission to'
+        - '&cuse this option.'
+      glowing: false
+      custom-model-data: 0
+
+  send:
+    slots:
+      - 45
+      - 46
+      - 47
+    glowing-slots:
+      - 46
+    item:
+      material: STAINED_GLASS_PANE
+      data: 5
+      name: '&a&lSEND REQUEST'
+      lore:
+        - '&7Click to send this duel request.'
+      glowing: false
+      custom-model-data: 0
+
+  cancel:
+    slots:
+      - 51
+      - 52
+      - 53
+    glowing-slots:
+      - 52
+    item:
+      material: STAINED_GLASS_PANE
+      data: 14
+      name: '&c&lCANCEL'
+      lore:
+        - '&7Click to cancel and close.'
+      glowing: false
+      custom-model-data: 0

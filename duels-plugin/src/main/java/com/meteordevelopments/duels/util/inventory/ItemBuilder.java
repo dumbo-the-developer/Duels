@@ -30,12 +30,29 @@ public final class ItemBuilder {
     private final ItemStack result;
 
     private ItemBuilder(final Material type, final int amount, final short durability) {
-        this.result = new ItemStack(type, amount);
+        this.result = new ItemStack(type != null ? type : Material.STONE, amount);
         Items.setDurability(result, durability);
     }
 
     private ItemBuilder(final String type, final int amount, final short durability) {
-        this(Material.matchMaterial(type), amount, durability);
+        this(matchType(type), amount, durability);
+    }
+
+    private static Material matchType(final String type) {
+        if (type == null) {
+            return Material.STONE;
+        }
+        final Material mat = Material.matchMaterial(type);
+        if (mat != null) {
+            return mat;
+        }
+        if (type.equalsIgnoreCase("SIGN") || type.equalsIgnoreCase("OAK_SIGN") || type.equalsIgnoreCase("SIGN_POST")) {
+            return CompatUtil.isPre1_14() ? Material.matchMaterial("SIGN") : Material.matchMaterial("OAK_SIGN");
+        }
+        if (type.equalsIgnoreCase("GRASS") || type.equalsIgnoreCase("GRASS_BLOCK")) {
+            return CompatUtil.isPre1_13() ? Material.matchMaterial("GRASS") : Material.matchMaterial("GRASS_BLOCK");
+        }
+        return Material.STONE;
     }
 
     private ItemBuilder(final ItemStack item) {

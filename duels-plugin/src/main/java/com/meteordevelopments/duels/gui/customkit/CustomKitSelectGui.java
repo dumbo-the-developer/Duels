@@ -5,8 +5,10 @@ import com.meteordevelopments.duels.api.customkit.CustomKit;
 import com.meteordevelopments.duels.core.customkit.CustomKitImpl;
 import com.meteordevelopments.duels.core.customkit.validation.CustomKitValidator;
 import com.meteordevelopments.duels.gui.BaseButton;
+import com.meteordevelopments.duels.gui.configuration.CustomKitSelectGuiConfig;
+import com.meteordevelopments.duels.gui.configuration.GuiDecoration;
+import com.meteordevelopments.duels.gui.configuration.GuiItemConfig;
 import com.meteordevelopments.duels.setting.Settings;
-import com.meteordevelopments.duels.util.compat.Items;
 import com.meteordevelopments.duels.util.gui.SinglePageGui;
 import com.meteordevelopments.duels.util.inventory.ItemBuilder;
 import org.bukkit.Material;
@@ -15,12 +17,20 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CustomKitSelectGui extends SinglePageGui<DuelsPlugin> {
 
     public CustomKitSelectGui(final DuelsPlugin plugin, final Player player) {
-        super(plugin, plugin.getLang().getMessage("GUI.customkit-selector.title"), 6);
+        super(plugin,
+                plugin.getGuiConfigManager().getCustomKitSelectGuiConfig() != null
+                        ? plugin.getGuiConfigManager().getCustomKitSelectGuiConfig().getTitle()
+                        : plugin.getLang().getMessage("GUI.customkit-selector.title"),
+                plugin.getGuiConfigManager().getCustomKitSelectGuiConfig() != null
+                        ? plugin.getGuiConfigManager().getCustomKitSelectGuiConfig().getRows()
+                        : 4);
 
         render(player);
     }
@@ -28,48 +38,124 @@ public class CustomKitSelectGui extends SinglePageGui<DuelsPlugin> {
     private void render(final Player player) {
         inventory.clear();
 
+        final CustomKitSelectGuiConfig guiConfig = plugin.getGuiConfigManager().getCustomKitSelectGuiConfig();
+        if (guiConfig == null) {
+            return;
+        }
+
+        // Place decorations
+        for (final GuiDecoration decoration : guiConfig.getDecorations().values()) {
+            final GuiItemConfig itemConfig = decoration.getItemConfig();
+            for (final int slot : decoration.getSlots()) {
+                if (slot >= 0 && slot < inventory.getSize()) {
+                    final boolean glow = itemConfig.isGlowingAt(slot);
+                    final ItemStack item = itemConfig.buildItem(plugin.getLang(), glow);
+                    inventory.setItem(slot, item);
+                }
+            }
+        }
+
         final List<CustomKit> playerKits = plugin.getCustomKitManager().getKits(player.getUniqueId());
 
         if (playerKits.isEmpty()) {
-            set(22, new BaseButton(plugin, ItemBuilder.of(Material.BARRIER)
-                    .name("&c&lNo Custom Kits Found", plugin.getLang())
-                    .lore(plugin.getLang(),
-                            "&7You have not created any custom kits yet.",
-                            "&7Use &e/customkits &7to create your first kit!"
-                    ).build()) {
-                @Override
-                public void onClick(final Player player) {
-                    CustomKitTypeSelectGui.open(plugin, player);
+            final GuiItemConfig emptyCfg = guiConfig.getEmptyButton();
+            if (emptyCfg != null && !emptyCfg.getSlots().isEmpty()) {
+                for (final int slot : emptyCfg.getSlots()) {
+                    if (slot >= 0 && slot < inventory.getSize()) {
+                        final boolean glow = emptyCfg.isGlowingAt(slot);
+                        final ItemStack item = emptyCfg.buildItem(plugin.getLang(), glow);
+                        set(slot, new BaseButton(plugin, item) {
+                            @Override
+                            public void onClick(final Player player) {
+                                CustomKitTypeSelectGui.open(plugin, player);
+                            }
+                        });
+                    }
                 }
-            });
+            } else if (inventory.getSize() > 22) {
+                set(22, new BaseButton(plugin, ItemBuilder.of(Material.STICK)
+                        .name("&c&lNo Custom Kits Found", plugin.getLang())
+                        .lore(plugin.getLang(),
+                                "&7You have not created any custom kits yet.",
+                                "&7Use &e/customkits &7to create your first kit!"
+                        ).build()) {
+                    @Override
+                    public void onClick(final Player player) {
+                        CustomKitTypeSelectGui.open(plugin, player);
+                    }
+                });
+            }
         } else {
-            int slot = 0;
+            final List<Integer> itemSlots = !guiConfig.getItemSlots().isEmpty()
+                    ? guiConfig.getItemSlots()
+                    : defaultSlots();
+
+            final GuiItemConfig template = guiConfig.getCustomKitButton();
+
+            int index = 0;
             for (final CustomKit kit : playerKits) {
-                if (slot > 44) break;
+                if (index >= itemSlots.size()) {
+                    break;
+                }
+
+                final int slot = itemSlots.get(index);
+                if (slot < 0 || slot >= inventory.getSize()) {
+                    index++;
+                    continue;
+                }
 
                 final CustomKitImpl impl = (CustomKitImpl) kit;
                 final int itemCount = impl.getItems().size() + impl.getArmor().size() + (impl.getOffHand() != null ? 1 : 0);
 
-                final List<String> lore = new ArrayList<>();
-                if (!impl.getDescription().isEmpty()) {
-                    for (final String desc : impl.getDescription()) {
-                        lore.add("&7" + desc);
-                    }
+                final ItemStack iconItem;
+                if (impl.getIcon() != null) {
+                    iconItem = impl.getIcon().clone();
+                } else if (template != null) {
+                    final ItemStack base = template.buildItem(plugin.getLang(), false);
+                    iconItem = base.clone();
+                } else {
+                    iconItem = new ItemStack(Material.NETHERITE_SWORD);
                 }
-                lore.add("&7Items: &e" + itemCount);
-                lore.add("");
-                lore.add("&aClick to select this kit for duel request");
-                lore.add("&7Note: Custom kit duels only support Money Betting");
 
-                final ItemStack iconItem = impl.getIcon() != null ? impl.getIcon().clone() : new ItemStack(Material.NETHERITE_SWORD);
+                final Map<String, String> placeholders = new HashMap<>();
+                placeholders.put("name", impl.getName());
+                placeholders.put("items", String.valueOf(itemCount));
+
+                final List<String> lore = new ArrayList<>();
+                if (template != null && template.getLore() != null && !template.getLore().isEmpty()) {
+                    for (final String line : template.getLore()) {
+                        if (line.contains("%description%")) {
+                            if (!impl.getDescription().isEmpty()) {
+                                for (final String desc : impl.getDescription()) {
+                                    lore.add("&7" + desc);
+                                }
+                            }
+                        } else {
+                            lore.add(formatPlaceholders(line, placeholders));
+                        }
+                    }
+                } else {
+                    if (!impl.getDescription().isEmpty()) {
+                        for (final String desc : impl.getDescription()) {
+                            lore.add("&7" + desc);
+                        }
+                    }
+                    lore.add("&7Items: &e" + itemCount);
+                    lore.add("");
+                    lore.add("&aClick to select this kit for duel request");
+                    lore.add("&7Note: Custom kit duels only support Money Betting");
+                }
+
+                final String displayName = template != null && template.getName() != null
+                        ? formatPlaceholders(template.getName(), placeholders)
+                        : "&d&l" + impl.getName();
 
                 final BaseButton kitBtn = new BaseButton(plugin, ItemBuilder.of(iconItem)
-                        .name("&b&l" + impl.getName(), plugin.getLang())
+                        .name(displayName, plugin.getLang())
                         .lore(lore, plugin.getLang())
                         .build()) {
                     @Override
                     public void onClick(final Player player) {
-                        // Validate kit before allowing selection
                         final CustomKitValidator.ValidationResult val = plugin.getCustomKitManager().getValidator().validateKit(
                                 impl, player, plugin.getCustomKitManager().getCustomKitsConfig()
                         );
@@ -86,26 +172,46 @@ public class CustomKitSelectGui extends SinglePageGui<DuelsPlugin> {
                 };
 
                 set(slot, kitBtn);
-                slot++;
+                index++;
             }
         }
 
-        // Bottom Navigation Bar (slots 45-53)
-        final ItemStack filler = Items.GRAY_PANE.clone();
-        for (int s = 45; s < 54; s++) {
-            inventory.setItem(s, filler);
+        // Place Back button
+        final GuiItemConfig backCfg = guiConfig.getBackButton();
+        if (backCfg != null && !backCfg.getSlots().isEmpty()) {
+            for (final int slot : backCfg.getSlots()) {
+                if (slot >= 0 && slot < inventory.getSize()) {
+                    final boolean glow = backCfg.isGlowingAt(slot);
+                    final ItemStack item = backCfg.buildItem(plugin.getLang(), glow);
+                    set(slot, new BaseButton(plugin, item) {
+                        @Override
+                        public void onClick(final Player player) {
+                            CustomKitTypeSelectGui.open(plugin, player);
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    private List<Integer> defaultSlots() {
+        final List<Integer> slots = new ArrayList<>();
+        for (int i = 0; i < inventory.getSize() - 9; i++) {
+            slots.add(i);
+        }
+        return slots;
+    }
+
+    private String formatPlaceholders(String text, final Map<String, String> placeholders) {
+        if (text == null || placeholders == null || placeholders.isEmpty()) {
+            return text;
         }
 
-        // Back Button at slot 49
-        set(49, new BaseButton(plugin, ItemBuilder.of(Material.BARRIER)
-                .name("&c&lBack", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to return.")
-                .build()) {
-            @Override
-            public void onClick(final Player player) {
-                CustomKitTypeSelectGui.open(plugin, player);
-            }
-        });
+        for (final Map.Entry<String, String> entry : placeholders.entrySet()) {
+            text = text.replace("%" + entry.getKey() + "%", entry.getValue() != null ? entry.getValue() : "");
+        }
+
+        return text;
     }
 
     public static void open(@NotNull final DuelsPlugin plugin, @NotNull final Player player) {

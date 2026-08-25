@@ -1,15 +1,18 @@
 package com.meteordevelopments.duels.core.queue;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.api.kit.Kit;
 import com.meteordevelopments.duels.api.queue.DQueue;
 import com.meteordevelopments.duels.gui.BaseButton;
+import com.meteordevelopments.duels.gui.configuration.GuiItemConfig;
 import com.meteordevelopments.duels.util.inventory.ItemBuilder;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -43,17 +46,45 @@ public class Queue extends BaseButton implements DQueue {
     }
 
     public Queue(final DuelsPlugin plugin, final String name, final Kit kit, final int bet, final int teamSize) {
-        super(plugin, ItemBuilder
-                .of((plugin.getConfiguration().isInheritKitItemType() && kit != null) ? kit.getDisplayed().clone() : ItemBuilder.of(Material.DIAMOND_SWORD).build())
-                .name(plugin.getLang().getMessage("GUI.queues.buttons.queue.name",
-                        "name", name, "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", 0, "in_match", 0), plugin.getLang())
-                .lore(plugin.getLang(), plugin.getLang().getMessage("GUI.queues.buttons.queue.lore",
-                        "name", name, "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", 0, "in_match", 0).split("\n"))
-                .build());
+        super(plugin, buildDefaultItem(plugin, name, kit, bet, Math.max(1, teamSize), 0, 0));
         this.name = name;
         this.kit = kit;
         this.bet = bet;
         this.teamSize = Math.max(1, teamSize);
+    }
+
+    private static ItemStack buildDefaultItem(final DuelsPlugin plugin, final String name, final Kit kit, final int bet, final int teamSize, final int inQueue, final long inMatch) {
+        final Map<String, String> placeholders = new HashMap<>();
+        placeholders.put("name", name);
+        placeholders.put("kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"));
+        placeholders.put("bet_amount", String.valueOf(bet));
+        placeholders.put("team_size", String.valueOf(teamSize));
+        placeholders.put("in_queue", String.valueOf(inQueue));
+        placeholders.put("in_match", String.valueOf(inMatch));
+
+        if (plugin.getGuiConfigManager() != null && plugin.getGuiConfigManager().getQueueSelectGuiConfig() != null) {
+            final GuiItemConfig queueBtn = plugin.getGuiConfigManager().getQueueSelectGuiConfig().getQueueButton();
+            if (queueBtn != null && queueBtn.getName() != null) {
+                final ItemStack item = queueBtn.buildItem(plugin.getLang(), queueBtn.isGlowing(), placeholders);
+                if (plugin.getConfiguration().isInheritKitItemType() && kit != null) {
+                    final ItemStack kitDisplay = kit.getDisplayed().clone();
+                    kitDisplay.setItemMeta(item.getItemMeta());
+                    return kitDisplay;
+                }
+                return item;
+            }
+        }
+
+        final ItemStack base = (plugin.getConfiguration().isInheritKitItemType() && kit != null)
+                ? kit.getDisplayed().clone()
+                : ItemBuilder.of(Material.DIAMOND_SWORD).build();
+
+        return ItemBuilder.of(base)
+                .name(plugin.getLang().getMessage("GUI.queues.buttons.queue.name",
+                        "name", name, "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch), plugin.getLang())
+                .lore(plugin.getLang(), plugin.getLang().getMessage("GUI.queues.buttons.queue.lore",
+                        "name", name, "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch).split("\n"))
+                .build();
     }
 
     @Override
@@ -100,6 +131,31 @@ public class Queue extends BaseButton implements DQueue {
     public void update() {
         int inQueue = players.size();
         long inMatch = getPlayersInMatch();
+
+        if (plugin.getGuiConfigManager() != null && plugin.getGuiConfigManager().getQueueSelectGuiConfig() != null) {
+            final GuiItemConfig queueBtn = plugin.getGuiConfigManager().getQueueSelectGuiConfig().getQueueButton();
+            if (queueBtn != null && queueBtn.getName() != null) {
+                final Map<String, String> placeholders = new HashMap<>();
+                placeholders.put("name", name);
+                placeholders.put("kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"));
+                placeholders.put("bet_amount", String.valueOf(bet));
+                placeholders.put("team_size", String.valueOf(teamSize));
+                placeholders.put("in_queue", String.valueOf(inQueue));
+                placeholders.put("in_match", String.valueOf(inMatch));
+
+                final ItemStack updated = queueBtn.buildItem(lang, queueBtn.isGlowing(), placeholders);
+                if (plugin.getConfiguration().isInheritKitItemType() && kit != null) {
+                    final ItemMeta meta = updated.getItemMeta();
+                    final ItemStack kitDisplay = kit.getDisplayed().clone();
+                    kitDisplay.setItemMeta(meta);
+                    setDisplayed(kitDisplay);
+                } else {
+                    setDisplayed(updated);
+                }
+                return;
+            }
+        }
+
         setDisplayName(lang.getMessage("GUI.queues.buttons.queue.name",
                 "name", name, "kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch), lang);
         setLore(lang, lang.getMessage("GUI.queues.buttons.queue.lore",

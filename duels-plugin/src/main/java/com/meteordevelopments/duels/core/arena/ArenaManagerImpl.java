@@ -36,6 +36,11 @@ import org.bukkit.projectiles.ProjectileSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import org.bukkit.inventory.ItemStack;
+import com.meteordevelopments.duels.gui.BaseButton;
+import com.meteordevelopments.duels.setting.Settings;
+import com.meteordevelopments.duels.gui.configuration.ArenaSelectGuiConfig;
+import com.meteordevelopments.duels.gui.configuration.GuiItemConfig;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -68,11 +73,49 @@ public class ArenaManagerImpl implements Loadable, ArenaManager {
 
     @Override
     public void handleLoad() throws IOException {
-        gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.arena-selector.title"), config.getArenaSelectorRows(), arenas);
-        gui.setSpaceFiller(Items.from(config.getArenaSelectorFillerType(), config.getArenaSelectorFillerData()));
-        gui.setPrevButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.previous-page.name"), lang).build());
-        gui.setNextButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.next-page.name"), lang).build());
-        gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.empty.name"), lang).build());
+        final com.meteordevelopments.duels.gui.configuration.ArenaSelectGuiConfig arenaGuiConfig = plugin.getGuiConfigManager().getArenaSelectGuiConfig();
+        final String title = arenaGuiConfig != null ? arenaGuiConfig.getTitle() : lang.getMessage("GUI.arena-selector.title");
+        final int rows = arenaGuiConfig != null ? arenaGuiConfig.getRows() : config.getArenaSelectorRows();
+
+        gui = new MultiPageGui<>(plugin, title, rows, arenas);
+
+        if (arenaGuiConfig != null) {
+            gui.setItemSlots(arenaGuiConfig.getItemSlots());
+            gui.setDecorations(arenaGuiConfig.getDecorations());
+
+            final com.meteordevelopments.duels.gui.configuration.GuiItemConfig prevCfg = arenaGuiConfig.getPreviousPageButton();
+            if (prevCfg != null) {
+                gui.setPrevButtonSlots(prevCfg.getSlots(), prevCfg.buildItem(lang));
+            }
+
+            final com.meteordevelopments.duels.gui.configuration.GuiItemConfig nextCfg = arenaGuiConfig.getNextPageButton();
+            if (nextCfg != null) {
+                gui.setNextButtonSlots(nextCfg.getSlots(), nextCfg.buildItem(lang));
+            }
+
+            final com.meteordevelopments.duels.gui.configuration.GuiItemConfig emptyCfg = arenaGuiConfig.getEmptyButton();
+            if (emptyCfg != null) {
+                gui.setEmptyIndicatorSlots(emptyCfg.getSlots(), emptyCfg.buildItem(lang));
+            }
+
+            final com.meteordevelopments.duels.gui.configuration.GuiItemConfig backCfg = arenaGuiConfig.getBackButton();
+            if (backCfg != null && !backCfg.getSlots().isEmpty()) {
+                final ItemStack backItem = backCfg.buildItem(lang);
+                gui.setBackButton(backCfg.getSlots(), new BaseButton(plugin, backItem) {
+                    @Override
+                    public void onClick(final Player player) {
+                        final Settings settings = settingManager.getSafely(player);
+                        settings.openGui(player);
+                    }
+                });
+            }
+        } else {
+            gui.setSpaceFiller(Items.from(config.getArenaSelectorFillerType(), config.getArenaSelectorFillerData()));
+            gui.setPrevButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.previous-page.name"), lang).build());
+            gui.setNextButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.next-page.name"), lang).build());
+            gui.setEmptyIndicator(ItemBuilder.of(Material.STICK).name(lang.getMessage("GUI.kit-selector.buttons.empty.name"), lang).build());
+        }
+
         plugin.getGuiListener().addGui(gui);
 
         if (FileUtil.checkNonEmpty(file, true)) {

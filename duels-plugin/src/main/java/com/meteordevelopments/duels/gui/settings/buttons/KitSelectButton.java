@@ -3,23 +3,34 @@ package com.meteordevelopments.duels.gui.settings.buttons;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.Permissions;
 import com.meteordevelopments.duels.gui.BaseButton;
+import com.meteordevelopments.duels.gui.configuration.GuiItemConfig;
+import com.meteordevelopments.duels.gui.customkit.CustomKitTypeSelectGui;
 import com.meteordevelopments.duels.setting.Settings;
-import com.meteordevelopments.duels.util.compat.Items;
-import com.meteordevelopments.duels.util.inventory.ItemBuilder;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 public class KitSelectButton extends BaseButton {
 
-    public KitSelectButton(final DuelsPlugin plugin) {
-        super(plugin, ItemBuilder.of(Items.from(plugin.getConfiguration().getKitSelectorButtonType(), plugin.getConfiguration().getKitSelectorButtonData()))
-                .name(plugin.getLang().getMessage("GUI.settings.buttons.kit-selector.name"), plugin.getLang()).build());
+    private final GuiItemConfig itemConfig;
+    private final boolean glow;
+
+    public KitSelectButton(final DuelsPlugin plugin, final GuiItemConfig itemConfig, final boolean glow) {
+        super(plugin, itemConfig.buildItem(plugin.getLang(), glow));
+        this.itemConfig = itemConfig;
+        this.glow = glow;
+    }
+
+    public KitSelectButton(final DuelsPlugin plugin, final GuiItemConfig itemConfig) {
+        this(plugin, itemConfig, itemConfig.isGlowing());
     }
 
     @Override
     public void update(final Player player) {
         if (config.isKitSelectingUsePermission() && !player.hasPermission(Permissions.KIT_SELECTING) && !player.hasPermission(Permissions.SETTING_ALL)) {
-            setLore(lang, lang.getMessage("GUI.settings.buttons.kit-selector.lore-no-permission").split("\n"));
+            if (itemConfig.getLoreNoPermission() != null && !itemConfig.getLoreNoPermission().isEmpty()) {
+                setLore(lang, itemConfig.getLoreNoPermission().toArray(new String[0]));
+            } else {
+                setLore(lang, lang.getMessage("GUI.settings.buttons.kit-selector.lore-no-permission").split("\n"));
+            }
             return;
         }
 
@@ -34,8 +45,16 @@ public class KitSelectButton extends BaseButton {
         } else {
             kit = lang.getMessage("GENERAL.not-selected");
         }
-        final String lore = lang.getMessage("GUI.settings.buttons.kit-selector.lore", "kit", kit);
-        setLore(lang, lore.split("\n"));
+
+        if (itemConfig.getLore() != null && !itemConfig.getLore().isEmpty()) {
+            final String[] lines = itemConfig.getLore().stream()
+                    .map(line -> line.replace("%kit%", kit))
+                    .toArray(String[]::new);
+            setLore(lang, lines);
+        } else {
+            final String lore = lang.getMessage("GUI.settings.buttons.kit-selector.lore", "kit", kit);
+            setLore(lang, lore.split("\n"));
+        }
     }
 
     @Override
@@ -45,6 +64,6 @@ public class KitSelectButton extends BaseButton {
             return;
         }
 
-        com.meteordevelopments.duels.gui.customkit.CustomKitTypeSelectGui.open(plugin, player);
+        CustomKitTypeSelectGui.open(plugin, player);
     }
 }

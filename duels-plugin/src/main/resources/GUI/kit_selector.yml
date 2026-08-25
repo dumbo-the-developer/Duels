@@ -1,0 +1,109 @@
+# =============================================================
+# Duels - Server Kit Selector GUI Configuration
+# =============================================================
+# This GUI opens when a player selects "Server Kits" in the Kit Type
+# Selector GUI.
+#
+# Configurations available:
+#   title: The inventory title (supports & color codes and MiniMessage tags)
+#   rows: Number of rows in the GUI (1 - 6)
+#   item-slots: The exact slots where server kits are populated dynamically per page
+#   decorations: Custom decorative/filler items placed into specific slots
+#   buttons: Navigation and action buttons
+#
+# Slot definitions support:
+#   slot: 4                          (single slot)
+#   slots: [0, 1, 2, 3]              (list of slots)
+#   slots: ["0-8", "18-26"]          (ranges of slots)
+#   glowing-slots: [10, 16]          (slots with enchantment glow)
+# =============================================================
+
+title: '&8Select Server Kit'
+rows: 3
+
+# =============================================================
+# DYNAMIC ITEM FILL SLOTS
+# =============================================================
+# Kits will be placed into these slots sequentially on each page.
+item-slots:
+  - "10-16"
+
+# =============================================================
+# DECORATIONS
+# =============================================================
+decorations:
+  # Outer frame border
+  border:
+    slots:
+      - "0-9"
+      - 17
+      - "19-21"
+      - "23-25"
+    item:
+      material: STAINED_GLASS_PANE
+      data: 7
+      name: '&r'
+      lore: []
+      glowing: false
+      custom-model-data: 0
+
+# =============================================================
+# BUTTONS
+# =============================================================
+buttons:
+  previous-page:
+    slot: 18
+    item:
+      material: ARROW
+      data: 0
+      name: '&a&l« Previous Page'
+      lore:
+        - '&7Click to go to the previous page.'
+      glowing: false
+      custom-model-data: 0
+
+  next-page:
+    slot: 26
+    item:
+      material: ARROW
+      data: 0
+      name: '&a&lNext Page »'
+      lore:
+        - '&7Click to go to the next page.'
+      glowing: false
+      custom-model-data: 0
+
+  back:
+    slot: 22
+    item:
+      material: BARRIER
+      data: 0
+      name: '&c&lBack'
+      lore:
+        - '&7Click to return to Kit Type Selection.'
+      glowing: false
+      custom-model-data: 0
+
+  empty:
+    slot: 13
+    item:
+      material: STICK
+      data: 0
+      name: '&c&lNo Kits Available'
+      lore:
+        - '&7There are currently no server kits created.'
+      glowing: false
+      custom-model-data: 0
+
+  # Template format for kit display items (when no custom icon is set via /duels setitem)
+  kit:
+    item:
+      material: DIAMOND_SWORD
+      data: 0
+      name: '&b&l%name%'
+      lore:
+        - '&7Predefined duel kit.'
+        - ' '
+        - '&aClick to select this kit!'
+      glowing: false
+      custom-model-data: 0

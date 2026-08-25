@@ -3,7 +3,6 @@ package com.meteordevelopments.duels.core.kit;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
-import lombok.Getter;
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.api.event.kit.KitCreateEvent;
 import com.meteordevelopments.duels.api.event.kit.KitRemoveEvent;
@@ -12,6 +11,10 @@ import com.meteordevelopments.duels.api.kit.KitManager;
 import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.config.Lang;
 import com.meteordevelopments.duels.data.KitData;
+import com.meteordevelopments.duels.gui.BaseButton;
+import com.meteordevelopments.duels.gui.customkit.CustomKitTypeSelectGui;
+import com.meteordevelopments.duels.gui.configuration.KitSelectGuiConfig;
+import com.meteordevelopments.duels.gui.configuration.GuiItemConfig;
 import com.meteordevelopments.duels.util.Loadable;
 import com.meteordevelopments.duels.util.Log;
 import com.meteordevelopments.duels.util.StringUtil;
@@ -20,10 +23,12 @@ import com.meteordevelopments.duels.util.gui.MultiPageGui;
 import com.meteordevelopments.duels.util.inventory.ItemBuilder;
 import com.meteordevelopments.duels.util.io.FileUtil;
 import com.meteordevelopments.duels.util.json.JsonUtil;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,11 +61,48 @@ public class KitManagerImpl implements Loadable, KitManager {
 
     @Override
     public void handleLoad() throws IOException {
-        gui = new MultiPageGui<>(plugin, lang.getMessage("GUI.kit-selector.title"), config.getKitSelectorRows(), kits.values());
-        gui.setSpaceFiller(Items.from(config.getKitSelectorFillerType(), config.getKitSelectorFillerData()));
-        gui.setPrevButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.previous-page.name"), lang).build());
-        gui.setNextButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.next-page.name"), lang).build());
-        gui.setEmptyIndicator(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.empty.name"), lang).build());
+        final KitSelectGuiConfig kitGuiConfig = plugin.getGuiConfigManager().getKitSelectGuiConfig();
+        final String title = kitGuiConfig != null ? kitGuiConfig.getTitle() : lang.getMessage("GUI.kit-selector.title");
+        final int rows = kitGuiConfig != null ? kitGuiConfig.getRows() : config.getKitSelectorRows();
+
+        gui = new MultiPageGui<>(plugin, title, rows, kits.values());
+
+        if (kitGuiConfig != null) {
+            gui.setItemSlots(kitGuiConfig.getItemSlots());
+            gui.setDecorations(kitGuiConfig.getDecorations());
+
+            final GuiItemConfig prevCfg = kitGuiConfig.getPreviousPageButton();
+            if (prevCfg != null) {
+                gui.setPrevButtonSlots(prevCfg.getSlots(), prevCfg.buildItem(lang));
+            }
+
+            final GuiItemConfig nextCfg = kitGuiConfig.getNextPageButton();
+            if (nextCfg != null) {
+                gui.setNextButtonSlots(nextCfg.getSlots(), nextCfg.buildItem(lang));
+            }
+
+            final GuiItemConfig emptyCfg = kitGuiConfig.getEmptyButton();
+            if (emptyCfg != null) {
+                gui.setEmptyIndicatorSlots(emptyCfg.getSlots(), emptyCfg.buildItem(lang));
+            }
+
+            final GuiItemConfig backCfg = kitGuiConfig.getBackButton();
+            if (backCfg != null && !backCfg.getSlots().isEmpty()) {
+                final ItemStack backItem = backCfg.buildItem(lang);
+                gui.setBackButton(backCfg.getSlots(), new BaseButton(plugin, backItem) {
+                    @Override
+                    public void onClick(final Player player) {
+                        CustomKitTypeSelectGui.open(plugin, player);
+                    }
+                });
+            }
+        } else {
+            gui.setSpaceFiller(Items.from(config.getKitSelectorFillerType(), config.getKitSelectorFillerData()));
+            gui.setPrevButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.previous-page.name"), lang).build());
+            gui.setNextButton(ItemBuilder.of(Material.PAPER).name(lang.getMessage("GUI.kit-selector.buttons.next-page.name"), lang).build());
+            gui.setEmptyIndicator(ItemBuilder.of(Material.STICK).name(lang.getMessage("GUI.kit-selector.buttons.empty.name"), lang).build());
+        }
+
         plugin.getGuiListener().addGui(gui);
 
         if (FileUtil.checkNonEmpty(file, true)) {

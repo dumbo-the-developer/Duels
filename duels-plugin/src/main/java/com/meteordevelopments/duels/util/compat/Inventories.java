@@ -1,5 +1,6 @@
 package com.meteordevelopments.duels.util.compat;
 
+import com.meteordevelopments.duels.util.StringUtil;
 import com.meteordevelopments.duels.util.reflect.ReflectionUtil;
 import org.bukkit.inventory.Inventory;
 
@@ -24,11 +25,12 @@ public final class Inventories {
 
     public static void setTitle(final Inventory inventory, final String title) {
         try {
-            Object value = title;
+            final String colored = title != null ? StringUtil.color(title) : "";
+            Object value = colored;
 
             // In 1.13, title field was changed to IChatBaseComponent, but the change was reverted in 1.14.
             if (CHAT_SERIALIZER_A != null) {
-                value = CHAT_SERIALIZER_A.invoke(null, "{\"text\": \"" + title + "\"}");
+                value = CHAT_SERIALIZER_A.invoke(null, "{\"text\": \"" + colored + "\"}");
             }
 
             CB_INVENTORY_TITLE.set(CB_INVENTORY.get(inventory), value);

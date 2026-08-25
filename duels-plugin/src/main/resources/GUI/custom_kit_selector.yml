@@ -1,0 +1,92 @@
+# =============================================================
+# Duels - Custom Kit Selector GUI Configuration
+# =============================================================
+# This GUI opens when a player clicks "My Custom Kits" in the Kit Type
+# Selector GUI.
+#
+# Configurations available:
+#   title: The inventory title (supports & color codes and MiniMessage tags)
+#   rows: Number of rows in the GUI (1 - 6)
+#   item-slots: The exact slots where custom kits are populated dynamically
+#   decorations: Custom decorative/filler items placed into specific slots
+#   buttons: Navigation and action buttons
+#
+# Slot definitions support:
+#   slot: 4                          (single slot)
+#   slots: [0, 1, 2, 3]              (list of slots)
+#   slots: ["0-8", "18-26"]          (ranges of slots)
+#   glowing-slots: [10, 16]          (slots with enchantment glow)
+# =============================================================
+
+title: '&8Select Custom Kit'
+rows: 4
+
+# =============================================================
+# DYNAMIC ITEM FILL SLOTS
+# =============================================================
+# Custom kits will be placed into these slots sequentially.
+item-slots:
+  - "10-16"
+  - "19-25"
+
+# =============================================================
+# DECORATIONS
+# =============================================================
+decorations:
+  # Outer frame border
+  border:
+    slots:
+      - "0-9"
+      - 17
+      - 18
+      - 26
+      - "27-30"
+      - "32-35"
+    item:
+      material: STAINED_GLASS_PANE
+      data: 7
+      name: '&r'
+      lore: []
+      glowing: false
+      custom-model-data: 0
+
+# =============================================================
+# BUTTONS
+# =============================================================
+buttons:
+  back:
+    slot: 31
+    item:
+      material: BARRIER
+      data: 0
+      name: '&c&lBack'
+      lore:
+        - '&7Click to return to Kit Type Selection.'
+      glowing: false
+      custom-model-data: 0
+
+  empty:
+    slot: 22
+    item:
+      material: STICK
+      data: 0
+      name: '&c&lNo Custom Kits Found'
+      lore:
+        - '&7You have not created any custom kits yet.'
+        - '&7Use &e/customkits &7to create your first kit!'
+      glowing: false
+      custom-model-data: 0
+
+  # Template format for custom kit display items
+  custom-kit:
+    item:
+      material: NETHERITE_SWORD
+      data: 0
+      name: '&d&l%name%'
+      lore:
+        - '&7Items: &e%items%'
+        - ' '
+        - '&aClick to select this kit for duel request'
+        - '&7Note: Custom kit duels only support Money Betting'
+      glowing: false
+      custom-model-data: 0

@@ -59,8 +59,17 @@ public final class Items {
     }
 
     public static ItemStack from(final String type, final short data) {
+        if (type == null) {
+            return new ItemStack(Material.STONE);
+        }
+
         if (type.equalsIgnoreCase("STAINED_GLASS_PANE") && !CompatUtil.isPre1_13()) {
-            return ItemBuilder.of(Panes.from(data)).name(" ").build();
+            final Material pane = Panes.from(data);
+            return ItemBuilder.of(pane != null ? pane : Material.GLASS_PANE).name(" ").build();
+        }
+
+        if (type.equalsIgnoreCase("SIGN") || type.equalsIgnoreCase("OAK_SIGN") || type.equalsIgnoreCase("SIGN_POST")) {
+            return ItemBuilder.of(Items.SIGN).name(" ").build();
         }
 
         return ItemBuilder.of(type, 1, data).name(" ").build();

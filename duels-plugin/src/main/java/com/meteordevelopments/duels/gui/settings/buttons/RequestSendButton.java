@@ -2,18 +2,25 @@ package com.meteordevelopments.duels.gui.settings.buttons;
 
 import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.gui.BaseButton;
+import com.meteordevelopments.duels.gui.configuration.GuiItemConfig;
 import com.meteordevelopments.duels.party.Party;
 import com.meteordevelopments.duels.setting.Settings;
-import com.meteordevelopments.duels.util.compat.Items;
-import com.meteordevelopments.duels.util.inventory.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class RequestSendButton extends BaseButton {
 
-    public RequestSendButton(final DuelsPlugin plugin) {
-        super(plugin, ItemBuilder.of(Items.from(plugin.getConfiguration().getSendButtonType(), plugin.getConfiguration().getSendButtonData()))
-                .name(plugin.getLang().getMessage("GUI.settings.buttons.send.name"), plugin.getLang()).build());
+    private final GuiItemConfig itemConfig;
+    private final boolean glow;
+
+    public RequestSendButton(final DuelsPlugin plugin, final GuiItemConfig itemConfig, final boolean glow) {
+        super(plugin, itemConfig.buildItem(plugin.getLang(), glow));
+        this.itemConfig = itemConfig;
+        this.glow = glow;
+    }
+
+    public RequestSendButton(final DuelsPlugin plugin, final GuiItemConfig itemConfig) {
+        this(plugin, itemConfig, itemConfig.isGlowing());
     }
 
     @Override
