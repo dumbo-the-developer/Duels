@@ -113,22 +113,29 @@ public class ReplaySession {
 		
 		this.packetListener.unregister();
 
-		// Perform immediate synchronous reset so inventory is never lost
-		resetPlayer();
-		if (start != null && start.getWorld() != null) {
-			player.teleport(start);
-		}
+		DuelsPlugin.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+			if (!player.isOnline()) {
+				ReplaySpectatorStorage.deleteSnapshot(player.getUniqueId());
+				return;
+			}
 
-		for (Player all : Bukkit.getOnlinePlayers()) {
-			if (all == player) continue;
-			player.showPlayer(DuelsPlugin.getInstance(), all);
-			all.showPlayer(DuelsPlugin.getInstance(), player);
-		}
+			// Perform immediate synchronous reset so inventory is never lost
+			resetPlayer();
+			if (start != null && start.getWorld() != null) {
+				player.teleport(start);
+			}
 
-		try {
-			ReplaySessionFinishEvent finishEvent = new ReplaySessionFinishEvent(replayer.getReplay(), player);
-			Bukkit.getPluginManager().callEvent(finishEvent);
-		} catch (Throwable ignored) {}
+			for (Player all : Bukkit.getOnlinePlayers()) {
+				if (all == player) continue;
+				player.showPlayer(DuelsPlugin.getInstance(), all);
+				all.showPlayer(DuelsPlugin.getInstance(), player);
+			}
+
+			try {
+				ReplaySessionFinishEvent finishEvent = new ReplaySessionFinishEvent(replayer.getReplay(), player);
+				Bukkit.getPluginManager().callEvent(finishEvent);
+			} catch (Throwable ignored) {}
+		});
 	}
 	
 	public void resetPlayer() {

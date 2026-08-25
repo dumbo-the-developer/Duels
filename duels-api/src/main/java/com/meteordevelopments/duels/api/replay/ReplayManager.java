@@ -30,4 +30,12 @@ public interface ReplayManager {
      * @return true if the player is in an active replay session, false otherwise
      */
     boolean isWatching(@NotNull Player player);
+
+    /**
+     * Checks if the replay system is available and enabled (e.g. required dependencies like ProtocolLib are present).
+     *
+     * @return true if the replay system is available, false otherwise
+     */
+    boolean isAvailable();
 }
+

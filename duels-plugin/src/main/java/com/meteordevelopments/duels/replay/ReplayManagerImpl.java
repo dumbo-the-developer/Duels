@@ -36,6 +36,7 @@ public class ReplayManagerImpl implements ReplayManager, Loadable, Reloadable, L
     private final Map<UUID, Replay> activeDuelRecordings = new ConcurrentHashMap<>();
 
     private final DuelsPlugin plugin;
+    private boolean available = false;
     private DefaultReplaySaver storage;
     private ReplayListener replayListener;
 
@@ -45,6 +46,13 @@ public class ReplayManagerImpl implements ReplayManager, Loadable, Reloadable, L
 
     @Override
     public void handleLoad() {
+        if (!Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")) {
+            this.available = false;
+            plugin.warn("[Replay] ProtocolLib is missing or disabled! The replay system will be disabled.");
+            return;
+        }
+
+        this.available = true;
         ConfigManager.loadConfigs();
 
         // Restore any spectators from prior server crashes/restarts
@@ -58,7 +66,11 @@ public class ReplayManagerImpl implements ReplayManager, Loadable, Reloadable, L
 
         DuelsPlugin.getFoliaLib().getScheduler().runAsync(task -> {
             if (VersionUtil.isAbove(VersionUtil.VersionEnum.V1_21)) {
-                ProtocolLibUtil.prepare();
+                try {
+                    ProtocolLibUtil.prepare();
+                } catch (Throwable t) {
+                    plugin.warn("[Replay] Failed to prepare ProtocolLib packet wrappers: " + t.getMessage());
+                }
             }
             if (ConfigManager.CLEANUP_REPLAYS > 0) {
                 ReplayCleanup.cleanupReplays();
@@ -68,6 +80,10 @@ public class ReplayManagerImpl implements ReplayManager, Loadable, Reloadable, L
 
     @Override
     public void handleUnload() {
+        if (!available) {
+            return;
+        }
+
         // Stop all active recordings
         for (Replay replay : new ArrayList<>(activeReplays.values())) {
             try {
@@ -99,12 +115,15 @@ public class ReplayManagerImpl implements ReplayManager, Loadable, Reloadable, L
     }
 
     public void handleReload() {
+        if (!available) {
+            return;
+        }
         ConfigManager.reloadConfig();
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onMatchStart(final MatchStartEvent event) {
-        if (!ConfigManager.ENABLED) return;
+        if (!available || !ConfigManager.ENABLED) return;
 
         final Match match = event.getMatch();
         final Player[] players = event.getPlayers();
@@ -155,6 +174,8 @@ public class ReplayManagerImpl implements ReplayManager, Loadable, Reloadable, L
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onMatchEnd(final MatchEndEvent event) {
+        if (!available) return;
+
         final Match match = event.getMatch();
         final UUID winner = event.getWinner();
         final UUID loser = event.getLoser();
@@ -207,6 +228,11 @@ public class ReplayManagerImpl implements ReplayManager, Loadable, Reloadable, L
     public void playReplay(@org.jetbrains.annotations.NotNull final Player watcher, @org.jetbrains.annotations.NotNull final String replayId) {
         if (watcher == null || replayId == null) return;
 
+        if (!available) {
+            plugin.getLang().sendMessage(watcher, "REPLAY.protocollib-missing");
+            return;
+        }
+
         if (ReplayHelper.replaySessions.containsKey(watcher.getName())) {
             plugin.getLang().sendMessage(watcher, "REPLAY.already-watching");
             return;
@@ -226,6 +252,7 @@ public class ReplayManagerImpl implements ReplayManager, Loadable, Reloadable, L
 
     @Override
     public void deleteReplay(@org.jetbrains.annotations.NotNull final String replayId) {
+        if (!available) return;
         if (replayId != null) {
             ReplaySaver.delete(replayId);
         }
@@ -249,10 +276,16 @@ public class ReplayManagerImpl implements ReplayManager, Loadable, Reloadable, L
 
     @Override
     public boolean isWatching(@org.jetbrains.annotations.NotNull final Player player) {
-        return player != null && ReplayHelper.replaySessions.containsKey(player.getName());
+        return available && player != null && ReplayHelper.replaySessions.containsKey(player.getName());
     }
 
     public Replayer getReplayer(final Player player) {
-        return player != null ? ReplayHelper.replaySessions.get(player.getName()) : null;
+        return available && player != null ? ReplayHelper.replaySessions.get(player.getName()) : null;
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return available;
     }
 }
+

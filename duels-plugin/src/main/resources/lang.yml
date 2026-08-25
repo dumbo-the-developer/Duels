@@ -607,6 +607,7 @@ SPECTATE:
 
 
 REPLAY:
+  protocollib-missing: '{PREFIX} &cThe replay system is disabled because ProtocolLib is missing from this server.'
   already-watching: '{PREFIX} &cYou are already watching a replay.'
   not-watching: '{PREFIX} &cYou are not currently watching a replay.'
   not-found: '{PREFIX} &cReplay ''&e%id%&c'' was not found or failed to load.'

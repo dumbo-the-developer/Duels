@@ -31,6 +31,11 @@ public class ReplayCommand extends BaseCommand {
             return;
         }
 
+        if (!plugin.getReplayManager().isAvailable()) {
+            lang.sendMessage(player, "REPLAY.protocollib-missing");
+            return;
+        }
+
         if (args.length == 0) {
             openReplays(player, null);
             return;
@@ -110,6 +115,10 @@ public class ReplayCommand extends BaseCommand {
 
     @Override
     public List<String> onTabComplete(final CommandSender sender, final org.bukkit.command.Command command, final String alias, final String[] args) {
+        if (!plugin.getReplayManager().isAvailable()) {
+            return Collections.emptyList();
+        }
+
         if (args.length == 1) {
             final List<String> suggestions = new ArrayList<>();
             suggestions.add("list");

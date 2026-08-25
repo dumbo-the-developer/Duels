@@ -101,7 +101,12 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
                         final UserData user = JsonUtil.getObjectMapper().readValue(reader, UserData.class);
 
                         if (user == null) {
-                            Log.warn(this, "Could not load userdata from file: " + fileName);
+                            Log.warn(this, "Could not load userdata from file " + fileName + " (corrupted or empty). Deleting corrupted file.");
+                            if (file.delete()) {
+                                Log.info(this, "Successfully deleted corrupted userdata file: " + fileName);
+                            } else {
+                                Log.warn(this, "Failed to delete corrupted userdata file: " + fileName);
+                            }
                             continue;
                         }
 
@@ -112,9 +117,15 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
                         // Player might have logged in while reading the file
                         names.putIfAbsent(user.getName().toLowerCase(), uuid);
                         users.putIfAbsent(uuid, user);
-                    } catch (IOException ex) {
-                        Log.error(this, "Could not load userdata from file: " + fileName, ex);
+                    } catch (Exception ex) {
+                        Log.warn(this, "Could not load userdata from file " + fileName + " (" + ex.getMessage() + "). File is corrupted. Deleting corrupted file.");
+                        if (file.delete()) {
+                            Log.info(this, "Successfully deleted corrupted userdata file: " + fileName);
+                        } else {
+                            Log.warn(this, "Failed to delete corrupted userdata file: " + fileName);
+                        }
                     }
+
                 }
             }
 
@@ -292,7 +303,13 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
             final UserData user = JsonUtil.getObjectMapper().readValue(reader, UserData.class);
 
             if (user == null) {
-                return null;
+                Log.warn(this, "Could not load userdata from file " + file.getName() + " for player " + player.getName() + " (corrupted or empty). Deleting corrupted file and creating fresh data.");
+                if (file.delete()) {
+                    Log.info(this, "Successfully deleted corrupted userdata file: " + file.getName());
+                }
+                final UserData freshUser = new UserData(folder, defaultRating, matchesToDisplay, player);
+                plugin.doSync(() -> Bukkit.getPluginManager().callEvent(new UserCreateEvent(freshUser)));
+                return freshUser;
             }
 
             user.folder = folder;
@@ -305,10 +322,16 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
             }
 
             return user;
-        } catch (IOException ex) {
-            Log.error(this, "An error occured while loading userdata of " + player.getName() + "!", ex);
-            return null;
+        } catch (Exception ex) {
+            Log.warn(this, "Could not load userdata from file " + file.getName() + " for player " + player.getName() + " (" + ex.getMessage() + "). File is corrupted. Deleting corrupted file and creating fresh data.");
+            if (file.delete()) {
+                Log.info(this, "Successfully deleted corrupted userdata file: " + file.getName());
+            }
+            final UserData freshUser = new UserData(folder, defaultRating, matchesToDisplay, player);
+            plugin.doSync(() -> Bukkit.getPluginManager().callEvent(new UserCreateEvent(freshUser)));
+            return freshUser;
         }
+
     }
 
     private void saveUsers(final Collection<? extends Player> players) {

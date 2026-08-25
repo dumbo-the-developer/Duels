@@ -66,7 +66,8 @@ public class VersionUtil {
 		V1_20(13),
 		V1_21(14),
         V1_21_10(15),
-        V26_1(16);
+        V26_1(16),
+        V26_2(17);
 
 		
 		private int order;
@@ -82,43 +83,63 @@ public class VersionUtil {
         public int getPatch() {
             String[] parts = this.name().split("_");
             if (parts.length == 3) {
-                return Integer.parseInt(parts[2]);
+                try {
+                    return Integer.parseInt(parts[2]);
+                } catch (NumberFormatException e) {
+                    return 0;
+                }
             }
             return 0;
         }
 
 		public static VersionEnum parseVersion() {
-			// Extract base version string (e.g., "1.21.1" from "1.21.1-R0.1-SNAPSHOT")
-			String version = Bukkit.getBukkitVersion().split("-")[0];
+			String bukkitVersion = Bukkit.getBukkitVersion();
+			String version = (bukkitVersion != null ? bukkitVersion.split("-")[0] : "1.21");
 			String[] parts = version.split("\\.");
 
-			// Safely parse major and minor components
-			String major = parts[0];
-			String minor = parts.length > 1 ? parts[1] : "0";
+			int majorInt = parts.length > 0 ? extractNumber(parts[0], 1) : 1;
+			int minorInt = parts.length > 1 ? extractNumber(parts[1], 0) : 0;
+			int patchInt = parts.length > 2 ? extractNumber(parts[2], 0) : 0;
 
-			// Safely parse patch version; default to 0 if absent (e.g., "1.21")
-			int patchInt = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
-			String patchStr = String.valueOf(patchInt);
-
-			String majorMinor = major + "_" + minor;
-			String majorMinorPatch = majorMinor + "_" + patchStr;
+			final int finalPatch = patchInt;
+			String majorMinor = majorInt + "_" + minorInt;
+			String majorMinorPatch = majorMinor + "_" + patchInt;
 
 			return Arrays.stream(VersionEnum.values())
 					.filter(v -> v.toString().equals("V" + majorMinorPatch)
-							|| (v.getPatch() != 0 && v.getPatch() < patchInt))
-					.findAny()
+							|| (v.toString().startsWith("V" + majorMinor + "_") && v.getPatch() != 0 && v.getPatch() <= finalPatch))
+					.max((v1, v2) -> Integer.compare(v1.getOrder(), v2.getOrder()))
 					.orElseGet(() -> {
 						try {
 							return VersionEnum.valueOf("V" + majorMinor);
 						} catch (IllegalArgumentException e) {
 							// Log warning on startup and use the latest supported version as fallback
-							Bukkit.getLogger().warning("[AdvancedReplay] Detected untested or unsupported Minecraft version: " + version + ". Falling back to latest known version.");
+							Bukkit.getLogger().warning("Detected untested or unsupported Minecraft version: " + bukkitVersion + ". Falling back to latest known version.");
 							return VersionEnum.values()[VersionEnum.values().length - 1];
 						}
 					});
 		}
 
+		private static int extractNumber(String s, int defaultValue) {
+			if (s == null || s.isEmpty()) return defaultValue;
+			StringBuilder digits = new StringBuilder();
+			for (char c : s.toCharArray()) {
+				if (Character.isDigit(c)) {
+					digits.append(c);
+				} else if (digits.length() > 0) {
+					break;
+				}
+			}
+			if (digits.length() == 0) return defaultValue;
+			try {
+				return Integer.parseInt(digits.toString());
+			} catch (NumberFormatException e) {
+				return defaultValue;
+			}
+		}
+
 	}
 }
+
 
 
