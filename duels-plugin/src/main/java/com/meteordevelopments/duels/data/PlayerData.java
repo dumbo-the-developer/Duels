@@ -18,6 +18,7 @@ public class PlayerData {
     private int hunger;
     private LocationData location;
     private boolean restoreExperience;
+    private Boolean pvpState;
     private List<ItemData> extra = new ArrayList<>();
     private PlayerData() {
     }
@@ -29,6 +30,7 @@ public class PlayerData {
         this.hunger = info.getHunger();
         this.location = LocationData.fromLocation(info.getLocation());
         this.restoreExperience = info.isRestoreExperience();
+        this.pvpState = info.getPvpState();
 
         for (final Map.Entry<String, Map<Integer, ItemStack>> entry : info.getItems().entrySet()) {
             final Map<Integer, ItemData> data = new HashMap<>();
@@ -56,6 +58,8 @@ public class PlayerData {
                 location.toLocation(),
                 restoreExperience
         );
+
+        info.setPvpState(pvpState);
 
         for (final Map.Entry<String, Map<Integer, ItemData>> entry : items.entrySet()) {
             final Map<Integer, ItemStack> data = new HashMap<>();

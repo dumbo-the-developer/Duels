@@ -10,6 +10,7 @@ import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.data.LocationData;
 import com.meteordevelopments.duels.data.PlayerData;
 import com.meteordevelopments.duels.hook.hooks.EssentialsHook;
+import com.meteordevelopments.duels.hook.hooks.PvPManagerHook;
 import com.meteordevelopments.duels.core.match.team.TeamDuelMatch;
 import com.meteordevelopments.duels.core.teleport.Teleport;
 import com.meteordevelopments.duels.util.Loadable;
@@ -60,6 +61,7 @@ public class PlayerInfoManager implements Loadable {
 
     private Teleport teleport;
     private EssentialsHook essentials;
+    private PvPManagerHook pvpManager;
     private ArenaManagerImpl arenaManager;
 
     @Getter
@@ -80,6 +82,7 @@ public class PlayerInfoManager implements Loadable {
     public void handleLoad() throws IOException {
         this.teleport = plugin.getTeleport();
         this.essentials = plugin.getHookManager().getHook(EssentialsHook.class);
+        this.pvpManager = plugin.getHookManager().getHook(PvPManagerHook.class);
         this.arenaManager = plugin.getArenaManager();
 
         if (FileUtil.checkNonEmpty(cacheFile, false)) {
@@ -226,6 +229,9 @@ public class PlayerInfoManager implements Loadable {
      */
     public void create(final Player player, final boolean excludeInventory, final boolean restoreExperience) {
         final PlayerInfo info = new PlayerInfo(player, excludeInventory, restoreExperience);
+        if (pvpManager != null) {
+            info.setPvpState(pvpManager.getPvPState(player));
+        }
 
         if (!config.isTeleportToLastLocation()) {
             info.setLocation(lobby.clone());
@@ -250,7 +256,15 @@ public class PlayerInfoManager implements Loadable {
      * @return Removed PlayerInfo instance or null if not found
      */
     public PlayerInfo remove(final Player player) {
+        restorePvP(player);
         return cache.remove(player.getUniqueId());
+    }
+
+    public void restorePvP(final Player player) {
+        final PlayerInfo info = get(player);
+        if (pvpManager != null && info != null && info.getPvpState() != null) {
+            pvpManager.setPvPState(player, info.getPvpState());
+        }
     }
 
     private class PlayerInfoListener implements Listener {
@@ -303,6 +317,8 @@ public class PlayerInfoManager implements Loadable {
                 }
             }
 
+            // Restore before respawning outside the arena, not in the delayed inventory task.
+            restorePvP(player);
             event.setRespawnLocation(info.getLocation());
 
             if (essentials != null) {

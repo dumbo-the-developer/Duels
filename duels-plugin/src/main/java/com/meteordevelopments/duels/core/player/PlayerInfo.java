@@ -23,6 +23,8 @@ public class PlayerInfo {
     private final int level;
     private final int hunger;
     private final boolean restoreExperience;
+    @Setter
+    private Boolean pvpState; // Null when PvPManager was unavailable or loading an older cache.
     private final List<ItemStack> extra = new ArrayList<>();
     @Setter
     private Location location;
