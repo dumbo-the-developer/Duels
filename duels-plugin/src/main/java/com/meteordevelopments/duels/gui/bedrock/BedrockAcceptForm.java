@@ -27,55 +27,60 @@ public final class BedrockAcceptForm {
      * @param settings the duel settings from the request (used for display only)
      */
     public static void send(final DuelsPlugin plugin, final Player sender, final Player target, final Settings settings) {
+        final String customPrefix = plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-duel.custom-kit-prefix", "[Custom] "));
         final String kit;
         if (settings.getCustomKit() != null) {
-            kit = "[Custom] " + settings.getCustomKit().getName();
+            kit = customPrefix + settings.getCustomKit().getName();
         } else if (settings.getKit() != null) {
             kit = settings.getKit().getName();
         } else if (settings.isOwnInventory()) {
-            kit = plugin.getLang().getMessage("GENERAL.enabled");
+            kit = plugin.getLang().toLegacyString(plugin.getLang().getMessage("GENERAL.enabled"));
         } else {
-            kit = plugin.getLang().getMessage("GENERAL.not-selected");
+            kit = plugin.getLang().toLegacyString(plugin.getLang().getMessage("GENERAL.not-selected"));
         }
 
         final String arena = settings.getArena() != null
                 ? settings.getArena().getName()
-                : plugin.getLang().getMessage("GENERAL.random");
+                : plugin.getLang().toLegacyString(plugin.getLang().getMessage("GENERAL.random"));
         final int bet = settings.getBet();
 
         // Build the info content string
         final StringBuilder content = new StringBuilder();
-        content.append("§e").append(sender.getName()).append("§r has challenged you to a duel!\n\n");
-        content.append("§7Kit: §f").append(kit).append("\n");
+        content.append(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-accept.challenge", "&e%sender%&r has challenged you to a duel!\n\n")
+                .replace("%sender%", sender.getName())));
+        content.append(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-accept.kit", "&7Kit: &f%kit%\n")
+                .replace("%kit%", kit)));
 
         if (settings.isOwnInventory()) {
-            content.append("§7Own Inventory: §aEnabled\n");
+            content.append(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-accept.own-inventory", "&7Own Inventory: &aEnabled\n")));
         }
 
-        content.append("§7Arena: §f").append(arena).append("\n");
+        content.append(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-accept.arena", "&7Arena: &f%arena%\n")
+                .replace("%arena%", arena)));
 
         if (bet > 0) {
-            content.append("§7Bet: §6$").append(bet).append("\n");
+            content.append(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-accept.bet", "&7Bet: &6$%bet%\n")
+                    .replace("%bet%", String.valueOf(bet))));
         }
 
         if (settings.isItemBetting()) {
-            content.append("§7Item Betting: §aEnabled\n");
+            content.append(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-accept.item-betting", "&7Item Betting: &aEnabled\n")));
         }
 
-        content.append("\n§fDo you accept?");
+        content.append(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-accept.question", "\n&fDo you accept?")));
 
         final com.meteordevelopments.duels.api.customkit.CustomKitSnapshot snapshot = settings.getCustomKitSnapshot() != null
                 ? settings.getCustomKitSnapshot()
                 : (settings.getCustomKit() != null ? settings.getCustomKit().toSnapshot() : null);
 
         final SimpleForm.Builder formBuilder = SimpleForm.builder()
-                .title("Duel Request")
+                .title(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-accept.title", "Duel Request")))
                 .content(content.toString())
-                .button("§a✔ Accept")
-                .button("§c✘ Deny");
+                .button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-accept.accept", "&a✔ Accept")))
+                .button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-accept.deny", "&c✘ Deny")));
 
         if (snapshot != null) {
-            formBuilder.button("§b👁 Preview Custom Kit");
+            formBuilder.button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-accept.preview-custom-kit", "&b👁 Preview Custom Kit")));
         }
 
         formBuilder.validResultHandler(response -> {

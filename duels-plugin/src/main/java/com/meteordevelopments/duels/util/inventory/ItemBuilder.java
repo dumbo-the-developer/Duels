@@ -114,7 +114,14 @@ public final class ItemBuilder {
         return editMeta(meta -> {
             List<String> convertedLore = new ArrayList<>();
             for (String line : lore) {
-                convertedLore.add(lang.toLegacyString(line));
+                if (line == null) continue;
+                if (line.contains("\n")) {
+                    for (String subLine : line.split("\n")) {
+                        convertedLore.add(lang.toLegacyString(subLine));
+                    }
+                } else {
+                    convertedLore.add(lang.toLegacyString(line));
+                }
             }
             meta.setLore(convertedLore);
         });

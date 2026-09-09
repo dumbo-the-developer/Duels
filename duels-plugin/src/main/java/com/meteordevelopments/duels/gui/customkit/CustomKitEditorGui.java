@@ -39,13 +39,19 @@ public class CustomKitEditorGui extends SinglePageGui<DuelsPlugin> {
         }
 
         // Armor slots (0: Helmet, 9: Chestplate, 18: Leggings, 27: Boots)
-        renderSlot(0, draft.getArmor().get(0), 0, true, false, Material.CHAINMAIL_HELMET, "&7(Click to set Helmet)");
-        renderSlot(9, draft.getArmor().get(1), 1, true, false, Material.CHAINMAIL_CHESTPLATE, "&7(Click to set Chestplate)");
-        renderSlot(18, draft.getArmor().get(2), 2, true, false, Material.CHAINMAIL_LEGGINGS, "&7(Click to set Leggings)");
-        renderSlot(27, draft.getArmor().get(3), 3, true, false, Material.CHAINMAIL_BOOTS, "&7(Click to set Boots)");
+        final String helmetPh = plugin.getLang().getMessageOrDefault("GUI.customkit-editor.placeholders.helmet", "&7(Click to set Helmet)");
+        final String chestPh = plugin.getLang().getMessageOrDefault("GUI.customkit-editor.placeholders.chestplate", "&7(Click to set Chestplate)");
+        final String legsPh = plugin.getLang().getMessageOrDefault("GUI.customkit-editor.placeholders.leggings", "&7(Click to set Leggings)");
+        final String bootsPh = plugin.getLang().getMessageOrDefault("GUI.customkit-editor.placeholders.boots", "&7(Click to set Boots)");
+        final String offhandPh = plugin.getLang().getMessageOrDefault("GUI.customkit-editor.placeholders.offhand", "&7(Click to set Offhand)");
+
+        renderSlot(0, draft.getArmor().get(0), 0, true, false, Material.CHAINMAIL_HELMET, helmetPh);
+        renderSlot(9, draft.getArmor().get(1), 1, true, false, Material.CHAINMAIL_CHESTPLATE, chestPh);
+        renderSlot(18, draft.getArmor().get(2), 2, true, false, Material.CHAINMAIL_LEGGINGS, legsPh);
+        renderSlot(27, draft.getArmor().get(3), 3, true, false, Material.CHAINMAIL_BOOTS, bootsPh);
 
         // Offhand slot (slot 36)
-        renderSlot(36, draft.getOffHand(), 0, false, true, Material.SHIELD, "&7(Click to set Offhand)");
+        renderSlot(36, draft.getOffHand(), 0, false, true, Material.SHIELD, offhandPh);
 
         // Main Inventory 27 slots (slots 9 to 35) -> GUI slots: (rows 0-3, columns 2-8)
         int mainIdx = 9;
@@ -58,7 +64,11 @@ public class CustomKitEditorGui extends SinglePageGui<DuelsPlugin> {
                     final int itemSlot = mainIdx;
                     final int guiSlot = r * 9 + c;
                     final ItemStack item = draft.getItems().get(itemSlot);
-                    renderSlot(guiSlot, item, itemSlot, false, false, Material.LIGHT_GRAY_STAINED_GLASS_PANE, "&8(Empty Slot " + itemSlot + ")");
+                    final String emptySlotPh = plugin.getLang().getMessageOrDefault(
+                            "GUI.customkit-editor.placeholders.empty-slot",
+                            "&8(Empty Slot " + itemSlot + ")",
+                            "slot", itemSlot);
+                    renderSlot(guiSlot, item, itemSlot, false, false, Material.LIGHT_GRAY_STAINED_GLASS_PANE, emptySlotPh);
                     mainIdx++;
                 }
             }
@@ -69,22 +79,33 @@ public class CustomKitEditorGui extends SinglePageGui<DuelsPlugin> {
             final int itemSlot = h;
             final int guiSlot = 45 + h;
             final ItemStack item = draft.getItems().get(itemSlot);
-            renderSlot(guiSlot, item, itemSlot, false, false, Material.LIGHT_GRAY_STAINED_GLASS_PANE, "&8(Empty Hotbar " + (h + 1) + ")");
+            final String emptyHotbarPh = plugin.getLang().getMessageOrDefault(
+                    "GUI.customkit-editor.placeholders.empty-hotbar",
+                    "&8(Empty Hotbar " + (h + 1) + ")",
+                    "slot", (h + 1));
+            renderSlot(guiSlot, item, itemSlot, false, false, Material.LIGHT_GRAY_STAINED_GLASS_PANE, emptyHotbarPh);
         }
 
         // Control Bar:
         // Slot 38: Cancel / Discard
+        final String cancelName = plugin.getLang().getMessageOrDefault("GUI.customkit-editor.buttons.cancel.name", "&c&lCancel / Discard");
+        final List<String> cancelLore = plugin.getLang().getMessageListOrDefault("GUI.customkit-editor.buttons.cancel.lore",
+                java.util.Collections.singletonList("&7Click to discard unsaved changes."));
+        final String discardTitle = plugin.getLang().getMessageOrDefault("GUI.customkit-editor.confirm-discard.title", "Discard Changes?");
+        final String discardMsg = plugin.getLang().getMessageOrDefault("GUI.customkit-editor.confirm-discard.message",
+                "Are you sure you want to discard unsaved changes?");
+
         set(38, new BaseButton(plugin, ItemBuilder.of(Material.RED_CONCRETE)
-                .name("&c&lCancel / Discard", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to discard unsaved changes.")
+                .name(cancelName, plugin.getLang())
+                .lore(cancelLore, plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
                 CustomKitConfirmGui.open(
                         plugin,
                         player,
-                        "Discard Changes?",
-                        "Are you sure you want to discard unsaved changes?",
+                        discardTitle,
+                        discardMsg,
                         () -> {
                             plugin.getCustomKitManager().discardSession(player);
                             CustomKitMenuGui.open(plugin, player);
@@ -95,17 +116,24 @@ public class CustomKitEditorGui extends SinglePageGui<DuelsPlugin> {
         });
 
         // Slot 39: Clear All Items
+        final String clearName = plugin.getLang().getMessageOrDefault("GUI.customkit-editor.buttons.clear.name", "&c&lClear All Items");
+        final List<String> clearLore = plugin.getLang().getMessageListOrDefault("GUI.customkit-editor.buttons.clear.lore",
+                java.util.Collections.singletonList("&7Click to empty all kit inventory slots."));
+        final String clearTitle = plugin.getLang().getMessageOrDefault("GUI.customkit-editor.confirm-clear.title", "Clear All Items?");
+        final String clearMsg = plugin.getLang().getMessageOrDefault("GUI.customkit-editor.confirm-clear.message",
+                "Are you sure you want to clear all items in this kit?");
+
         set(39, new BaseButton(plugin, ItemBuilder.of(Material.LAVA_BUCKET)
-                .name("&c&lClear All Items", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to empty all kit inventory slots.")
+                .name(clearName, plugin.getLang())
+                .lore(clearLore, plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
                 CustomKitConfirmGui.open(
                         plugin,
                         player,
-                        "Clear All Items?",
-                        "Are you sure you want to clear all items in this kit?",
+                        clearTitle,
+                        clearMsg,
                         () -> {
                             draft.getItems().clear();
                             draft.getArmor().clear();
@@ -119,16 +147,25 @@ public class CustomKitEditorGui extends SinglePageGui<DuelsPlugin> {
         });
 
         // Slot 40: Kit Settings (Rename, Change Icon, Description)
-        set(40, new BaseButton(plugin, ItemBuilder.of(draft.getIcon() != null ? draft.getIcon().clone() : new ItemStack(Material.NAME_TAG))
-                .name("&e&lKit Settings", plugin.getLang())
-                .lore(plugin.getLang(),
-                        "&7Name: &f" + draft.getName(),
-                        "&7Description: &f" + (draft.getDescription().isEmpty() ? "None" : String.join(", ", draft.getDescription())),
+        final String noneDesc = plugin.getLang().getMessageOrDefault("GENERAL.none", "None");
+        final String settingsName = plugin.getLang().getMessageOrDefault("GUI.customkit-editor.buttons.settings.name", "&e&lKit Settings");
+        final List<String> settingsLore = plugin.getLang().getMessageListOrDefault("GUI.customkit-editor.buttons.settings.lore",
+                java.util.Arrays.asList(
+                        "&7Name: &f%name%",
+                        "&7Description: &f%description%",
                         "",
                         "&a[Left-Click] &7Rename Kit",
                         "&e[Right-Click] &7Edit Description",
                         "&b[Shift-Click] &7Change Icon"
-                ).build()) {
+                ),
+                "name", draft.getName(),
+                "description", draft.getDescription().isEmpty() ? noneDesc : String.join(", ", draft.getDescription())
+        );
+
+        set(40, new BaseButton(plugin, ItemBuilder.of(draft.getIcon() != null ? draft.getIcon().clone() : new ItemStack(Material.NAME_TAG))
+                .name(settingsName, plugin.getLang())
+                .lore(settingsLore, plugin.getLang())
+                .build()) {
             @Override
             public void onClick(final Player player, final org.bukkit.event.inventory.InventoryClickEvent event) {
                 if (event.isShiftClick()) {
@@ -142,9 +179,13 @@ public class CustomKitEditorGui extends SinglePageGui<DuelsPlugin> {
         });
 
         // Slot 41: Preview Kit
+        final String previewName = plugin.getLang().getMessageOrDefault("GUI.customkit-editor.buttons.preview.name", "&b&lPreview Kit");
+        final List<String> previewLore = plugin.getLang().getMessageListOrDefault("GUI.customkit-editor.buttons.preview.lore",
+                java.util.Collections.singletonList("&7Click to view read-only kit preview."));
+
         set(41, new BaseButton(plugin, ItemBuilder.of(Material.ENDER_EYE)
-                .name("&b&lPreview Kit", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to view read-only kit preview.")
+                .name(previewName, plugin.getLang())
+                .lore(previewLore, plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -153,9 +194,13 @@ public class CustomKitEditorGui extends SinglePageGui<DuelsPlugin> {
         });
 
         // Slot 44: Save Kit
+        final String saveName = plugin.getLang().getMessageOrDefault("GUI.customkit-editor.buttons.save.name", "&a&lSave Kit");
+        final List<String> saveLore = plugin.getLang().getMessageListOrDefault("GUI.customkit-editor.buttons.save.lore",
+                java.util.Collections.singletonList("&7Click to validate and save this custom kit."));
+
         set(44, new BaseButton(plugin, ItemBuilder.of(Material.EMERALD_BLOCK)
-                .name("&a&lSave Kit", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to validate and save this custom kit.")
+                .name(saveName, plugin.getLang())
+                .lore(saveLore, plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -181,9 +226,12 @@ public class CustomKitEditorGui extends SinglePageGui<DuelsPlugin> {
         if (hasItem) {
             displayStack = item.clone();
         } else {
+            final List<String> chooseLore = plugin.getLang().getMessageListOrDefault(
+                    "GUI.customkit-editor.placeholders.choose-item-lore",
+                    java.util.Collections.singletonList("&aClick to choose item"));
             displayStack = ItemBuilder.of(placeholderMat)
                     .name(placeholderName, plugin.getLang())
-                    .lore(plugin.getLang(), "&aClick to choose item")
+                    .lore(chooseLore, plugin.getLang())
                     .build();
         }
 

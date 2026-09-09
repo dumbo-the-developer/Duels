@@ -27,32 +27,54 @@ public class CustomKitMenuGui extends SinglePageGui<DuelsPlugin> {
 
         final List<CustomKit> playerKits = plugin.getCustomKitManager().getKits(player.getUniqueId());
         final int maxKits = plugin.getCustomKitManager().getMaxKits(player);
-        final String limitStr = maxKits == Integer.MAX_VALUE ? "Unlimited" : String.valueOf(maxKits);
+        final String unlimitedStr = plugin.getLang().getMessageOrDefault("GENERAL.unlimited", "Unlimited");
+        final String limitStr = maxKits == Integer.MAX_VALUE ? unlimitedStr : String.valueOf(maxKits);
 
         // Display player custom kits (slots 0-44)
         int slot = 0;
         for (final CustomKit kit : playerKits) {
             if (slot >= 45) break;
             final CustomKitImpl impl = (CustomKitImpl) kit;
+            final int itemCount = impl.getItems().size() + impl.getArmor().size() + (impl.getOffHand() != null ? 1 : 0);
+
+            final List<String> templateLore = plugin.getLang().getMessageList("GUI.customkits-menu.buttons.kit.lore",
+                    "name", impl.getName(),
+                    "items", itemCount);
 
             final List<String> lore = new ArrayList<>();
-            if (!impl.getDescription().isEmpty()) {
-                for (final String line : impl.getDescription()) {
-                    lore.add("&7" + line);
+            if (!templateLore.isEmpty()) {
+                for (final String line : templateLore) {
+                    if (line.contains("%description%")) {
+                        if (!impl.getDescription().isEmpty()) {
+                            for (final String desc : impl.getDescription()) {
+                                lore.add("&7" + desc);
+                            }
+                        }
+                    } else {
+                        lore.add(line);
+                    }
                 }
+            } else {
+                if (!impl.getDescription().isEmpty()) {
+                    for (final String line : impl.getDescription()) {
+                        lore.add("&7" + line);
+                    }
+                    lore.add("");
+                }
+                lore.add("&7Items: &f" + itemCount);
                 lore.add("");
+                lore.add("&a[Left-Click] &7Edit Kit");
+                lore.add("&b[Right-Click] &7Preview Kit");
+                lore.add("&e[Shift-Left] &7Duplicate Kit");
+                lore.add("&c[Shift-Right] &7Delete Kit");
             }
-            lore.add("&7Items: &f" + (impl.getItems().size() + impl.getArmor().size() + (impl.getOffHand() != null ? 1 : 0)));
-            lore.add("");
-            lore.add("&a[Left-Click] &7Edit Kit");
-            lore.add("&b[Right-Click] &7Preview Kit");
-            lore.add("&e[Shift-Left] &7Duplicate Kit");
-            lore.add("&c[Shift-Right] &7Delete Kit");
 
             final ItemStack iconItem = impl.getIcon() != null ? impl.getIcon().clone() : new ItemStack(Material.NETHERITE_SWORD);
+            final String displayName = plugin.getLang().getMessageOrDefault("GUI.customkits-menu.buttons.kit.name",
+                    "&e&l" + impl.getName(), "name", impl.getName());
 
             final BaseButton kitBtn = new BaseButton(plugin, ItemBuilder.of(iconItem)
-                    .name("&e&l" + impl.getName(), plugin.getLang())
+                    .name(displayName, plugin.getLang())
                     .lore(lore, plugin.getLang())
                     .build()) {
                 @Override
@@ -63,11 +85,15 @@ public class CustomKitMenuGui extends SinglePageGui<DuelsPlugin> {
                             plugin.getLang().sendMessage(player, "ERROR.no-permission", "permission", Permissions.CUSTOMKITS_DELETE);
                             return;
                         }
+                        final String confirmTitle = plugin.getLang().getMessageOrDefault("GUI.customkits-menu.confirm-delete.title", "Delete Kit?");
+                        final String confirmMsg = plugin.getLang().getMessageOrDefault("GUI.customkits-menu.confirm-delete.message",
+                                "Are you sure you want to delete kit '" + impl.getName() + "'?", "kit", impl.getName());
+
                         CustomKitConfirmGui.open(
                                 plugin,
                                 player,
-                                "Delete Kit?",
-                                "Are you sure you want to delete kit '" + impl.getName() + "'?",
+                                confirmTitle,
+                                confirmMsg,
                                 () -> {
                                     plugin.getCustomKitManager().deleteKit(player.getUniqueId(), impl.getUniqueId());
                                     plugin.getLang().sendMessage(player, "COMMAND.customkits.deleted", "kit", impl.getName());
@@ -109,12 +135,22 @@ public class CustomKitMenuGui extends SinglePageGui<DuelsPlugin> {
         }
 
         // Slot 45: Limit Info Button
-        set(45, new BaseButton(plugin, ItemBuilder.of(Material.BOOK)
-                .name("&e&lKit Limit", plugin.getLang())
-                .lore(plugin.getLang(),
+        final Object remainingObj = maxKits == Integer.MAX_VALUE ? unlimitedStr : Math.max(0, maxKits - playerKits.size());
+        final String limitName = plugin.getLang().getMessageOrDefault("GUI.customkits-menu.buttons.limit.name", "&e&lKit Limit");
+        final List<String> limitLore = plugin.getLang().getMessageListOrDefault("GUI.customkits-menu.buttons.limit.lore",
+                java.util.Arrays.asList(
                         "&7Kits: &a" + playerKits.size() + " &7/ &e" + limitStr,
-                        "&7Remaining: &b" + (maxKits == Integer.MAX_VALUE ? "Unlimited" : Math.max(0, maxKits - playerKits.size()))
-                ).build()) {
+                        "&7Remaining: &b" + remainingObj
+                ),
+                "count", playerKits.size(),
+                "limit", limitStr,
+                "remaining", remainingObj
+        );
+
+        set(45, new BaseButton(plugin, ItemBuilder.of(Material.BOOK)
+                .name(limitName, plugin.getLang())
+                .lore(limitLore, plugin.getLang())
+                .build()) {
             @Override
             public void onClick(final Player player) {
             }
@@ -123,13 +159,19 @@ public class CustomKitMenuGui extends SinglePageGui<DuelsPlugin> {
         // Slot 49: Create New Kit Button
         final boolean reached = plugin.getCustomKitManager().hasReachedLimit(player);
         final Material createMat = reached ? Material.REDSTONE_BLOCK : Material.EMERALD_BLOCK;
-        final String createName = reached ? "&c&lKit Limit Reached" : "&a&l+ Create New Kit";
+        final String createName = reached
+                ? plugin.getLang().getMessageOrDefault("GUI.customkits-menu.buttons.create.name-reached", "&c&lKit Limit Reached")
+                : plugin.getLang().getMessageOrDefault("GUI.customkits-menu.buttons.create.name", "&a&l+ Create New Kit");
+        final List<String> createLore = reached
+                ? plugin.getLang().getMessageListOrDefault("GUI.customkits-menu.buttons.create.lore-reached",
+                        java.util.Collections.singletonList("&cYou cannot create more custom kits."))
+                : plugin.getLang().getMessageListOrDefault("GUI.customkits-menu.buttons.create.lore",
+                        java.util.Collections.singletonList("&7Click to name and create a new kit."));
 
         set(49, new BaseButton(plugin, ItemBuilder.of(createMat)
                 .name(createName, plugin.getLang())
-                .lore(plugin.getLang(),
-                        reached ? "&cYou cannot create more custom kits." : "&7Click to name and create a new kit."
-                ).build()) {
+                .lore(createLore, plugin.getLang())
+                .build()) {
             @Override
             public void onClick(final Player player) {
                 if (reached) {
@@ -147,9 +189,13 @@ public class CustomKitMenuGui extends SinglePageGui<DuelsPlugin> {
         });
 
         // Slot 53: Close Button
+        final String closeName = plugin.getLang().getMessageOrDefault("GUI.customkits-menu.buttons.close.name", "&c&lClose Menu");
+        final List<String> closeLore = plugin.getLang().getMessageListOrDefault("GUI.customkits-menu.buttons.close.lore",
+                java.util.Collections.singletonList("&7Click to exit."));
+
         set(53, new BaseButton(plugin, ItemBuilder.of(Material.BARRIER)
-                .name("&c&lClose Menu", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to exit.")
+                .name(closeName, plugin.getLang())
+                .lore(closeLore, plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {

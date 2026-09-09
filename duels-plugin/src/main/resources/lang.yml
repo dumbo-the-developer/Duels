@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 18
+config-version: 19
 
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
@@ -18,6 +18,8 @@ GENERAL:
   not-selected: 'Not Selected'
   random: 'Random'
   none: 'none'
+  unlimited: 'Unlimited'
+  unknown: 'Unknown'
   kit-selector: 'Kit Selector'
   arena-selector: 'Arena Selector'
   item-betting: 'Item Betting'
@@ -357,7 +359,18 @@ COMMAND:
         - '&f/%command% lobby &e- &7Teleports to duel lobby.'
         - '&f/%command% playsound [name] &e- &7Plays the selected sound if defined in config.'
         - '&f/%command% reload <module> &e- &7Reloads the plugin or the specified module.'
+        - '&f/%command% start <player1> <player2> [kit] [arena] &e- &7Forcefully starts a duel between two players.'
         - '{HALF_LINE} &fExtra Commands {HALF_LINE}'
+    start:
+      usage: '{PREFIX} &cUsage: /%command% [admin] start <player1> <player2> [kit] [arena]'
+      same-player: '{PREFIX} &cYou cannot start a duel between the same player!'
+      player-dead: '{PREFIX} &c%name% is currently dead!'
+      already-in-match: '{PREFIX} &c%name% is already in a match!'
+      no-arena-available: '{PREFIX} &cNo arenas are currently available for this duel.'
+      arena-in-use: '{PREFIX} &cArena ''%name%'' is currently in use.'
+      arena-disabled: '{PREFIX} &cArena ''%name%'' is currently disabled.'
+      target: '{PREFIX} &eAn administrator has forcefully started a duel between you and &f%opponent%&e.'
+      success: '{PREFIX} &aForcefully started a duel between &e%player1% &aand &e%player2% &aon arena &e%arena% &awith kit &e%kit%&a.'
     create: '{PREFIX} &7Arena &e%name% &7was successfully created. To set spawnpoints for this arena, use the command &f/duels set %name% 1'
     delete: '{PREFIX} &7Arena &e%name% &7was successfully removed.'
     set: '{PREFIX} &7Set position &f%position% &7for arena &e%name% &7at &f%location%&7.'
@@ -641,36 +654,518 @@ REPLAY:
 GUI:
   customkits-menu:
     title: 'My Custom Kits'
+    buttons:
+      kit:
+        name: '&e&l%name%'
+        lore:
+          - '%description%'
+          - '&7Items: &f%items%'
+          - ' '
+          - '&a[Left-Click] &7Edit Kit'
+          - '&b[Right-Click] &7Preview Kit'
+          - '&e[Shift-Left] &7Duplicate Kit'
+          - '&c[Shift-Right] &7Delete Kit'
+      limit:
+        name: '&e&lKit Limit'
+        lore:
+          - '&7Kits: &a%count% &7/ &e%limit%'
+          - '&7Remaining: &b%remaining%'
+      create:
+        name: '&a&l+ Create New Kit'
+        name-reached: '&c&lKit Limit Reached'
+        lore:
+          - '&7Click to name and create a new kit.'
+        lore-reached:
+          - '&cYou cannot create more custom kits.'
+      close:
+        name: '&c&lClose Menu'
+        lore:
+          - '&7Click to exit.'
+    confirm-delete:
+      title: 'Delete Kit?'
+      message: 'Are you sure you want to delete kit ''%kit%''?'
+  customkit-confirm:
+    buttons:
+      confirm:
+        name: '&a&lConfirm'
+        lore:
+          - '&7Click to proceed with this action.'
+      cancel:
+        name: '&c&lCancel'
+        lore:
+          - '&7Click to cancel and go back.'
+      info:
+        name: '&e&lInformation'
+        lore:
+          - '&7%text%'
   customkit-selector:
     title: 'Select Custom Kit'
+    buttons:
+      empty:
+        name: '&c&lNo Custom Kits Found'
+        lore:
+          - '&7You have not created any custom kits yet.'
+          - '&7Use &e/customkits &7to create your first kit!'
+      custom-kit:
+        name: '&d&l%name%'
+        lore:
+          - '%description%'
+          - '&7Items: &e%items%'
+          - ' '
+          - '&aClick to select this kit for duel request'
+          - '&7Note: Custom kit duels only support Money Betting'
+      back:
+        name: '&c&lBack'
+        lore:
+          - '&7Click to return to Kit Type Selection.'
   kit-type-selector:
     title: 'Select Kit Type'
   customkit-editor:
     title: 'Editing: %kit%'
+    placeholders:
+      helmet: '&7(Click to set Helmet)'
+      chestplate: '&7(Click to set Chestplate)'
+      leggings: '&7(Click to set Leggings)'
+      boots: '&7(Click to set Boots)'
+      offhand: '&7(Click to set Offhand)'
+      empty-slot: '&8(Empty Slot %slot%)'
+      empty-hotbar: '&8(Empty Hotbar %slot%)'
+      choose-item-lore:
+        - '&aClick to choose item'
+    buttons:
+      cancel:
+        name: '&c&lCancel / Discard'
+        lore:
+          - '&7Click to discard unsaved changes.'
+      clear:
+        name: '&c&lClear All Items'
+        lore:
+          - '&7Click to empty all kit inventory slots.'
+      settings:
+        name: '&e&lKit Settings'
+        lore:
+          - '&7Name: &f%name%'
+          - '&7Description: &f%description%'
+          - ' '
+          - '&a[Left-Click] &7Rename Kit'
+          - '&e[Right-Click] &7Edit Description'
+          - '&b[Shift-Click] &7Change Icon'
+      preview:
+        name: '&b&lPreview Kit'
+        lore:
+          - '&7Click to view read-only kit preview.'
+      save:
+        name: '&a&lSave Kit'
+        lore:
+          - '&7Click to validate and save this custom kit.'
+    confirm-discard:
+      title: 'Discard Changes?'
+      message: 'Are you sure you want to discard unsaved changes?'
+    confirm-clear:
+      title: 'Clear All Items?'
+      message: 'Are you sure you want to clear all items in this kit?'
   customkit-preview:
     title: 'Preview: %kit%'
+    placeholders:
+      helmet: '&7(Empty Helmet)'
+      chestplate: '&7(Empty Chestplate)'
+      leggings: '&7(Empty Leggings)'
+      boots: '&7(Empty Boots)'
+      offhand: '&7(Empty Offhand)'
+      empty-slot: '&8(Empty Slot)'
+      empty-hotbar: '&8(Empty Hotbar)'
+    buttons:
+      info:
+        name: '&e&lKit: %kit%'
+        owner: '&7Owner: &f%owner%'
+        description-header: '&7Description:'
+        readonly-footer: '&8Read-only preview'
+      close:
+        name: '&c&lClose Preview'
+        lore:
+          - '&7Click to close preview.'
   material-browser:
     title: 'Material Browser'
+    categories:
+      weapons: 'Weapons'
+      armor: 'Armor'
+      tools: 'Tools'
+      food: 'Food'
+      blocks: 'Blocks'
+      combat: 'Combat'
+      potions: 'Potions'
+      utility: 'Utility'
+      misc: 'Miscellaneous'
+    buttons:
+      armor-slot:
+        name: '&e&lArmor Slot: &b%slot%'
+        lore:
+          - '&7Select valid armor for this slot below.'
+      category-tab:
+        name: '&7%category%'
+        name-selected: '&a&l%category%'
+        lore:
+          - '&eClick to view category'
+        lore-selected:
+          - '&a▶ Currently viewing'
+      item:
+        lore:
+          - '&aClick to select this item'
+        lore-icon:
+          - '&aClick to select as kit icon'
+      previous-page:
+        name: '&ePrevious Page (%page%/%total%)'
+      next-page:
+        name: '&eNext Page (%page%/%total%)'
+      back:
+        name: '&c&lBack to Layout Editor'
+        lore:
+          - '&7Click to return to inventory editor.'
   item-editor:
     title: 'Item Editor'
     enter-damage: '{PREFIX} &aType durability damage value in chat (or 0 for max durability):'
     enter-model-data: '{PREFIX} &aType custom model data integer in chat (or 0 to remove):'
     enter-rgb-color: '{PREFIX} &aType RGB color in chat (e.g. &e255 0 0&a):'
+    buttons:
+      change-material:
+        name: '&e&lChange Material'
+        lore:
+          - '&7Current: &f%material%'
+          - ' '
+          - '&aClick to browse materials'
+      change-amount:
+        name: '&e&lChange Amount: &a%amount%'
+        lore:
+          - '&a[Left-Click] &7+1'
+          - '&e[Right-Click] &7-1'
+          - '&b[Shift-Left] &7+16'
+          - '&c[Shift-Right] &7-16'
+      display-name-lore:
+        name: '&e&lDisplay Name & Lore'
+        lore:
+          - '&7Click to edit item name and lore lines.'
+      enchantments:
+        name: '&b&lEnchantments (&e%count%&b)'
+        lore:
+          - '&7Click to configure item enchantments.'
+      attributes:
+        name: '&b&lAttributes (&e%count%&b)'
+        lore:
+          - '&7Click to configure attribute modifiers.'
+      armor-trim:
+        name: '&b&lArmor Trim'
+        lore:
+          - '&7Click to configure trim pattern and material.'
+      potion-settings:
+        name: '&d&lPotion Settings'
+        lore:
+          - '&7Click to configure potion type and custom effects.'
+      durability-damage:
+        name: '&e&lDurability Damage: &f%damage%'
+        lore:
+          - '&a[Left-Click] &7Restore full durability (0 damage)'
+          - '&e[Right-Click] &7Enter custom damage value'
+      unbreakable:
+        name: '&eUnbreakable: %status%'
+        lore:
+          - '&aClick to toggle'
+      item-flags:
+        name: '&e&lItem Flags'
+        lore:
+          - '&7Hide Enchants: %hide_enchants%'
+          - '&7Hide Attributes: %hide_attributes%'
+          - '&7Hide Unbreakable: %hide_unbreakable%'
+          - ' '
+          - '&a[Left-Click] &7Toggle Hide Enchants'
+          - '&e[Right-Click] &7Toggle Hide Attributes'
+          - '&b[Shift-Click] &7Toggle Hide Unbreakable'
+      custom-model-data:
+        name: '&eCustom Model Data: &f%data%'
+        lore:
+          - '&aClick to enter custom model data number'
+      leather-color:
+        name: '&e&lLeather Armor Color'
+        lore:
+          - '&7RGB: &f%r%, %g%, %b%'
+          - ' '
+          - '&aClick to choose color'
+      remove-item:
+        name: '&c&lRemove Item'
+        lore:
+          - '&7Click to delete this item from the kit.'
+      back:
+        name: '&c&lBack to Layout Editor'
+        lore:
+          - '&7Click to return to the kit layout editor.'
   enchantment-editor:
     title: 'Enchantment Editor'
+    buttons:
+      add:
+        name: '&a&l+ Add Enchantment'
+        lore:
+          - '&7Click to browse and add an enchantment.'
+      clear:
+        name: '&c&lClear All Enchantments'
+        lore:
+          - '&7Click to remove all enchantments.'
+      enchant-entry:
+        name: '&b%enchantment% %level%'
+        lore:
+          - '&7Current Level: &e%level% &7/ &a%max%'
+          - ' '
+          - '&a[Left-Click] &7+1 Level'
+          - '&e[Right-Click] &7-1 Level'
+          - '&c[Shift-Click / Middle] &7Remove Enchantment'
+      browse-entry:
+        name: '&b%enchantment%'
+        lore:
+          - '&7Max Allowed Level: &a%max%'
+          - ' '
+          - '&aClick to add level 1'
+      previous-page:
+        name: '&ePrevious Page (%page%/%total%)'
+      next-page:
+        name: '&eNext Page (%page%/%total%)'
+      back-enchantments:
+        name: '&c&lBack to Enchantments'
+        lore:
+          - '&7Click to go back.'
+      back-item-editor:
+        name: '&c&lBack to Item Editor'
+        lore:
+          - '&7Click to go back.'
   attribute-editor:
     title: 'Attribute Modifier Editor'
     enter-amount: '{PREFIX} &aType attribute modifier amount in chat:'
+    range-info: ' (Range: %min% to %max%)'
+    buttons:
+      add:
+        name: '&a&l+ Add Attribute Modifier'
+        lore:
+          - '&7Click to configure and add a modifier.'
+      clear:
+        name: '&c&lClear All Modifiers'
+        lore:
+          - '&7Click to remove all attribute modifiers.'
+      modifier-entry:
+        name: '&e%attribute%'
+        lore:
+          - '&7Amount: &f%amount%'
+          - '&7Operation: &f%operation%'
+          - '&7Slot: &f%slot%'
+          - ' '
+          - '&c[Click to remove]'
+      select-attribute:
+        name: '&b%attribute%'
+        lore:
+          - '&aClick to select attribute'
+      select-slot:
+        name: '&eSlot: %slot%'
+        lore:
+          - '&aClick to select equipment slot'
+      select-operation:
+        name: '&aOperation: %operation%'
+        lore:
+          - '&7Click to proceed to enter modifier amount.'
+      back:
+        name-back: '&c&lBack'
+        name-editor: '&c&lBack to Item Editor'
+        lore:
+          - '&7Click to go back.'
   armor-trim-editor:
     title: 'Armor Trim Editor'
+    buttons:
+      remove:
+        name: '&c&lRemove Armor Trim'
+        lore:
+          - '&7Click to clear the armor trim.'
+      pattern-entry:
+        name: '&b%pattern% Pattern'
+        lore:
+          - '&aClick to select pattern'
+      material-entry:
+        name: '&e%material% Trim'
+        lore:
+          - '&aClick to apply trim'
+      back:
+        name-patterns: '&c&lBack to Patterns'
+        name-editor: '&c&lBack to Item Editor'
+        lore:
+          - '&7Click to go back.'
   potion-editor:
     title: 'Potion Settings Editor'
     enter-duration-amplifier: '{PREFIX} &aType duration (seconds) and amplifier (e.g. &e60 2&a) in chat:'
+    buttons:
+      extended:
+        name: '&eExtended Duration: %status%'
+        lore:
+          - '&aClick to toggle'
+      upgraded:
+        name: '&eUpgraded (Tier II): %status%'
+        lore:
+          - '&aClick to toggle'
+      potion-type:
+        name: '&b%type%'
+        name-selected: '&a&l%type%'
+        lore:
+          - '&eClick to select'
+        lore-selected:
+          - '&a▶ Currently selected'
+      add-effect:
+        name: '&a&l+ Add Custom Potion Effect'
+        lore:
+          - '&7Click to add a custom potion effect.'
+      clear-effects:
+        name: '&c&lClear Custom Effects'
+        lore:
+          - '&7Click to remove all custom potion effects.'
+      effect-entry:
+        name: '&e%effect%'
+        lore:
+          - '&7Duration: &f%duration%s'
+          - '&7Amplifier: &f%amplifier%'
+          - ' '
+          - '&c[Click to remove]'
+      browse-effect:
+        name: '&b%effect%'
+        lore:
+          - '&aClick to set duration and amplifier'
+      previous-page:
+        name: '&ePrevious Page (%page%/%total%)'
+      next-page:
+        name: '&eNext Page (%page%/%total%)'
+      back:
+        name-settings: '&c&lBack to Potion Settings'
+        name-editor: '&c&lBack to Item Editor'
+        lore:
+          - '&7Click to go back.'
   lore-editor:
     title: 'Name & Lore Editor'
     enter-display-name: '{PREFIX} &aType display name in chat:'
     enter-lore-line: '{PREFIX} &aType lore line to add in chat:'
     enter-new-lore-line: '{PREFIX} &aType replacement lore line in chat:'
+    buttons:
+      set-name:
+        name: '&e&lSet Display Name'
+        default-name: '&7(Default)'
+        lore:
+          - '&7Current: %name%'
+          - ' '
+          - '&aClick to change display name.'
+      reset-name:
+        name: '&c&lReset Display Name'
+        lore:
+          - '&7Click to restore default item name.'
+      add-lore:
+        name: '&a&l+ Add Lore Line'
+        lore:
+          - '&7Click to append a new lore line.'
+      clear-lore:
+        name: '&c&lClear All Lore'
+        lore:
+          - '&7Click to remove all lore lines.'
+      lore-entry:
+        name: '&eLine %index%: %line%'
+        lore:
+          - '&a[Left-Click] &7Edit line'
+          - '&e[Shift-Left] &7Move UP'
+          - '&b[Shift-Right] &7Move DOWN'
+          - '&c[Right-Click] &7Delete line'
+      back:
+        name: '&c&lBack to Item Editor'
+        lore:
+          - '&7Click to go back.'
+  bedrock-customkits:
+    main-menu:
+      title: 'My Custom Kits'
+      content: '&7Manage your custom duel kits.\n&eKits: &a%count% &7/ &e%limit%\n'
+      create: '&a+ Create New Kit'
+      item-format: '&b%name%\n&7(%items% items)'
+    create-prompt:
+      title: 'Create Custom Kit'
+      name-label: 'Kit Name'
+      name-placeholder: 'Enter name (e.g. Sword PvP)'
+    duplicate-prompt:
+      title: 'Duplicate Kit'
+      name-label: 'New Kit Name'
+      copy-suffix: ' Copy'
+    actions:
+      title: 'Kit: %kit%'
+      content: '&eChoose an action for this kit:'
+      edit-layout: '&e✏ Edit Inventory Layout'
+      edit-settings: '&b⚙ Edit Kit Name / Description'
+      preview: '&a👁 Preview Kit'
+      duplicate: '&6❐ Duplicate Kit'
+      delete: '&c✘ Delete Kit'
+      back: '&7« Back to Kits'
+    layout:
+      title: 'Layout: %kit%'
+      content: '&7Tap any slot to configure its item:\n'
+      save: '&a✔ Save Kit'
+      discard: '&c✘ Discard / Cancel'
+      helmet: '&e[Helmet] &f%item%'
+      chestplate: '&e[Chestplate] &f%item%'
+      leggings: '&e[Leggings] &f%item%'
+      boots: '&e[Boots] &f%item%'
+      offhand: '&6[Offhand] &f%item%'
+      hotbar: '&b[Hotbar %slot%] &f%item%'
+      inventory: '&7[Inv %slot%] &f%item%'
+    slot-options:
+      title-item: 'Item: %material%'
+      title-empty: 'Empty Slot'
+      edit-properties: '&e✏ Edit Item Properties'
+      change-material: '&b🔄 Change Material'
+      clear-slot: '&c✘ Clear Slot'
+      choose-material: '&a+ Choose Material'
+      back: '&7« Back'
+    properties:
+      title: 'Edit: %material%'
+      display-name-label: 'Display Name'
+      amount-label: 'Amount'
+      unbreakable-label: 'Unbreakable'
+    settings:
+      title: 'Settings: %kit%'
+      name-label: 'Kit Name'
+      desc-line-1: 'Description Line 1'
+      desc-line-2: 'Description Line 2'
+    categories:
+      title: 'Select Category'
+    material-picker:
+      title-armor: 'Pick Armor (%slot%)'
+      title-category: 'Pick Material: %category%'
+    preview:
+      title: 'Preview: %kit%'
+      header: '&e=== Kit Preview: &f%kit% &e===\n\n'
+      armor-header: '&6Armor:\n'
+      armor-slot: '&7- %slot%: &f%item%\n'
+      offhand-slot: '&7- Offhand: &f%item%\n\n'
+      hotbar-header: '&6Hotbar Items:\n'
+      hotbar-item: '&7%slot%. &f%item%\n'
+      inventory-header: '\n&6Main Inventory:\n'
+      inventory-item: '&7%slot%. &f%item%\n'
+      back: '&a« Back'
+      empty: 'Empty'
+  bedrock-duel:
+    title: 'Duel %target%'
+    select-kit: 'Select Kit'
+    select-arena: 'Select Arena'
+    enable-bet: 'Enable Bet'
+    bet-amount: 'Bet Amount'
+    own-inventory: 'Own Inventory'
+    custom-kit-prefix: '[Custom] '
+    server-kit-prefix: '[Server] '
+  bedrock-accept:
+    title: 'Duel Request'
+    challenge: '&e%sender%&r has challenged you to a duel!\n\n'
+    kit: '&7Kit: &f%kit%\n'
+    own-inventory: '&7Own Inventory: &aEnabled\n'
+    arena: '&7Arena: &f%arena%\n'
+    bet: '&7Bet: &6$%bet%\n'
+    item-betting: '&7Item Betting: &aEnabled\n'
+    question: '\n&fDo you accept?'
+    accept: '&a✔ Accept'
+    deny: '&c✘ Deny'
+    preview-custom-kit: '&b👁 Preview Custom Kit'
   settings:
     title: 'Request Settings'
     buttons:

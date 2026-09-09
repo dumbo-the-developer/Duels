@@ -66,14 +66,22 @@ public class LoreEditorGui extends SinglePageGui<DuelsPlugin> {
         });
 
         // Set Display Name Button (slot 1)
-        final String currentDisplayName = (meta != null && meta.hasDisplayName()) ? meta.getDisplayName() : "&7(Default)";
-        set(1, new BaseButton(plugin, ItemBuilder.of(Material.NAME_TAG)
-                .name("&e&lSet Display Name", plugin.getLang())
-                .lore(plugin.getLang(),
-                        "&7Current: " + currentDisplayName,
+        final String defaultName = plugin.getLang().getMessageOrDefault("GUI.lore-editor.buttons.set-name.default-name", "&7(Default)");
+        final String currentDisplayName = (meta != null && meta.hasDisplayName()) ? meta.getDisplayName() : defaultName;
+        final List<String> setNameLore = new ArrayList<>();
+        for (final String line : plugin.getLang().getMessageListOrDefault("GUI.lore-editor.buttons.set-name.lore",
+                List.of(
+                        "&7Current: %name%",
                         "",
                         "&aClick to change display name."
-                ).build()) {
+                ))) {
+            setNameLore.add(line.replace("%name%", currentDisplayName));
+        }
+
+        set(1, new BaseButton(plugin, ItemBuilder.of(Material.NAME_TAG)
+                .name(plugin.getLang().getMessageOrDefault("GUI.lore-editor.buttons.set-name.name", "&e&lSet Display Name"), plugin.getLang())
+                .lore(setNameLore, plugin.getLang())
+                .build()) {
             @Override
             public void onClick(final Player player) {
                 promptDisplayName(player);
@@ -83,8 +91,9 @@ public class LoreEditorGui extends SinglePageGui<DuelsPlugin> {
         // Reset Display Name Button (slot 2)
         if (meta != null && meta.hasDisplayName()) {
             set(2, new BaseButton(plugin, ItemBuilder.of(Material.REDSTONE)
-                    .name("&c&lReset Display Name", plugin.getLang())
-                    .lore(plugin.getLang(), "&7Click to restore default item name.")
+                    .name(plugin.getLang().getMessageOrDefault("GUI.lore-editor.buttons.reset-name.name", "&c&lReset Display Name"), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.lore-editor.buttons.reset-name.lore",
+                            List.of("&7Click to restore default item name.")), plugin.getLang())
                     .build()) {
                 @Override
                 public void onClick(final Player player) {
@@ -98,8 +107,9 @@ public class LoreEditorGui extends SinglePageGui<DuelsPlugin> {
 
         // Add Lore Line Button (slot 7)
         set(7, new BaseButton(plugin, ItemBuilder.of(Material.WRITABLE_BOOK)
-                .name("&a&l+ Add Lore Line", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to append a new lore line.")
+                .name(plugin.getLang().getMessageOrDefault("GUI.lore-editor.buttons.add-lore.name", "&a&l+ Add Lore Line"), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.lore-editor.buttons.add-lore.lore",
+                        List.of("&7Click to append a new lore line.")), plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -110,8 +120,9 @@ public class LoreEditorGui extends SinglePageGui<DuelsPlugin> {
         // Clear All Lore (slot 8)
         if (meta != null && meta.hasLore()) {
             set(8, new BaseButton(plugin, ItemBuilder.of(Material.LAVA_BUCKET)
-                    .name("&c&lClear All Lore", plugin.getLang())
-                    .lore(plugin.getLang(), "&7Click to remove all lore lines.")
+                    .name(plugin.getLang().getMessageOrDefault("GUI.lore-editor.buttons.clear-lore.name", "&c&lClear All Lore"), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.lore-editor.buttons.clear-lore.lore",
+                            List.of("&7Click to remove all lore lines.")), plugin.getLang())
                     .build()) {
                 @Override
                 public void onClick(final Player player) {
@@ -135,13 +146,17 @@ public class LoreEditorGui extends SinglePageGui<DuelsPlugin> {
             final String lineText = lore.get(i);
 
             final BaseButton lineBtn = new BaseButton(plugin, ItemBuilder.of(Material.PAPER)
-                    .name("&eLine " + (lineIndex + 1) + ": " + lineText, plugin.getLang())
-                    .lore(plugin.getLang(),
-                            "&a[Left-Click] &7Edit line",
-                            "&e[Shift-Left] &7Move UP",
-                            "&b[Shift-Right] &7Move DOWN",
-                            "&c[Right-Click] &7Delete line"
-                    ).build()) {
+                    .name(plugin.getLang().getMessageOrDefault("GUI.lore-editor.buttons.lore-entry.name", "&eLine %index%: %line%")
+                            .replace("%index%", String.valueOf(lineIndex + 1))
+                            .replace("%line%", lineText), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.lore-editor.buttons.lore-entry.lore",
+                            List.of(
+                                    "&a[Left-Click] &7Edit line",
+                                    "&e[Shift-Left] &7Move UP",
+                                    "&b[Shift-Right] &7Move DOWN",
+                                    "&c[Right-Click] &7Delete line"
+                            )), plugin.getLang())
+                    .build()) {
                 @Override
                 public void onClick(final Player player, final org.bukkit.event.inventory.InventoryClickEvent event) {
                     if (event.isShiftClick() && event.isLeftClick()) {
@@ -188,8 +203,9 @@ public class LoreEditorGui extends SinglePageGui<DuelsPlugin> {
 
         // Back Button (slot 49)
         set(49, new BaseButton(plugin, ItemBuilder.of(Material.BARRIER)
-                .name("&c&lBack to Item Editor", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to go back.")
+                .name(plugin.getLang().getMessageOrDefault("GUI.lore-editor.buttons.back.name", "&c&lBack to Item Editor"), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.lore-editor.buttons.back.lore",
+                        List.of("&7Click to go back.")), plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {

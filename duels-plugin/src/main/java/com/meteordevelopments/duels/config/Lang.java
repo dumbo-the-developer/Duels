@@ -126,6 +126,37 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
         return message != null ? replace(message, replacers) : null;
     }
 
+    public String getMessageOrDefault(final String key, final String defaultVal, final Object... replacers) {
+        final String message = getMessage(key, replacers);
+        if (message != null) {
+            return message;
+        }
+        return defaultVal != null ? (replacers.length > 0 ? replace(toLegacyString(defaultVal), replacers) : toLegacyString(defaultVal)) : null;
+    }
+
+    public List<String> getMessageList(final String key, final Object... replacers) {
+        final String message = getMessage(key, replacers);
+        if (message == null) {
+            return Collections.emptyList();
+        }
+        return Arrays.asList(message.split("\n"));
+    }
+
+    public List<String> getMessageListOrDefault(final String key, final List<String> defaultList, final Object... replacers) {
+        final String message = getMessage(key, replacers);
+        if (message != null) {
+            return Arrays.asList(message.split("\n"));
+        }
+        if (defaultList == null) {
+            return Collections.emptyList();
+        }
+        final List<String> result = new ArrayList<>();
+        for (final String line : defaultList) {
+            result.add(replacers.length > 0 ? replace(toLegacyString(line), replacers) : toLegacyString(line));
+        }
+        return result;
+    }
+
     public void sendMessage(final CommandSender receiver, final String key, final Object... replacers) {
         final String message = getRawMessage(key);
 

@@ -18,8 +18,8 @@ public class CustomKitConfirmGui extends SinglePageGui<DuelsPlugin> {
         super(plugin, title, 3);
 
         final BaseButton confirmButton = new BaseButton(plugin, ItemBuilder.of(Material.LIME_CONCRETE)
-                .name("&a&lConfirm", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to proceed with this action.")
+                .name(plugin.getLang().getMessageOrDefault("GUI.customkit-confirm.buttons.confirm.name", "&a&lConfirm"), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.customkit-confirm.buttons.confirm.lore", java.util.Collections.singletonList("&7Click to proceed with this action.")), plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -32,8 +32,8 @@ public class CustomKitConfirmGui extends SinglePageGui<DuelsPlugin> {
         };
 
         final BaseButton cancelButton = new BaseButton(plugin, ItemBuilder.of(Material.RED_CONCRETE)
-                .name("&c&lCancel", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to cancel and go back.")
+                .name(plugin.getLang().getMessageOrDefault("GUI.customkit-confirm.buttons.cancel.name", "&c&lCancel"), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.customkit-confirm.buttons.cancel.lore", java.util.Collections.singletonList("&7Click to cancel and go back.")), plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -46,8 +46,8 @@ public class CustomKitConfirmGui extends SinglePageGui<DuelsPlugin> {
         };
 
         final BaseButton infoButton = new BaseButton(plugin, ItemBuilder.of(Material.PAPER)
-                .name("&e&lInformation", plugin.getLang())
-                .lore(plugin.getLang(), "&7" + questionText)
+                .name(plugin.getLang().getMessageOrDefault("GUI.customkit-confirm.buttons.info.name", "&e&lInformation"), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.customkit-confirm.buttons.info.lore", java.util.Collections.singletonList("&7" + questionText), "text", questionText), plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {

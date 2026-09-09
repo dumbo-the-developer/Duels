@@ -17,22 +17,28 @@ import java.util.*;
 public class MaterialBrowserGui extends SinglePageGui<DuelsPlugin> {
 
     public enum Category {
-        WEAPONS(Material.DIAMOND_SWORD, "Weapons"),
-        ARMOR(Material.DIAMOND_CHESTPLATE, "Armor"),
-        TOOLS(Material.DIAMOND_PICKAXE, "Tools"),
-        FOOD(Material.GOLDEN_APPLE, "Food"),
-        BLOCKS(Material.OBSIDIAN, "Blocks"),
-        COMBAT(Material.ENDER_PEARL, "Combat"),
-        POTIONS(Material.POTION, "Potions"),
-        UTILITY(Material.WATER_BUCKET, "Utility"),
-        MISC(Material.CHEST, "Miscellaneous");
+        WEAPONS(Material.DIAMOND_SWORD, "weapons", "Weapons"),
+        ARMOR(Material.DIAMOND_CHESTPLATE, "armor", "Armor"),
+        TOOLS(Material.DIAMOND_PICKAXE, "tools", "Tools"),
+        FOOD(Material.GOLDEN_APPLE, "food", "Food"),
+        BLOCKS(Material.OBSIDIAN, "blocks", "Blocks"),
+        COMBAT(Material.ENDER_PEARL, "combat", "Combat"),
+        POTIONS(Material.POTION, "potions", "Potions"),
+        UTILITY(Material.WATER_BUCKET, "utility", "Utility"),
+        MISC(Material.CHEST, "misc", "Miscellaneous");
 
         private final Material icon;
-        private final String displayName;
+        private final String key;
+        private final String defaultName;
 
-        Category(final Material icon, final String displayName) {
+        Category(final Material icon, final String key, final String defaultName) {
             this.icon = icon;
-            this.displayName = displayName;
+            this.key = key;
+            this.defaultName = defaultName;
+        }
+
+        public String getDisplayName(final com.meteordevelopments.duels.config.Lang lang) {
+            return lang.getMessageOrDefault("GUI.material-browser.categories." + key, defaultName);
         }
     }
 
@@ -121,8 +127,10 @@ public class MaterialBrowserGui extends SinglePageGui<DuelsPlugin> {
                 inventory.setItem(s, filler);
             }
             set(4, new BaseButton(plugin, ItemBuilder.of(Material.ARMOR_STAND)
-                    .name("&e&lArmor Slot: &b" + slotName, plugin.getLang())
-                    .lore(plugin.getLang(), "&7Select valid armor for this slot below.")
+                    .name(plugin.getLang().getMessageOrDefault("GUI.material-browser.buttons.armor-slot.name", "&e&lArmor Slot: &b%slot%")
+                            .replace("%slot%", slotName), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.material-browser.buttons.armor-slot.lore",
+                            List.of("&7Select valid armor for this slot below.")), plugin.getLang())
                     .build()) {
                 @Override
                 public void onClick(final Player player) {
@@ -134,9 +142,16 @@ public class MaterialBrowserGui extends SinglePageGui<DuelsPlugin> {
                 final Category cat = categories[i];
                 final boolean selected = (cat == currentCategory);
 
+                final String catTitle = selected
+                        ? plugin.getLang().getMessageOrDefault("GUI.material-browser.buttons.category-tab.name-selected", "&a&l%category%").replace("%category%", cat.getDisplayName(plugin.getLang()))
+                        : plugin.getLang().getMessageOrDefault("GUI.material-browser.buttons.category-tab.name", "&7%category%").replace("%category%", cat.getDisplayName(plugin.getLang()));
+                final List<String> catLore = selected
+                        ? plugin.getLang().getMessageListOrDefault("GUI.material-browser.buttons.category-tab.lore-selected", List.of("&a▶ Currently viewing"))
+                        : plugin.getLang().getMessageListOrDefault("GUI.material-browser.buttons.category-tab.lore", List.of("&eClick to view category"));
+
                 final ItemBuilder builder = ItemBuilder.of(cat.icon)
-                        .name((selected ? "&a&l" : "&7") + cat.displayName, plugin.getLang())
-                        .lore(plugin.getLang(), selected ? "&a▶ Currently viewing" : "&eClick to view category");
+                        .name(catTitle, plugin.getLang())
+                        .lore(catLore, plugin.getLang());
 
                 set(i, new BaseButton(plugin, builder.build()) {
                     @Override
@@ -184,10 +199,13 @@ public class MaterialBrowserGui extends SinglePageGui<DuelsPlugin> {
 
             final ItemStack stack = new ItemStack(mat);
             final String matTitle = "&f" + formatMaterialName(mat.name());
+            final List<String> itemLore = isIconPicker
+                    ? plugin.getLang().getMessageListOrDefault("GUI.material-browser.buttons.item.lore-icon", List.of("&aClick to select as kit icon"))
+                    : plugin.getLang().getMessageListOrDefault("GUI.material-browser.buttons.item.lore", List.of("&aClick to select this item"));
 
             final BaseButton itemBtn = new BaseButton(plugin, ItemBuilder.of(stack)
                     .name(matTitle, plugin.getLang())
-                    .lore(plugin.getLang(), isIconPicker ? "&aClick to select as kit icon" : "&aClick to select this item")
+                    .lore(itemLore, plugin.getLang())
                     .build()) {
                 @Override
                 public void onClick(final Player player) {
@@ -230,8 +248,11 @@ public class MaterialBrowserGui extends SinglePageGui<DuelsPlugin> {
 
         // Previous Page
         if (currentPage > 0) {
+            final String prevName = plugin.getLang().getMessageOrDefault("GUI.material-browser.buttons.previous-page.name", "&ePrevious Page (%page%/%total%)")
+                    .replace("%page%", String.valueOf(currentPage))
+                    .replace("%total%", String.valueOf(totalPages));
             set(45, new BaseButton(plugin, ItemBuilder.of(Material.ARROW)
-                    .name("&ePrevious Page (" + currentPage + "/" + totalPages + ")", plugin.getLang()).build()) {
+                    .name(prevName, plugin.getLang()).build()) {
                 @Override
                 public void onClick(final Player player) {
                     if (currentPage > 0) {
@@ -244,8 +265,9 @@ public class MaterialBrowserGui extends SinglePageGui<DuelsPlugin> {
 
         // Back to Layout Editor
         set(49, new BaseButton(plugin, ItemBuilder.of(Material.BARRIER)
-                .name("&c&lBack to Layout Editor", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to return to inventory editor.")
+                .name(plugin.getLang().getMessageOrDefault("GUI.material-browser.buttons.back.name", "&c&lBack to Layout Editor"), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.material-browser.buttons.back.lore",
+                        List.of("&7Click to return to inventory editor.")), plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -255,8 +277,11 @@ public class MaterialBrowserGui extends SinglePageGui<DuelsPlugin> {
 
         // Next Page
         if (currentPage < totalPages - 1) {
+            final String nextName = plugin.getLang().getMessageOrDefault("GUI.material-browser.buttons.next-page.name", "&eNext Page (%page%/%total%)")
+                    .replace("%page%", String.valueOf(currentPage + 2))
+                    .replace("%total%", String.valueOf(totalPages));
             set(53, new BaseButton(plugin, ItemBuilder.of(Material.ARROW)
-                    .name("&eNext Page (" + (currentPage + 2) + "/" + totalPages + ")", plugin.getLang()).build()) {
+                    .name(nextName, plugin.getLang()).build()) {
                 @Override
                 public void onClick(final Player player) {
                     if (currentPage < totalPages - 1) {

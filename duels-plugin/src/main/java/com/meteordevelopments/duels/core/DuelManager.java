@@ -29,6 +29,9 @@ import com.meteordevelopments.duels.util.compat.Titles;
 import com.meteordevelopments.duels.util.inventory.InventoryUtil;
 import com.meteordevelopments.duels.util.validator.ValidatorUtil;
 import com.meteordevelopments.duels.api.folialib.task.WrappedTask;
+import com.meteordevelopments.duels.data.UserData;
+import com.meteordevelopments.duels.core.spectate.SpectateManagerImpl;
+import org.bukkit.command.CommandSender;
 import org.bukkit.*;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
@@ -629,6 +632,124 @@ public class DuelManager implements Loadable {
         } else {
             return startMatch(Collections.singleton(sender), Collections.singleton(target), settings, items, source);
         }
+    }
+
+    public boolean forceStartMatch(final CommandSender sender, final Player first, final Player second, final Settings settings) {
+        if (!first.isOnline()) {
+            lang.sendMessage(sender, "ERROR.player.not-found", "name", first.getName());
+            return false;
+        }
+
+        if (!second.isOnline()) {
+            lang.sendMessage(sender, "ERROR.player.not-found", "name", second.getName());
+            return false;
+        }
+
+        if (first.equals(second)) {
+            lang.sendMessage(sender, "COMMAND.duels.start.same-player");
+            return false;
+        }
+
+        if (first.isDead()) {
+            lang.sendMessage(sender, "COMMAND.duels.start.player-dead", "name", first.getName());
+            return false;
+        }
+
+        if (second.isDead()) {
+            lang.sendMessage(sender, "COMMAND.duels.start.player-dead", "name", second.getName());
+            return false;
+        }
+
+        if (arenaManager.isInMatch(first)) {
+            lang.sendMessage(sender, "COMMAND.duels.start.already-in-match", "name", first.getName());
+            return false;
+        }
+
+        if (arenaManager.isInMatch(second)) {
+            lang.sendMessage(sender, "COMMAND.duels.start.already-in-match", "name", second.getName());
+            return false;
+        }
+
+        // Clean up spectating states
+        final SpectateManagerImpl spectateManager = plugin.getSpectateManager();
+        if (spectateManager != null) {
+            if (spectateManager.isSpectating(first)) {
+                spectateManager.stopSpectating(first);
+            }
+            if (spectateManager.isSpectating(second)) {
+                spectateManager.stopSpectating(second);
+            }
+        }
+
+        // Clean up queue states
+        queueManager.remove(first);
+        queueManager.remove(second);
+
+        // Clean up any kit editing session
+        final KitEditManager kitEditManager = KitEditManager.getInstance();
+        if (kitEditManager != null) {
+            kitEditManager.checkAndAbortIfInQueueOrMatch(first);
+            kitEditManager.checkAndAbortIfInQueueOrMatch(second);
+        }
+
+        // Clean up existing duel requests between the two
+        plugin.getRequestManager().remove(first, second);
+        plugin.getRequestManager().remove(second, first);
+
+        // Reset cooldowns so admin matches are never blocked
+        final UserData u1 = userDataManager.get(first);
+        if (u1 != null) {
+            u1.setDuelCooldownUntil(0L);
+        }
+        final UserData u2 = userDataManager.get(second);
+        if (u2 != null) {
+            u2.setDuelCooldownUntil(0L);
+        }
+
+        final KitImpl kit = settings.getKit();
+        ArenaImpl arena = settings.getArena();
+
+        if (arena != null) {
+            if (!arena.isAvailable()) {
+                if (arena.isUsed()) {
+                    lang.sendMessage(sender, "COMMAND.duels.start.arena-in-use", "name", arena.getName());
+                } else if (arena.isDisabled()) {
+                    lang.sendMessage(sender, "COMMAND.duels.start.arena-disabled", "name", arena.getName());
+                } else {
+                    lang.sendMessage(sender, "ERROR.arena.no-position-set", "name", arena.getName());
+                }
+                return false;
+            }
+
+            if (kit != null && !arenaManager.isSelectable(kit, arena)) {
+                lang.sendMessage(sender, "DUEL.start-failure.arena-not-applicable", "kit", kit.getName(), "arena", arena.getName());
+                return false;
+            }
+        } else {
+            arena = arenaManager.randomArena(kit);
+            if (arena == null) {
+                lang.sendMessage(sender, "COMMAND.duels.start.no-arena-available");
+                return false;
+            }
+            settings.setArena(arena);
+        }
+
+        final DuelMatch match = arena.startMatch(kit, null, settings, null);
+        addPlayers(Collections.singleton(first), match, arena, kit, arena.getPosition(1));
+        addPlayers(Collections.singleton(second), match, arena, kit, arena.getPosition(2));
+
+        if (config.isCdEnabled()) {
+            arena.startCountdown();
+        }
+
+        final MatchStartEvent event = new MatchStartEvent(match, new Player[]{first, second});
+        Bukkit.getPluginManager().callEvent(event);
+
+        final String kitName = kit != null ? kit.getName() : lang.getMessage("GENERAL.none");
+        lang.sendMessage(first, "COMMAND.duels.start.target", "opponent", second.getName());
+        lang.sendMessage(second, "COMMAND.duels.start.target", "opponent", first.getName());
+        lang.sendMessage(sender, "COMMAND.duels.start.success", "player1", first.getName(), "player2", second.getName(), "kit", kitName, "arena", arena.getName());
+        return true;
     }
 
     private void addPlayers(final Collection<Player> players, final DuelMatch match, final ArenaImpl arena, final KitImpl kit, final Location location) {

@@ -80,9 +80,13 @@ public class PotionEditorGui extends SinglePageGui<DuelsPlugin> {
         }
 
         // Back Button (slot 49)
+        final String backName = browsingEffects
+                ? plugin.getLang().getMessageOrDefault("GUI.potion-editor.buttons.back.name-settings", "&c&lBack to Potion Settings")
+                : plugin.getLang().getMessageOrDefault("GUI.potion-editor.buttons.back.name-editor", "&c&lBack to Item Editor");
+        final List<String> backLore = plugin.getLang().getMessageListOrDefault("GUI.potion-editor.buttons.back.lore", List.of("&7Click to go back."));
         set(49, new BaseButton(plugin, ItemBuilder.of(Material.BARRIER)
-                .name(browsingEffects ? "&c&lBack to Potion Settings" : "&c&lBack to Item Editor", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to go back.")
+                .name(backName, plugin.getLang())
+                .lore(backLore, plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -110,9 +114,14 @@ public class PotionEditorGui extends SinglePageGui<DuelsPlugin> {
 
         // Extended Toggle (slot 1)
         final boolean extended = data.isExtended();
+        final String extStatus = extended
+                ? plugin.getLang().getMessageOrDefault("GENERAL.enabled", "&aEnabled")
+                : plugin.getLang().getMessageOrDefault("GENERAL.disabled", "&7Disabled");
         set(1, new BaseButton(plugin, ItemBuilder.of(extended ? Material.LIME_DYE : Material.GRAY_DYE)
-                .name("&eExtended Duration: " + (extended ? "&aEnabled" : "&7Disabled"), plugin.getLang())
-                .lore(plugin.getLang(), "&aClick to toggle")
+                .name(plugin.getLang().getMessageOrDefault("GUI.potion-editor.buttons.extended.name", "&eExtended Duration: %status%")
+                        .replace("%status%", extStatus), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.potion-editor.buttons.extended.lore",
+                        List.of("&aClick to toggle")), plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -140,9 +149,14 @@ public class PotionEditorGui extends SinglePageGui<DuelsPlugin> {
 
         // Upgraded (Strong / Tier II) Toggle (slot 7)
         final boolean upgraded = data.isUpgraded();
+        final String upgStatus = upgraded
+                ? plugin.getLang().getMessageOrDefault("GENERAL.enabled", "&aEnabled")
+                : plugin.getLang().getMessageOrDefault("GENERAL.disabled", "&7Disabled");
         set(7, new BaseButton(plugin, ItemBuilder.of(upgraded ? Material.LIME_DYE : Material.GRAY_DYE)
-                .name("&eUpgraded (Tier II): " + (upgraded ? "&aEnabled" : "&7Disabled"), plugin.getLang())
-                .lore(plugin.getLang(), "&aClick to toggle")
+                .name(plugin.getLang().getMessageOrDefault("GUI.potion-editor.buttons.upgraded.name", "&eUpgraded (Tier II): %status%")
+                        .replace("%status%", upgStatus), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.potion-editor.buttons.upgraded.lore",
+                        List.of("&aClick to toggle")), plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -184,9 +198,16 @@ public class PotionEditorGui extends SinglePageGui<DuelsPlugin> {
             if (slot > 25) break;
 
             final boolean selected = (data.getType() == type);
+            final String typeName = selected
+                    ? plugin.getLang().getMessageOrDefault("GUI.potion-editor.buttons.potion-type.name-selected", "&a&l%type%").replace("%type%", formatName(type.name()))
+                    : plugin.getLang().getMessageOrDefault("GUI.potion-editor.buttons.potion-type.name", "&b%type%").replace("%type%", formatName(type.name()));
+            final List<String> typeLore = selected
+                    ? plugin.getLang().getMessageListOrDefault("GUI.potion-editor.buttons.potion-type.lore-selected", List.of("&a▶ Currently selected"))
+                    : plugin.getLang().getMessageListOrDefault("GUI.potion-editor.buttons.potion-type.lore", List.of("&eClick to select"));
+
             final BaseButton btn = new BaseButton(plugin, ItemBuilder.of(Material.POTION)
-                    .name((selected ? "&a&l" : "&b") + formatName(type.name()), plugin.getLang())
-                    .lore(plugin.getLang(), selected ? "&a▶ Currently selected" : "&eClick to select")
+                    .name(typeName, plugin.getLang())
+                    .lore(typeLore, plugin.getLang())
                     .build()) {
                 @Override
                 public void onClick(final Player player) {
@@ -209,8 +230,9 @@ public class PotionEditorGui extends SinglePageGui<DuelsPlugin> {
 
         // Custom Effects Section (slots 28-43)
         set(28, new BaseButton(plugin, ItemBuilder.of(Material.BREWING_STAND)
-                .name("&a&l+ Add Custom Potion Effect", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to add a custom potion effect.")
+                .name(plugin.getLang().getMessageOrDefault("GUI.potion-editor.buttons.add-effect.name", "&a&l+ Add Custom Potion Effect"), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.potion-editor.buttons.add-effect.lore",
+                        List.of("&7Click to add a custom potion effect.")), plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -222,8 +244,9 @@ public class PotionEditorGui extends SinglePageGui<DuelsPlugin> {
 
         if (meta.hasCustomEffects()) {
             set(35, new BaseButton(plugin, ItemBuilder.of(Material.LAVA_BUCKET)
-                    .name("&c&lClear Custom Effects", plugin.getLang())
-                    .lore(plugin.getLang(), "&7Click to remove all custom potion effects.")
+                    .name(plugin.getLang().getMessageOrDefault("GUI.potion-editor.buttons.clear-effects.name", "&c&lClear Custom Effects"), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.potion-editor.buttons.clear-effects.lore",
+                            List.of("&7Click to remove all custom potion effects.")), plugin.getLang())
                     .build()) {
                 @Override
                 public void onClick(final Player player) {
@@ -242,14 +265,24 @@ public class PotionEditorGui extends SinglePageGui<DuelsPlugin> {
         for (final PotionEffect effect : meta.getCustomEffects()) {
             if (effSlot >= 35) break;
 
-            final BaseButton effBtn = new BaseButton(plugin, ItemBuilder.of(Material.POTION)
-                    .name("&e" + formatName(effect.getType().getName()), plugin.getLang())
-                    .lore(plugin.getLang(),
-                            "&7Duration: &f" + (effect.getDuration() / 20) + "s",
-                            "&7Amplifier: &f" + (effect.getAmplifier() + 1),
+            final List<String> effLore = new ArrayList<>();
+            for (final String line : plugin.getLang().getMessageListOrDefault("GUI.potion-editor.buttons.effect-entry.lore",
+                    List.of(
+                            "&7Duration: &f%duration%s",
+                            "&7Amplifier: &f%amplifier%",
                             "",
                             "&c[Click to remove]"
-                    ).build()) {
+                    ))) {
+                effLore.add(line
+                        .replace("%duration%", String.valueOf(effect.getDuration() / 20))
+                        .replace("%amplifier%", String.valueOf(effect.getAmplifier() + 1)));
+            }
+
+            final BaseButton effBtn = new BaseButton(plugin, ItemBuilder.of(Material.POTION)
+                    .name(plugin.getLang().getMessageOrDefault("GUI.potion-editor.buttons.effect-entry.name", "&e%effect%")
+                            .replace("%effect%", formatName(effect.getType().getName())), plugin.getLang())
+                    .lore(effLore, plugin.getLang())
+                    .build()) {
                 @Override
                 public void onClick(final Player player) {
                     meta.removeCustomEffect(effect.getType());
@@ -288,8 +321,10 @@ public class PotionEditorGui extends SinglePageGui<DuelsPlugin> {
             if (slot % 9 == 8) slot += 2;
 
             final BaseButton btn = new BaseButton(plugin, ItemBuilder.of(Material.POTION)
-                    .name("&b" + formatName(type.getName()), plugin.getLang())
-                    .lore(plugin.getLang(), "&aClick to set duration and amplifier")
+                    .name(plugin.getLang().getMessageOrDefault("GUI.potion-editor.buttons.browse-effect.name", "&b%effect%")
+                            .replace("%effect%", formatName(type.getName())), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.potion-editor.buttons.browse-effect.lore",
+                            List.of("&aClick to set duration and amplifier")), plugin.getLang())
                     .build()) {
                 @Override
                 public void onClick(final Player player) {
@@ -303,8 +338,11 @@ public class PotionEditorGui extends SinglePageGui<DuelsPlugin> {
         }
 
         if (effectsPage > 0) {
+            final String prevName = plugin.getLang().getMessageOrDefault("GUI.potion-editor.buttons.previous-page.name", "&ePrevious Page (%page%/%total%)")
+                    .replace("%page%", String.valueOf(effectsPage))
+                    .replace("%total%", String.valueOf(totalPages));
             set(45, new BaseButton(plugin, ItemBuilder.of(Material.ARROW)
-                    .name("&ePrevious Page (" + effectsPage + "/" + totalPages + ")", plugin.getLang()).build()) {
+                    .name(prevName, plugin.getLang()).build()) {
                 @Override
                 public void onClick(final Player player) {
                     if (effectsPage > 0) {
@@ -316,8 +354,11 @@ public class PotionEditorGui extends SinglePageGui<DuelsPlugin> {
         }
 
         if (effectsPage < totalPages - 1) {
+            final String nextName = plugin.getLang().getMessageOrDefault("GUI.potion-editor.buttons.next-page.name", "&eNext Page (%page%/%total%)")
+                    .replace("%page%", String.valueOf(effectsPage + 2))
+                    .replace("%total%", String.valueOf(totalPages));
             set(53, new BaseButton(plugin, ItemBuilder.of(Material.ARROW)
-                    .name("&eNext Page (" + (effectsPage + 2) + "/" + totalPages + ")", plugin.getLang()).build()) {
+                    .name(nextName, plugin.getLang()).build()) {
                 @Override
                 public void onClick(final Player player) {
                     if (effectsPage < totalPages - 1) {

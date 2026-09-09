@@ -7,6 +7,7 @@ import com.meteordevelopments.duels.replay.packet.WrapperPlayServerEntityDestroy
 import com.meteordevelopments.duels.replay.packet.WrapperPlayServerGameStateChange;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.ListenerOptions;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
@@ -46,15 +47,18 @@ public class ReplayPacketListener extends AbstractListener {
     public void register() {
         if (isRegistered()) return;
 
-        this.packetAdapter = new PacketAdapter(DuelsPlugin.getInstance(), ListenerPriority.NORMAL, 
-                PacketType.Play.Client.USE_ENTITY, 
-                PacketType.Play.Client.ENTITY_ACTION,
-                PacketType.Play.Client.STEER_VEHICLE,
-                PacketType.Play.Server.ENTITY_DESTROY,
-                PacketType.Play.Server.BLOCK_CHANGE,
-                PacketType.Play.Server.MULTI_BLOCK_CHANGE,
-                PacketType.Play.Server.BLOCK_ACTION,
-                PacketType.Play.Server.EXPLOSION) {
+        this.packetAdapter = new PacketAdapter(
+                PacketAdapter.params(DuelsPlugin.getInstance(),
+                        PacketType.Play.Client.USE_ENTITY,
+                        PacketType.Play.Client.ENTITY_ACTION,
+                        PacketType.Play.Client.STEER_VEHICLE,
+                        PacketType.Play.Server.ENTITY_DESTROY,
+                        PacketType.Play.Server.BLOCK_CHANGE,
+                        PacketType.Play.Server.MULTI_BLOCK_CHANGE,
+                        PacketType.Play.Server.BLOCK_ACTION,
+                        PacketType.Play.Server.EXPLOSION)
+                        .listenerPriority(ListenerPriority.NORMAL)
+                        .options(ListenerOptions.SKIP_PLUGIN_VERIFIER)) {
 
             @SuppressWarnings("deprecation")
             @Override

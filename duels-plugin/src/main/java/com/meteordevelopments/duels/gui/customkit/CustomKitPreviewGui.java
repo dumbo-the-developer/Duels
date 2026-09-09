@@ -41,18 +41,21 @@ public class CustomKitPreviewGui extends SinglePageGui<DuelsPlugin> {
         }
 
         // Armor slots
-        final ItemStack helmet = armor != null ? armor.get(0) : null;
-        final ItemStack chestplate = armor != null ? armor.get(1) : null;
-        final ItemStack leggings = armor != null ? armor.get(2) : null;
-        final ItemStack boots = armor != null ? armor.get(3) : null;
+        final String helmetPh = plugin.getLang().getMessageOrDefault("GUI.customkit-preview.placeholders.helmet", "&7(Empty Helmet)");
+        final String chestPh = plugin.getLang().getMessageOrDefault("GUI.customkit-preview.placeholders.chestplate", "&7(Empty Chestplate)");
+        final String legsPh = plugin.getLang().getMessageOrDefault("GUI.customkit-preview.placeholders.leggings", "&7(Empty Leggings)");
+        final String bootsPh = plugin.getLang().getMessageOrDefault("GUI.customkit-preview.placeholders.boots", "&7(Empty Boots)");
+        final String offhandPh = plugin.getLang().getMessageOrDefault("GUI.customkit-preview.placeholders.offhand", "&7(Empty Offhand)");
+        final String slotPh = plugin.getLang().getMessageOrDefault("GUI.customkit-preview.placeholders.empty-slot", "&8(Empty Slot)");
+        final String hotbarPh = plugin.getLang().getMessageOrDefault("GUI.customkit-preview.placeholders.empty-hotbar", "&8(Empty Hotbar)");
 
-        setReadOnlySlot(0, helmet, Material.CHAINMAIL_HELMET, "&7(Empty Helmet)");
-        setReadOnlySlot(9, chestplate, Material.CHAINMAIL_CHESTPLATE, "&7(Empty Chestplate)");
-        setReadOnlySlot(18, leggings, Material.CHAINMAIL_LEGGINGS, "&7(Empty Leggings)");
-        setReadOnlySlot(27, boots, Material.CHAINMAIL_BOOTS, "&7(Empty Boots)");
+        setReadOnlySlot(0, armor != null ? armor.get(0) : null, Material.CHAINMAIL_HELMET, helmetPh);
+        setReadOnlySlot(9, armor != null ? armor.get(1) : null, Material.CHAINMAIL_CHESTPLATE, chestPh);
+        setReadOnlySlot(18, armor != null ? armor.get(2) : null, Material.CHAINMAIL_LEGGINGS, legsPh);
+        setReadOnlySlot(27, armor != null ? armor.get(3) : null, Material.CHAINMAIL_BOOTS, bootsPh);
 
         // Offhand slot
-        setReadOnlySlot(36, offHand, Material.SHIELD, "&7(Empty Offhand)");
+        setReadOnlySlot(36, offHand, Material.SHIELD, offhandPh);
 
         // Main inventory slots (27 slots: 2-8, 11-17, 20-26, 29-35)
         int mainIdx = 9;
@@ -65,7 +68,7 @@ public class CustomKitPreviewGui extends SinglePageGui<DuelsPlugin> {
                     final int itemSlot = mainIdx;
                     final ItemStack item = items != null ? items.get(itemSlot) : null;
                     final int guiSlot = r * 9 + c;
-                    setReadOnlySlot(guiSlot, item, Material.LIGHT_GRAY_STAINED_GLASS_PANE, "&8(Empty Slot)");
+                    setReadOnlySlot(guiSlot, item, Material.LIGHT_GRAY_STAINED_GLASS_PANE, slotPh);
                     mainIdx++;
                 }
             }
@@ -75,22 +78,31 @@ public class CustomKitPreviewGui extends SinglePageGui<DuelsPlugin> {
         for (int h = 0; h < 9; h++) {
             final ItemStack item = items != null ? items.get(h) : null;
             final int guiSlot = 45 + h;
-            setReadOnlySlot(guiSlot, item, Material.LIGHT_GRAY_STAINED_GLASS_PANE, "&8(Empty Hotbar)");
+            setReadOnlySlot(guiSlot, item, Material.LIGHT_GRAY_STAINED_GLASS_PANE, hotbarPh);
         }
 
         // Info Button at slot 40
+        final String unknownStr = plugin.getLang().getMessageOrDefault("GENERAL.unknown", "Unknown");
+        final String ownerLine = plugin.getLang().getMessageOrDefault("GUI.customkit-preview.buttons.info.owner",
+                "&7Owner: &f%owner%", "owner", ownerName != null ? ownerName : unknownStr);
+        final String descHeader = plugin.getLang().getMessageOrDefault("GUI.customkit-preview.buttons.info.description-header", "&7Description:");
+        final String readonlyFooter = plugin.getLang().getMessageOrDefault("GUI.customkit-preview.buttons.info.readonly-footer", "&8Read-only preview");
+
         final List<String> infoLore = new ArrayList<>();
-        infoLore.add("&7Owner: &f" + (ownerName != null ? ownerName : "Unknown"));
+        infoLore.add(ownerLine);
         if (description != null && !description.isEmpty()) {
-            infoLore.add("&7Description:");
+            infoLore.add(descHeader);
             for (final String line : description) {
                 infoLore.add("&f" + line);
             }
         }
-        infoLore.add("&8Read-only preview");
+        infoLore.add(readonlyFooter);
+
+        final String infoName = plugin.getLang().getMessageOrDefault("GUI.customkit-preview.buttons.info.name",
+                "&e&lKit: %kit%", "kit", kitName);
 
         final BaseButton infoBtn = new BaseButton(plugin, ItemBuilder.of(icon != null ? icon.clone() : new ItemStack(Material.NETHERITE_SWORD))
-                .name("&e&lKit: " + kitName, plugin.getLang())
+                .name(infoName, plugin.getLang())
                 .lore(infoLore, plugin.getLang())
                 .build()) {
             @Override
@@ -100,9 +112,13 @@ public class CustomKitPreviewGui extends SinglePageGui<DuelsPlugin> {
         set(40, infoBtn);
 
         // Back / Close Button at slot 44
+        final String closeName = plugin.getLang().getMessageOrDefault("GUI.customkit-preview.buttons.close.name", "&c&lClose Preview");
+        final List<String> closeLore = plugin.getLang().getMessageListOrDefault("GUI.customkit-preview.buttons.close.lore",
+                java.util.Collections.singletonList("&7Click to close preview."));
+
         final BaseButton backBtn = new BaseButton(plugin, ItemBuilder.of(Material.BARRIER)
-                .name("&c&lClose Preview", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to close preview.")
+                .name(closeName, plugin.getLang())
+                .lore(closeLore, plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {

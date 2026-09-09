@@ -47,46 +47,52 @@ public final class BedrockDuelForm {
         final ArenaManagerImpl arenaManager = plugin.getArenaManager();
 
         // --- Build kit options ---
+        // --- Build kit options ---
+        final String ownInvLabel = plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-duel.own-inventory", "Own Inventory"));
+        final String customPrefix = plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-duel.custom-kit-prefix", "[Custom] "));
+        final String serverPrefix = plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-duel.server-kit-prefix", "[Server] "));
+        final String randomLabel = plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GENERAL.random", "Random"));
+
         final List<String> kitOptions = new ArrayList<>();
         if (config.isOwnInventoryEnabled()) {
-            kitOptions.add("Own Inventory");
+            kitOptions.add(ownInvLabel);
         }
 
         final List<com.meteordevelopments.duels.api.customkit.CustomKit> customKits = plugin.getCustomKitManager().getKits(player.getUniqueId());
         for (final com.meteordevelopments.duels.api.customkit.CustomKit ck : customKits) {
-            kitOptions.add("[Custom] " + ck.getName());
+            kitOptions.add(customPrefix + ck.getName());
         }
 
         final List<String> kitNames = kitManager.getNames(false);
         for (final String sk : kitNames) {
-            kitOptions.add("[Server] " + sk);
+            kitOptions.add(serverPrefix + sk);
         }
 
         // --- Build arena options ---
         final List<String> arenaOptions = new ArrayList<>();
-        arenaOptions.add("Random");
+        arenaOptions.add(randomLabel);
         arenaOptions.addAll(arenaManager.getNames());
 
         // --- Build the form ---
         final boolean moneyBettingAvailable = config.isMoneyBettingEnabled();
 
         final CustomForm.Builder builder = CustomForm.builder()
-                .title("Duel " + target.getName());
+                .title(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-duel.title", "Duel %target%").replace("%target%", target.getName())));
 
         // Component 0: Kit dropdown
         if (config.isKitSelectingEnabled() || config.isOwnInventoryEnabled() || !customKits.isEmpty()) {
-            builder.dropdown("Select Kit", kitOptions);
+            builder.dropdown(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-duel.select-kit", "Select Kit")), kitOptions);
         }
 
         // Component 1: Arena dropdown
         if (config.isArenaSelectingEnabled()) {
-            builder.dropdown("Select Arena", arenaOptions);
+            builder.dropdown(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-duel.select-arena", "Select Arena")), arenaOptions);
         }
 
         // Components 2 & 3: Betting (only if money betting is enabled in config)
         if (moneyBettingAvailable) {
-            builder.toggle("Enable Bet", false);
-            builder.input("Bet Amount", "0");
+            builder.toggle(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-duel.enable-bet", "Enable Bet")), false);
+            builder.input(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-duel.bet-amount", "Bet Amount")), "0");
         }
 
         // Track component indices dynamically

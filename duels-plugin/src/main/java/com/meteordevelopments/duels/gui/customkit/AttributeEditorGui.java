@@ -91,9 +91,13 @@ public class AttributeEditorGui extends SinglePageGui<DuelsPlugin> {
         }
 
         // Back Button (slot 49)
+        final String backName = step > 0
+                ? plugin.getLang().getMessageOrDefault("GUI.attribute-editor.buttons.back.name-back", "&c&lBack")
+                : plugin.getLang().getMessageOrDefault("GUI.attribute-editor.buttons.back.name-editor", "&c&lBack to Item Editor");
+        final List<String> backLore = plugin.getLang().getMessageListOrDefault("GUI.attribute-editor.buttons.back.lore", List.of("&7Click to go back."));
         set(49, new BaseButton(plugin, ItemBuilder.of(Material.BARRIER)
-                .name(step > 0 ? "&c&lBack" : "&c&lBack to Item Editor", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to go back.")
+                .name(backName, plugin.getLang())
+                .lore(backLore, plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -114,8 +118,9 @@ public class AttributeEditorGui extends SinglePageGui<DuelsPlugin> {
 
         // Add Modifier Button (slot 0)
         set(0, new BaseButton(plugin, ItemBuilder.of(Material.NETHER_STAR)
-                .name("&a&l+ Add Attribute Modifier", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to configure and add a modifier.")
+                .name(plugin.getLang().getMessageOrDefault("GUI.attribute-editor.buttons.add.name", "&a&l+ Add Attribute Modifier"), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.attribute-editor.buttons.add.lore",
+                        List.of("&7Click to configure and add a modifier.")), plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -132,8 +137,9 @@ public class AttributeEditorGui extends SinglePageGui<DuelsPlugin> {
         // Clear All Modifiers (slot 8)
         if (modifiers != null && !modifiers.isEmpty()) {
             set(8, new BaseButton(plugin, ItemBuilder.of(Material.LAVA_BUCKET)
-                    .name("&c&lClear All Modifiers", plugin.getLang())
-                    .lore(plugin.getLang(), "&7Click to remove all attribute modifiers.")
+                    .name(plugin.getLang().getMessageOrDefault("GUI.attribute-editor.buttons.clear.name", "&c&lClear All Modifiers"), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.attribute-editor.buttons.clear.lore",
+                            List.of("&7Click to remove all attribute modifiers.")), plugin.getLang())
                     .build()) {
                 @Override
                 public void onClick(final Player player) {
@@ -159,15 +165,26 @@ public class AttributeEditorGui extends SinglePageGui<DuelsPlugin> {
                 final Attribute attr = entry.getKey();
                 final AttributeModifier mod = entry.getValue();
 
-                final BaseButton modBtn = new BaseButton(plugin, ItemBuilder.of(Material.IRON_SWORD)
-                        .name("&e" + formatName(attr.name()), plugin.getLang())
-                        .lore(plugin.getLang(),
-                                "&7Amount: &f" + mod.getAmount(),
-                                "&7Operation: &f" + mod.getOperation().name(),
-                                "&7Slot: &f" + (mod.getSlot() != null ? mod.getSlot().name() : "ANY"),
+                final List<String> modLore = new ArrayList<>();
+                for (final String line : plugin.getLang().getMessageListOrDefault("GUI.attribute-editor.buttons.modifier-entry.lore",
+                        List.of(
+                                "&7Amount: &f%amount%",
+                                "&7Operation: &f%operation%",
+                                "&7Slot: &f%slot%",
                                 "",
                                 "&c[Click to remove]"
-                        ).build()) {
+                        ))) {
+                    modLore.add(line
+                            .replace("%amount%", String.valueOf(mod.getAmount()))
+                            .replace("%operation%", mod.getOperation().name())
+                            .replace("%slot%", mod.getSlot() != null ? mod.getSlot().name() : "ANY"));
+                }
+
+                final BaseButton modBtn = new BaseButton(plugin, ItemBuilder.of(Material.IRON_SWORD)
+                        .name(plugin.getLang().getMessageOrDefault("GUI.attribute-editor.buttons.modifier-entry.name", "&e%attribute%")
+                                .replace("%attribute%", formatName(attr.name())), plugin.getLang())
+                        .lore(modLore, plugin.getLang())
+                        .build()) {
                     @Override
                     public void onClick(final Player player) {
                         meta.removeAttributeModifier(attr, mod);
@@ -198,8 +215,10 @@ public class AttributeEditorGui extends SinglePageGui<DuelsPlugin> {
         int slot = 10;
         for (final Attribute attr : attributes) {
             final BaseButton btn = new BaseButton(plugin, ItemBuilder.of(Material.PAPER)
-                    .name("&b" + formatName(attr.name()), plugin.getLang())
-                    .lore(plugin.getLang(), "&aClick to select attribute")
+                    .name(plugin.getLang().getMessageOrDefault("GUI.attribute-editor.buttons.select-attribute.name", "&b%attribute%")
+                            .replace("%attribute%", formatName(attr.name())), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.attribute-editor.buttons.select-attribute.lore",
+                            List.of("&aClick to select attribute")), plugin.getLang())
                     .build()) {
                 @Override
                 public void onClick(final Player player) {
@@ -220,8 +239,10 @@ public class AttributeEditorGui extends SinglePageGui<DuelsPlugin> {
         int slot = 11;
         for (final EquipmentSlot s : slots) {
             final BaseButton btn = new BaseButton(plugin, ItemBuilder.of(Material.ARMOR_STAND)
-                    .name("&eSlot: " + s.name(), plugin.getLang())
-                    .lore(plugin.getLang(), "&aClick to select equipment slot")
+                    .name(plugin.getLang().getMessageOrDefault("GUI.attribute-editor.buttons.select-slot.name", "&eSlot: %slot%")
+                            .replace("%slot%", s.name()), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.attribute-editor.buttons.select-slot.lore",
+                            List.of("&aClick to select equipment slot")), plugin.getLang())
                     .build()) {
                 @Override
                 public void onClick(final Player player) {
@@ -242,8 +263,10 @@ public class AttributeEditorGui extends SinglePageGui<DuelsPlugin> {
         int slot = 11;
         for (final AttributeModifier.Operation op : ops) {
             final BaseButton btn = new BaseButton(plugin, ItemBuilder.of(Material.REPEATER)
-                    .name("&aOperation: " + op.name(), plugin.getLang())
-                    .lore(plugin.getLang(), "&7Click to proceed to enter modifier amount.")
+                    .name(plugin.getLang().getMessageOrDefault("GUI.attribute-editor.buttons.select-operation.name", "&aOperation: %operation%")
+                            .replace("%operation%", op.name()), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.attribute-editor.buttons.select-operation.lore",
+                            List.of("&7Click to proceed to enter modifier amount.")), plugin.getLang())
                     .build()) {
                 @Override
                 public void onClick(final Player player) {
@@ -258,7 +281,11 @@ public class AttributeEditorGui extends SinglePageGui<DuelsPlugin> {
     private void promptAmount(final Player player, final AttributeModifier.Operation op) {
         final CustomKitsConfig config = plugin.getCustomKitManager().getCustomKitsConfig();
         final CustomKitsConfig.AttributeLimit limit = config.getAttributeLimits().get(selectedAttribute.name());
-        final String rangeInfo = (limit != null) ? " (Range: " + limit.getMin() + " to " + limit.getMax() + ")" : "";
+        final String rangeInfo = (limit != null)
+                ? plugin.getLang().getMessageOrDefault("GUI.attribute-editor.range-info", " (Range: %min% to %max%)")
+                        .replace("%min%", String.valueOf(limit.getMin()))
+                        .replace("%max%", String.valueOf(limit.getMax()))
+                : "";
 
         final ChatInputManager inputManager = new ChatInputManager(plugin);
         inputManager.prompt(

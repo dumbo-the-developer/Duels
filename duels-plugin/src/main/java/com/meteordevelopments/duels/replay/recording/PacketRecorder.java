@@ -3,6 +3,7 @@ package com.meteordevelopments.duels.replay.recording;
 import com.meteordevelopments.duels.replay.packet.*;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.ListenerOptions;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
@@ -79,7 +80,7 @@ public class PacketRecorder extends AbstractListener {
 			RECORDED_PACKETS.add(WrapperPlayServerEntityTeleport.TYPE);
 		}
 		
-		this.packetAdapter = new PacketAdapter(DuelsPlugin.getInstance(), ListenerPriority.HIGHEST, RECORDED_PACKETS) {
+		this.packetAdapter = new PacketAdapter(DuelsPlugin.getInstance(), ListenerPriority.HIGHEST, RECORDED_PACKETS, ListenerOptions.SKIP_PLUGIN_VERIFIER) {
 			@Override
 			public void onPacketReceiving(PacketEvent event) {
 				

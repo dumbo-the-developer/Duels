@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 12
+config-version: 13
 
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
@@ -18,6 +18,8 @@ GENERAL:
   not-selected: 'Not Selected'
   random: 'Random'
   none: 'none'
+  unlimited: 'Unlimited'
+  unknown: 'Unknown'
   kit-selector: 'Kit Selector'
   arena-selector: 'Arena Selector'
   item-betting: 'Item Betting'
@@ -355,7 +357,18 @@ COMMAND:
         - '<white>/%command% lobby <yellow>- <gray>Teleports to duel lobby.'
         - '<white>/%command% playsound [name] <yellow>- <gray>Plays the selected sound if defined in config.'
         - '<white>/%command% reload <module> <yellow>- <gray>Reloads the plugin or the specified module.'
+        - '<white>/%command% start <player1> <player2> [kit] [arena] <yellow>- <gray>Forcefully starts a duel between two players.'
         - '{HALF_LINE} <white>Extra Commands {HALF_LINE}'
+    start:
+      usage: '{PREFIX} <red>Usage: /%command% [admin] start <player1> <player2> [kit] [arena]'
+      same-player: '{PREFIX} <red>You cannot start a duel between the same player!'
+      player-dead: '{PREFIX} <red>%name% is currently dead!'
+      already-in-match: '{PREFIX} <red>%name% is already in a match!'
+      no-arena-available: '{PREFIX} <red>No arenas are currently available for this duel.'
+      arena-in-use: '{PREFIX} <red>Arena ''%name%'' is currently in use.'
+      arena-disabled: '{PREFIX} <red>Arena ''%name%'' is currently disabled.'
+      target: '{PREFIX} <yellow>An administrator has forcefully started a duel between you and <white>%opponent%<yellow>.'
+      success: '{PREFIX} <green>Forcefully started a duel between <yellow>%player1% <green>and <yellow>%player2% <green>on arena <yellow>%arena% <green>with kit <yellow>%kit%<green>.'
     create: '{PREFIX} <gray>Arena <yellow>%name% <gray>was successfully created. To set spawnpoints for this arena, use the command <white>/duels set %name% 1'
     delete: '{PREFIX} <gray>Arena <yellow>%name% <gray>was successfully removed.'
     set: '{PREFIX} <gray>Set position <white>%position% <gray>for arena <yellow>%name% <gray>at <white>%location%<gray>.'
@@ -601,36 +614,518 @@ SPECTATE:
 GUI:
   customkits-menu:
     title: 'My Custom Kits'
+    buttons:
+      kit:
+        name: '<yellow><bold>%name%'
+        lore:
+          - '%description%'
+          - '<gray>Items: <white>%items%'
+          - ' '
+          - '<green>[Left-Click] <gray>Edit Kit'
+          - '<aqua>[Right-Click] <gray>Preview Kit'
+          - '<yellow>[Shift-Left] <gray>Duplicate Kit'
+          - '<red>[Shift-Right] <gray>Delete Kit'
+      limit:
+        name: '<yellow><bold>Kit Limit'
+        lore:
+          - '<gray>Kits: <green>%count% <gray>/ <yellow>%limit%'
+          - '<gray>Remaining: <aqua>%remaining%'
+      create:
+        name: '<green><bold>+ Create New Kit'
+        name-reached: '<red><bold>Kit Limit Reached'
+        lore:
+          - '<gray>Click to name and create a new kit.'
+        lore-reached:
+          - '<red>You cannot create more custom kits.'
+      close:
+        name: '<red><bold>Close Menu'
+        lore:
+          - '<gray>Click to exit.'
+    confirm-delete:
+      title: 'Delete Kit?'
+      message: 'Are you sure you want to delete kit ''%kit%''?'
+  customkit-confirm:
+    buttons:
+      confirm:
+        name: '<green><bold>Confirm'
+        lore:
+          - '<gray>Click to proceed with this action.'
+      cancel:
+        name: '<red><bold>Cancel'
+        lore:
+          - '<gray>Click to cancel and go back.'
+      info:
+        name: '<yellow><bold>Information'
+        lore:
+          - '<gray>%text%'
   customkit-selector:
     title: 'Select Custom Kit'
+    buttons:
+      empty:
+        name: '<red><bold>No Custom Kits Found'
+        lore:
+          - '<gray>You have not created any custom kits yet.'
+          - '<gray>Use <yellow>/customkits <gray>to create your first kit!'
+      custom-kit:
+        name: '<light_purple><bold>%name%'
+        lore:
+          - '%description%'
+          - '<gray>Items: <yellow>%items%'
+          - ' '
+          - '<green>Click to select this kit for duel request'
+          - '<gray>Note: Custom kit duels only support Money Betting'
+      back:
+        name: '<red><bold>Back'
+        lore:
+          - '<gray>Click to return to Kit Type Selection.'
   kit-type-selector:
     title: 'Select Kit Type'
   customkit-editor:
     title: 'Editing: %kit%'
+    placeholders:
+      helmet: '<gray>(Click to set Helmet)'
+      chestplate: '<gray>(Click to set Chestplate)'
+      leggings: '<gray>(Click to set Leggings)'
+      boots: '<gray>(Click to set Boots)'
+      offhand: '<gray>(Click to set Offhand)'
+      empty-slot: '<dark_gray>(Empty Slot %slot%)'
+      empty-hotbar: '<dark_gray>(Empty Hotbar %slot%)'
+      choose-item-lore:
+        - '<green>Click to choose item'
+    buttons:
+      cancel:
+        name: '<red><bold>Cancel / Discard'
+        lore:
+          - '<gray>Click to discard unsaved changes.'
+      clear:
+        name: '<red><bold>Clear All Items'
+        lore:
+          - '<gray>Click to empty all kit inventory slots.'
+      settings:
+        name: '<yellow><bold>Kit Settings'
+        lore:
+          - '<gray>Name: <white>%name%'
+          - '<gray>Description: <white>%description%'
+          - ' '
+          - '<green>[Left-Click] <gray>Rename Kit'
+          - '<yellow>[Right-Click] <gray>Edit Description'
+          - '<aqua>[Shift-Click] <gray>Change Icon'
+      preview:
+        name: '<aqua><bold>Preview Kit'
+        lore:
+          - '<gray>Click to view read-only kit preview.'
+      save:
+        name: '<green><bold>Save Kit'
+        lore:
+          - '<gray>Click to validate and save this custom kit.'
+    confirm-discard:
+      title: 'Discard Changes?'
+      message: 'Are you sure you want to discard unsaved changes?'
+    confirm-clear:
+      title: 'Clear All Items?'
+      message: 'Are you sure you want to clear all items in this kit?'
   customkit-preview:
     title: 'Preview: %kit%'
+    placeholders:
+      helmet: '<gray>(Empty Helmet)'
+      chestplate: '<gray>(Empty Chestplate)'
+      leggings: '<gray>(Empty Leggings)'
+      boots: '<gray>(Empty Boots)'
+      offhand: '<gray>(Empty Offhand)'
+      empty-slot: '<dark_gray>(Empty Slot)'
+      empty-hotbar: '<dark_gray>(Empty Hotbar)'
+    buttons:
+      info:
+        name: '<yellow><bold>Kit: %kit%'
+        owner: '<gray>Owner: <white>%owner%'
+        description-header: '<gray>Description:'
+        readonly-footer: '<dark_gray>Read-only preview'
+      close:
+        name: '<red><bold>Close Preview'
+        lore:
+          - '<gray>Click to close preview.'
   material-browser:
     title: 'Material Browser'
+    categories:
+      weapons: 'Weapons'
+      armor: 'Armor'
+      tools: 'Tools'
+      food: 'Food'
+      blocks: 'Blocks'
+      combat: 'Combat'
+      potions: 'Potions'
+      utility: 'Utility'
+      misc: 'Miscellaneous'
+    buttons:
+      armor-slot:
+        name: '<yellow><bold>Armor Slot: <aqua>%slot%'
+        lore:
+          - '<gray>Select valid armor for this slot below.'
+      category-tab:
+        name: '<gray>%category%'
+        name-selected: '<green><bold>%category%'
+        lore:
+          - '<yellow>Click to view category'
+        lore-selected:
+          - '<green>▶ Currently viewing'
+      item:
+        lore:
+          - '<green>Click to select this item'
+        lore-icon:
+          - '<green>Click to select as kit icon'
+      previous-page:
+        name: '<yellow>Previous Page (%page%/%total%)'
+      next-page:
+        name: '<yellow>Next Page (%page%/%total%)'
+      back:
+        name: '<red><bold>Back to Layout Editor'
+        lore:
+          - '<gray>Click to return to inventory editor.'
   item-editor:
     title: 'Item Editor'
     enter-damage: '{PREFIX} <green>Type durability damage value in chat (or 0 for max durability):'
     enter-model-data: '{PREFIX} <green>Type custom model data integer in chat (or 0 to remove):'
     enter-rgb-color: '{PREFIX} <green>Type RGB color in chat (e.g. <yellow>255 0 0</yellow>):'
+    buttons:
+      change-material:
+        name: '<yellow><bold>Change Material'
+        lore:
+          - '<gray>Current: <white>%material%'
+          - ' '
+          - '<green>Click to browse materials'
+      change-amount:
+        name: '<yellow><bold>Change Amount: <green>%amount%'
+        lore:
+          - '<green>[Left-Click] <gray>+1'
+          - '<yellow>[Right-Click] <gray>-1'
+          - '<aqua>[Shift-Left] <gray>+16'
+          - '<red>[Shift-Right] <gray>-16'
+      display-name-lore:
+        name: '<yellow><bold>Display Name & Lore'
+        lore:
+          - '<gray>Click to edit item name and lore lines.'
+      enchantments:
+        name: '<aqua><bold>Enchantments (<yellow>%count%<aqua>)'
+        lore:
+          - '<gray>Click to configure item enchantments.'
+      attributes:
+        name: '<aqua><bold>Attributes (<yellow>%count%<aqua>)'
+        lore:
+          - '<gray>Click to configure attribute modifiers.'
+      armor-trim:
+        name: '<aqua><bold>Armor Trim'
+        lore:
+          - '<gray>Click to configure trim pattern and material.'
+      potion-settings:
+        name: '<light_purple><bold>Potion Settings'
+        lore:
+          - '<gray>Click to configure potion type and custom effects.'
+      durability-damage:
+        name: '<yellow><bold>Durability Damage: <white>%damage%'
+        lore:
+          - '<green>[Left-Click] <gray>Restore full durability (0 damage)'
+          - '<yellow>[Right-Click] <gray>Enter custom damage value'
+      unbreakable:
+        name: '<yellow>Unbreakable: %status%'
+        lore:
+          - '<green>Click to toggle'
+      item-flags:
+        name: '<yellow><bold>Item Flags'
+        lore:
+          - '<gray>Hide Enchants: %hide_enchants%'
+          - '<gray>Hide Attributes: %hide_attributes%'
+          - '<gray>Hide Unbreakable: %hide_unbreakable%'
+          - ' '
+          - '<green>[Left-Click] <gray>Toggle Hide Enchants'
+          - '<yellow>[Right-Click] <gray>Toggle Hide Attributes'
+          - '<aqua>[Shift-Click] <gray>Toggle Hide Unbreakable'
+      custom-model-data:
+        name: '<yellow>Custom Model Data: <white>%data%'
+        lore:
+          - '<green>Click to enter custom model data number'
+      leather-color:
+        name: '<yellow><bold>Leather Armor Color'
+        lore:
+          - '<gray>RGB: <white>%r%, %g%, %b%'
+          - ' '
+          - '<green>Click to choose color'
+      remove-item:
+        name: '<red><bold>Remove Item'
+        lore:
+          - '<gray>Click to delete this item from the kit.'
+      back:
+        name: '<red><bold>Back to Layout Editor'
+        lore:
+          - '<gray>Click to return to the kit layout editor.'
   enchantment-editor:
     title: 'Enchantment Editor'
+    buttons:
+      add:
+        name: '<green><bold>+ Add Enchantment'
+        lore:
+          - '<gray>Click to browse and add an enchantment.'
+      clear:
+        name: '<red><bold>Clear All Enchantments'
+        lore:
+          - '<gray>Click to remove all enchantments.'
+      enchant-entry:
+        name: '<aqua>%enchantment% %level%'
+        lore:
+          - '<gray>Current Level: <yellow>%level% <gray>/ <green>%max%'
+          - ' '
+          - '<green>[Left-Click] <gray>+1 Level'
+          - '<yellow>[Right-Click] <gray>-1 Level'
+          - '<red>[Shift-Click / Middle] <gray>Remove Enchantment'
+      browse-entry:
+        name: '<aqua>%enchantment%'
+        lore:
+          - '<gray>Max Allowed Level: <green>%max%'
+          - ' '
+          - '<green>Click to add level 1'
+      previous-page:
+        name: '<yellow>Previous Page (%page%/%total%)'
+      next-page:
+        name: '<yellow>Next Page (%page%/%total%)'
+      back-enchantments:
+        name: '<red><bold>Back to Enchantments'
+        lore:
+          - '<gray>Click to go back.'
+      back-item-editor:
+        name: '<red><bold>Back to Item Editor'
+        lore:
+          - '<gray>Click to go back.'
   attribute-editor:
     title: 'Attribute Modifier Editor'
     enter-amount: '{PREFIX} <green>Type attribute modifier amount in chat:'
+    range-info: ' (Range: %min% to %max%)'
+    buttons:
+      add:
+        name: '<green><bold>+ Add Attribute Modifier'
+        lore:
+          - '<gray>Click to configure and add a modifier.'
+      clear:
+        name: '<red><bold>Clear All Modifiers'
+        lore:
+          - '<gray>Click to remove all attribute modifiers.'
+      modifier-entry:
+        name: '<yellow>%attribute%'
+        lore:
+          - '<gray>Amount: <white>%amount%'
+          - '<gray>Operation: <white>%operation%'
+          - '<gray>Slot: <white>%slot%'
+          - ' '
+          - '<red>[Click to remove]'
+      select-attribute:
+        name: '<aqua>%attribute%'
+        lore:
+          - '<green>Click to select attribute'
+      select-slot:
+        name: '<yellow>Slot: %slot%'
+        lore:
+          - '<green>Click to select equipment slot'
+      select-operation:
+        name: '<green>Operation: %operation%'
+        lore:
+          - '<gray>Click to proceed to enter modifier amount.'
+      back:
+        name-back: '<red><bold>Back'
+        name-editor: '<red><bold>Back to Item Editor'
+        lore:
+          - '<gray>Click to go back.'
   armor-trim-editor:
     title: 'Armor Trim Editor'
+    buttons:
+      remove:
+        name: '<red><bold>Remove Armor Trim'
+        lore:
+          - '<gray>Click to clear the armor trim.'
+      pattern-entry:
+        name: '<aqua>%pattern% Pattern'
+        lore:
+          - '<green>Click to select pattern'
+      material-entry:
+        name: '<yellow>%material% Trim'
+        lore:
+          - '<green>Click to apply trim'
+      back:
+        name-patterns: '<red><bold>Back to Patterns'
+        name-editor: '<red><bold>Back to Item Editor'
+        lore:
+          - '<gray>Click to go back.'
   potion-editor:
     title: 'Potion Settings Editor'
     enter-duration-amplifier: '{PREFIX} <green>Type duration (seconds) and amplifier (e.g. <yellow>60 2</yellow>) in chat:'
+    buttons:
+      extended:
+        name: '<yellow>Extended Duration: %status%'
+        lore:
+          - '<green>Click to toggle'
+      upgraded:
+        name: '<yellow>Upgraded (Tier II): %status%'
+        lore:
+          - '<green>Click to toggle'
+      potion-type:
+        name: '<aqua>%type%'
+        name-selected: '<green><bold>%type%'
+        lore:
+          - '<yellow>Click to select'
+        lore-selected:
+          - '<green>▶ Currently selected'
+      add-effect:
+        name: '<green><bold>+ Add Custom Potion Effect'
+        lore:
+          - '<gray>Click to add a custom potion effect.'
+      clear-effects:
+        name: '<red><bold>Clear Custom Effects'
+        lore:
+          - '<gray>Click to remove all custom potion effects.'
+      effect-entry:
+        name: '<yellow>%effect%'
+        lore:
+          - '<gray>Duration: <white>%duration%s'
+          - '<gray>Amplifier: <white>%amplifier%'
+          - ' '
+          - '<red>[Click to remove]'
+      browse-effect:
+        name: '<aqua>%effect%'
+        lore:
+          - '<green>Click to set duration and amplifier'
+      previous-page:
+        name: '<yellow>Previous Page (%page%/%total%)'
+      next-page:
+        name: '<yellow>Next Page (%page%/%total%)'
+      back:
+        name-settings: '<red><bold>Back to Potion Settings'
+        name-editor: '<red><bold>Back to Item Editor'
+        lore:
+          - '<gray>Click to go back.'
   lore-editor:
     title: 'Name & Lore Editor'
     enter-display-name: '{PREFIX} <green>Type display name in chat:'
     enter-lore-line: '{PREFIX} <green>Type lore line to add in chat:'
     enter-new-lore-line: '{PREFIX} <green>Type replacement lore line in chat:'
+    buttons:
+      set-name:
+        name: '<yellow><bold>Set Display Name'
+        default-name: '<gray>(Default)'
+        lore:
+          - '<gray>Current: %name%'
+          - ' '
+          - '<green>Click to change display name.'
+      reset-name:
+        name: '<red><bold>Reset Display Name'
+        lore:
+          - '<gray>Click to restore default item name.'
+      add-lore:
+        name: '<green><bold>+ Add Lore Line'
+        lore:
+          - '<gray>Click to append a new lore line.'
+      clear-lore:
+        name: '<red><bold>Clear All Lore'
+        lore:
+          - '<gray>Click to remove all lore lines.'
+      lore-entry:
+        name: '<yellow>Line %index%: %line%'
+        lore:
+          - '<green>[Left-Click] <gray>Edit line'
+          - '<yellow>[Shift-Left] <gray>Move UP'
+          - '<aqua>[Shift-Right] <gray>Move DOWN'
+          - '<red>[Right-Click] <gray>Delete line'
+      back:
+        name: '<red><bold>Back to Item Editor'
+        lore:
+          - '<gray>Click to go back.'
+  bedrock-customkits:
+    main-menu:
+      title: 'My Custom Kits'
+      content: '<gray>Manage your custom duel kits.\n<yellow>Kits: <green>%count% <gray>/ <yellow>%limit%\n'
+      create: '<green>+ Create New Kit'
+      item-format: '<aqua>%name%\n<gray>(%items% items)'
+    create-prompt:
+      title: 'Create Custom Kit'
+      name-label: 'Kit Name'
+      name-placeholder: 'Enter name (e.g. Sword PvP)'
+    duplicate-prompt:
+      title: 'Duplicate Kit'
+      name-label: 'New Kit Name'
+      copy-suffix: ' Copy'
+    actions:
+      title: 'Kit: %kit%'
+      content: '<yellow>Choose an action for this kit:'
+      edit-layout: '<yellow>✏ Edit Inventory Layout'
+      edit-settings: '<aqua>⚙ Edit Kit Name / Description'
+      preview: '<green>👁 Preview Kit'
+      duplicate: '<gold>❐ Duplicate Kit'
+      delete: '<red>✘ Delete Kit'
+      back: '<gray>« Back to Kits'
+    layout:
+      title: 'Layout: %kit%'
+      content: '<gray>Tap any slot to configure its item:\n'
+      save: '<green>✔ Save Kit'
+      discard: '<red>✘ Discard / Cancel'
+      helmet: '<yellow>[Helmet] <white>%item%'
+      chestplate: '<yellow>[Chestplate] <white>%item%'
+      leggings: '<yellow>[Leggings] <white>%item%'
+      boots: '<yellow>[Boots] <white>%item%'
+      offhand: '<gold>[Offhand] <white>%item%'
+      hotbar: '<aqua>[Hotbar %slot%] <white>%item%'
+      inventory: '<gray>[Inv %slot%] <white>%item%'
+    slot-options:
+      title-item: 'Item: %material%'
+      title-empty: 'Empty Slot'
+      edit-properties: '<yellow>✏ Edit Item Properties'
+      change-material: '<aqua>🔄 Change Material'
+      clear-slot: '<red>✘ Clear Slot'
+      choose-material: '<green>+ Choose Material'
+      back: '<gray>« Back'
+    properties:
+      title: 'Edit: %material%'
+      display-name-label: 'Display Name'
+      amount-label: 'Amount'
+      unbreakable-label: 'Unbreakable'
+    settings:
+      title: 'Settings: %kit%'
+      name-label: 'Kit Name'
+      desc-line-1: 'Description Line 1'
+      desc-line-2: 'Description Line 2'
+    categories:
+      title: 'Select Category'
+    material-picker:
+      title-armor: 'Pick Armor (%slot%)'
+      title-category: 'Pick Material: %category%'
+    preview:
+      title: 'Preview: %kit%'
+      header: '<yellow>=== Kit Preview: <white>%kit% <yellow>===\n\n'
+      armor-header: '<gold>Armor:\n'
+      armor-slot: '<gray>- %slot%: <white>%item%\n'
+      offhand-slot: '<gray>- Offhand: <white>%item%\n\n'
+      hotbar-header: '<gold>Hotbar Items:\n'
+      hotbar-item: '<gray>%slot%. <white>%item%\n'
+      inventory-header: '\n<gold>Main Inventory:\n'
+      inventory-item: '<gray>%slot%. <white>%item%\n'
+      back: '<green>« Back'
+      empty: 'Empty'
+  bedrock-duel:
+    title: 'Duel %target%'
+    select-kit: 'Select Kit'
+    select-arena: 'Select Arena'
+    enable-bet: 'Enable Bet'
+    bet-amount: 'Bet Amount'
+    own-inventory: 'Own Inventory'
+    custom-kit-prefix: '[Custom] '
+    server-kit-prefix: '[Server] '
+  bedrock-accept:
+    title: 'Duel Request'
+    challenge: '<yellow>%sender%<reset> has challenged you to a duel!\n\n'
+    kit: '<gray>Kit: <white>%kit%\n'
+    own-inventory: '<gray>Own Inventory: <green>Enabled\n'
+    arena: '<gray>Arena: <white>%arena%\n'
+    bet: '<gray>Bet: <gold>$%bet%\n'
+    item-betting: '<gray>Item Betting: <green>Enabled\n'
+    question: '\n<white>Do you accept?'
+    accept: '<green>✔ Accept'
+    deny: '<red>✘ Deny'
+    preview-custom-kit: '<aqua>👁 Preview Custom Kit'
   settings:
     title: 'Request Settings'
     buttons:

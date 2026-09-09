@@ -72,13 +72,15 @@ public class ItemEditorGui extends SinglePageGui<DuelsPlugin> {
         });
 
         // Slot 10: Change Material
+        final List<String> changeMatLore = new ArrayList<>();
+        for (final String line : plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.change-material.lore",
+                List.of("&7Current: &f%material%", "", "&aClick to browse materials"))) {
+            changeMatLore.add(line.replace("%material%", item.getType().name()));
+        }
         set(10, new BaseButton(plugin, ItemBuilder.of(Material.CHEST)
-                .name("&e&lChange Material", plugin.getLang())
-                .lore(plugin.getLang(),
-                        "&7Current: &f" + item.getType().name(),
-                        "",
-                        "&aClick to browse materials"
-                ).build()) {
+                .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.change-material.name", "&e&lChange Material"), plugin.getLang())
+                .lore(changeMatLore, plugin.getLang())
+                .build()) {
             @Override
             public void onClick(final Player player) {
                 MaterialBrowserGui.open(plugin, player, session, targetSlot, isArmor, isOffHand);
@@ -88,13 +90,16 @@ public class ItemEditorGui extends SinglePageGui<DuelsPlugin> {
         // Slot 11: Change Amount
         final int amount = item.getAmount();
         set(11, new BaseButton(plugin, ItemBuilder.of(Material.HOPPER)
-                .name("&e&lChange Amount: &a" + amount, plugin.getLang())
-                .lore(plugin.getLang(),
-                        "&a[Left-Click] &7+1",
-                        "&e[Right-Click] &7-1",
-                        "&b[Shift-Left] &7+16",
-                        "&c[Shift-Right] &7-16"
-                ).build()) {
+                .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.change-amount.name", "&e&lChange Amount: &a%amount%")
+                        .replace("%amount%", String.valueOf(amount)), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.change-amount.lore",
+                        List.of(
+                                "&a[Left-Click] &7+1",
+                                "&e[Right-Click] &7-1",
+                                "&b[Shift-Left] &7+16",
+                                "&c[Shift-Right] &7-16"
+                        )), plugin.getLang())
+                .build()) {
             @Override
             public void onClick(final Player player, final org.bukkit.event.inventory.InventoryClickEvent event) {
                 int delta = 1;
@@ -113,8 +118,9 @@ public class ItemEditorGui extends SinglePageGui<DuelsPlugin> {
 
         // Slot 12: Display Name & Lore
         set(12, new BaseButton(plugin, ItemBuilder.of(Material.WRITABLE_BOOK)
-                .name("&e&lDisplay Name & Lore", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to edit item name and lore lines.")
+                .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.display-name-lore.name", "&e&lDisplay Name & Lore"), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.display-name-lore.lore",
+                        List.of("&7Click to edit item name and lore lines.")), plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -125,8 +131,10 @@ public class ItemEditorGui extends SinglePageGui<DuelsPlugin> {
         // Slot 14: Enchantments
         final int enchCount = item.getEnchantments().size();
         set(14, new BaseButton(plugin, ItemBuilder.of(Material.ENCHANTED_BOOK)
-                .name("&b&lEnchantments (&e" + enchCount + "&b)", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to configure item enchantments.")
+                .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.enchantments.name", "&b&lEnchantments (&e%count%&b)")
+                        .replace("%count%", String.valueOf(enchCount)), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.enchantments.lore",
+                        List.of("&7Click to configure item enchantments.")), plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -137,8 +145,10 @@ public class ItemEditorGui extends SinglePageGui<DuelsPlugin> {
         // Slot 15: Attributes
         final int attrCount = (meta != null && meta.hasAttributeModifiers()) ? meta.getAttributeModifiers().size() : 0;
         set(15, new BaseButton(plugin, ItemBuilder.of(Material.NETHER_STAR)
-                .name("&b&lAttributes (&e" + attrCount + "&b)", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to configure attribute modifiers.")
+                .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.attributes.name", "&b&lAttributes (&e%count%&b)")
+                        .replace("%count%", String.valueOf(attrCount)), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.attributes.lore",
+                        List.of("&7Click to configure attribute modifiers.")), plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -151,8 +161,9 @@ public class ItemEditorGui extends SinglePageGui<DuelsPlugin> {
         final boolean isArmorItem = matName.endsWith("_HELMET") || matName.endsWith("_CHESTPLATE") || matName.endsWith("_LEGGINGS") || matName.endsWith("_BOOTS");
         if (isArmorItem) {
             set(16, new BaseButton(plugin, ItemBuilder.of(Material.ARMOR_STAND)
-                    .name("&b&lArmor Trim", plugin.getLang())
-                    .lore(plugin.getLang(), "&7Click to configure trim pattern and material.")
+                    .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.armor-trim.name", "&b&lArmor Trim"), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.armor-trim.lore",
+                            List.of("&7Click to configure trim pattern and material.")), plugin.getLang())
                     .build()) {
                 @Override
                 public void onClick(final Player player) {
@@ -164,8 +175,9 @@ public class ItemEditorGui extends SinglePageGui<DuelsPlugin> {
         // Slot 19: Potion Settings (for potion items)
         if (meta instanceof PotionMeta || item.getType().name().contains("POTION") || item.getType() == Material.TIPPED_ARROW) {
             set(19, new BaseButton(plugin, ItemBuilder.of(Material.BREWING_STAND)
-                    .name("&d&lPotion Settings", plugin.getLang())
-                    .lore(plugin.getLang(), "&7Click to configure potion type and custom effects.")
+                    .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.potion-settings.name", "&d&lPotion Settings"), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.potion-settings.lore",
+                            List.of("&7Click to configure potion type and custom effects.")), plugin.getLang())
                     .build()) {
                 @Override
                 public void onClick(final Player player) {
@@ -177,11 +189,14 @@ public class ItemEditorGui extends SinglePageGui<DuelsPlugin> {
         // Slot 20: Durability / Damage (for damageable items)
         if (meta instanceof Damageable dmg) {
             set(20, new BaseButton(plugin, ItemBuilder.of(Material.ANVIL)
-                    .name("&e&lDurability Damage: &f" + dmg.getDamage(), plugin.getLang())
-                    .lore(plugin.getLang(),
-                            "&a[Left-Click] &7Restore full durability (0 damage)",
-                            "&e[Right-Click] &7Enter custom damage value"
-                    ).build()) {
+                    .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.durability-damage.name", "&e&lDurability Damage: &f%damage%")
+                            .replace("%damage%", String.valueOf(dmg.getDamage())), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.durability-damage.lore",
+                            List.of(
+                                    "&a[Left-Click] &7Restore full durability (0 damage)",
+                                    "&e[Right-Click] &7Enter custom damage value"
+                            )), plugin.getLang())
+                    .build()) {
                 @Override
                 public void onClick(final Player player, final org.bukkit.event.inventory.InventoryClickEvent event) {
                     if (event.isRightClick()) {
@@ -198,9 +213,14 @@ public class ItemEditorGui extends SinglePageGui<DuelsPlugin> {
 
         // Slot 21: Unbreakable Toggle
         final boolean isUnbreakable = meta != null && meta.isUnbreakable();
+        final String statusText = isUnbreakable
+                ? plugin.getLang().getMessageOrDefault("GENERAL.enabled", "&aEnabled")
+                : plugin.getLang().getMessageOrDefault("GENERAL.disabled", "&7Disabled");
         set(21, new BaseButton(plugin, ItemBuilder.of(isUnbreakable ? Material.LIME_DYE : Material.GRAY_DYE)
-                .name("&eUnbreakable: " + (isUnbreakable ? "&aEnabled" : "&7Disabled"), plugin.getLang())
-                .lore(plugin.getLang(), "&aClick to toggle")
+                .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.unbreakable.name", "&eUnbreakable: %status%")
+                        .replace("%status%", statusText), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.unbreakable.lore",
+                        List.of("&aClick to toggle")), plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -214,16 +234,37 @@ public class ItemEditorGui extends SinglePageGui<DuelsPlugin> {
         });
 
         // Slot 22: Item Flags
-        set(22, new BaseButton(plugin, ItemBuilder.of(Material.FLOWER_BANNER_PATTERN)
-                .name("&e&lItem Flags", plugin.getLang())
-                .lore(plugin.getLang(),
-                        "&7Hide Enchants: " + (meta != null && meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS) ? "&aYES" : "&7NO"),
-                        "&7Hide Attributes: " + (meta != null && meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES) ? "&aYES" : "&7NO"),
-                        "&7Hide Unbreakable: " + (meta != null && meta.hasItemFlag(ItemFlag.HIDE_UNBREAKABLE) ? "&aYES" : "&7NO"),
+        final String hideEnchantsVal = meta != null && meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS)
+                ? plugin.getLang().getMessageOrDefault("GENERAL.true", "&aYES")
+                : plugin.getLang().getMessageOrDefault("GENERAL.false", "&7NO");
+        final String hideAttrsVal = meta != null && meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES)
+                ? plugin.getLang().getMessageOrDefault("GENERAL.true", "&aYES")
+                : plugin.getLang().getMessageOrDefault("GENERAL.false", "&7NO");
+        final String hideUnbreakVal = meta != null && meta.hasItemFlag(ItemFlag.HIDE_UNBREAKABLE)
+                ? plugin.getLang().getMessageOrDefault("GENERAL.true", "&aYES")
+                : plugin.getLang().getMessageOrDefault("GENERAL.false", "&7NO");
+
+        final List<String> itemFlagsLore = new ArrayList<>();
+        for (final String line : plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.item-flags.lore",
+                List.of(
+                        "&7Hide Enchants: %hide_enchants%",
+                        "&7Hide Attributes: %hide_attributes%",
+                        "&7Hide Unbreakable: %hide_unbreakable%",
                         "",
                         "&a[Left-Click] &7Toggle Hide Enchants",
-                        "&e[Right-Click] &7Toggle Hide Attributes"
-                ).build()) {
+                        "&e[Right-Click] &7Toggle Hide Attributes",
+                        "&b[Shift-Click] &7Toggle Hide Unbreakable"
+                ))) {
+            itemFlagsLore.add(line
+                    .replace("%hide_enchants%", hideEnchantsVal)
+                    .replace("%hide_attributes%", hideAttrsVal)
+                    .replace("%hide_unbreakable%", hideUnbreakVal));
+        }
+
+        set(22, new BaseButton(plugin, ItemBuilder.of(Material.FLOWER_BANNER_PATTERN)
+                .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.item-flags.name", "&e&lItem Flags"), plugin.getLang())
+                .lore(itemFlagsLore, plugin.getLang())
+                .build()) {
             @Override
             public void onClick(final Player player, final org.bukkit.event.inventory.InventoryClickEvent event) {
                 if (meta != null) {
@@ -255,9 +296,12 @@ public class ItemEditorGui extends SinglePageGui<DuelsPlugin> {
 
         // Slot 23: Custom Model Data
         final Integer cmd = (meta != null && meta.hasCustomModelData()) ? meta.getCustomModelData() : null;
+        final String cmdVal = cmd != null ? String.valueOf(cmd) : plugin.getLang().getMessageOrDefault("GENERAL.none", "None");
         set(23, new BaseButton(plugin, ItemBuilder.of(Material.COMMAND_BLOCK)
-                .name("&eCustom Model Data: &f" + (cmd != null ? cmd : "None"), plugin.getLang())
-                .lore(plugin.getLang(), "&aClick to enter custom model data number")
+                .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.custom-model-data.name", "&eCustom Model Data: &f%data%")
+                        .replace("%data%", cmdVal), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.custom-model-data.lore",
+                        List.of("&aClick to enter custom model data number")), plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -267,13 +311,23 @@ public class ItemEditorGui extends SinglePageGui<DuelsPlugin> {
 
         // Slot 24: Leather Armor Color (for leather items)
         if (meta instanceof LeatherArmorMeta leatherMeta) {
-            set(24, new BaseButton(plugin, ItemBuilder.of(Material.CYAN_DYE)
-                    .name("&e&lLeather Armor Color", plugin.getLang())
-                    .lore(plugin.getLang(),
-                            "&7RGB: &f" + leatherMeta.getColor().getRed() + ", " + leatherMeta.getColor().getGreen() + ", " + leatherMeta.getColor().getBlue(),
+            final List<String> leatherLore = new ArrayList<>();
+            for (final String line : plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.leather-color.lore",
+                    List.of(
+                            "&7RGB: &f%r%, %g%, %b%",
                             "",
                             "&aClick to choose color"
-                    ).build()) {
+                    ))) {
+                leatherLore.add(line
+                        .replace("%r%", String.valueOf(leatherMeta.getColor().getRed()))
+                        .replace("%g%", String.valueOf(leatherMeta.getColor().getGreen()))
+                        .replace("%b%", String.valueOf(leatherMeta.getColor().getBlue())));
+            }
+
+            set(24, new BaseButton(plugin, ItemBuilder.of(Material.CYAN_DYE)
+                    .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.leather-color.name", "&e&lLeather Armor Color"), plugin.getLang())
+                    .lore(leatherLore, plugin.getLang())
+                    .build()) {
                 @Override
                 public void onClick(final Player player) {
                     promptLeatherColor(player);
@@ -283,8 +337,9 @@ public class ItemEditorGui extends SinglePageGui<DuelsPlugin> {
 
         // Slot 25: Remove / Clear Item
         set(25, new BaseButton(plugin, ItemBuilder.of(Material.LAVA_BUCKET)
-                .name("&c&lRemove Item", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to delete this item from the kit.")
+                .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.remove-item.name", "&c&lRemove Item"), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.remove-item.lore",
+                        List.of("&7Click to delete this item from the kit.")), plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -308,8 +363,9 @@ public class ItemEditorGui extends SinglePageGui<DuelsPlugin> {
 
         // Slot 49: Back to Layout Editor
         set(49, new BaseButton(plugin, ItemBuilder.of(Material.BARRIER)
-                .name("&c&lBack to Layout Editor", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to return to the kit layout editor.")
+                .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.back.name", "&c&lBack to Layout Editor"), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.back.lore",
+                        List.of("&7Click to return to the kit layout editor.")), plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {

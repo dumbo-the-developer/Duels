@@ -74,11 +74,13 @@ public class CustomKitSelectGui extends SinglePageGui<DuelsPlugin> {
                 }
             } else if (inventory.getSize() > 22) {
                 set(22, new BaseButton(plugin, ItemBuilder.of(Material.STICK)
-                        .name("&c&lNo Custom Kits Found", plugin.getLang())
-                        .lore(plugin.getLang(),
-                                "&7You have not created any custom kits yet.",
-                                "&7Use &e/customkits &7to create your first kit!"
-                        ).build()) {
+                        .name(plugin.getLang().getMessageOrDefault("GUI.customkit-selector.buttons.empty.name", "&c&lNo Custom Kits Found"), plugin.getLang())
+                        .lore(plugin.getLang().getMessageListOrDefault("GUI.customkit-selector.buttons.empty.lore",
+                                List.of(
+                                        "&7You have not created any custom kits yet.",
+                                        "&7Use &e/customkits &7to create your first kit!"
+                                )), plugin.getLang())
+                        .build()) {
                     @Override
                     public void onClick(final Player player) {
                         CustomKitTypeSelectGui.open(plugin, player);
@@ -135,20 +137,30 @@ public class CustomKitSelectGui extends SinglePageGui<DuelsPlugin> {
                         }
                     }
                 } else {
-                    if (!impl.getDescription().isEmpty()) {
-                        for (final String desc : impl.getDescription()) {
-                            lore.add("&7" + desc);
+                    final List<String> defaultLore = plugin.getLang().getMessageListOrDefault("GUI.customkit-selector.buttons.custom-kit.lore",
+                            List.of(
+                                    "%description%",
+                                    "&7Items: &e%items%",
+                                    " ",
+                                    "&aClick to select this kit for duel request",
+                                    "&7Note: Custom kit duels only support Money Betting"
+                            ));
+                    for (final String line : defaultLore) {
+                        if (line.contains("%description%")) {
+                            if (!impl.getDescription().isEmpty()) {
+                                for (final String desc : impl.getDescription()) {
+                                    lore.add("&7" + desc);
+                                }
+                            }
+                        } else {
+                            lore.add(formatPlaceholders(line, placeholders));
                         }
                     }
-                    lore.add("&7Items: &e" + itemCount);
-                    lore.add("");
-                    lore.add("&aClick to select this kit for duel request");
-                    lore.add("&7Note: Custom kit duels only support Money Betting");
                 }
 
                 final String displayName = template != null && template.getName() != null
                         ? formatPlaceholders(template.getName(), placeholders)
-                        : "&d&l" + impl.getName();
+                        : formatPlaceholders(plugin.getLang().getMessageOrDefault("GUI.customkit-selector.buttons.custom-kit.name", "&d&l%name%"), placeholders);
 
                 final BaseButton kitBtn = new BaseButton(plugin, ItemBuilder.of(iconItem)
                         .name(displayName, plugin.getLang())

@@ -21,7 +21,7 @@ public class CustomKitTypeSelectGui extends SinglePageGui<DuelsPlugin> {
         super(plugin,
                 plugin.getGuiConfigManager().getKitTypeSelectGuiConfig() != null
                         ? plugin.getGuiConfigManager().getKitTypeSelectGuiConfig().getTitle()
-                        : plugin.getLang().getMessage("GUI.kit-type-selector.title"),
+                        : plugin.getLang().getMessageOrDefault("GUI.kit-type-selector.title", "Select Kit Type"),
                 plugin.getGuiConfigManager().getKitTypeSelectGuiConfig() != null
                         ? plugin.getGuiConfigManager().getKitTypeSelectGuiConfig().getRows()
                         : 4);

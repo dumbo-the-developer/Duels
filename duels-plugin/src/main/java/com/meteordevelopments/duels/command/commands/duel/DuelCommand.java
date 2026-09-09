@@ -4,6 +4,7 @@ import com.meteordevelopments.duels.DuelsPlugin;
 import com.meteordevelopments.duels.Permissions;
 import com.meteordevelopments.duels.command.BaseCommand;
 import com.meteordevelopments.duels.command.commands.duel.subcommands.*;
+import com.meteordevelopments.duels.command.commands.duels.subcommands.AdminCommand;
 import com.meteordevelopments.duels.config.CommandsConfig.CommandSettings;
 import com.meteordevelopments.duels.gui.bedrock.BedrockDuelForm;
 import com.meteordevelopments.duels.hook.hooks.VaultHook;
@@ -43,7 +44,8 @@ public class DuelCommand extends BaseCommand {
                 new InventoryCommand(plugin),
                 new VersionCommand(plugin),
                 new LeaveCommand(plugin),
-                new PreviewCommand(plugin)
+                new PreviewCommand(plugin),
+                new AdminCommand(plugin)
         );
         this.worldGuard = hookManager.getHook(WorldGuardHook.class);
         this.vault = hookManager.getHook(VaultHook.class);

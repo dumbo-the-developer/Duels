@@ -77,9 +77,15 @@ public class EnchantmentEditorGui extends SinglePageGui<DuelsPlugin> {
         }
 
         // Back Button (slot 49)
+        final String backName = browsingAll
+                ? plugin.getLang().getMessageOrDefault("GUI.enchantment-editor.buttons.back-enchantments.name", "&c&lBack to Enchantments")
+                : plugin.getLang().getMessageOrDefault("GUI.enchantment-editor.buttons.back-item-editor.name", "&c&lBack to Item Editor");
+        final List<String> backLore = browsingAll
+                ? plugin.getLang().getMessageListOrDefault("GUI.enchantment-editor.buttons.back-enchantments.lore", List.of("&7Click to go back."))
+                : plugin.getLang().getMessageListOrDefault("GUI.enchantment-editor.buttons.back-item-editor.lore", List.of("&7Click to go back."));
         set(49, new BaseButton(plugin, ItemBuilder.of(Material.BARRIER)
-                .name(browsingAll ? "&c&lBack to Enchantments" : "&c&lBack to Item Editor", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to go back.")
+                .name(backName, plugin.getLang())
+                .lore(backLore, plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -105,8 +111,9 @@ public class EnchantmentEditorGui extends SinglePageGui<DuelsPlugin> {
 
         // Add Enchantment Button at slot 0
         set(0, new BaseButton(plugin, ItemBuilder.of(Material.ENCHANTED_BOOK)
-                .name("&a&l+ Add Enchantment", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to browse and add an enchantment.")
+                .name(plugin.getLang().getMessageOrDefault("GUI.enchantment-editor.buttons.add.name", "&a&l+ Add Enchantment"), plugin.getLang())
+                .lore(plugin.getLang().getMessageListOrDefault("GUI.enchantment-editor.buttons.add.lore",
+                        List.of("&7Click to browse and add an enchantment.")), plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -119,8 +126,9 @@ public class EnchantmentEditorGui extends SinglePageGui<DuelsPlugin> {
         // Clear All Enchantments at slot 8
         if (!enchants.isEmpty()) {
             set(8, new BaseButton(plugin, ItemBuilder.of(Material.LAVA_BUCKET)
-                    .name("&c&lClear All Enchantments", plugin.getLang())
-                    .lore(plugin.getLang(), "&7Click to remove all enchantments.")
+                    .name(plugin.getLang().getMessageOrDefault("GUI.enchantment-editor.buttons.clear.name", "&c&lClear All Enchantments"), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.enchantment-editor.buttons.clear.lore",
+                            List.of("&7Click to remove all enchantments.")), plugin.getLang())
                     .build()) {
                 @Override
                 public void onClick(final Player player) {
@@ -143,15 +151,26 @@ public class EnchantmentEditorGui extends SinglePageGui<DuelsPlugin> {
             final String enchName = formatEnchantName(ench.getKey().getKey());
             final int maxAllowed = config.getEnchantOverrides().getOrDefault(ench.getKey().getKey().toUpperCase(), config.getDefaultMaxEnchantLevel());
 
-            final BaseButton enchBtn = new BaseButton(plugin, ItemBuilder.of(Material.ENCHANTED_BOOK)
-                    .name("&b" + enchName + " " + toRoman(level), plugin.getLang())
-                    .lore(plugin.getLang(),
-                            "&7Current Level: &e" + level + " &7/ &a" + maxAllowed,
+            final List<String> enchLore = new ArrayList<>();
+            for (final String line : plugin.getLang().getMessageListOrDefault("GUI.enchantment-editor.buttons.enchant-entry.lore",
+                    List.of(
+                            "&7Current Level: &e%level% &7/ &a%max%",
                             "",
                             "&a[Left-Click] &7+1 Level",
                             "&e[Right-Click] &7-1 Level",
                             "&c[Shift-Click / Middle] &7Remove Enchantment"
-                    ).build()) {
+                    ))) {
+                enchLore.add(line
+                        .replace("%level%", String.valueOf(level))
+                        .replace("%max%", String.valueOf(maxAllowed)));
+            }
+
+            final BaseButton enchBtn = new BaseButton(plugin, ItemBuilder.of(Material.ENCHANTED_BOOK)
+                    .name(plugin.getLang().getMessageOrDefault("GUI.enchantment-editor.buttons.enchant-entry.name", "&b%enchantment% %level%")
+                            .replace("%enchantment%", enchName)
+                            .replace("%level%", toRoman(level)), plugin.getLang())
+                    .lore(enchLore, plugin.getLang())
+                    .build()) {
                 @Override
                 public void onClick(final Player player, final InventoryClickEvent event) {
                     if (event.isShiftClick() || event.getClick() == ClickType.MIDDLE) {
@@ -206,13 +225,21 @@ public class EnchantmentEditorGui extends SinglePageGui<DuelsPlugin> {
             final String enchName = formatEnchantName(ench.getKey().getKey());
             final int maxAllowed = config.getEnchantOverrides().getOrDefault(ench.getKey().getKey().toUpperCase(), config.getDefaultMaxEnchantLevel());
 
-            final BaseButton addBtn = new BaseButton(plugin, ItemBuilder.of(Material.BOOK)
-                    .name("&b" + enchName, plugin.getLang())
-                    .lore(plugin.getLang(),
-                            "&7Max Allowed Level: &a" + maxAllowed,
+            final List<String> browseLore = new ArrayList<>();
+            for (final String line : plugin.getLang().getMessageListOrDefault("GUI.enchantment-editor.buttons.browse-entry.lore",
+                    List.of(
+                            "&7Max Allowed Level: &a%max%",
                             "",
                             "&aClick to add level 1"
-                    ).build()) {
+                    ))) {
+                browseLore.add(line.replace("%max%", String.valueOf(maxAllowed)));
+            }
+
+            final BaseButton addBtn = new BaseButton(plugin, ItemBuilder.of(Material.BOOK)
+                    .name(plugin.getLang().getMessageOrDefault("GUI.enchantment-editor.buttons.browse-entry.name", "&b%enchantment%")
+                            .replace("%enchantment%", enchName), plugin.getLang())
+                    .lore(browseLore, plugin.getLang())
+                    .build()) {
                 @Override
                 public void onClick(final Player player) {
                     final ItemStack targetItem = getItem();
@@ -231,8 +258,11 @@ public class EnchantmentEditorGui extends SinglePageGui<DuelsPlugin> {
         }
 
         if (page > 0) {
+            final String prevName = plugin.getLang().getMessageOrDefault("GUI.enchantment-editor.buttons.previous-page.name", "&ePrevious Page (%page%/%total%)")
+                    .replace("%page%", String.valueOf(page))
+                    .replace("%total%", String.valueOf(totalPages));
             set(45, new BaseButton(plugin, ItemBuilder.of(Material.ARROW)
-                    .name("&ePrevious Page (" + page + "/" + totalPages + ")", plugin.getLang()).build()) {
+                    .name(prevName, plugin.getLang()).build()) {
                 @Override
                 public void onClick(final Player player) {
                     if (page > 0) {
@@ -244,8 +274,11 @@ public class EnchantmentEditorGui extends SinglePageGui<DuelsPlugin> {
         }
 
         if (page < totalPages - 1) {
+            final String nextName = plugin.getLang().getMessageOrDefault("GUI.enchantment-editor.buttons.next-page.name", "&eNext Page (%page%/%total%)")
+                    .replace("%page%", String.valueOf(page + 2))
+                    .replace("%total%", String.valueOf(totalPages));
             set(53, new BaseButton(plugin, ItemBuilder.of(Material.ARROW)
-                    .name("&eNext Page (" + (page + 2) + "/" + totalPages + ")", plugin.getLang()).build()) {
+                    .name(nextName, plugin.getLang()).build()) {
                 @Override
                 public void onClick(final Player player) {
                     if (page < totalPages - 1) {

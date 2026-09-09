@@ -40,19 +40,31 @@ public final class BedrockCustomKitForm {
 
         final List<CustomKit> playerKits = plugin.getCustomKitManager().getKits(player.getUniqueId());
         final int maxKits = plugin.getCustomKitManager().getMaxKits(player);
-        final String limitStr = maxKits == Integer.MAX_VALUE ? "Unlimited" : String.valueOf(maxKits);
+        final String limitStr = maxKits == Integer.MAX_VALUE
+                ? plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GENERAL.unlimited", "Unlimited"))
+                : String.valueOf(maxKits);
         final boolean reached = plugin.getCustomKitManager().hasReachedLimit(player);
 
+        final String content = plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.main-menu.content",
+                "&7Manage your custom duel kits.\n&eKits: &a%count% &7/ &e%limit%\n")
+                .replace("%count%", String.valueOf(playerKits.size()))
+                .replace("%limit%", limitStr));
+
         final SimpleForm.Builder builder = SimpleForm.builder()
-                .title("My Custom Kits")
-                .content("§7Manage your custom duel kits.\n§eKits: §a" + playerKits.size() + " §7/ §e" + limitStr + "\n");
+                .title(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.main-menu.title", "My Custom Kits")))
+                .content(content);
 
         if (!reached) {
-            builder.button("§a+ Create New Kit");
+            builder.button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.main-menu.create", "&a+ Create New Kit")));
         }
 
         for (final CustomKit kit : playerKits) {
-            builder.button("§b" + kit.getName() + "\n§7(" + (kit.getItems().size() + kit.getArmor().size() + (kit.getOffHand() != null ? 1 : 0)) + " items)");
+            final int itemCount = kit.getItems().size() + kit.getArmor().size() + (kit.getOffHand() != null ? 1 : 0);
+            final String itemBtn = plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.main-menu.item-format",
+                    "&b%name%\n&7(%items% items)")
+                    .replace("%name%", kit.getName())
+                    .replace("%items%", String.valueOf(itemCount)));
+            builder.button(itemBtn);
         }
 
         builder.validResultHandler(response -> {
@@ -74,8 +86,9 @@ public final class BedrockCustomKitForm {
 
     private static void openCreateKitPrompt(final DuelsPlugin plugin, final Player player) {
         final CustomForm form = CustomForm.builder()
-                .title("Create Custom Kit")
-                .input("Kit Name", "Enter name (e.g. Sword PvP)")
+                .title(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.create-prompt.title", "Create Custom Kit")))
+                .input(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.create-prompt.name-label", "Kit Name")),
+                        plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.create-prompt.name-placeholder", "Enter name (e.g. Sword PvP)")))
                 .validResultHandler(response -> {
                     final String name = response.asInput(0);
                     DuelsPlugin.getFoliaLib().getScheduler().runAtEntity(player, task -> {
@@ -97,14 +110,14 @@ public final class BedrockCustomKitForm {
 
     public static void openKitActions(final DuelsPlugin plugin, final Player player, final CustomKitImpl kit) {
         final SimpleForm form = SimpleForm.builder()
-                .title("Kit: " + kit.getName())
-                .content("§eChoose an action for this kit:")
-                .button("§e✏ Edit Inventory Layout")
-                .button("§b⚙ Edit Kit Name / Description")
-                .button("§a👁 Preview Kit")
-                .button("§6❐ Duplicate Kit")
-                .button("§c✘ Delete Kit")
-                .button("§7« Back to Kits")
+                .title(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.actions.title", "Kit: %kit%").replace("%kit%", kit.getName())))
+                .content(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.actions.content", "&eChoose an action for this kit:")))
+                .button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.actions.edit-layout", "&e✏ Edit Inventory Layout")))
+                .button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.actions.edit-settings", "&b⚙ Edit Kit Name / Description")))
+                .button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.actions.preview", "&a👁 Preview Kit")))
+                .button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.actions.duplicate", "&6❐ Duplicate Kit")))
+                .button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.actions.delete", "&c✘ Delete Kit")))
+                .button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.actions.back", "&7« Back to Kits")))
                 .validResultHandler(response -> {
                     final int id = response.clickedButtonId();
                     switch (id) {
@@ -128,29 +141,38 @@ public final class BedrockCustomKitForm {
     public static void openLayoutEditor(final DuelsPlugin plugin, final Player player, final CustomKitEditSession session) {
         final CustomKitImpl draft = session.getDraftKit();
         final SimpleForm.Builder builder = SimpleForm.builder()
-                .title("Layout: " + draft.getName())
-                .content("§7Tap any slot to configure its item:\n");
+                .title(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.layout.title", "Layout: %kit%").replace("%kit%", draft.getName())))
+                .content(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.layout.content", "&7Tap any slot to configure its item:\n")));
 
-        builder.button("§a✔ Save Kit");
-        builder.button("§c✘ Discard / Cancel");
+        builder.button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.layout.save", "&a✔ Save Kit")));
+        builder.button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.layout.discard", "&c✘ Discard / Cancel")));
 
         // Armor
-        builder.button("§e[Helmet] §f" + formatSlotItem(draft.getArmor().get(0)));
-        builder.button("§e[Chestplate] §f" + formatSlotItem(draft.getArmor().get(1)));
-        builder.button("§e[Leggings] §f" + formatSlotItem(draft.getArmor().get(2)));
-        builder.button("§e[Boots] §f" + formatSlotItem(draft.getArmor().get(3)));
+        builder.button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.layout.helmet", "&e[Helmet] &f%item%")
+                .replace("%item%", formatSlotItem(plugin, draft.getArmor().get(0)))));
+        builder.button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.layout.chestplate", "&e[Chestplate] &f%item%")
+                .replace("%item%", formatSlotItem(plugin, draft.getArmor().get(1)))));
+        builder.button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.layout.leggings", "&e[Leggings] &f%item%")
+                .replace("%item%", formatSlotItem(plugin, draft.getArmor().get(2)))));
+        builder.button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.layout.boots", "&e[Boots] &f%item%")
+                .replace("%item%", formatSlotItem(plugin, draft.getArmor().get(3)))));
 
         // Offhand
-        builder.button("§6[Offhand] §f" + formatSlotItem(draft.getOffHand()));
+        builder.button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.layout.offhand", "&6[Offhand] &f%item%")
+                .replace("%item%", formatSlotItem(plugin, draft.getOffHand()))));
 
         // Hotbar 1-9
         for (int h = 0; h < 9; h++) {
-            builder.button("§b[Hotbar " + (h + 1) + "] §f" + formatSlotItem(draft.getItems().get(h)));
+            builder.button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.layout.hotbar", "&b[Hotbar %slot%] &f%item%")
+                    .replace("%slot%", String.valueOf(h + 1))
+                    .replace("%item%", formatSlotItem(plugin, draft.getItems().get(h)))));
         }
 
         // Main Inventory 1-27
         for (int m = 9; m < 36; m++) {
-            builder.button("§7[Inv " + (m - 8) + "] §f" + formatSlotItem(draft.getItems().get(m)));
+            builder.button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.layout.inventory", "&7[Inv %slot%] &f%item%")
+                    .replace("%slot%", String.valueOf(m - 8))
+                    .replace("%item%", formatSlotItem(plugin, draft.getItems().get(m)))));
         }
 
         builder.validResultHandler(response -> {
@@ -201,17 +223,20 @@ public final class BedrockCustomKitForm {
 
         final boolean hasItem = (currentItem != null && currentItem.getType() != Material.AIR);
 
-        final SimpleForm.Builder builder = SimpleForm.builder()
-                .title(hasItem ? "Item: " + currentItem.getType().name() : "Empty Slot");
+        final String title = hasItem
+                ? plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.slot-options.title-item", "Item: %material%").replace("%material%", currentItem.getType().name()))
+                : plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.slot-options.title-empty", "Empty Slot"));
+
+        final SimpleForm.Builder builder = SimpleForm.builder().title(title);
 
         if (hasItem) {
-            builder.button("§e✏ Edit Item Properties");
-            builder.button("§b🔄 Change Material");
-            builder.button("§c✘ Clear Slot");
-            builder.button("§7« Back");
+            builder.button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.slot-options.edit-properties", "&e✏ Edit Item Properties")));
+            builder.button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.slot-options.change-material", "&b🔄 Change Material")));
+            builder.button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.slot-options.clear-slot", "&c✘ Clear Slot")));
+            builder.button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.slot-options.back", "&7« Back")));
         } else {
-            builder.button("§a+ Choose Material");
-            builder.button("§7« Back");
+            builder.button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.slot-options.choose-material", "&a+ Choose Material")));
+            builder.button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.slot-options.back", "&7« Back")));
         }
 
         builder.validResultHandler(response -> {
@@ -253,10 +278,11 @@ public final class BedrockCustomKitForm {
             return;
         }
 
-        final SimpleForm.Builder builder = SimpleForm.builder().title("Select Category");
+        final SimpleForm.Builder builder = SimpleForm.builder()
+                .title(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.categories.title", "Select Category")));
 
         for (final MaterialBrowserGui.Category cat : MaterialBrowserGui.Category.values()) {
-            builder.button("§b" + cat.name());
+            builder.button("§b" + cat.getDisplayName(plugin.getLang()));
         }
 
         builder.validResultHandler(response -> {
@@ -294,7 +320,11 @@ public final class BedrockCustomKitForm {
             materials.add(m);
         }
 
-        final String title = isArmor ? "Pick Armor (" + com.meteordevelopments.duels.core.customkit.validation.CustomKitValidator.getArmorSlotName(slot) + ")" : "Pick Material: " + category.name();
+        final String title = isArmor
+                ? plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.material-picker.title-armor", "Pick Armor (%slot%)")
+                        .replace("%slot%", com.meteordevelopments.duels.core.customkit.validation.CustomKitValidator.getArmorSlotName(slot)))
+                : plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.material-picker.title-category", "Pick Material: %category%")
+                        .replace("%category%", category.getDisplayName(plugin.getLang())));
         final SimpleForm.Builder builder = SimpleForm.builder().title(title);
 
         final List<Material> displayList = materials.subList(0, Math.min(100, materials.size()));
@@ -343,10 +373,10 @@ public final class BedrockCustomKitForm {
         final boolean unbreakable = meta != null && meta.isUnbreakable();
 
         final CustomForm form = CustomForm.builder()
-                .title("Edit: " + item.getType().name())
-                .input("Display Name", "Display Name", displayName)
-                .slider("Amount", 1, 64, 1, amount)
-                .toggle("Unbreakable", unbreakable)
+                .title(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.properties.title", "Edit: %material%").replace("%material%", item.getType().name())))
+                .input(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.properties.display-name-label", "Display Name")), "Display Name", displayName)
+                .slider(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.properties.amount-label", "Amount")), 1, 64, 1, amount)
+                .toggle(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.properties.unbreakable-label", "Unbreakable")), unbreakable)
                 .validResultHandler(response -> {
                     final String newName = response.asInput(0);
                     final int newAmount = (int) response.asSlider(1);
@@ -374,10 +404,10 @@ public final class BedrockCustomKitForm {
 
     private static void openSettingsEditor(final DuelsPlugin plugin, final Player player, final CustomKitImpl kit) {
         final CustomForm form = CustomForm.builder()
-                .title("Settings: " + kit.getName())
-                .input("Kit Name", "Kit Name", kit.getName())
-                .input("Description Line 1", "Description line 1", kit.getDescription().size() > 0 ? kit.getDescription().get(0) : "")
-                .input("Description Line 2", "Description line 2", kit.getDescription().size() > 1 ? kit.getDescription().get(1) : "")
+                .title(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.settings.title", "Settings: %kit%").replace("%kit%", kit.getName())))
+                .input(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.settings.name-label", "Kit Name")), "Kit Name", kit.getName())
+                .input(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.settings.desc-line-1", "Description Line 1")), "Description line 1", kit.getDescription().size() > 0 ? kit.getDescription().get(0) : "")
+                .input(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.settings.desc-line-2", "Description Line 2")), "Description line 2", kit.getDescription().size() > 1 ? kit.getDescription().get(1) : "")
                 .validResultHandler(response -> {
                     final String newName = response.asInput(0);
                     final String desc1 = response.asInput(1);
@@ -402,9 +432,10 @@ public final class BedrockCustomKitForm {
     }
 
     private static void openDuplicatePrompt(final DuelsPlugin plugin, final Player player, final CustomKitImpl kit) {
+        final String copySuffix = plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.duplicate-prompt.copy-suffix", " Copy"));
         final CustomForm form = CustomForm.builder()
-                .title("Duplicate Kit")
-                .input("New Kit Name", "New Kit Name", kit.getName() + " Copy")
+                .title(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.duplicate-prompt.title", "Duplicate Kit")))
+                .input(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.duplicate-prompt.name-label", "New Kit Name")), "New Kit Name", kit.getName() + copySuffix)
                 .validResultHandler(response -> {
                     final String newName = response.asInput(0);
                     DuelsPlugin.getFoliaLib().getScheduler().runAtEntity(player, task -> {
@@ -423,10 +454,10 @@ public final class BedrockCustomKitForm {
 
     private static void openDeleteConfirm(final DuelsPlugin plugin, final Player player, final CustomKitImpl kit) {
         final ModalForm form = ModalForm.builder()
-                .title("Delete Kit?")
-                .content("Are you sure you want to delete '" + kit.getName() + "'?")
-                .button1("§c✘ Delete")
-                .button2("§a« Cancel")
+                .title(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.customkits-menu.confirm-delete.title", "Delete Kit?")))
+                .content(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.customkits-menu.confirm-delete.message", "Are you sure you want to delete kit '%kit%'?").replace("%kit%", kit.getName())))
+                .button1(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.actions.delete", "§c✘ Delete")))
+                .button2(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.customkit-confirm.buttons.cancel.name", "§a« Cancel")))
                 .validResultHandler(response -> {
                     if (response.clickedFirst()) {
                         DuelsPlugin.getFoliaLib().getScheduler().runAtEntity(player, task -> {
@@ -446,35 +477,42 @@ public final class BedrockCustomKitForm {
 
     public static void openPreview(final DuelsPlugin plugin, final Player player, final CustomKitSnapshot snapshot, final Runnable onBack) {
         final StringBuilder content = new StringBuilder();
-        content.append("§e=== Kit Preview: §f").append(snapshot.getName()).append(" §e===\n\n");
+        content.append(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.preview.header", "§e=== Kit Preview: §f%kit% §e===\n\n").replace("%kit%", snapshot.getName())));
 
-        content.append("§6Armor:\n");
-        content.append("§7- Helmet: §f").append(formatSlotItem(snapshot.getArmor().get(0))).append("\n");
-        content.append("§7- Chestplate: §f").append(formatSlotItem(snapshot.getArmor().get(1))).append("\n");
-        content.append("§7- Leggings: §f").append(formatSlotItem(snapshot.getArmor().get(2))).append("\n");
-        content.append("§7- Boots: §f").append(formatSlotItem(snapshot.getArmor().get(3))).append("\n");
-        content.append("§7- Offhand: §f").append(formatSlotItem(snapshot.getOffHand())).append("\n\n");
+        content.append(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.preview.armor-header", "§6Armor:\n")));
+        final String[] armorSlots = {"Helmet", "Chestplate", "Leggings", "Boots"};
+        for (int i = 0; i < 4; i++) {
+            content.append(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.preview.armor-slot", "§7- %slot%: §f%item%\n")
+                    .replace("%slot%", armorSlots[i])
+                    .replace("%item%", formatSlotItem(plugin, snapshot.getArmor().get(i)))));
+        }
+        content.append(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.preview.offhand-slot", "§7- Offhand: §f%item%\n\n")
+                .replace("%item%", formatSlotItem(plugin, snapshot.getOffHand()))));
 
-        content.append("§6Hotbar Items:\n");
+        content.append(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.preview.hotbar-header", "§6Hotbar Items:\n")));
         for (int i = 0; i < 9; i++) {
             final ItemStack item = snapshot.getItems().get(i);
             if (item != null && item.getType() != Material.AIR) {
-                content.append("§7").append(i + 1).append(". §f").append(formatSlotItem(item)).append("\n");
+                content.append(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.preview.hotbar-item", "§7%slot%. §f%item%\n")
+                        .replace("%slot%", String.valueOf(i + 1))
+                        .replace("%item%", formatSlotItem(plugin, item))));
             }
         }
 
-        content.append("\n§6Main Inventory:\n");
+        content.append(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.preview.inventory-header", "\n§6Main Inventory:\n")));
         for (int i = 9; i < 36; i++) {
             final ItemStack item = snapshot.getItems().get(i);
             if (item != null && item.getType() != Material.AIR) {
-                content.append("§7").append(i - 8).append(". §f").append(formatSlotItem(item)).append("\n");
+                content.append(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.preview.inventory-item", "§7%slot%. §f%item%\n")
+                        .replace("%slot%", String.valueOf(i - 8))
+                        .replace("%item%", formatSlotItem(plugin, item))));
             }
         }
 
         final SimpleForm form = SimpleForm.builder()
-                .title("Preview: " + snapshot.getName())
+                .title(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.preview.title", "Preview: %kit%").replace("%kit%", snapshot.getName())))
                 .content(content.toString())
-                .button("§a« Back")
+                .button(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.preview.back", "§a« Back")))
                 .validResultHandler(response -> {
                     if (onBack != null) onBack.run();
                 })
@@ -486,9 +524,9 @@ public final class BedrockCustomKitForm {
         FloodgateApi.getInstance().sendForm(player.getUniqueId(), form);
     }
 
-    private static String formatSlotItem(final ItemStack item) {
+    private static String formatSlotItem(final DuelsPlugin plugin, final ItemStack item) {
         if (item == null || item.getType() == Material.AIR) {
-            return "Empty";
+            return plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.preview.empty", "Empty"));
         }
         final String name = (item.getItemMeta() != null && item.getItemMeta().hasDisplayName())
                 ? item.getItemMeta().getDisplayName() : item.getType().name();

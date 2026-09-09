@@ -73,8 +73,9 @@ public class ArmorTrimEditorGui extends SinglePageGui<DuelsPlugin> {
         // Clear Trim Button (slot 8)
         if (meta.hasTrim()) {
             set(8, new BaseButton(plugin, ItemBuilder.of(Material.LAVA_BUCKET)
-                    .name("&c&lRemove Armor Trim", plugin.getLang())
-                    .lore(plugin.getLang(), "&7Click to clear the armor trim.")
+                    .name(plugin.getLang().getMessageOrDefault("GUI.armor-trim-editor.buttons.remove.name", "&c&lRemove Armor Trim"), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.armor-trim-editor.buttons.remove.lore",
+                            List.of("&7Click to clear the armor trim.")), plugin.getLang())
                     .build()) {
                 @Override
                 public void onClick(final Player player) {
@@ -99,9 +100,13 @@ public class ArmorTrimEditorGui extends SinglePageGui<DuelsPlugin> {
         }
 
         // Back Button (slot 49)
+        final String backName = selectingMaterial
+                ? plugin.getLang().getMessageOrDefault("GUI.armor-trim-editor.buttons.back.name-patterns", "&c&lBack to Patterns")
+                : plugin.getLang().getMessageOrDefault("GUI.armor-trim-editor.buttons.back.name-editor", "&c&lBack to Item Editor");
+        final List<String> backLore = plugin.getLang().getMessageListOrDefault("GUI.armor-trim-editor.buttons.back.lore", List.of("&7Click to go back."));
         set(49, new BaseButton(plugin, ItemBuilder.of(Material.BARRIER)
-                .name(selectingMaterial ? "&c&lBack to Patterns" : "&c&lBack to Item Editor", plugin.getLang())
-                .lore(plugin.getLang(), "&7Click to go back.")
+                .name(backName, plugin.getLang())
+                .lore(backLore, plugin.getLang())
                 .build()) {
             @Override
             public void onClick(final Player player) {
@@ -131,8 +136,10 @@ public class ArmorTrimEditorGui extends SinglePageGui<DuelsPlugin> {
 
             final String patName = formatKey(pat.getKey().getKey());
             final BaseButton btn = new BaseButton(plugin, ItemBuilder.of(Material.ARMOR_STAND)
-                    .name("&b" + patName + " Pattern", plugin.getLang())
-                    .lore(plugin.getLang(), "&aClick to select pattern")
+                    .name(plugin.getLang().getMessageOrDefault("GUI.armor-trim-editor.buttons.pattern-entry.name", "&b%pattern% Pattern")
+                            .replace("%pattern%", patName), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.armor-trim-editor.buttons.pattern-entry.lore",
+                            List.of("&aClick to select pattern")), plugin.getLang())
                     .build()) {
                 @Override
                 public void onClick(final Player player) {
@@ -171,8 +178,10 @@ public class ArmorTrimEditorGui extends SinglePageGui<DuelsPlugin> {
             final String matName = formatKey(trimMat.getKey().getKey());
 
             final BaseButton btn = new BaseButton(plugin, ItemBuilder.of(icon)
-                    .name("&e" + matName + " Trim", plugin.getLang())
-                    .lore(plugin.getLang(), "&aClick to apply trim")
+                    .name(plugin.getLang().getMessageOrDefault("GUI.armor-trim-editor.buttons.material-entry.name", "&e%material% Trim")
+                            .replace("%material%", matName), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.armor-trim-editor.buttons.material-entry.lore",
+                            List.of("&aClick to apply trim")), plugin.getLang())
                     .build()) {
                 @Override
                 public void onClick(final Player player) {

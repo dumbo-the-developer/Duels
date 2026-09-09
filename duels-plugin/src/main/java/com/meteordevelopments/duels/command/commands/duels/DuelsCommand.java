@@ -12,8 +12,11 @@ public class DuelsCommand extends BaseCommand {
 
     public DuelsCommand(final DuelsPlugin plugin, final CommandSettings settings) {
         super(plugin, Objects.requireNonNull(settings, "settings").getName(), Permissions.ADMIN, false, settings.getAliasArray());
+        final StartCommand startCommand = new StartCommand(plugin);
         child(
                 new HelpCommand(plugin),
+                startCommand,
+                new AdminCommand(plugin, startCommand),
                 new SavekitCommand(plugin),
                 new DeletekitCommand(plugin),
                 new LoadkitCommand(plugin),
