@@ -50,7 +50,7 @@ dependencies {
     compileOnly 'org.geysermc.floodgate:api:2.2.5-SNAPSHOT'
     compileOnly 'net.dmulloy2:ProtocolLib:5.4.0'
     implementation 'io.papermc:paperlib:1.0.8'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.1'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.2'
     implementation 'org.json:json:20251224'
     implementation 'net.kyori:adventure-text-minimessage:5.2.0'
     implementation 'net.kyori:adventure-text-serializer-legacy:5.2.0'
