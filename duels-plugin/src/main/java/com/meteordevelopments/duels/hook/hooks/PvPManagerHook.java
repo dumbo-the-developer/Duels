@@ -32,6 +32,18 @@ public class PvPManagerHook extends PluginHook<DuelsPlugin> {
         Bukkit.getPluginManager().registerEvents(new PvPManagerListener(), plugin);
     }
 
+    public Boolean getPvPState(final Player player) {
+        final CombatPlayer pvPlayer = CombatPlayer.get(player);
+        return pvPlayer != null ? pvPlayer.hasPvPEnabled() : null;
+    }
+
+    public void setPvPState(final Player player, final boolean state) {
+        final CombatPlayer pvPlayer = CombatPlayer.get(player);
+        if (pvPlayer != null) {
+            pvPlayer.setPvP(state);
+        }
+    }
+
     public boolean isTagged(final Player player) {
         if (config.isPmPreventDuel()) {
             return false;

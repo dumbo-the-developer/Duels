@@ -228,6 +228,7 @@ public class DuelManager implements Loadable {
         }
 
         endgameLeaveRequests.add(player.getUniqueId());
+        playerManager.restorePvP(player);
 
         final PlayerInfo info = playerManager.get(player);
         if (info != null) {
@@ -1008,6 +1009,7 @@ public class DuelManager implements Loadable {
         @EventHandler
         public void on(final PlayerQuitEvent event) {
             final Player player = event.getPlayer();
+            playerManager.restorePvP(player);
 
             if (!arenaManager.isInMatch(player) || endgameLeaveRequests.contains(player.getUniqueId())) {
                 return;
