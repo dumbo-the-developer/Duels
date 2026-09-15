@@ -103,16 +103,17 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    private boolean canFight(final Kit kit, final UserData first, final UserData second) {
-        if (!config.isRatingEnabled()) {
+    private boolean canFight(final Queue queue, final UserData first, final UserData second) {
+        if (!config.isRatingEnabled() || !queue.isRated()) {
             return true;
         }
 
         if (first != null && second != null) {
+            final Kit kit = queue.getKit();
             final int firstRating = first.getRatingUnsafe(kit);
             final int secondRating = second.getRatingUnsafe(kit);
             final int kFactor = config.getKFactor();
-            final int maxDifference = config.getMaxDifference();
+            final int maxDifference = queue.getMaxDifference() != null ? queue.getMaxDifference() : config.getMaxDifference();
             return firstRating - secondRating <= maxDifference && secondRating - firstRating <= maxDifference && NumberUtil.getChange(kFactor, firstRating, secondRating) != 0 && NumberUtil.getChange(kFactor, secondRating, firstRating) != 0;
         }
 
@@ -252,7 +253,7 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
                             boolean compatible = true;
                             for (final QueueEntry a : firstGroup) {
                                 for (final QueueEntry b : secondGroup) {
-                                    if (!canFight(queue.getKit(), userManager.get(a.getPlayer()), userManager.get(b.getPlayer()))) {
+                                    if (!canFight(queue, userManager.get(a.getPlayer()), userManager.get(b.getPlayer()))) {
                                         compatible = false;
                                         break;
                                     }
@@ -456,6 +457,18 @@ public class QueueManager implements Loadable, DQueueManager, Listener {
         Bukkit.getPluginManager().callEvent(event);
         gui.calculatePages();
         return queue;
+    }
+
+    public void setRated(final Queue queue, final boolean rated) {
+        queue.setRated(rated);
+        saveQueues();
+        queue.update();
+        gui.calculatePages();
+    }
+
+    public void setMaxDifference(final Queue queue, @Nullable final Integer maxDifference) {
+        queue.setMaxDifference(maxDifference);
+        saveQueues();
     }
 
     public boolean queue(final Player player, final Queue queue) {

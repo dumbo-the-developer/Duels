@@ -32,6 +32,7 @@ public class DuelsCommand extends BaseCommand {
                 new TeleportCommand(plugin),
                 new CreatequeueCommand(plugin),
                 new DeletequeueCommand(plugin),
+                new QueueoptionsCommand(plugin),
                 new AddsignCommand(plugin),
                 new DeletesignCommand(plugin),
                 new SetlobbyCommand(plugin),

@@ -420,7 +420,7 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
                 int loserRating = loserData.getRatingUnsafe(kit);
                 int change = 0;
 
-                if (config.isRatingEnabled() && !(!match.isFromQueue() && config.isRatingQueueOnly())) {
+                if (config.isRatingEnabled() && !match.isFromUnratedQueue() && !(!match.isFromQueue() && config.isRatingQueueOnly())) {
                     change = NumberUtil.getChange(config.getKFactor(), winnerRating, loserRating);
                     winnerData.setRating(kit, winnerRating = winnerRating + change);
                     loserData.setRating(kit, loserRating = loserRating - change);
@@ -484,7 +484,7 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
         }
         
         // Handle rating updates for team matches
-        if (config.isRatingEnabled() && !(!match.isFromQueue() && config.isRatingQueueOnly())) {
+        if (config.isRatingEnabled() && !match.isFromUnratedQueue() && !(!match.isFromQueue() && config.isRatingQueueOnly())) {
             final KitImpl kit = match.getKit();
             
             // Calculate average rating for each team

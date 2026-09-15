@@ -32,6 +32,13 @@ public class Queue extends BaseButton implements DQueue {
     @Getter
     @Setter(value = AccessLevel.PACKAGE)
     private boolean removed;
+    @Getter
+    @Setter(value = AccessLevel.PACKAGE)
+    private boolean rated;
+    // Overrides rating.max-difference for this queue if not null
+    @Getter
+    @Setter(value = AccessLevel.PACKAGE)
+    private Integer maxDifference;
 
     public Queue(final DuelsPlugin plugin, final Kit kit, final int bet) {
         this(plugin, "Unnamed", kit, bet, 1);
@@ -46,19 +53,27 @@ public class Queue extends BaseButton implements DQueue {
     }
 
     public Queue(final DuelsPlugin plugin, final String name, final Kit kit, final int bet, final int teamSize) {
-        super(plugin, buildDefaultItem(plugin, name, kit, bet, Math.max(1, teamSize), 0, 0));
+        this(plugin, name, kit, bet, teamSize, true, null);
+    }
+
+    public Queue(final DuelsPlugin plugin, final String name, final Kit kit, final int bet, final int teamSize, final boolean rated, final Integer maxDifference) {
+        super(plugin, buildDefaultItem(plugin, name, kit, bet, Math.max(1, teamSize), rated, 0, 0));
         this.name = name;
         this.kit = kit;
         this.bet = bet;
         this.teamSize = Math.max(1, teamSize);
+        this.rated = rated;
+        this.maxDifference = maxDifference;
     }
 
-    private static ItemStack buildDefaultItem(final DuelsPlugin plugin, final String name, final Kit kit, final int bet, final int teamSize, final int inQueue, final long inMatch) {
+    private static ItemStack buildDefaultItem(final DuelsPlugin plugin, final String name, final Kit kit, final int bet, final int teamSize, final boolean rated, final int inQueue, final long inMatch) {
+        final String ratedText = plugin.getLang().getMessage("GUI.queues.buttons.queue." + (rated ? "rated" : "unrated"));
         final Map<String, String> placeholders = new HashMap<>();
         placeholders.put("name", name);
         placeholders.put("kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"));
         placeholders.put("bet_amount", String.valueOf(bet));
         placeholders.put("team_size", String.valueOf(teamSize));
+        placeholders.put("rated", ratedText);
         placeholders.put("in_queue", String.valueOf(inQueue));
         placeholders.put("in_match", String.valueOf(inMatch));
 
@@ -81,9 +96,9 @@ public class Queue extends BaseButton implements DQueue {
 
         return ItemBuilder.of(base)
                 .name(plugin.getLang().getMessage("GUI.queues.buttons.queue.name",
-                        "name", name, "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch), plugin.getLang())
+                        "name", name, "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "rated", ratedText, "in_queue", inQueue, "in_match", inMatch), plugin.getLang())
                 .lore(plugin.getLang(), plugin.getLang().getMessage("GUI.queues.buttons.queue.lore",
-                        "name", name, "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch).split("\n"))
+                        "name", name, "kit", kit != null ? kit.getName() : plugin.getLang().getMessage("GENERAL.none"), "bet_amount", bet, "rated", ratedText, "in_queue", inQueue, "in_match", inMatch).split("\n"))
                 .build();
     }
 
@@ -131,6 +146,7 @@ public class Queue extends BaseButton implements DQueue {
     public void update() {
         int inQueue = players.size();
         long inMatch = getPlayersInMatch();
+        final String ratedText = lang.getMessage("GUI.queues.buttons.queue." + (rated ? "rated" : "unrated"));
 
         if (plugin.getGuiConfigManager() != null && plugin.getGuiConfigManager().getQueueSelectGuiConfig() != null) {
             final GuiItemConfig queueBtn = plugin.getGuiConfigManager().getQueueSelectGuiConfig().getQueueButton();
@@ -140,6 +156,7 @@ public class Queue extends BaseButton implements DQueue {
                 placeholders.put("kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"));
                 placeholders.put("bet_amount", String.valueOf(bet));
                 placeholders.put("team_size", String.valueOf(teamSize));
+                placeholders.put("rated", ratedText);
                 placeholders.put("in_queue", String.valueOf(inQueue));
                 placeholders.put("in_match", String.valueOf(inMatch));
 
@@ -157,9 +174,9 @@ public class Queue extends BaseButton implements DQueue {
         }
 
         setDisplayName(lang.getMessage("GUI.queues.buttons.queue.name",
-                "name", name, "kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch), lang);
+                "name", name, "kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), "bet_amount", bet, "rated", ratedText, "in_queue", inQueue, "in_match", inMatch), lang);
         setLore(lang, lang.getMessage("GUI.queues.buttons.queue.lore",
-                "name", name, "kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), "bet_amount", bet, "in_queue", inQueue, "in_match", inMatch).split("\n"));
+                "name", name, "kit", kit != null ? kit.getName() : lang.getMessage("GENERAL.none"), "bet_amount", bet, "rated", ratedText, "in_queue", inQueue, "in_match", inMatch).split("\n"));
     }
 
     @Override
