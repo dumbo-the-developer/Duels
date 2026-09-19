@@ -10,7 +10,7 @@ buildscript {
 
 allprojects {
     group = 'com.meteordevelopments'
-    version = '8.1'
+    version = '8.1-northbyte.1'
 }
 
 subprojects {
