@@ -41,7 +41,6 @@ public class AxGravesHook extends PluginHook<DuelsPlugin> {
                 return;
             }
 
-            event.getGrave().remove();
             event.setCancelled(true);
         }
     }
