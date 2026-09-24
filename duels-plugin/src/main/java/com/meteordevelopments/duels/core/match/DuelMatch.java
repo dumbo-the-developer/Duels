@@ -40,6 +40,9 @@ public class DuelMatch implements Match {
     private final int bet;
     @Getter
     private final Queue source;
+    // Captured at start so changing the queue's rated flag does not affect a match in progress
+    @Getter
+    private final boolean fromUnratedQueue;
 
     @Getter
     private boolean finished;
@@ -72,6 +75,7 @@ public class DuelMatch implements Match {
         this.settings = settings;
         this.bet = bet;
         this.source = source;
+        this.fromUnratedQueue = source != null && !source.isRated();
     }
     
     public long getDurationInMillis() {

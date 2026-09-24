@@ -115,6 +115,7 @@ ERROR:
     not-found: '{PREFIX} &cNo existe ningún inventario con el UUID ''%uuid%''.'
   queue:
     not-found: '{PREFIX} &cNo existe ninguna cola con el kit %kit% y apuesta $%bet_amount%.'
+    not-found-name: '{PREFIX} &cNo existe ninguna cola llamada ''%name%''.'
     already-exists: '{PREFIX} &cYa existe una cola con el kit ''%kit%'' y apuesta $%bet_amount%.'
     already-in: '{PREFIX} &c¡Ya estás en una cola!'
     not-in-queue: '{PREFIX} &cNo estás en ninguna cola.'
@@ -306,6 +307,7 @@ COMMAND:
         - '{HALF_LINE} &fComandos de Cola {HALF_LINE}'
         - '&f/%command% createqueue [apuesta] [-|kit] &e- &7Crea una cola con apuesta y kit.'
         - '&f/%command% deletequeue &e- &7Elimina la cola con apuesta y kit.'
+        - '&f/%command% queueoptions [nombre] [rated|maxdifference] [valor] &e- &7Define si una cola afecta la puntuación o su diferencia máxima de puntuación.'
         - '&f/%command% list &e- &7Muestra la lista de colas disponibles.'
         - '{HALF_LINE} &fComandos de Cola {HALF_LINE}'
       sign:
@@ -357,6 +359,10 @@ COMMAND:
     set-arena-item: '{PREFIX} &7El objeto mostrado de la arena &e%name%&7 fue cambiado al objeto que sostienes.'
     create-queue: '{PREFIX} &7Cola creada con el kit &3%kit% &7y apuesta &6$%bet_amount%&7.'
     delete-queue: '{PREFIX} &7Cola eliminada con el kit &3%kit% &7y apuesta &6$%bet_amount%&7.'
+    queue-options:
+      rated: '{PREFIX} &7La cola &f%name% &7afecta la puntuación: %rated%&7.'
+      max-difference: '{PREFIX} &7Diferencia máxima de puntuación de la cola &f%name% &7establecida en &a%max_difference%&7.'
+      max-difference-default: '{PREFIX} &7La cola &f%name% &7ahora usa la diferencia máxima de puntuación predeterminada de &a%max_difference%&7.'
     add-sign: '{PREFIX} &7Letrero de cola creado en &f%location% &7con el kit &3%kit% &7y apuesta &6$%bet_amount%&7.'
     del-sign: '{PREFIX} &7Letrero de cola eliminado en &f%location% &7con el kit &3%kit% &7y apuesta &6$%bet_amount%&7.'
     set-lobby: '{PREFIX} &7Lobby de duelo establecido en tu ubicación actual.'
@@ -659,10 +665,13 @@ GUI:
         name: '&3%name%'
         lore:
           - '&7Apuesta: &6$%bet_amount%'
+          - '&7Clasificatoria: %rated%'
           - '&7En cola: &f%in_queue%'
           - '&7En partida: &f%in_match%'
           - ' '
           - '&a&l¡Clic para unirse a la cola!'
+        rated: '&aSí'
+        unrated: '&cNo'
       previous-page:
         name: '&aPágina anterior'
       next-page:

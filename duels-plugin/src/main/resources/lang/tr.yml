@@ -115,6 +115,7 @@ ERROR:
     not-found: '{PREFIX} &c''%uuid%'' UUID''li bir envanter bulunamadı.'
   queue:
     not-found: '{PREFIX} &c%kit% kiti ve %bet_amount%$ bahisli kuyruk bulunamadı.'
+    not-found-name: '{PREFIX} &c''%name%'' adında bir kuyruk bulunamadı.'
     already-exists: '{PREFIX} &c''%kit%'' kiti ve %bet_amount%$ bahisli bir kuyruk zaten mevcut.'
     already-in: '{PREFIX} &cZaten bir kuyruktasın!'
     not-in-queue: '{PREFIX} &cHerhangi bir kuyrukta değilsin.'
@@ -306,6 +307,7 @@ COMMAND:
         - '{HALF_LINE} &fKuyruk Komutları {HALF_LINE}'
         - '&f/%command% createqueue [bahis] [-|kit] &e- &7Bahisli ve kitli kuyruk oluşturur.'
         - '&f/%command% deletequeue &e- &7Kuyruğu siler.'
+        - '&f/%command% queueoptions [ad] [rated|maxdifference] [değer] &e- &7Kuyruğun reytingi etkileyip etkilemediğini veya maksimum reyting farkını ayarlar.'
         - '&f/%command% list &e- &7Mevcut kuyrukları listeler.'
         - '{HALF_LINE} &fKuyruk Komutları {HALF_LINE}'
       sign:
@@ -357,6 +359,10 @@ COMMAND:
     set-arena-item: '{PREFIX} &7Arena &e%name%&7''nin görünen eşyası tuttuğun eşyaya değiştirildi.'
     create-queue: '{PREFIX} &7&3%kit% &7kiti ve &6$%bet_amount% &7bahisli kuyruk oluşturuldu.'
     delete-queue: '{PREFIX} &7&3%kit% &7kiti ve &6$%bet_amount% &7bahisli kuyruk silindi.'
+    queue-options:
+      rated: '{PREFIX} &f%name% &7kuyruğu reytingi etkiler: %rated%&7.'
+      max-difference: '{PREFIX} &f%name% &7kuyruğunun maksimum reyting farkı &a%max_difference% &7olarak ayarlandı.'
+      max-difference-default: '{PREFIX} &f%name% &7kuyruğu artık varsayılan maksimum reyting farkını (&a%max_difference%&7) kullanıyor.'
     add-sign: '{PREFIX} &7&f%location%&7 konumunda &3%kit% &7kiti ve &6$%bet_amount% &7bahisli kuyruk tabelası oluşturuldu.'
     del-sign: '{PREFIX} &7&f%location%&7 konumundaki &3%kit% &7kiti ve &6$%bet_amount% &7bahisli kuyruk tabelası silindi.'
     set-lobby: '{PREFIX} &7Duel lobisi bulunduğun konuma ayarlandı.'
@@ -659,10 +665,13 @@ GUI:
         name: '&3%name%'
         lore:
           - '&7Bahis: &6$%bet_amount%'
+          - '&7Dereceli: %rated%'
           - '&7Kuyrukta: &f%in_queue%'
           - '&7Maçta: &f%in_match%'
           - ' '
           - '&a&lKuyruğa Katılmak İçin Tıkla!'
+        rated: '&aEvet'
+        unrated: '&cHayır'
       previous-page:
         name: '&aÖnceki Sayfa'
       next-page:

@@ -95,6 +95,7 @@ buttons:
       lore:
         - '&7Kit: &b%kit%'
         - '&7Bet: &6$%bet_amount%'
+        - '&7Ranked: %rated%'
         - '&7In Queue: &a%in_queue%'
         - '&7In Match: &e%in_match%'
         - ' '

@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS VALUE!
-config-version: 19
+config-version: 20
 
 # Define placeholders usable in any message below.
 # Example: Adding 'PREFIX: "[Cool]"' below and then putting '{PREFIX}' in a message will display '[Cool]' when the message is sent in game.
@@ -142,6 +142,7 @@ ERROR:
     not-found: '{PREFIX} &cNo inventory exists with the UUID ''%uuid%''.'
   queue:
     not-found: '{PREFIX} &cNo queue exists with kit %kit% and bet $%bet_amount%.'
+    not-found-name: '{PREFIX} &cNo queue exists with the name ''%name%''.'
     already-exists: '{PREFIX} &cA queue with kit ''%kit%'' and bet $%bet_amount% already exists.'
     already-in: '{PREFIX} &cYou are already in a queue!'
     not-in-queue: '{PREFIX} &cYou are not in a queue.'
@@ -338,6 +339,7 @@ COMMAND:
         - '{HALF_LINE} &fQueue Sign Commands {HALF_LINE}'
         - '&f/%command% createqueue [bet] [-|kit] &e- &7Creates a queue with bet and kit.'
         - '&f/%command% deletequeue &e- &7Deletes the queue with bet and kit.'
+        - '&f/%command% queueoptions [name] [rated|maxdifference] [value] &e- &7Sets whether a queue is rated or its max rating difference.'
         - '&f/%command% list &e- &7Displays a list of available queues.'
         - '{HALF_LINE} &fQueue Sign Commands {HALF_LINE}'
       sign:
@@ -389,6 +391,10 @@ COMMAND:
     set-arena-item: '{PREFIX} &7Arena &e%name%&7''s displayed item was changed to your held item.'
     create-queue: '{PREFIX} &7Created a queue with kit &3%kit% &7and bet &6$%bet_amount%&7.'
     delete-queue: '{PREFIX} &7Deleted a queue with kit &3%kit% &7and bet &6$%bet_amount%&7.'
+    queue-options:
+      rated: '{PREFIX} &7Set rated to %rated% &7for queue &f%name%&7.'
+      max-difference: '{PREFIX} &7Set max rating difference to &a%max_difference% &7for queue &f%name%&7.'
+      max-difference-default: '{PREFIX} &7Queue &f%name% &7now uses the default max rating difference of &a%max_difference%&7.'
     add-sign: '{PREFIX} &7Created queue sign at &f%location% &7with kit &3%kit% &7and bet &6$%bet_amount%&7.'
     del-sign: '{PREFIX} &7Deleted queue sign at &f%location% &7with kit &3%kit% &7and bet &6$%bet_amount%&7.'
     set-lobby: '{PREFIX} &7Duel lobby set at your current location.'
@@ -1265,10 +1271,13 @@ GUI:
         name: '&3%name%'
         lore:
           - '&7Bet: &6$%bet_amount%'
+          - '&7Ranked: %rated%'
           - '&7In Queue: &f%in_queue%'
           - '&7In Match: &f%in_match%'
           - ' '
           - '&a&lClick to Queue!'
+        rated: '&aYes'
+        unrated: '&cNo'
       previous-page:
         name: '&aPrevious Page'
       next-page:

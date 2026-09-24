@@ -115,6 +115,7 @@ ERROR:
     not-found: '{PREFIX} &cИнвентарь с UUID ''%uuid%'' не найден.'
   queue:
     not-found: '{PREFIX} &cОчередь с китом %kit% и ставкой $%bet_amount% не найдена.'
+    not-found-name: '{PREFIX} &cОчередь с названием ''%name%'' не найдена.'
     already-exists: '{PREFIX} &cОчередь с китом ''%kit%'' и ставкой $%bet_amount% уже существует.'
     already-in: '{PREFIX} &cТы уже находишься в очереди!'
     not-in-queue: '{PREFIX} &cТы не находишься в очереди.'
@@ -306,6 +307,7 @@ COMMAND:
         - '{HALF_LINE} &fКоманды очереди {HALF_LINE}'
         - '&f/%command% createqueue [ставка] [-|кит] &e- &7Создаёт очередь со ставкой и китом.'
         - '&f/%command% deletequeue &e- &7Удаляет очередь со ставкой и китом.'
+        - '&f/%command% queueoptions [название] [rated|maxdifference] [значение] &e- &7Задаёт, влияет ли очередь на рейтинг, или её максимальную разницу рейтинга.'
         - '&f/%command% list &e- &7Показывает список доступных очередей.'
         - '{HALF_LINE} &fКоманды очереди {HALF_LINE}'
       sign:
@@ -357,6 +359,10 @@ COMMAND:
     set-arena-item: '{PREFIX} &7Отображаемый предмет арены &e%name%&7 изменён на предмет в руке.'
     create-queue: '{PREFIX} &7Создана очередь с китом &3%kit% &7и ставкой &6$%bet_amount%&7.'
     delete-queue: '{PREFIX} &7Удалена очередь с китом &3%kit% &7и ставкой &6$%bet_amount%&7.'
+    queue-options:
+      rated: '{PREFIX} &7Очередь &f%name% &7влияет на рейтинг: %rated%&7.'
+      max-difference: '{PREFIX} &7Максимальная разница рейтинга для очереди &f%name% &7установлена на &a%max_difference%&7.'
+      max-difference-default: '{PREFIX} &7Очередь &f%name% &7теперь использует стандартную максимальную разницу рейтинга &a%max_difference%&7.'
     add-sign: '{PREFIX} &7Создана табличка очереди в &f%location% &7с китом &3%kit% &7и ставкой &6$%bet_amount%&7.'
     del-sign: '{PREFIX} &7Удалена табличка очереди в &f%location% &7с китом &3%kit% &7и ставкой &6$%bet_amount%&7.'
     set-lobby: '{PREFIX} &7Лобби дуэлей установлено в твоём текущем местоположении.'
@@ -659,10 +665,13 @@ GUI:
         name: '&3%name%'
         lore:
           - '&7Ставка: &6$%bet_amount%'
+          - '&7Рейтинговая: %rated%'
           - '&7В очереди: &f%in_queue%'
           - '&7В матче: &f%in_match%'
           - ' '
           - '&a&lНажми, чтобы встать в очередь!'
+        rated: '&aДа'
+        unrated: '&cНет'
       previous-page:
         name: '&aПредыдущая страница'
       next-page:
