@@ -53,20 +53,48 @@ public class ReplayDetailsGui extends SinglePageGui<DuelsPlugin> {
                 final String title = plugin.getLang().getMessage("GUI.replay-details.buttons.summary.name");
                 setDisplayName(title != null ? title : "&e&lMatch Details");
 
+                final String rawReason = metadata.getEndReason() != null ? metadata.getEndReason() : "OTHER";
+                final String translatedReason = resolveReason(plugin, rawReason);
+
+                final String loreLine = plugin.getLang().getMessage(
+                        "GUI.replay-details.buttons.summary.lore",
+                        "id", metadata.getReplayId(),
+                        "player1", metadata.getPlayer1Name() != null ? metadata.getPlayer1Name() : "Unknown",
+                        "player2", metadata.getPlayer2Name() != null ? metadata.getPlayer2Name() : "Unknown",
+                        "winner", metadata.getWinnerName() != null ? metadata.getWinnerName() : "None",
+                        "loser", metadata.getLoserName() != null ? metadata.getLoserName() : "None",
+                        "kit", metadata.getKitName() != null ? metadata.getKitName() : "Own Inventory",
+                        "arena", metadata.getArenaName() != null ? metadata.getArenaName() : "Random",
+                        "duration", metadata.getFormattedDuration(),
+                        "reason", translatedReason,
+                        "date", DATE_FORMAT.format(new Date(metadata.getStartTime()))
+                );
+
                 final List<String> lore = new ArrayList<>();
-                lore.add("&7Replay ID: &f" + metadata.getReplayId());
-                lore.add("&7Player 1: &b" + (metadata.getPlayer1Name() != null ? metadata.getPlayer1Name() : "Unknown"));
-                lore.add("&7Player 2: &b" + (metadata.getPlayer2Name() != null ? metadata.getPlayer2Name() : "Unknown"));
-                lore.add("&7Winner: &a" + (metadata.getWinnerName() != null ? metadata.getWinnerName() : "None"));
-                lore.add("&7Loser: &c" + (metadata.getLoserName() != null ? metadata.getLoserName() : "None"));
-                lore.add("&7Kit: &f" + (metadata.getKitName() != null ? metadata.getKitName() : "Own Inventory"));
-                lore.add("&7Arena: &f" + (metadata.getArenaName() != null ? metadata.getArenaName() : "Random"));
-                lore.add("&7Duration: &e" + metadata.getFormattedDuration());
-                if (metadata.getBetAmount() > 0) {
-                    lore.add("&7Bet: &6$" + metadata.getBetAmount());
+                if (loreLine != null) {
+                    for (final String line : loreLine.split("\n")) {
+                        lore.add(line);
+                    }
+                } else {
+                    // Fallback
+                    lore.add("&7Replay ID: &f" + metadata.getReplayId());
+                    lore.add("&7Player 1: &b" + (metadata.getPlayer1Name() != null ? metadata.getPlayer1Name() : "Unknown"));
+                    lore.add("&7Player 2: &b" + (metadata.getPlayer2Name() != null ? metadata.getPlayer2Name() : "Unknown"));
+                    lore.add("&7Winner: &a" + (metadata.getWinnerName() != null ? metadata.getWinnerName() : "None"));
+                    lore.add("&7Loser: &c" + (metadata.getLoserName() != null ? metadata.getLoserName() : "None"));
+                    lore.add("&7Kit: &f" + (metadata.getKitName() != null ? metadata.getKitName() : "Own Inventory"));
+                    lore.add("&7Arena: &f" + (metadata.getArenaName() != null ? metadata.getArenaName() : "Random"));
+                    lore.add("&7Duration: &e" + metadata.getFormattedDuration());
+                    lore.add("&7End Reason: &7" + translatedReason);
+                    lore.add("&7Date: &8" + DATE_FORMAT.format(new Date(metadata.getStartTime())));
                 }
-                lore.add("&7End Reason: &7" + (metadata.getEndReason() != null ? metadata.getEndReason() : "OTHER"));
-                lore.add("&7Date: &8" + DATE_FORMAT.format(new Date(metadata.getStartTime())));
+
+                if (metadata.getBetAmount() > 0) {
+                    final String betLine = plugin.getLang().getMessage(
+                            "GUI.replay-details.buttons.summary.lore-bet", "bet", metadata.getBetAmount());
+                    lore.add(betLine != null ? betLine : "&7Bet: &6$" + metadata.getBetAmount());
+                }
+
                 setLore(lore);
             }
         });
@@ -77,7 +105,17 @@ public class ReplayDetailsGui extends SinglePageGui<DuelsPlugin> {
             public void update(final Player p) {
                 final String name = plugin.getLang().getMessage("GUI.replay-details.buttons.play.name");
                 setDisplayName(name != null ? name : "&a&l▶ Watch Replay");
-                setLore("&7Click to enter replay viewer mode.", "&eTakes you into spectator camera!");
+
+                final String loreLine = plugin.getLang().getMessage("GUI.replay-details.buttons.play.lore");
+                if (loreLine != null) {
+                    final List<String> lore = new ArrayList<>();
+                    for (final String line : loreLine.split("\n")) {
+                        lore.add(line);
+                    }
+                    setLore(lore);
+                } else {
+                    setLore("&7Click to enter replay viewer mode.", "&eTakes you into spectator camera!");
+                }
             }
 
             @Override
@@ -95,7 +133,17 @@ public class ReplayDetailsGui extends SinglePageGui<DuelsPlugin> {
                 public void update(final Player p) {
                     final String name = plugin.getLang().getMessage("GUI.replay-details.buttons.delete.name");
                     setDisplayName(name != null ? name : "&c&l✖ Delete Replay");
-                    setLore("&7Click to permanently delete this replay.");
+
+                    final String loreLine = plugin.getLang().getMessage("GUI.replay-details.buttons.delete.lore");
+                    if (loreLine != null) {
+                        final List<String> lore = new ArrayList<>();
+                        for (final String line : loreLine.split("\n")) {
+                            lore.add(line);
+                        }
+                        setLore(lore);
+                    } else {
+                        setLore("&7Click to permanently delete this replay.");
+                    }
                 }
 
                 @Override
@@ -130,6 +178,18 @@ public class ReplayDetailsGui extends SinglePageGui<DuelsPlugin> {
                 }
             }
         });
+    }
+
+    /**
+     * Resolves a raw end reason (e.g. "OPPONENT_DEFEAT") to a human-readable
+     * string via lang.yml key GUI.replay-details.end-reason.<REASON>.
+     * Falls back to the raw value if the key is not defined.
+     */
+    public static String resolveReason(final DuelsPlugin plugin, final String rawReason) {
+        if (rawReason == null) return "Other";
+        final String key = "GUI.replay-details.end-reason." + rawReason;
+        final String translated = plugin.getLang().getMessage(key);
+        return translated != null ? translated : rawReason;
     }
 
     private static String resolveTitle(final DuelsPlugin plugin, final DuelReplayMetadata metadata) {
