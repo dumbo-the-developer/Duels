@@ -59,10 +59,9 @@ public class WrapperPlayServerPlayerInfo extends AbstractPacket {
     }
 
     public void setData(List<PlayerInfoData> value) {
-        if (VersionUtil.isBetween(VersionUtil.VersionEnum.V1_19, VersionUtil.VersionEnum.V1_21_10)) {
-            handle.getPlayerInfoDataLists().write(1, value);
-        } else {
-            handle.getPlayerInfoDataLists().write(0, value);
-        }
+        // ProtocolLib 5.4.0 changed getPlayerInfoDataLists() from withType(Collection.class)
+        // to getLists(withType(List.class)), which now returns only the PlayerInfoData list
+        // at index 0. The old write(1, ...) for 1.19–1.21.10 no longer works.
+        handle.getPlayerInfoDataLists().write(0, value);
     }
 }
