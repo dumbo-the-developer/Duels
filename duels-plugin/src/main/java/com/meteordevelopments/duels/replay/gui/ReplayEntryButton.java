@@ -52,36 +52,67 @@ public class ReplayEntryButton extends Button<DuelsPlugin> {
         final String kit = metadata.getKitName() != null ? metadata.getKitName() : "Own Inventory";
         final String arena = metadata.getArenaName() != null ? metadata.getArenaName() : "Random";
         final String duration = metadata.getFormattedDuration();
-        final String reason = metadata.getEndReason() != null ? metadata.getEndReason() : "OTHER";
+        final String rawReason = metadata.getEndReason() != null ? metadata.getEndReason() : "OTHER";
+        final String reason = ReplayDetailsGui.resolveReason(plugin, rawReason);
         final String date = DATE_FORMAT.format(new Date(metadata.getStartTime()));
 
+        // Display name from lang.yml: GUI.replay-browser.buttons.entry.name
         final String nameMsg = plugin.getLang().getMessage(
                 "GUI.replay-browser.buttons.entry.name",
                 "player1", p1,
                 "player2", p2
         );
-        if (nameMsg != null) {
-            setDisplayName(nameMsg);
-        } else {
-            setDisplayName("&eReplay: &b" + p1 + " &7vs &b" + p2);
-        }
+        setDisplayName(nameMsg != null ? nameMsg : "&eReplay: &b" + p1 + " &7vs &b" + p2);
+
+        // Main lore from lang.yml: GUI.replay-browser.buttons.entry.lore
+        // The list is joined with \n by Lang, so we split it back.
+        final String loreLine = plugin.getLang().getMessage(
+                "GUI.replay-browser.buttons.entry.lore",
+                "id", metadata.getReplayId(),
+                "winner", winner,
+                "loser", loser,
+                "kit", kit,
+                "arena", arena,
+                "duration", duration,
+                "reason", reason,
+                "date", date
+        );
 
         final List<String> lore = new ArrayList<>();
-        lore.add("&7ID: &8" + metadata.getReplayId());
-        lore.add("&7Winner: &a" + winner);
-        lore.add("&7Loser: &c" + loser);
-        lore.add("&7Kit: &f" + kit);
-        lore.add("&7Arena: &f" + arena);
-        lore.add("&7Duration: &e" + duration);
-        if (metadata.getBetAmount() > 0) {
-            lore.add("&7Bet: &6$" + metadata.getBetAmount());
+        if (loreLine != null) {
+            for (final String line : loreLine.split("\n")) {
+                lore.add(line);
+            }
+        } else {
+            // Fallback if lang key is missing
+            lore.add("&7ID: &8" + metadata.getReplayId());
+            lore.add("&7Winner: &a" + winner);
+            lore.add("&7Loser: &c" + loser);
+            lore.add("&7Kit: &f" + kit);
+            lore.add("&7Arena: &f" + arena);
+            lore.add("&7Duration: &e" + duration);
+            lore.add("&7End Reason: &7" + reason);
+            lore.add("&7Date: &8" + date);
+            lore.add(" ");
+            lore.add("&e► Left-Click to view options / watch");
         }
-        lore.add("&7End Reason: &7" + reason);
-        lore.add("&7Date: &8" + date);
-        lore.add(" ");
-        lore.add("&e► Left-Click to view options / watch");
+
+        if (metadata.getBetAmount() > 0) {
+            final String betLine = plugin.getLang().getMessage(
+                    "GUI.replay-browser.buttons.entry.lore-bet", "bet", metadata.getBetAmount());
+            lore.add(betLine != null ? betLine : "&7Bet: &6$" + metadata.getBetAmount());
+        }
+
+        // Admin lore from lang.yml: GUI.replay-browser.buttons.entry.lore-admin
         if (player.hasPermission(Permissions.ADMIN) || player.hasPermission(Permissions.REPLAY_ADMIN)) {
-            lore.add("&c► Shift-Right-Click to delete");
+            final String loreAdmin = plugin.getLang().getMessage("GUI.replay-browser.buttons.entry.lore-admin");
+            if (loreAdmin != null) {
+                for (final String line : loreAdmin.split("\n")) {
+                    lore.add(line);
+                }
+            } else {
+                lore.add("&c► Shift-Right-Click to delete");
+            }
         }
 
         setLore(lore);

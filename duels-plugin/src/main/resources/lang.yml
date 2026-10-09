@@ -1347,6 +1347,12 @@ GUI:
   replay-browser:
     title: 'Duel Replays'
     player-title: 'Replays: %player%'
+    end-reason:
+      OPPONENT_DEFEAT: 'Opponent Defeat'
+      TIE: 'Tie'
+      MAX_TIME_REACHED: 'Time Limit'
+      PLUGIN_DISABLE: 'Plugin Disable'
+      OTHER: 'Other'
     buttons:
       entry:
         name: '&eReplay: &b%player1% &7vs &b%player2%'
@@ -1383,9 +1389,9 @@ GUI:
           - '&7Kit: &f%kit%'
           - '&7Arena: &e%arena%'
           - '&7Duration: &e%duration%'
-          - '&7Bet: &6$%bet%'
           - '&7End Reason: &7%reason%'
           - '&7Date: &8%date%'
+        lore-bet: '&7Bet: &6$%bet%'
       play:
         name: '&a&l▶ Watch Replay'
         lore:
@@ -1397,6 +1403,12 @@ GUI:
           - '&7Click to permanently delete this replay.'
       back:
         name: '&7« Back to Replay List'
+    end-reason:
+      OPPONENT_DEFEAT: 'Opponent Defeat'
+      TIE: 'Tie'
+      MAX_TIME_REACHED: 'Time Limit'
+      PLUGIN_DISABLE: 'Plugin Disable'
+      OTHER: 'Other'
 
 
 KIT:
