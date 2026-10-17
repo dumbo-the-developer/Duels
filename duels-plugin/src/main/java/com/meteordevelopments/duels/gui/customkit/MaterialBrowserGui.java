@@ -56,6 +56,13 @@ public class MaterialBrowserGui extends SinglePageGui<DuelsPlugin> {
 
             final String name = mat.name();
 
+            if (name.endsWith("_SPAWN_EGG")) {
+                if (mat == Material.CREEPER_SPAWN_EGG) {
+                    CATEGORY_MATERIALS.get(Category.COMBAT).add(mat);
+                }
+                continue;
+            }
+
             if (name.endsWith("_SWORD") || name.endsWith("_AXE") && !name.endsWith("_PICKAXE") || name.equals("BOW") || name.equals("CROSSBOW") || name.equals("TRIDENT") || name.equals("MACE")) {
                 CATEGORY_MATERIALS.get(Category.WEAPONS).add(mat);
             } else if (name.endsWith("_HELMET") || name.endsWith("_CHESTPLATE") || name.endsWith("_LEGGINGS") || name.endsWith("_BOOTS") || name.equals("SHIELD") || name.equals("ELYTRA") || name.equals("TURTLE_HELMET") || name.equals("CARVED_PUMPKIN")) {
@@ -198,13 +205,15 @@ public class MaterialBrowserGui extends SinglePageGui<DuelsPlugin> {
             final int guiSlot = 9 + (i - startIndex);
 
             final ItemStack stack = new ItemStack(mat);
-            final String matTitle = "&f" + formatMaterialName(mat.name());
+            final net.kyori.adventure.text.Component matComp = net.kyori.adventure.text.Component.translatable(mat.translationKey())
+                    .color(net.kyori.adventure.text.format.NamedTextColor.WHITE)
+                    .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false);
             final List<String> itemLore = isIconPicker
                     ? plugin.getLang().getMessageListOrDefault("GUI.material-browser.buttons.item.lore-icon", List.of("&aClick to select as kit icon"))
                     : plugin.getLang().getMessageListOrDefault("GUI.material-browser.buttons.item.lore", List.of("&aClick to select this item"));
 
             final BaseButton itemBtn = new BaseButton(plugin, ItemBuilder.of(stack)
-                    .name(matTitle, plugin.getLang())
+                    .name(matComp)
                     .lore(itemLore, plugin.getLang())
                     .build()) {
                 @Override

@@ -120,6 +120,10 @@ public class CustomKitValidator {
     }
 
     public ValidationResult validateItem(final ItemStack item, final boolean bypassRestrictions, final CustomKitsConfig config) {
+        return validateItem(item, bypassRestrictions, bypassRestrictions, config);
+    }
+
+    public ValidationResult validateItem(final ItemStack item, final boolean bypassRestrictions, final boolean canEditItemData, final CustomKitsConfig config) {
         if (item == null || item.getType() == Material.AIR) {
             return ValidationResult.ok();
         }
@@ -139,13 +143,40 @@ public class CustomKitValidator {
             }
         }
 
-        if (item.getAmount() < 1 || item.getAmount() > 64) {
-            return ValidationResult.fail("ERROR.customkits.invalid-amount");
+        if (!bypassRestrictions && matName.endsWith("_SPAWN_EGG") && mat != Material.CREEPER_SPAWN_EGG) {
+            return ValidationResult.fail("ERROR.customkits.material-blocked", "material", matName);
+        }
+
+        final int maxStack = bypassRestrictions ? 64 : mat.getMaxStackSize();
+        if (item.getAmount() < 1 || item.getAmount() > maxStack) {
+            return ValidationResult.fail("ERROR.customkits.invalid-amount-stack", "material", matName, "max", maxStack);
         }
 
         final ItemMeta meta = item.getItemMeta();
         if (meta == null) {
             return ValidationResult.ok();
+        }
+
+        // Validate Non-vanilla Item Data
+        if (!canEditItemData && !bypassRestrictions) {
+            if (meta.hasAttributeModifiers()) {
+                return ValidationResult.fail("ERROR.customkits.item-data-disallowed");
+            }
+            if (meta.isUnbreakable()) {
+                return ValidationResult.fail("ERROR.customkits.item-data-disallowed");
+            }
+            if (meta.hasCustomModelData()) {
+                return ValidationResult.fail("ERROR.customkits.item-data-disallowed");
+            }
+            if (!meta.getItemFlags().isEmpty()) {
+                return ValidationResult.fail("ERROR.customkits.item-data-disallowed");
+            }
+            if (meta.hasLore()) {
+                return ValidationResult.fail("ERROR.customkits.item-data-disallowed");
+            }
+            if (meta instanceof org.bukkit.inventory.meta.Damageable dmg && dmg.hasDamage()) {
+                return ValidationResult.fail("ERROR.customkits.item-data-disallowed");
+            }
         }
 
         // Validate Enchantments
@@ -215,9 +246,12 @@ public class CustomKitValidator {
                 player.hasPermission(Permissions.CUSTOMKITS_ADMIN) ||
                 player.hasPermission(Permissions.ADMIN)
         );
+        final boolean canEditItemData = player != null && (
+                bypass || player.hasPermission(Permissions.CUSTOMKITS_ITEMDATA)
+        );
 
         for (final ItemStack item : kit.getItems().values()) {
-            final ValidationResult res = validateItem(item, bypass, config);
+            final ValidationResult res = validateItem(item, bypass, canEditItemData, config);
             if (!res.isValid()) return res;
         }
 
@@ -231,12 +265,12 @@ public class CustomKitValidator {
                             "slot", getArmorSlotName(slot));
                 }
             }
-            final ValidationResult res = validateItem(armorItem, bypass, config);
+            final ValidationResult res = validateItem(armorItem, bypass, canEditItemData, config);
             if (!res.isValid()) return res;
         }
 
         if (kit.getOffHand() != null) {
-            final ValidationResult res = validateItem(kit.getOffHand(), bypass, config);
+            final ValidationResult res = validateItem(kit.getOffHand(), bypass, canEditItemData, config);
             if (!res.isValid()) return res;
         }
 

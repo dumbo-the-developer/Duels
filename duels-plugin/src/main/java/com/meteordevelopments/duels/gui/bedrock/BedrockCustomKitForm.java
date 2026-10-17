@@ -369,37 +369,63 @@ public final class BedrockCustomKitForm {
 
         final ItemMeta meta = item.getItemMeta();
         final String displayName = meta != null && meta.hasDisplayName() ? meta.getDisplayName() : "";
-        final int amount = item.getAmount();
+        final int maxStack = item.getType().getMaxStackSize();
+        final int amount = Math.max(1, Math.min(item.getAmount(), maxStack));
         final boolean unbreakable = meta != null && meta.isUnbreakable();
+        final boolean canEditItemData = player.hasPermission(com.meteordevelopments.duels.Permissions.CUSTOMKITS_ITEMDATA) ||
+                player.hasPermission(com.meteordevelopments.duels.Permissions.CUSTOMKITS_ADMIN) ||
+                player.hasPermission(com.meteordevelopments.duels.Permissions.ADMIN) ||
+                player.hasPermission(com.meteordevelopments.duels.Permissions.CUSTOMKITS_BYPASS_RESTRICTIONS);
 
-        final CustomForm form = CustomForm.builder()
-                .title(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.properties.title", "Edit: %material%").replace("%material%", item.getType().name())))
-                .input(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.properties.display-name-label", "Display Name")), "Display Name", displayName)
-                .slider(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.properties.amount-label", "Amount")), 1, 64, 1, amount)
-                .toggle(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.properties.unbreakable-label", "Unbreakable")), unbreakable)
-                .validResultHandler(response -> {
-                    final String newName = response.asInput(0);
-                    final int newAmount = (int) response.asSlider(1);
-                    final boolean newUnbreakable = response.asToggle(2);
+        final CustomForm.Builder formBuilder = CustomForm.builder()
+                .title(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.properties.title", "Edit: %material%").replace("%material%", item.getType().name())));
 
-                    item.setAmount(Math.max(1, Math.min(64, newAmount)));
-                    if (meta != null) {
-                        if (newName != null && !newName.trim().isEmpty()) {
-                            meta.setDisplayName(plugin.getLang().toLegacyString(newName.trim()));
-                        } else {
-                            meta.setDisplayName(null);
-                        }
-                        meta.setUnbreakable(newUnbreakable);
-                        item.setItemMeta(meta);
-                    }
+        if (canEditItemData) {
+            formBuilder.input(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.properties.display-name-label", "Display Name")), "Display Name", displayName);
+        }
 
-                    session.touch();
-                    openLayoutEditor(plugin, player, session);
-                })
-                .closedOrInvalidResultHandler(() -> openLayoutEditor(plugin, player, session))
-                .build();
+        if (maxStack > 1) {
+            formBuilder.slider(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.properties.amount-label", "Amount")), 1, maxStack, 1, amount);
+        }
 
-        FloodgateApi.getInstance().sendForm(player.getUniqueId(), form);
+        if (canEditItemData) {
+            formBuilder.toggle(plugin.getLang().toLegacyString(plugin.getLang().getMessageOrDefault("GUI.bedrock-customkits.properties.unbreakable-label", "Unbreakable")), unbreakable);
+        }
+
+        formBuilder.validResultHandler(response -> {
+            int inputIdx = 0;
+            String newName = null;
+            if (canEditItemData) {
+                newName = response.asInput(inputIdx++);
+            }
+
+            int newAmount = 1;
+            if (maxStack > 1) {
+                newAmount = (int) response.asSlider(inputIdx++);
+            }
+
+            boolean newUnbreakable = false;
+            if (canEditItemData) {
+                newUnbreakable = response.asToggle(inputIdx++);
+            }
+
+            item.setAmount(Math.max(1, Math.min(maxStack, newAmount)));
+            if (meta != null && canEditItemData) {
+                if (newName != null && !newName.trim().isEmpty()) {
+                    meta.setDisplayName(plugin.getLang().toLegacyString(newName.trim()));
+                } else {
+                    meta.setDisplayName(null);
+                }
+                meta.setUnbreakable(newUnbreakable);
+                item.setItemMeta(meta);
+            }
+
+            session.touch();
+            openLayoutEditor(plugin, player, session);
+        })
+        .closedOrInvalidResultHandler(() -> openLayoutEditor(plugin, player, session));
+
+        FloodgateApi.getInstance().sendForm(player.getUniqueId(), formBuilder.build());
     }
 
     private static void openSettingsEditor(final DuelsPlugin plugin, final Player player, final CustomKitImpl kit) {

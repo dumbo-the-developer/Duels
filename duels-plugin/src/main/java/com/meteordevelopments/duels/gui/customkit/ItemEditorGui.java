@@ -87,46 +87,88 @@ public class ItemEditorGui extends SinglePageGui<DuelsPlugin> {
             }
         });
 
-        // Slot 11: Change Amount
-        final int amount = item.getAmount();
-        set(11, new BaseButton(plugin, ItemBuilder.of(Material.HOPPER)
-                .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.change-amount.name", "&e&lChange Amount: &a%amount%")
-                        .replace("%amount%", String.valueOf(amount)), plugin.getLang())
-                .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.change-amount.lore",
-                        List.of(
-                                "&a[Left-Click] &7+1",
-                                "&e[Right-Click] &7-1",
-                                "&b[Shift-Left] &7+16",
-                                "&c[Shift-Right] &7-16"
-                        )), plugin.getLang())
-                .build()) {
-            @Override
-            public void onClick(final Player player, final org.bukkit.event.inventory.InventoryClickEvent event) {
-                int delta = 1;
-                if (event.isShiftClick()) {
-                    delta = 16;
-                }
-                if (event.isRightClick()) {
-                    delta = -delta;
-                }
-                final int newAmount = Math.max(1, Math.min(64, amount + delta));
-                item.setAmount(newAmount);
-                session.touch();
-                render();
-            }
-        });
+        final Player viewer = (inventory != null && !inventory.getViewers().isEmpty())
+                ? (Player) inventory.getViewers().iterator().next()
+                : org.bukkit.Bukkit.getPlayer(session.getPlayerUuid());
+        final boolean canEditItemData = viewer != null && (
+                viewer.hasPermission(com.meteordevelopments.duels.Permissions.CUSTOMKITS_ITEMDATA) ||
+                viewer.hasPermission(com.meteordevelopments.duels.Permissions.CUSTOMKITS_ADMIN) ||
+                viewer.hasPermission(com.meteordevelopments.duels.Permissions.ADMIN) ||
+                viewer.hasPermission(com.meteordevelopments.duels.Permissions.CUSTOMKITS_BYPASS_RESTRICTIONS)
+        );
 
-        // Slot 12: Display Name & Lore
-        set(12, new BaseButton(plugin, ItemBuilder.of(Material.WRITABLE_BOOK)
-                .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.display-name-lore.name", "&e&lDisplay Name & Lore"), plugin.getLang())
-                .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.display-name-lore.lore",
-                        List.of("&7Click to edit item name and lore lines.")), plugin.getLang())
-                .build()) {
-            @Override
-            public void onClick(final Player player) {
-                LoreEditorGui.open(plugin, player, session, targetSlot, isArmor, isOffHand);
+        // Slot 11: Change Amount
+        final int maxStack = item.getType().getMaxStackSize();
+        final int amount = Math.min(item.getAmount(), maxStack);
+        if (item.getAmount() > maxStack) {
+            item.setAmount(maxStack);
+            session.touch();
+        }
+
+        if (maxStack <= 1) {
+            // Unstackable item (armor, weapon, bed, etc.)
+            final List<String> unstackableLore = plugin.getLang().getMessageListOrDefault(
+                    "GUI.item-editor.buttons.change-amount.unstackable-lore",
+                    List.of("&7This item cannot be stacked", "&7in vanilla Minecraft.", "", "&8Amount locked to 1")
+            );
+            set(11, new BaseButton(plugin, ItemBuilder.of(Material.HOPPER)
+                    .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.change-amount.unstackable-name", "&7&lAmount: &f1 (Unstackable)"), plugin.getLang())
+                    .lore(unstackableLore, plugin.getLang())
+                    .build()) {
+                @Override
+                public void onClick(final Player player) {
+                }
+            });
+        } else {
+            final List<String> stackableLore = new ArrayList<>();
+            for (final String line : plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.change-amount.lore",
+                    List.of(
+                            "&a[Left-Click] &7+1",
+                            "&e[Right-Click] &7-1",
+                            "&b[Shift-Left] &7+16",
+                            "&c[Shift-Right] &7-16",
+                            "",
+                            "&7Vanilla Max Stack: &f%max%"
+                    ))) {
+                stackableLore.add(line.replace("%max%", String.valueOf(maxStack)));
             }
-        });
+
+            set(11, new BaseButton(plugin, ItemBuilder.of(Material.HOPPER)
+                    .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.change-amount.name", "&e&lChange Amount: &a%amount%")
+                            .replace("%amount%", String.valueOf(amount)), plugin.getLang())
+                    .lore(stackableLore, plugin.getLang())
+                    .build()) {
+                @Override
+                public void onClick(final Player player, final org.bukkit.event.inventory.InventoryClickEvent event) {
+                    int delta = 1;
+                    if (event.isShiftClick()) {
+                        delta = 16;
+                    }
+                    if (event.isRightClick()) {
+                        delta = -delta;
+                    }
+                    final int newAmount = Math.max(1, Math.min(maxStack, amount + delta));
+                    item.setAmount(newAmount);
+                    session.touch();
+                    render();
+                }
+            });
+        }
+
+        // Non-vanilla Item Data options (Display Name & Lore, Attributes)
+        if (canEditItemData) {
+            // Slot 12: Display Name & Lore
+            set(12, new BaseButton(plugin, ItemBuilder.of(Material.WRITABLE_BOOK)
+                    .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.display-name-lore.name", "&e&lDisplay Name & Lore"), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.display-name-lore.lore",
+                            List.of("&7Click to edit item name and lore lines.")), plugin.getLang())
+                    .build()) {
+                @Override
+                public void onClick(final Player player) {
+                    LoreEditorGui.open(plugin, player, session, targetSlot, isArmor, isOffHand);
+                }
+            });
+        }
 
         // Slot 14: Enchantments
         final int enchCount = item.getEnchantments().size();
@@ -142,19 +184,21 @@ public class ItemEditorGui extends SinglePageGui<DuelsPlugin> {
             }
         });
 
-        // Slot 15: Attributes
-        final int attrCount = (meta != null && meta.hasAttributeModifiers()) ? meta.getAttributeModifiers().size() : 0;
-        set(15, new BaseButton(plugin, ItemBuilder.of(Material.NETHER_STAR)
-                .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.attributes.name", "&b&lAttributes (&e%count%&b)")
-                        .replace("%count%", String.valueOf(attrCount)), plugin.getLang())
-                .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.attributes.lore",
-                        List.of("&7Click to configure attribute modifiers.")), plugin.getLang())
-                .build()) {
-            @Override
-            public void onClick(final Player player) {
-                AttributeEditorGui.open(plugin, player, session, targetSlot, isArmor, isOffHand);
-            }
-        });
+        // Slot 15: Attributes (only if player has permission to edit item data)
+        if (canEditItemData) {
+            final int attrCount = (meta != null && meta.hasAttributeModifiers()) ? meta.getAttributeModifiers().size() : 0;
+            set(15, new BaseButton(plugin, ItemBuilder.of(Material.NETHER_STAR)
+                    .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.attributes.name", "&b&lAttributes (&e%count%&b)")
+                            .replace("%count%", String.valueOf(attrCount)), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.attributes.lore",
+                            List.of("&7Click to configure attribute modifiers.")), plugin.getLang())
+                    .build()) {
+                @Override
+                public void onClick(final Player player) {
+                    AttributeEditorGui.open(plugin, player, session, targetSlot, isArmor, isOffHand);
+                }
+            });
+        }
 
         // Slot 16: Armor Trims (only for armor)
         final String matName = item.getType().name();
@@ -186,128 +230,130 @@ public class ItemEditorGui extends SinglePageGui<DuelsPlugin> {
             });
         }
 
-        // Slot 20: Durability / Damage (for damageable items)
-        if (meta instanceof Damageable dmg) {
-            set(20, new BaseButton(plugin, ItemBuilder.of(Material.ANVIL)
-                    .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.durability-damage.name", "&e&lDurability Damage: &f%damage%")
-                            .replace("%damage%", String.valueOf(dmg.getDamage())), plugin.getLang())
-                    .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.durability-damage.lore",
-                            List.of(
-                                    "&a[Left-Click] &7Restore full durability (0 damage)",
-                                    "&e[Right-Click] &7Enter custom damage value"
-                            )), plugin.getLang())
+        if (canEditItemData) {
+            // Slot 20: Durability / Damage (for damageable items)
+            if (meta instanceof Damageable dmg) {
+                set(20, new BaseButton(plugin, ItemBuilder.of(Material.ANVIL)
+                        .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.durability-damage.name", "&e&lDurability Damage: &f%damage%")
+                                .replace("%damage%", String.valueOf(dmg.getDamage())), plugin.getLang())
+                        .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.durability-damage.lore",
+                                List.of(
+                                        "&a[Left-Click] &7Restore full durability (0 damage)",
+                                        "&e[Right-Click] &7Enter custom damage value"
+                                )), plugin.getLang())
+                        .build()) {
+                    @Override
+                    public void onClick(final Player player, final org.bukkit.event.inventory.InventoryClickEvent event) {
+                        if (event.isRightClick()) {
+                            promptDurabilityDamage(player, dmg);
+                        } else {
+                            dmg.setDamage(0);
+                            item.setItemMeta((ItemMeta) dmg);
+                            session.touch();
+                            render();
+                        }
+                    }
+                });
+            }
+
+            // Slot 21: Unbreakable Toggle
+            final boolean isUnbreakable = meta != null && meta.isUnbreakable();
+            final String statusText = isUnbreakable
+                    ? plugin.getLang().getMessageOrDefault("GENERAL.enabled", "&aEnabled")
+                    : plugin.getLang().getMessageOrDefault("GENERAL.disabled", "&7Disabled");
+            set(21, new BaseButton(plugin, ItemBuilder.of(isUnbreakable ? Material.LIME_DYE : Material.GRAY_DYE)
+                    .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.unbreakable.name", "&eUnbreakable: %status%")
+                            .replace("%status%", statusText), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.unbreakable.lore",
+                            List.of("&aClick to toggle")), plugin.getLang())
                     .build()) {
                 @Override
-                public void onClick(final Player player, final org.bukkit.event.inventory.InventoryClickEvent event) {
-                    if (event.isRightClick()) {
-                        promptDurabilityDamage(player, dmg);
-                    } else {
-                        dmg.setDamage(0);
-                        item.setItemMeta((ItemMeta) dmg);
+                public void onClick(final Player player) {
+                    if (meta != null) {
+                        meta.setUnbreakable(!isUnbreakable);
+                        item.setItemMeta(meta);
                         session.touch();
                         render();
                     }
                 }
             });
-        }
 
-        // Slot 21: Unbreakable Toggle
-        final boolean isUnbreakable = meta != null && meta.isUnbreakable();
-        final String statusText = isUnbreakable
-                ? plugin.getLang().getMessageOrDefault("GENERAL.enabled", "&aEnabled")
-                : plugin.getLang().getMessageOrDefault("GENERAL.disabled", "&7Disabled");
-        set(21, new BaseButton(plugin, ItemBuilder.of(isUnbreakable ? Material.LIME_DYE : Material.GRAY_DYE)
-                .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.unbreakable.name", "&eUnbreakable: %status%")
-                        .replace("%status%", statusText), plugin.getLang())
-                .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.unbreakable.lore",
-                        List.of("&aClick to toggle")), plugin.getLang())
-                .build()) {
-            @Override
-            public void onClick(final Player player) {
-                if (meta != null) {
-                    meta.setUnbreakable(!isUnbreakable);
-                    item.setItemMeta(meta);
-                    session.touch();
-                    render();
-                }
+            // Slot 22: Item Flags
+            final String hideEnchantsVal = meta != null && meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS)
+                    ? plugin.getLang().getMessageOrDefault("GENERAL.true", "&aYES")
+                    : plugin.getLang().getMessageOrDefault("GENERAL.false", "&7NO");
+            final String hideAttrsVal = meta != null && meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES)
+                    ? plugin.getLang().getMessageOrDefault("GENERAL.true", "&aYES")
+                    : plugin.getLang().getMessageOrDefault("GENERAL.false", "&7NO");
+            final String hideUnbreakVal = meta != null && meta.hasItemFlag(ItemFlag.HIDE_UNBREAKABLE)
+                    ? plugin.getLang().getMessageOrDefault("GENERAL.true", "&aYES")
+                    : plugin.getLang().getMessageOrDefault("GENERAL.false", "&7NO");
+
+            final List<String> itemFlagsLore = new ArrayList<>();
+            for (final String line : plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.item-flags.lore",
+                    List.of(
+                            "&7Hide Enchants: %hide_enchants%",
+                            "&7Hide Attributes: %hide_attributes%",
+                            "&7Hide Unbreakable: %hide_unbreakable%",
+                            "",
+                            "&a[Left-Click] &7Toggle Hide Enchants",
+                            "&e[Right-Click] &7Toggle Hide Attributes",
+                            "&b[Shift-Click] &7Toggle Hide Unbreakable"
+                    ))) {
+                itemFlagsLore.add(line
+                        .replace("%hide_enchants%", hideEnchantsVal)
+                        .replace("%hide_attributes%", hideAttrsVal)
+                        .replace("%hide_unbreakable%", hideUnbreakVal));
             }
-        });
 
-        // Slot 22: Item Flags
-        final String hideEnchantsVal = meta != null && meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS)
-                ? plugin.getLang().getMessageOrDefault("GENERAL.true", "&aYES")
-                : plugin.getLang().getMessageOrDefault("GENERAL.false", "&7NO");
-        final String hideAttrsVal = meta != null && meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES)
-                ? plugin.getLang().getMessageOrDefault("GENERAL.true", "&aYES")
-                : plugin.getLang().getMessageOrDefault("GENERAL.false", "&7NO");
-        final String hideUnbreakVal = meta != null && meta.hasItemFlag(ItemFlag.HIDE_UNBREAKABLE)
-                ? plugin.getLang().getMessageOrDefault("GENERAL.true", "&aYES")
-                : plugin.getLang().getMessageOrDefault("GENERAL.false", "&7NO");
-
-        final List<String> itemFlagsLore = new ArrayList<>();
-        for (final String line : plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.item-flags.lore",
-                List.of(
-                        "&7Hide Enchants: %hide_enchants%",
-                        "&7Hide Attributes: %hide_attributes%",
-                        "&7Hide Unbreakable: %hide_unbreakable%",
-                        "",
-                        "&a[Left-Click] &7Toggle Hide Enchants",
-                        "&e[Right-Click] &7Toggle Hide Attributes",
-                        "&b[Shift-Click] &7Toggle Hide Unbreakable"
-                ))) {
-            itemFlagsLore.add(line
-                    .replace("%hide_enchants%", hideEnchantsVal)
-                    .replace("%hide_attributes%", hideAttrsVal)
-                    .replace("%hide_unbreakable%", hideUnbreakVal));
-        }
-
-        set(22, new BaseButton(plugin, ItemBuilder.of(Material.FLOWER_BANNER_PATTERN)
-                .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.item-flags.name", "&e&lItem Flags"), plugin.getLang())
-                .lore(itemFlagsLore, plugin.getLang())
-                .build()) {
-            @Override
-            public void onClick(final Player player, final org.bukkit.event.inventory.InventoryClickEvent event) {
-                if (meta != null) {
-                    if (event.isRightClick()) {
-                        if (meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES)) {
-                            meta.removeItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+            set(22, new BaseButton(plugin, ItemBuilder.of(Material.FLOWER_BANNER_PATTERN)
+                    .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.item-flags.name", "&e&lItem Flags"), plugin.getLang())
+                    .lore(itemFlagsLore, plugin.getLang())
+                    .build()) {
+                @Override
+                public void onClick(final Player player, final org.bukkit.event.inventory.InventoryClickEvent event) {
+                    if (meta != null) {
+                        if (event.isRightClick()) {
+                            if (meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES)) {
+                                meta.removeItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+                            } else {
+                                meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+                            }
+                        } else if (event.isShiftClick()) {
+                            if (meta.hasItemFlag(ItemFlag.HIDE_UNBREAKABLE)) {
+                                meta.removeItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+                            } else {
+                                meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+                            }
                         } else {
-                            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+                            if (meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS)) {
+                                meta.removeItemFlags(ItemFlag.HIDE_ENCHANTS);
+                            } else {
+                                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                            }
                         }
-                    } else if (event.isShiftClick()) {
-                        if (meta.hasItemFlag(ItemFlag.HIDE_UNBREAKABLE)) {
-                            meta.removeItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-                        } else {
-                            meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-                        }
-                    } else {
-                        if (meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS)) {
-                            meta.removeItemFlags(ItemFlag.HIDE_ENCHANTS);
-                        } else {
-                            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                        }
+                        item.setItemMeta(meta);
+                        session.touch();
+                        render();
                     }
-                    item.setItemMeta(meta);
-                    session.touch();
-                    render();
                 }
-            }
-        });
+            });
 
-        // Slot 23: Custom Model Data
-        final Integer cmd = (meta != null && meta.hasCustomModelData()) ? meta.getCustomModelData() : null;
-        final String cmdVal = cmd != null ? String.valueOf(cmd) : plugin.getLang().getMessageOrDefault("GENERAL.none", "None");
-        set(23, new BaseButton(plugin, ItemBuilder.of(Material.COMMAND_BLOCK)
-                .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.custom-model-data.name", "&eCustom Model Data: &f%data%")
-                        .replace("%data%", cmdVal), plugin.getLang())
-                .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.custom-model-data.lore",
-                        List.of("&aClick to enter custom model data number")), plugin.getLang())
-                .build()) {
-            @Override
-            public void onClick(final Player player) {
-                promptCustomModelData(player);
-            }
-        });
+            // Slot 23: Custom Model Data
+            final Integer cmd = (meta != null && meta.hasCustomModelData()) ? meta.getCustomModelData() : null;
+            final String cmdVal = cmd != null ? String.valueOf(cmd) : plugin.getLang().getMessageOrDefault("GENERAL.none", "None");
+            set(23, new BaseButton(plugin, ItemBuilder.of(Material.COMMAND_BLOCK)
+                    .name(plugin.getLang().getMessageOrDefault("GUI.item-editor.buttons.custom-model-data.name", "&eCustom Model Data: &f%data%")
+                            .replace("%data%", cmdVal), plugin.getLang())
+                    .lore(plugin.getLang().getMessageListOrDefault("GUI.item-editor.buttons.custom-model-data.lore",
+                            List.of("&aClick to enter custom model data number")), plugin.getLang())
+                    .build()) {
+                @Override
+                public void onClick(final Player player) {
+                    promptCustomModelData(player);
+                }
+            });
+        }
 
         // Slot 24: Leather Armor Color (for leather items)
         if (meta instanceof LeatherArmorMeta leatherMeta) {

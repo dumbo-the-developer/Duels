@@ -90,12 +90,24 @@ public final class ItemBuilder {
         return editMeta(meta -> meta.setDisplayName(StringUtil.color(name)));
     }
 
+    public ItemBuilder name(final net.kyori.adventure.text.Component component) {
+        return editMeta(meta -> meta.displayName(component));
+    }
+
     public ItemBuilder lore(final List<String> lore) {
         return editMeta(meta -> meta.setLore(StringUtil.color(lore)));
     }
 
+    public ItemBuilder loreComponents(final List<? extends net.kyori.adventure.text.Component> lore) {
+        return editMeta(meta -> meta.lore(lore));
+    }
+
     public ItemBuilder lore(final String... lore) {
         return lore(Arrays.asList(lore));
+    }
+
+    public ItemBuilder loreComponents(final net.kyori.adventure.text.Component... lore) {
+        return loreComponents(Arrays.asList(lore));
     }
 
     /**

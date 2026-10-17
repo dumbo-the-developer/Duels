@@ -61,6 +61,8 @@ ERROR:
     material-blocked: '{PREFIX} &cMaterial ''&e%material%&c'' is not allowed in custom kits.'
     material-not-allowed: '{PREFIX} &cMaterial ''&e%material%&c'' is not allowed in custom kits.'
     invalid-amount: '{PREFIX} &cInvalid item amount.'
+    invalid-amount-stack: '{PREFIX} &cItem amount for ''&e%material%&c'' exceeds vanilla maximum stack size (&e%max%&c).'
+    item-data-disallowed: '{PREFIX} &cCustom item data (attributes, unbreakable, etc.) goes beyond vanilla mechanics and requires permission.'
     enchantment-blocked: '{PREFIX} &cEnchantment ''&e%enchantment%&c'' is not allowed.'
     enchantment-incompatible: '{PREFIX} &cEnchantment ''&e%enchantment%&c'' cannot be applied to ''&e%item%&c''.'
     enchantment-level-too-high: '{PREFIX} &cEnchantment ''&e%enchantment%&c'' level exceeds maximum allowed (&e%max%&c).'

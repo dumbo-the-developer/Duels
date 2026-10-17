@@ -37,6 +37,7 @@ public final class Permissions {
     public static final String CUSTOMKITS_LIMIT_UNLIMITED = "duels.customkits.limit.unlimited";
     public static final String CUSTOMKITS_ADMIN = "duels.customkits.admin";
     public static final String CUSTOMKITS_BYPASS_RESTRICTIONS = "duels.customkits.bypass.restrictions";
+    public static final String CUSTOMKITS_ITEMDATA = "duels.customkits.itemdata";
 
     // Replay Permissions
     public static final String REPLAY = "duels.replay";

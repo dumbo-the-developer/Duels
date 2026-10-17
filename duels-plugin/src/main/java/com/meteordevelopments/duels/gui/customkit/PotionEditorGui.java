@@ -198,15 +198,29 @@ public class PotionEditorGui extends SinglePageGui<DuelsPlugin> {
             if (slot > 25) break;
 
             final boolean selected = (data.getType() == type);
-            final String typeName = selected
-                    ? plugin.getLang().getMessageOrDefault("GUI.potion-editor.buttons.potion-type.name-selected", "&a&l%type%").replace("%type%", formatName(type.name()))
-                    : plugin.getLang().getMessageOrDefault("GUI.potion-editor.buttons.potion-type.name", "&b%type%").replace("%type%", formatName(type.name()));
             final List<String> typeLore = selected
                     ? plugin.getLang().getMessageListOrDefault("GUI.potion-editor.buttons.potion-type.lore-selected", List.of("&a▶ Currently selected"))
                     : plugin.getLang().getMessageListOrDefault("GUI.potion-editor.buttons.potion-type.lore", List.of("&eClick to select"));
 
-            final BaseButton btn = new BaseButton(plugin, ItemBuilder.of(Material.POTION)
-                    .name(typeName, plugin.getLang())
+            final ItemStack potionItem = new ItemStack(Material.POTION);
+            final PotionMeta pMeta = (PotionMeta) potionItem.getItemMeta();
+            if (pMeta != null) {
+                pMeta.setBasePotionData(new PotionData(type, false, false));
+                final net.kyori.adventure.text.Component nameComp;
+                if (type.getEffectType() != null) {
+                    nameComp = net.kyori.adventure.text.Component.translatable(type.getEffectType().translationKey())
+                            .color(selected ? net.kyori.adventure.text.format.NamedTextColor.GREEN : net.kyori.adventure.text.format.NamedTextColor.AQUA)
+                            .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false);
+                } else {
+                    nameComp = net.kyori.adventure.text.Component.translatable("item.minecraft.potion.effect." + type.name().toLowerCase(Locale.ROOT))
+                            .color(selected ? net.kyori.adventure.text.format.NamedTextColor.GREEN : net.kyori.adventure.text.format.NamedTextColor.AQUA)
+                            .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false);
+                }
+                pMeta.displayName(nameComp);
+                potionItem.setItemMeta(pMeta);
+            }
+
+            final BaseButton btn = new BaseButton(plugin, ItemBuilder.of(potionItem)
                     .lore(typeLore, plugin.getLang())
                     .build()) {
                 @Override
@@ -278,9 +292,20 @@ public class PotionEditorGui extends SinglePageGui<DuelsPlugin> {
                         .replace("%amplifier%", String.valueOf(effect.getAmplifier() + 1)));
             }
 
-            final BaseButton effBtn = new BaseButton(plugin, ItemBuilder.of(Material.POTION)
-                    .name(plugin.getLang().getMessageOrDefault("GUI.potion-editor.buttons.effect-entry.name", "&e%effect%")
-                            .replace("%effect%", formatName(effect.getType().getName())), plugin.getLang())
+            final ItemStack effStack = new ItemStack(Material.POTION);
+            final PotionMeta effMeta = (PotionMeta) effStack.getItemMeta();
+            if (effMeta != null) {
+                effMeta.addCustomEffect(effect, true);
+                if (effect.getType().getColor() != null) {
+                    effMeta.setColor(effect.getType().getColor());
+                }
+                effMeta.displayName(net.kyori.adventure.text.Component.translatable(effect.getType().translationKey())
+                        .color(net.kyori.adventure.text.format.NamedTextColor.YELLOW)
+                        .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
+                effStack.setItemMeta(effMeta);
+            }
+
+            final BaseButton effBtn = new BaseButton(plugin, ItemBuilder.of(effStack)
                     .lore(effLore, plugin.getLang())
                     .build()) {
                 @Override
@@ -320,9 +345,20 @@ public class PotionEditorGui extends SinglePageGui<DuelsPlugin> {
             if (slot % 9 == 0) slot++;
             if (slot % 9 == 8) slot += 2;
 
-            final BaseButton btn = new BaseButton(plugin, ItemBuilder.of(Material.POTION)
-                    .name(plugin.getLang().getMessageOrDefault("GUI.potion-editor.buttons.browse-effect.name", "&b%effect%")
-                            .replace("%effect%", formatName(type.getName())), plugin.getLang())
+            final ItemStack browseStack = new ItemStack(Material.POTION);
+            final PotionMeta bMeta = (PotionMeta) browseStack.getItemMeta();
+            if (bMeta != null) {
+                bMeta.addCustomEffect(new PotionEffect(type, 3600, 0), true);
+                if (type.getColor() != null) {
+                    bMeta.setColor(type.getColor());
+                }
+                bMeta.displayName(net.kyori.adventure.text.Component.translatable(type.translationKey())
+                        .color(net.kyori.adventure.text.format.NamedTextColor.AQUA)
+                        .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
+                browseStack.setItemMeta(bMeta);
+            }
+
+            final BaseButton btn = new BaseButton(plugin, ItemBuilder.of(browseStack)
                     .lore(plugin.getLang().getMessageListOrDefault("GUI.potion-editor.buttons.browse-effect.lore",
                             List.of("&aClick to set duration and amplifier")), plugin.getLang())
                     .build()) {

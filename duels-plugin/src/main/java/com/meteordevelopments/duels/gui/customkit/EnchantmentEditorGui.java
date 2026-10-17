@@ -165,10 +165,17 @@ public class EnchantmentEditorGui extends SinglePageGui<DuelsPlugin> {
                         .replace("%max%", String.valueOf(maxAllowed)));
             }
 
+            final net.kyori.adventure.text.Component levelComp = (level >= 1 && level <= 10)
+                    ? net.kyori.adventure.text.Component.translatable("enchantment.level." + level)
+                    : net.kyori.adventure.text.Component.text(toRoman(level));
+            final net.kyori.adventure.text.Component enchDisplayName = net.kyori.adventure.text.Component.translatable(ench.translationKey())
+                    .append(net.kyori.adventure.text.Component.space())
+                    .append(levelComp)
+                    .color(net.kyori.adventure.text.format.NamedTextColor.AQUA)
+                    .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false);
+
             final BaseButton enchBtn = new BaseButton(plugin, ItemBuilder.of(Material.ENCHANTED_BOOK)
-                    .name(plugin.getLang().getMessageOrDefault("GUI.enchantment-editor.buttons.enchant-entry.name", "&b%enchantment% %level%")
-                            .replace("%enchantment%", enchName)
-                            .replace("%level%", toRoman(level)), plugin.getLang())
+                    .name(enchDisplayName)
                     .lore(enchLore, plugin.getLang())
                     .build()) {
                 @Override
@@ -235,9 +242,12 @@ public class EnchantmentEditorGui extends SinglePageGui<DuelsPlugin> {
                 browseLore.add(line.replace("%max%", String.valueOf(maxAllowed)));
             }
 
+            final net.kyori.adventure.text.Component browseComp = net.kyori.adventure.text.Component.translatable(ench.translationKey())
+                    .color(net.kyori.adventure.text.format.NamedTextColor.AQUA)
+                    .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false);
+
             final BaseButton addBtn = new BaseButton(plugin, ItemBuilder.of(Material.BOOK)
-                    .name(plugin.getLang().getMessageOrDefault("GUI.enchantment-editor.buttons.browse-entry.name", "&b%enchantment%")
-                            .replace("%enchantment%", enchName), plugin.getLang())
+                    .name(browseComp)
                     .lore(browseLore, plugin.getLang())
                     .build()) {
                 @Override

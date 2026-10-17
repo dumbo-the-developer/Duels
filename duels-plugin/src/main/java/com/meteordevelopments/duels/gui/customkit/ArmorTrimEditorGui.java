@@ -120,6 +120,15 @@ public class ArmorTrimEditorGui extends SinglePageGui<DuelsPlugin> {
         });
     }
 
+    public static Material getTemplateMaterial(final TrimPattern pattern) {
+        if (pattern == null) {
+            return Material.ARMOR_STAND;
+        }
+        final String templateName = pattern.getKey().getKey().toUpperCase(Locale.ROOT) + "_ARMOR_TRIM_SMITHING_TEMPLATE";
+        final Material match = Material.matchMaterial(templateName);
+        return match != null ? match : Material.ARMOR_STAND;
+    }
+
     private void renderPatternSelection() {
         final TrimPattern[] patterns = {
                 TrimPattern.SENTRY, TrimPattern.DUNE, TrimPattern.COAST, TrimPattern.WILD,
@@ -134,10 +143,13 @@ public class ArmorTrimEditorGui extends SinglePageGui<DuelsPlugin> {
             if (slot % 9 == 0) slot++;
             if (slot % 9 == 8) slot += 2;
 
-            final String patName = formatKey(pat.getKey().getKey());
-            final BaseButton btn = new BaseButton(plugin, ItemBuilder.of(Material.ARMOR_STAND)
-                    .name(plugin.getLang().getMessageOrDefault("GUI.armor-trim-editor.buttons.pattern-entry.name", "&b%pattern% Pattern")
-                            .replace("%pattern%", patName), plugin.getLang())
+            final Material templateMat = getTemplateMaterial(pat);
+            final net.kyori.adventure.text.Component patComp = net.kyori.adventure.text.Component.translatable("trim_pattern.minecraft." + pat.getKey().getKey())
+                    .color(net.kyori.adventure.text.format.NamedTextColor.AQUA)
+                    .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false);
+
+            final BaseButton btn = new BaseButton(plugin, ItemBuilder.of(templateMat)
+                    .name(patComp)
                     .lore(plugin.getLang().getMessageListOrDefault("GUI.armor-trim-editor.buttons.pattern-entry.lore",
                             List.of("&aClick to select pattern")), plugin.getLang())
                     .build()) {
@@ -175,11 +187,12 @@ public class ArmorTrimEditorGui extends SinglePageGui<DuelsPlugin> {
 
             final TrimMaterial trimMat = materials[i];
             final Material icon = icons[i];
-            final String matName = formatKey(trimMat.getKey().getKey());
+            final net.kyori.adventure.text.Component matComp = net.kyori.adventure.text.Component.translatable("trim_material.minecraft." + trimMat.getKey().getKey())
+                    .color(net.kyori.adventure.text.format.NamedTextColor.YELLOW)
+                    .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false);
 
             final BaseButton btn = new BaseButton(plugin, ItemBuilder.of(icon)
-                    .name(plugin.getLang().getMessageOrDefault("GUI.armor-trim-editor.buttons.material-entry.name", "&e%material% Trim")
-                            .replace("%material%", matName), plugin.getLang())
+                    .name(matComp)
                     .lore(plugin.getLang().getMessageListOrDefault("GUI.armor-trim-editor.buttons.material-entry.lore",
                             List.of("&aClick to apply trim")), plugin.getLang())
                     .build()) {
