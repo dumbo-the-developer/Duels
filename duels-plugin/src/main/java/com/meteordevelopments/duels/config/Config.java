@@ -191,6 +191,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private int matchesToDisplay;
     @Getter
+    private int skipInactiveDays;
+    @Getter
+    private int purgeInactiveDays;
+    @Getter
     private long topUpdateInterval;
     @Getter
     private String topWinsType;
@@ -469,6 +473,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         displayNoKitRating = configuration.getBoolean("stats.display-nokit-rating", false);
         displayPastMatches = configuration.getBoolean("stats.display-past-matches", true);
         matchesToDisplay = Math.max(configuration.getInt("stats.matches-to-display", 10), 0);
+        skipInactiveDays = Math.max(configuration.getInt("stats.skip-inactive-days", 0), 0);
+        purgeInactiveDays = Math.max(configuration.getInt("stats.purge-inactive-days", 0), 0);
 
         topUpdateInterval = Math.max(configuration.getInt("top.update-interval", 5), 1) * 60L * 1000L;
         topWinsType = configuration.getString("top.displayed-replacers.wins.type", "Wins");
