@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
 
@@ -58,10 +59,36 @@ public class PlayerInfo {
     }
 
     public void restore(final Player player) {
+        restore(player, true);
+    }
+
+    public void restore(final Player player, final boolean restorePotionEffects) {
         PlayerUtil.reset(player);
 
         final double maxHealth = PlayerUtil.getMaxHealth(player);
-        player.addPotionEffects(effects);
+
+        // Build the set of allowed effect types from the pre-duel snapshot.
+        final Set<PotionEffectType> allowedTypes = new HashSet<>();
+        if (restorePotionEffects && effects != null) {
+            for (final PotionEffect effect : effects) {
+                if (effect != null) {
+                    player.addPotionEffect(effect);
+                    allowedTypes.add(effect.getType());
+                }
+            }
+        }
+
+        // Final cleanup: remove any effect not in the pre-duel saved set.
+        // This catches duel-gained effects that survived the reset, or effects
+        // re-applied by another plugin between the reset and this restore call.
+        for (final PotionEffect active : new ArrayList<>(player.getActivePotionEffects())) {
+            if (active != null && !allowedTypes.contains(active.getType())) {
+                try {
+                    player.removePotionEffect(active.getType());
+                } catch (Throwable ignored) {}
+            }
+        }
+
         player.setHealth(Math.min(health, maxHealth));
         if (restoreExperience) {
             player.setExp(experience);
@@ -78,10 +105,34 @@ public class PlayerInfo {
      * changes that occurred during the match (for example, if the player picked up XP orbs).
      */
     public void restoreWithoutExperience(final Player player) {
+        restoreWithoutExperience(player, true);
+    }
+
+    public void restoreWithoutExperience(final Player player, final boolean restorePotionEffects) {
         PlayerUtil.reset(player);
 
         final double maxHealth = PlayerUtil.getMaxHealth(player);
-        player.addPotionEffects(effects);
+
+        // Build the set of allowed effect types from the pre-duel snapshot.
+        final Set<PotionEffectType> allowedTypes = new HashSet<>();
+        if (restorePotionEffects && effects != null) {
+            for (final PotionEffect effect : effects) {
+                if (effect != null) {
+                    player.addPotionEffect(effect);
+                    allowedTypes.add(effect.getType());
+                }
+            }
+        }
+
+        // Final cleanup: remove any effect not in the pre-duel saved set.
+        for (final PotionEffect active : new ArrayList<>(player.getActivePotionEffects())) {
+            if (active != null && !allowedTypes.contains(active.getType())) {
+                try {
+                    player.removePotionEffect(active.getType());
+                } catch (Throwable ignored) {}
+            }
+        }
+
         player.setHealth(Math.min(health, maxHealth));
         player.setFoodLevel(hunger);
         InventoryUtil.fillFromMap(player.getInventory(), items);
