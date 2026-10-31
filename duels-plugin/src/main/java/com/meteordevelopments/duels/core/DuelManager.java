@@ -125,7 +125,7 @@ public class DuelManager implements Loadable {
             winners.forEach(w -> inventoryManager.create(w, false));
             userDataManager.handleMatchEnd(match, winners);
             plugin.doSyncAfter(() -> inventoryManager.handleMatchEnd(match), 1L);
-            DuelsPlugin.getFoliaLib().getScheduler().runAtEntityLater(loser, () -> {
+            DuelsPlugin.getFoliaLib().getScheduler().runAtLocationLater(deadLocation, task -> {
                 // Handle the loser (remove from arena and restore state)
                 // This is especially important for ROUNDS3 where the loser never actually dies
                 if (match.getKit() != null && match.getKit().hasCharacteristic(KitImpl.Characteristic.ROUNDS3)) {
@@ -142,7 +142,7 @@ public class DuelManager implements Loadable {
 
                 arena.endMatch(winner.getUniqueId(), loser.getUniqueId(), Reason.OPPONENT_DEFEAT);
                 clearEndgameLeaveState(arena, match);
-            }, null, config.getTeleportDelay() * 20L);
+            }, config.getTeleportDelay() * 20L);
         }, 1L);
     }
 
@@ -197,7 +197,7 @@ public class DuelManager implements Loadable {
                         }
                         
                         teleport.tryTeleport(loser, loserInfo.getLocation());
-                        loserInfo.restore(loser);
+                        loserInfo.restore(loser, config.isRestorePotionEffectsOnEnd());
                     }
                 }
                 
@@ -232,8 +232,21 @@ public class DuelManager implements Loadable {
 
         final PlayerInfo info = playerManager.get(player);
         if (info != null) {
+            playerManager.remove(player);
+
+            if (!(match.isOwnInventory() && config.isOwnInventoryDropInventoryItems())) {
+                PlayerUtil.reset(player);
+            }
+
             teleport.tryTeleport(player, info.getLocation());
+
+            if (match.isOwnInventory()) {
+                info.restoreWithoutExperience(player, config.isRestorePotionEffectsOnEnd());
+            } else {
+                info.restore(player, config.isRestorePotionEffectsOnEnd());
+            }
         } else {
+            PlayerUtil.reset(player);
             teleport.tryTeleport(player, playerManager.getLobby());
         }
 
@@ -296,11 +309,13 @@ public class DuelManager implements Loadable {
                 teleport.tryTeleport(winner, info.getLocation());
                 if (match.isOwnInventory()) {
                     // Preserve any XP gained during the duel when using own inventory
-                    info.restoreWithoutExperience(winner);
+                    info.restoreWithoutExperience(winner, config.isRestorePotionEffectsOnEnd());
                 } else {
                     // Restore saved experience for non-own-inventory matches
-                    info.restore(winner);
+                    info.restore(winner, config.isRestorePotionEffectsOnEnd());
                 }
+            } else {
+                teleport.tryTeleport(winner, playerManager.getLobby());
             }
 
             if (InventoryUtil.addOrDrop(winner, items)) {
@@ -421,7 +436,7 @@ public class DuelManager implements Loadable {
 
             if (info != null) {
                 teleport.tryTeleport(player, info.getLocation());
-                info.restore(player);
+                info.restore(player, config.isRestorePotionEffectsOnEnd());
             } else {
                 // If somehow PlayerInfo is not found...
                 teleport.tryTeleport(player, playerManager.getLobby());
@@ -491,11 +506,13 @@ public class DuelManager implements Loadable {
                 teleport.tryTeleport(winner, info.getLocation());
                 if (match.isOwnInventory()) {
                     // Preserve any XP gained during the duel when using own inventory
-                    info.restoreWithoutExperience(winner);
+                    info.restoreWithoutExperience(winner, config.isRestorePotionEffectsOnEnd());
                 } else {
                     // Restore saved experience for non-own-inventory matches
-                    info.restore(winner);
+                    info.restore(winner, config.isRestorePotionEffectsOnEnd());
                 }
+            } else {
+                teleport.tryTeleport(winner, playerManager.getLobby());
             }
 
             if (InventoryUtil.addOrDrop(winner, items)) {
@@ -534,10 +551,10 @@ public class DuelManager implements Loadable {
                 teleport.tryTeleport(loser, info.getLocation());
                 if (match.isOwnInventory()) {
                     // Preserve any XP gained during the duel when using own inventory
-                    info.restoreWithoutExperience(loser);
+                    info.restoreWithoutExperience(loser, config.isRestorePotionEffectsOnEnd());
                 } else {
                     // Restore saved experience for non-own-inventory matches
-                    info.restore(loser);
+                    info.restore(loser, config.isRestorePotionEffectsOnEnd());
                 }
             } else {
                 teleport.tryTeleport(loser, playerManager.getLobby());
@@ -776,6 +793,10 @@ public class DuelManager implements Loadable {
             final boolean restoreExperience = !match.isOwnInventory();
             playerManager.create(player, dropOwnInv, restoreExperience);
             teleport.tryTeleport(player, location);
+
+            if (config.isClearEffectsOnStart()) {
+                PlayerUtil.clearAllEffects(player);
+            }
 
             if (match.getCustomKitSnapshot() != null) {
                 PlayerUtil.reset(player);

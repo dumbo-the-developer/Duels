@@ -1,31 +1,35 @@
 package com.meteordevelopments.duels.listeners;
 
 import com.meteordevelopments.duels.DuelsPlugin;
+import com.meteordevelopments.duels.config.Config;
 import com.meteordevelopments.duels.core.arena.ArenaManagerImpl;
 import com.meteordevelopments.duels.util.compat.CompatUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
 
 /**
- * Removes empty potion bottle after consumption if enabled.
+ * Handles potion consumption and removes empty potion bottles after consumption if enabled.
  */
 public class PotionListener implements Listener {
+    private final DuelsPlugin plugin;
+    private final Config config;
     private final ArenaManagerImpl arenaManager;
 
     public PotionListener(final DuelsPlugin plugin) {
+        this.plugin = plugin;
+        this.config = plugin.getConfiguration();
         this.arenaManager = plugin.getArenaManager();
 
-        if (plugin.getConfiguration().isRemoveEmptyBottle()) {
-            Bukkit.getPluginManager().registerEvents(this, plugin);
-        }
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void on(final PlayerItemConsumeEvent event) {
         final Player player = event.getPlayer();
 
@@ -33,8 +37,11 @@ public class PotionListener implements Listener {
             return;
         }
 
-        final ItemStack item = event.getItem();
+        if (!config.isRemoveEmptyBottle()) {
+            return;
+        }
 
+        final ItemStack item = event.getItem();
         if (!item.getType().name().endsWith("POTION")) {
             return;
         }
@@ -46,10 +53,13 @@ public class PotionListener implements Listener {
                 } else {
                     final ItemStack held = player.getInventory().getItemInMainHand();
 
-                    if (held.getType() == Material.GLASS_BOTTLE) {
+                    if (held != null && held.getType() == Material.GLASS_BOTTLE) {
                         player.getInventory().setItemInMainHand(null);
                     } else {
-                        player.getInventory().setItemInOffHand(null);
+                        final ItemStack offHand = player.getInventory().getItemInOffHand();
+                        if (offHand != null && offHand.getType() == Material.GLASS_BOTTLE) {
+                            player.getInventory().setItemInOffHand(null);
+                        }
                     }
                 }
             } else {

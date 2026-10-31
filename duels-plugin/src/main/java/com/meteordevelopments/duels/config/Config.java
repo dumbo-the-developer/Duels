@@ -155,6 +155,10 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
     @Getter
     private List<String> queueBlacklistedCommands;
     @Getter
+    private boolean restorePotionEffectsOnEnd;
+    @Getter
+    private boolean clearEffectsOnStart;
+    @Getter
     private boolean ratingEnabled;
     @Getter
     private int kFactor;
@@ -445,6 +449,8 @@ public class Config extends AbstractConfiguration<DuelsPlugin> {
         blockAllCommands = configuration.getBoolean("duel.block-all-commands", false);
         whitelistedCommands = configuration.getStringList("duel.whitelisted-commands");
         blacklistedCommands = configuration.getStringList("duel.blacklisted-commands");
+        restorePotionEffectsOnEnd = configuration.getBoolean("duel.restore-potion-effects-on-end", true);
+        clearEffectsOnStart = configuration.getBoolean("duel.clear-effects-on-start", false);
 
         queueBlacklistedCommands = configuration.getStringList("queue.blacklisted-commands");
 
