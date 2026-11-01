@@ -20,6 +20,9 @@ import java.util.regex.Pattern;
 
 public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadable {
 
+    private static final Pattern LEGACY_HEX_PATTERN = Pattern.compile("(?i)§x((?:§[0-9a-f]){6})");
+    private static final Pattern LEGACY_CODE_PATTERN = Pattern.compile("(?i)§([0-9a-fk-or])");
+
     private final Config config;
     private final Map<String, String> messages = new HashMap<>();
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
@@ -173,7 +176,7 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
             replacedMessage = StringUtil.color(replacedMessage);
             config.playSound(player, replacedMessage);
             if (config.isUseMinimessage()) {
-                Component parsed = miniMessage.deserialize(replacedMessage);
+                Component parsed = miniMessage.deserialize(legacyToMiniMessage(replacedMessage));
                 player.sendMessage(parsed);
             }else{
                 player.sendMessage(replacedMessage);
@@ -183,7 +186,7 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
             // Console or other senders — no PlaceholderAPI parsing
             replacedMessage = StringUtil.color(replacedMessage);
             if (config.isUseMinimessage()) {
-                Component parsed = miniMessage.deserialize(replacedMessage);
+                Component parsed = miniMessage.deserialize(legacyToMiniMessage(replacedMessage));
                 receiver.sendMessage(parsed);
             }else {
                 receiver.sendMessage(replacedMessage);
@@ -193,6 +196,48 @@ public class Lang extends AbstractConfiguration<DuelsPlugin> implements Reloadab
 
     public void sendMessage(final Collection<Player> players, final String key, final Object... replacers) {
         players.forEach(player -> sendMessage(player, key, replacers));
+    }
+
+    /**
+     * Converts legacy section codes into MiniMessage tags, since MiniMessage refuses to parse strings containing them.
+     * They can come from '&' codes in lang.yml, placeholder values built by commands (e.g. arena colors) or PlaceholderAPI.
+     */
+    private static String legacyToMiniMessage(final String message) {
+        if (message.indexOf('§') == -1) {
+            return message;
+        }
+
+        final String hexConverted = LEGACY_HEX_PATTERN.matcher(message)
+                .replaceAll(match -> "<#" + match.group(1).replace("§", "") + ">");
+        return LEGACY_CODE_PATTERN.matcher(hexConverted)
+                .replaceAll(match -> legacyCodeToTag(match.group(1).charAt(0)));
+    }
+
+    private static String legacyCodeToTag(final char code) {
+        return switch (Character.toLowerCase(code)) {
+            case '0' -> "<black>";
+            case '1' -> "<dark_blue>";
+            case '2' -> "<dark_green>";
+            case '3' -> "<dark_aqua>";
+            case '4' -> "<dark_red>";
+            case '5' -> "<dark_purple>";
+            case '6' -> "<gold>";
+            case '7' -> "<gray>";
+            case '8' -> "<dark_gray>";
+            case '9' -> "<blue>";
+            case 'a' -> "<green>";
+            case 'b' -> "<aqua>";
+            case 'c' -> "<red>";
+            case 'd' -> "<light_purple>";
+            case 'e' -> "<yellow>";
+            case 'f' -> "<white>";
+            case 'k' -> "<obfuscated>";
+            case 'l' -> "<bold>";
+            case 'm' -> "<strikethrough>";
+            case 'n' -> "<underlined>";
+            case 'o' -> "<italic>";
+            default -> "<reset>";
+        };
     }
 
     /**
