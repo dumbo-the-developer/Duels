@@ -78,8 +78,15 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
             matchesToDisplay = 0;
         }
 
+        // Files not saved since this time belong to inactive players and are loaded on join instead
+        final long inactiveBefore = config.getSkipInactiveDays() > 0 ? System.currentTimeMillis() - config.getSkipInactiveDays() * 86_400_000L : 0L;
+        // Files not saved since this time are deleted
+        final long purgeBefore = config.getPurgeInactiveDays() > 0 ? System.currentTimeMillis() - config.getPurgeInactiveDays() * 86_400_000L : 0L;
+
         plugin.doAsync(() -> {
             final File[] files = folder.listFiles();
+            int skipped = 0;
+            int purged = 0;
 
             if (files != null) {
                 for (final File file : files) {
@@ -94,6 +101,18 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
                     final UUID uuid = UUIDUtil.parseUUID(name);
 
                     if (uuid == null || users.containsKey(uuid)) {
+                        continue;
+                    }
+
+                    if (purgeBefore > 0L && file.lastModified() < purgeBefore) {
+                        if (file.delete()) {
+                            purged++;
+                            continue;
+                        }
+                    }
+
+                    if (inactiveBefore > 0L && file.lastModified() < inactiveBefore) {
+                        skipped++;
                         continue;
                     }
 
@@ -127,6 +146,14 @@ public class UserManagerImpl implements Loadable, Listener, UserManager {
                     }
 
                 }
+            }
+
+            if (purged > 0) {
+                Log.info(this, "Deleted stats of " + purged + " inactive players (stats.purge-inactive-days).");
+            }
+
+            if (skipped > 0) {
+                Log.info(this, "Skipped loading " + skipped + " inactive players (stats.skip-inactive-days).");
             }
 
             loaded = true;
