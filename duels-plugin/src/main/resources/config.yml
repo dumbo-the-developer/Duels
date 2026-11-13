@@ -244,6 +244,16 @@ duel:
   # default: true
   remove-empty-bottle: true
 
+  # If set to 'true', potion effects that a player had before entering a duel will be restored when the duel ends,
+  # and any potion effects gained during the duel (e.g. from potions or ominous bottles) will be cleared.
+  # default: true
+  restore-potion-effects-on-end: true
+
+  # If set to 'true', all potion effects (including omen-like effects) are removed when a player enters a duel.
+  # Effects the player had before the duel are still restored at the end if restore-potion-effects-on-end is enabled.
+  # default: false
+  clear-effects-on-start: false
+
   # If set to 'true', players will not be able to teleport to players in duel.
   # NOTE: This was implemented to patch an exploit regarding the '/tpa' command. Bypass permission - duels.teleport.bypass
   # default: true

@@ -285,7 +285,7 @@ public class PlayerInfoManager implements Loadable {
             }
 
             teleport.tryTeleport(player, info.getLocation());
-            info.restore(player);
+            info.restore(player, true);
         }
 
         @EventHandler(priority = EventPriority.HIGHEST)
@@ -341,7 +341,9 @@ public class PlayerInfoManager implements Loadable {
                 }
 
                 remove(player);
-                DuelsPlugin.getFoliaLib().getScheduler().runAtEntity(player, task -> info.restore(player));
+                DuelsPlugin.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                    info.restore(player, true);
+                });
             }, 1L);
         }
     }
