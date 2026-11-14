@@ -1,8 +1,12 @@
 package com.meteordevelopments.duels.util;
 
 import java.util.OptionalInt;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class NumberUtil {
+
+    private static final Pattern VERSION_PATTERN = Pattern.compile("^\\s*v?(\\d+(?:\\.\\d+)*)");
 
     private NumberUtil() {
     }
@@ -81,9 +85,49 @@ public final class NumberUtil {
         return Math.pow(10.0, rating / 400.0);
     }
 
+    /**
+     * Compares two versions part by part ("8.10" is higher than "8.9").
+     * Only the leading numbers count, so any suffix works: "8.3-SNAPSHOT", "8.3-custom2", "8.3+build.5".
+     * A version without leading numbers is never treated as lower.
+     */
     public static boolean isLower(String version, String otherVersion) {
-        version = version.replace("-SNAPSHOT", "").replace(".", "");
-        otherVersion = otherVersion.replace("-SNAPSHOT", "").replace(".", "");
-        return NumberUtil.parseInt(version).orElse(0) < NumberUtil.parseInt(otherVersion).orElse(0);
+        final int[] current = versionParts(version);
+        final int[] required = versionParts(otherVersion);
+
+        if (current.length == 0 || required.length == 0) {
+            return false;
+        }
+
+        for (int i = 0; i < Math.max(current.length, required.length); i++) {
+            final int a = i < current.length ? current[i] : 0;
+            final int b = i < required.length ? required[i] : 0;
+
+            if (a != b) {
+                return a < b;
+            }
+        }
+
+        return false;
+    }
+
+    private static int[] versionParts(final String version) {
+        if (version == null) {
+            return new int[0];
+        }
+
+        final Matcher matcher = VERSION_PATTERN.matcher(version);
+
+        if (!matcher.find()) {
+            return new int[0];
+        }
+
+        final String[] parts = matcher.group(1).split("\\.");
+        final int[] result = new int[parts.length];
+
+        for (int i = 0; i < parts.length; i++) {
+            result[i] = parseInt(parts[i]).orElse(0);
+        }
+
+        return result;
     }
 }
