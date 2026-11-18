@@ -30,18 +30,34 @@ dependencies {
     implementation('net.essentialsx:EssentialsX:2.22.0') {
         transitive = false
     }
-    implementation(name: 'MVdWPlaceholderAPI-3.1.1') {
+    implementation('com.intellectualsites.mvdwplaceholderapi:MVdWPlaceholderAPI:3.1.1') {
         transitive = false
     }
-    implementation name: 'Vault-1.6.7'
-    implementation name: 'CombatTagPlus'
-    implementation name: 'Factions-1.6.9.5-U0.1.14'
-    implementation name: 'MassiveCore'
-    implementation name: 'Factions'
-    implementation name: 'MyPet-2.3.4'
-    implementation name: 'MCPets-4.1.12'
+    implementation('com.github.MilkBowl:VaultAPI:1.7.1') {
+        transitive = false
+    }
+    implementation('com.github.MinelinkNetwork.CombatTagPlus:CombatTagPlus:v1.2.4') {
+        transitive = false
+    }
+    implementation('com.massivecraft:Factions:1.6.9.5-U0.6.35') {
+        transitive = false
+    }
+    implementation('com.massivecraft.massivecore:MassiveCore:3.3.0') {
+        transitive = false
+    }
+    implementation('com.massivecraft.factions:Factions:3.3.0') {
+        transitive = false
+    }
+    implementation('de.keyle:mypet-api:3.14.3') {
+        transitive = false
+    }
+    implementation('com.github.Nocsy-Workshop:mcpets:v4.1.11') {
+        transitive = false
+    }
+    implementation('net.sacredlabyrinth.phaed.simpleclans:SimpleClans:2.19.2') {
+        transitive = false
+    }
     implementation name: 'BountyHunters-2.2.6'
-    implementation name: 'SimpleClans-2.14.4.1'
     implementation name: 'LeaderHeadsAPI'
 
     implementation project(':duels-api')

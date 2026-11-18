@@ -19,11 +19,11 @@ subprojects {
     apply plugin: 'com.gradleup.shadow'
     apply plugin: 'maven-publish'
 
-    java {
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(21)
-        }
-    }
+    // java {
+    //     toolchain {
+    //         languageVersion = JavaLanguageVersion.of(21)
+    //     }
+    // }
 
     tasks.withType(JavaCompile).configureEach {
         options.release.set(21)
@@ -114,6 +114,16 @@ subprojects {
         maven {
             name = 'dmulloy2-repo'
             url = "https://repo.dmulloy2.net/repository/public/"
+        }
+
+        maven {
+            name = 'roinujnosde-repo'
+            url = 'https://repo.roinujnosde.me/releases/'
+        }
+
+        maven {
+            name = 'mypet-repo'
+            url = 'https://repo.userderezzed.dev/releases'
         }
 
         flatDir {
