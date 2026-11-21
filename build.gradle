@@ -10,7 +10,7 @@ buildscript {
 
 allprojects {
     group = 'com.meteordevelopments'
-    version = '8.3'
+    version = '8.4'
 }
 
 subprojects {
@@ -109,11 +109,6 @@ subprojects {
         maven {
             name = 'opencollab-repo'
             url = 'https://repo.opencollab.dev/main/'
-        }
-
-        maven {
-            name = 'dmulloy2-repo'
-            url = "https://repo.dmulloy2.net/repository/public/"
         }
 
         maven {
